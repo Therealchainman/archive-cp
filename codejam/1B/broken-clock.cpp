@@ -136,19 +136,66 @@ void printVecPair(vector<pair<T1, T2>> p)
     }
     cout << "}" << endl;
 }
+// marks/ticks, ratio of marks to ticks, where a mark represents 1/60th of the full revolution of the clock.
+
+ll M = 720LL * 1000LL * 1000LL * 1000LL;
+
+bool check(ll h, ll m, ll s)
+{
+
+    if ((m == 12 * (h % (M * 5LL))) && (s == 60 * (m % M)))
+    {
+        return true;
+    }
+    return false;
+}
+
+void output(ll h, ll m, ll s)
+{
+    cout << h / (5 * M) << ' ' << m / M << ' ' << s / M << ' ' << (s % M) / 720 << endl;
+}
+
+bool find(ll h, ll m, ll s)
+{
+    for (int Q = 0; Q < 60; Q++)
+    {
+
+        ll shift = (60 * (M * Q - m) + s) / 59;
+        ll H = mod(h + shift, 60 * M);
+        ll min = mod(m + shift, 60 * M);
+        ll S = mod(s + shift, 60 * M);
+
+        if (check(H, min, S))
+        {
+            output(H, min, S);
+            return true;
+        }
+    }
+    return false;
+}
 
 typedef pair<int, int> p2;
 int main()
+
 {
+
     ios_base::sync_with_stdio(false);
     cin.tie(0);
     cout.tie(0);
-    int T, N, Q, m, num, den;
-    string s;
+    int T;
+    ll A, B, C;
     cin >> T;
     for (int t = 1; t <= T; t++)
     {
-
-        cout << "Case #" << t << ": " << ans << ' ' << num << '/' << den << endl;
+        cin >> A >> B >> C;
+        vector<ll> ticks = {A, B, C};
+        cout << "Case #" << t << ": ";
+        do
+        {
+            if (find(ticks[0], ticks[1], ticks[2]))
+            {
+                break;
+            }
+        } while (next_permutation(ticks.begin(), ticks.end()));
     }
 }

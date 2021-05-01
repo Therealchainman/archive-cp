@@ -136,6 +136,47 @@ void printVecPair(vector<pair<T1, T2>> p)
     }
     cout << "}" << endl;
 }
+const string IMPOSSIBLE = "IMPOSSIBLE";
+const int LIMIT = 1000;
+
+template <class T>
+T gcd(T a, T b)
+{
+    if (b == 0)
+    {
+        return a;
+    }
+    return gcd(b, a % b);
+}
+
+bool isPossible(int A, int B, unordered_map<int, int> &U)
+{
+    int g = gcd(A, B);
+    int k = -1;
+    for (auto u : U)
+    {
+        if (u.second == 0)
+        {
+            continue;
+        }
+
+        if (k == -1)
+        {
+            k = u.first % g;
+        }
+        else if (k != u.first % g)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+template <class T>
+void output(int t, T out)
+{
+    cout << "Case #" << t << ": " << out << endl;
+}
 
 typedef pair<int, int> p2;
 int main()
@@ -143,62 +184,54 @@ int main()
     ios_base::sync_with_stdio(false);
     cin.tie(0);
     cout.tie(0);
-    int T;
-    ll A, B, C, shift, x, diff, ns;
-    int s, h, m;
-    ll M = 360LL * 12LL * 1e10;
+    int T, N, A, B, u;
     cin >> T;
     for (int t = 1; t <= T; t++)
-
     {
-        cin >> A >> B >> C;
-        vector<ll> ticks = {A, B, C};
-        do
+        cin >> N >> A >> B;
+        unordered_map<int, int> U;
+        int total = 0;
+        for (int i = 1; i <= N; i++)
         {
-            diff = ticks[1] - ticks[0];
-            if (diff < 0)
+            cin >> u;
+            U[i] += u;
+            total += u;
+        }
+        if (!isPossible(A, B, U))
+        {
+            output(t, IMPOSSIBLE);
+            continue;
+        }
+        for (int i = 1; i < LIMIT; i++)
+        {
+            int cnt = 0;
+            queue<int> q;
+            q.push(i);
+            unordered_map<int, int> NU = U;
+            while (!q.empty())
             {
-                diff += M;
-            }
-            printf("diff=%lld\n", diff);
-            if (mod(diff, 11LL) == 0)
-            {
-                x = diff / 11;
-                printf("x=%lld\n", x);
-                shift = ticks[0] - x;
-                if (shift < 0)
+                int cur = q.front();
+                q.pop();
+                if (cur <= 0)
                 {
-                    shift += M;
+                    continue;
                 }
-                bool isGood = true;
-                for (int i = 0; i < 3; i++)
+                if (NU[cur] > 0)
                 {
-                    if (mod(vector<int>{1, 12, 720}[i] * x + shift, M) != ticks[i])
-                    {
-                        isGood = false;
-                    }
+                    NU[cur]--;
+                    cnt++;
                 }
-                if (isGood)
+                else
                 {
-                    vector<int> ans;
-                    ans.push_back(mod(x, 1e9));
-                    x /= 1e9;
-                    ans.push_back(mod(x, 60));
-                    x /= 60;
-                    ans.push_back(mod(x, 60));
-                    x /= 60;
-                    ans.push_back(x);
-                    reverse(ans.begin(), ans.end());
-                    if (ans[0] < 12)
-                    {
-                        h = ans[0], m = ans[1], s = ans[2], ns = ans[3];
-                        printf("h=%d,m=%d,s=%d,ns=%lld\n", h, m, s, ns);
-                    }
+                    q.push(cur - A);
+                    q.push(cur - B);
                 }
             }
-
-        } while (next_permutation(ticks.begin(), ticks.end()));
-
-        cout << "Case #" << t << ": " << h << " " << m << " " << s << " " << ns << endl;
+            if (cnt == total)
+            {
+                output(t, i);
+                break;
+            }
+        }
     }
 }
