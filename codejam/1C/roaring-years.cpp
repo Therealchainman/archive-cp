@@ -137,60 +137,56 @@ void printVecPair(vector<pair<T1, T2>> p)
     cout << "}" << endl;
 }
 
-int find9(vector<int> &cnt, int in, int B)
+template <class T>
+void output(int t, T out)
 {
-    int maxx = -1;
-    int maxxi = -1;
-    for (int i = 0; i < cnt.size(); i++)
-    {
-        if (cnt[i] > maxx && cnt[i] < B)
-        {
-            maxx = cnt[i];
-            maxxi = i;
-        }
-    }
-    return maxxi;
+    cout << "Case #" << t << ": " << out << endl;
 }
 
-int find8(vector<int> &cnt, int in, int B)
+bool isValid(vector<int> &vec)
 {
-    int maxx = -1;
-    int maxxi = -1;
-    for (int i = 0; i < cnt.size(); i++)
+    for (int i = 1; i < vec.size(); i++)
     {
-        if (cnt[i] > maxx && cnt[i] < B - 1)
+        if (vec[i] - vec[i - 1] != 1)
         {
-            maxx = cnt[i];
-            maxxi = i;
+            return false;
         }
     }
-    if (maxxi == -1)
-    {
-        for (int i = 0; i < cnt.size(); i++)
-        {
-            if (cnt[i] > maxx && cnt[i] < B)
-            {
-                maxx = cnt[i];
-                maxxi = i;
-            }
-        }
-    }
-    return maxxi;
+    return true;
 }
 
-int find(vector<int> &cnt, int in, int B)
+bool find(int idx, string &Y, vector<int> vec)
 {
-    int minn = B + 1;
-    int minni = -1;
-    for (int i = 0; i < cnt.size(); i++)
+    int n = Y.size();
+    // printf("idx=%d\n", idx);
+    // printVec(vec);
+    // flush(cout);
+    if (idx == n)
     {
-        if (cnt[i] < minn)
+        if (vec.size() < 2)
         {
-            minn = cnt[i];
-            minni = i;
+            return false;
         }
+        return isValid(vec) ? true : false;
     }
-    return minni;
+    for (int i = idx; i < n; i++)
+    {
+        if (i + 1 < n && Y[i + 1] == '0')
+        {
+            continue;
+        }
+        int nxt = stoi(Y.substr(idx, i - idx + 1));
+        // printf("nxt=%d\n", nxt);
+        vec.push_back(nxt);
+        // printVec(vec);
+        // flush(cout);
+        if (find(i + 1, Y, vec))
+        {
+            return true;
+        }
+        vec.pop_back();
+    }
+    return false;
 }
 
 typedef pair<int, int> p2;
@@ -199,33 +195,20 @@ int main()
     ios_base::sync_with_stdio(false);
     cin.tie(0);
     cout.tie(0);
-    int T, D, B, N, cand;
-    ll in;
+    int T, Y;
     cin >> T;
     for (int t = 1; t <= T; t++)
     {
-        cin >> N >> B;
-        vector<int> cnt(N, 0);
-        for (int i = 0; i < N * B; i++)
+        cin >> Y;
+        vector<int> vec;
+        for (int i = Y + 1;; i++)
         {
-            cin >> in;
-            if (in == 9)
+            string s = to_string(i);
+            if (find(0, s, vec))
             {
-                cand = find9(cnt, in, B);
-                cnt[cand]++;
-                cout << cand << endl;
-                continue;
+                output(t, i);
+                break;
             }
-            if (in == 8)
-            {
-                cand = find8(cnt, in, B);
-                cnt[cand]++;
-                cout << cand << endl;
-                continue;
-            }
-            cand = find(cnt, in, B);
-            cnt[cand]++;
-            cout << cand << endl;
         }
     }
 }

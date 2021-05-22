@@ -137,60 +137,10 @@ void printVecPair(vector<pair<T1, T2>> p)
     cout << "}" << endl;
 }
 
-int find9(vector<int> &cnt, int in, int B)
+template <class T>
+void output(int t, T out)
 {
-    int maxx = -1;
-    int maxxi = -1;
-    for (int i = 0; i < cnt.size(); i++)
-    {
-        if (cnt[i] > maxx && cnt[i] < B)
-        {
-            maxx = cnt[i];
-            maxxi = i;
-        }
-    }
-    return maxxi;
-}
-
-int find8(vector<int> &cnt, int in, int B)
-{
-    int maxx = -1;
-    int maxxi = -1;
-    for (int i = 0; i < cnt.size(); i++)
-    {
-        if (cnt[i] > maxx && cnt[i] < B - 1)
-        {
-            maxx = cnt[i];
-            maxxi = i;
-        }
-    }
-    if (maxxi == -1)
-    {
-        for (int i = 0; i < cnt.size(); i++)
-        {
-            if (cnt[i] > maxx && cnt[i] < B)
-            {
-                maxx = cnt[i];
-                maxxi = i;
-            }
-        }
-    }
-    return maxxi;
-}
-
-int find(vector<int> &cnt, int in, int B)
-{
-    int minn = B + 1;
-    int minni = -1;
-    for (int i = 0; i < cnt.size(); i++)
-    {
-        if (cnt[i] < minn)
-        {
-            minn = cnt[i];
-            minni = i;
-        }
-    }
-    return minni;
+    cout << "Case #" << t << ": " << out << endl;
 }
 
 typedef pair<int, int> p2;
@@ -199,33 +149,29 @@ int main()
     ios_base::sync_with_stdio(false);
     cin.tie(0);
     cout.tie(0);
-    int T, D, B, N, cand;
-    ll in;
+    int T, N, K, p;
     cin >> T;
     for (int t = 1; t <= T; t++)
     {
-        cin >> N >> B;
-        vector<int> cnt(N, 0);
-        for (int i = 0; i < N * B; i++)
+        cin >> N >> K;
+        vector<int> tickets;
+        int maxx = 0;
+        for (int i = 0; i < N; i++)
         {
-            cin >> in;
-            if (in == 9)
-            {
-                cand = find9(cnt, in, B);
-                cnt[cand]++;
-                cout << cand << endl;
-                continue;
-            }
-            if (in == 8)
-            {
-                cand = find8(cnt, in, B);
-                cnt[cand]++;
-                cout << cand << endl;
-                continue;
-            }
-            cand = find(cnt, in, B);
-            cnt[cand]++;
-            cout << cand << endl;
+            cin >> p;
+            tickets.push_back(p);
         }
+        sort(tickets.begin(), tickets.end());
+        vector<int> best;
+        best.push_back(tickets[0] - 1);
+        best.push_back(K - tickets.back());
+        for (int i = 1; i < N; i++)
+        {
+            maxx = max(maxx, tickets[i] - tickets[i - 1] - 1);
+            best.push_back((tickets[i] - tickets[i - 1]) / 2);
+        }
+        sort(best.rbegin(), best.rend());
+        maxx = max(maxx, best[0] + best[1]);
+        output(t, (double)maxx / (double)K);
     }
 }

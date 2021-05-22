@@ -137,95 +137,128 @@ void printVecPair(vector<pair<T1, T2>> p)
     cout << "}" << endl;
 }
 
-int find9(vector<int> &cnt, int in, int B)
+const string IMPOSSIBLE = "IMPOSSIBLE";
+
+bool isPossible(string &S, string &E)
 {
-    int maxx = -1;
-    int maxxi = -1;
-    for (int i = 0; i < cnt.size(); i++)
+    int cntS = 0, cntE = 0;
+    for (int i = 1; i < E.size(); i++)
     {
-        if (cnt[i] > maxx && cnt[i] < B)
+        if (E[i - 1] == '0' && E[i] == '1')
         {
-            maxx = cnt[i];
-            maxxi = i;
+            cntE++;
         }
     }
-    return maxxi;
+    if (cntE == 0)
+    {
+        return true;
+    }
+    for (int i = 1; i < S.size(); i++)
+    {
+        if (S[i - 1] == '0' && S[i] == '1')
+        {
+            cntS++;
+        }
+    }
+    return cntS == cntE;
 }
 
-int find8(vector<int> &cnt, int in, int B)
+template <class T>
+void output(int t, T out)
 {
-    int maxx = -1;
-    int maxxi = -1;
-    for (int i = 0; i < cnt.size(); i++)
-    {
-        if (cnt[i] > maxx && cnt[i] < B - 1)
-        {
-            maxx = cnt[i];
-            maxxi = i;
-        }
-    }
-    if (maxxi == -1)
-    {
-        for (int i = 0; i < cnt.size(); i++)
-        {
-            if (cnt[i] > maxx && cnt[i] < B)
-            {
-                maxx = cnt[i];
-                maxxi = i;
-            }
-        }
-    }
-    return maxxi;
+    cout << "Case #" << t << ": " << out << endl;
 }
 
-int find(vector<int> &cnt, int in, int B)
+string notBit(string &s)
 {
-    int minn = B + 1;
-    int minni = -1;
-    for (int i = 0; i < cnt.size(); i++)
+    string res = "";
+    bool prev = false;
+    for (int i = 0; i < s.size(); i++)
     {
-        if (cnt[i] < minn)
+        if (s[i] == '0')
         {
-            minn = cnt[i];
-            minni = i;
+            prev = true;
+            res += '1';
+        }
+        else if (prev)
+        {
+            res += '0';
         }
     }
-    return minni;
+    if (res.size() == 0)
+    {
+        res += '0';
+    }
+    return res;
 }
 
+string doubleVal(string &s)
+{
+    string res = "";
+    if (s.size() == 1 && s[0] == '0')
+    {
+        res += '0';
+        return res;
+    }
+    res += s + '0';
+    return res;
+}
+
+const int LIMIT = 1e9;
 typedef pair<int, int> p2;
 int main()
 {
     ios_base::sync_with_stdio(false);
     cin.tie(0);
     cout.tie(0);
-    int T, D, B, N, cand;
-    ll in;
+    int T, oper;
+    string S, E, B;
     cin >> T;
     for (int t = 1; t <= T; t++)
     {
-        cin >> N >> B;
-        vector<int> cnt(N, 0);
-        for (int i = 0; i < N * B; i++)
+        cin >> S >> E;
+        queue<pair<string, int>> q;
+        unordered_set<string> seen;
+        q.emplace(S, 0);
+        seen.insert(S);
+        int cnt = 0;
+        bool isPossible = false;
+        while (!q.empty())
         {
-            cin >> in;
-            if (in == 9)
+            tie(B, oper) = q.front();
+            cnt++;
+            if (cnt == LIMIT)
             {
-                cand = find9(cnt, in, B);
-                cnt[cand]++;
-                cout << cand << endl;
+                break;
+            }
+            if (B == E)
+            {
+                output(t, oper);
+                isPossible = true;
+                break;
+            }
+            q.pop();
+            if (B.size() > 32)
+            {
                 continue;
             }
-            if (in == 8)
+            string n = notBit(B);
+            if (seen.count(n) == 0)
             {
-                cand = find8(cnt, in, B);
-                cnt[cand]++;
-                cout << cand << endl;
-                continue;
+                q.emplace(n, oper + 1);
+                seen.insert(n);
             }
-            cand = find(cnt, in, B);
-            cnt[cand]++;
-            cout << cand << endl;
+            string d = doubleVal(B);
+            if (seen.count(d) == 0)
+            {
+
+                q.emplace(d, oper + 1);
+                seen.insert(d);
+            }
+        }
+        if (!isPossible)
+        {
+            output(t, IMPOSSIBLE);
         }
     }
 }
