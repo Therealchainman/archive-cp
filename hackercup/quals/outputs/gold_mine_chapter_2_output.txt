@@ -1,0 +1,4895 @@
+Case #1: number children initially = 0
+i=3, parent=1
+number children initially = 0
+i=5, parent=4
+number children initially = 0
+i=2, parent=4
+number children initially = 2
+i=4, parent=1
+G=0
+set = 0, free path here=0, at least one child connected = 0
+I think you connect child here, a2=0
+F=11, node=5, numpaths=0, free=1
+I think you connect child here, a2=1
+F=-1, node=5, numpaths=1, free=1
+I think you connect child here, a2=2
+F=-1, node=5, numpaths=2, free=1
+I think you connect child here, a2=3
+F=-1, node=5, numpaths=3, free=1
+I think you connect child here, a2=4
+F=-1, node=5, numpaths=4, free=1
+I think you connect child here, a2=5
+F=-1, node=5, numpaths=5, free=1
+I think you connect child here, a2=6
+F=-1, node=5, numpaths=6, free=1
+I think you connect child here, a2=7
+F=-1, node=5, numpaths=7, free=1
+I think you connect child here, a2=8
+F=-1, node=5, numpaths=8, free=1
+I think you connect child here, a2=9
+F=-1, node=5, numpaths=9, free=1
+I think you connect child here, a2=10
+F=-1, node=5, numpaths=10, free=1
+I think you connect child here, a2=11
+F=-1, node=5, numpaths=11, free=1
+I think you connect child here, a2=12
+F=-1, node=5, numpaths=12, free=1
+I think you connect child here, a2=13
+F=-1, node=5, numpaths=13, free=1
+I think you connect child here, a2=14
+F=-1, node=5, numpaths=14, free=1
+I think you connect child here, a2=15
+F=-1, node=5, numpaths=15, free=1
+I think you connect child here, a2=16
+F=-1, node=5, numpaths=16, free=1
+I think you connect child here, a2=17
+F=-1, node=5, numpaths=17, free=1
+I think you connect child here, a2=18
+F=-1, node=5, numpaths=18, free=1
+I think you connect child here, a2=19
+F=-1, node=5, numpaths=19, free=1
+I think you connect child here, a2=20
+F=-1, node=5, numpaths=20, free=1
+I think you connect child here, a2=21
+F=-1, node=5, numpaths=21, free=1
+I think you connect child here, a2=22
+F=-1, node=5, numpaths=22, free=1
+I think you connect child here, a2=23
+F=-1, node=5, numpaths=23, free=1
+I think you connect child here, a2=24
+F=-1, node=5, numpaths=24, free=1
+I think you connect child here, a2=25
+F=-1, node=5, numpaths=25, free=1
+I think you connect child here, a2=26
+F=-1, node=5, numpaths=26, free=1
+I think you connect child here, a2=27
+F=-1, node=5, numpaths=27, free=1
+I think you connect child here, a2=28
+F=-1, node=5, numpaths=28, free=1
+I think you connect child here, a2=29
+F=-1, node=5, numpaths=29, free=1
+I think you connect child here, a2=30
+F=-1, node=5, numpaths=30, free=1
+I think you connect child here, a2=31
+F=-1, node=5, numpaths=31, free=1
+I think you connect child here, a2=32
+F=-1, node=5, numpaths=32, free=1
+I think you connect child here, a2=33
+F=-1, node=5, numpaths=33, free=1
+I think you connect child here, a2=34
+F=-1, node=5, numpaths=34, free=1
+I think you connect child here, a2=35
+F=-1, node=5, numpaths=35, free=1
+I think you connect child here, a2=36
+F=-1, node=5, numpaths=36, free=1
+I think you connect child here, a2=37
+F=-1, node=5, numpaths=37, free=1
+I think you connect child here, a2=38
+F=-1, node=5, numpaths=38, free=1
+I think you connect child here, a2=39
+F=-1, node=5, numpaths=39, free=1
+I think you connect child here, a2=40
+F=-1, node=5, numpaths=40, free=1
+I think you connect child here, a2=41
+F=-1, node=5, numpaths=41, free=1
+I think you connect child here, a2=42
+F=-1, node=5, numpaths=42, free=1
+I think you connect child here, a2=43
+F=-1, node=5, numpaths=43, free=1
+I think you connect child here, a2=44
+F=-1, node=5, numpaths=44, free=1
+I think you connect child here, a2=45
+F=-1, node=5, numpaths=45, free=1
+I think you connect child here, a2=46
+F=-1, node=5, numpaths=46, free=1
+I think you connect child here, a2=47
+F=-1, node=5, numpaths=47, free=1
+I think you connect child here, a2=48
+F=-1, node=5, numpaths=48, free=1
+I think you connect child here, a2=49
+F=-1, node=5, numpaths=49, free=1
+I think you connect child here, a2=50
+F=-1, node=5, numpaths=50, free=1
+G=-1
+set = 0, free path here=0, at least one child connected = 1
+G=-1
+set = 0, free path here=1, at least one child connected = 0
+G=-1
+set = 0, free path here=1, at least one child connected = 1
+G=-1
+set = 1, free path here=0, at least one child connected = 0
+G=-1
+set = 1, free path here=0, at least one child connected = 1
+G=-1
+set = 1, free path here=1, at least one child connected = 0
+G=-1
+set = 1, free path here=1, at least one child connected = 1
+G=-1
+set = 2, free path here=0, at least one child connected = 0
+G=-1
+set = 2, free path here=0, at least one child connected = 1
+G=-1
+set = 2, free path here=1, at least one child connected = 0
+G=-1
+set = 2, free path here=1, at least one child connected = 1
+G=-1
+set = 3, free path here=0, at least one child connected = 0
+G=-1
+set = 3, free path here=0, at least one child connected = 1
+G=-1
+set = 3, free path here=1, at least one child connected = 0
+G=-1
+set = 3, free path here=1, at least one child connected = 1
+G=-1
+set = 4, free path here=0, at least one child connected = 0
+G=-1
+set = 4, free path here=0, at least one child connected = 1
+G=-1
+set = 4, free path here=1, at least one child connected = 0
+G=-1
+set = 4, free path here=1, at least one child connected = 1
+G=-1
+set = 5, free path here=0, at least one child connected = 0
+G=-1
+set = 5, free path here=0, at least one child connected = 1
+G=-1
+set = 5, free path here=1, at least one child connected = 0
+G=-1
+set = 5, free path here=1, at least one child connected = 1
+G=-1
+set = 6, free path here=0, at least one child connected = 0
+G=-1
+set = 6, free path here=0, at least one child connected = 1
+G=-1
+set = 6, free path here=1, at least one child connected = 0
+G=-1
+set = 6, free path here=1, at least one child connected = 1
+G=-1
+set = 7, free path here=0, at least one child connected = 0
+G=-1
+set = 7, free path here=0, at least one child connected = 1
+G=-1
+set = 7, free path here=1, at least one child connected = 0
+G=-1
+set = 7, free path here=1, at least one child connected = 1
+G=-1
+set = 8, free path here=0, at least one child connected = 0
+G=-1
+set = 8, free path here=0, at least one child connected = 1
+G=-1
+set = 8, free path here=1, at least one child connected = 0
+G=-1
+set = 8, free path here=1, at least one child connected = 1
+G=-1
+set = 9, free path here=0, at least one child connected = 0
+G=-1
+set = 9, free path here=0, at least one child connected = 1
+G=-1
+set = 9, free path here=1, at least one child connected = 0
+G=-1
+set = 9, free path here=1, at least one child connected = 1
+G=-1
+set = 10, free path here=0, at least one child connected = 0
+G=-1
+set = 10, free path here=0, at least one child connected = 1
+G=-1
+set = 10, free path here=1, at least one child connected = 0
+G=-1
+set = 10, free path here=1, at least one child connected = 1
+G=-1
+set = 11, free path here=0, at least one child connected = 0
+G=-1
+set = 11, free path here=0, at least one child connected = 1
+G=-1
+set = 11, free path here=1, at least one child connected = 0
+G=-1
+set = 11, free path here=1, at least one child connected = 1
+G=-1
+set = 12, free path here=0, at least one child connected = 0
+G=-1
+set = 12, free path here=0, at least one child connected = 1
+G=-1
+set = 12, free path here=1, at least one child connected = 0
+G=-1
+set = 12, free path here=1, at least one child connected = 1
+G=-1
+set = 13, free path here=0, at least one child connected = 0
+G=-1
+set = 13, free path here=0, at least one child connected = 1
+G=-1
+set = 13, free path here=1, at least one child connected = 0
+G=-1
+set = 13, free path here=1, at least one child connected = 1
+G=-1
+set = 14, free path here=0, at least one child connected = 0
+G=-1
+set = 14, free path here=0, at least one child connected = 1
+G=-1
+set = 14, free path here=1, at least one child connected = 0
+G=-1
+set = 14, free path here=1, at least one child connected = 1
+G=-1
+set = 15, free path here=0, at least one child connected = 0
+G=-1
+set = 15, free path here=0, at least one child connected = 1
+G=-1
+set = 15, free path here=1, at least one child connected = 0
+G=-1
+set = 15, free path here=1, at least one child connected = 1
+G=-1
+set = 16, free path here=0, at least one child connected = 0
+G=-1
+set = 16, free path here=0, at least one child connected = 1
+G=-1
+set = 16, free path here=1, at least one child connected = 0
+G=-1
+set = 16, free path here=1, at least one child connected = 1
+G=-1
+set = 17, free path here=0, at least one child connected = 0
+G=-1
+set = 17, free path here=0, at least one child connected = 1
+G=-1
+set = 17, free path here=1, at least one child connected = 0
+G=-1
+set = 17, free path here=1, at least one child connected = 1
+G=-1
+set = 18, free path here=0, at least one child connected = 0
+G=-1
+set = 18, free path here=0, at least one child connected = 1
+G=-1
+set = 18, free path here=1, at least one child connected = 0
+G=-1
+set = 18, free path here=1, at least one child connected = 1
+G=-1
+set = 19, free path here=0, at least one child connected = 0
+G=-1
+set = 19, free path here=0, at least one child connected = 1
+G=-1
+set = 19, free path here=1, at least one child connected = 0
+G=-1
+set = 19, free path here=1, at least one child connected = 1
+G=-1
+set = 20, free path here=0, at least one child connected = 0
+G=-1
+set = 20, free path here=0, at least one child connected = 1
+G=-1
+set = 20, free path here=1, at least one child connected = 0
+G=-1
+set = 20, free path here=1, at least one child connected = 1
+G=-1
+set = 21, free path here=0, at least one child connected = 0
+G=-1
+set = 21, free path here=0, at least one child connected = 1
+G=-1
+set = 21, free path here=1, at least one child connected = 0
+G=-1
+set = 21, free path here=1, at least one child connected = 1
+G=-1
+set = 22, free path here=0, at least one child connected = 0
+G=-1
+set = 22, free path here=0, at least one child connected = 1
+G=-1
+set = 22, free path here=1, at least one child connected = 0
+G=-1
+set = 22, free path here=1, at least one child connected = 1
+G=-1
+set = 23, free path here=0, at least one child connected = 0
+G=-1
+set = 23, free path here=0, at least one child connected = 1
+G=-1
+set = 23, free path here=1, at least one child connected = 0
+G=-1
+set = 23, free path here=1, at least one child connected = 1
+G=-1
+set = 24, free path here=0, at least one child connected = 0
+G=-1
+set = 24, free path here=0, at least one child connected = 1
+G=-1
+set = 24, free path here=1, at least one child connected = 0
+G=-1
+set = 24, free path here=1, at least one child connected = 1
+G=-1
+set = 25, free path here=0, at least one child connected = 0
+G=-1
+set = 25, free path here=0, at least one child connected = 1
+G=-1
+set = 25, free path here=1, at least one child connected = 0
+G=-1
+set = 25, free path here=1, at least one child connected = 1
+G=-1
+set = 26, free path here=0, at least one child connected = 0
+G=-1
+set = 26, free path here=0, at least one child connected = 1
+G=-1
+set = 26, free path here=1, at least one child connected = 0
+G=-1
+set = 26, free path here=1, at least one child connected = 1
+G=-1
+set = 27, free path here=0, at least one child connected = 0
+G=-1
+set = 27, free path here=0, at least one child connected = 1
+G=-1
+set = 27, free path here=1, at least one child connected = 0
+G=-1
+set = 27, free path here=1, at least one child connected = 1
+G=-1
+set = 28, free path here=0, at least one child connected = 0
+G=-1
+set = 28, free path here=0, at least one child connected = 1
+G=-1
+set = 28, free path here=1, at least one child connected = 0
+G=-1
+set = 28, free path here=1, at least one child connected = 1
+G=-1
+set = 29, free path here=0, at least one child connected = 0
+G=-1
+set = 29, free path here=0, at least one child connected = 1
+G=-1
+set = 29, free path here=1, at least one child connected = 0
+G=-1
+set = 29, free path here=1, at least one child connected = 1
+G=-1
+set = 30, free path here=0, at least one child connected = 0
+G=-1
+set = 30, free path here=0, at least one child connected = 1
+G=-1
+set = 30, free path here=1, at least one child connected = 0
+G=-1
+set = 30, free path here=1, at least one child connected = 1
+G=-1
+set = 31, free path here=0, at least one child connected = 0
+G=-1
+set = 31, free path here=0, at least one child connected = 1
+G=-1
+set = 31, free path here=1, at least one child connected = 0
+G=-1
+set = 31, free path here=1, at least one child connected = 1
+G=-1
+set = 32, free path here=0, at least one child connected = 0
+G=-1
+set = 32, free path here=0, at least one child connected = 1
+G=-1
+set = 32, free path here=1, at least one child connected = 0
+G=-1
+set = 32, free path here=1, at least one child connected = 1
+G=-1
+set = 33, free path here=0, at least one child connected = 0
+G=-1
+set = 33, free path here=0, at least one child connected = 1
+G=-1
+set = 33, free path here=1, at least one child connected = 0
+G=-1
+set = 33, free path here=1, at least one child connected = 1
+G=-1
+set = 34, free path here=0, at least one child connected = 0
+G=-1
+set = 34, free path here=0, at least one child connected = 1
+G=-1
+set = 34, free path here=1, at least one child connected = 0
+G=-1
+set = 34, free path here=1, at least one child connected = 1
+G=-1
+set = 35, free path here=0, at least one child connected = 0
+G=-1
+set = 35, free path here=0, at least one child connected = 1
+G=-1
+set = 35, free path here=1, at least one child connected = 0
+G=-1
+set = 35, free path here=1, at least one child connected = 1
+G=-1
+set = 36, free path here=0, at least one child connected = 0
+G=-1
+set = 36, free path here=0, at least one child connected = 1
+G=-1
+set = 36, free path here=1, at least one child connected = 0
+G=-1
+set = 36, free path here=1, at least one child connected = 1
+G=-1
+set = 37, free path here=0, at least one child connected = 0
+G=-1
+set = 37, free path here=0, at least one child connected = 1
+G=-1
+set = 37, free path here=1, at least one child connected = 0
+G=-1
+set = 37, free path here=1, at least one child connected = 1
+G=-1
+set = 38, free path here=0, at least one child connected = 0
+G=-1
+set = 38, free path here=0, at least one child connected = 1
+G=-1
+set = 38, free path here=1, at least one child connected = 0
+G=-1
+set = 38, free path here=1, at least one child connected = 1
+G=-1
+set = 39, free path here=0, at least one child connected = 0
+G=-1
+set = 39, free path here=0, at least one child connected = 1
+G=-1
+set = 39, free path here=1, at least one child connected = 0
+G=-1
+set = 39, free path here=1, at least one child connected = 1
+G=-1
+set = 40, free path here=0, at least one child connected = 0
+G=-1
+set = 40, free path here=0, at least one child connected = 1
+G=-1
+set = 40, free path here=1, at least one child connected = 0
+G=-1
+set = 40, free path here=1, at least one child connected = 1
+G=-1
+set = 41, free path here=0, at least one child connected = 0
+G=-1
+set = 41, free path here=0, at least one child connected = 1
+G=-1
+set = 41, free path here=1, at least one child connected = 0
+G=-1
+set = 41, free path here=1, at least one child connected = 1
+G=-1
+set = 42, free path here=0, at least one child connected = 0
+G=-1
+set = 42, free path here=0, at least one child connected = 1
+G=-1
+set = 42, free path here=1, at least one child connected = 0
+G=-1
+set = 42, free path here=1, at least one child connected = 1
+G=-1
+set = 43, free path here=0, at least one child connected = 0
+G=-1
+set = 43, free path here=0, at least one child connected = 1
+G=-1
+set = 43, free path here=1, at least one child connected = 0
+G=-1
+set = 43, free path here=1, at least one child connected = 1
+G=-1
+set = 44, free path here=0, at least one child connected = 0
+G=-1
+set = 44, free path here=0, at least one child connected = 1
+G=-1
+set = 44, free path here=1, at least one child connected = 0
+G=-1
+set = 44, free path here=1, at least one child connected = 1
+G=-1
+set = 45, free path here=0, at least one child connected = 0
+G=-1
+set = 45, free path here=0, at least one child connected = 1
+G=-1
+set = 45, free path here=1, at least one child connected = 0
+G=-1
+set = 45, free path here=1, at least one child connected = 1
+G=-1
+set = 46, free path here=0, at least one child connected = 0
+G=-1
+set = 46, free path here=0, at least one child connected = 1
+G=-1
+set = 46, free path here=1, at least one child connected = 0
+G=-1
+set = 46, free path here=1, at least one child connected = 1
+G=-1
+set = 47, free path here=0, at least one child connected = 0
+G=-1
+set = 47, free path here=0, at least one child connected = 1
+G=-1
+set = 47, free path here=1, at least one child connected = 0
+G=-1
+set = 47, free path here=1, at least one child connected = 1
+G=-1
+set = 48, free path here=0, at least one child connected = 0
+G=-1
+set = 48, free path here=0, at least one child connected = 1
+G=-1
+set = 48, free path here=1, at least one child connected = 0
+G=-1
+set = 48, free path here=1, at least one child connected = 1
+G=-1
+set = 49, free path here=0, at least one child connected = 0
+G=-1
+set = 49, free path here=0, at least one child connected = 1
+G=-1
+set = 49, free path here=1, at least one child connected = 0
+G=-1
+set = 49, free path here=1, at least one child connected = 1
+G=-1
+set = 50, free path here=0, at least one child connected = 0
+G=-1
+set = 50, free path here=0, at least one child connected = 1
+G=-1
+set = 50, free path here=1, at least one child connected = 0
+G=-1
+set = 50, free path here=1, at least one child connected = 1
+G=0
+set = 0, free path here=0, at least one child connected = 0
+I think you connect child here, a2=0
+F=14, node=2, numpaths=0, free=1
+I think you connect child here, a2=1
+F=-1, node=2, numpaths=1, free=1
+I think you connect child here, a2=2
+F=-1, node=2, numpaths=2, free=1
+I think you connect child here, a2=3
+F=-1, node=2, numpaths=3, free=1
+I think you connect child here, a2=4
+F=-1, node=2, numpaths=4, free=1
+I think you connect child here, a2=5
+F=-1, node=2, numpaths=5, free=1
+I think you connect child here, a2=6
+F=-1, node=2, numpaths=6, free=1
+I think you connect child here, a2=7
+F=-1, node=2, numpaths=7, free=1
+I think you connect child here, a2=8
+F=-1, node=2, numpaths=8, free=1
+I think you connect child here, a2=9
+F=-1, node=2, numpaths=9, free=1
+I think you connect child here, a2=10
+F=-1, node=2, numpaths=10, free=1
+I think you connect child here, a2=11
+F=-1, node=2, numpaths=11, free=1
+I think you connect child here, a2=12
+F=-1, node=2, numpaths=12, free=1
+I think you connect child here, a2=13
+F=-1, node=2, numpaths=13, free=1
+I think you connect child here, a2=14
+F=-1, node=2, numpaths=14, free=1
+I think you connect child here, a2=15
+F=-1, node=2, numpaths=15, free=1
+I think you connect child here, a2=16
+F=-1, node=2, numpaths=16, free=1
+I think you connect child here, a2=17
+F=-1, node=2, numpaths=17, free=1
+I think you connect child here, a2=18
+F=-1, node=2, numpaths=18, free=1
+I think you connect child here, a2=19
+F=-1, node=2, numpaths=19, free=1
+I think you connect child here, a2=20
+F=-1, node=2, numpaths=20, free=1
+I think you connect child here, a2=21
+F=-1, node=2, numpaths=21, free=1
+I think you connect child here, a2=22
+F=-1, node=2, numpaths=22, free=1
+I think you connect child here, a2=23
+F=-1, node=2, numpaths=23, free=1
+I think you connect child here, a2=24
+F=-1, node=2, numpaths=24, free=1
+I think you connect child here, a2=25
+F=-1, node=2, numpaths=25, free=1
+I think you connect child here, a2=26
+F=-1, node=2, numpaths=26, free=1
+I think you connect child here, a2=27
+F=-1, node=2, numpaths=27, free=1
+I think you connect child here, a2=28
+F=-1, node=2, numpaths=28, free=1
+I think you connect child here, a2=29
+F=-1, node=2, numpaths=29, free=1
+I think you connect child here, a2=30
+F=-1, node=2, numpaths=30, free=1
+I think you connect child here, a2=31
+F=-1, node=2, numpaths=31, free=1
+I think you connect child here, a2=32
+F=-1, node=2, numpaths=32, free=1
+I think you connect child here, a2=33
+F=-1, node=2, numpaths=33, free=1
+I think you connect child here, a2=34
+F=-1, node=2, numpaths=34, free=1
+I think you connect child here, a2=35
+F=-1, node=2, numpaths=35, free=1
+I think you connect child here, a2=36
+F=-1, node=2, numpaths=36, free=1
+I think you connect child here, a2=37
+F=-1, node=2, numpaths=37, free=1
+I think you connect child here, a2=38
+F=-1, node=2, numpaths=38, free=1
+I think you connect child here, a2=39
+F=-1, node=2, numpaths=39, free=1
+I think you connect child here, a2=40
+F=-1, node=2, numpaths=40, free=1
+I think you connect child here, a2=41
+F=-1, node=2, numpaths=41, free=1
+I think you connect child here, a2=42
+F=-1, node=2, numpaths=42, free=1
+I think you connect child here, a2=43
+F=-1, node=2, numpaths=43, free=1
+I think you connect child here, a2=44
+F=-1, node=2, numpaths=44, free=1
+I think you connect child here, a2=45
+F=-1, node=2, numpaths=45, free=1
+I think you connect child here, a2=46
+F=-1, node=2, numpaths=46, free=1
+I think you connect child here, a2=47
+F=-1, node=2, numpaths=47, free=1
+I think you connect child here, a2=48
+F=-1, node=2, numpaths=48, free=1
+I think you connect child here, a2=49
+F=-1, node=2, numpaths=49, free=1
+I think you connect child here, a2=50
+F=-1, node=2, numpaths=50, free=1
+G=-1
+set = 0, free path here=0, at least one child connected = 1
+G=-1
+set = 0, free path here=1, at least one child connected = 0
+G=-1
+set = 0, free path here=1, at least one child connected = 1
+G=-1
+set = 1, free path here=0, at least one child connected = 0
+G=-1
+set = 1, free path here=0, at least one child connected = 1
+G=-1
+set = 1, free path here=1, at least one child connected = 0
+G=11
+set = 1, free path here=1, at least one child connected = 1
+I think you connect child here, a2=0
+F=14, node=2, numpaths=0, free=1
+I think you connect child here, a2=1
+F=-1, node=2, numpaths=1, free=1
+I think you connect child here, a2=2
+F=-1, node=2, numpaths=2, free=1
+I think you connect child here, a2=3
+F=-1, node=2, numpaths=3, free=1
+I think you connect child here, a2=4
+F=-1, node=2, numpaths=4, free=1
+I think you connect child here, a2=5
+F=-1, node=2, numpaths=5, free=1
+I think you connect child here, a2=6
+F=-1, node=2, numpaths=6, free=1
+I think you connect child here, a2=7
+F=-1, node=2, numpaths=7, free=1
+I think you connect child here, a2=8
+F=-1, node=2, numpaths=8, free=1
+I think you connect child here, a2=9
+F=-1, node=2, numpaths=9, free=1
+I think you connect child here, a2=10
+F=-1, node=2, numpaths=10, free=1
+I think you connect child here, a2=11
+F=-1, node=2, numpaths=11, free=1
+I think you connect child here, a2=12
+F=-1, node=2, numpaths=12, free=1
+I think you connect child here, a2=13
+F=-1, node=2, numpaths=13, free=1
+I think you connect child here, a2=14
+F=-1, node=2, numpaths=14, free=1
+I think you connect child here, a2=15
+F=-1, node=2, numpaths=15, free=1
+I think you connect child here, a2=16
+F=-1, node=2, numpaths=16, free=1
+I think you connect child here, a2=17
+F=-1, node=2, numpaths=17, free=1
+I think you connect child here, a2=18
+F=-1, node=2, numpaths=18, free=1
+I think you connect child here, a2=19
+F=-1, node=2, numpaths=19, free=1
+I think you connect child here, a2=20
+F=-1, node=2, numpaths=20, free=1
+I think you connect child here, a2=21
+F=-1, node=2, numpaths=21, free=1
+I think you connect child here, a2=22
+F=-1, node=2, numpaths=22, free=1
+I think you connect child here, a2=23
+F=-1, node=2, numpaths=23, free=1
+I think you connect child here, a2=24
+F=-1, node=2, numpaths=24, free=1
+I think you connect child here, a2=25
+F=-1, node=2, numpaths=25, free=1
+I think you connect child here, a2=26
+F=-1, node=2, numpaths=26, free=1
+I think you connect child here, a2=27
+F=-1, node=2, numpaths=27, free=1
+I think you connect child here, a2=28
+F=-1, node=2, numpaths=28, free=1
+I think you connect child here, a2=29
+F=-1, node=2, numpaths=29, free=1
+I think you connect child here, a2=30
+F=-1, node=2, numpaths=30, free=1
+I think you connect child here, a2=31
+F=-1, node=2, numpaths=31, free=1
+I think you connect child here, a2=32
+F=-1, node=2, numpaths=32, free=1
+I think you connect child here, a2=33
+F=-1, node=2, numpaths=33, free=1
+I think you connect child here, a2=34
+F=-1, node=2, numpaths=34, free=1
+I think you connect child here, a2=35
+F=-1, node=2, numpaths=35, free=1
+I think you connect child here, a2=36
+F=-1, node=2, numpaths=36, free=1
+I think you connect child here, a2=37
+F=-1, node=2, numpaths=37, free=1
+I think you connect child here, a2=38
+F=-1, node=2, numpaths=38, free=1
+I think you connect child here, a2=39
+F=-1, node=2, numpaths=39, free=1
+I think you connect child here, a2=40
+F=-1, node=2, numpaths=40, free=1
+I think you connect child here, a2=41
+F=-1, node=2, numpaths=41, free=1
+I think you connect child here, a2=42
+F=-1, node=2, numpaths=42, free=1
+I think you connect child here, a2=43
+F=-1, node=2, numpaths=43, free=1
+I think you connect child here, a2=44
+F=-1, node=2, numpaths=44, free=1
+I think you connect child here, a2=45
+F=-1, node=2, numpaths=45, free=1
+I think you connect child here, a2=46
+F=-1, node=2, numpaths=46, free=1
+I think you connect child here, a2=47
+F=-1, node=2, numpaths=47, free=1
+I think you connect child here, a2=48
+F=-1, node=2, numpaths=48, free=1
+I think you connect child here, a2=49
+F=-1, node=2, numpaths=49, free=1
+G=-1
+set = 2, free path here=0, at least one child connected = 0
+G=-1
+set = 2, free path here=0, at least one child connected = 1
+G=-1
+set = 2, free path here=1, at least one child connected = 0
+G=-1
+set = 2, free path here=1, at least one child connected = 1
+G=-1
+set = 3, free path here=0, at least one child connected = 0
+G=-1
+set = 3, free path here=0, at least one child connected = 1
+G=-1
+set = 3, free path here=1, at least one child connected = 0
+G=-1
+set = 3, free path here=1, at least one child connected = 1
+G=-1
+set = 4, free path here=0, at least one child connected = 0
+G=-1
+set = 4, free path here=0, at least one child connected = 1
+G=-1
+set = 4, free path here=1, at least one child connected = 0
+G=-1
+set = 4, free path here=1, at least one child connected = 1
+G=-1
+set = 5, free path here=0, at least one child connected = 0
+G=-1
+set = 5, free path here=0, at least one child connected = 1
+G=-1
+set = 5, free path here=1, at least one child connected = 0
+G=-1
+set = 5, free path here=1, at least one child connected = 1
+G=-1
+set = 6, free path here=0, at least one child connected = 0
+G=-1
+set = 6, free path here=0, at least one child connected = 1
+G=-1
+set = 6, free path here=1, at least one child connected = 0
+G=-1
+set = 6, free path here=1, at least one child connected = 1
+G=-1
+set = 7, free path here=0, at least one child connected = 0
+G=-1
+set = 7, free path here=0, at least one child connected = 1
+G=-1
+set = 7, free path here=1, at least one child connected = 0
+G=-1
+set = 7, free path here=1, at least one child connected = 1
+G=-1
+set = 8, free path here=0, at least one child connected = 0
+G=-1
+set = 8, free path here=0, at least one child connected = 1
+G=-1
+set = 8, free path here=1, at least one child connected = 0
+G=-1
+set = 8, free path here=1, at least one child connected = 1
+G=-1
+set = 9, free path here=0, at least one child connected = 0
+G=-1
+set = 9, free path here=0, at least one child connected = 1
+G=-1
+set = 9, free path here=1, at least one child connected = 0
+G=-1
+set = 9, free path here=1, at least one child connected = 1
+G=-1
+set = 10, free path here=0, at least one child connected = 0
+G=-1
+set = 10, free path here=0, at least one child connected = 1
+G=-1
+set = 10, free path here=1, at least one child connected = 0
+G=-1
+set = 10, free path here=1, at least one child connected = 1
+G=-1
+set = 11, free path here=0, at least one child connected = 0
+G=-1
+set = 11, free path here=0, at least one child connected = 1
+G=-1
+set = 11, free path here=1, at least one child connected = 0
+G=-1
+set = 11, free path here=1, at least one child connected = 1
+G=-1
+set = 12, free path here=0, at least one child connected = 0
+G=-1
+set = 12, free path here=0, at least one child connected = 1
+G=-1
+set = 12, free path here=1, at least one child connected = 0
+G=-1
+set = 12, free path here=1, at least one child connected = 1
+G=-1
+set = 13, free path here=0, at least one child connected = 0
+G=-1
+set = 13, free path here=0, at least one child connected = 1
+G=-1
+set = 13, free path here=1, at least one child connected = 0
+G=-1
+set = 13, free path here=1, at least one child connected = 1
+G=-1
+set = 14, free path here=0, at least one child connected = 0
+G=-1
+set = 14, free path here=0, at least one child connected = 1
+G=-1
+set = 14, free path here=1, at least one child connected = 0
+G=-1
+set = 14, free path here=1, at least one child connected = 1
+G=-1
+set = 15, free path here=0, at least one child connected = 0
+G=-1
+set = 15, free path here=0, at least one child connected = 1
+G=-1
+set = 15, free path here=1, at least one child connected = 0
+G=-1
+set = 15, free path here=1, at least one child connected = 1
+G=-1
+set = 16, free path here=0, at least one child connected = 0
+G=-1
+set = 16, free path here=0, at least one child connected = 1
+G=-1
+set = 16, free path here=1, at least one child connected = 0
+G=-1
+set = 16, free path here=1, at least one child connected = 1
+G=-1
+set = 17, free path here=0, at least one child connected = 0
+G=-1
+set = 17, free path here=0, at least one child connected = 1
+G=-1
+set = 17, free path here=1, at least one child connected = 0
+G=-1
+set = 17, free path here=1, at least one child connected = 1
+G=-1
+set = 18, free path here=0, at least one child connected = 0
+G=-1
+set = 18, free path here=0, at least one child connected = 1
+G=-1
+set = 18, free path here=1, at least one child connected = 0
+G=-1
+set = 18, free path here=1, at least one child connected = 1
+G=-1
+set = 19, free path here=0, at least one child connected = 0
+G=-1
+set = 19, free path here=0, at least one child connected = 1
+G=-1
+set = 19, free path here=1, at least one child connected = 0
+G=-1
+set = 19, free path here=1, at least one child connected = 1
+G=-1
+set = 20, free path here=0, at least one child connected = 0
+G=-1
+set = 20, free path here=0, at least one child connected = 1
+G=-1
+set = 20, free path here=1, at least one child connected = 0
+G=-1
+set = 20, free path here=1, at least one child connected = 1
+G=-1
+set = 21, free path here=0, at least one child connected = 0
+G=-1
+set = 21, free path here=0, at least one child connected = 1
+G=-1
+set = 21, free path here=1, at least one child connected = 0
+G=-1
+set = 21, free path here=1, at least one child connected = 1
+G=-1
+set = 22, free path here=0, at least one child connected = 0
+G=-1
+set = 22, free path here=0, at least one child connected = 1
+G=-1
+set = 22, free path here=1, at least one child connected = 0
+G=-1
+set = 22, free path here=1, at least one child connected = 1
+G=-1
+set = 23, free path here=0, at least one child connected = 0
+G=-1
+set = 23, free path here=0, at least one child connected = 1
+G=-1
+set = 23, free path here=1, at least one child connected = 0
+G=-1
+set = 23, free path here=1, at least one child connected = 1
+G=-1
+set = 24, free path here=0, at least one child connected = 0
+G=-1
+set = 24, free path here=0, at least one child connected = 1
+G=-1
+set = 24, free path here=1, at least one child connected = 0
+G=-1
+set = 24, free path here=1, at least one child connected = 1
+G=-1
+set = 25, free path here=0, at least one child connected = 0
+G=-1
+set = 25, free path here=0, at least one child connected = 1
+G=-1
+set = 25, free path here=1, at least one child connected = 0
+G=-1
+set = 25, free path here=1, at least one child connected = 1
+G=-1
+set = 26, free path here=0, at least one child connected = 0
+G=-1
+set = 26, free path here=0, at least one child connected = 1
+G=-1
+set = 26, free path here=1, at least one child connected = 0
+G=-1
+set = 26, free path here=1, at least one child connected = 1
+G=-1
+set = 27, free path here=0, at least one child connected = 0
+G=-1
+set = 27, free path here=0, at least one child connected = 1
+G=-1
+set = 27, free path here=1, at least one child connected = 0
+G=-1
+set = 27, free path here=1, at least one child connected = 1
+G=-1
+set = 28, free path here=0, at least one child connected = 0
+G=-1
+set = 28, free path here=0, at least one child connected = 1
+G=-1
+set = 28, free path here=1, at least one child connected = 0
+G=-1
+set = 28, free path here=1, at least one child connected = 1
+G=-1
+set = 29, free path here=0, at least one child connected = 0
+G=-1
+set = 29, free path here=0, at least one child connected = 1
+G=-1
+set = 29, free path here=1, at least one child connected = 0
+G=-1
+set = 29, free path here=1, at least one child connected = 1
+G=-1
+set = 30, free path here=0, at least one child connected = 0
+G=-1
+set = 30, free path here=0, at least one child connected = 1
+G=-1
+set = 30, free path here=1, at least one child connected = 0
+G=-1
+set = 30, free path here=1, at least one child connected = 1
+G=-1
+set = 31, free path here=0, at least one child connected = 0
+G=-1
+set = 31, free path here=0, at least one child connected = 1
+G=-1
+set = 31, free path here=1, at least one child connected = 0
+G=-1
+set = 31, free path here=1, at least one child connected = 1
+G=-1
+set = 32, free path here=0, at least one child connected = 0
+G=-1
+set = 32, free path here=0, at least one child connected = 1
+G=-1
+set = 32, free path here=1, at least one child connected = 0
+G=-1
+set = 32, free path here=1, at least one child connected = 1
+G=-1
+set = 33, free path here=0, at least one child connected = 0
+G=-1
+set = 33, free path here=0, at least one child connected = 1
+G=-1
+set = 33, free path here=1, at least one child connected = 0
+G=-1
+set = 33, free path here=1, at least one child connected = 1
+G=-1
+set = 34, free path here=0, at least one child connected = 0
+G=-1
+set = 34, free path here=0, at least one child connected = 1
+G=-1
+set = 34, free path here=1, at least one child connected = 0
+G=-1
+set = 34, free path here=1, at least one child connected = 1
+G=-1
+set = 35, free path here=0, at least one child connected = 0
+G=-1
+set = 35, free path here=0, at least one child connected = 1
+G=-1
+set = 35, free path here=1, at least one child connected = 0
+G=-1
+set = 35, free path here=1, at least one child connected = 1
+G=-1
+set = 36, free path here=0, at least one child connected = 0
+G=-1
+set = 36, free path here=0, at least one child connected = 1
+G=-1
+set = 36, free path here=1, at least one child connected = 0
+G=-1
+set = 36, free path here=1, at least one child connected = 1
+G=-1
+set = 37, free path here=0, at least one child connected = 0
+G=-1
+set = 37, free path here=0, at least one child connected = 1
+G=-1
+set = 37, free path here=1, at least one child connected = 0
+G=-1
+set = 37, free path here=1, at least one child connected = 1
+G=-1
+set = 38, free path here=0, at least one child connected = 0
+G=-1
+set = 38, free path here=0, at least one child connected = 1
+G=-1
+set = 38, free path here=1, at least one child connected = 0
+G=-1
+set = 38, free path here=1, at least one child connected = 1
+G=-1
+set = 39, free path here=0, at least one child connected = 0
+G=-1
+set = 39, free path here=0, at least one child connected = 1
+G=-1
+set = 39, free path here=1, at least one child connected = 0
+G=-1
+set = 39, free path here=1, at least one child connected = 1
+G=-1
+set = 40, free path here=0, at least one child connected = 0
+G=-1
+set = 40, free path here=0, at least one child connected = 1
+G=-1
+set = 40, free path here=1, at least one child connected = 0
+G=-1
+set = 40, free path here=1, at least one child connected = 1
+G=-1
+set = 41, free path here=0, at least one child connected = 0
+G=-1
+set = 41, free path here=0, at least one child connected = 1
+G=-1
+set = 41, free path here=1, at least one child connected = 0
+G=-1
+set = 41, free path here=1, at least one child connected = 1
+G=-1
+set = 42, free path here=0, at least one child connected = 0
+G=-1
+set = 42, free path here=0, at least one child connected = 1
+G=-1
+set = 42, free path here=1, at least one child connected = 0
+G=-1
+set = 42, free path here=1, at least one child connected = 1
+G=-1
+set = 43, free path here=0, at least one child connected = 0
+G=-1
+set = 43, free path here=0, at least one child connected = 1
+G=-1
+set = 43, free path here=1, at least one child connected = 0
+G=-1
+set = 43, free path here=1, at least one child connected = 1
+G=-1
+set = 44, free path here=0, at least one child connected = 0
+G=-1
+set = 44, free path here=0, at least one child connected = 1
+G=-1
+set = 44, free path here=1, at least one child connected = 0
+G=-1
+set = 44, free path here=1, at least one child connected = 1
+G=-1
+set = 45, free path here=0, at least one child connected = 0
+G=-1
+set = 45, free path here=0, at least one child connected = 1
+G=-1
+set = 45, free path here=1, at least one child connected = 0
+G=-1
+set = 45, free path here=1, at least one child connected = 1
+G=-1
+set = 46, free path here=0, at least one child connected = 0
+G=-1
+set = 46, free path here=0, at least one child connected = 1
+G=-1
+set = 46, free path here=1, at least one child connected = 0
+G=-1
+set = 46, free path here=1, at least one child connected = 1
+G=-1
+set = 47, free path here=0, at least one child connected = 0
+G=-1
+set = 47, free path here=0, at least one child connected = 1
+G=-1
+set = 47, free path here=1, at least one child connected = 0
+G=-1
+set = 47, free path here=1, at least one child connected = 1
+G=-1
+set = 48, free path here=0, at least one child connected = 0
+G=-1
+set = 48, free path here=0, at least one child connected = 1
+G=-1
+set = 48, free path here=1, at least one child connected = 0
+G=-1
+set = 48, free path here=1, at least one child connected = 1
+G=-1
+set = 49, free path here=0, at least one child connected = 0
+G=-1
+set = 49, free path here=0, at least one child connected = 1
+G=-1
+set = 49, free path here=1, at least one child connected = 0
+G=-1
+set = 49, free path here=1, at least one child connected = 1
+G=-1
+set = 50, free path here=0, at least one child connected = 0
+G=-1
+set = 50, free path here=0, at least one child connected = 1
+G=-1
+set = 50, free path here=1, at least one child connected = 0
+G=-1
+set = 50, free path here=1, at least one child connected = 1
+number children initially = 0
+i=9, parent=8
+number children initially = 0
+i=7, parent=6
+number children initially = 1
+i=6, parent=8
+G=0
+set = 0, free path here=0, at least one child connected = 0
+I think you connect child here, a2=0
+F=6, node=7, numpaths=0, free=1
+I think you connect child here, a2=1
+F=-1, node=7, numpaths=1, free=1
+I think you connect child here, a2=2
+F=-1, node=7, numpaths=2, free=1
+I think you connect child here, a2=3
+F=-1, node=7, numpaths=3, free=1
+I think you connect child here, a2=4
+F=-1, node=7, numpaths=4, free=1
+I think you connect child here, a2=5
+F=-1, node=7, numpaths=5, free=1
+I think you connect child here, a2=6
+F=-1, node=7, numpaths=6, free=1
+I think you connect child here, a2=7
+F=-1, node=7, numpaths=7, free=1
+I think you connect child here, a2=8
+F=-1, node=7, numpaths=8, free=1
+I think you connect child here, a2=9
+F=-1, node=7, numpaths=9, free=1
+I think you connect child here, a2=10
+F=-1, node=7, numpaths=10, free=1
+I think you connect child here, a2=11
+F=-1, node=7, numpaths=11, free=1
+I think you connect child here, a2=12
+F=-1, node=7, numpaths=12, free=1
+I think you connect child here, a2=13
+F=-1, node=7, numpaths=13, free=1
+I think you connect child here, a2=14
+F=-1, node=7, numpaths=14, free=1
+I think you connect child here, a2=15
+F=-1, node=7, numpaths=15, free=1
+I think you connect child here, a2=16
+F=-1, node=7, numpaths=16, free=1
+I think you connect child here, a2=17
+F=-1, node=7, numpaths=17, free=1
+I think you connect child here, a2=18
+F=-1, node=7, numpaths=18, free=1
+I think you connect child here, a2=19
+F=-1, node=7, numpaths=19, free=1
+I think you connect child here, a2=20
+F=-1, node=7, numpaths=20, free=1
+I think you connect child here, a2=21
+F=-1, node=7, numpaths=21, free=1
+I think you connect child here, a2=22
+F=-1, node=7, numpaths=22, free=1
+I think you connect child here, a2=23
+F=-1, node=7, numpaths=23, free=1
+I think you connect child here, a2=24
+F=-1, node=7, numpaths=24, free=1
+I think you connect child here, a2=25
+F=-1, node=7, numpaths=25, free=1
+I think you connect child here, a2=26
+F=-1, node=7, numpaths=26, free=1
+I think you connect child here, a2=27
+F=-1, node=7, numpaths=27, free=1
+I think you connect child here, a2=28
+F=-1, node=7, numpaths=28, free=1
+I think you connect child here, a2=29
+F=-1, node=7, numpaths=29, free=1
+I think you connect child here, a2=30
+F=-1, node=7, numpaths=30, free=1
+I think you connect child here, a2=31
+F=-1, node=7, numpaths=31, free=1
+I think you connect child here, a2=32
+F=-1, node=7, numpaths=32, free=1
+I think you connect child here, a2=33
+F=-1, node=7, numpaths=33, free=1
+I think you connect child here, a2=34
+F=-1, node=7, numpaths=34, free=1
+I think you connect child here, a2=35
+F=-1, node=7, numpaths=35, free=1
+I think you connect child here, a2=36
+F=-1, node=7, numpaths=36, free=1
+I think you connect child here, a2=37
+F=-1, node=7, numpaths=37, free=1
+I think you connect child here, a2=38
+F=-1, node=7, numpaths=38, free=1
+I think you connect child here, a2=39
+F=-1, node=7, numpaths=39, free=1
+I think you connect child here, a2=40
+F=-1, node=7, numpaths=40, free=1
+I think you connect child here, a2=41
+F=-1, node=7, numpaths=41, free=1
+I think you connect child here, a2=42
+F=-1, node=7, numpaths=42, free=1
+I think you connect child here, a2=43
+F=-1, node=7, numpaths=43, free=1
+I think you connect child here, a2=44
+F=-1, node=7, numpaths=44, free=1
+I think you connect child here, a2=45
+F=-1, node=7, numpaths=45, free=1
+I think you connect child here, a2=46
+F=-1, node=7, numpaths=46, free=1
+I think you connect child here, a2=47
+F=-1, node=7, numpaths=47, free=1
+I think you connect child here, a2=48
+F=-1, node=7, numpaths=48, free=1
+I think you connect child here, a2=49
+F=-1, node=7, numpaths=49, free=1
+I think you connect child here, a2=50
+F=-1, node=7, numpaths=50, free=1
+G=-1
+set = 0, free path here=0, at least one child connected = 1
+G=-1
+set = 0, free path here=1, at least one child connected = 0
+G=-1
+set = 0, free path here=1, at least one child connected = 1
+G=-1
+set = 1, free path here=0, at least one child connected = 0
+G=-1
+set = 1, free path here=0, at least one child connected = 1
+G=-1
+set = 1, free path here=1, at least one child connected = 0
+G=-1
+set = 1, free path here=1, at least one child connected = 1
+G=-1
+set = 2, free path here=0, at least one child connected = 0
+G=-1
+set = 2, free path here=0, at least one child connected = 1
+G=-1
+set = 2, free path here=1, at least one child connected = 0
+G=-1
+set = 2, free path here=1, at least one child connected = 1
+G=-1
+set = 3, free path here=0, at least one child connected = 0
+G=-1
+set = 3, free path here=0, at least one child connected = 1
+G=-1
+set = 3, free path here=1, at least one child connected = 0
+G=-1
+set = 3, free path here=1, at least one child connected = 1
+G=-1
+set = 4, free path here=0, at least one child connected = 0
+G=-1
+set = 4, free path here=0, at least one child connected = 1
+G=-1
+set = 4, free path here=1, at least one child connected = 0
+G=-1
+set = 4, free path here=1, at least one child connected = 1
+G=-1
+set = 5, free path here=0, at least one child connected = 0
+G=-1
+set = 5, free path here=0, at least one child connected = 1
+G=-1
+set = 5, free path here=1, at least one child connected = 0
+G=-1
+set = 5, free path here=1, at least one child connected = 1
+G=-1
+set = 6, free path here=0, at least one child connected = 0
+G=-1
+set = 6, free path here=0, at least one child connected = 1
+G=-1
+set = 6, free path here=1, at least one child connected = 0
+G=-1
+set = 6, free path here=1, at least one child connected = 1
+G=-1
+set = 7, free path here=0, at least one child connected = 0
+G=-1
+set = 7, free path here=0, at least one child connected = 1
+G=-1
+set = 7, free path here=1, at least one child connected = 0
+G=-1
+set = 7, free path here=1, at least one child connected = 1
+G=-1
+set = 8, free path here=0, at least one child connected = 0
+G=-1
+set = 8, free path here=0, at least one child connected = 1
+G=-1
+set = 8, free path here=1, at least one child connected = 0
+G=-1
+set = 8, free path here=1, at least one child connected = 1
+G=-1
+set = 9, free path here=0, at least one child connected = 0
+G=-1
+set = 9, free path here=0, at least one child connected = 1
+G=-1
+set = 9, free path here=1, at least one child connected = 0
+G=-1
+set = 9, free path here=1, at least one child connected = 1
+G=-1
+set = 10, free path here=0, at least one child connected = 0
+G=-1
+set = 10, free path here=0, at least one child connected = 1
+G=-1
+set = 10, free path here=1, at least one child connected = 0
+G=-1
+set = 10, free path here=1, at least one child connected = 1
+G=-1
+set = 11, free path here=0, at least one child connected = 0
+G=-1
+set = 11, free path here=0, at least one child connected = 1
+G=-1
+set = 11, free path here=1, at least one child connected = 0
+G=-1
+set = 11, free path here=1, at least one child connected = 1
+G=-1
+set = 12, free path here=0, at least one child connected = 0
+G=-1
+set = 12, free path here=0, at least one child connected = 1
+G=-1
+set = 12, free path here=1, at least one child connected = 0
+G=-1
+set = 12, free path here=1, at least one child connected = 1
+G=-1
+set = 13, free path here=0, at least one child connected = 0
+G=-1
+set = 13, free path here=0, at least one child connected = 1
+G=-1
+set = 13, free path here=1, at least one child connected = 0
+G=-1
+set = 13, free path here=1, at least one child connected = 1
+G=-1
+set = 14, free path here=0, at least one child connected = 0
+G=-1
+set = 14, free path here=0, at least one child connected = 1
+G=-1
+set = 14, free path here=1, at least one child connected = 0
+G=-1
+set = 14, free path here=1, at least one child connected = 1
+G=-1
+set = 15, free path here=0, at least one child connected = 0
+G=-1
+set = 15, free path here=0, at least one child connected = 1
+G=-1
+set = 15, free path here=1, at least one child connected = 0
+G=-1
+set = 15, free path here=1, at least one child connected = 1
+G=-1
+set = 16, free path here=0, at least one child connected = 0
+G=-1
+set = 16, free path here=0, at least one child connected = 1
+G=-1
+set = 16, free path here=1, at least one child connected = 0
+G=-1
+set = 16, free path here=1, at least one child connected = 1
+G=-1
+set = 17, free path here=0, at least one child connected = 0
+G=-1
+set = 17, free path here=0, at least one child connected = 1
+G=-1
+set = 17, free path here=1, at least one child connected = 0
+G=-1
+set = 17, free path here=1, at least one child connected = 1
+G=-1
+set = 18, free path here=0, at least one child connected = 0
+G=-1
+set = 18, free path here=0, at least one child connected = 1
+G=-1
+set = 18, free path here=1, at least one child connected = 0
+G=-1
+set = 18, free path here=1, at least one child connected = 1
+G=-1
+set = 19, free path here=0, at least one child connected = 0
+G=-1
+set = 19, free path here=0, at least one child connected = 1
+G=-1
+set = 19, free path here=1, at least one child connected = 0
+G=-1
+set = 19, free path here=1, at least one child connected = 1
+G=-1
+set = 20, free path here=0, at least one child connected = 0
+G=-1
+set = 20, free path here=0, at least one child connected = 1
+G=-1
+set = 20, free path here=1, at least one child connected = 0
+G=-1
+set = 20, free path here=1, at least one child connected = 1
+G=-1
+set = 21, free path here=0, at least one child connected = 0
+G=-1
+set = 21, free path here=0, at least one child connected = 1
+G=-1
+set = 21, free path here=1, at least one child connected = 0
+G=-1
+set = 21, free path here=1, at least one child connected = 1
+G=-1
+set = 22, free path here=0, at least one child connected = 0
+G=-1
+set = 22, free path here=0, at least one child connected = 1
+G=-1
+set = 22, free path here=1, at least one child connected = 0
+G=-1
+set = 22, free path here=1, at least one child connected = 1
+G=-1
+set = 23, free path here=0, at least one child connected = 0
+G=-1
+set = 23, free path here=0, at least one child connected = 1
+G=-1
+set = 23, free path here=1, at least one child connected = 0
+G=-1
+set = 23, free path here=1, at least one child connected = 1
+G=-1
+set = 24, free path here=0, at least one child connected = 0
+G=-1
+set = 24, free path here=0, at least one child connected = 1
+G=-1
+set = 24, free path here=1, at least one child connected = 0
+G=-1
+set = 24, free path here=1, at least one child connected = 1
+G=-1
+set = 25, free path here=0, at least one child connected = 0
+G=-1
+set = 25, free path here=0, at least one child connected = 1
+G=-1
+set = 25, free path here=1, at least one child connected = 0
+G=-1
+set = 25, free path here=1, at least one child connected = 1
+G=-1
+set = 26, free path here=0, at least one child connected = 0
+G=-1
+set = 26, free path here=0, at least one child connected = 1
+G=-1
+set = 26, free path here=1, at least one child connected = 0
+G=-1
+set = 26, free path here=1, at least one child connected = 1
+G=-1
+set = 27, free path here=0, at least one child connected = 0
+G=-1
+set = 27, free path here=0, at least one child connected = 1
+G=-1
+set = 27, free path here=1, at least one child connected = 0
+G=-1
+set = 27, free path here=1, at least one child connected = 1
+G=-1
+set = 28, free path here=0, at least one child connected = 0
+G=-1
+set = 28, free path here=0, at least one child connected = 1
+G=-1
+set = 28, free path here=1, at least one child connected = 0
+G=-1
+set = 28, free path here=1, at least one child connected = 1
+G=-1
+set = 29, free path here=0, at least one child connected = 0
+G=-1
+set = 29, free path here=0, at least one child connected = 1
+G=-1
+set = 29, free path here=1, at least one child connected = 0
+G=-1
+set = 29, free path here=1, at least one child connected = 1
+G=-1
+set = 30, free path here=0, at least one child connected = 0
+G=-1
+set = 30, free path here=0, at least one child connected = 1
+G=-1
+set = 30, free path here=1, at least one child connected = 0
+G=-1
+set = 30, free path here=1, at least one child connected = 1
+G=-1
+set = 31, free path here=0, at least one child connected = 0
+G=-1
+set = 31, free path here=0, at least one child connected = 1
+G=-1
+set = 31, free path here=1, at least one child connected = 0
+G=-1
+set = 31, free path here=1, at least one child connected = 1
+G=-1
+set = 32, free path here=0, at least one child connected = 0
+G=-1
+set = 32, free path here=0, at least one child connected = 1
+G=-1
+set = 32, free path here=1, at least one child connected = 0
+G=-1
+set = 32, free path here=1, at least one child connected = 1
+G=-1
+set = 33, free path here=0, at least one child connected = 0
+G=-1
+set = 33, free path here=0, at least one child connected = 1
+G=-1
+set = 33, free path here=1, at least one child connected = 0
+G=-1
+set = 33, free path here=1, at least one child connected = 1
+G=-1
+set = 34, free path here=0, at least one child connected = 0
+G=-1
+set = 34, free path here=0, at least one child connected = 1
+G=-1
+set = 34, free path here=1, at least one child connected = 0
+G=-1
+set = 34, free path here=1, at least one child connected = 1
+G=-1
+set = 35, free path here=0, at least one child connected = 0
+G=-1
+set = 35, free path here=0, at least one child connected = 1
+G=-1
+set = 35, free path here=1, at least one child connected = 0
+G=-1
+set = 35, free path here=1, at least one child connected = 1
+G=-1
+set = 36, free path here=0, at least one child connected = 0
+G=-1
+set = 36, free path here=0, at least one child connected = 1
+G=-1
+set = 36, free path here=1, at least one child connected = 0
+G=-1
+set = 36, free path here=1, at least one child connected = 1
+G=-1
+set = 37, free path here=0, at least one child connected = 0
+G=-1
+set = 37, free path here=0, at least one child connected = 1
+G=-1
+set = 37, free path here=1, at least one child connected = 0
+G=-1
+set = 37, free path here=1, at least one child connected = 1
+G=-1
+set = 38, free path here=0, at least one child connected = 0
+G=-1
+set = 38, free path here=0, at least one child connected = 1
+G=-1
+set = 38, free path here=1, at least one child connected = 0
+G=-1
+set = 38, free path here=1, at least one child connected = 1
+G=-1
+set = 39, free path here=0, at least one child connected = 0
+G=-1
+set = 39, free path here=0, at least one child connected = 1
+G=-1
+set = 39, free path here=1, at least one child connected = 0
+G=-1
+set = 39, free path here=1, at least one child connected = 1
+G=-1
+set = 40, free path here=0, at least one child connected = 0
+G=-1
+set = 40, free path here=0, at least one child connected = 1
+G=-1
+set = 40, free path here=1, at least one child connected = 0
+G=-1
+set = 40, free path here=1, at least one child connected = 1
+G=-1
+set = 41, free path here=0, at least one child connected = 0
+G=-1
+set = 41, free path here=0, at least one child connected = 1
+G=-1
+set = 41, free path here=1, at least one child connected = 0
+G=-1
+set = 41, free path here=1, at least one child connected = 1
+G=-1
+set = 42, free path here=0, at least one child connected = 0
+G=-1
+set = 42, free path here=0, at least one child connected = 1
+G=-1
+set = 42, free path here=1, at least one child connected = 0
+G=-1
+set = 42, free path here=1, at least one child connected = 1
+G=-1
+set = 43, free path here=0, at least one child connected = 0
+G=-1
+set = 43, free path here=0, at least one child connected = 1
+G=-1
+set = 43, free path here=1, at least one child connected = 0
+G=-1
+set = 43, free path here=1, at least one child connected = 1
+G=-1
+set = 44, free path here=0, at least one child connected = 0
+G=-1
+set = 44, free path here=0, at least one child connected = 1
+G=-1
+set = 44, free path here=1, at least one child connected = 0
+G=-1
+set = 44, free path here=1, at least one child connected = 1
+G=-1
+set = 45, free path here=0, at least one child connected = 0
+G=-1
+set = 45, free path here=0, at least one child connected = 1
+G=-1
+set = 45, free path here=1, at least one child connected = 0
+G=-1
+set = 45, free path here=1, at least one child connected = 1
+G=-1
+set = 46, free path here=0, at least one child connected = 0
+G=-1
+set = 46, free path here=0, at least one child connected = 1
+G=-1
+set = 46, free path here=1, at least one child connected = 0
+G=-1
+set = 46, free path here=1, at least one child connected = 1
+G=-1
+set = 47, free path here=0, at least one child connected = 0
+G=-1
+set = 47, free path here=0, at least one child connected = 1
+G=-1
+set = 47, free path here=1, at least one child connected = 0
+G=-1
+set = 47, free path here=1, at least one child connected = 1
+G=-1
+set = 48, free path here=0, at least one child connected = 0
+G=-1
+set = 48, free path here=0, at least one child connected = 1
+G=-1
+set = 48, free path here=1, at least one child connected = 0
+G=-1
+set = 48, free path here=1, at least one child connected = 1
+G=-1
+set = 49, free path here=0, at least one child connected = 0
+G=-1
+set = 49, free path here=0, at least one child connected = 1
+G=-1
+set = 49, free path here=1, at least one child connected = 0
+G=-1
+set = 49, free path here=1, at least one child connected = 1
+G=-1
+set = 50, free path here=0, at least one child connected = 0
+G=-1
+set = 50, free path here=0, at least one child connected = 1
+G=-1
+set = 50, free path here=1, at least one child connected = 0
+G=-1
+set = 50, free path here=1, at least one child connected = 1
+number children initially = 2
+i=8, parent=1
+G=0
+set = 0, free path here=0, at least one child connected = 0
+I think you connect child here, a2=0
+F=8, node=9, numpaths=0, free=1
+I think you connect child here, a2=1
+F=-1, node=9, numpaths=1, free=1
+I think you connect child here, a2=2
+F=-1, node=9, numpaths=2, free=1
+I think you connect child here, a2=3
+F=-1, node=9, numpaths=3, free=1
+I think you connect child here, a2=4
+F=-1, node=9, numpaths=4, free=1
+I think you connect child here, a2=5
+F=-1, node=9, numpaths=5, free=1
+I think you connect child here, a2=6
+F=-1, node=9, numpaths=6, free=1
+I think you connect child here, a2=7
+F=-1, node=9, numpaths=7, free=1
+I think you connect child here, a2=8
+F=-1, node=9, numpaths=8, free=1
+I think you connect child here, a2=9
+F=-1, node=9, numpaths=9, free=1
+I think you connect child here, a2=10
+F=-1, node=9, numpaths=10, free=1
+I think you connect child here, a2=11
+F=-1, node=9, numpaths=11, free=1
+I think you connect child here, a2=12
+F=-1, node=9, numpaths=12, free=1
+I think you connect child here, a2=13
+F=-1, node=9, numpaths=13, free=1
+I think you connect child here, a2=14
+F=-1, node=9, numpaths=14, free=1
+I think you connect child here, a2=15
+F=-1, node=9, numpaths=15, free=1
+I think you connect child here, a2=16
+F=-1, node=9, numpaths=16, free=1
+I think you connect child here, a2=17
+F=-1, node=9, numpaths=17, free=1
+I think you connect child here, a2=18
+F=-1, node=9, numpaths=18, free=1
+I think you connect child here, a2=19
+F=-1, node=9, numpaths=19, free=1
+I think you connect child here, a2=20
+F=-1, node=9, numpaths=20, free=1
+I think you connect child here, a2=21
+F=-1, node=9, numpaths=21, free=1
+I think you connect child here, a2=22
+F=-1, node=9, numpaths=22, free=1
+I think you connect child here, a2=23
+F=-1, node=9, numpaths=23, free=1
+I think you connect child here, a2=24
+F=-1, node=9, numpaths=24, free=1
+I think you connect child here, a2=25
+F=-1, node=9, numpaths=25, free=1
+I think you connect child here, a2=26
+F=-1, node=9, numpaths=26, free=1
+I think you connect child here, a2=27
+F=-1, node=9, numpaths=27, free=1
+I think you connect child here, a2=28
+F=-1, node=9, numpaths=28, free=1
+I think you connect child here, a2=29
+F=-1, node=9, numpaths=29, free=1
+I think you connect child here, a2=30
+F=-1, node=9, numpaths=30, free=1
+I think you connect child here, a2=31
+F=-1, node=9, numpaths=31, free=1
+I think you connect child here, a2=32
+F=-1, node=9, numpaths=32, free=1
+I think you connect child here, a2=33
+F=-1, node=9, numpaths=33, free=1
+I think you connect child here, a2=34
+F=-1, node=9, numpaths=34, free=1
+I think you connect child here, a2=35
+F=-1, node=9, numpaths=35, free=1
+I think you connect child here, a2=36
+F=-1, node=9, numpaths=36, free=1
+I think you connect child here, a2=37
+F=-1, node=9, numpaths=37, free=1
+I think you connect child here, a2=38
+F=-1, node=9, numpaths=38, free=1
+I think you connect child here, a2=39
+F=-1, node=9, numpaths=39, free=1
+I think you connect child here, a2=40
+F=-1, node=9, numpaths=40, free=1
+I think you connect child here, a2=41
+F=-1, node=9, numpaths=41, free=1
+I think you connect child here, a2=42
+F=-1, node=9, numpaths=42, free=1
+I think you connect child here, a2=43
+F=-1, node=9, numpaths=43, free=1
+I think you connect child here, a2=44
+F=-1, node=9, numpaths=44, free=1
+I think you connect child here, a2=45
+F=-1, node=9, numpaths=45, free=1
+I think you connect child here, a2=46
+F=-1, node=9, numpaths=46, free=1
+I think you connect child here, a2=47
+F=-1, node=9, numpaths=47, free=1
+I think you connect child here, a2=48
+F=-1, node=9, numpaths=48, free=1
+I think you connect child here, a2=49
+F=-1, node=9, numpaths=49, free=1
+I think you connect child here, a2=50
+F=-1, node=9, numpaths=50, free=1
+G=-1
+set = 0, free path here=0, at least one child connected = 1
+G=-1
+set = 0, free path here=1, at least one child connected = 0
+G=-1
+set = 0, free path here=1, at least one child connected = 1
+G=-1
+set = 1, free path here=0, at least one child connected = 0
+G=-1
+set = 1, free path here=0, at least one child connected = 1
+G=-1
+set = 1, free path here=1, at least one child connected = 0
+G=-1
+set = 1, free path here=1, at least one child connected = 1
+G=-1
+set = 2, free path here=0, at least one child connected = 0
+G=-1
+set = 2, free path here=0, at least one child connected = 1
+G=-1
+set = 2, free path here=1, at least one child connected = 0
+G=-1
+set = 2, free path here=1, at least one child connected = 1
+G=-1
+set = 3, free path here=0, at least one child connected = 0
+G=-1
+set = 3, free path here=0, at least one child connected = 1
+G=-1
+set = 3, free path here=1, at least one child connected = 0
+G=-1
+set = 3, free path here=1, at least one child connected = 1
+G=-1
+set = 4, free path here=0, at least one child connected = 0
+G=-1
+set = 4, free path here=0, at least one child connected = 1
+G=-1
+set = 4, free path here=1, at least one child connected = 0
+G=-1
+set = 4, free path here=1, at least one child connected = 1
+G=-1
+set = 5, free path here=0, at least one child connected = 0
+G=-1
+set = 5, free path here=0, at least one child connected = 1
+G=-1
+set = 5, free path here=1, at least one child connected = 0
+G=-1
+set = 5, free path here=1, at least one child connected = 1
+G=-1
+set = 6, free path here=0, at least one child connected = 0
+G=-1
+set = 6, free path here=0, at least one child connected = 1
+G=-1
+set = 6, free path here=1, at least one child connected = 0
+G=-1
+set = 6, free path here=1, at least one child connected = 1
+G=-1
+set = 7, free path here=0, at least one child connected = 0
+G=-1
+set = 7, free path here=0, at least one child connected = 1
+G=-1
+set = 7, free path here=1, at least one child connected = 0
+G=-1
+set = 7, free path here=1, at least one child connected = 1
+G=-1
+set = 8, free path here=0, at least one child connected = 0
+G=-1
+set = 8, free path here=0, at least one child connected = 1
+G=-1
+set = 8, free path here=1, at least one child connected = 0
+G=-1
+set = 8, free path here=1, at least one child connected = 1
+G=-1
+set = 9, free path here=0, at least one child connected = 0
+G=-1
+set = 9, free path here=0, at least one child connected = 1
+G=-1
+set = 9, free path here=1, at least one child connected = 0
+G=-1
+set = 9, free path here=1, at least one child connected = 1
+G=-1
+set = 10, free path here=0, at least one child connected = 0
+G=-1
+set = 10, free path here=0, at least one child connected = 1
+G=-1
+set = 10, free path here=1, at least one child connected = 0
+G=-1
+set = 10, free path here=1, at least one child connected = 1
+G=-1
+set = 11, free path here=0, at least one child connected = 0
+G=-1
+set = 11, free path here=0, at least one child connected = 1
+G=-1
+set = 11, free path here=1, at least one child connected = 0
+G=-1
+set = 11, free path here=1, at least one child connected = 1
+G=-1
+set = 12, free path here=0, at least one child connected = 0
+G=-1
+set = 12, free path here=0, at least one child connected = 1
+G=-1
+set = 12, free path here=1, at least one child connected = 0
+G=-1
+set = 12, free path here=1, at least one child connected = 1
+G=-1
+set = 13, free path here=0, at least one child connected = 0
+G=-1
+set = 13, free path here=0, at least one child connected = 1
+G=-1
+set = 13, free path here=1, at least one child connected = 0
+G=-1
+set = 13, free path here=1, at least one child connected = 1
+G=-1
+set = 14, free path here=0, at least one child connected = 0
+G=-1
+set = 14, free path here=0, at least one child connected = 1
+G=-1
+set = 14, free path here=1, at least one child connected = 0
+G=-1
+set = 14, free path here=1, at least one child connected = 1
+G=-1
+set = 15, free path here=0, at least one child connected = 0
+G=-1
+set = 15, free path here=0, at least one child connected = 1
+G=-1
+set = 15, free path here=1, at least one child connected = 0
+G=-1
+set = 15, free path here=1, at least one child connected = 1
+G=-1
+set = 16, free path here=0, at least one child connected = 0
+G=-1
+set = 16, free path here=0, at least one child connected = 1
+G=-1
+set = 16, free path here=1, at least one child connected = 0
+G=-1
+set = 16, free path here=1, at least one child connected = 1
+G=-1
+set = 17, free path here=0, at least one child connected = 0
+G=-1
+set = 17, free path here=0, at least one child connected = 1
+G=-1
+set = 17, free path here=1, at least one child connected = 0
+G=-1
+set = 17, free path here=1, at least one child connected = 1
+G=-1
+set = 18, free path here=0, at least one child connected = 0
+G=-1
+set = 18, free path here=0, at least one child connected = 1
+G=-1
+set = 18, free path here=1, at least one child connected = 0
+G=-1
+set = 18, free path here=1, at least one child connected = 1
+G=-1
+set = 19, free path here=0, at least one child connected = 0
+G=-1
+set = 19, free path here=0, at least one child connected = 1
+G=-1
+set = 19, free path here=1, at least one child connected = 0
+G=-1
+set = 19, free path here=1, at least one child connected = 1
+G=-1
+set = 20, free path here=0, at least one child connected = 0
+G=-1
+set = 20, free path here=0, at least one child connected = 1
+G=-1
+set = 20, free path here=1, at least one child connected = 0
+G=-1
+set = 20, free path here=1, at least one child connected = 1
+G=-1
+set = 21, free path here=0, at least one child connected = 0
+G=-1
+set = 21, free path here=0, at least one child connected = 1
+G=-1
+set = 21, free path here=1, at least one child connected = 0
+G=-1
+set = 21, free path here=1, at least one child connected = 1
+G=-1
+set = 22, free path here=0, at least one child connected = 0
+G=-1
+set = 22, free path here=0, at least one child connected = 1
+G=-1
+set = 22, free path here=1, at least one child connected = 0
+G=-1
+set = 22, free path here=1, at least one child connected = 1
+G=-1
+set = 23, free path here=0, at least one child connected = 0
+G=-1
+set = 23, free path here=0, at least one child connected = 1
+G=-1
+set = 23, free path here=1, at least one child connected = 0
+G=-1
+set = 23, free path here=1, at least one child connected = 1
+G=-1
+set = 24, free path here=0, at least one child connected = 0
+G=-1
+set = 24, free path here=0, at least one child connected = 1
+G=-1
+set = 24, free path here=1, at least one child connected = 0
+G=-1
+set = 24, free path here=1, at least one child connected = 1
+G=-1
+set = 25, free path here=0, at least one child connected = 0
+G=-1
+set = 25, free path here=0, at least one child connected = 1
+G=-1
+set = 25, free path here=1, at least one child connected = 0
+G=-1
+set = 25, free path here=1, at least one child connected = 1
+G=-1
+set = 26, free path here=0, at least one child connected = 0
+G=-1
+set = 26, free path here=0, at least one child connected = 1
+G=-1
+set = 26, free path here=1, at least one child connected = 0
+G=-1
+set = 26, free path here=1, at least one child connected = 1
+G=-1
+set = 27, free path here=0, at least one child connected = 0
+G=-1
+set = 27, free path here=0, at least one child connected = 1
+G=-1
+set = 27, free path here=1, at least one child connected = 0
+G=-1
+set = 27, free path here=1, at least one child connected = 1
+G=-1
+set = 28, free path here=0, at least one child connected = 0
+G=-1
+set = 28, free path here=0, at least one child connected = 1
+G=-1
+set = 28, free path here=1, at least one child connected = 0
+G=-1
+set = 28, free path here=1, at least one child connected = 1
+G=-1
+set = 29, free path here=0, at least one child connected = 0
+G=-1
+set = 29, free path here=0, at least one child connected = 1
+G=-1
+set = 29, free path here=1, at least one child connected = 0
+G=-1
+set = 29, free path here=1, at least one child connected = 1
+G=-1
+set = 30, free path here=0, at least one child connected = 0
+G=-1
+set = 30, free path here=0, at least one child connected = 1
+G=-1
+set = 30, free path here=1, at least one child connected = 0
+G=-1
+set = 30, free path here=1, at least one child connected = 1
+G=-1
+set = 31, free path here=0, at least one child connected = 0
+G=-1
+set = 31, free path here=0, at least one child connected = 1
+G=-1
+set = 31, free path here=1, at least one child connected = 0
+G=-1
+set = 31, free path here=1, at least one child connected = 1
+G=-1
+set = 32, free path here=0, at least one child connected = 0
+G=-1
+set = 32, free path here=0, at least one child connected = 1
+G=-1
+set = 32, free path here=1, at least one child connected = 0
+G=-1
+set = 32, free path here=1, at least one child connected = 1
+G=-1
+set = 33, free path here=0, at least one child connected = 0
+G=-1
+set = 33, free path here=0, at least one child connected = 1
+G=-1
+set = 33, free path here=1, at least one child connected = 0
+G=-1
+set = 33, free path here=1, at least one child connected = 1
+G=-1
+set = 34, free path here=0, at least one child connected = 0
+G=-1
+set = 34, free path here=0, at least one child connected = 1
+G=-1
+set = 34, free path here=1, at least one child connected = 0
+G=-1
+set = 34, free path here=1, at least one child connected = 1
+G=-1
+set = 35, free path here=0, at least one child connected = 0
+G=-1
+set = 35, free path here=0, at least one child connected = 1
+G=-1
+set = 35, free path here=1, at least one child connected = 0
+G=-1
+set = 35, free path here=1, at least one child connected = 1
+G=-1
+set = 36, free path here=0, at least one child connected = 0
+G=-1
+set = 36, free path here=0, at least one child connected = 1
+G=-1
+set = 36, free path here=1, at least one child connected = 0
+G=-1
+set = 36, free path here=1, at least one child connected = 1
+G=-1
+set = 37, free path here=0, at least one child connected = 0
+G=-1
+set = 37, free path here=0, at least one child connected = 1
+G=-1
+set = 37, free path here=1, at least one child connected = 0
+G=-1
+set = 37, free path here=1, at least one child connected = 1
+G=-1
+set = 38, free path here=0, at least one child connected = 0
+G=-1
+set = 38, free path here=0, at least one child connected = 1
+G=-1
+set = 38, free path here=1, at least one child connected = 0
+G=-1
+set = 38, free path here=1, at least one child connected = 1
+G=-1
+set = 39, free path here=0, at least one child connected = 0
+G=-1
+set = 39, free path here=0, at least one child connected = 1
+G=-1
+set = 39, free path here=1, at least one child connected = 0
+G=-1
+set = 39, free path here=1, at least one child connected = 1
+G=-1
+set = 40, free path here=0, at least one child connected = 0
+G=-1
+set = 40, free path here=0, at least one child connected = 1
+G=-1
+set = 40, free path here=1, at least one child connected = 0
+G=-1
+set = 40, free path here=1, at least one child connected = 1
+G=-1
+set = 41, free path here=0, at least one child connected = 0
+G=-1
+set = 41, free path here=0, at least one child connected = 1
+G=-1
+set = 41, free path here=1, at least one child connected = 0
+G=-1
+set = 41, free path here=1, at least one child connected = 1
+G=-1
+set = 42, free path here=0, at least one child connected = 0
+G=-1
+set = 42, free path here=0, at least one child connected = 1
+G=-1
+set = 42, free path here=1, at least one child connected = 0
+G=-1
+set = 42, free path here=1, at least one child connected = 1
+G=-1
+set = 43, free path here=0, at least one child connected = 0
+G=-1
+set = 43, free path here=0, at least one child connected = 1
+G=-1
+set = 43, free path here=1, at least one child connected = 0
+G=-1
+set = 43, free path here=1, at least one child connected = 1
+G=-1
+set = 44, free path here=0, at least one child connected = 0
+G=-1
+set = 44, free path here=0, at least one child connected = 1
+G=-1
+set = 44, free path here=1, at least one child connected = 0
+G=-1
+set = 44, free path here=1, at least one child connected = 1
+G=-1
+set = 45, free path here=0, at least one child connected = 0
+G=-1
+set = 45, free path here=0, at least one child connected = 1
+G=-1
+set = 45, free path here=1, at least one child connected = 0
+G=-1
+set = 45, free path here=1, at least one child connected = 1
+G=-1
+set = 46, free path here=0, at least one child connected = 0
+G=-1
+set = 46, free path here=0, at least one child connected = 1
+G=-1
+set = 46, free path here=1, at least one child connected = 0
+G=-1
+set = 46, free path here=1, at least one child connected = 1
+G=-1
+set = 47, free path here=0, at least one child connected = 0
+G=-1
+set = 47, free path here=0, at least one child connected = 1
+G=-1
+set = 47, free path here=1, at least one child connected = 0
+G=-1
+set = 47, free path here=1, at least one child connected = 1
+G=-1
+set = 48, free path here=0, at least one child connected = 0
+G=-1
+set = 48, free path here=0, at least one child connected = 1
+G=-1
+set = 48, free path here=1, at least one child connected = 0
+G=-1
+set = 48, free path here=1, at least one child connected = 1
+G=-1
+set = 49, free path here=0, at least one child connected = 0
+G=-1
+set = 49, free path here=0, at least one child connected = 1
+G=-1
+set = 49, free path here=1, at least one child connected = 0
+G=-1
+set = 49, free path here=1, at least one child connected = 1
+G=-1
+set = 50, free path here=0, at least one child connected = 0
+G=-1
+set = 50, free path here=0, at least one child connected = 1
+G=-1
+set = 50, free path here=1, at least one child connected = 0
+G=-1
+set = 50, free path here=1, at least one child connected = 1
+G=0
+set = 0, free path here=0, at least one child connected = 0
+I think you connect child here, a2=0
+F=9, node=6, numpaths=0, free=1
+I think you connect child here, a2=1
+F=-1, node=6, numpaths=1, free=1
+I think you connect child here, a2=2
+F=-1, node=6, numpaths=2, free=1
+I think you connect child here, a2=3
+F=-1, node=6, numpaths=3, free=1
+I think you connect child here, a2=4
+F=-1, node=6, numpaths=4, free=1
+I think you connect child here, a2=5
+F=-1, node=6, numpaths=5, free=1
+I think you connect child here, a2=6
+F=-1, node=6, numpaths=6, free=1
+I think you connect child here, a2=7
+F=-1, node=6, numpaths=7, free=1
+I think you connect child here, a2=8
+F=-1, node=6, numpaths=8, free=1
+I think you connect child here, a2=9
+F=-1, node=6, numpaths=9, free=1
+I think you connect child here, a2=10
+F=-1, node=6, numpaths=10, free=1
+I think you connect child here, a2=11
+F=-1, node=6, numpaths=11, free=1
+I think you connect child here, a2=12
+F=-1, node=6, numpaths=12, free=1
+I think you connect child here, a2=13
+F=-1, node=6, numpaths=13, free=1
+I think you connect child here, a2=14
+F=-1, node=6, numpaths=14, free=1
+I think you connect child here, a2=15
+F=-1, node=6, numpaths=15, free=1
+I think you connect child here, a2=16
+F=-1, node=6, numpaths=16, free=1
+I think you connect child here, a2=17
+F=-1, node=6, numpaths=17, free=1
+I think you connect child here, a2=18
+F=-1, node=6, numpaths=18, free=1
+I think you connect child here, a2=19
+F=-1, node=6, numpaths=19, free=1
+I think you connect child here, a2=20
+F=-1, node=6, numpaths=20, free=1
+I think you connect child here, a2=21
+F=-1, node=6, numpaths=21, free=1
+I think you connect child here, a2=22
+F=-1, node=6, numpaths=22, free=1
+I think you connect child here, a2=23
+F=-1, node=6, numpaths=23, free=1
+I think you connect child here, a2=24
+F=-1, node=6, numpaths=24, free=1
+I think you connect child here, a2=25
+F=-1, node=6, numpaths=25, free=1
+I think you connect child here, a2=26
+F=-1, node=6, numpaths=26, free=1
+I think you connect child here, a2=27
+F=-1, node=6, numpaths=27, free=1
+I think you connect child here, a2=28
+F=-1, node=6, numpaths=28, free=1
+I think you connect child here, a2=29
+F=-1, node=6, numpaths=29, free=1
+I think you connect child here, a2=30
+F=-1, node=6, numpaths=30, free=1
+I think you connect child here, a2=31
+F=-1, node=6, numpaths=31, free=1
+I think you connect child here, a2=32
+F=-1, node=6, numpaths=32, free=1
+I think you connect child here, a2=33
+F=-1, node=6, numpaths=33, free=1
+I think you connect child here, a2=34
+F=-1, node=6, numpaths=34, free=1
+I think you connect child here, a2=35
+F=-1, node=6, numpaths=35, free=1
+I think you connect child here, a2=36
+F=-1, node=6, numpaths=36, free=1
+I think you connect child here, a2=37
+F=-1, node=6, numpaths=37, free=1
+I think you connect child here, a2=38
+F=-1, node=6, numpaths=38, free=1
+I think you connect child here, a2=39
+F=-1, node=6, numpaths=39, free=1
+I think you connect child here, a2=40
+F=-1, node=6, numpaths=40, free=1
+I think you connect child here, a2=41
+F=-1, node=6, numpaths=41, free=1
+I think you connect child here, a2=42
+F=-1, node=6, numpaths=42, free=1
+I think you connect child here, a2=43
+F=-1, node=6, numpaths=43, free=1
+I think you connect child here, a2=44
+F=-1, node=6, numpaths=44, free=1
+I think you connect child here, a2=45
+F=-1, node=6, numpaths=45, free=1
+I think you connect child here, a2=46
+F=-1, node=6, numpaths=46, free=1
+I think you connect child here, a2=47
+F=-1, node=6, numpaths=47, free=1
+I think you connect child here, a2=48
+F=-1, node=6, numpaths=48, free=1
+I think you connect child here, a2=49
+F=-1, node=6, numpaths=49, free=1
+I think you connect child here, a2=50
+F=-1, node=6, numpaths=50, free=1
+G=-1
+set = 0, free path here=0, at least one child connected = 1
+G=-1
+set = 0, free path here=1, at least one child connected = 0
+G=-1
+set = 0, free path here=1, at least one child connected = 1
+G=-1
+set = 1, free path here=0, at least one child connected = 0
+G=-1
+set = 1, free path here=0, at least one child connected = 1
+G=-1
+set = 1, free path here=1, at least one child connected = 0
+G=8
+set = 1, free path here=1, at least one child connected = 1
+I think you connect child here, a2=0
+F=9, node=6, numpaths=0, free=1
+I think you connect child here, a2=1
+F=-1, node=6, numpaths=1, free=1
+I think you connect child here, a2=2
+F=-1, node=6, numpaths=2, free=1
+I think you connect child here, a2=3
+F=-1, node=6, numpaths=3, free=1
+I think you connect child here, a2=4
+F=-1, node=6, numpaths=4, free=1
+I think you connect child here, a2=5
+F=-1, node=6, numpaths=5, free=1
+I think you connect child here, a2=6
+F=-1, node=6, numpaths=6, free=1
+I think you connect child here, a2=7
+F=-1, node=6, numpaths=7, free=1
+I think you connect child here, a2=8
+F=-1, node=6, numpaths=8, free=1
+I think you connect child here, a2=9
+F=-1, node=6, numpaths=9, free=1
+I think you connect child here, a2=10
+F=-1, node=6, numpaths=10, free=1
+I think you connect child here, a2=11
+F=-1, node=6, numpaths=11, free=1
+I think you connect child here, a2=12
+F=-1, node=6, numpaths=12, free=1
+I think you connect child here, a2=13
+F=-1, node=6, numpaths=13, free=1
+I think you connect child here, a2=14
+F=-1, node=6, numpaths=14, free=1
+I think you connect child here, a2=15
+F=-1, node=6, numpaths=15, free=1
+I think you connect child here, a2=16
+F=-1, node=6, numpaths=16, free=1
+I think you connect child here, a2=17
+F=-1, node=6, numpaths=17, free=1
+I think you connect child here, a2=18
+F=-1, node=6, numpaths=18, free=1
+I think you connect child here, a2=19
+F=-1, node=6, numpaths=19, free=1
+I think you connect child here, a2=20
+F=-1, node=6, numpaths=20, free=1
+I think you connect child here, a2=21
+F=-1, node=6, numpaths=21, free=1
+I think you connect child here, a2=22
+F=-1, node=6, numpaths=22, free=1
+I think you connect child here, a2=23
+F=-1, node=6, numpaths=23, free=1
+I think you connect child here, a2=24
+F=-1, node=6, numpaths=24, free=1
+I think you connect child here, a2=25
+F=-1, node=6, numpaths=25, free=1
+I think you connect child here, a2=26
+F=-1, node=6, numpaths=26, free=1
+I think you connect child here, a2=27
+F=-1, node=6, numpaths=27, free=1
+I think you connect child here, a2=28
+F=-1, node=6, numpaths=28, free=1
+I think you connect child here, a2=29
+F=-1, node=6, numpaths=29, free=1
+I think you connect child here, a2=30
+F=-1, node=6, numpaths=30, free=1
+I think you connect child here, a2=31
+F=-1, node=6, numpaths=31, free=1
+I think you connect child here, a2=32
+F=-1, node=6, numpaths=32, free=1
+I think you connect child here, a2=33
+F=-1, node=6, numpaths=33, free=1
+I think you connect child here, a2=34
+F=-1, node=6, numpaths=34, free=1
+I think you connect child here, a2=35
+F=-1, node=6, numpaths=35, free=1
+I think you connect child here, a2=36
+F=-1, node=6, numpaths=36, free=1
+I think you connect child here, a2=37
+F=-1, node=6, numpaths=37, free=1
+I think you connect child here, a2=38
+F=-1, node=6, numpaths=38, free=1
+I think you connect child here, a2=39
+F=-1, node=6, numpaths=39, free=1
+I think you connect child here, a2=40
+F=-1, node=6, numpaths=40, free=1
+I think you connect child here, a2=41
+F=-1, node=6, numpaths=41, free=1
+I think you connect child here, a2=42
+F=-1, node=6, numpaths=42, free=1
+I think you connect child here, a2=43
+F=-1, node=6, numpaths=43, free=1
+I think you connect child here, a2=44
+F=-1, node=6, numpaths=44, free=1
+I think you connect child here, a2=45
+F=-1, node=6, numpaths=45, free=1
+I think you connect child here, a2=46
+F=-1, node=6, numpaths=46, free=1
+I think you connect child here, a2=47
+F=-1, node=6, numpaths=47, free=1
+I think you connect child here, a2=48
+F=-1, node=6, numpaths=48, free=1
+I think you connect child here, a2=49
+F=-1, node=6, numpaths=49, free=1
+G=-1
+set = 2, free path here=0, at least one child connected = 0
+G=-1
+set = 2, free path here=0, at least one child connected = 1
+G=-1
+set = 2, free path here=1, at least one child connected = 0
+G=-1
+set = 2, free path here=1, at least one child connected = 1
+G=-1
+set = 3, free path here=0, at least one child connected = 0
+G=-1
+set = 3, free path here=0, at least one child connected = 1
+G=-1
+set = 3, free path here=1, at least one child connected = 0
+G=-1
+set = 3, free path here=1, at least one child connected = 1
+G=-1
+set = 4, free path here=0, at least one child connected = 0
+G=-1
+set = 4, free path here=0, at least one child connected = 1
+G=-1
+set = 4, free path here=1, at least one child connected = 0
+G=-1
+set = 4, free path here=1, at least one child connected = 1
+G=-1
+set = 5, free path here=0, at least one child connected = 0
+G=-1
+set = 5, free path here=0, at least one child connected = 1
+G=-1
+set = 5, free path here=1, at least one child connected = 0
+G=-1
+set = 5, free path here=1, at least one child connected = 1
+G=-1
+set = 6, free path here=0, at least one child connected = 0
+G=-1
+set = 6, free path here=0, at least one child connected = 1
+G=-1
+set = 6, free path here=1, at least one child connected = 0
+G=-1
+set = 6, free path here=1, at least one child connected = 1
+G=-1
+set = 7, free path here=0, at least one child connected = 0
+G=-1
+set = 7, free path here=0, at least one child connected = 1
+G=-1
+set = 7, free path here=1, at least one child connected = 0
+G=-1
+set = 7, free path here=1, at least one child connected = 1
+G=-1
+set = 8, free path here=0, at least one child connected = 0
+G=-1
+set = 8, free path here=0, at least one child connected = 1
+G=-1
+set = 8, free path here=1, at least one child connected = 0
+G=-1
+set = 8, free path here=1, at least one child connected = 1
+G=-1
+set = 9, free path here=0, at least one child connected = 0
+G=-1
+set = 9, free path here=0, at least one child connected = 1
+G=-1
+set = 9, free path here=1, at least one child connected = 0
+G=-1
+set = 9, free path here=1, at least one child connected = 1
+G=-1
+set = 10, free path here=0, at least one child connected = 0
+G=-1
+set = 10, free path here=0, at least one child connected = 1
+G=-1
+set = 10, free path here=1, at least one child connected = 0
+G=-1
+set = 10, free path here=1, at least one child connected = 1
+G=-1
+set = 11, free path here=0, at least one child connected = 0
+G=-1
+set = 11, free path here=0, at least one child connected = 1
+G=-1
+set = 11, free path here=1, at least one child connected = 0
+G=-1
+set = 11, free path here=1, at least one child connected = 1
+G=-1
+set = 12, free path here=0, at least one child connected = 0
+G=-1
+set = 12, free path here=0, at least one child connected = 1
+G=-1
+set = 12, free path here=1, at least one child connected = 0
+G=-1
+set = 12, free path here=1, at least one child connected = 1
+G=-1
+set = 13, free path here=0, at least one child connected = 0
+G=-1
+set = 13, free path here=0, at least one child connected = 1
+G=-1
+set = 13, free path here=1, at least one child connected = 0
+G=-1
+set = 13, free path here=1, at least one child connected = 1
+G=-1
+set = 14, free path here=0, at least one child connected = 0
+G=-1
+set = 14, free path here=0, at least one child connected = 1
+G=-1
+set = 14, free path here=1, at least one child connected = 0
+G=-1
+set = 14, free path here=1, at least one child connected = 1
+G=-1
+set = 15, free path here=0, at least one child connected = 0
+G=-1
+set = 15, free path here=0, at least one child connected = 1
+G=-1
+set = 15, free path here=1, at least one child connected = 0
+G=-1
+set = 15, free path here=1, at least one child connected = 1
+G=-1
+set = 16, free path here=0, at least one child connected = 0
+G=-1
+set = 16, free path here=0, at least one child connected = 1
+G=-1
+set = 16, free path here=1, at least one child connected = 0
+G=-1
+set = 16, free path here=1, at least one child connected = 1
+G=-1
+set = 17, free path here=0, at least one child connected = 0
+G=-1
+set = 17, free path here=0, at least one child connected = 1
+G=-1
+set = 17, free path here=1, at least one child connected = 0
+G=-1
+set = 17, free path here=1, at least one child connected = 1
+G=-1
+set = 18, free path here=0, at least one child connected = 0
+G=-1
+set = 18, free path here=0, at least one child connected = 1
+G=-1
+set = 18, free path here=1, at least one child connected = 0
+G=-1
+set = 18, free path here=1, at least one child connected = 1
+G=-1
+set = 19, free path here=0, at least one child connected = 0
+G=-1
+set = 19, free path here=0, at least one child connected = 1
+G=-1
+set = 19, free path here=1, at least one child connected = 0
+G=-1
+set = 19, free path here=1, at least one child connected = 1
+G=-1
+set = 20, free path here=0, at least one child connected = 0
+G=-1
+set = 20, free path here=0, at least one child connected = 1
+G=-1
+set = 20, free path here=1, at least one child connected = 0
+G=-1
+set = 20, free path here=1, at least one child connected = 1
+G=-1
+set = 21, free path here=0, at least one child connected = 0
+G=-1
+set = 21, free path here=0, at least one child connected = 1
+G=-1
+set = 21, free path here=1, at least one child connected = 0
+G=-1
+set = 21, free path here=1, at least one child connected = 1
+G=-1
+set = 22, free path here=0, at least one child connected = 0
+G=-1
+set = 22, free path here=0, at least one child connected = 1
+G=-1
+set = 22, free path here=1, at least one child connected = 0
+G=-1
+set = 22, free path here=1, at least one child connected = 1
+G=-1
+set = 23, free path here=0, at least one child connected = 0
+G=-1
+set = 23, free path here=0, at least one child connected = 1
+G=-1
+set = 23, free path here=1, at least one child connected = 0
+G=-1
+set = 23, free path here=1, at least one child connected = 1
+G=-1
+set = 24, free path here=0, at least one child connected = 0
+G=-1
+set = 24, free path here=0, at least one child connected = 1
+G=-1
+set = 24, free path here=1, at least one child connected = 0
+G=-1
+set = 24, free path here=1, at least one child connected = 1
+G=-1
+set = 25, free path here=0, at least one child connected = 0
+G=-1
+set = 25, free path here=0, at least one child connected = 1
+G=-1
+set = 25, free path here=1, at least one child connected = 0
+G=-1
+set = 25, free path here=1, at least one child connected = 1
+G=-1
+set = 26, free path here=0, at least one child connected = 0
+G=-1
+set = 26, free path here=0, at least one child connected = 1
+G=-1
+set = 26, free path here=1, at least one child connected = 0
+G=-1
+set = 26, free path here=1, at least one child connected = 1
+G=-1
+set = 27, free path here=0, at least one child connected = 0
+G=-1
+set = 27, free path here=0, at least one child connected = 1
+G=-1
+set = 27, free path here=1, at least one child connected = 0
+G=-1
+set = 27, free path here=1, at least one child connected = 1
+G=-1
+set = 28, free path here=0, at least one child connected = 0
+G=-1
+set = 28, free path here=0, at least one child connected = 1
+G=-1
+set = 28, free path here=1, at least one child connected = 0
+G=-1
+set = 28, free path here=1, at least one child connected = 1
+G=-1
+set = 29, free path here=0, at least one child connected = 0
+G=-1
+set = 29, free path here=0, at least one child connected = 1
+G=-1
+set = 29, free path here=1, at least one child connected = 0
+G=-1
+set = 29, free path here=1, at least one child connected = 1
+G=-1
+set = 30, free path here=0, at least one child connected = 0
+G=-1
+set = 30, free path here=0, at least one child connected = 1
+G=-1
+set = 30, free path here=1, at least one child connected = 0
+G=-1
+set = 30, free path here=1, at least one child connected = 1
+G=-1
+set = 31, free path here=0, at least one child connected = 0
+G=-1
+set = 31, free path here=0, at least one child connected = 1
+G=-1
+set = 31, free path here=1, at least one child connected = 0
+G=-1
+set = 31, free path here=1, at least one child connected = 1
+G=-1
+set = 32, free path here=0, at least one child connected = 0
+G=-1
+set = 32, free path here=0, at least one child connected = 1
+G=-1
+set = 32, free path here=1, at least one child connected = 0
+G=-1
+set = 32, free path here=1, at least one child connected = 1
+G=-1
+set = 33, free path here=0, at least one child connected = 0
+G=-1
+set = 33, free path here=0, at least one child connected = 1
+G=-1
+set = 33, free path here=1, at least one child connected = 0
+G=-1
+set = 33, free path here=1, at least one child connected = 1
+G=-1
+set = 34, free path here=0, at least one child connected = 0
+G=-1
+set = 34, free path here=0, at least one child connected = 1
+G=-1
+set = 34, free path here=1, at least one child connected = 0
+G=-1
+set = 34, free path here=1, at least one child connected = 1
+G=-1
+set = 35, free path here=0, at least one child connected = 0
+G=-1
+set = 35, free path here=0, at least one child connected = 1
+G=-1
+set = 35, free path here=1, at least one child connected = 0
+G=-1
+set = 35, free path here=1, at least one child connected = 1
+G=-1
+set = 36, free path here=0, at least one child connected = 0
+G=-1
+set = 36, free path here=0, at least one child connected = 1
+G=-1
+set = 36, free path here=1, at least one child connected = 0
+G=-1
+set = 36, free path here=1, at least one child connected = 1
+G=-1
+set = 37, free path here=0, at least one child connected = 0
+G=-1
+set = 37, free path here=0, at least one child connected = 1
+G=-1
+set = 37, free path here=1, at least one child connected = 0
+G=-1
+set = 37, free path here=1, at least one child connected = 1
+G=-1
+set = 38, free path here=0, at least one child connected = 0
+G=-1
+set = 38, free path here=0, at least one child connected = 1
+G=-1
+set = 38, free path here=1, at least one child connected = 0
+G=-1
+set = 38, free path here=1, at least one child connected = 1
+G=-1
+set = 39, free path here=0, at least one child connected = 0
+G=-1
+set = 39, free path here=0, at least one child connected = 1
+G=-1
+set = 39, free path here=1, at least one child connected = 0
+G=-1
+set = 39, free path here=1, at least one child connected = 1
+G=-1
+set = 40, free path here=0, at least one child connected = 0
+G=-1
+set = 40, free path here=0, at least one child connected = 1
+G=-1
+set = 40, free path here=1, at least one child connected = 0
+G=-1
+set = 40, free path here=1, at least one child connected = 1
+G=-1
+set = 41, free path here=0, at least one child connected = 0
+G=-1
+set = 41, free path here=0, at least one child connected = 1
+G=-1
+set = 41, free path here=1, at least one child connected = 0
+G=-1
+set = 41, free path here=1, at least one child connected = 1
+G=-1
+set = 42, free path here=0, at least one child connected = 0
+G=-1
+set = 42, free path here=0, at least one child connected = 1
+G=-1
+set = 42, free path here=1, at least one child connected = 0
+G=-1
+set = 42, free path here=1, at least one child connected = 1
+G=-1
+set = 43, free path here=0, at least one child connected = 0
+G=-1
+set = 43, free path here=0, at least one child connected = 1
+G=-1
+set = 43, free path here=1, at least one child connected = 0
+G=-1
+set = 43, free path here=1, at least one child connected = 1
+G=-1
+set = 44, free path here=0, at least one child connected = 0
+G=-1
+set = 44, free path here=0, at least one child connected = 1
+G=-1
+set = 44, free path here=1, at least one child connected = 0
+G=-1
+set = 44, free path here=1, at least one child connected = 1
+G=-1
+set = 45, free path here=0, at least one child connected = 0
+G=-1
+set = 45, free path here=0, at least one child connected = 1
+G=-1
+set = 45, free path here=1, at least one child connected = 0
+G=-1
+set = 45, free path here=1, at least one child connected = 1
+G=-1
+set = 46, free path here=0, at least one child connected = 0
+G=-1
+set = 46, free path here=0, at least one child connected = 1
+G=-1
+set = 46, free path here=1, at least one child connected = 0
+G=-1
+set = 46, free path here=1, at least one child connected = 1
+G=-1
+set = 47, free path here=0, at least one child connected = 0
+G=-1
+set = 47, free path here=0, at least one child connected = 1
+G=-1
+set = 47, free path here=1, at least one child connected = 0
+G=-1
+set = 47, free path here=1, at least one child connected = 1
+G=-1
+set = 48, free path here=0, at least one child connected = 0
+G=-1
+set = 48, free path here=0, at least one child connected = 1
+G=-1
+set = 48, free path here=1, at least one child connected = 0
+G=-1
+set = 48, free path here=1, at least one child connected = 1
+G=-1
+set = 49, free path here=0, at least one child connected = 0
+G=-1
+set = 49, free path here=0, at least one child connected = 1
+G=-1
+set = 49, free path here=1, at least one child connected = 0
+G=-1
+set = 49, free path here=1, at least one child connected = 1
+G=-1
+set = 50, free path here=0, at least one child connected = 0
+G=-1
+set = 50, free path here=0, at least one child connected = 1
+G=-1
+set = 50, free path here=1, at least one child connected = 0
+G=-1
+set = 50, free path here=1, at least one child connected = 1
+number children initially = 3
+i=1, parent=0
+G=0
+set = 0, free path here=0, at least one child connected = 0
+I think you connect child here, a2=0
+F=7, node=3, numpaths=0, free=1
+I think you connect child here, a2=1
+F=-1, node=3, numpaths=1, free=1
+I think you connect child here, a2=2
+F=-1, node=3, numpaths=2, free=1
+I think you connect child here, a2=3
+F=-1, node=3, numpaths=3, free=1
+I think you connect child here, a2=4
+F=-1, node=3, numpaths=4, free=1
+I think you connect child here, a2=5
+F=-1, node=3, numpaths=5, free=1
+I think you connect child here, a2=6
+F=-1, node=3, numpaths=6, free=1
+I think you connect child here, a2=7
+F=-1, node=3, numpaths=7, free=1
+I think you connect child here, a2=8
+F=-1, node=3, numpaths=8, free=1
+I think you connect child here, a2=9
+F=-1, node=3, numpaths=9, free=1
+I think you connect child here, a2=10
+F=-1, node=3, numpaths=10, free=1
+I think you connect child here, a2=11
+F=-1, node=3, numpaths=11, free=1
+I think you connect child here, a2=12
+F=-1, node=3, numpaths=12, free=1
+I think you connect child here, a2=13
+F=-1, node=3, numpaths=13, free=1
+I think you connect child here, a2=14
+F=-1, node=3, numpaths=14, free=1
+I think you connect child here, a2=15
+F=-1, node=3, numpaths=15, free=1
+I think you connect child here, a2=16
+F=-1, node=3, numpaths=16, free=1
+I think you connect child here, a2=17
+F=-1, node=3, numpaths=17, free=1
+I think you connect child here, a2=18
+F=-1, node=3, numpaths=18, free=1
+I think you connect child here, a2=19
+F=-1, node=3, numpaths=19, free=1
+I think you connect child here, a2=20
+F=-1, node=3, numpaths=20, free=1
+I think you connect child here, a2=21
+F=-1, node=3, numpaths=21, free=1
+I think you connect child here, a2=22
+F=-1, node=3, numpaths=22, free=1
+I think you connect child here, a2=23
+F=-1, node=3, numpaths=23, free=1
+I think you connect child here, a2=24
+F=-1, node=3, numpaths=24, free=1
+I think you connect child here, a2=25
+F=-1, node=3, numpaths=25, free=1
+I think you connect child here, a2=26
+F=-1, node=3, numpaths=26, free=1
+I think you connect child here, a2=27
+F=-1, node=3, numpaths=27, free=1
+I think you connect child here, a2=28
+F=-1, node=3, numpaths=28, free=1
+I think you connect child here, a2=29
+F=-1, node=3, numpaths=29, free=1
+I think you connect child here, a2=30
+F=-1, node=3, numpaths=30, free=1
+I think you connect child here, a2=31
+F=-1, node=3, numpaths=31, free=1
+I think you connect child here, a2=32
+F=-1, node=3, numpaths=32, free=1
+I think you connect child here, a2=33
+F=-1, node=3, numpaths=33, free=1
+I think you connect child here, a2=34
+F=-1, node=3, numpaths=34, free=1
+I think you connect child here, a2=35
+F=-1, node=3, numpaths=35, free=1
+I think you connect child here, a2=36
+F=-1, node=3, numpaths=36, free=1
+I think you connect child here, a2=37
+F=-1, node=3, numpaths=37, free=1
+I think you connect child here, a2=38
+F=-1, node=3, numpaths=38, free=1
+I think you connect child here, a2=39
+F=-1, node=3, numpaths=39, free=1
+I think you connect child here, a2=40
+F=-1, node=3, numpaths=40, free=1
+I think you connect child here, a2=41
+F=-1, node=3, numpaths=41, free=1
+I think you connect child here, a2=42
+F=-1, node=3, numpaths=42, free=1
+I think you connect child here, a2=43
+F=-1, node=3, numpaths=43, free=1
+I think you connect child here, a2=44
+F=-1, node=3, numpaths=44, free=1
+I think you connect child here, a2=45
+F=-1, node=3, numpaths=45, free=1
+I think you connect child here, a2=46
+F=-1, node=3, numpaths=46, free=1
+I think you connect child here, a2=47
+F=-1, node=3, numpaths=47, free=1
+I think you connect child here, a2=48
+F=-1, node=3, numpaths=48, free=1
+I think you connect child here, a2=49
+F=-1, node=3, numpaths=49, free=1
+I think you connect child here, a2=50
+F=-1, node=3, numpaths=50, free=1
+G=-1
+set = 0, free path here=0, at least one child connected = 1
+G=-1
+set = 0, free path here=1, at least one child connected = 0
+G=-1
+set = 0, free path here=1, at least one child connected = 1
+G=-1
+set = 1, free path here=0, at least one child connected = 0
+G=-1
+set = 1, free path here=0, at least one child connected = 1
+G=-1
+set = 1, free path here=1, at least one child connected = 0
+G=-1
+set = 1, free path here=1, at least one child connected = 1
+G=-1
+set = 2, free path here=0, at least one child connected = 0
+G=-1
+set = 2, free path here=0, at least one child connected = 1
+G=-1
+set = 2, free path here=1, at least one child connected = 0
+G=-1
+set = 2, free path here=1, at least one child connected = 1
+G=-1
+set = 3, free path here=0, at least one child connected = 0
+G=-1
+set = 3, free path here=0, at least one child connected = 1
+G=-1
+set = 3, free path here=1, at least one child connected = 0
+G=-1
+set = 3, free path here=1, at least one child connected = 1
+G=-1
+set = 4, free path here=0, at least one child connected = 0
+G=-1
+set = 4, free path here=0, at least one child connected = 1
+G=-1
+set = 4, free path here=1, at least one child connected = 0
+G=-1
+set = 4, free path here=1, at least one child connected = 1
+G=-1
+set = 5, free path here=0, at least one child connected = 0
+G=-1
+set = 5, free path here=0, at least one child connected = 1
+G=-1
+set = 5, free path here=1, at least one child connected = 0
+G=-1
+set = 5, free path here=1, at least one child connected = 1
+G=-1
+set = 6, free path here=0, at least one child connected = 0
+G=-1
+set = 6, free path here=0, at least one child connected = 1
+G=-1
+set = 6, free path here=1, at least one child connected = 0
+G=-1
+set = 6, free path here=1, at least one child connected = 1
+G=-1
+set = 7, free path here=0, at least one child connected = 0
+G=-1
+set = 7, free path here=0, at least one child connected = 1
+G=-1
+set = 7, free path here=1, at least one child connected = 0
+G=-1
+set = 7, free path here=1, at least one child connected = 1
+G=-1
+set = 8, free path here=0, at least one child connected = 0
+G=-1
+set = 8, free path here=0, at least one child connected = 1
+G=-1
+set = 8, free path here=1, at least one child connected = 0
+G=-1
+set = 8, free path here=1, at least one child connected = 1
+G=-1
+set = 9, free path here=0, at least one child connected = 0
+G=-1
+set = 9, free path here=0, at least one child connected = 1
+G=-1
+set = 9, free path here=1, at least one child connected = 0
+G=-1
+set = 9, free path here=1, at least one child connected = 1
+G=-1
+set = 10, free path here=0, at least one child connected = 0
+G=-1
+set = 10, free path here=0, at least one child connected = 1
+G=-1
+set = 10, free path here=1, at least one child connected = 0
+G=-1
+set = 10, free path here=1, at least one child connected = 1
+G=-1
+set = 11, free path here=0, at least one child connected = 0
+G=-1
+set = 11, free path here=0, at least one child connected = 1
+G=-1
+set = 11, free path here=1, at least one child connected = 0
+G=-1
+set = 11, free path here=1, at least one child connected = 1
+G=-1
+set = 12, free path here=0, at least one child connected = 0
+G=-1
+set = 12, free path here=0, at least one child connected = 1
+G=-1
+set = 12, free path here=1, at least one child connected = 0
+G=-1
+set = 12, free path here=1, at least one child connected = 1
+G=-1
+set = 13, free path here=0, at least one child connected = 0
+G=-1
+set = 13, free path here=0, at least one child connected = 1
+G=-1
+set = 13, free path here=1, at least one child connected = 0
+G=-1
+set = 13, free path here=1, at least one child connected = 1
+G=-1
+set = 14, free path here=0, at least one child connected = 0
+G=-1
+set = 14, free path here=0, at least one child connected = 1
+G=-1
+set = 14, free path here=1, at least one child connected = 0
+G=-1
+set = 14, free path here=1, at least one child connected = 1
+G=-1
+set = 15, free path here=0, at least one child connected = 0
+G=-1
+set = 15, free path here=0, at least one child connected = 1
+G=-1
+set = 15, free path here=1, at least one child connected = 0
+G=-1
+set = 15, free path here=1, at least one child connected = 1
+G=-1
+set = 16, free path here=0, at least one child connected = 0
+G=-1
+set = 16, free path here=0, at least one child connected = 1
+G=-1
+set = 16, free path here=1, at least one child connected = 0
+G=-1
+set = 16, free path here=1, at least one child connected = 1
+G=-1
+set = 17, free path here=0, at least one child connected = 0
+G=-1
+set = 17, free path here=0, at least one child connected = 1
+G=-1
+set = 17, free path here=1, at least one child connected = 0
+G=-1
+set = 17, free path here=1, at least one child connected = 1
+G=-1
+set = 18, free path here=0, at least one child connected = 0
+G=-1
+set = 18, free path here=0, at least one child connected = 1
+G=-1
+set = 18, free path here=1, at least one child connected = 0
+G=-1
+set = 18, free path here=1, at least one child connected = 1
+G=-1
+set = 19, free path here=0, at least one child connected = 0
+G=-1
+set = 19, free path here=0, at least one child connected = 1
+G=-1
+set = 19, free path here=1, at least one child connected = 0
+G=-1
+set = 19, free path here=1, at least one child connected = 1
+G=-1
+set = 20, free path here=0, at least one child connected = 0
+G=-1
+set = 20, free path here=0, at least one child connected = 1
+G=-1
+set = 20, free path here=1, at least one child connected = 0
+G=-1
+set = 20, free path here=1, at least one child connected = 1
+G=-1
+set = 21, free path here=0, at least one child connected = 0
+G=-1
+set = 21, free path here=0, at least one child connected = 1
+G=-1
+set = 21, free path here=1, at least one child connected = 0
+G=-1
+set = 21, free path here=1, at least one child connected = 1
+G=-1
+set = 22, free path here=0, at least one child connected = 0
+G=-1
+set = 22, free path here=0, at least one child connected = 1
+G=-1
+set = 22, free path here=1, at least one child connected = 0
+G=-1
+set = 22, free path here=1, at least one child connected = 1
+G=-1
+set = 23, free path here=0, at least one child connected = 0
+G=-1
+set = 23, free path here=0, at least one child connected = 1
+G=-1
+set = 23, free path here=1, at least one child connected = 0
+G=-1
+set = 23, free path here=1, at least one child connected = 1
+G=-1
+set = 24, free path here=0, at least one child connected = 0
+G=-1
+set = 24, free path here=0, at least one child connected = 1
+G=-1
+set = 24, free path here=1, at least one child connected = 0
+G=-1
+set = 24, free path here=1, at least one child connected = 1
+G=-1
+set = 25, free path here=0, at least one child connected = 0
+G=-1
+set = 25, free path here=0, at least one child connected = 1
+G=-1
+set = 25, free path here=1, at least one child connected = 0
+G=-1
+set = 25, free path here=1, at least one child connected = 1
+G=-1
+set = 26, free path here=0, at least one child connected = 0
+G=-1
+set = 26, free path here=0, at least one child connected = 1
+G=-1
+set = 26, free path here=1, at least one child connected = 0
+G=-1
+set = 26, free path here=1, at least one child connected = 1
+G=-1
+set = 27, free path here=0, at least one child connected = 0
+G=-1
+set = 27, free path here=0, at least one child connected = 1
+G=-1
+set = 27, free path here=1, at least one child connected = 0
+G=-1
+set = 27, free path here=1, at least one child connected = 1
+G=-1
+set = 28, free path here=0, at least one child connected = 0
+G=-1
+set = 28, free path here=0, at least one child connected = 1
+G=-1
+set = 28, free path here=1, at least one child connected = 0
+G=-1
+set = 28, free path here=1, at least one child connected = 1
+G=-1
+set = 29, free path here=0, at least one child connected = 0
+G=-1
+set = 29, free path here=0, at least one child connected = 1
+G=-1
+set = 29, free path here=1, at least one child connected = 0
+G=-1
+set = 29, free path here=1, at least one child connected = 1
+G=-1
+set = 30, free path here=0, at least one child connected = 0
+G=-1
+set = 30, free path here=0, at least one child connected = 1
+G=-1
+set = 30, free path here=1, at least one child connected = 0
+G=-1
+set = 30, free path here=1, at least one child connected = 1
+G=-1
+set = 31, free path here=0, at least one child connected = 0
+G=-1
+set = 31, free path here=0, at least one child connected = 1
+G=-1
+set = 31, free path here=1, at least one child connected = 0
+G=-1
+set = 31, free path here=1, at least one child connected = 1
+G=-1
+set = 32, free path here=0, at least one child connected = 0
+G=-1
+set = 32, free path here=0, at least one child connected = 1
+G=-1
+set = 32, free path here=1, at least one child connected = 0
+G=-1
+set = 32, free path here=1, at least one child connected = 1
+G=-1
+set = 33, free path here=0, at least one child connected = 0
+G=-1
+set = 33, free path here=0, at least one child connected = 1
+G=-1
+set = 33, free path here=1, at least one child connected = 0
+G=-1
+set = 33, free path here=1, at least one child connected = 1
+G=-1
+set = 34, free path here=0, at least one child connected = 0
+G=-1
+set = 34, free path here=0, at least one child connected = 1
+G=-1
+set = 34, free path here=1, at least one child connected = 0
+G=-1
+set = 34, free path here=1, at least one child connected = 1
+G=-1
+set = 35, free path here=0, at least one child connected = 0
+G=-1
+set = 35, free path here=0, at least one child connected = 1
+G=-1
+set = 35, free path here=1, at least one child connected = 0
+G=-1
+set = 35, free path here=1, at least one child connected = 1
+G=-1
+set = 36, free path here=0, at least one child connected = 0
+G=-1
+set = 36, free path here=0, at least one child connected = 1
+G=-1
+set = 36, free path here=1, at least one child connected = 0
+G=-1
+set = 36, free path here=1, at least one child connected = 1
+G=-1
+set = 37, free path here=0, at least one child connected = 0
+G=-1
+set = 37, free path here=0, at least one child connected = 1
+G=-1
+set = 37, free path here=1, at least one child connected = 0
+G=-1
+set = 37, free path here=1, at least one child connected = 1
+G=-1
+set = 38, free path here=0, at least one child connected = 0
+G=-1
+set = 38, free path here=0, at least one child connected = 1
+G=-1
+set = 38, free path here=1, at least one child connected = 0
+G=-1
+set = 38, free path here=1, at least one child connected = 1
+G=-1
+set = 39, free path here=0, at least one child connected = 0
+G=-1
+set = 39, free path here=0, at least one child connected = 1
+G=-1
+set = 39, free path here=1, at least one child connected = 0
+G=-1
+set = 39, free path here=1, at least one child connected = 1
+G=-1
+set = 40, free path here=0, at least one child connected = 0
+G=-1
+set = 40, free path here=0, at least one child connected = 1
+G=-1
+set = 40, free path here=1, at least one child connected = 0
+G=-1
+set = 40, free path here=1, at least one child connected = 1
+G=-1
+set = 41, free path here=0, at least one child connected = 0
+G=-1
+set = 41, free path here=0, at least one child connected = 1
+G=-1
+set = 41, free path here=1, at least one child connected = 0
+G=-1
+set = 41, free path here=1, at least one child connected = 1
+G=-1
+set = 42, free path here=0, at least one child connected = 0
+G=-1
+set = 42, free path here=0, at least one child connected = 1
+G=-1
+set = 42, free path here=1, at least one child connected = 0
+G=-1
+set = 42, free path here=1, at least one child connected = 1
+G=-1
+set = 43, free path here=0, at least one child connected = 0
+G=-1
+set = 43, free path here=0, at least one child connected = 1
+G=-1
+set = 43, free path here=1, at least one child connected = 0
+G=-1
+set = 43, free path here=1, at least one child connected = 1
+G=-1
+set = 44, free path here=0, at least one child connected = 0
+G=-1
+set = 44, free path here=0, at least one child connected = 1
+G=-1
+set = 44, free path here=1, at least one child connected = 0
+G=-1
+set = 44, free path here=1, at least one child connected = 1
+G=-1
+set = 45, free path here=0, at least one child connected = 0
+G=-1
+set = 45, free path here=0, at least one child connected = 1
+G=-1
+set = 45, free path here=1, at least one child connected = 0
+G=-1
+set = 45, free path here=1, at least one child connected = 1
+G=-1
+set = 46, free path here=0, at least one child connected = 0
+G=-1
+set = 46, free path here=0, at least one child connected = 1
+G=-1
+set = 46, free path here=1, at least one child connected = 0
+G=-1
+set = 46, free path here=1, at least one child connected = 1
+G=-1
+set = 47, free path here=0, at least one child connected = 0
+G=-1
+set = 47, free path here=0, at least one child connected = 1
+G=-1
+set = 47, free path here=1, at least one child connected = 0
+G=-1
+set = 47, free path here=1, at least one child connected = 1
+G=-1
+set = 48, free path here=0, at least one child connected = 0
+G=-1
+set = 48, free path here=0, at least one child connected = 1
+G=-1
+set = 48, free path here=1, at least one child connected = 0
+G=-1
+set = 48, free path here=1, at least one child connected = 1
+G=-1
+set = 49, free path here=0, at least one child connected = 0
+G=-1
+set = 49, free path here=0, at least one child connected = 1
+G=-1
+set = 49, free path here=1, at least one child connected = 0
+G=-1
+set = 49, free path here=1, at least one child connected = 1
+G=-1
+set = 50, free path here=0, at least one child connected = 0
+G=-1
+set = 50, free path here=0, at least one child connected = 1
+G=-1
+set = 50, free path here=1, at least one child connected = 0
+G=-1
+set = 50, free path here=1, at least one child connected = 1
+G=0
+set = 0, free path here=0, at least one child connected = 0
+I think you connect child here, a2=0
+F=20, node=4, numpaths=0, free=1
+I think you connect child here, a2=1
+F=31, node=4, numpaths=1, free=1
+I think you connect child here, a2=2
+F=-1, node=4, numpaths=2, free=1
+I think you connect child here, a2=3
+F=-1, node=4, numpaths=3, free=1
+I think you connect child here, a2=4
+F=-1, node=4, numpaths=4, free=1
+I think you connect child here, a2=5
+F=-1, node=4, numpaths=5, free=1
+I think you connect child here, a2=6
+F=-1, node=4, numpaths=6, free=1
+I think you connect child here, a2=7
+F=-1, node=4, numpaths=7, free=1
+I think you connect child here, a2=8
+F=-1, node=4, numpaths=8, free=1
+I think you connect child here, a2=9
+F=-1, node=4, numpaths=9, free=1
+I think you connect child here, a2=10
+F=-1, node=4, numpaths=10, free=1
+I think you connect child here, a2=11
+F=-1, node=4, numpaths=11, free=1
+I think you connect child here, a2=12
+F=-1, node=4, numpaths=12, free=1
+I think you connect child here, a2=13
+F=-1, node=4, numpaths=13, free=1
+I think you connect child here, a2=14
+F=-1, node=4, numpaths=14, free=1
+I think you connect child here, a2=15
+F=-1, node=4, numpaths=15, free=1
+I think you connect child here, a2=16
+F=-1, node=4, numpaths=16, free=1
+I think you connect child here, a2=17
+F=-1, node=4, numpaths=17, free=1
+I think you connect child here, a2=18
+F=-1, node=4, numpaths=18, free=1
+I think you connect child here, a2=19
+F=-1, node=4, numpaths=19, free=1
+I think you connect child here, a2=20
+F=-1, node=4, numpaths=20, free=1
+I think you connect child here, a2=21
+F=-1, node=4, numpaths=21, free=1
+I think you connect child here, a2=22
+F=-1, node=4, numpaths=22, free=1
+I think you connect child here, a2=23
+F=-1, node=4, numpaths=23, free=1
+I think you connect child here, a2=24
+F=-1, node=4, numpaths=24, free=1
+I think you connect child here, a2=25
+F=-1, node=4, numpaths=25, free=1
+I think you connect child here, a2=26
+F=-1, node=4, numpaths=26, free=1
+I think you connect child here, a2=27
+F=-1, node=4, numpaths=27, free=1
+I think you connect child here, a2=28
+F=-1, node=4, numpaths=28, free=1
+I think you connect child here, a2=29
+F=-1, node=4, numpaths=29, free=1
+I think you connect child here, a2=30
+F=-1, node=4, numpaths=30, free=1
+I think you connect child here, a2=31
+F=-1, node=4, numpaths=31, free=1
+I think you connect child here, a2=32
+F=-1, node=4, numpaths=32, free=1
+I think you connect child here, a2=33
+F=-1, node=4, numpaths=33, free=1
+I think you connect child here, a2=34
+F=-1, node=4, numpaths=34, free=1
+I think you connect child here, a2=35
+F=-1, node=4, numpaths=35, free=1
+I think you connect child here, a2=36
+F=-1, node=4, numpaths=36, free=1
+I think you connect child here, a2=37
+F=-1, node=4, numpaths=37, free=1
+I think you connect child here, a2=38
+F=-1, node=4, numpaths=38, free=1
+I think you connect child here, a2=39
+F=-1, node=4, numpaths=39, free=1
+I think you connect child here, a2=40
+F=-1, node=4, numpaths=40, free=1
+I think you connect child here, a2=41
+F=-1, node=4, numpaths=41, free=1
+I think you connect child here, a2=42
+F=-1, node=4, numpaths=42, free=1
+I think you connect child here, a2=43
+F=-1, node=4, numpaths=43, free=1
+I think you connect child here, a2=44
+F=-1, node=4, numpaths=44, free=1
+I think you connect child here, a2=45
+F=-1, node=4, numpaths=45, free=1
+I think you connect child here, a2=46
+F=-1, node=4, numpaths=46, free=1
+I think you connect child here, a2=47
+F=-1, node=4, numpaths=47, free=1
+I think you connect child here, a2=48
+F=-1, node=4, numpaths=48, free=1
+I think you connect child here, a2=49
+F=-1, node=4, numpaths=49, free=1
+I think you connect child here, a2=50
+F=-1, node=4, numpaths=50, free=1
+G=-1
+set = 0, free path here=0, at least one child connected = 1
+G=-1
+set = 0, free path here=1, at least one child connected = 0
+G=-1
+set = 0, free path here=1, at least one child connected = 1
+G=-1
+set = 1, free path here=0, at least one child connected = 0
+G=-1
+set = 1, free path here=0, at least one child connected = 1
+G=-1
+set = 1, free path here=1, at least one child connected = 0
+G=7
+set = 1, free path here=1, at least one child connected = 1
+I think you connect child here, a2=0
+F=20, node=4, numpaths=0, free=1
+I think you connect child here, a2=1
+F=31, node=4, numpaths=1, free=1
+I think you connect child here, a2=2
+F=-1, node=4, numpaths=2, free=1
+I think you connect child here, a2=3
+F=-1, node=4, numpaths=3, free=1
+I think you connect child here, a2=4
+F=-1, node=4, numpaths=4, free=1
+I think you connect child here, a2=5
+F=-1, node=4, numpaths=5, free=1
+I think you connect child here, a2=6
+F=-1, node=4, numpaths=6, free=1
+I think you connect child here, a2=7
+F=-1, node=4, numpaths=7, free=1
+I think you connect child here, a2=8
+F=-1, node=4, numpaths=8, free=1
+I think you connect child here, a2=9
+F=-1, node=4, numpaths=9, free=1
+I think you connect child here, a2=10
+F=-1, node=4, numpaths=10, free=1
+I think you connect child here, a2=11
+F=-1, node=4, numpaths=11, free=1
+I think you connect child here, a2=12
+F=-1, node=4, numpaths=12, free=1
+I think you connect child here, a2=13
+F=-1, node=4, numpaths=13, free=1
+I think you connect child here, a2=14
+F=-1, node=4, numpaths=14, free=1
+I think you connect child here, a2=15
+F=-1, node=4, numpaths=15, free=1
+I think you connect child here, a2=16
+F=-1, node=4, numpaths=16, free=1
+I think you connect child here, a2=17
+F=-1, node=4, numpaths=17, free=1
+I think you connect child here, a2=18
+F=-1, node=4, numpaths=18, free=1
+I think you connect child here, a2=19
+F=-1, node=4, numpaths=19, free=1
+I think you connect child here, a2=20
+F=-1, node=4, numpaths=20, free=1
+I think you connect child here, a2=21
+F=-1, node=4, numpaths=21, free=1
+I think you connect child here, a2=22
+F=-1, node=4, numpaths=22, free=1
+I think you connect child here, a2=23
+F=-1, node=4, numpaths=23, free=1
+I think you connect child here, a2=24
+F=-1, node=4, numpaths=24, free=1
+I think you connect child here, a2=25
+F=-1, node=4, numpaths=25, free=1
+I think you connect child here, a2=26
+F=-1, node=4, numpaths=26, free=1
+I think you connect child here, a2=27
+F=-1, node=4, numpaths=27, free=1
+I think you connect child here, a2=28
+F=-1, node=4, numpaths=28, free=1
+I think you connect child here, a2=29
+F=-1, node=4, numpaths=29, free=1
+I think you connect child here, a2=30
+F=-1, node=4, numpaths=30, free=1
+I think you connect child here, a2=31
+F=-1, node=4, numpaths=31, free=1
+I think you connect child here, a2=32
+F=-1, node=4, numpaths=32, free=1
+I think you connect child here, a2=33
+F=-1, node=4, numpaths=33, free=1
+I think you connect child here, a2=34
+F=-1, node=4, numpaths=34, free=1
+I think you connect child here, a2=35
+F=-1, node=4, numpaths=35, free=1
+I think you connect child here, a2=36
+F=-1, node=4, numpaths=36, free=1
+I think you connect child here, a2=37
+F=-1, node=4, numpaths=37, free=1
+I think you connect child here, a2=38
+F=-1, node=4, numpaths=38, free=1
+I think you connect child here, a2=39
+F=-1, node=4, numpaths=39, free=1
+I think you connect child here, a2=40
+F=-1, node=4, numpaths=40, free=1
+I think you connect child here, a2=41
+F=-1, node=4, numpaths=41, free=1
+I think you connect child here, a2=42
+F=-1, node=4, numpaths=42, free=1
+I think you connect child here, a2=43
+F=-1, node=4, numpaths=43, free=1
+I think you connect child here, a2=44
+F=-1, node=4, numpaths=44, free=1
+I think you connect child here, a2=45
+F=-1, node=4, numpaths=45, free=1
+I think you connect child here, a2=46
+F=-1, node=4, numpaths=46, free=1
+I think you connect child here, a2=47
+F=-1, node=4, numpaths=47, free=1
+I think you connect child here, a2=48
+F=-1, node=4, numpaths=48, free=1
+I think you connect child here, a2=49
+F=-1, node=4, numpaths=49, free=1
+G=-1
+set = 2, free path here=0, at least one child connected = 0
+G=-1
+set = 2, free path here=0, at least one child connected = 1
+G=-1
+set = 2, free path here=1, at least one child connected = 0
+G=-1
+set = 2, free path here=1, at least one child connected = 1
+G=-1
+set = 3, free path here=0, at least one child connected = 0
+G=-1
+set = 3, free path here=0, at least one child connected = 1
+G=-1
+set = 3, free path here=1, at least one child connected = 0
+G=-1
+set = 3, free path here=1, at least one child connected = 1
+G=-1
+set = 4, free path here=0, at least one child connected = 0
+G=-1
+set = 4, free path here=0, at least one child connected = 1
+G=-1
+set = 4, free path here=1, at least one child connected = 0
+G=-1
+set = 4, free path here=1, at least one child connected = 1
+G=-1
+set = 5, free path here=0, at least one child connected = 0
+G=-1
+set = 5, free path here=0, at least one child connected = 1
+G=-1
+set = 5, free path here=1, at least one child connected = 0
+G=-1
+set = 5, free path here=1, at least one child connected = 1
+G=-1
+set = 6, free path here=0, at least one child connected = 0
+G=-1
+set = 6, free path here=0, at least one child connected = 1
+G=-1
+set = 6, free path here=1, at least one child connected = 0
+G=-1
+set = 6, free path here=1, at least one child connected = 1
+G=-1
+set = 7, free path here=0, at least one child connected = 0
+G=-1
+set = 7, free path here=0, at least one child connected = 1
+G=-1
+set = 7, free path here=1, at least one child connected = 0
+G=-1
+set = 7, free path here=1, at least one child connected = 1
+G=-1
+set = 8, free path here=0, at least one child connected = 0
+G=-1
+set = 8, free path here=0, at least one child connected = 1
+G=-1
+set = 8, free path here=1, at least one child connected = 0
+G=-1
+set = 8, free path here=1, at least one child connected = 1
+G=-1
+set = 9, free path here=0, at least one child connected = 0
+G=-1
+set = 9, free path here=0, at least one child connected = 1
+G=-1
+set = 9, free path here=1, at least one child connected = 0
+G=-1
+set = 9, free path here=1, at least one child connected = 1
+G=-1
+set = 10, free path here=0, at least one child connected = 0
+G=-1
+set = 10, free path here=0, at least one child connected = 1
+G=-1
+set = 10, free path here=1, at least one child connected = 0
+G=-1
+set = 10, free path here=1, at least one child connected = 1
+G=-1
+set = 11, free path here=0, at least one child connected = 0
+G=-1
+set = 11, free path here=0, at least one child connected = 1
+G=-1
+set = 11, free path here=1, at least one child connected = 0
+G=-1
+set = 11, free path here=1, at least one child connected = 1
+G=-1
+set = 12, free path here=0, at least one child connected = 0
+G=-1
+set = 12, free path here=0, at least one child connected = 1
+G=-1
+set = 12, free path here=1, at least one child connected = 0
+G=-1
+set = 12, free path here=1, at least one child connected = 1
+G=-1
+set = 13, free path here=0, at least one child connected = 0
+G=-1
+set = 13, free path here=0, at least one child connected = 1
+G=-1
+set = 13, free path here=1, at least one child connected = 0
+G=-1
+set = 13, free path here=1, at least one child connected = 1
+G=-1
+set = 14, free path here=0, at least one child connected = 0
+G=-1
+set = 14, free path here=0, at least one child connected = 1
+G=-1
+set = 14, free path here=1, at least one child connected = 0
+G=-1
+set = 14, free path here=1, at least one child connected = 1
+G=-1
+set = 15, free path here=0, at least one child connected = 0
+G=-1
+set = 15, free path here=0, at least one child connected = 1
+G=-1
+set = 15, free path here=1, at least one child connected = 0
+G=-1
+set = 15, free path here=1, at least one child connected = 1
+G=-1
+set = 16, free path here=0, at least one child connected = 0
+G=-1
+set = 16, free path here=0, at least one child connected = 1
+G=-1
+set = 16, free path here=1, at least one child connected = 0
+G=-1
+set = 16, free path here=1, at least one child connected = 1
+G=-1
+set = 17, free path here=0, at least one child connected = 0
+G=-1
+set = 17, free path here=0, at least one child connected = 1
+G=-1
+set = 17, free path here=1, at least one child connected = 0
+G=-1
+set = 17, free path here=1, at least one child connected = 1
+G=-1
+set = 18, free path here=0, at least one child connected = 0
+G=-1
+set = 18, free path here=0, at least one child connected = 1
+G=-1
+set = 18, free path here=1, at least one child connected = 0
+G=-1
+set = 18, free path here=1, at least one child connected = 1
+G=-1
+set = 19, free path here=0, at least one child connected = 0
+G=-1
+set = 19, free path here=0, at least one child connected = 1
+G=-1
+set = 19, free path here=1, at least one child connected = 0
+G=-1
+set = 19, free path here=1, at least one child connected = 1
+G=-1
+set = 20, free path here=0, at least one child connected = 0
+G=-1
+set = 20, free path here=0, at least one child connected = 1
+G=-1
+set = 20, free path here=1, at least one child connected = 0
+G=-1
+set = 20, free path here=1, at least one child connected = 1
+G=-1
+set = 21, free path here=0, at least one child connected = 0
+G=-1
+set = 21, free path here=0, at least one child connected = 1
+G=-1
+set = 21, free path here=1, at least one child connected = 0
+G=-1
+set = 21, free path here=1, at least one child connected = 1
+G=-1
+set = 22, free path here=0, at least one child connected = 0
+G=-1
+set = 22, free path here=0, at least one child connected = 1
+G=-1
+set = 22, free path here=1, at least one child connected = 0
+G=-1
+set = 22, free path here=1, at least one child connected = 1
+G=-1
+set = 23, free path here=0, at least one child connected = 0
+G=-1
+set = 23, free path here=0, at least one child connected = 1
+G=-1
+set = 23, free path here=1, at least one child connected = 0
+G=-1
+set = 23, free path here=1, at least one child connected = 1
+G=-1
+set = 24, free path here=0, at least one child connected = 0
+G=-1
+set = 24, free path here=0, at least one child connected = 1
+G=-1
+set = 24, free path here=1, at least one child connected = 0
+G=-1
+set = 24, free path here=1, at least one child connected = 1
+G=-1
+set = 25, free path here=0, at least one child connected = 0
+G=-1
+set = 25, free path here=0, at least one child connected = 1
+G=-1
+set = 25, free path here=1, at least one child connected = 0
+G=-1
+set = 25, free path here=1, at least one child connected = 1
+G=-1
+set = 26, free path here=0, at least one child connected = 0
+G=-1
+set = 26, free path here=0, at least one child connected = 1
+G=-1
+set = 26, free path here=1, at least one child connected = 0
+G=-1
+set = 26, free path here=1, at least one child connected = 1
+G=-1
+set = 27, free path here=0, at least one child connected = 0
+G=-1
+set = 27, free path here=0, at least one child connected = 1
+G=-1
+set = 27, free path here=1, at least one child connected = 0
+G=-1
+set = 27, free path here=1, at least one child connected = 1
+G=-1
+set = 28, free path here=0, at least one child connected = 0
+G=-1
+set = 28, free path here=0, at least one child connected = 1
+G=-1
+set = 28, free path here=1, at least one child connected = 0
+G=-1
+set = 28, free path here=1, at least one child connected = 1
+G=-1
+set = 29, free path here=0, at least one child connected = 0
+G=-1
+set = 29, free path here=0, at least one child connected = 1
+G=-1
+set = 29, free path here=1, at least one child connected = 0
+G=-1
+set = 29, free path here=1, at least one child connected = 1
+G=-1
+set = 30, free path here=0, at least one child connected = 0
+G=-1
+set = 30, free path here=0, at least one child connected = 1
+G=-1
+set = 30, free path here=1, at least one child connected = 0
+G=-1
+set = 30, free path here=1, at least one child connected = 1
+G=-1
+set = 31, free path here=0, at least one child connected = 0
+G=-1
+set = 31, free path here=0, at least one child connected = 1
+G=-1
+set = 31, free path here=1, at least one child connected = 0
+G=-1
+set = 31, free path here=1, at least one child connected = 1
+G=-1
+set = 32, free path here=0, at least one child connected = 0
+G=-1
+set = 32, free path here=0, at least one child connected = 1
+G=-1
+set = 32, free path here=1, at least one child connected = 0
+G=-1
+set = 32, free path here=1, at least one child connected = 1
+G=-1
+set = 33, free path here=0, at least one child connected = 0
+G=-1
+set = 33, free path here=0, at least one child connected = 1
+G=-1
+set = 33, free path here=1, at least one child connected = 0
+G=-1
+set = 33, free path here=1, at least one child connected = 1
+G=-1
+set = 34, free path here=0, at least one child connected = 0
+G=-1
+set = 34, free path here=0, at least one child connected = 1
+G=-1
+set = 34, free path here=1, at least one child connected = 0
+G=-1
+set = 34, free path here=1, at least one child connected = 1
+G=-1
+set = 35, free path here=0, at least one child connected = 0
+G=-1
+set = 35, free path here=0, at least one child connected = 1
+G=-1
+set = 35, free path here=1, at least one child connected = 0
+G=-1
+set = 35, free path here=1, at least one child connected = 1
+G=-1
+set = 36, free path here=0, at least one child connected = 0
+G=-1
+set = 36, free path here=0, at least one child connected = 1
+G=-1
+set = 36, free path here=1, at least one child connected = 0
+G=-1
+set = 36, free path here=1, at least one child connected = 1
+G=-1
+set = 37, free path here=0, at least one child connected = 0
+G=-1
+set = 37, free path here=0, at least one child connected = 1
+G=-1
+set = 37, free path here=1, at least one child connected = 0
+G=-1
+set = 37, free path here=1, at least one child connected = 1
+G=-1
+set = 38, free path here=0, at least one child connected = 0
+G=-1
+set = 38, free path here=0, at least one child connected = 1
+G=-1
+set = 38, free path here=1, at least one child connected = 0
+G=-1
+set = 38, free path here=1, at least one child connected = 1
+G=-1
+set = 39, free path here=0, at least one child connected = 0
+G=-1
+set = 39, free path here=0, at least one child connected = 1
+G=-1
+set = 39, free path here=1, at least one child connected = 0
+G=-1
+set = 39, free path here=1, at least one child connected = 1
+G=-1
+set = 40, free path here=0, at least one child connected = 0
+G=-1
+set = 40, free path here=0, at least one child connected = 1
+G=-1
+set = 40, free path here=1, at least one child connected = 0
+G=-1
+set = 40, free path here=1, at least one child connected = 1
+G=-1
+set = 41, free path here=0, at least one child connected = 0
+G=-1
+set = 41, free path here=0, at least one child connected = 1
+G=-1
+set = 41, free path here=1, at least one child connected = 0
+G=-1
+set = 41, free path here=1, at least one child connected = 1
+G=-1
+set = 42, free path here=0, at least one child connected = 0
+G=-1
+set = 42, free path here=0, at least one child connected = 1
+G=-1
+set = 42, free path here=1, at least one child connected = 0
+G=-1
+set = 42, free path here=1, at least one child connected = 1
+G=-1
+set = 43, free path here=0, at least one child connected = 0
+G=-1
+set = 43, free path here=0, at least one child connected = 1
+G=-1
+set = 43, free path here=1, at least one child connected = 0
+G=-1
+set = 43, free path here=1, at least one child connected = 1
+G=-1
+set = 44, free path here=0, at least one child connected = 0
+G=-1
+set = 44, free path here=0, at least one child connected = 1
+G=-1
+set = 44, free path here=1, at least one child connected = 0
+G=-1
+set = 44, free path here=1, at least one child connected = 1
+G=-1
+set = 45, free path here=0, at least one child connected = 0
+G=-1
+set = 45, free path here=0, at least one child connected = 1
+G=-1
+set = 45, free path here=1, at least one child connected = 0
+G=-1
+set = 45, free path here=1, at least one child connected = 1
+G=-1
+set = 46, free path here=0, at least one child connected = 0
+G=-1
+set = 46, free path here=0, at least one child connected = 1
+G=-1
+set = 46, free path here=1, at least one child connected = 0
+G=-1
+set = 46, free path here=1, at least one child connected = 1
+G=-1
+set = 47, free path here=0, at least one child connected = 0
+G=-1
+set = 47, free path here=0, at least one child connected = 1
+G=-1
+set = 47, free path here=1, at least one child connected = 0
+G=-1
+set = 47, free path here=1, at least one child connected = 1
+G=-1
+set = 48, free path here=0, at least one child connected = 0
+G=-1
+set = 48, free path here=0, at least one child connected = 1
+G=-1
+set = 48, free path here=1, at least one child connected = 0
+G=-1
+set = 48, free path here=1, at least one child connected = 1
+G=-1
+set = 49, free path here=0, at least one child connected = 0
+G=-1
+set = 49, free path here=0, at least one child connected = 1
+G=-1
+set = 49, free path here=1, at least one child connected = 0
+G=-1
+set = 49, free path here=1, at least one child connected = 1
+G=-1
+set = 50, free path here=0, at least one child connected = 0
+G=-1
+set = 50, free path here=0, at least one child connected = 1
+G=-1
+set = 50, free path here=1, at least one child connected = 0
+G=-1
+set = 50, free path here=1, at least one child connected = 1
+G=0
+set = 0, free path here=0, at least one child connected = 0
+I think you connect child here, a2=0
+F=10, node=8, numpaths=0, free=1
+I think you connect child here, a2=1
+F=18, node=8, numpaths=1, free=1
+I think you connect child here, a2=2
+F=-1, node=8, numpaths=2, free=1
+I think you connect child here, a2=3
+F=-1, node=8, numpaths=3, free=1
+I think you connect child here, a2=4
+F=-1, node=8, numpaths=4, free=1
+I think you connect child here, a2=5
+F=-1, node=8, numpaths=5, free=1
+I think you connect child here, a2=6
+F=-1, node=8, numpaths=6, free=1
+I think you connect child here, a2=7
+F=-1, node=8, numpaths=7, free=1
+I think you connect child here, a2=8
+F=-1, node=8, numpaths=8, free=1
+I think you connect child here, a2=9
+F=-1, node=8, numpaths=9, free=1
+I think you connect child here, a2=10
+F=-1, node=8, numpaths=10, free=1
+I think you connect child here, a2=11
+F=-1, node=8, numpaths=11, free=1
+I think you connect child here, a2=12
+F=-1, node=8, numpaths=12, free=1
+I think you connect child here, a2=13
+F=-1, node=8, numpaths=13, free=1
+I think you connect child here, a2=14
+F=-1, node=8, numpaths=14, free=1
+I think you connect child here, a2=15
+F=-1, node=8, numpaths=15, free=1
+I think you connect child here, a2=16
+F=-1, node=8, numpaths=16, free=1
+I think you connect child here, a2=17
+F=-1, node=8, numpaths=17, free=1
+I think you connect child here, a2=18
+F=-1, node=8, numpaths=18, free=1
+I think you connect child here, a2=19
+F=-1, node=8, numpaths=19, free=1
+I think you connect child here, a2=20
+F=-1, node=8, numpaths=20, free=1
+I think you connect child here, a2=21
+F=-1, node=8, numpaths=21, free=1
+I think you connect child here, a2=22
+F=-1, node=8, numpaths=22, free=1
+I think you connect child here, a2=23
+F=-1, node=8, numpaths=23, free=1
+I think you connect child here, a2=24
+F=-1, node=8, numpaths=24, free=1
+I think you connect child here, a2=25
+F=-1, node=8, numpaths=25, free=1
+I think you connect child here, a2=26
+F=-1, node=8, numpaths=26, free=1
+I think you connect child here, a2=27
+F=-1, node=8, numpaths=27, free=1
+I think you connect child here, a2=28
+F=-1, node=8, numpaths=28, free=1
+I think you connect child here, a2=29
+F=-1, node=8, numpaths=29, free=1
+I think you connect child here, a2=30
+F=-1, node=8, numpaths=30, free=1
+I think you connect child here, a2=31
+F=-1, node=8, numpaths=31, free=1
+I think you connect child here, a2=32
+F=-1, node=8, numpaths=32, free=1
+I think you connect child here, a2=33
+F=-1, node=8, numpaths=33, free=1
+I think you connect child here, a2=34
+F=-1, node=8, numpaths=34, free=1
+I think you connect child here, a2=35
+F=-1, node=8, numpaths=35, free=1
+I think you connect child here, a2=36
+F=-1, node=8, numpaths=36, free=1
+I think you connect child here, a2=37
+F=-1, node=8, numpaths=37, free=1
+I think you connect child here, a2=38
+F=-1, node=8, numpaths=38, free=1
+I think you connect child here, a2=39
+F=-1, node=8, numpaths=39, free=1
+I think you connect child here, a2=40
+F=-1, node=8, numpaths=40, free=1
+I think you connect child here, a2=41
+F=-1, node=8, numpaths=41, free=1
+I think you connect child here, a2=42
+F=-1, node=8, numpaths=42, free=1
+I think you connect child here, a2=43
+F=-1, node=8, numpaths=43, free=1
+I think you connect child here, a2=44
+F=-1, node=8, numpaths=44, free=1
+I think you connect child here, a2=45
+F=-1, node=8, numpaths=45, free=1
+I think you connect child here, a2=46
+F=-1, node=8, numpaths=46, free=1
+I think you connect child here, a2=47
+F=-1, node=8, numpaths=47, free=1
+I think you connect child here, a2=48
+F=-1, node=8, numpaths=48, free=1
+I think you connect child here, a2=49
+F=-1, node=8, numpaths=49, free=1
+I think you connect child here, a2=50
+F=-1, node=8, numpaths=50, free=1
+G=-1
+set = 0, free path here=0, at least one child connected = 1
+G=-1
+set = 0, free path here=1, at least one child connected = 0
+G=-1
+set = 0, free path here=1, at least one child connected = 1
+G=31
+set = 1, free path here=0, at least one child connected = 0
+I think you connect child here, a2=0
+F=10, node=8, numpaths=0, free=1
+I think you connect child here, a2=1
+F=18, node=8, numpaths=1, free=1
+I think you connect child here, a2=2
+F=-1, node=8, numpaths=2, free=1
+I think you connect child here, a2=3
+F=-1, node=8, numpaths=3, free=1
+I think you connect child here, a2=4
+F=-1, node=8, numpaths=4, free=1
+I think you connect child here, a2=5
+F=-1, node=8, numpaths=5, free=1
+I think you connect child here, a2=6
+F=-1, node=8, numpaths=6, free=1
+I think you connect child here, a2=7
+F=-1, node=8, numpaths=7, free=1
+I think you connect child here, a2=8
+F=-1, node=8, numpaths=8, free=1
+I think you connect child here, a2=9
+F=-1, node=8, numpaths=9, free=1
+I think you connect child here, a2=10
+F=-1, node=8, numpaths=10, free=1
+I think you connect child here, a2=11
+F=-1, node=8, numpaths=11, free=1
+I think you connect child here, a2=12
+F=-1, node=8, numpaths=12, free=1
+I think you connect child here, a2=13
+F=-1, node=8, numpaths=13, free=1
+I think you connect child here, a2=14
+F=-1, node=8, numpaths=14, free=1
+I think you connect child here, a2=15
+F=-1, node=8, numpaths=15, free=1
+I think you connect child here, a2=16
+F=-1, node=8, numpaths=16, free=1
+I think you connect child here, a2=17
+F=-1, node=8, numpaths=17, free=1
+I think you connect child here, a2=18
+F=-1, node=8, numpaths=18, free=1
+I think you connect child here, a2=19
+F=-1, node=8, numpaths=19, free=1
+I think you connect child here, a2=20
+F=-1, node=8, numpaths=20, free=1
+I think you connect child here, a2=21
+F=-1, node=8, numpaths=21, free=1
+I think you connect child here, a2=22
+F=-1, node=8, numpaths=22, free=1
+I think you connect child here, a2=23
+F=-1, node=8, numpaths=23, free=1
+I think you connect child here, a2=24
+F=-1, node=8, numpaths=24, free=1
+I think you connect child here, a2=25
+F=-1, node=8, numpaths=25, free=1
+I think you connect child here, a2=26
+F=-1, node=8, numpaths=26, free=1
+I think you connect child here, a2=27
+F=-1, node=8, numpaths=27, free=1
+I think you connect child here, a2=28
+F=-1, node=8, numpaths=28, free=1
+I think you connect child here, a2=29
+F=-1, node=8, numpaths=29, free=1
+I think you connect child here, a2=30
+F=-1, node=8, numpaths=30, free=1
+I think you connect child here, a2=31
+F=-1, node=8, numpaths=31, free=1
+I think you connect child here, a2=32
+F=-1, node=8, numpaths=32, free=1
+I think you connect child here, a2=33
+F=-1, node=8, numpaths=33, free=1
+I think you connect child here, a2=34
+F=-1, node=8, numpaths=34, free=1
+I think you connect child here, a2=35
+F=-1, node=8, numpaths=35, free=1
+I think you connect child here, a2=36
+F=-1, node=8, numpaths=36, free=1
+I think you connect child here, a2=37
+F=-1, node=8, numpaths=37, free=1
+I think you connect child here, a2=38
+F=-1, node=8, numpaths=38, free=1
+I think you connect child here, a2=39
+F=-1, node=8, numpaths=39, free=1
+I think you connect child here, a2=40
+F=-1, node=8, numpaths=40, free=1
+I think you connect child here, a2=41
+F=-1, node=8, numpaths=41, free=1
+I think you connect child here, a2=42
+F=-1, node=8, numpaths=42, free=1
+I think you connect child here, a2=43
+F=-1, node=8, numpaths=43, free=1
+I think you connect child here, a2=44
+F=-1, node=8, numpaths=44, free=1
+I think you connect child here, a2=45
+F=-1, node=8, numpaths=45, free=1
+I think you connect child here, a2=46
+F=-1, node=8, numpaths=46, free=1
+I think you connect child here, a2=47
+F=-1, node=8, numpaths=47, free=1
+I think you connect child here, a2=48
+F=-1, node=8, numpaths=48, free=1
+I think you connect child here, a2=49
+F=-1, node=8, numpaths=49, free=1
+G=27
+set = 1, free path here=0, at least one child connected = 1
+I think you connect child here, a2=0
+F=10, node=8, numpaths=0, free=1
+I think you connect child here, a2=1
+F=18, node=8, numpaths=1, free=1
+I think you connect child here, a2=2
+F=-1, node=8, numpaths=2, free=1
+I think you connect child here, a2=3
+F=-1, node=8, numpaths=3, free=1
+I think you connect child here, a2=4
+F=-1, node=8, numpaths=4, free=1
+I think you connect child here, a2=5
+F=-1, node=8, numpaths=5, free=1
+I think you connect child here, a2=6
+F=-1, node=8, numpaths=6, free=1
+I think you connect child here, a2=7
+F=-1, node=8, numpaths=7, free=1
+I think you connect child here, a2=8
+F=-1, node=8, numpaths=8, free=1
+I think you connect child here, a2=9
+F=-1, node=8, numpaths=9, free=1
+I think you connect child here, a2=10
+F=-1, node=8, numpaths=10, free=1
+I think you connect child here, a2=11
+F=-1, node=8, numpaths=11, free=1
+I think you connect child here, a2=12
+F=-1, node=8, numpaths=12, free=1
+I think you connect child here, a2=13
+F=-1, node=8, numpaths=13, free=1
+I think you connect child here, a2=14
+F=-1, node=8, numpaths=14, free=1
+I think you connect child here, a2=15
+F=-1, node=8, numpaths=15, free=1
+I think you connect child here, a2=16
+F=-1, node=8, numpaths=16, free=1
+I think you connect child here, a2=17
+F=-1, node=8, numpaths=17, free=1
+I think you connect child here, a2=18
+F=-1, node=8, numpaths=18, free=1
+I think you connect child here, a2=19
+F=-1, node=8, numpaths=19, free=1
+I think you connect child here, a2=20
+F=-1, node=8, numpaths=20, free=1
+I think you connect child here, a2=21
+F=-1, node=8, numpaths=21, free=1
+I think you connect child here, a2=22
+F=-1, node=8, numpaths=22, free=1
+I think you connect child here, a2=23
+F=-1, node=8, numpaths=23, free=1
+I think you connect child here, a2=24
+F=-1, node=8, numpaths=24, free=1
+I think you connect child here, a2=25
+F=-1, node=8, numpaths=25, free=1
+I think you connect child here, a2=26
+F=-1, node=8, numpaths=26, free=1
+I think you connect child here, a2=27
+F=-1, node=8, numpaths=27, free=1
+I think you connect child here, a2=28
+F=-1, node=8, numpaths=28, free=1
+I think you connect child here, a2=29
+F=-1, node=8, numpaths=29, free=1
+I think you connect child here, a2=30
+F=-1, node=8, numpaths=30, free=1
+I think you connect child here, a2=31
+F=-1, node=8, numpaths=31, free=1
+I think you connect child here, a2=32
+F=-1, node=8, numpaths=32, free=1
+I think you connect child here, a2=33
+F=-1, node=8, numpaths=33, free=1
+I think you connect child here, a2=34
+F=-1, node=8, numpaths=34, free=1
+I think you connect child here, a2=35
+F=-1, node=8, numpaths=35, free=1
+I think you connect child here, a2=36
+F=-1, node=8, numpaths=36, free=1
+I think you connect child here, a2=37
+F=-1, node=8, numpaths=37, free=1
+I think you connect child here, a2=38
+F=-1, node=8, numpaths=38, free=1
+I think you connect child here, a2=39
+F=-1, node=8, numpaths=39, free=1
+I think you connect child here, a2=40
+F=-1, node=8, numpaths=40, free=1
+I think you connect child here, a2=41
+F=-1, node=8, numpaths=41, free=1
+I think you connect child here, a2=42
+F=-1, node=8, numpaths=42, free=1
+I think you connect child here, a2=43
+F=-1, node=8, numpaths=43, free=1
+I think you connect child here, a2=44
+F=-1, node=8, numpaths=44, free=1
+I think you connect child here, a2=45
+F=-1, node=8, numpaths=45, free=1
+I think you connect child here, a2=46
+F=-1, node=8, numpaths=46, free=1
+I think you connect child here, a2=47
+F=-1, node=8, numpaths=47, free=1
+I think you connect child here, a2=48
+F=-1, node=8, numpaths=48, free=1
+I think you connect child here, a2=49
+F=-1, node=8, numpaths=49, free=1
+G=-1
+set = 1, free path here=1, at least one child connected = 0
+G=20
+set = 1, free path here=1, at least one child connected = 1
+I think you connect child here, a2=0
+F=10, node=8, numpaths=0, free=1
+I think you connect child here, a2=1
+F=18, node=8, numpaths=1, free=1
+I think you connect child here, a2=2
+F=-1, node=8, numpaths=2, free=1
+I think you connect child here, a2=3
+F=-1, node=8, numpaths=3, free=1
+I think you connect child here, a2=4
+F=-1, node=8, numpaths=4, free=1
+I think you connect child here, a2=5
+F=-1, node=8, numpaths=5, free=1
+I think you connect child here, a2=6
+F=-1, node=8, numpaths=6, free=1
+I think you connect child here, a2=7
+F=-1, node=8, numpaths=7, free=1
+I think you connect child here, a2=8
+F=-1, node=8, numpaths=8, free=1
+I think you connect child here, a2=9
+F=-1, node=8, numpaths=9, free=1
+I think you connect child here, a2=10
+F=-1, node=8, numpaths=10, free=1
+I think you connect child here, a2=11
+F=-1, node=8, numpaths=11, free=1
+I think you connect child here, a2=12
+F=-1, node=8, numpaths=12, free=1
+I think you connect child here, a2=13
+F=-1, node=8, numpaths=13, free=1
+I think you connect child here, a2=14
+F=-1, node=8, numpaths=14, free=1
+I think you connect child here, a2=15
+F=-1, node=8, numpaths=15, free=1
+I think you connect child here, a2=16
+F=-1, node=8, numpaths=16, free=1
+I think you connect child here, a2=17
+F=-1, node=8, numpaths=17, free=1
+I think you connect child here, a2=18
+F=-1, node=8, numpaths=18, free=1
+I think you connect child here, a2=19
+F=-1, node=8, numpaths=19, free=1
+I think you connect child here, a2=20
+F=-1, node=8, numpaths=20, free=1
+I think you connect child here, a2=21
+F=-1, node=8, numpaths=21, free=1
+I think you connect child here, a2=22
+F=-1, node=8, numpaths=22, free=1
+I think you connect child here, a2=23
+F=-1, node=8, numpaths=23, free=1
+I think you connect child here, a2=24
+F=-1, node=8, numpaths=24, free=1
+I think you connect child here, a2=25
+F=-1, node=8, numpaths=25, free=1
+I think you connect child here, a2=26
+F=-1, node=8, numpaths=26, free=1
+I think you connect child here, a2=27
+F=-1, node=8, numpaths=27, free=1
+I think you connect child here, a2=28
+F=-1, node=8, numpaths=28, free=1
+I think you connect child here, a2=29
+F=-1, node=8, numpaths=29, free=1
+I think you connect child here, a2=30
+F=-1, node=8, numpaths=30, free=1
+I think you connect child here, a2=31
+F=-1, node=8, numpaths=31, free=1
+I think you connect child here, a2=32
+F=-1, node=8, numpaths=32, free=1
+I think you connect child here, a2=33
+F=-1, node=8, numpaths=33, free=1
+I think you connect child here, a2=34
+F=-1, node=8, numpaths=34, free=1
+I think you connect child here, a2=35
+F=-1, node=8, numpaths=35, free=1
+I think you connect child here, a2=36
+F=-1, node=8, numpaths=36, free=1
+I think you connect child here, a2=37
+F=-1, node=8, numpaths=37, free=1
+I think you connect child here, a2=38
+F=-1, node=8, numpaths=38, free=1
+I think you connect child here, a2=39
+F=-1, node=8, numpaths=39, free=1
+I think you connect child here, a2=40
+F=-1, node=8, numpaths=40, free=1
+I think you connect child here, a2=41
+F=-1, node=8, numpaths=41, free=1
+I think you connect child here, a2=42
+F=-1, node=8, numpaths=42, free=1
+I think you connect child here, a2=43
+F=-1, node=8, numpaths=43, free=1
+I think you connect child here, a2=44
+F=-1, node=8, numpaths=44, free=1
+I think you connect child here, a2=45
+F=-1, node=8, numpaths=45, free=1
+I think you connect child here, a2=46
+F=-1, node=8, numpaths=46, free=1
+I think you connect child here, a2=47
+F=-1, node=8, numpaths=47, free=1
+I think you connect child here, a2=48
+F=-1, node=8, numpaths=48, free=1
+I think you connect child here, a2=49
+F=-1, node=8, numpaths=49, free=1
+G=-1
+set = 2, free path here=0, at least one child connected = 0
+G=38
+set = 2, free path here=0, at least one child connected = 1
+I think you connect child here, a2=0
+F=10, node=8, numpaths=0, free=1
+I think you connect child here, a2=1
+F=18, node=8, numpaths=1, free=1
+I think you connect child here, a2=2
+F=-1, node=8, numpaths=2, free=1
+I think you connect child here, a2=3
+F=-1, node=8, numpaths=3, free=1
+I think you connect child here, a2=4
+F=-1, node=8, numpaths=4, free=1
+I think you connect child here, a2=5
+F=-1, node=8, numpaths=5, free=1
+I think you connect child here, a2=6
+F=-1, node=8, numpaths=6, free=1
+I think you connect child here, a2=7
+F=-1, node=8, numpaths=7, free=1
+I think you connect child here, a2=8
+F=-1, node=8, numpaths=8, free=1
+I think you connect child here, a2=9
+F=-1, node=8, numpaths=9, free=1
+I think you connect child here, a2=10
+F=-1, node=8, numpaths=10, free=1
+I think you connect child here, a2=11
+F=-1, node=8, numpaths=11, free=1
+I think you connect child here, a2=12
+F=-1, node=8, numpaths=12, free=1
+I think you connect child here, a2=13
+F=-1, node=8, numpaths=13, free=1
+I think you connect child here, a2=14
+F=-1, node=8, numpaths=14, free=1
+I think you connect child here, a2=15
+F=-1, node=8, numpaths=15, free=1
+I think you connect child here, a2=16
+F=-1, node=8, numpaths=16, free=1
+I think you connect child here, a2=17
+F=-1, node=8, numpaths=17, free=1
+I think you connect child here, a2=18
+F=-1, node=8, numpaths=18, free=1
+I think you connect child here, a2=19
+F=-1, node=8, numpaths=19, free=1
+I think you connect child here, a2=20
+F=-1, node=8, numpaths=20, free=1
+I think you connect child here, a2=21
+F=-1, node=8, numpaths=21, free=1
+I think you connect child here, a2=22
+F=-1, node=8, numpaths=22, free=1
+I think you connect child here, a2=23
+F=-1, node=8, numpaths=23, free=1
+I think you connect child here, a2=24
+F=-1, node=8, numpaths=24, free=1
+I think you connect child here, a2=25
+F=-1, node=8, numpaths=25, free=1
+I think you connect child here, a2=26
+F=-1, node=8, numpaths=26, free=1
+I think you connect child here, a2=27
+F=-1, node=8, numpaths=27, free=1
+I think you connect child here, a2=28
+F=-1, node=8, numpaths=28, free=1
+I think you connect child here, a2=29
+F=-1, node=8, numpaths=29, free=1
+I think you connect child here, a2=30
+F=-1, node=8, numpaths=30, free=1
+I think you connect child here, a2=31
+F=-1, node=8, numpaths=31, free=1
+I think you connect child here, a2=32
+F=-1, node=8, numpaths=32, free=1
+I think you connect child here, a2=33
+F=-1, node=8, numpaths=33, free=1
+I think you connect child here, a2=34
+F=-1, node=8, numpaths=34, free=1
+I think you connect child here, a2=35
+F=-1, node=8, numpaths=35, free=1
+I think you connect child here, a2=36
+F=-1, node=8, numpaths=36, free=1
+I think you connect child here, a2=37
+F=-1, node=8, numpaths=37, free=1
+I think you connect child here, a2=38
+F=-1, node=8, numpaths=38, free=1
+I think you connect child here, a2=39
+F=-1, node=8, numpaths=39, free=1
+I think you connect child here, a2=40
+F=-1, node=8, numpaths=40, free=1
+I think you connect child here, a2=41
+F=-1, node=8, numpaths=41, free=1
+I think you connect child here, a2=42
+F=-1, node=8, numpaths=42, free=1
+I think you connect child here, a2=43
+F=-1, node=8, numpaths=43, free=1
+I think you connect child here, a2=44
+F=-1, node=8, numpaths=44, free=1
+I think you connect child here, a2=45
+F=-1, node=8, numpaths=45, free=1
+I think you connect child here, a2=46
+F=-1, node=8, numpaths=46, free=1
+I think you connect child here, a2=47
+F=-1, node=8, numpaths=47, free=1
+I think you connect child here, a2=48
+F=-1, node=8, numpaths=48, free=1
+G=-1
+set = 2, free path here=1, at least one child connected = 0
+G=38
+set = 2, free path here=1, at least one child connected = 1
+I think you connect child here, a2=0
+F=10, node=8, numpaths=0, free=1
+I think you connect child here, a2=1
+F=18, node=8, numpaths=1, free=1
+I think you connect child here, a2=2
+F=-1, node=8, numpaths=2, free=1
+I think you connect child here, a2=3
+F=-1, node=8, numpaths=3, free=1
+I think you connect child here, a2=4
+F=-1, node=8, numpaths=4, free=1
+I think you connect child here, a2=5
+F=-1, node=8, numpaths=5, free=1
+I think you connect child here, a2=6
+F=-1, node=8, numpaths=6, free=1
+I think you connect child here, a2=7
+F=-1, node=8, numpaths=7, free=1
+I think you connect child here, a2=8
+F=-1, node=8, numpaths=8, free=1
+I think you connect child here, a2=9
+F=-1, node=8, numpaths=9, free=1
+I think you connect child here, a2=10
+F=-1, node=8, numpaths=10, free=1
+I think you connect child here, a2=11
+F=-1, node=8, numpaths=11, free=1
+I think you connect child here, a2=12
+F=-1, node=8, numpaths=12, free=1
+I think you connect child here, a2=13
+F=-1, node=8, numpaths=13, free=1
+I think you connect child here, a2=14
+F=-1, node=8, numpaths=14, free=1
+I think you connect child here, a2=15
+F=-1, node=8, numpaths=15, free=1
+I think you connect child here, a2=16
+F=-1, node=8, numpaths=16, free=1
+I think you connect child here, a2=17
+F=-1, node=8, numpaths=17, free=1
+I think you connect child here, a2=18
+F=-1, node=8, numpaths=18, free=1
+I think you connect child here, a2=19
+F=-1, node=8, numpaths=19, free=1
+I think you connect child here, a2=20
+F=-1, node=8, numpaths=20, free=1
+I think you connect child here, a2=21
+F=-1, node=8, numpaths=21, free=1
+I think you connect child here, a2=22
+F=-1, node=8, numpaths=22, free=1
+I think you connect child here, a2=23
+F=-1, node=8, numpaths=23, free=1
+I think you connect child here, a2=24
+F=-1, node=8, numpaths=24, free=1
+I think you connect child here, a2=25
+F=-1, node=8, numpaths=25, free=1
+I think you connect child here, a2=26
+F=-1, node=8, numpaths=26, free=1
+I think you connect child here, a2=27
+F=-1, node=8, numpaths=27, free=1
+I think you connect child here, a2=28
+F=-1, node=8, numpaths=28, free=1
+I think you connect child here, a2=29
+F=-1, node=8, numpaths=29, free=1
+I think you connect child here, a2=30
+F=-1, node=8, numpaths=30, free=1
+I think you connect child here, a2=31
+F=-1, node=8, numpaths=31, free=1
+I think you connect child here, a2=32
+F=-1, node=8, numpaths=32, free=1
+I think you connect child here, a2=33
+F=-1, node=8, numpaths=33, free=1
+I think you connect child here, a2=34
+F=-1, node=8, numpaths=34, free=1
+I think you connect child here, a2=35
+F=-1, node=8, numpaths=35, free=1
+I think you connect child here, a2=36
+F=-1, node=8, numpaths=36, free=1
+I think you connect child here, a2=37
+F=-1, node=8, numpaths=37, free=1
+I think you connect child here, a2=38
+F=-1, node=8, numpaths=38, free=1
+I think you connect child here, a2=39
+F=-1, node=8, numpaths=39, free=1
+I think you connect child here, a2=40
+F=-1, node=8, numpaths=40, free=1
+I think you connect child here, a2=41
+F=-1, node=8, numpaths=41, free=1
+I think you connect child here, a2=42
+F=-1, node=8, numpaths=42, free=1
+I think you connect child here, a2=43
+F=-1, node=8, numpaths=43, free=1
+I think you connect child here, a2=44
+F=-1, node=8, numpaths=44, free=1
+I think you connect child here, a2=45
+F=-1, node=8, numpaths=45, free=1
+I think you connect child here, a2=46
+F=-1, node=8, numpaths=46, free=1
+I think you connect child here, a2=47
+F=-1, node=8, numpaths=47, free=1
+I think you connect child here, a2=48
+F=-1, node=8, numpaths=48, free=1
+G=-1
+set = 3, free path here=0, at least one child connected = 0
+G=-1
+set = 3, free path here=0, at least one child connected = 1
+G=-1
+set = 3, free path here=1, at least one child connected = 0
+G=-1
+set = 3, free path here=1, at least one child connected = 1
+G=-1
+set = 4, free path here=0, at least one child connected = 0
+G=-1
+set = 4, free path here=0, at least one child connected = 1
+G=-1
+set = 4, free path here=1, at least one child connected = 0
+G=-1
+set = 4, free path here=1, at least one child connected = 1
+G=-1
+set = 5, free path here=0, at least one child connected = 0
+G=-1
+set = 5, free path here=0, at least one child connected = 1
+G=-1
+set = 5, free path here=1, at least one child connected = 0
+G=-1
+set = 5, free path here=1, at least one child connected = 1
+G=-1
+set = 6, free path here=0, at least one child connected = 0
+G=-1
+set = 6, free path here=0, at least one child connected = 1
+G=-1
+set = 6, free path here=1, at least one child connected = 0
+G=-1
+set = 6, free path here=1, at least one child connected = 1
+G=-1
+set = 7, free path here=0, at least one child connected = 0
+G=-1
+set = 7, free path here=0, at least one child connected = 1
+G=-1
+set = 7, free path here=1, at least one child connected = 0
+G=-1
+set = 7, free path here=1, at least one child connected = 1
+G=-1
+set = 8, free path here=0, at least one child connected = 0
+G=-1
+set = 8, free path here=0, at least one child connected = 1
+G=-1
+set = 8, free path here=1, at least one child connected = 0
+G=-1
+set = 8, free path here=1, at least one child connected = 1
+G=-1
+set = 9, free path here=0, at least one child connected = 0
+G=-1
+set = 9, free path here=0, at least one child connected = 1
+G=-1
+set = 9, free path here=1, at least one child connected = 0
+G=-1
+set = 9, free path here=1, at least one child connected = 1
+G=-1
+set = 10, free path here=0, at least one child connected = 0
+G=-1
+set = 10, free path here=0, at least one child connected = 1
+G=-1
+set = 10, free path here=1, at least one child connected = 0
+G=-1
+set = 10, free path here=1, at least one child connected = 1
+G=-1
+set = 11, free path here=0, at least one child connected = 0
+G=-1
+set = 11, free path here=0, at least one child connected = 1
+G=-1
+set = 11, free path here=1, at least one child connected = 0
+G=-1
+set = 11, free path here=1, at least one child connected = 1
+G=-1
+set = 12, free path here=0, at least one child connected = 0
+G=-1
+set = 12, free path here=0, at least one child connected = 1
+G=-1
+set = 12, free path here=1, at least one child connected = 0
+G=-1
+set = 12, free path here=1, at least one child connected = 1
+G=-1
+set = 13, free path here=0, at least one child connected = 0
+G=-1
+set = 13, free path here=0, at least one child connected = 1
+G=-1
+set = 13, free path here=1, at least one child connected = 0
+G=-1
+set = 13, free path here=1, at least one child connected = 1
+G=-1
+set = 14, free path here=0, at least one child connected = 0
+G=-1
+set = 14, free path here=0, at least one child connected = 1
+G=-1
+set = 14, free path here=1, at least one child connected = 0
+G=-1
+set = 14, free path here=1, at least one child connected = 1
+G=-1
+set = 15, free path here=0, at least one child connected = 0
+G=-1
+set = 15, free path here=0, at least one child connected = 1
+G=-1
+set = 15, free path here=1, at least one child connected = 0
+G=-1
+set = 15, free path here=1, at least one child connected = 1
+G=-1
+set = 16, free path here=0, at least one child connected = 0
+G=-1
+set = 16, free path here=0, at least one child connected = 1
+G=-1
+set = 16, free path here=1, at least one child connected = 0
+G=-1
+set = 16, free path here=1, at least one child connected = 1
+G=-1
+set = 17, free path here=0, at least one child connected = 0
+G=-1
+set = 17, free path here=0, at least one child connected = 1
+G=-1
+set = 17, free path here=1, at least one child connected = 0
+G=-1
+set = 17, free path here=1, at least one child connected = 1
+G=-1
+set = 18, free path here=0, at least one child connected = 0
+G=-1
+set = 18, free path here=0, at least one child connected = 1
+G=-1
+set = 18, free path here=1, at least one child connected = 0
+G=-1
+set = 18, free path here=1, at least one child connected = 1
+G=-1
+set = 19, free path here=0, at least one child connected = 0
+G=-1
+set = 19, free path here=0, at least one child connected = 1
+G=-1
+set = 19, free path here=1, at least one child connected = 0
+G=-1
+set = 19, free path here=1, at least one child connected = 1
+G=-1
+set = 20, free path here=0, at least one child connected = 0
+G=-1
+set = 20, free path here=0, at least one child connected = 1
+G=-1
+set = 20, free path here=1, at least one child connected = 0
+G=-1
+set = 20, free path here=1, at least one child connected = 1
+G=-1
+set = 21, free path here=0, at least one child connected = 0
+G=-1
+set = 21, free path here=0, at least one child connected = 1
+G=-1
+set = 21, free path here=1, at least one child connected = 0
+G=-1
+set = 21, free path here=1, at least one child connected = 1
+G=-1
+set = 22, free path here=0, at least one child connected = 0
+G=-1
+set = 22, free path here=0, at least one child connected = 1
+G=-1
+set = 22, free path here=1, at least one child connected = 0
+G=-1
+set = 22, free path here=1, at least one child connected = 1
+G=-1
+set = 23, free path here=0, at least one child connected = 0
+G=-1
+set = 23, free path here=0, at least one child connected = 1
+G=-1
+set = 23, free path here=1, at least one child connected = 0
+G=-1
+set = 23, free path here=1, at least one child connected = 1
+G=-1
+set = 24, free path here=0, at least one child connected = 0
+G=-1
+set = 24, free path here=0, at least one child connected = 1
+G=-1
+set = 24, free path here=1, at least one child connected = 0
+G=-1
+set = 24, free path here=1, at least one child connected = 1
+G=-1
+set = 25, free path here=0, at least one child connected = 0
+G=-1
+set = 25, free path here=0, at least one child connected = 1
+G=-1
+set = 25, free path here=1, at least one child connected = 0
+G=-1
+set = 25, free path here=1, at least one child connected = 1
+G=-1
+set = 26, free path here=0, at least one child connected = 0
+G=-1
+set = 26, free path here=0, at least one child connected = 1
+G=-1
+set = 26, free path here=1, at least one child connected = 0
+G=-1
+set = 26, free path here=1, at least one child connected = 1
+G=-1
+set = 27, free path here=0, at least one child connected = 0
+G=-1
+set = 27, free path here=0, at least one child connected = 1
+G=-1
+set = 27, free path here=1, at least one child connected = 0
+G=-1
+set = 27, free path here=1, at least one child connected = 1
+G=-1
+set = 28, free path here=0, at least one child connected = 0
+G=-1
+set = 28, free path here=0, at least one child connected = 1
+G=-1
+set = 28, free path here=1, at least one child connected = 0
+G=-1
+set = 28, free path here=1, at least one child connected = 1
+G=-1
+set = 29, free path here=0, at least one child connected = 0
+G=-1
+set = 29, free path here=0, at least one child connected = 1
+G=-1
+set = 29, free path here=1, at least one child connected = 0
+G=-1
+set = 29, free path here=1, at least one child connected = 1
+G=-1
+set = 30, free path here=0, at least one child connected = 0
+G=-1
+set = 30, free path here=0, at least one child connected = 1
+G=-1
+set = 30, free path here=1, at least one child connected = 0
+G=-1
+set = 30, free path here=1, at least one child connected = 1
+G=-1
+set = 31, free path here=0, at least one child connected = 0
+G=-1
+set = 31, free path here=0, at least one child connected = 1
+G=-1
+set = 31, free path here=1, at least one child connected = 0
+G=-1
+set = 31, free path here=1, at least one child connected = 1
+G=-1
+set = 32, free path here=0, at least one child connected = 0
+G=-1
+set = 32, free path here=0, at least one child connected = 1
+G=-1
+set = 32, free path here=1, at least one child connected = 0
+G=-1
+set = 32, free path here=1, at least one child connected = 1
+G=-1
+set = 33, free path here=0, at least one child connected = 0
+G=-1
+set = 33, free path here=0, at least one child connected = 1
+G=-1
+set = 33, free path here=1, at least one child connected = 0
+G=-1
+set = 33, free path here=1, at least one child connected = 1
+G=-1
+set = 34, free path here=0, at least one child connected = 0
+G=-1
+set = 34, free path here=0, at least one child connected = 1
+G=-1
+set = 34, free path here=1, at least one child connected = 0
+G=-1
+set = 34, free path here=1, at least one child connected = 1
+G=-1
+set = 35, free path here=0, at least one child connected = 0
+G=-1
+set = 35, free path here=0, at least one child connected = 1
+G=-1
+set = 35, free path here=1, at least one child connected = 0
+G=-1
+set = 35, free path here=1, at least one child connected = 1
+G=-1
+set = 36, free path here=0, at least one child connected = 0
+G=-1
+set = 36, free path here=0, at least one child connected = 1
+G=-1
+set = 36, free path here=1, at least one child connected = 0
+G=-1
+set = 36, free path here=1, at least one child connected = 1
+G=-1
+set = 37, free path here=0, at least one child connected = 0
+G=-1
+set = 37, free path here=0, at least one child connected = 1
+G=-1
+set = 37, free path here=1, at least one child connected = 0
+G=-1
+set = 37, free path here=1, at least one child connected = 1
+G=-1
+set = 38, free path here=0, at least one child connected = 0
+G=-1
+set = 38, free path here=0, at least one child connected = 1
+G=-1
+set = 38, free path here=1, at least one child connected = 0
+G=-1
+set = 38, free path here=1, at least one child connected = 1
+G=-1
+set = 39, free path here=0, at least one child connected = 0
+G=-1
+set = 39, free path here=0, at least one child connected = 1
+G=-1
+set = 39, free path here=1, at least one child connected = 0
+G=-1
+set = 39, free path here=1, at least one child connected = 1
+G=-1
+set = 40, free path here=0, at least one child connected = 0
+G=-1
+set = 40, free path here=0, at least one child connected = 1
+G=-1
+set = 40, free path here=1, at least one child connected = 0
+G=-1
+set = 40, free path here=1, at least one child connected = 1
+G=-1
+set = 41, free path here=0, at least one child connected = 0
+G=-1
+set = 41, free path here=0, at least one child connected = 1
+G=-1
+set = 41, free path here=1, at least one child connected = 0
+G=-1
+set = 41, free path here=1, at least one child connected = 1
+G=-1
+set = 42, free path here=0, at least one child connected = 0
+G=-1
+set = 42, free path here=0, at least one child connected = 1
+G=-1
+set = 42, free path here=1, at least one child connected = 0
+G=-1
+set = 42, free path here=1, at least one child connected = 1
+G=-1
+set = 43, free path here=0, at least one child connected = 0
+G=-1
+set = 43, free path here=0, at least one child connected = 1
+G=-1
+set = 43, free path here=1, at least one child connected = 0
+G=-1
+set = 43, free path here=1, at least one child connected = 1
+G=-1
+set = 44, free path here=0, at least one child connected = 0
+G=-1
+set = 44, free path here=0, at least one child connected = 1
+G=-1
+set = 44, free path here=1, at least one child connected = 0
+G=-1
+set = 44, free path here=1, at least one child connected = 1
+G=-1
+set = 45, free path here=0, at least one child connected = 0
+G=-1
+set = 45, free path here=0, at least one child connected = 1
+G=-1
+set = 45, free path here=1, at least one child connected = 0
+G=-1
+set = 45, free path here=1, at least one child connected = 1
+G=-1
+set = 46, free path here=0, at least one child connected = 0
+G=-1
+set = 46, free path here=0, at least one child connected = 1
+G=-1
+set = 46, free path here=1, at least one child connected = 0
+G=-1
+set = 46, free path here=1, at least one child connected = 1
+G=-1
+set = 47, free path here=0, at least one child connected = 0
+G=-1
+set = 47, free path here=0, at least one child connected = 1
+G=-1
+set = 47, free path here=1, at least one child connected = 0
+G=-1
+set = 47, free path here=1, at least one child connected = 1
+G=-1
+set = 48, free path here=0, at least one child connected = 0
+G=-1
+set = 48, free path here=0, at least one child connected = 1
+G=-1
+set = 48, free path here=1, at least one child connected = 0
+G=-1
+set = 48, free path here=1, at least one child connected = 1
+G=-1
+set = 49, free path here=0, at least one child connected = 0
+G=-1
+set = 49, free path here=0, at least one child connected = 1
+G=-1
+set = 49, free path here=1, at least one child connected = 0
+G=-1
+set = 49, free path here=1, at least one child connected = 1
+G=-1
+set = 50, free path here=0, at least one child connected = 0
+G=-1
+set = 50, free path here=0, at least one child connected = 1
+G=-1
+set = 50, free path here=1, at least one child connected = 0
+G=-1
+set = 50, free path here=1, at least one child connected = 1
+65
