@@ -19,10 +19,10 @@ by
 
 int main() {
     int T;
-    // freopen("inputs/weak_typing_chapter_2_validation_input.txt", "r", stdin);
-    // freopen("outputs/weak_typing_chapter_2_validation_output.txt", "w", stdout);
-    freopen("inputs/weak_typing_chapter_2_input.txt", "r", stdin);
-    freopen("outputs/weak_typing_chapter_2_output.txt", "w", stdout);
+    freopen("inputs/weak_typing_chapter_2_validation_input.txt", "r", stdin);
+    freopen("outputs/weak_typing_chapter_2_validation_output.txt", "w", stdout);
+    // freopen("inputs/weak_typing_chapter_2_input.txt", "r", stdin);
+    // freopen("outputs/weak_typing_chapter_2_output.txt", "w", stdout);
     cin>>T;
     for (int t = 1;t<=T;t++) {
         int N;

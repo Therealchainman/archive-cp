@@ -1,0 +1,9 @@
+Case #1: 22
+Case #2: 26
+Case #3: 00000
+Case #4: 1
+Case #5: 111
+Case #6: 111
+Case #7: 2
+Case #8: 1
+Case #9: 22222222463
