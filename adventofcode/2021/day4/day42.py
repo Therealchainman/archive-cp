@@ -10,7 +10,7 @@ def winningScore(game):
 
 if __name__ == '__main__':
     with open("inputs/input.txt", "r") as f:
-        calls = list(map(lambda x: int(x13,.replace('\n', '')), f.readline().split(",")))
+        calls = list(map(lambda x: int(x.replace('\n', '')), f.readline().split(",")))
         boards = []
         while f.readline():
             boards.append([list(map(int, f.readline().split())) for _ in range(5)])
