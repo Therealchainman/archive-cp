@@ -81,7 +81,7 @@ if __name__ == "__main__":
     print(s.computeSumOutputs())
 ```
 
-Final solution using frozenset because it is immutable set that is hashable and can be a key in a dictionary in python. 
+Uses logic to solve with if statements. Using frozenset because it is immutable set that is hashable and can be a key in a dictionary in python. 
 
 ```py
 class SevenSegmentSearch:
