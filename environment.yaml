@@ -1,0 +1,6 @@
+name: programming
+
+depdencies:
+  - python=3.10
+  - pip:
+    - numpy

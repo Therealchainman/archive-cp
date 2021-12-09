@@ -1,6 +1,10 @@
 
 # Part 1
 
+We just need to count the digits that have a unique number of on segments.  This is 2,3,4,7.
+I can create a set and then just count the number of these that have that size int he output of the patterns
+
+
 ```py
 A = f.read().splitlines()
 sizeDigitMap = {2,4,3,7}
@@ -10,8 +14,16 @@ print(cnt)
 ```
 
 # Part 2
+This problem can be solved a couple ways.  One way is with permutations 
+Still need to explore the permutation method. 
+DFS + backtracking algorithm with OOP
+So I use the fact that there are a certain number of on segments that need to be on in common for 
+a pattern to be valid.  Such as maybe 1 and 2 need to always have 2 segments in common. so given each 
+alphabet character represents a specific segment being on.  We don't know which segment. But with this
+comparison between them we can say for certain if a having a character assigned to a segment is appropriate. 
 
-DFS + backtracking algorithm with OOP 
+Another way to approach this would be with generating all permutations of having characters
+represent certain segments.  Then just need to check that it works as well.  
 
 ```py
 class SevenSegmentSearch:
@@ -82,6 +94,11 @@ if __name__ == "__main__":
 ```
 
 Uses logic to solve with if statements. Using frozenset because it is immutable set that is hashable and can be a key in a dictionary in python. 
+
+This was another way to solve.  It turned out that you can separate the 2,3,5 and 0,6,9 into 
+sets that have 5 and 6 segments respectively. Then there exist relationships that would
+indicate the digit.  For example if length if 5 and it has 2 segments in common with the 1 digit. 
+It must be a 3.  
 
 ```py
 class SevenSegmentSearch:

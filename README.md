@@ -13,3 +13,12 @@ Kick Start is a global online coding competition, consisting of three-hour round
 ## hash code 
 
 Hash Code is a team programming competition, organized by Google, for students and professionals around the world. You pick your team and programming language and we pick an engineering problem for you to solve. This year’s contest kicks off with an Online Qualifications, where your team can compete virtually from wherever you’d like, alongside your virtual Hub. Top teams will then be invited to compete from our virtual World Finals.
+
+### Setup conda environment
+
+The conda environment has updated python version of 3.10
+
+```sh
+conda env create -f environment.yaml
+conda activate programming
+```
