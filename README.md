@@ -21,4 +21,11 @@ The conda environment has updated python version of 3.10
 ```sh
 conda env create -f environment.yaml
 conda activate programming
+
+```
+
+Some reason it installed the wrong python so I had to manually conda install with
+
+```sh
+conda install python=3.10
 ```
