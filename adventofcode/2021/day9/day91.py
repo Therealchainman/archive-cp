@@ -1,7 +1,7 @@
 # sys.stdout = open('outputs/output.txt', 'w')
 with open("inputs/input.txt", "r") as f:
     data = []
-    lines = f.read().split()
+    lines = f.read().splitlines()
     for line in lines:
         data.append([int(x) for x in line])
     R, C = len(data), len(data[0])
