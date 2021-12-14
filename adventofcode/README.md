@@ -51,6 +51,17 @@ self.data = {tuple(map(int,points.split(','))) for points in points.split('\n')}
 self.folds = [(fold[11], int(fold[13])) for fold in folds.split('\n')]
 ```
 
+A method to create pairs of characters by offseting the iterable.  
+```
+abcdef => (ab, bc, cd, de, ef)
+```
+
+```py
+for k, v in zip(template, template[1:]):
+    s = k + v
+    freqs[s]+=1
+```
+
 # Outputing 
 
 This is a method to create an output when I'm given points that should be marked.  This will create a grid
