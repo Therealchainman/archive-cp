@@ -12,9 +12,11 @@ This reads it in as text format.
 
 If you are given an input that is a grid of integers such as 
 
+```
 111222
 232322
 234242
+```
 
 This is a clean way to create a 2d array of integers.
 ```py
@@ -28,6 +30,43 @@ If you are given an input that is a grid of characters, and don't want to conver
 
 ```py
 data = f.read().splitlines()
+```
+
+If you are given a digits on each line separate by a comma and then you have two line breaks before
+there is an input with a different structure.
+
+```
+1,3
+2,4
+3,5
+
+fold along x=7
+fold along y=8
+```
+
+Here I'm adding the data into a set data structure
+```py
+points, folds = f.read().split('\n\n') # splits the different input structures that are seprated by two line breaks
+self.data = {tuple(map(int,points.split(','))) for points in points.split('\n')} # read in comma separated digits that are line breaked
+self.folds = [(fold[11], int(fold[13])) for fold in folds.split('\n')]
+```
+
+# Outputing 
+
+This is a method to create an output when I'm given points that should be marked.  This will create a grid
+and add the marks to the 2d array. and then convert it to a string for easier reading in terminal. 
+
+```py
+def displayData(self):
+    self.maxX = 0
+    self.maxY = 0
+    for x, y in self.data:
+        self.maxX = max(self.maxX, x)
+        self.maxY = max(self.maxY, y)
+    grid = [[' ' for x in range(self.maxX+1)] for y in range(self.maxY+1)]
+    for x, y in self.data:
+        grid[y][x] = '#'
+    return "\n".join(["".join(row) for row in grid])
 ```
 
 # Debugging tricks
