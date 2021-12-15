@@ -1,13 +1,13 @@
 from collections import Counter
 with open("inputs/input.txt", "r") as f:
     freqs = Counter()
-    template = f.readline().strip()
-    f.readline()
-    raw_data = f.read().splitlines()
+    template , raw_data = f.read().split('\n\n')
+    print(template,raw_data)
     for k, v in zip(template, template[1:]):
         s = k + v
         freqs[s]+=1
     transitions = {}
+    raw_data = raw_data.split('\n')
     for line in raw_data:
         x, y = line.split(" -> ")
         transitions[x] = [x[0]+y, y+x[1]]
