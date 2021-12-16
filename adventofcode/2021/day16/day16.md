@@ -1,4 +1,12 @@
 
+
+Just parsing the packets and breaking it down into 3 parts,
+parsing the literal, parsing the operator, and parsing in general
+
+parsing in general is for when you don't know if it is a literal or operator. 
+
+
+```py
 class PacketDecoder:
     def __init__(self, hexa):
         self.version = 0
@@ -89,3 +97,43 @@ if __name__ == '__main__':
     s = PacketDecoder(None)
     print(f'the sum of the packet versions: {s.version}') # part 1
     print(f'the result of parsing the hexadecimal: {s.run()}') # part 2
+```
+
+discord user solution
+
+Going to analyze this, there are a lot of tricks I think are so beautiful
+```py
+from math import *
+from operator import *
+s = ''.join(bin(int(c, 16))[2:].zfill(4) for c in input().strip())
+ans = pos = 0
+def get(a):
+    global pos
+    return int(s[pos:(pos:=pos+a)], 2)
+def fun(a, b):
+    return a*b
+def parse():
+    global ans
+    version = get(3)
+    ans += version
+    typeid = get(3)
+    if typeid == 4:
+        l = ''
+        while s[pos] == '1':
+            l += bin(get(5)%16)[2:].zfill(4)
+        l += bin(get(5)%16)[2:].zfill(4)
+        return int(l, 2)
+    l = []
+    if get(1):
+        numpackets = get(11)
+        for p in range(numpackets):
+            l.append(parse())
+    else:
+        z = get(15)+pos
+        while pos < z:
+            l.append(parse())
+    return [sum, prod, min, max][typeid](l) if typeid < 4 else [gt, lt, eq][typeid-5](*l)
+print('Part 2:', parse())
+print('Part 1:', ans)
+
+```
