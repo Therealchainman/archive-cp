@@ -62,6 +62,18 @@ for k, v in zip(template, template[1:]):
     freqs[s]+=1
 ```
 
+Using regex to parse a more complex string input such as the following. 
+
+It finds all the integers in the string, there are four.  
+
+```
+target area: x=20..30, y=-10..-5
+```
+
+```py
+xmin, xmax, ymin, ymax = list(map(int, re.findall(r'[-\d]+', f.read())))
+```
+
 # Outputing 
 
 This is a method to create an output when I'm given points that should be marked.  This will create a grid
