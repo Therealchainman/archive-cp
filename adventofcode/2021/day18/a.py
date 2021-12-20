@@ -13,89 +13,28 @@ class SnailNumber:
 
     def data_loader(self):
         with open("inputs/input.txt", "r") as file:
-            return file.read().splitlines()
+            return list(map(self.create_pair, file.read().splitlines()))
 
-    def explode(self, snail):
-        bal, i = 0, 0
-        left = None
-        val = 0
-        while i<len(snail):
-            if snail[i]=='[':
-                bal += 1
-                i+=1
-            elif snail[i]==']':
-                bal -= 1
-                i+=1
-            elif snail[i]==',':
-                i+=1
-            elif bal==5:
-                index = i
-                x, y = 0, 0
-                while snail[i].isdigit():
-                    x = x*10 + int(snail[i])
-                    i += 1
-                i += 1
-                while snail[i].isdigit():
-                    y = y*10 + int(snail[i])
-                    i += 1
-                i += 1
-                index2 = i
-                right = None
-                rv = 0
-                while i<len(snail):
-                    start = i
-                    while snail[i].isdigit():
-                        rv = rv*10 + int(snail[i])
-                        i += 1
-                    end = i-1
-                    if start<=end:
-                        right = (start, end)
-                        break
-                    i += 1
-                # print(left,right)
-                if left and right:
-                    res = snail[:left[0]] + str(val+x) + snail[left[1]+1:index-1] + '0' + snail[index2:right[0]] + str(rv+y) + snail[right[1]+1:]
-                    # print(res)
-                    return res, True
-                if left:
-                    res = snail[:left[0]] + str(val+x) + snail[left[1]+1:index-1] + '0' + snail[index2:]
-                    # print(res)
-                    return res, True
-                if right:
-                    res = snail[:index-1] + '0' + snail[index2:right[0]] + str(rv+y) + snail[right[1]+1:]
-                    # print(res)
-                    return res, True
-                res = snail[:index-1] + '0' + snail[index2:]
-                # print(res)
-                return res, True
-            else:
-                start = i
-                val = 0
-                while i<len(snail) and snail[i].isdigit():
-                    val = val*10 + int(snail[i])
-                    i+=1
-                left = (start, i-1)
-        return snail, False
-                
+    def explode(self, pair, bal=0):
+        if isinstance(pair,int):
+            if bal>=4:
+                return 0, True
+            return pair, False
+        pair.left, bleft = self.explode(pair.left, bal+1)
+        pair.right, bright = self.explode(pair.right, bal+1)
+        return pair, bleft or bright
     
     def add(self, snail1, snail2):
-        return '[' + snail1 + ',' + snail2 + ']'
+        return Pair(snail1, snail2)
     
-    def split(self, snail):
-        i = 0
-        while i<len(snail):
-            start = i
-            val = 0
-            while snail[i].isdigit():
-                val = val*10 + int(snail[i])
-                i+=1
-            end  = i-1
-            if val>9:
-                res = snail[:start] + '[' + str(val//2) + ',' + str((val+1)//2) + ']' + snail[end+1:]
-                # print(res)
-                return res, True
-            i+=1
-        return snail, False
+    def split(self, pair):
+        if isinstance(pair, int):
+            if pair>9:
+                return Pair(pair//2, (pair+1)//2), True
+            return pair, False
+        pair.left, bleft = self.split(pair.left)
+        pair.right, bright = self.split(pair.right)
+        return pair, bleft or bright
 
     def create_pair(self, snail):
         stack = [] # Stack that holds my Pair objects. 
@@ -126,17 +65,19 @@ class SnailNumber:
         return 3*self.snailnumbers_sum(left_pair.left, left_pair.right) + 2*self.snailnumbers_sum(right_pair.left, right_pair.right)
 
     def run(self):
-        cur = self.numbers[0]
+        initial_pair = self.numbers[0]
+        print(initial_pair)
+        print(self.explode(initial_pair))
         for i in range(1, len(self.numbers)):
-            cur = self.add(cur, self.numbers[i])
+            initial_pair = self.add(initial_pair, self.numbers[i])
             while True:
                 isReduce = False
-                cur, isReduce = self.explode(cur)
-                if not isReduce:
-                    cur, isReduce = self.split(cur)
+                initial_pair, isReduce = self.explode(initial_pair)
+                if isReduce:
+                    continue
+                initial_pair, isReduce = self.split(initial_pair)
                 if not isReduce:
                     break
-        initial_pair = self.create_pair(cur) # creates pair object from the string
         return self.snailnumbers_sum(initial_pair.left, initial_pair.right)
 
 if __name__ == '__main__':
