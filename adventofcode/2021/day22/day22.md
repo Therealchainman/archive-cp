@@ -1,3 +1,17 @@
+
+
+# Part 2 
+
+Part 1 is the same but it limits the input so you can get away with a more brute forcy solution.  
+
+For part 2 you have such a large input you need to keep track of the cuboids appropriately.  
+
+Basic idea is to store the cuboids in a counter, and keep count.  So when you turn a cuboid on, you turn on that cuboid in the counter
+But you need to make sure that if there are any overlaps with previous cuboids that you remove those because when you add your current cuboid
+it will be double counting the cells that overlap with other cuboids. 
+
+Then if you are turning off you just want to remove the overlapping with other cuboids
+```py
 import re
 from collections import namedtuple, Counter
 class Instruction:
@@ -35,3 +49,4 @@ class ReactorReboot:
 if __name__ == '__main__':
     reactor = ReactorReboot()
     print(reactor.run())
+```
