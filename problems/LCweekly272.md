@@ -1,8 +1,8 @@
-Leetcode Weekly contest 272
+# Leetcode Weekly contest 272
 
-LC2108. Find First Palindromic String in the Array
+## LC2108. Find First Palindromic String in the Array
 
-Solution:  Reverse string
+### Solution:  Reverse string
 
 Check if it is palindrome by reversing each word and return the first one that is palindrome
 
@@ -45,7 +45,7 @@ def firstPalindrome(self, words: List[str]) -> str:
     return ""
 ```
 
-Solution: Two pointers to find palindromes
+### Solution: Two pointers to find palindromes
 
 Efficient solution, avoid creating temporary strings.  
 
@@ -67,9 +67,9 @@ string firstPalindrome(vector<string>& words) {
 }
 ```
 
-LC2109. Adding Spaces to a String
+## LC2109. Adding Spaces to a String
 
-Solution: String 
+### Solution: String 
 
 I am able to use the reserve to set the capacity to reduce the time for reallocating the string when it reaches capacity. 
 This can be done because I know the final size of the string. 
@@ -105,10 +105,10 @@ so you have to use an array instead and append to it, then reconstruct the strin
         return "".join(store)
 ```
 
-LC2110. Number of Smooth Descent Periods of a Stock
+## LC2110. Number of Smooth Descent Periods of a Stock
 
 
-Solution: Iterative
+### Solution: Iterative
 
 ```c++
 long long getDescentPeriods(vector<int>& prices) {
@@ -122,7 +122,7 @@ long long getDescentPeriods(vector<int>& prices) {
 }
 ```
 
-LC2111. Minimum Operations to Make the Array K-Increasing
+## LC2111. Minimum Operations to Make the Array K-Increasing
 
 This problem you can use the idea of longest non-decreasing subsequence to solve it. 
 
@@ -142,7 +142,7 @@ and just change the rest of the values.
 
 
 
-Solution: binary search with vector to find the k longest non-decreasing subsequences
+### Solution: binary search with vector to find the k longest non-decreasing subsequences
 
 ```c++
 const int NEUTRAL = 1e9;
@@ -170,7 +170,7 @@ int kIncreasing(vector<int>& arr, int k) {
 }
 ```
 
-Solution: This one is same but using a monostack 
+### Solution: This one is same but using a monostack 
 
 
 ```c++
