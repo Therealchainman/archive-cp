@@ -12,7 +12,7 @@ struct UnionFind {
     void init(int n) {
         parents.resize(n);
         iota(parents.begin(),parents.end(),0);
-        size.assign(n,0);
+        size.assign(n,1);
     }
 
     int ufind(int i) {
