@@ -2,7 +2,7 @@
 
 ## 2133. Check if Every Row and Column Contains All Numbers
 
-### Solution: rows and columns count O(n^2) and O(n) memory
+### Solution: array - rows and columns count O(n^2) and O(n) memory
 
 ```c++
 bool checkValid(vector<vector<int>>& matrix) {
@@ -23,6 +23,7 @@ bool checkValid(vector<vector<int>>& matrix) {
 ## 2134. Minimum Swaps to Group All 1's Together II
 
 ### Solution: sliding window algorithm count number of 0s in the window. 
+Every 0 must be replaced with a 1. 
 
 ```c++
 int minSwaps(vector<int>& nums) {
@@ -41,7 +42,74 @@ int minSwaps(vector<int>& nums) {
 
 ## 2135. Count Words Obtained After Adding a Letter
 
-### Solution:  Set of all bitsets of possible conversions for startWords
+An observation that made this easier to approach is that you store all the strings from startWords in some datastructure. 
+Then when you iterate through the targetWords, remove one character from it and check it's existence in chosen datastructures. 
+
+
+### Solution: Hashset + Bitmask
+O(n+m) linear solution because number of characters = 26 and is constant. 
+
+```c++
+int wordCount(vector<string>& startWords, vector<string>& targetWords) {
+    unordered_set<int> masks;
+    int cnt = 0, mask;
+    for (string& s : startWords) {
+        mask = 0;
+        for (char& c : s) {
+            mask += (1<<(c-'a'));
+        }
+        masks.insert(mask);
+    }
+    for (string& s : targetWords) {
+        for (int i = 0;i<s.size();i++) {
+            mask = 0;
+            for (int j = 0;j<s.size();j++) {
+                if (i==j) continue;
+                mask += (1<<(s[j]-'a'));
+            }
+            if (masks.count(mask)) {
+                cnt++;
+                break;
+            }
+        }
+    }
+    return cnt;
+}
+```
+
+### Solution: Hashset + bitmask with bitsets
+I feel using bitsets can scale for if you have more than 26 characters, without the bit limitation.
+
+```c++
+int wordCount(vector<string>& startWords, vector<string>& targetWords) {
+    unordered_set<bitset<26>> masks;
+    int cnt = 0;
+    bitset<26> mask;
+    for (string& s : startWords) {
+        mask.reset();
+        for (char& c : s) {
+            mask.set(c-'a');
+        }
+        masks.insert(mask);
+    }
+    for (string& s : targetWords) {
+        for (int i = 0;i<s.size();i++) {
+            mask.reset();
+            for (int j = 0;j<s.size();j++) {
+                if (i==j) continue;
+                mask.set(s[j]-'a');
+            }
+            if (masks.count(mask)) {
+                cnt++;
+                break;
+            }
+        }
+    }
+    return cnt;
+}
+```
+
+### Solution:  Hashset + bitmask with bitsets
 O(len(startWords)*len(startWords[0])*26)
 
 ```c++
@@ -76,6 +144,98 @@ int wordCount(vector<string>& startWords, vector<string>& targetWords) {
 }
 ```
 
+### Solution: Trie Datastructure
+
+```c++
+struct Node {
+    int children[26];
+    bool isLeaf;
+    void init() {
+        memset(children,0,sizeof(children));
+        isLeaf = false;
+    }
+};
+struct Trie {
+    vector<Node> trie;
+    void init() {
+        Node root;
+        root.init();
+        trie.push_back(root);
+    }
+    void insert(string& s) {
+        int cur = 0;
+        for (char &c : s) {
+            int i = c-'a';
+            if (trie[cur].children[i]==0) {
+                Node root;
+                root.init();
+                trie[cur].children[i] = trie.size();
+                trie.push_back(root);
+            }
+            cur = trie[cur].children[i];
+        }
+        trie[cur].isLeaf= true;
+    }
+    int search(string& s) {
+        int cur = 0;
+        for (char &c : s) {
+            int i = c-'a';
+            if (!trie[cur].children[i]) { return false;
+            }
+            cur = trie[cur].children[i];
+        }
+        return trie[cur].isLeaf;
+    }
+};
+class Solution {
+public:
+    int wordCount(vector<string>& startWords, vector<string>& targetWords) {
+        Trie trie;
+        trie.init();
+        int cnt = 0;
+        unordered_set<string> seen;
+        for (string& s : startWords) {
+            sort(s.begin(),s.end());
+            trie.insert(s);
+        }
+        for (string& s : targetWords) {
+            sort(s.begin(),s.end());
+            for (int i = 0;i<s.size();i++) {
+                string tmp = s.substr(0,i) + s.substr(i+1); // remove the ith character, and check it exists
+                if (trie.search(tmp)) {
+                    cnt++;
+                    break;
+                }
+            }
+        }
+        return cnt;
+    }
+};
+```
+
+### Solution: Hashset
+
+```c++
+int wordCount(vector<string>& startWords, vector<string>& targetWords) {
+    unordered_set<string> seen;
+    int cnt = 0;
+    for (string& s : startWords) {
+        sort(s.begin(),s.end());
+        seen.insert(s);
+    }
+    for (string& s : targetWords) {
+        sort(s.begin(),s.end());
+        for (int i = 0;i<s.size();i++) {
+            if (seen.count(s.substr(0,i)+s.substr(i+1))) {
+                cnt++;
+                break;
+            }
+        }
+    }
+    return cnt;
+}
+```
+
 ## 2136. Earliest Possible Day of Full Bloom
 
 ### Solution: sorting - greedy plant the flower seeds that have the longest growing time first. 
@@ -87,10 +247,7 @@ int earliestFullBloom(vector<int>& P, vector<int>& G) {
     vector<int> plants(n);
     iota(plants.begin(), plants.end(),0);
     sort(plants.begin(),plants.end(),[&](const auto& i, const auto& j) {
-        if (G[i]!=G[j]) {
-            return G[i]>G[j];
-        } 
-        return P[i]>P[j];
+        return G[i]>G[j];
     });
     int finish = 0;
     for (int i = 0, time = 0;i<n;i++) {
