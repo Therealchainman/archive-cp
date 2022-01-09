@@ -20,9 +20,63 @@ bool checkValid(vector<vector<int>>& matrix) {
 }
 ```
 
+## 2134. Minimum Swaps to Group All 1's Together II
 
+### Solution: sliding window algorithm count number of 0s in the window. 
 
-## 5979. Earliest Possible Day of Full Bloom
+```c++
+int minSwaps(vector<int>& nums) {
+    int n = nums.size();
+    int ones = count(nums.begin(),nums.end(),1), best = n;
+    for (int i=0,j=0, cnt = 0;i<n;i++) {
+        while (j-i<ones) {
+            cnt += nums[j++%n];
+        }
+        best = min(best, ones-cnt);
+        cnt -= nums[i];           
+    }
+    return best;
+}
+```
+
+## 2135. Count Words Obtained After Adding a Letter
+
+### Solution:  Set of all bitsets of possible conversions for startWords
+O(len(startWords)*len(startWords[0])*26)
+
+```c++
+int wordCount(vector<string>& startWords, vector<string>& targetWords) {
+    unordered_set<bitset<26>> appears;
+    int cnt = 0;
+    for (string& s : startWords) {
+        bitset<26> bs;
+        for (char c = 'a';c<='z';c++) {
+            if (s.find(c)!=string::npos) {
+                bs.set(c-'a');
+            }
+        }
+        for (char c = 'a';c<='z';c++) {
+            if (!bs.test(c-'a')) {
+                bitset<26> b = bs;
+                b.set(c-'a');
+                appears.insert(b);
+            }
+        }
+    }
+    for (string& s : targetWords) {
+        bitset<26> bc;
+        for (char c='a';c<='z';c++) {
+            if (s.find(c)!=string::npos) {
+                bc.set(c-'a');
+            }
+        }
+        cnt += appears.count(bc);
+    }
+    return cnt;
+}
+```
+
+## 2136. Earliest Possible Day of Full Bloom
 
 ### Solution: sorting - greedy plant the flower seeds that have the longest growing time first. 
 
@@ -59,10 +113,7 @@ struct Plant {
         seed=s;
     }
     bool operator<(const Plant& b) const {
-        if (grow!=b.grow) {
-            return grow>b.grow;
-        }
-        return seed<b.seed;
+        return grow>b.grow;
     }
 };
 class Solution {
