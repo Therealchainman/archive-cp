@@ -1,4 +1,10 @@
 """
+Copyright (C) 2022 Todd Chaney - All Rights Reserved
+You may use, distribute and modify this code under the
+terms of the XYZ license. Once I figure out licensing
+"""
+
+"""
 assume I've read in the following data
 
 n m => stories, users
@@ -6,8 +12,10 @@ n lines for stories each user created
 p q => user follows, story follows
 p lines for user follows Ui Uj
 q lines for story follows Ui Sk
+
+The worse case time complexity for this algorithm is O(n*m^2)
 """
-from collections import defaultdict, namedtuple
+from collections import namedtuple
 import unittest
 
 class DigestRecommendation:
@@ -22,8 +30,8 @@ class DigestRecommendation:
         n, m = map(int, input().split())
         self.num_users = m
         self.num_stories = n
-        self.user_creates_story = [[0 for _ in range(m+1)] for _ in range(n+1)]
-        self.user_follows_story = [[0 for _ in range(m+1)] for _ in range(n+1)]
+        self.user_creates_story = [[0 for _ in range(n+1)] for _ in range(m+1)]
+        self.user_follows_story = [[0 for _ in range(n+1)] for _ in range(m+1)]
         self.user_follows_user = [[0 for _ in range(m+1)] for _ in range(m+1)]
         for i in range(1,n+1):
             user = int(input())
@@ -35,32 +43,17 @@ class DigestRecommendation:
         for _ in range(q):
             ui, sk = map(int, input().split())
             self.user_follows_story[ui][sk]=1
-    
-    def user_score(self, useri, userj):
-        if useri==userj:
-            return 0
-        if self.user_follows_user[useri][userj]:
-            return 3
-        if len(self.user_follows_story[useri] & self.user_creates_story[userj])>0:
-            return 2
-        if len(self.user_follows_story[useri] & self.user_follows_story[userj])>0:
-            return 1
-        return 0
-
-    def story_score(self, user, story):
-        if story in self.user_creates_story[user]:
-            return 2
-        if story in self.user_follows_story[user]:
-            return 1
-        return 0
 
     def display(self, data):
         """
-        The function to display the result.
+        The function to displays the result.
         """
         print(" ".join(map(lambda x: str(x.index),data)))
 
     def debug(self):
+        """
+        Code that was used for debugging
+        """
         print("===useri follows users===")
         for i in range(1,self.num_users+1):
             print(f"useri={i} follows users={self.user_follows_user[i]}")
@@ -75,7 +68,6 @@ class DigestRecommendation:
         """
         The main function to run the algorithm.
         """
-
         self.data_loader()
         # self.debug()
         user_scores = [[0 for _ in range(self.num_users+1)] for _ in range(self.num_users+1)]
@@ -91,7 +83,7 @@ class DigestRecommendation:
                         break
                     if self.user_follows_story[i][k] and self.user_follows_story[j][k]:
                         user_scores[i][j] = 1
-        story_scores = [[0 for _ in range(self.num_users+1)] for _ in range(self.num_stories+1)]
+        story_scores = [[0 for _ in range(self.num_stories+1)] for _ in range(self.num_users+1)]
         for i in range(1,self.num_users+1):
             for k in range(1,self.num_stories+1):
                 if self.user_creates_story[i][k]:
@@ -100,21 +92,23 @@ class DigestRecommendation:
                 if self.user_follows_story[i][k]:
                     story_scores[i][k] = 1
         StoryScore = namedtuple("StoryScore", ["score", "index"])
-        # O(n^2*m)
+        # O(n*m^2 + m*nlogn)
         for i in range(1,self.num_users+1):
             digest_scores = []
             for k in range(1,self.num_stories+1):
-                if k in self.user_follows_story[i] or k in self.user_creates_story[i]:
+                if self.user_follows_story[i][k] or self.user_creates_story[i][k]:
                     story_score = StoryScore(-1,k)
                     digest_scores.append(story_score)
                     continue
                 score = 0
                 for j in range(1,self.num_users+1):
-                    score += self.user_score(i,j)*self.story_score(j,k) 
+                    score += user_scores[i][j]*story_scores[j][k]
                 story_score = StoryScore(score, k)
                 digest_scores.append(story_score)
             digest_scores.sort(key = lambda x: (-x.score, x.index))
             self.display(digest_scores[:3])
+
+
 class TestDigestRecommendation(unittest.TestCase):
     def test_user_scores(self):
         """
@@ -125,10 +119,12 @@ class TestDigestRecommendation(unittest.TestCase):
         self.assertEqual(digestRecommendationSystem.user_score(1,1), 0)
         self.assertEqual(digestRecommendationSystem.user_score(1,2), 3) # if useri follows userj
         self.assertEqual(digestRecommendationSystem.user_score(1,5), 2) # if useri follows stories created by userj
-        # self.assertEqual(self.user_score(2,1), 3) # if useri follow stories followed by userj
         self.assertEqual(digestRecommendationSystem.user_score(1,3),0) # otherwise
 
     def test_story_scores(self):
+        """
+        Test the story scores function
+        """
         digestRecommendationSystem = DigestRecommendation()
         digestRecommendationSystem.data_loader()
         self.assertEqual(digestRecommendationSystem.story_score(2,3), 2) # if useri created story k
