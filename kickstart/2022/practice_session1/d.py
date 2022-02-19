@@ -14,6 +14,8 @@ class Hex:
     self.N = board_size
     self.board = board
     self.neighborhood = ((1,0),(-1,0),(0,-1),(0,1),(1,-1),(-1,1))
+    self.depthB = 0
+    self.depthR = 0
   
   def init_for_articulation(self, N):
     self.disc = [0 for _ in range(N)]
@@ -92,7 +94,13 @@ class Hex:
         self.low[vertex] = min(self.low[nei], self.low[vertex])
       else: # we have found an ancestor it already discovered
         self.low[vertex] = min(self.low[vertex], self.disc[nei])
-      
+
+  def get_depthB(self,vertex, depth):
+    self.depthA = max(self.depthA, depth)
+
+    for nei in self.graphB
+
+
   def valid_articulation_point(self, vertex, color):
     pass
 
@@ -104,6 +112,7 @@ class Hex:
     self.build_graphB('B')
     self.init_for_articulation(len(self.graphB))
     self.get_articulation_points(0, None)
+    self.get_depthA(0, None)
     blue_wins = False
     for vertex in self.graphB.keys():
       if self.articulation_points[vertex]==1 and self.valid_articulation_point(vertex, 'B'):
