@@ -50,9 +50,9 @@ class Solution:
         return []
 ```
 
-## 
+## 2179. Count Good Triplets in an Array
 
-### 
+### Solution: IDK
 
 ```py
 
