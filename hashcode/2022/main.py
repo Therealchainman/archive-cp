@@ -27,7 +27,7 @@ class Project:
         self.best_day = best_day
         self.num_roles = num_roles
         self.max_skill_level = 0
-        self.skills = set()
+        self.skills = []
         
     def __repr__(self):
         return f"project name: {self.name}, number of skills: {self.num_roles}, duration: {self.duration}, score: {self.score}, best_day: {self.best_day}, skills: {self.skills}\n"
@@ -45,8 +45,10 @@ class AssignedProject:
         return f"project name: {self.project_name}, contributors: {self.contributors}, learnings: {self.learnings}"
     
 class Solver:
-    def data_loader(self, name):
-        with open(f'inputs/{name}') as f:
+    def __init__(self, dataset_name):
+        self.dataset_name = dataset_name
+    def data_loader(self):
+        with open(f'inputs/{self.dataset_name}.in') as f:
             self.num_contributors, self.num_projects = map(int, f.readline().split())
             # print(self.num_contributors, self.num_projects)
             self.contributors = {}
@@ -70,9 +72,10 @@ class Solver:
                     skill_name, skill_level = f.readline().split()
                     skill_level = int(skill_level)
                     self.projects[project_name].max_skill_level = max(self.projects[project_name].max_skill_level, skill_level)
-                    self.projects[project_name].skills.add(Skill(skill_name, skill_level))
+                    self.projects[project_name].skills.append(Skill(skill_name, skill_level))
             
-    def run(self, name):
+    def run(self):
+        self.data_loader()
         ordered_projects = []
         self.skills_contributors = {}
         self.contributor_skill_levels = defaultdict(dict)
@@ -80,6 +83,8 @@ class Solver:
         for contrib in self.contributors.values():
             for skill in contrib.skills.values():
                 unique_skills.add(skill.name)
+        
+        # PREPROCESSING THE CONTRIBUTORS SKILL LEVELS IN ALL SKILLS AND SKILLS WITH CONTRIBUTORS
         for skill in unique_skills:
             self.skills_contributors[skill] = SortedList(key=lambda x: x[0])
             for contrib in self.contributors.values():
@@ -125,20 +130,31 @@ class Solver:
 
             for proj in ordered_projects:
                 if proj.name in completed_projects: continue
-                assigned_contributors = set()
+                assigned_contributors = []
+                seen_contributors = set()
                 learnings = []
                 can_assign = True
+                # print(f"project skills: {proj.skills}")
                 for role in proj.skills:
                     skill_name, level = role.name, role.skill_level
                     index = self.skills_contributors[skill_name].bisect_left((level, 0))
                     if index == len(self.skills_contributors[skill_name]): 
                         can_assign = False
                         break
+                    
+                    # contributor_name = self.skills_contributors[skill_name][index][0]
+                    # contributor_skill_level = self.contributor_skill_levels[contributor_name][skill_name]
+                    # self.skills_contributors[skill_name].remove((contributor_skill_level, contributor_name))
+                    # if level == contributor_skill_level:
+                    #     learnings.append((contributor_name, skill_name))
+                    
+                    # TODO: ADD A SET FOR CHECKING IF THE CONTRIBUTOR IS ASSIGNED
                     len_before = len(assigned_contributors)
                     for i in range(index, len(self.skills_contributors[skill_name])):
                         contributor_name = self.skills_contributors[skill_name][i][1]
-                        if contributor_name in assigned_contributors: continue
-                        assigned_contributors.add(contributor_name)
+                        if contributor_name in seen_contributors: continue
+                        assigned_contributors.append(contributor_name)
+                        seen_contributors.add(contributor_name)
                         # print(contributor_name, level, self.contributor_skill_levels[contributor_name][skill_name])
                         if level == self.contributor_skill_levels[contributor_name][skill_name]:
                             learnings.append((contributor_name, skill_name))
@@ -157,10 +173,12 @@ class Solver:
                 # MIN HEAP DATASTRUCTURE FOR ASSIGNED PROJECT
                 heappush(min_heap, (day + proj.duration, assigned_project))
                 
+                # SIMULATING THE PROJECT SCORE 
                 project_score = max(0, proj.score - (max(0,(day + proj.duration)-proj.best_day)))
                 total_score += project_score
                 
                 # print(len(assigned_contributors), len(unique_skills))
+                
                 # REMOVE THE CONTRIBUTORS NO LONGER AVAILABLE
                 for contrib in assigned_contributors:
                     for skill in unique_skills:
@@ -169,23 +187,27 @@ class Solver:
                 
                 # print(f"After removing contributors working on the project: {self.skills_contributors}")
                 
-                # UPDATE THE COUNT OR PROJECTS ASSIGNED
+                # UPDATE THE COMPLETED PROJECTS
                 completed_projects.add(proj.name)
                 assigned_projects.append(assigned_project)
             # print(f"heap datastructure with assigned projects: {min_heap}")
             # print(f"progress: {len(completed_projects)}/{len(ordered_projects)}")
+            
             # EXITS WHEN IT NO LONGER HAS PROJECTS THAT CAN BE ASSIGNED
             if not min_heap:
                 break
         # print(f"score estimation: {total_score}")
 
         # WRITE TO OUTPUT FILE
-        with open(f"outputs/{name}.out", "w") as f:
+        with open(f"outputs/{self.dataset_name}.out", "w") as f:
             f.write(str(len(assigned_projects)) + '\n')
             for proj in assigned_projects:
                 f.write(proj.project_name + '\n')
                 f.write(" ".join(proj.contributors) + '\n')
+        
+        # RETURNS THE TOTAL SCORE
         return total_score
+
 
 # Get the upper_bound for the score for each dataset
 # assume that I complete all projects by the best day
