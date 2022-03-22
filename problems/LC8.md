@@ -23,3 +23,50 @@ int myAtoi(string s) {
     return max(res, (long long)INT_MIN);
 }
 ```
+
+## Solution: Finite State Machine 
+
+```py
+class Solution:
+    def myAtoi(self, s: str) -> int:
+        
+        def trim_integer(val):
+            if val > 2**31 -1:
+                return 2**31-1
+            elif val < -2**31:
+                return -2**31
+            return val
+        
+        # FINITE STATE MACHINE
+        states = {
+            1: {'blank': 1, 'sign': 2, 'digit': 3},
+            2: {'digit': 3},
+            3: {'digit': 3}
+        }
+        
+        num = 0
+        # START IN THE INIT STATE OF FSM
+        cstate = sign = 1
+        for ch in s:
+            # FIND THE TRANSITION 
+            transition = 'else'
+            if ch==' ':
+                transition = 'blank'
+            elif ch in '-+':
+                transition = 'sign'
+            elif ch in '0123456789':
+                transition = 'digit'
+            # FIND IF THE TRANSITION IS POSSIBLE IN CURRENT STATE
+            if transition not in states[cstate]: break
+                
+            # UPDATE THE CURRENT STATE OF THE FSM
+            cstate = states[cstate][transition]
+                
+            # PROCESS THE INPUT ACCORDING TO THE STATE OF THE FSM
+            if cstate == 2:
+                sign = 1 if ch=='+' else -1
+            elif cstate == 3:
+                num = num*10 + int(ch)
+                
+        return trim_integer(sign*num)
+```
