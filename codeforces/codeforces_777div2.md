@@ -1,5 +1,9 @@
 # Codeforces Round 777 Div2
 
+This feels like a greedy contest, just need to find simple tricks to make the questions astronomically simpler.  
+such as using the 2 by 2 square for madoka and the elegant gift.  Or like using the 1 by 2 and 2 by 1 rectangles
+to paint for childish pranks
+
 ## Madoka and Math Dad
 
 ```py
