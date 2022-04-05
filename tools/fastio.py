@@ -1,3 +1,8 @@
+"""
+Works on codeforces
+Doesn't work on dmoj yet
+"""
+
 import os,sys
 from io import BytesIO, IOBase
 
@@ -23,7 +28,7 @@ class FastIO(IOBase):
         while self.newlines == 0:
             b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))
             self.newlines = b.count(b"\n") + (not b)
-            ptr = self.buffer.tell()
+            ptr = self.buffer.tell()``
             self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)
         self.newlines -= 1
         return self.buffer.readline()
