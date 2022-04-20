@@ -64,10 +64,19 @@ class Solution:
         return max_zeros
 ```
 
-## Solution 2: Numpy
+## Solution 2: Numpy + np.cumsum + np.minimum + np.rot90
 
 ```py
+import numpy as np
 
+class Solution:
+    def maxTrailingZeros(self, grid: List[List[int]]) -> int:
+        A = np.array(grid)
+        def prefix_sums(digit):
+            sa = sum(A%digit**i==0 for i in range(1,10))
+            return np.cumsum(sa, axis=0) + np.cumsum(sa, axis=1) - sa
+        return max(np.minimum(prefix_sums(2), prefix_sums(5)).max() 
+                  for _ in range(4) if bool([A := np.rot90(A)]))
 ```
 
 ## 2246. Longest Path With Different Adjacent Characters
