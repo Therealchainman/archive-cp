@@ -223,4 +223,258 @@ class BSTIterator:
         return self.stack or self.node
 ```
 
+## 705. Design Hashset
 
+### Solution 1:  separate-chaining = Hashset with modulus of prime number and using buckets with linkedlist for collisions
+
+This uses separate chaining because each bucket contains a datastructure that stores all elements that have that bucket index
+from the hash function.  So if there is a hash collision it will search through the linked list to add it into that bucket.  
+
+This is still O(n) though because to search through linked list is O(n) but delete, add are O(1)
+
+We could use a list for the buckets and it would be O(n) for search and delete but O(1) for add
+
+We could finally use a self-balancing binary search tree which would give O(logn) for add, search, delete
+
+```py
+class MyHashSet:
+
+    def __init__(self):
+        self.MOD = 769
+        self.values = [Bucket() for _ in range(self.MOD)]
+    
+    def hash_(self, key: int) -> int:
+        return key % self.MOD
+    
+    def add(self, key: int) -> None:
+        i = self.hash_(key)
+        self.values[i].add(key)
+
+    def remove(self, key: int) -> None:
+        i = self.hash_(key)
+        self.values[i].remove(key)
+
+    def contains(self, key: int) -> bool:
+        i = self.hash_(key)
+        return self.values[i].contains(key)
+
+class Bucket:
+    def __init__(self):
+        self.linked_list = LinkedList()
+
+    def add(self, value):
+        self.linked_list.add(value)
+
+    def remove(self, value):
+        self.linked_list.remove(value)
+
+    def contains(self, value):
+        return self.linked_list.contains(value)
+
+class Node:
+    def __init__(self, val=0, next_node=None):
+        self.val = val
+        self.next = next_node
+    
+class LinkedList:
+    def __init__(self):
+        self.head = Node()
+    
+    def add(self, val: int) -> None:
+        if self.contains(val): return
+        node = self.head
+        while node.next:
+            node = node.next
+        node.next = Node(val)
+    
+    def remove(self, val: int) -> None:
+        node = self.head
+        while node.next:
+            if node.next.val == val:
+                node.next = node.next.next
+                break
+            node=node.next
+        
+    def contains(self, val: int) -> None:
+        node = self.head.next
+        while node:
+            if node.val == val: return True
+            node=node.next
+        return False
+```
+
+### Solution 2: Separate chaining with buckets but bucket is binary search tree
+
+Example of a facade design pattern
+
+```py
+class MyHashSet:
+
+    def __init__(self):
+        self.MOD = 769
+        self.values = [Bucket() for _ in range(self.MOD)]
+    
+    def hash_(self, key: int) -> int:
+        return key % self.MOD
+    
+    def add(self, key: int) -> None:
+        i = self.hash_(key)
+        self.values[i].add(key)
+
+    def remove(self, key: int) -> None:
+        i = self.hash_(key)
+        self.values[i].remove(key)
+
+    def contains(self, key: int) -> bool:
+        i = self.hash_(key)
+        return self.values[i].contains(key)
+
+class Bucket:
+    def __init__(self):
+        self.tree = BSTree()
+
+    def add(self, value):
+        self.tree.root = self.tree.insertIntoBST(self.tree.root, value)
+
+    def remove(self, value):
+        self.tree.root = self.tree.deleteNode(self.tree.root, value)
+
+    def contains(self, value):
+        return (self.tree.searchBST(self.tree.root, value) is not None)
+
+class TreeNode:
+    def __init__(self, value):
+        self.val = value
+        self.left = None
+        self.right = None
+
+class BSTree:
+    def __init__(self):
+        self.root = None
+
+    def searchBST(self, root: TreeNode, val: int) -> TreeNode:
+        if root is None or val == root.val:
+            return root
+
+        return self.searchBST(root.left, val) if val < root.val \
+            else self.searchBST(root.right, val)
+
+    def insertIntoBST(self, root: TreeNode, val: int) -> TreeNode:
+        if not root:
+            return TreeNode(val)
+
+        if val > root.val:
+            # insert into the right subtree
+            root.right = self.insertIntoBST(root.right, val)
+        elif val == root.val:
+            return root
+        else:
+            # insert into the left subtree
+            root.left = self.insertIntoBST(root.left, val)
+        return root
+
+    def successor(self, root):
+        """
+        One step right and then always left
+        """
+        root = root.right
+        while root.left:
+            root = root.left
+        return root.val
+
+    def predecessor(self, root):
+        """
+        One step left and then always right
+        """
+        root = root.left
+        while root.right:
+            root = root.right
+        return root.val
+
+    def deleteNode(self, root: TreeNode, key: int) -> TreeNode:
+        if not root:
+            return None
+
+        # delete from the right subtree
+        if key > root.val:
+            root.right = self.deleteNode(root.right, key)
+        # delete from the left subtree
+        elif key < root.val:
+            root.left = self.deleteNode(root.left, key)
+        # delete the current node
+        else:
+            # the node is a leaf
+            if not (root.left or root.right):
+                root = None
+            # the node is not a leaf and has a right child
+            elif root.right:
+                root.val = self.successor(root)
+                root.right = self.deleteNode(root.right, root.val)
+            # the node is not a leaf, has no right child, and has a left child
+            else:
+                root.val = self.predecessor(root)
+                root.left = self.deleteNode(root.left, root.val)
+
+        return root
+```
+
+## 706. Design HashMap
+
+### Solution 1: 
+
+```py
+class MyHashMap:
+
+    def __init__(self):
+        self.MOD = 2069
+        self.buckets = [Bucket() for _ in range(self.MOD)]
+        
+    def hash_(self, key: int) -> int:
+        return key % self.MOD
+
+    def put(self, key: int, value: int) -> None:
+        bucket_index = self.hash_(key)
+        self.buckets[bucket_index].add(key, value)
+
+    def get(self, key: int) -> int:
+        bucket_index = self.hash_(key)
+        return self.buckets[bucket_index].search(key)
+
+    def remove(self, key: int) -> None:
+        bucket_index = self.hash_(key)
+        self.buckets[bucket_index].remove(key)
+        
+class Node:
+    def __init__(self, key=0, val=0,next_node=None):
+        self.key = key
+        self.val = val
+        self.next = next_node
+        
+class Bucket:
+    def __init__(self):
+        self.head = Node()
+        
+    def search(self, key: int) -> int:
+        node = self.head.next
+        while node:
+            if node.key == key: return node.val
+            node=node.next
+        return -1
+    
+    def add(self, key: int, val: int) -> None:
+        node = self.head
+        while node.next:
+            if node.next.key == key: 
+                node.next.val = val
+                return
+            node=node.next
+        node.next = Node(key,val)
+    
+    def remove(self, key: int) -> None:
+        node = self.head
+        while node.next:
+            if node.next.key == key:
+                node.next = node.next.next
+                return
+            node=node.next
+```

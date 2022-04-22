@@ -68,7 +68,6 @@ class Solution:
 
 ```py
 import numpy as np
-
 class Solution:
     def maxTrailingZeros(self, grid: List[List[int]]) -> int:
         A = np.array(grid)
