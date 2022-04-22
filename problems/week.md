@@ -478,3 +478,27 @@ class Bucket:
                 return
             node=node.next
 ```
+
+## 687. Longest Univalue Path
+
+### Solution 1: Recursion + postorder dfs binary tree traversal
+
+
+```py
+class Solution:
+    def longestUnivaluePath(self, root: Optional[TreeNode]) -> int:
+        self.longest_path = 0
+        def dfs(node):
+            if not node: return 0
+            left_len, right_len = dfs(node.left), dfs(node.right)
+            left_arrow = right_arrow = 0
+            if node.left and node.val==node.left.val:
+                left_arrow = left_len + 1
+            if node.right and node.val==node.right.val:
+                right_arrow = right_len + 1
+            self.longest_path = max(self.longest_path, left_arrow + right_arrow)
+            return max(left_arrow, right_arrow)
+                
+        dfs(root)
+        return self.longest_path
+```
