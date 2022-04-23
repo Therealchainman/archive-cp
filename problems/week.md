@@ -483,7 +483,6 @@ class Bucket:
 
 ### Solution 1: Recursion + postorder dfs binary tree traversal
 
-
 ```py
 class Solution:
     def longestUnivaluePath(self, root: Optional[TreeNode]) -> int:
@@ -501,4 +500,84 @@ class Solution:
                 
         dfs(root)
         return self.longest_path
+```
+
+## 535. Encode and Decode TinyURL
+
+### Solution 1: counter + hash table
+
+The problems with this solution is that integer will get very large over time and the tinyurl will be no longy short. 
+And in other languages it will overflow, python it won't overflow so that is fine. But there will be performance degredation potentially
+
+```py
+class Codec:
+    def __init__(self):
+        self.cnt = 0
+        self.map = {}
+    def encode(self, longUrl: str) -> str:
+        """Encodes a URL to a shortened URL.
+        """
+        self.map[self.cnt] = longUrl
+        shortUrl = 'http://tinyurl.com/' + str(self.cnt)
+        self.cnt += 1
+        return shortUrl
+    def decode(self, shortUrl: str) -> str:
+        """Decodes a shortened URL to its original URL.
+        """
+        return self.map[int(shortUrl.replace('http://tinyurl.com/', ''))]
+```
+
+### Solution 2: variable length encoding
+
+The next level is to use more than just integers to fix the overflow and the fact the short url becomes long quickly
+
+we can use 62 characters if we take integers + alphabet
+
+```py
+    def __init__(self):
+        self.chars = string.ascii_letters + string.digits
+        self.cnt = 0
+        self.map = {}
+    def encode(self, longUrl: str) -> str:
+        """Encodes a URL to a shortened URL.
+        """
+        count = self.cnt
+        encoding = []
+        while count > 0:
+            encoding.append(self.chars[count%62])
+            count //= 62
+        encoding_str = "".join(encoding)
+        shortUrl = f'http://tinyurl.com/{encoding_str}'
+        self.map[encoding_str] = longUrl
+        return shortUrl
+    def decode(self, shortUrl: str) -> str:
+        """Decodes a shortened URL to its original URL.
+        """
+        return self.map[shortUrl.replace('http://tinyurl.com/', '')]
+```
+
+### Solution 3: python inbuilt hash function
+
+```py
+class Codec:
+    def __init__(self):
+        self.map = {}
+    def encode(self, longUrl: str) -> str:
+        """Encodes a URL to a shortened URL.
+        """
+        hash_ = hash(longUrl)
+        self.map[hash_] = longUrl
+        return f'http://tinyurl.com/{hash_}'
+    def decode(self, shortUrl: str) -> str:
+        """Decodes a shortened URL to its original URL.
+        """
+        return self.map[int(shortUrl.replace('http://tinyurl.com/', ''))]
+```
+
+### Solution 4: random fixed length encoding
+
+62 characters with 6 as fixed size is 62^6
+
+```py
+
 ```
