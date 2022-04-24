@@ -581,3 +581,27 @@ class Codec:
 ```py
 
 ```
+
+## 1396. Design Underground System
+
+### Solution 1: Multiple hash tables 
+
+```py
+class UndergroundSystem:
+
+    def __init__(self):
+        self.trip_times = Counter()
+        self.trip_counts = Counter()
+        self.checkedin = {}
+
+    def checkIn(self, id: int, stationName: str, t: int) -> None:
+        self.checkedin[id] = (stationName, t)
+
+    def checkOut(self, id: int, stationName: str, t: int) -> None:
+        startStation, t1 = self.checkedin[id]
+        self.trip_counts[(startStation, stationName)] += 1
+        self.trip_times[(startStation, stationName)] += (t-t1)
+
+    def getAverageTime(self, startStation: str, endStation: str) -> float:
+        return self.trip_times[(startStation, endStation)] / self.trip_counts[(startStation, endStation)]
+```
