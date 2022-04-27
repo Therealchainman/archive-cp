@@ -605,3 +605,237 @@ class UndergroundSystem:
     def getAverageTime(self, startStation: str, endStation: str) -> float:
         return self.trip_times[(startStation, endStation)] / self.trip_counts[(startStation, endStation)]
 ```
+
+## 284. Peeking Iterator
+
+### Solution 1: iterator that stores next value for peek, and uses boolean for end so it works with any data type
+
+```py
+# Below is the interface for Iterator, which is already defined for you.
+#
+# class Iterator:
+#     def __init__(self, nums):
+#         """
+#         Initializes an iterator object to the beginning of a list.
+#         :type nums: List[int]
+#         """
+#
+#     def hasNext(self):
+#         """
+#         Returns true if the iteration has more elements.
+#         :rtype: bool
+#         """
+#
+#     def next(self):
+#         """
+#         Returns the next element in the iteration.
+#         :rtype: int
+#         """
+
+class PeekingIterator:
+    def __init__(self, iterator):
+        """
+        Initialize your data structure here.
+        :type iterator: Iterator
+        """
+        self.iterator = iterator
+        self.next_data = self.iterator.next()
+        self.not_end = True
+
+    def peek(self):
+        """
+        Returns the next element in the iteration without advancing the iterator.
+        :rtype: int
+        """
+        if not self.hasNext():
+            raise StopIteration
+        return self.next_data
+
+    def next(self):
+        """
+        :rtype: int
+        """
+        if not self.hasNext():
+            raise StopIteration
+        data = self.next_data
+        self.not_end = False
+        if self.iterator.hasNext():
+            self.next_data = self.iterator.next()
+            self.not_end = True
+        return data
+
+    def hasNext(self):
+        """
+        :rtype: bool
+        """
+        return self.not_end
+
+# Your PeekingIterator object will be instantiated and called as such:
+# iter = PeekingIterator(Iterator(nums))
+# while iter.hasNext():
+#     val = iter.peek()   # Get the next element but not advance the iterator.
+#     iter.next()         # Should return the same value as [val].
+```
+
+## 1166. Design File System
+
+### Solution 1: hash table + hash table for tree
+
+```py
+class FileSystem:
+
+    def __init__(self):
+        self.paths = {}
+
+    def createPath(self, path: str, value: int) -> bool:
+        if path in self.paths: return False
+        parent = path[:path.rfind('/')]
+        if len(parent) > 1 and parent not in self.paths: return False
+        self.paths[path] = value
+        return True
+
+    def get(self, path: str) -> int:
+        return self.paths[path] if path in self.paths else -1
+```
+
+### Solution 2: Trie datastructure
+
+```py
+class TrieNode:
+    def __init__(self, name):
+        self.children = defaultdict(TrieNode)
+        self.name = name
+        self.value = -1
+class FileSystem:
+
+    def __init__(self):
+        self.root = TrieNode('')
+
+    def createPath(self, path: str, value: int) -> bool:
+        components = path.split('/')
+        node = self.root
+        for i in range(1,len(components)):
+            name = components[i]
+            if name not in node.children:
+                if i==len(components)-1:
+                    node.children[name] = TrieNode(name)
+                else: 
+                    return False
+            node=node.children[name]
+        if node.value != -1: return False
+        node.value = value
+        return True
+
+    def get(self, path: str) -> int:
+        components = path.split('/')
+        node = self.root
+        for i in range(1,len(components)):
+            name = components[i]
+            if name not in node.children: return -1
+            node=node.children[name]
+        return node.value
+```
+
+## 1584. Min Cost to Connect All Points
+
+### Solution 1: Kruskal's Algorithm to find Minimimum Spanning Tree + UnionFind + sort
+
+```py
+class UnionFind:
+    def __init__(self,n):
+        self.size = [0]*n
+        self.parent = list(range(n))
+    
+    def find(self,i):
+        if i==self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+
+    def union(self,i,j):
+        i, j = self.find(i), self.find(j)
+        if i!=j:
+            if self.size[i] < self.size[j]:
+                i,j=j,i
+            self.parent[j] = i
+            self.size[i] += self.size[j]
+            return True
+        return False
+class Solution:
+    def minCostConnectPoints(self, points: List[List[int]]) -> int:
+        n = len(points)
+        edges = []
+        manhattan = lambda p1, p2: abs(p1[0]-p2[0])+abs(p1[1]-p2[1])
+        for i in range(n):
+            for j in range(i+1,n):
+                edges.append((manhattan(points[i], points[j]), i, j))
+        edges.sort()
+        dsu = UnionFind(n)
+        minCost = 0
+        for cost, u, v in edges:
+            if dsu.union(u,v):
+                minCost += cost
+            if dsu.size[u] == n: break
+        return minCost
+```
+
+## 1202. Smallest String With Swaps
+
+### Solution 1: Union find + minheap for each connected component
+
+```py
+class UnionFind:
+    pass
+class Solution:
+    def smallestStringWithSwaps(self, s: str, pairs: List[List[int]]) -> str:
+        n = len(s)
+        dsu = UnionFind(n)
+        for u, v in pairs:
+            dsu.union(u,v)
+        connected_components = defaultdict(list)
+        for i in range(n):
+            heappush(connected_components[dsu.find(i)], s[i])
+        swapped = []
+        for i in range(n):
+            swapped.append(heappop(connected_components[dsu.find(i)]))
+        return "".join(swapped)
+```
+
+### Solution 1: dfs + sorting
+
+```py
+class Solution:
+    def smallestStringWithSwaps(self, s: str, pairs: List[List[int]]) -> str:
+        def dfs(u):
+            component.append(u)
+            for v in graph[u]:
+                if visited[v]: continue
+                visited[v] = 1
+                dfs(v)
+        n = len(s)
+        graph = defaultdict(list)
+        for u, v in pairs:
+            graph[u].append(v)
+            graph[v].append(u)
+        visited = [0]*n
+        result = list(s)
+        for i in range(n):
+            if visited[i]: continue
+            component = []
+            visited[i] = 1
+            dfs(i)
+            component.sort()
+            chars = [s[j] for j in component]
+            chars.sort()
+            for j, k in enumerate(component):
+                result[k] = chars[j]
+        return "".join(result)
+```
+
+## 
+
+### Solution 1:
+
+```py
+
+```

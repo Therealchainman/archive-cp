@@ -51,31 +51,13 @@ while True:
       threat += math.hypot(abs(base_x - spider['x']), abs(base_y - spider['y']))
       spiders_rank.append((threat, (spider['x'], spider['y'])))
     heapify(spiders_rank)
-    spiders = nsmallest(3, spiders_rank)
-    print("\n".join(map(str,spiders)), file=sys.stderr, flush=True)
-    movements = [(base_x, base_y) for _ in range(3)]
-    used = [0]*3
-    for i in range(len(spiders)):
-      closest = math.inf
-      x_spider, y_spider = spiders[i][1]
-      player = -1
-      for j in range(len(spiders)):
-        if used[j]: continue
-        x, y = my_player[j]['x'], my_player[j]['y']
-        dist = math.hypot(abs(x - x_spider), abs(y - y_spider))
-        if dist < closest:
-          closest = dist
-          movements[j] = (x_spider, y_spider)
-          player = j
-      if player != -1:
-        used[player] = 1
-
+    x = y = -1
+    if bool(spiders_rank):
+      _, (x,y) = heappop(spiders_rank)
 
     for i in range(heroes_per_player):
         # In the first league: MOVE <x> <y> | WAIT; In later leagues: | SPELL <spellParams>;
-        x, y = movements[i]
-        if x==base_x and y==base_y:
-            print(f"WAIT {i}")
+        if x != -1:
+          print(f"MOVE {x} {y}")
         else:
-            print(f"MOVE {x} {y} {i}")
-
+          print(f"WAIT")

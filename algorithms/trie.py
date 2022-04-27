@@ -1,4 +1,7 @@
-from collections import deque
+"""
+A method to do trie
+"""
+from collections import deque, defaultdict
 class Node:
     def __init__(self):
         self.children = [0]*26
@@ -38,3 +41,11 @@ class Trie:
                 if self.trie[ncur].children[ord(v)-ord('a')]:
                     dq.append((v, ncur, index+1))
         return cnt
+"""
+easier method with just a single class for TrieNode with defaultdict to represent the next triednoes
+"""
+class TrieNode:
+    def __init__(self, name):
+        self.children = defaultdict(TrieNode)
+        self.name = name
+        self.value = -1

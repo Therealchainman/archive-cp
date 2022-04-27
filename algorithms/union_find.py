@@ -16,3 +16,5 @@ class UnionFind:
                 i,j=j,i
             self.parent[j] = i
             self.size[i] += self.size[j]
+            return True
+        return False
