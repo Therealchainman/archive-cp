@@ -832,10 +832,425 @@ class Solution:
         return "".join(result)
 ```
 
+## 1631. Path With Minimum Effort
+
+### Solution 1: min heap datastructure + memoize cheapest cost to that cell (similar to dijkstra algorithm)
+
+```py
+class Solution:
+    def minimumEffortPath(self, heights: List[List[int]]) -> int:
+        R, C = len(heights), len(heights[0])
+        heap = [(0, 0, 0)] # (cost, row, column)
+        diff_matrix = [[inf]*C for _ in range(R)]
+        in_boundary = lambda r, c: 0<=r<R and 0<=c<C
+        while heap:
+            cost, row, col = heappop(heap)
+            if row==R-1 and col==C-1:
+                return cost
+            for r, c in map(lambda x: (row+x[0], col+x[1]), [(1,0),(-1,0),(0,1),(0,-1)]):
+                if not in_boundary(r,c): continue
+                ncost = max(abs(heights[r][c]-heights[row][col]), cost)
+                if ncost < diff_matrix[r][c]:
+                    heappush(heap, (ncost, r, c))
+                    diff_matrix[r][c] = ncost
+        return -1
+```
+
+### Solution 2: Binary search + BFS
+
+```py
+class Solution:
+    def minimumEffortPath(self, heights: List[List[int]]) -> int:
+        left, right = 0, max((max(height) for height in heights))-min((min(height) for height in heights))
+        R, C = len(heights), len(heights[0])
+        def bfs(threshold):
+            queue = deque([(0, 0)]) # (row, col)
+            visited = set()
+            in_boundary = lambda r, c: 0<=r<R and 0<=c<C
+            while queue:
+                row, col = queue.popleft()
+                if row==R-1 and col==C-1:
+                    return True
+                for nr, nc in map(lambda x: (row+x[0], col+x[1]), [(1,0),(-1,0),(0,1),(0,-1)]):
+                    if not in_boundary(nr,nc): continue
+                    if (nr,nc) in visited or abs(heights[row][col]-heights[nr][nc]) > threshold: continue
+                    visited.add((nr,nc))
+                    queue.append((nr,nc))
+            return False
+        while left < right:
+            mid = (left+right)>>1
+            if not bfs(mid):
+                left = mid+1
+            else:
+                right = mid
+        return left
+```
+
+### Solution 3: binary search + dfs
+
+Turns out to be much faster than using bfs too. 
+
+```py
+class Solution:
+    def minimumEffortPath(self, heights: List[List[int]]) -> int:
+        left, right = 0, max((max(height) for height in heights))-min((min(height) for height in heights))
+        R, C = len(heights), len(heights[0])
+        def dfs(row, col, threshold):
+            if row==R-1 and col==C-1: return True
+            visited[row][col] = 1
+            for nr, nc in map(lambda x: (row+x[0], col+x[1]), [(1,0),(-1,0),(0,1),(0,-1)]):
+                if not (0<=nr<R and 0<=nc<C): continue
+                if visited[nr][nc] or abs(heights[row][col]-heights[nr][nc]) > threshold: continue
+                visited[nr][nc] = 1
+                if dfs(nr,nc,threshold): return True
+            return False
+        while left < right:
+            mid = (left+right)>>1
+            visited = [[0]*C for _ in range(R)]
+            if not dfs(0,0,mid):
+                left = mid+1
+            else:
+                right = mid
+        return left
+```
+
+### Solution 4: Union Find + it contains the first and last cell in path
+
+```py
+class UnionFind:
+    pass
+class Solution:
+    def minimumEffortPath(self, heights: List[List[int]]) -> int:
+        R, C = len(heights), len(heights[0])
+        dsu = UnionFind(R*C)
+        edges = []
+        in_boundary = lambda r, c: 0<=r<R and 0<=c<C
+        for r, c in product(range(R), range(C)):
+            for nr, nc in map(lambda x: (r+x[0],c+x[1]), [(1,0),(-1,0),(0,1),(0,-1)]):
+                if not in_boundary(nr,nc): continue
+                cost = abs(heights[r][c]-heights[nr][nc])
+                node1, node2 = r*C+c, nr*C+nc
+                edges.append((cost, node1, node2))
+        edges.sort()
+        for cost, u, v in edges:
+            dsu.union(u,v)
+            if dsu.find(0) == dsu.find(R*C-1):
+                return cost
+        return 0 # single node 
+```
+
+
+## 399. Evaluate Division
+
+### Solution 1: Union Find to check if evaluate division will work + bfs
+
+This is rather brute force, not really saving values, and just recomputing bfs many times. 
+
+```py
+class UnionFind:
+    pass
+class Solution:
+    def calcEquation(self, equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:
+        graph = defaultdict(list)
+        compressed = {}
+        for i, (a, b) in enumerate(equations):
+            if a not in compressed:
+                compressed[a] = len(compressed)
+            if b not in compressed:
+                compressed[b] = len(compressed)
+            u, v = compressed[a], compressed[b]
+            graph[u].append((v, values[i]))
+            graph[v].append((u, 1.0/values[i]))
+        n=len(compressed)
+        dsu = UnionFind(n)
+        for a, b in equations:
+            dsu.union(compressed[a], compressed[b])
+        def bfs(u, v):
+            queue = deque([(u, 1.0)])
+            visited = set()
+            visited.add(u)
+            while queue:
+                node, val = queue.popleft()
+                if node == v: return val
+                for nei, weight in graph[node]:
+                    if nei in visited: continue
+                    queue.append((nei, val*weight))
+                    visited.add(nei)
+            return -1.0
+        answer = [-1.0]*len(queries)
+        for i, (a, b) in enumerate(queries):
+            if a not in compressed or b not in compressed: continue
+            u, v = compressed[a], compressed[b]
+            if dsu.find(u) != dsu.find(v): continue
+            answer[i] = bfs(u, v)
+        return answer
+            
+```
+
+### Solution 2: Brute Force DFS
+
+```py
+class Solution:
+    def calcEquation(self, equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:
+        graph = defaultdict(defaultdict)
+        for (dividend, divisor), val in zip(equations, values):
+            graph[dividend][divisor] = val
+            graph[divisor][dividend] = 1/val
+        def dfs(current_node, target_node):
+            if current_node == target_node: return 1.0
+            prod = inf
+            for nei in graph[current_node]:
+                if nei in visited: continue
+                visited.add(nei)
+                prod = (graph[current_node][nei]*dfs(nei, target_node))
+                if prod != inf: return prod
+            return prod 
+        answer = [-1.0]*len(queries)
+        for i, (a, b) in enumerate(queries):
+            if a not in graph or b not in graph: continue
+            visited = set()
+            res = dfs(a,b)
+            answer[i] = res if res != inf else -1.0
+        return answer
+```
+
+### Solution 3: Floyd Warshall Algorithm
+
+works because we have small number of vertices, the algorithm takes O(V^3) time complexity, 
+very good for dense graphs that have many edges.  
+
+think k internal nodes, 
+
+```py
+class Solution:
+    def calcEquation(self, equations, values, queries):
+        graph = defaultdict(dict)
+        # INITIALIZE THE VALUES FOR EDGES AND ITSELF
+        for (a, b), val in zip(equations, values):
+            graph[a][b] = val
+            graph[b][a] = 1.0/val
+            graph[a][a] = 1.0
+            graph[b][b] = 1.0
+        # (i,j) => (i,k) + (k,j), k is internal node
+        for k, i, j in permutations(graph, 3):
+            if k in graph[i] and j in graph[k]:
+                graph[i][j] = graph[i][k]*graph[k][j]
+        return [graph[i][j] if j in graph[i] else -1.0 for i,j in queries]
+```
+
+
+```py
+class Solution:
+    def calcEquation(self, equations, values, queries):
+        graph = defaultdict(dict)
+        # INITIALIZE THE VALUES FOR EDGES AND ITSELF
+        for (a, b), val in zip(equations, values):
+            graph[a][b] = val
+            graph[b][a] = 1.0/val
+            graph[a][a] = 1.0
+            graph[b][b] = 1.0
+        n = len(graph)
+        # (i,j) => (i,k) + (k,j), k is internal node
+        for k in graph.keys():
+            for i in graph.keys():
+                if k not in graph[i]: continue
+                for j in graph.keys():
+                    if j not in graph[k]: continue
+                    graph[i][j] = graph[i][k]*graph[k][j]
+        return [graph[i][j] if j in graph[i] else -1.0 for i,j in queries]
+```
+
+### Solution 4: Union Find with Weighted Edges
+
+```py
+
+```
+
+## 431. Encode N-ary Tree to Binary Tree
+
+### Solution 1: BFS type algorithm 
+
+The strategy is that for a given nary tree, for the first child we add it as a left node in the binary tree
+Then from that binary tree we add each additional child node as a right node from each binary node. 
+
+
+```py
+class Codec:
+    # Encodes an n-ary tree to a binary tree.
+    def encode(self, root: 'Optional[Node]') -> Optional[TreeNode]:
+        if not root: return None
+        binary_root = TreeNode(root.val)
+        queue = deque([(root, binary_root)])
+        while queue:
+            nary_node, binary_node = queue.popleft()
+            current_node = binary_node # current binary node
+            for child in nary_node.children:
+                if not binary_node.left:
+                    current_node.left = TreeNode(child.val)
+                    current_node=current_node.left
+                else:
+                    current_node.right = TreeNode(child.val)
+                    current_node=current_node.right
+                queue.append((child, current_node))
+        return binary_root
+	
+	# Decodes your binary tree to an n-ary tree.
+    def decode(self, data: Optional[TreeNode]) -> 'Optional[Node]':
+        if not data: return None
+        queue = deque([(data, None)])
+        while queue:
+            binary_node, nary_node = queue.popleft()
+            # nary node is going to be the parent for the current nary node
+            current_node = Node(binary_node.val, []) # current nary node
+            if not nary_node:
+                root = current_node
+            else:
+                nary_node.children.append(current_node)
+            if binary_node.left:
+                queue.append((binary_node.left, current_node))
+            if binary_node.right:
+                queue.append((binary_node.right, nary_node))
+        return root
+```
+
+### Solution 2: Alternative BFS
+
+```py
+class Codec:
+    # Encodes an n-ary tree to a binary tree.
+    def encode(self, root: 'Optional[Node]') -> Optional[TreeNode]:
+        if not root: return None
+        binary_root = TreeNode(root.val)
+        queue = deque([(root, binary_root)])
+        while queue:
+            nary_node, binary_node = queue.popleft()
+            current_node = binary_node # current binary node
+            for child in nary_node.children:
+                if not binary_node.left:
+                    current_node.left = TreeNode(child.val)
+                    current_node=current_node.left
+                else:
+                    current_node.right = TreeNode(child.val)
+                    current_node=current_node.right
+                queue.append((child, current_node))
+        return binary_root
+	
+	# Decodes your binary tree to an n-ary tree.
+    def decode(self, data: Optional[TreeNode]) -> 'Optional[Node]':
+        if not data: return None
+        root = Node(data.val, [])
+        queue = deque([(data, root)])
+        while queue:
+            binary_node, nary_node = queue.popleft()
+            # nary node is going to be the parent for the current nary node
+            sibling = binary_node.left
+            while sibling:
+                current_node = Node(sibling.val, []) # current nary node
+                nary_node.children.append(current_node)
+                queue.append((sibling, current_node))
+                sibling = sibling.right
+        return root
+```
+
+### Solution 3: DFS with Recursion
+
+```py
+class Codec:
+    # Encodes an n-ary tree to a binary tree.
+    def encode(self, root: 'Optional[Node]') -> Optional[TreeNode]:
+        if not root: return None
+        binary_root = TreeNode(root.val)
+        if not root.children: return binary_root
+        binary_root.left = self.encode(root.children[0])
+        current_node = binary_root.left
+        for i in range(1,len(root.children)):
+            current_node.right = self.encode(root.children[i])
+            current_node = current_node.right
+        return binary_root
+	
+	# Decodes your binary tree to an n-ary tree.
+    def decode(self, data: Optional[TreeNode]) -> 'Optional[Node]':
+        if not data: return None
+        root = Node(data.val, [])
+        sibling_node = data.left
+        while sibling_node:
+            root.children.append(self.decode(sibling_node))
+            sibling_node = sibling_node.right
+        return root
+```
+
+## 785. Is Graph Bipartite?
+
+### Solution 1: dfs with 2 coloring algorithm 
+
+```py
+class Solution:
+    def isBipartite(self, graph: List[List[int]]) -> bool:
+        n=len(graph)
+        colors = {}
+        def dfs(node):
+            if node not in colors: 
+                colors[node] = 0
+            for nei in graph[node]:
+                if nei in colors and node in colors and colors[nei]==colors[node]: return False
+                if nei in colors and node in colors: continue
+                colors[nei] = colors[node]^1
+                if not dfs(nei): return False
+            return True
+        
+        for i in range(n):
+            if not dfs(i): return False
+        return True
+```
+
+### Solution 2: BFS with 2 coloring algorithm 
+
+```py
+class Solution:
+    def isBipartite(self, graph: List[List[int]]) -> bool:
+        n=len(graph)
+        colors = {}
+        def bfs(node):
+            queue = deque([node])
+            colors[node] = 0
+            while queue:
+                node = queue.popleft()
+                for nei in graph[node]:
+                    if node in colors and nei in colors:
+                        if colors[node]==colors[nei]: return False
+                        continue
+                    colors[nei] = colors[node]^1
+                    queue.append(nei)
+            return True
+        for i in range(n):
+            if i in colors: continue
+            if not bfs(i): return False
+        return True
+```
+
+### Solution 3: Union Find
+
+idea is that a node and all of it's neighbors should be in two disjoint sets.  If you ever catch
+a node being in the same disjoint set as one of it's neighbor it is not a bipartite graph
+
+```py
+class UnionFind:
+    pass
+class Solution:
+    def isBipartite(self, graph: List[List[int]]) -> bool:
+        n=len(graph)
+        dsu = UnionFind(n)
+        for i in range(n):
+            for j in graph[i]:
+                if dsu.find(i) == dsu.find(j): return False
+                dsu.union(graph[i][0], j)
+        return True
+```
+
 ## 
 
 ### Solution 1:
 
 ```py
 
-```
+```ss
