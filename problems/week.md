@@ -1247,10 +1247,44 @@ class Solution:
         return True
 ```
 
+## 905. Sort Array By Parity
+
+### Solution 1: sorting by parity
+
+```py
+class Solution:
+    def sortArrayByParity(self, nums: List[int]) -> List[int]:
+        return sorted(nums, key=lambda x: x%2)
+```
+
+### Solution 2: two pointers
+
+```py
+class Solution:
+    def sortArrayByParity(self, nums: List[int]) -> List[int]:
+        n=len(nums)
+        i, j = 0, n-1
+        while i < j:
+            if nums[i]%2==0:
+                i += 1
+            else:
+                nums[i], nums[j] = nums[j], nums[i]
+                j -= 1
+        return nums
+```
+
 ## 
 
 ### Solution 1:
 
 ```py
 
-```ss
+```
+
+## 
+
+### Solution 1:
+
+```py
+
+```
