@@ -1273,12 +1273,139 @@ class Solution:
         return nums
 ```
 
-## 
+## 581. Shortest Unsorted Continuous Subarray
 
-### Solution 1:
+### Solution 1: Prefix Max + Suffix Min + two pointers + 3 loops + extra space
+
+suppose it is sorted
+nums = [2,4,6,6,6,6,8,9,10,15]
+prefixMax = [-f,02,04,06,06,08,09,10,15]
+suffixMin = [02,04,06,06,08,09,10,15,+f]
+since prefixMax[i]==suffixMin[i-1] we know we can keep moving and it is sorted
+the reason is that prefix max says the largest element I've seen at say index = 0, 
+and so we ask the question what is the smallest element I've seen at index = 0, if they are the same
+that would indicate that it is bost the max in the prefix and the min in the suffix, thus it is
+the largest element so far, while also being the samllest from the suffix, so that means it belongs
+at the prefix, and as they keep equal we are good, cause that means it is sorted according to this prefix max and suffix min
+it doesn't mean it is the largest too, just that it is the equal to the largest or is the largest
+and it doesn't mean it is the smallest, just that it is equal to the smallest or is the smallest. 
+then again we know we can do the same from the right side, cause if suffixmin equals prefix max that means we can move it to left, cause that means it is th elargest element so far. 
 
 ```py
+class Solution:
+    def findUnsortedSubarray(self, nums: List[int]) -> int:
+        n=len(nums)
+        left, right = 1, n
+        prefixMax, suffixMin = [-inf]*(n+1), [inf]*(n+1)
+        for i in range(n):
+            prefixMax[i+1] = max(prefixMax[i], nums[i])
+        for i in range(n)[::-1]:
+            suffixMin[i] = min(suffixMin[i+1], nums[i])
+        while left <= right:
+            if prefixMax[left]==suffixMin[left-1]:
+                left += 1
+            elif prefixMax[right]==suffixMin[right-1]:
+                right -= 1
+            else:
+                break
+        return right - left +1
+```
 
+### Solution 2: prefix Max + suffix Min + find last index + find first index + 2 O(n) loops + no extra space
+
+```py
+class Solution:
+    def findUnsortedSubarray(self, nums: List[int]) -> int:
+        n = len(nums)
+        # find the last index that breaks the sort
+        prefixMax = -inf
+        right = 0
+        for i in range(n):
+            if nums[i] < prefixMax:
+                right = i
+            else:
+                prefixMax = nums[i]
+        # find the first index that breaks sort
+        suffixMin = inf
+        left = n-1
+        for i in range(n)[::-1]:
+            if nums[i] > suffixMin:
+                left = i
+            else:
+                suffixMin = nums[i]
+        return right-left+1 if right>0 else 0
+```
+
+```py
+class Solution:
+    def findUnsortedSubarray(self, nums: List[int]) -> int:
+        n = len(nums)
+        # find the last index that breaks the sort
+        # find the first index that breaks sort
+        prefixMax, suffixMin = -inf, inf
+        left, right = n-1,0
+        for i in range(n):
+            if nums[i] < prefixMax:
+                right = i
+            if nums[n-i-1] > suffixMin:
+                left = n-i-1
+            prefixMax = max(prefixMax, nums[i])
+            suffixMin = min(suffixMin, nums[n-i-1])
+        return right-left+1 if right>0 else 0
+```
+
+### Solution 3: Using two deque for nums and sorted(nums), then just pop from left and from right as long as they are equal
+
+```py
+class Solution:
+    def findUnsortedSubarray(self, nums: List[int]) -> int:
+        nq = deque(nums)
+        sq = deque(sorted(nums))
+        while nq and nq[0]==sq[0]:
+            nq.popleft(), sq.popleft()
+        while nq and nq[-1]==sq[-1]:
+            nq.pop(), sq.pop()
+        return len(nq)
+```
+
+## 1679. Max Number of K-Sum Pairs
+
+### Solution 1: sort + two pointers
+
+```py
+class Solution:
+    def maxOperations(self, nums: List[int], k: int) -> int:
+        nums.sort()
+        n=len(nums)
+        i, j = 0, n-1
+        cnt = 0
+        while i < j:
+            if nums[i]+nums[j] == k:
+                cnt += 1
+                i += 1
+                j -= 1
+            elif nums[i]+nums[j] > k:
+                j -= 1
+            else:
+                i += 1
+        return cnt
+```
+
+### Solution 2: count + hash table
+
+```py
+class Solution:
+    def maxOperations(self, nums: List[int], k: int) -> int:
+        count = Counter()
+        cnt = 0
+        for x in nums:
+            y = k - x
+            if count[y] > 0:
+                count[y] -= 1
+                cnt += 1
+            else:
+                count[x] += 1
+        return cnt
 ```
 
 ## 
