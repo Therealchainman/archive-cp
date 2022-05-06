@@ -1408,6 +1408,108 @@ class Solution:
         return cnt
 ```
 
+## 225. Implement Stack using Queues
+
+### Solution 1: 2 queues push O(n), pop O(1)
+
+```py
+class MyStack:
+
+    def __init__(self):
+        self.queue = deque()
+
+    def push(self, x: int) -> None:
+        tmp_queue = deque([x])
+        while self.queue:
+            tmp_queue.append(self.queue.popleft())
+        self.queue = tmp_queue
+
+    def pop(self) -> int:
+        return self.queue.popleft()
+
+    def top(self) -> int:
+        return self.queue[0]
+
+    def empty(self) -> bool:
+        return not self.queue
+```
+
+### Solution 2: Single queue with push O(n) and pop O(1)
+
+```py
+class MyStack:
+
+    def __init__(self):
+        self.queue = deque()
+
+    def push(self, x: int) -> None:
+        n = len(self.queue)
+        self.queue.append(x)
+        for _ in range(n):
+            self.queue.append(self.queue.popleft())
+
+    def pop(self) -> int:
+        return self.queue.popleft()
+
+    def top(self) -> int:
+        return self.queue[0]
+
+    def empty(self) -> bool:
+        return not self.queue
+```
+
+### Solution 3:  queue of queues
+
+```py
+class MyStack:
+
+    def __init__(self):
+        self.queue = deque()
+
+    def push(self, x: int) -> None:
+        q = deque([x])
+        q.append(self.queue)
+        self.queue = q
+
+    def pop(self) -> int:
+        elem = self.queue.popleft()
+        self.queue = self.queue.popleft()
+        return elem
+
+    def top(self) -> int:
+        return self.queue[0]
+
+    def empty(self) -> bool:
+        return not self.queue
+```
+
+
+## 1209. Remove All Adjacent Duplicates in String II
+
+### Solution 1: stack + store count
+
+```py
+class Solution:
+    def removeDuplicates(self, s: str, k: int) -> str:
+        stack = []
+        for ch in s:
+            if not stack or stack[-1][0] != ch:
+                stack.append([ch, 1])
+            elif stack[-1][0] == ch:
+                stack[-1][1] += 1
+            if stack and stack[-1][1] == k:
+                stack.pop()
+        return "".join(char*cnt for char, cnt in stack)
+```
+
+## 
+
+### Solution 1:
+
+```py
+
+```
+
 ## 
 
 ### Solution 1:
