@@ -1502,6 +1502,56 @@ class Solution:
         return "".join(char*cnt for char, cnt in stack)
 ```
 
+## 232. Implement Queue using Stacks
+
+### Solution 1: temporary stack in push O(n), O(1) for pop 
+
+```py
+class MyQueue:
+
+    def __init__(self):
+        self.stack = []
+
+    def push(self, x: int) -> None:
+        tmp_stack = []
+        while self.stack:
+            tmp_stack.append(self.stack.pop())
+        tmp_stack.append(x)
+        while tmp_stack:
+            self.stack.append(tmp_stack.pop())
+        
+    def pop(self) -> int:
+        return self.stack.pop()
+
+    def peek(self) -> int:
+        return self.stack[-1]
+
+    def empty(self) -> bool:
+        return not bool(self.stack)
+```
+
+### Solution 2: two stacks, when one is empty place into there, O(1) push, and amortized O(1) pop
+
+```py
+class MyQueue:
+    def __init__(self):
+        self.stack1, self.stack2 = [], []
+    def push(self, x: int) -> None:
+        self.stack1.append(x)  
+    def pop(self) -> int:
+        self.move()
+        return self.stack2.pop()
+    def peek(self) -> int:
+        self.move()
+        return self.stack2[-1]
+    def move(self) -> None:
+        if not self.stack2:
+            while self.stack1:
+                self.stack2.append(self.stack1.pop())
+    def empty(self) -> bool:
+        return not bool(self.stack1) and not bool(self.stack2)
+```
+
 ## 
 
 ### Solution 1:
