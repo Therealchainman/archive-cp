@@ -1552,6 +1552,293 @@ class MyQueue:
         return not bool(self.stack1) and not bool(self.stack2)
 ```
 
+## 456. 132 Pattern
+
+### Solution 1: Sorted Dictionary + binary search through sorted dictionary to find elemen that is greater than prefix min and less than current element. 
+
+```py
+from sortedcontainers import SortedDict
+class Solution:
+    def find132pattern(self, nums: List[int]) -> bool:
+        n = len(nums)
+        sdict = SortedDict()
+        for i in range(1,n):
+            cnt = sdict.setdefault(nums[i], 0) + 1
+            sdict[nums[i]] = cnt
+        prefixMin = nums[0]
+        for j in range(1,n-1):
+            sdict[nums[j]] -= 1
+            if sdict[nums[j]] == 0:
+                sdict.pop(nums[j])
+            k = sdict.bisect_right(prefixMin)
+            keys = sdict.keys()
+            if k < len(keys) and keys[k] < nums[j]: return True
+            prefixMin = min(prefixMin, nums[j])
+        return False
+```
+
+### Solution 2: prefix min for nums[i] candidates + min stack for nums[k] candidates + backwards iteration for nums[j] candidates to find if nums[i] < nums[k] < nums[j]
+
+```py
+class Solution:
+    def find132pattern(self, nums: List[int]) -> bool:
+        n = len(nums)
+        prefixMin = list(accumulate(nums, min, initial=inf))
+        minStack = [] # top element is minimum of stack, sorted in descending order
+        k = n
+        for i in range(n)[::-1]:
+            k = bisect_right(nums, prefixMin[i], k, n)
+            if k < n and prefixMin[i] < nums[k] < nums[i]: return True
+            k -= 1
+            nums[k] = nums[i]
+        return False
+```
+
+### Solution 3: prefix min for nums[i] + storing values in nums array with a specific left and right pointer in nums array that is the segment to be binary searched to find elements that are greater than nums[i] for nums[k], then just need to check nums[k] < nums[j]
+
+```py
+class Solution:
+    def find132pattern(self, nums: List[int]) -> bool:
+        n = len(nums)
+        prefixMin = list(accumulate(nums, min, initial=inf))
+        minStack = [] # top element is minimum of stack, sorted in descending order
+        k = n
+        for i in range(n)[::-1]:
+            k = bisect_right(nums, prefixMin[i], k, n)
+            if k < n and prefixMin[i] < nums[k] < nums[i]: return True
+            k -= 1
+            nums[k] = nums[i]
+        return False
+```
+
+## 484. Find Permutation
+
+### Solution 1: stack based to reverse when it is D, and then always add to I and add from stack.  
+
+```py
+class Solution:
+    def findPermutation(self, s: str) -> List[int]:
+        result = []
+        stack = []
+        for i, ch in enumerate(s, start=1):
+            if ch=='I':
+                stack.append(i)
+                while stack:
+                    result.append(stack.pop())
+            else:
+                stack.append(i)
+        stack.append(len(s)+1)
+        while stack:
+            result.append(stack.pop())
+        return result
+```
+
+### Solution 2: greedily fill in the result array with elements in decreasing order everytime see an I, and add until you hit the len of result array, 
+
+```py
+class Solution:
+    def findPermutation(self, s: str) -> List[int]:
+        result = []
+        for i, ch in enumerate(s, start=1):
+            if ch=='I':
+                result.extend(range(i, len(result),-1))
+        result.extend(range(len(s)+1,len(result),-1))
+        return result
+```
+
+## 2264. Largest 3-Same-Digit Number in String
+
+### Solution 1: Check previous values
+
+```py
+class Solution:
+    def largestGoodInteger(self, num: str) -> str:
+        return max(num[i-2:i+1] if num[i-2]==num[i-1]==num[i] else "" for i in range(2,len(num)))
+```
+
+## 2265. Count Nodes Equal to Average of Subtree
+
+### Solution 1: recursion and postorder traversal of binary tree
+
+```py
+class Solution:
+    def averageOfSubtree(self, root: Optional[TreeNode]) -> int:
+        self.cnt = 0
+        def dfs(node):
+            if not node: return 0, 0
+            lsum, lcnt = dfs(node.left)
+            rsum, rcnt = dfs(node.right)
+            sum_ = lsum + rsum + node.val
+            cnt_ = lcnt + rcnt + 1
+            if sum_//cnt_ == node.val:
+                self.cnt += 1
+            return sum_, cnt_
+        dfs(root)
+        return self.cnt
+```
+
+## 2266. Count Number of Texts
+
+### Solution 1:
+
+```py
+
+```
+
+## 
+
+### Solution 1: dynamic programming with state being the row,col,balance of the parentheses
+
+```py
+class Solution:
+    def hasValidPath(self, grid: List[List[str]]) -> bool:
+        R, C = len(grid), len(grid[0])
+        for r, c in product(range(R), range(C)):
+            grid[r][c] = 1 if grid[r][c] == '(' else -1
+        stack = []
+        if grid[0][0] == ')': return False
+        stack.append((0,0,1))
+        visited = set()
+        in_bounds = lambda r, c: 0<=r<R and 0<=c<C
+        while stack:
+            row, col, bal = stack.pop()
+            for nr, nc in [(row+1,col),(row,col+1)]:
+                if not in_bounds(nr,nc): continue
+                nbal = bal + grid[nr][nc]
+                if nbal < 0 or nbal > (R+C)//2: continue
+                state = (nr,nc,nbal)
+                if state in visited: continue
+                if nr==R-1 and nc==C-1 and nbal == 0: 
+                    return True
+                visited.add(state)
+                stack.append(state)
+        return False
+```
+
+## 341. Flatten Nested List Iterator
+
+### Solution 1: Preprocess to flatten the list with a preorder traversal, and treating the nestedlist as a tree, where the leaf nodes are integers and internal nodes are nestedLists, gives a normal list of integers, and that is easy to creat iterator with a pointer.  Uses Recursion for the preorder traversal
+
+```py
+class NestedIterator:
+    def __init__(self, nestedList: [NestedInteger]):
+        self.nestedList = nestedList
+        self.flatList = []
+        self.flattenList(nestedList)
+        self.pointer = 0
+        
+    def flattenList(self, node):
+        for nei_node in node:
+            if nei_node.isInteger():
+                self.flatList.append(nei_node.getInteger())
+            else:
+                self.flattenList(nei_node.getList())
+    
+    def next(self) -> int:
+        elem = self.flatList[self.pointer]
+        self.pointer += 1
+        return elem
+    
+    def hasNext(self) -> bool:
+        return self.pointer < len(self.flatList)
+```
+
+### Solution 2: Same as solution 1, but just add a yield and make the flat list a flat list generator, then included peeked so that we can check if it hasNext element any number of times. 
+
+```py
+class NestedIterator:
+    def __init__(self, nestedList: [NestedInteger]):
+        self.flatList_generator = self.flattenList(nestedList)
+        self.peeked = None
+        
+    def flattenList(self, node):
+        for nei_node in node:
+            if nei_node.isInteger():
+                yield nei_node.getInteger()
+            else:
+                yield from self.flattenList(nei_node.getList())
+    
+    def next(self) -> int:
+        if not self.hasNext(): return None # so we can get the next element for peeked
+        integer, self.peeked = self.peeked, None
+        return integer
+    
+    def hasNext(self) -> bool:
+        if self.peeked is not None: return True
+        try:
+            self.peeked = next(self.flatList_generator)
+            return True
+        except:
+            return False
+```
+
+### Solution 3: stack of nestedIntegers
+
+```py
+
+```
+
+### Solution 4: optimized stack with 2 stack, pointers and nested list
+
+```py
+
+```
+
+## 251. Flatten 2D Vector
+
+### Solution 1: flatten generator with iterative solution 
+
+```py
+class Vector2D:
+
+    def __init__(self, vec: List[List[int]]):
+        self.flattenGen = self.flatten_generator(vec)
+        self.peeked = None
+        
+    def flatten_generator(self, vec):
+        for lst in vec:
+            for elem in lst:
+                yield elem
+
+    def next(self) -> int:
+        if not self.hasNext(): return None
+        integer, self.peeked = self.peeked, None
+        return integer
+
+    def hasNext(self) -> bool:
+        if self.peeked is not None: return True
+        try: 
+            self.peeked = next(self.flattenGen)
+            return True
+        except:
+            return False
+```
+
+### Solution 2: two pointers 
+
+```py
+class Vector2D:
+
+    def __init__(self, vec: List[List[int]]):
+        self.vec = vec
+        self.outer = self.inner = 0
+        
+    def update_pointers(self):
+        while self.outer < len(self.vec) and self.inner == len(self.vec[self.outer]):
+            self.outer += 1
+            self.inner = 0
+
+    def next(self) -> int:
+        if not self.hasNext(): return
+        elem = self.vec[self.outer][self.inner]
+        self.inner += 1
+        return elem
+
+    def hasNext(self) -> bool:
+        self.update_pointers()
+        return self.outer < len(self.vec)
+```
+
 ## 
 
 ### Solution 1:
