@@ -2,6 +2,8 @@
 
 ## Letter Blocks
 
+### Solution 1: greedy + break it down into starting characters and extending characters
+
 ```py
 from collections import defaultdict
 import string
@@ -67,6 +69,43 @@ def main():
 if __name__ == '__main__':
     T = int(input())
     for t in range(1,T+1):
-        print(f"Case #{t}: {main()}")y
+        print(f"Case #{t}: {main()}")
+```
+
+## Squary
+
+### Solution 1: math + finding out need the sum of distinct multiplicative pairs to be equal to 0
+
+![proof](squary.PNG)
+
+![proof2](squary2.PNG)
+
+```py
+from itertools import product
+IMP = "IMPOSSIBLE"
+def main():
+    N, K = map(int,input().split())
+    arr = list(map(int,input().split()))
+    SP = (sum(x*y for x, y in product(arr,repeat=2)) - sum(x*x for x in arr))//2
+    S = sum(arr)
+    if K == 1:
+        if SP==S==0: return 1
+        if S==0: return IMP
+        return -SP//S if SP%S==0 else IMP
+    n1 = 1-S
+    n2 = -(SP+n1*S)
+    return f"{n1} {n2}"
+    
+if __name__ == '__main__':
+    T = int(input())
+    for t in range(1,T+1):
+        print(f"Case #{t}: {main()}")
+```
+
+## Intranets
+
+Need to know how to take the multiplicative modular inverse
+
+```py
 
 ```

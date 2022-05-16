@@ -1839,6 +1839,545 @@ class Vector2D:
         return self.outer < len(self.vec)
 ```
 
+## 216 Combination Sum III
+
+### Solution 1: Uses itertools.combinations in python to generate combinations of an iterage of range(1,10) with length of k
+
+```py
+class Solution:
+    def combinationSum3(self, k: int, n: int) -> List[List[int]]:
+        return [combo for combo in combinations(range(1,10),k) if sum(combo) == n]
+```
+
+### Solution 2: Iterates through all possible combinations of 1-9 digits with a bitmask and checks if the sum of digits equal to n
+
+```py
+class Solution:
+    def combinationSum3(self, k: int, n: int) -> List[List[int]]:
+        combinations = []
+        for bitmask in range(1, 1<<9):
+            if bitmask.bit_count() != k: continue
+            cur_comb = []
+            for i in range(9):
+                if (bitmask>>i)&1:
+                    cur_comb.append(i+1)
+            if sum(cur_comb) == n:
+                combinations.append(cur_comb)
+        return combinations
+```
+
+## 223. Rectangle Area
+
+### Solution 1: Geometry and Math
+
+```py
+class Solution:
+    def computeArea(self, ax1: int, ay1: int, ax2: int, ay2: int, bx1: int, by1: int, bx2: int, by2: int) -> int:
+        x_overlap, y_overlap = max(min(ax2,bx2) - max(ax1,bx1), 0), max(min(ay2,by2) - max(ay1,by1),0)
+        area_overlap = x_overlap*y_overlap
+        get_area = lambda x1, x2, y1, y2: (x2-x1)*(y2-y1)
+        return get_area(ax1,ax2,ay1,ay2) + get_area(bx1,bx2,by1,by2) - area_overlap
+```
+
+## 2268. Minimum Number of Keypresses
+
+### Solution 1: Math + count 
+
+```py
+class Solution:
+    def minimumKeypresses(self, s: str) -> int:
+        return sum(cnt*((i+9)//9) for i, cnt in enumerate(sorted(Counter(s).values(), reverse=True)))
+```
+
+## 2254. Design Video Sharing Platform
+
+### Solution 1: hash table + minheap
+
+```py
+Video = namedtuple('Video', ['video', 'likes', 'dislikes', 'views'])
+class VideoSharingPlatform:
+    
+    def __init__(self):
+        self.video_dict = {}
+        self.minheap = []
+        self.pointer = 0
+
+    def upload(self, video: str) -> int:
+        if self.minheap:
+            videoId = heappop(self.minheap)
+        else:
+            videoId = self.pointer
+            self.pointer += 1
+        self.video_dict[videoId] = Video(video,0,0,0)
+        return videoId
+        
+    def remove(self, videoId: int) -> None:
+        if videoId not in self.video_dict: return
+        self.video_dict.pop(videoId)
+        heappush(self.minheap, videoId)
+
+    def watch(self, videoId: int, startMinute: int, endMinute: int) -> str:
+        if videoId not in self.video_dict: return "-1"
+        video = self.video_dict[videoId]
+        self.video_dict[videoId] = video._replace(views=video.views+1)
+        return video.video[startMinute:endMinute+1]
+
+    def like(self, videoId: int) -> None:
+        if videoId in self.video_dict:
+            video = self.video_dict[videoId]
+            self.video_dict[videoId] = video._replace(likes=video.likes + 1)
+
+    def dislike(self, videoId: int) -> None:
+        if videoId in self.video_dict:
+            video = self.video_dict[videoId]
+            self.video_dict[videoId] = video._replace(dislikes=video.dislikes+1)
+
+    def getLikesAndDislikes(self, videoId: int) -> List[int]:
+        if videoId not in self.video_dict: return [-1]
+        likes, dislikes = self.video_dict[videoId].likes, self.video_dict[videoId].dislikes
+        return [likes, dislikes]
+
+    def getViews(self, videoId: int) -> int:
+        if videoId not in self.video_dict: return -1
+        return self.video_dict[videoId].views
+```
+
+## 117. Populating Next Right Pointers in Each Node II
+
+### Solution 1: Preorder dfs with recursion 
+
+```py
+class Solution:
+    def connect(self, root: 'Node') -> 'Node':
+        depth_node_dict = {}
+        def preorder_dfs(depth, node):
+            if not node: return
+            if depth in depth_node_dict:
+                depth_node_dict[depth].next = node
+            depth_node_dict[depth] = node
+            preorder_dfs(depth+1, node.left)
+            preorder_dfs(depth+1, node.right)
+        preorder_dfs(0, root)
+        return root
+```
+
+### Solution 2: stack based solution
+
+```py
+class Solution:
+    def connect(self, root: 'Node') -> 'Node':
+        depth_node_dict = {}
+        stack = [(0, root)]
+        while stack:
+            depth, node = stack.pop()
+            if not node: continue
+            print(depth, node.val)
+            if depth in depth_node_dict:
+                depth_node_dict[depth].next = node
+            depth_node_dict[depth] = node
+            stack.append((depth+1, node.right))
+            stack.append((depth+1, node.left))
+        return root
+```
+
+### Solution 3: BFS level order traversal to remove needing the dictionary of previous node
+
+```py
+class Solution:
+    def connect(self, root: 'Node') -> 'Node':
+        queue = deque([(root)])
+        while queue:
+            sz = len(queue)
+            prev_node = None
+            for _ in range(sz):
+                node = queue.popleft()
+                if not node: continue
+                if prev_node:
+                    prev_node.next = node
+                prev_node = node
+                queue.append(node.left)
+                queue.append(node.right)
+        return root
+```
+
+### Solution 4: no extra space + using current level as linked list with next pointers set, and set next pointers for next level
+
+```py
+class Solution:
+    def processChild(self, child_node, prev_node, leftmost_node):
+        if child_node:
+            if prev_node:
+                prev_node.next = child_node
+            else:
+                leftmost_node = child_node
+            prev_node = child_node
+        return prev_node, leftmost_node
+    def connect(self, root: 'Node') -> 'Node':
+        leftmost_node = root
+        
+        while leftmost_node:
+            
+            curr_node, leftmost_node, prev_node = leftmost_node, None, None
+            while curr_node:
+                prev_node, leftmost_node = self.processChild(curr_node.left, prev_node, leftmost_node)
+                prev_node, leftmost_node = self.processChild(curr_node.right, prev_node, leftmost_node)
+                curr_node=curr_node.next
+            
+        return root
+```
+
+## Network Delay Time
+
+### Solution 1: shortest path from single source in directed graph + dijkstra algorithm + O((V+E)logV)
+
+```py
+class Solution:
+    def networkDelayTime(self, times: List[List[int]], n: int, k: int) -> int:
+        graph = defaultdict(list)
+        for u, v, w in times:
+            graph[u].append((v,w))
+        minheap = [(0, k)] # (time, node)
+        dist = defaultdict(lambda: inf)
+        dist[k] = 0
+        while minheap:
+            time, u = heappop(minheap)
+            for v, w in graph[u]:
+                ntime = time + w
+                if ntime < dist[v]:
+                    dist[v] = ntime
+                    heappush(minheap, (ntime, v))
+        return max(dist.values()) if len(dist)==n else -1
+```
+
+### Solution 2: Floyd Warshall + O(v^3) + good if dense networks (lots of edges)
+
+```py
+class Solution:
+    def networkDelayTime(self, times: List[List[int]], n: int, K: int) -> int:
+        dist = [[inf]*n for _ in range(n)]
+        for u, v, w in times:
+            dist[u-1][v-1] = w
+        for i in range(n):
+            dist[i][i] = 0
+        for k, i, j in product(range(n),repeat=3):
+            dist[i][j] = min(dist[i][j], dist[i][k]+dist[k][j])
+        return max(dist[K-1]) if max(dist[K-1]) < inf else -1
+```
+
+### Solution 3: Bellman ford + SSSP(Single Source Shortest Path) + O(VE) + negative edge weights
+
+```py
+class Solution:
+    def networkDelayTime(self, times: List[List[int]], n: int, k: int) -> int:  
+        dist = defaultdict(lambda: inf)
+        dist[k] = 0
+        for _ in range(n):
+            for u, v, w in times:
+                dist[v] = min(dist[v], dist[u]+w)
+        print(dist)
+        return max(dist.values()) if len(dist)== n and max(dist.values()) < inf else -1
+```
+
+## Reverse Integer
+
+### Solution 1: string 
+
+```py
+class Solution:
+    def reverse(self, x: int) -> int:
+        sign = [1,-1][x<0]
+        rev_x = sign * int(str(abs(x))[::-1])
+        return rev_x if rev_x>= -2**31 and rev_x<2**31 else 0
+```
+
+## 2269. Find the K-Beauty of a Number
+
+### Solution 1: convert to strings + sliding window
+
+```py
+class Solution:
+    def divisorSubstrings(self, num: int, k: int) -> int:
+        nums = [int(str(num)[i-k:i]) for i in range(k,len(str(num))+1)]
+        return sum(1 for n in nums if n!=0 and num%n==0)
+```
+
+## 2270. Number of Ways to Split Array
+
+### Solution 1: prefix and suffix sum
+
+```py
+class Solution:
+    def waysToSplitArray(self, nums: List[int]) -> int:
+        psum = 0
+        ssum = sum(nums)
+        n = len(nums)
+        cnt = 0
+        for i in range(n-1):
+            psum += nums[i]
+            ssum -= nums[i]
+            cnt += (psum>=ssum)
+        return cnt
+```
+
+## 2271. Maximum White Tiles Covered by a Carpet
+
+### Solution 1:
+
+```py
+
+```
+
+## 2272. Substring With Largest Variance
+
+### Solution 1: dynamic programming with maximum subarray by converting values to 1 and -1 + reduce search space by considering pair of characters, and convert to 1 and -1, 1 for the maximize one, and -1 for the minimize one. Then do the opposite. 
+
+```py
+
+class Solution:
+    def largestVariance(self, s: str) -> int:
+        n, var = len(s), 0
+        chars = list(set(s))
+        def maxSubarray(arr):
+            mxSub = rsum = 0
+            seen = False
+            for x in arr:
+                if x < 0: seen = True
+                rsum += x
+                if seen:
+                    mxSub = max(mxSub, rsum)
+                else:
+                    mxSub = max(mxSub, rsum-1)
+                if rsum < 0:
+                    rsum = 0
+                    seen = False
+            return mxSub
+        for i in range(len(chars)):
+            for j in range(i+1,len(chars)):
+                a, b = chars[i], chars[j]
+                arr = []
+                for ch in s:
+                    if ch == a:
+                        arr.append(1)
+                    elif ch == b:
+                        arr.append(-1)
+                var = max(var, maxSubarray(arr), maxSubarray([-v for v in arr]))
+        return var
+```
+
+## 1302. Deepest Leaves Sum
+
+### Solution 1: Tree traversal + sum array
+
+```py
+class Solution:
+    def deepestLeavesSum(self, root: Optional[TreeNode]) -> int:
+        # sum of each level
+        sum_arr = [0]
+        def preorder(depth, node):
+            if not node: return
+            if depth == len(sum_arr):
+                sum_arr.append(0)
+            sum_arr[depth] += node.val
+            preorder(depth+1, node.left)
+            preorder(depth+1, node.right)
+        preorder(0, root)
+        return sum_arr[-1]
+```
+
+```py
+class Solution:
+    def deepestLeavesSum(self, root: Optional[TreeNode]) -> int:
+        # sum of each level
+        sum_arr = [0]
+        def getDepth(node):
+            if not node: return 0
+            return max(getDepth(node.left), getDepth(node.right)) + 1
+        self.depth = getDepth(root)
+        self.sum = 0
+        def deepSum(depth, node):
+            if not node: return 0
+            self.sum += (node.val if depth==self.depth else 0)
+            deepSum(depth+1,node.left)
+            deepSum(depth+1,node.right)
+        deepSum(1, root)
+        return self.sum
+```
+
+### Solution 2: Iterative BFS
+
+```py
+class Solution:
+    def deepestLeavesSum(self, root: Optional[TreeNode]) -> int:
+        last_sum = 0
+        queue = deque([root])
+        while queue:
+            sz = len(queue)
+            last_sum = 0
+            for _ in range(sz):
+                node = queue.popleft()
+                last_sum += node.val
+                if node.left:
+                    queue.append(node.left)
+                if node.right:
+                    queue.append(node.right)
+        return last_sum
+```
+
+## 694. Number of Distinct Islands
+
+### Solution 1:
+
+```py
+
+```
+
+## 2273. Find Resultant Array After Removing Anagrams
+
+### Solution 1: stack
+
+```py
+class Solution:
+    def removeAnagrams(self, words: List[str]) -> List[str]:
+        stk = [words[0]]
+        for i in range(1,len(words)):
+            if Counter(words[i]) == Counter(words[i-1]): continue
+            stk.append(words[i])
+        return stk
+```
+
+## 2274. Maximum Consecutive Floors Without Special Floors
+
+### Solution 1: Sort + iterate
+
+```py
+class Solution:
+    def maxConsecutive(self, bottom: int, top: int, special: List[int]) -> int:
+        special.extend([bottom-1, top + 1])
+        special.sort()
+        result = 0
+        for x, y in zip(special, special[1:]):
+            result = max(result, y - x - 1)
+        return result
+```
+
+## 2275. Largest Combination With Bitwise AND Greater Than Zero
+
+### Solution 1: count maximum bit set across all candidates + 24 bits long
+
+```py
+class Solution:
+    def largestCombination(self, candidates: List[int]) -> int:
+        counts = [0]*24
+        for cand in candidates:
+            for i in range(24):
+                if (cand>>i)&1:
+                    counts[i] += 1
+        return max(counts)
+```
+
+## 2276. Count Integers in Intervals
+
+### Solution 1: binary search + merge intervals
+
+```py
+class Node:
+    def __init__(self, lo=0, hi=10 ** 9):
+        self.lo = lo
+        self.hi = hi
+        self.mi = (lo + hi) // 2
+        self.cnt = 0
+        self.left = self.right = None
+    
+    def add(self, lo, hi):
+        if lo > self.hi or hi < self.lo or self.cnt == self.hi - self.lo + 1:
+            return
+        if lo <= self.lo and hi >= self.hi:
+            self.cnt = self.hi - self.lo + 1
+        else:
+            if self.left is None:
+                self.left = Node(self.lo, self.mi)
+            self.left.add(lo, hi)
+            if self.right is None:
+                self.right = Node(self.mi + 1, self.hi)
+            self.right.add(lo, hi)
+            self.cnt = self.left.cnt + self.right.cnt
+
+
+class CountIntervals:
+
+    def __init__(self):
+        self.root = Node()
+
+    def add(self, left: int, right: int) -> None:
+        self.root.add(left, right)
+
+    def count(self) -> int:
+        return self.root.cnt
+```
+
+```cpp
+class CountIntervals {
+public:
+    set<pair<LL, LL> > se;
+    LL W = 0;
+
+    CountIntervals() {
+    }
+    
+    void add(int left_, int right_) {
+	LL left = left_;
+	LL right = right_ + 1;
+	auto it = se.lower_bound(make_pair(left, -1LL));
+	while (it != se.end() && it->second <= right) {
+	    W -= it->first - it->second;
+	    amin(left, it->second);
+	    amax(right, it->first);
+	    se.erase(it++);
+	}
+        
+	W += right - left;
+	se.emplace(right, left);
+    }
+    
+    int count() {
+        
+	return W;
+    }
+};
+
+```
+
+## 1091. Shortest Path in Binary Matrix
+
+### Solution 1: BFS + queue
+
+```py
+class Solution:
+    def shortestPathBinaryMatrix(self, grid: List[List[int]]) -> int:
+        if grid[0][0] == 1: return -1
+        n = len(grid)
+        queue = deque([(0,0,1)])
+        grid[0][0] = 1
+        in_bounds = lambda r,c: 0<=r<n and 0<=c<n
+        while queue:
+            r, c, dist = queue.popleft()
+            if r==c==n-1:
+                return dist
+            for nr,nc in [(r+1,c),(r-1,c),(r,c+1),(r,c-1),(r+1,c+1),(r+1,c-1),(r-1,c+1),(r-1,c-1)]:
+                if not in_bounds(nr,nc) or grid[nr][nc]==1: continue
+                queue.append((nr,nc,dist+1))
+                grid[nr][nc] = 1
+        return -1
+```
+
+## 
+
+### Solution 1:
+
+```py
+
+```
+
 ## 
 
 ### Solution 1:
