@@ -2370,6 +2370,30 @@ class Solution:
         return -1
 ```
 
+## 1192. Critical Connections in a Network
+
+### Solution 1: Find Articulation Points with DFS in undirected graph
+
+```py
+
+```
+
+## 
+
+### Solution 1:
+
+```py
+
+```
+
+## 
+
+### Solution 1:
+
+```py
+
+```
+
 ## 
 
 ### Solution 1:
