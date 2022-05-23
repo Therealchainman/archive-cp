@@ -2225,10 +2225,75 @@ class Solution:
 
 ## 694. Number of Distinct Islands
 
-### Solution 1:
+### Solution 1: hash table for distinct islands + DFS to create the local coordinates + frozenset to make set hashable
 
 ```py
+class Solution:
+    def numDistinctIslands(self, grid: List[List[int]]) -> int:
+        R, C = len(grid), len(grid[0])
+        unique_islands_set = set()
+        def dfs(row, col):
+            if 0<=row<R and 0<=col<C and grid[row][col]==1:
+                grid[row][col] = 0
+                island_set.add((row-cur_row,col-cur_col))
+                for nr, nc in [(row+1,col), (row-1,col), (row,col+1), (row,col-1)]:
+                    dfs(nr,nc)
+        for r, c in product(range(R), range(C)):
+            island_set = set()
+            cur_row, cur_col = r, c
+            dfs(r,c)
+            if island_set:
+                unique_islands_set.add(frozenset(island_set))
+        return len(unique_islands_set)
+```
 
+### Solution 2: hash table + bfs + local coordinates + frozenset
+
+```py
+class Solution:
+    def numDistinctIslands(self, grid: List[List[int]]) -> int:
+        R, C = len(grid), len(grid[0])
+        unique_islands_set = set()
+        def bfs(row, col):
+            queue = deque([(row,col)])
+            grid[row][col] = 0
+            in_bounds = lambda r, c: 0<=r<R and 0<=c<C
+            while queue:
+                r, c = queue.popleft()
+                island_set.add((r-cur_row,c-cur_col))
+                for nr, nc in [(r+1,c), (r-1,c), (r,c+1), (r,c-1)]:
+                    if not in_bounds(nr,nc) or grid[nr][nc] == 0: continue
+                    queue.append((nr,nc))
+                    grid[nr][nc] = 0
+        for r, c in product(range(R), range(C)):
+            if grid[r][c] == 1:
+                island_set = set()
+                cur_row, cur_col = r, c
+                bfs(r,c)
+                unique_islands_set.add(frozenset(island_set))
+        return len(unique_islands_set)
+```
+
+### Solution 2: dfs + hash table of tuple of path signature + need to store when backtracking in dfs
+
+```py
+class Solution:
+    def numDistinctIslands(self, grid: List[List[int]]) -> int:
+        R, C = len(grid), len(grid[0])
+        unique_islands_set = set()
+        def dfs(r, c, direction='0'):
+            if 0<=r<R and 0<=c<C and grid[r][c] == 1:
+                grid[r][c] = 0
+                path_sig.append(direction)
+                for nr, nc, ndirection in [(r+1,c,'D'),(r-1,c,'U'),(r,c+1,'R'),(r,c-1,'L')]:
+                    dfs(nr,nc,ndirection)
+                path_sig.append('0')
+        for r, c in product(range(R), range(C)):
+            if grid[r][c] == 1:
+                path_sig = []
+                dfs(r,c)
+                unique_islands_set.add(tuple(path_sig))
+        return len(unique_islands_set)
 ```
 
 ## 2273. Find Resultant Array After Removing Anagrams
@@ -2378,36 +2443,112 @@ class Solution:
 
 ```
 
-## 
+## 329. Longest Increasing Path in a Matrix
 
-### Solution 1:
+### Solution 1: sort + memoization
+
+```py
+class Solution:
+    def longestIncreasingPath(self, matrix: List[List[int]]) -> int:
+        R, C = len(matrix), len(matrix[0])
+        cells = sorted([(r,c) for r, c in product(range(R), range(C))], key=lambda x: matrix[x[0]][x[1]])
+        memo = [[1]*C for _ in range(R)]
+        in_bounds = lambda r, c: 0<=r<R and 0<=c<C
+        longest_path = 0
+        for r, c in cells:
+            val = matrix[r][c]
+            for nr, nc in [(r+1,c), (r-1,c), (r,c+1), (r,c-1)]:
+                if not in_bounds(nr,nc) or matrix[nr][nc] >= val: continue
+                memo[r][c] = max(memo[r][c], memo[nr][nc]+1)
+            longest_path = max(longest_path, memo[r][c])
+        return longest_path
+```
+
+### Solution 2: Topological sort and longest path in DAG
 
 ```py
 
 ```
 
-## 
+## 647. Palindromic Substrings
 
-### Solution 1:
+### Solution 1: dynamic programming
 
 ```py
-
+class Solution:
+    def countSubstrings(self, s: str) -> int:
+        cnt, n = 0, len(s)
+        def expand(left, right):
+            cnt = 0
+            while left >= 0 and right < n and s[left]==s[right]:
+                cnt += 1
+                left -= 1
+                right += 1
+            return cnt
+        for i in range(n):
+            cnt += expand(i, i)
+            cnt += expand(i, i+1)
+        return cnt
 ```
 
-## 
+## 277. Find the Celebrity
 
-### Solution 1:
+### Solution 1: Graph problem 
 
 ```py
-
+class Solution:
+    def findCelebrity(self, n: int) -> int:
+        celebrity = [True]*n 
+        for celeb in range(n):
+            if not celebrity[celeb]: continue
+            for guest in range(n):
+                if guest==celeb: continue
+                if knows(guest, celeb):
+                    celebrity[guest] = False # guest can't be celeb
+                else:
+                    celebrity[celeb] = False
+                    break
+                if knows(celeb, guest):
+                    celebrity[celeb] = False
+                else:
+                    celebrity[guest] = False
+        try:
+            return celebrity.index(True)
+        except:
+            return -1
 ```
 
-## 
+## 474. Ones and Zeroes
 
-### Solution 1:
+### Solution 1: Dynamic Programming with take or not take + Recursion
 
 ```py
+class Solution:
+    def findMaxForm(self, strs: List[str], m: int, n: int) -> int:
+        @cache
+        def dfs(i, zeros, ones):
+            if i == len(strs) or zeros==ones==0: return 0
+            cntOnes = strs[i].count('1')
+            cntZeros = len(strs[i]) - cntOnes
+            if zeros >= cntZeros and ones >= cntOnes:
+                return max(dfs(i+1,zeros,ones), dfs(i+1,zeros-cntZeros,ones-cntOnes)+1)
+            return dfs(i+1,zeros,ones)
+            
+        return dfs(0,m,n)
+```
 
+### Solution 2: dynamic programming + knapsack
+
+```py
+class Solution:
+    def findMaxForm(self, strs: List[str], m: int, n: int) -> int:
+        dp = [[0]*(m+1) for _ in range(n+1)]
+        for s in strs:
+            cntOnes = s.count('1')
+            cntZeros = len(s) - cntOnes
+            for ones, zeros in product(range(n,cntOnes-1,-1), range(m,cntZeros-1,-1)):
+                dp[ones][zeros] = max(dp[ones][zeros], 1+dp[ones-cntOnes][zeros-cntZeros])
+        return dp[-1][-1]
 ```
 
 ## 
