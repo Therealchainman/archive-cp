@@ -77,9 +77,59 @@ if __name__ == '__main__':
         print(f"Case #{t}: {main()}")
 ```
 
-## 
+## Ants and Sticks
 
 ###
+
+```py
+from collections import namedtuple
+from math import inf
+def main():
+    N, L = map(int,input().split())
+    Ant = namedtuple('Ant', ['pos', 'id', 'dir'])
+    ants_arr = []
+    for i in range(1,N+1):
+        loc, dir_ = map(int,input().split())
+        ants_arr.append(Ant(loc, i, dir_ if dir_ == 1 else -1))
+    ant_order = []
+    left_edge, right_edge = -1, L
+    ants_arr.sort(key=lambda ant: ant.pos)
+    while len(ants_arr) > 1:
+        event_time = inf
+        for i, ant in enumerate(ants_arr):
+            if i == 0 and ant.dir == -1: # leftmost ant traveling to left side
+                event_time = min(event_time, ant.pos - left_edge)
+            elif i == len(ants_arr) - 1 and ant.dir == 1:
+                event_time = min(event_time, right_edge - ant.pos)
+            if i > 0 and ants_arr[i-1].dir == 1 and ant.dir == -1: # left ant moving rightwards, right ant moving leftwards will have collision event
+                event_time = min(event_time, (ant.pos - ants_arr[i-1].pos)/2)
+        # move all ants to event_time
+        for i, ant in enumerate(ants_arr):
+            ants_arr[i] = ant._replace(pos=ant.pos+ant.dir*event_time)
+        # find events that took place
+        remaining_ants = []
+        for i, ant in enumerate(ants_arr):
+            if i == 0 and ant.pos == left_edge: 
+                ant_order.append(ant.id)
+                continue
+            if i == len(ants_arr) - 1 and ant.pos == right_edge: 
+                ant_order.append(ant.id)
+                continue
+            if remaining_ants and remaining_ants[-1].pos == ant.pos: 
+                # left one was going right, right was going left
+                remaining_ants[-1] = remaining_ants[-1]._replace(dir=-1)
+                ant = ant._replace(dir=1)
+            remaining_ants.append(ant)
+        ants_arr = remaining_ants
+    ant_order.append(ants_arr[-1].id)
+    return ' '.join(map(str, ant_order))
+
+if __name__ == '__main__':
+    T = int(input())
+    for t in range(1,T+1):
+        print(f"Case #{t}: {main()}")
+
+```
 
 ##
 
