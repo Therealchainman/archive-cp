@@ -2551,6 +2551,177 @@ class Solution:
         return dp[-1][-1]
 ```
 
+## 32. Longest Valid Parentheses
+
+### Solution 1: stack 
+
+```py
+class Solution:
+    def longestValidParentheses(self, s: str) -> int:
+        stack = [-1]
+        ans = 0
+        for i, ch in enumerate(s):
+            if ch == '(':
+                stack.append(i)
+            else:
+                stack.pop()
+                if not stack:
+                    stack.append(i)
+                else:
+                    ans = max(ans, i - stack[-1])
+        return ans
+```
+
+### Solution 2: stack + dynamicc programming
+
+```py
+class Solution:
+    def longestValidParentheses(self, s: str) -> int:
+        stack = []
+        n = len(s)
+        memo = [0]*(n+1)
+        for i, ch in enumerate(s):
+            if ch == '(':
+                stack.append(i)
+            elif stack:
+                j = stack.pop()
+                memo[i+1] = i-j+1+memo[j]
+        return max(memo)
+```
+
+## Russian Doll Envelopes
+
+### Solution 1: dynamic programming with sort + binary search
+
+```py
+class Solution:
+    def maxEnvelopes(self, envelopes):
+        nums = sorted(envelopes, key = lambda x: (x[0], -x[1]))
+        UPPER_BOUND = 100001
+        dp = [UPPER_BOUND] * (len(nums) + 1)
+        for w, h in nums: 
+            i = bisect_left(dp, h)
+            dp[i] = h
+        return dp.index(UPPER_BOUND)
+```
+
+## 268. Missing Number
+
+### Solution 1: bit manipulation with xor
+
+```py
+class Solution:
+    def missingNumber(self, nums: List[int]) -> int:
+        answer = len(nums)
+        for i, x in enumerate(nums):
+            answer = answer ^ i ^ x
+        return answer
+```
+
+### Solution 2: Gauss formula 
+
+```py
+class Solution:
+    def missingNumber(self, nums: List[int]) -> int:
+        n = len(nums)
+        expected_sum = n*(n+1)//2
+        return expected_sum - sum(nums)
+```
+
+## 1059. All Paths from Source Lead to Destination
+
+### Solution 1: BFS + Detect cycle in directed graph with dfs with backtracking algorithm, checking if node is in path. 
+
+```py
+class Solution:
+    def leadsToDestination(self, n: int, edges: List[List[int]], source: int, destination: int) -> bool:
+        graph = defaultdict(list)
+        for u, v in edges:
+            graph[u].append(v)
+        visited = [0]*n
+        in_path = [0]*n
+        def detect_cycle(node):
+            visited[node] = 1
+            in_path[node] = 1
+            for nei in graph[node]:
+                if in_path[nei]: return True
+                if not visited[nei] and detect_cycle(nei): return True
+            in_path[node] = 0
+            return False
+        if detect_cycle(source): return False
+        visited = [0]*n
+        visited[source] = 1
+        queue = deque([source])
+        is_terminal = lambda x: len(graph[x])==0
+        while queue:
+            node = queue.popleft()
+            if is_terminal(node) and node != destination: return False
+            for nei in graph[node]:
+                if visited[nei]: continue
+                visited[nei] = 1
+                queue.append(nei)
+        return True
+```
+
+## 595. Big Countries
+
+### Solution 1: WHERE clause
+
+```sql
+SELECT name, population, area
+FROM World
+WHERE area >= 3000000
+OR population >= 25000000;
+```
+
+## 1757. Recyclable and Low Fat Products
+
+### Solution 1: Where clause
+
+```sql
+SELECT product_id
+FROM Products
+WHERE recyclable = 'Y'
+AND low_fats = 'Y';
+```
+
+## 584. Find Customer Referee
+
+### Solution 1: Where clause and IS NULL
+
+```sql
+SELECT name
+FROM Customer
+WHERE referee_id IS NULL
+OR referee_id != 2;
+```
+
+## 
+
+### Solution 1: NOT IN clause
+
+```sql
+SELECT name AS Customers
+FROM Customers
+WHERE id NOT IN (SELECT customerId FROM Orders);
+```
+
+## 
+
+### Solution 1:
+
+```py
+
+```
+
+## 
+
+### Solution 1:
+
+```py
+
+```
+
 ## 
 
 ### Solution 1:
