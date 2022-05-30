@@ -38,24 +38,27 @@ def sequence_query():
         print(fr[arr[j+k-1]])
 
 class FenwickTree:
-  def __init__(self, N):
-    self.sums = [0 for _ in range(N+1)]
-  
-  def update(self, i, delta):
+    """
+    Fenwick tree that is 1-index based, so must start all computations from 1 to n values
+    """
+    def __init__(self, N):
+        self.sums = [0 for _ in range(N+1)]
 
-    while i < len(self.sums):
-      self.sums[i] += delta
-      i += i & (-i)
-      
-  def query(self, i):
-    res = 0
-    while i > 0:
-      res += self.sums[i]
-      i -= i & (-i)
-    return res
-  
-  def __repr__(self):
-    return f"array: {self.sums}"
+    def update(self, i, delta):
+
+        while i < len(self.sums):
+            self.sums[i] += delta
+            i += i & (-i)
+
+    def query(self, i):
+        res = 0
+        while i > 0:
+            res += self.sums[i]
+            i -= i & (-i)
+        return res
+
+    def __repr__(self):
+        return f"array: {self.sums}"
 
 def sequence_query_bit():
   Q = int(input())

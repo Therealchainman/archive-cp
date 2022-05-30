@@ -2696,7 +2696,7 @@ WHERE referee_id IS NULL
 OR referee_id != 2;
 ```
 
-## 
+## 183. Customers Who Never Order
 
 ### Solution 1: NOT IN clause
 
@@ -2706,26 +2706,477 @@ FROM Customers
 WHERE id NOT IN (SELECT customerId FROM Orders);
 ```
 
-## 
+## 2286. Booking Concert Tickets in Groups
 
-### Solution 1:
+### Solution 1: fenwick tree for range sum queries and segment tree for range max query
+
+```py
+class FenwickTree:
+    def __init__(self, N):
+        self.sums = [0 for _ in range(N+1)]
+
+    def update(self, i, delta):
+
+        while i < len(self.sums):
+            self.sums[i] += delta
+            i += i & (-i)
+
+    def query(self, i):
+        res = 0
+        while i > 0:
+            res += self.sums[i]
+            i -= i & (-i)
+        return res
+
+    def __repr__(self):
+        return f"array: {self.sums}"
+class MaxSegmentTree:
+    def __init__(self,arr):
+        self.arr = arr
+        n = len(arr)
+        self.neutral = -inf
+        self.size = 1
+        while self.size<n:
+            self.size*=2
+        self.tree = [0 for _ in range(self.size*2)]
+    def update_tree(self, idx, val):
+        self.update(idx,val,0,0,self.size)
+    def build_tree(self):
+        for i, val in enumerate(self.arr):
+            self.update_tree(i,val)
+    def update(self,idx,val,x,lx,rx):
+        if rx-lx==1:
+            self.tree[x] = val
+            return
+        mid = rx+lx>>1
+        if idx<mid:
+            self.update(idx,val,2*x+1,lx,mid)
+        else:
+            self.update(idx,val,2*x+2,mid,rx)
+        self.tree[x] = max(self.tree[2*x+1],self.tree[2*x+2])
+    def query(self, l, r, x, lx, rx):
+        if lx>=r or l>=rx:
+            return self.neutral
+        if lx>=l and rx<=r:
+            return self.tree[x]
+        m = lx+rx>>1
+        sl = self.query(l,r,2*x+1,lx,m)
+        sr = self.query(l,r,2*x+2,m,rx)
+        return max(sl,sr)
+    def query_tree(self, l, r):
+        return self.query(l,r,0,0,self.size)
+    def get_first_tree(self,l, r,val):
+        return self.get_first(l,r,0,0,self.size,val)
+    def get_first(self,l,r,x,lx,rx,val):
+        if lx>=r or rx<=l: return -1
+        if l<=lx and rx<=r:
+            if self.tree[x] < val: return -1
+            while rx != lx+1:
+                mid = lx + rx >> 1
+                if self.tree[2*x+1]>=val:
+                    x = 2*x+1
+                    rx = mid
+                else:
+                    x = 2*x+2
+                    lx = mid
+
+            return lx
+        mid = lx+rx>>1
+        left_segment = self.get_first(l,r,2*x+1,lx,mid,val)
+        if left_segment != -1: return left_segment
+        return self.get_first(l,r,2*x+2,mid,rx,val)
+    def __repr__(self):
+        return f"array: {self.tree}"
+
+class BookMyShow:
+
+    def __init__(self, n: int, m: int):
+        self.seats = [m]*n # cnt of empty seats
+        self.row_len = m
+        self.fenwick = FenwickTree(n)
+        for i in range(1,n+1):
+            self.fenwick.update(i,m)
+        self.maxSegTree = MaxSegmentTree(self.seats)
+        self.maxSegTree.build_tree()
+        self.cur_row = 0
+    def gather(self, k: int, maxRow: int) -> List[int]:
+        r = self.maxSegTree.get_first_tree(0,maxRow+1,k)
+        if r < 0: return []
+        empty_seats = self.seats[r]
+        c = self.row_len - empty_seats
+        self.seats[r] -= k # update the empty seats in the row
+        self.fenwick.update(r+1,-k)
+        self.maxSegTree.update_tree(r,self.seats[r])
+        return [r,c]
+
+    def scatter(self, k: int, maxRow: int) -> bool:
+        if self.fenwick.query(maxRow+1) < k: return False
+        for r in range(self.cur_row, maxRow+1):
+            fill_seats = min(k, self.seats[r])
+            self.seats[r] -= fill_seats
+            k -= fill_seats
+            self.fenwick.update(r+1,-fill_seats)
+            self.maxSegTree.update_tree(r,self.seats[r])
+            if self.seats[r] == 0:
+                self.cur_row = r + 1
+            if k == 0: break
+        return True
+```
+
+## 2283. Check if Number Has Equal Digit Count and Digit Value
+
+### Solution 1: counter
+
+```py
+class Solution:
+    def digitCount(self, num: str) -> bool:
+        counts = Counter(map(int, num))
+        return not any(counts[digit]!=cnt for digit, cnt in enumerate(map(int,num)))
+```
+
+## 2284. Sender With Largest Word Count
+
+### Solution 1: counter + sorting
+
+```py
+class Solution:
+    def largestWordCount(self, messages: List[str], senders: List[str]) -> str:
+        sender_counter = Counter()
+        for message, sender in zip(messages, senders):
+            sender_counter[sender] += message.count(' ') + 1
+        pairs = [(cnt , sender) for sender, cnt in sender_counter.items()]
+        pairs.sort(reverse=True)
+        return pairs[0][1]
+```
+
+## 2285. Maximum Total Importance of Roads
+
+### Solution 1: count indegrees of undirected graph
+
+```py
+class Solution:
+    def maximumImportance(self, n: int, roads: List[List[int]]) -> int:
+        graph = defaultdict(list)
+        for u, v in roads:
+            graph[u].append(v)
+            graph[v].append(u)
+        num_nei = sorted([len(edges) for edges in graph.values()], reverse=True)
+        return sum(i*cnt for i, cnt in zip(range(n+1)[::-1], num_nei))
+```
+
+```py
+class Solution:
+    def maximumImportance(self, n: int, roads: List[List[int]]) -> int:
+        indegrees = [0]*n
+        for u, v in roads:
+            indegrees[u]+=1
+            indegrees[v]+=1
+        indegrees.sort()
+        return sum(node*cnt_indegrees for node, cnt_indegrees in enumerate(indegrees, start=1))
+```
+
+## 318. Maximum Product of Word Lengths
+
+### Solution 1: Counter + bitmask + bit manipulation
+
+```py
+class Solution:
+    def maxProduct(self, words: List[str]) -> int:
+        bitmask_dict = Counter()
+        for word in words:
+            bitmask = 0
+            for ch in word:
+                right_shift_index = ord(ch)-ord('a')
+                bitmask |= (1<<right_shift_index)
+            bitmask_dict[bitmask] = max(bitmask_dict[bitmask], len(word))
+        max_prod = 0
+        for (b1,l1), (b2,l2) in product(bitmask_dict.items(), repeat=2):
+            if b1 & b2 == 0:
+                max_prod = max(max_prod, l1*l2)
+        return max_prod
+```
 
 ```py
 
 ```
 
-## 
+## 1136. Parallel Courses
 
-### Solution 1:
+### Solution 1: Topological sort + Use Topological sort to detect cycle + BFS Implementation + Called Kahn's Algorithm
 
 ```py
+class Solution:
+    def minimumSemesters(self, n: int, relations: List[List[int]]) -> int:
+        visited = [0]*(n+1)
+        graph = defaultdict(list)
+        indegrees = [0]*(n+1)
+        for u, v in relations:
+            graph[u].append(v)
+            indegrees[v] += 1
+        num_semesters = studied_count = 0
+        queue = deque()
+        for node in range(1,n+1):
+            if indegrees[node] == 0:
+                queue.append(node)
+                studied_count += 1
+        while queue:
+            num_semesters += 1
+            sz = len(queue)
+            for _ in range(sz):
+                node = queue.popleft()
+                for nei in graph[node]:
+                    indegrees[nei] -= 1
+                    if indegrees[nei] == 0 and not visited[nei]:
+                        queue.append(nei)
+                        studied_count += 1
+        return num_semesters if studied_count == n else -1
+```
 
+## 2289. Steps to Make Array Non-decreasing
+
+### Solution 1: stack + dynamic programming
+
+![edge case 1](images/make_array_nondecreasing1.PNG)
+![edge case 2](images/make_array_nondecreasing2.PNG)
+
+```py
+class Solution:
+    def totalSteps(self, nums: List[int]) -> int:
+        stack = []
+        total_steps = 0
+        for num in nums:
+            steps = 0
+            while stack and num >= stack[-1][0]:
+                steps = max(steps, stack[-1][1])
+                stack.pop()
+            steps = steps + 1 if stack else 0
+            total_steps = max(total_steps, steps)
+            stack.append((num,steps))
+        return total_steps
+```
+
+## 29. Divide Two Integers
+
+### Solution 1: Repeated Exponential Search 
+
+```py
+class Solution:
+    def divide(self, dividend: int, divisor: int) -> int:
+        LOWER, UPPER = -2**31, 2**31-1  
+        sign = 1 if (divisor>0)^(dividend>0) else -1
+        # SPECIAL CASE
+        if dividend == LOWER and divisor == -1: return UPPER
+        quotient = 0
+        dividend, divisor = -abs(dividend), -abs(divisor)
+        while dividend <= divisor:
+            value = divisor
+            num_times = -1
+            while value >= LOWER//2 and value+value >= dividend:
+                value+=value
+                num_times += num_times
+            quotient += num_times
+            dividend -= value
+        return sign*quotient
+```
+
+### Solution 2: Single Exponential Search + memoization + linear scan in reverse through potential values
+
+```py
+class Solution:
+    def divide(self, dividend: int, divisor: int) -> int:
+        LOWER, UPPER = -2**31, 2**31-1  
+        sign = 1 if (divisor>0)^(dividend>0) else -1
+        # SPECIAL CASE
+        if dividend == LOWER and divisor == -1: return UPPER
+        quotient = 0
+        dividend, divisor = -abs(dividend), -abs(divisor)
+        powers_arr, values_arr = [], []
+        values_arr, powers_arr = [divisor], [-1]
+        while values_arr[-1] >= LOWER//2 and values_arr[-1]+values_arr[-1] >= dividend:
+            values_arr.append(values_arr[-1]+values_arr[-1])
+            powers_arr.append(powers_arr[-1]+powers_arr[-1])
+        for val, pow_ in zip(reversed(values_arr), reversed(powers_arr)):
+            if val >= dividend:
+                quotient += pow_
+                dividend -= val
+        return sign*quotient
+```
+
+## 2287. Rearrange Characters to Make Target String
+
+### Solution 1: Counter + min 
+
+```py
+class Solution:
+    def rearrangeCharacters(self, s: str, target: str) -> int:
+        counts, tcounts = map(Counter, (s, target))
+        return min(counts[c]//tcounts[c] for c in tcounts)
+```
+
+## 2288. Apply Discount to Prices
+
+### Solution 1: isnumeric() + string + floats
+
+```py
+class Solution:
+    def discountPrices(self, sentence: str, discount: int) -> str:
+        delta = (100-discount)/100
+        words = sentence.split()
+        for i, word in enumerate(words):
+            if word[0] == '$' and word[1:].isnumeric():
+                updated_price = int(word[1:])*delta
+                words[i] = f'${updated_price:.2f}'
+        return ' '.join(words)
+```
+
+## 627. Swap Salary
+
+### Solution 1: UPDATE Query with CASE statement
+
+```sql
+UPDATE Salary
+SET 
+    sex =  CASE 
+        WHEN sex = 'f' THEN 'm'
+        ELSE 'f'
+    END;
+```
+
+## 196. Delete Duplicate Emails
+
+### Solution 1: DELETE FROM WITH IMPLICT JOIN QUERY USING WHERE
+
+```sql
+DELETE p1 FROM Person p1, Person p2
+WHERE p1.email = p2.email 
+AND p1.id > p2.id;
+```
+
+## 1873. Calculate Special Bonus
+
+### Solution 1: SELECT + CASE + SUBSTRING
+
+```sql
+SELECT employee_id, 
+    CASE 
+        WHEN employee_id%2 = 0 OR SUBSTRING(name, 1, 1) = 'M' THEN 0
+        ELSE salary
+    END bonus
+FROM Employees;
+```
+
+### Solution 2: SELECT + CASE + LIKE for prefix
+
+```sql
+SELECT employee_id, 
+    CASE 
+        WHEN employee_id%2 != 0 AND name NOT LIKE 'M%' THEN salary
+        ELSE 0
+    END bonus
+FROM Employees;
+```
+
+## 2290. Minimum Obstacle Removal to Reach Corner
+
+### Solution 1: Dijkstra Algorithm + minheap datastructure + shortest path
+
+```py
+class Solution:
+    def minimumObstacles(self, grid: List[List[int]]) -> int:
+        R, C = len(grid), len(grid[0])
+        minheap = [(0,0,0)] # (num_obstacles_removed, row, col)
+        # goal is to minimize on the num_obstacles_removed
+        dist = [[inf]*C for _ in range(R)]
+        in_bounds = lambda r, c: 0<=r<R and 0<=c<C
+        def neighbors(row, col):
+            for nr, nc in [(row-1,col),(row+1,col),(row,col-1),(row,col+1)]:
+                if not in_bounds(nr,nc): continue
+                yield nr, nc
+        dist[0][0] = 0
+        while minheap:
+            cost, row, col = heappop(minheap)
+            if row == R-1 and col == C-1:
+                return cost
+            for nr, nc in neighbors(row,col):
+                ncost = cost + grid[nr][nc]
+                if ncost < dist[nr][nc]:
+                    dist[nr][nc] = ncost
+                    heappush(minheap, (ncost,nr,nc))
+        return -1
+```
+
+### Solution 2: 0/1 BFS + Modified BFS
+
+```py
+class Solution:
+    def minimumObstacles(self, grid: List[List[int]]) -> int:
+        R, C = len(grid), len(grid[0])
+        queue = deque([(0,0,0)]) # (num_obstacles_removed, row, col)
+        # goal is to minimize on the num_obstacles_removed
+        dist = [[inf]*C for _ in range(R)]
+        in_bounds = lambda r, c: 0<=r<R and 0<=c<C
+        def neighbors(row, col):
+            for nr, nc in [(row-1,col),(row+1,col),(row,col-1),(row,col+1)]:
+                if not in_bounds(nr,nc) or dist[nr][nc] < inf: continue
+                yield nr, nc
+        dist[0][0] = 0
+        while queue:
+            cost, row, col = queue.popleft()
+            if row == R-1 and col == C-1:
+                return cost
+            for nr, nc in neighbors(row,col):
+                if grid[nr][nc] == 1:
+                    dist[nr][nc] = cost + 1
+                    queue.append((cost+1,nr,nc))
+                else:
+                    dist[nr][nc] = cost
+                    queue.appendleft((cost, nr,nc))
+        return -1
+```
+
+## 1667. Fix Names in a Table
+
+### Solution 1: CONCAT + UPPER/LOWER + SUBSTRING
+
+```sql
+SELECT user_id, CONCAT(UPPER(SUBSTRING(name, 1, 1)),LOWER(SUBSTRING(name, 2))) AS name
+FROM Users
+ORDER BY user_id
+```
+
+## 1484. Group Sold Products By The Date
+
+### Solution 1: GROUPBY + ORDERBY + GROUP_CONCAT create a list from a column
+
+```sql
+SELECT sell_date, COUNT(DISTINCT(product)) AS num_sold, GROUP_CONCAT(DISTINCT product ORDER BY product ASC) AS products
+FROM Activities
+GROUP BY sell_date
+ORDER BY sell_date 
+```
+
+## 1527. Patients With a Condition
+
+### Solution 1: WHERE WITH LIKE for prefix search + search for prefix in string
+
+```sql
+SELECT *
+FROM Patients
+WHERE conditions LIKE '% DIAB1%'
+OR conditions LIKE 'DIAB1%'
 ```
 
 ## 
 
-### Solution 1:
+### Solution 1: 
 
-```py
-
+```sql
 ```
+
+## 
+
+### Solution 1: 
+
+```sql
+```
+
