@@ -2896,8 +2896,20 @@ class Solution:
         return max_prod
 ```
 
-```py
+### Solution 2: reduce 
 
+```py
+class Solution:
+    def maxProduct(self, words: List[str]) -> int:
+        bitmask_dict = Counter()
+        for word in words:
+            bitmask = reduce(lambda prev, cur: prev|(1<<(ord(cur)-ord('a'))), word, 0)
+            bitmask_dict[bitmask] = max(bitmask_dict[bitmask], len(word))
+        max_prod = 0
+        for (b1,l1), (b2,l2) in product(bitmask_dict.items(), repeat=2):
+            if b1 & b2 == 0:
+                max_prod = max(max_prod, l1*l2)
+        return max_prod
 ```
 
 ## 1136. Parallel Courses
@@ -3166,7 +3178,77 @@ WHERE conditions LIKE '% DIAB1%'
 OR conditions LIKE 'DIAB1%'
 ```
 
-## 
+## 1965. Employees With Missing Information
+
+### Solution 1: INNER JOIN + UNION
+
+```sql
+SELECT employee_id 
+FROM Employees
+WHERE employee_id NOT IN (
+    SELECT e.employee_id 
+    FROM Employees e
+    JOIN Salaries s
+    ON e.employee_id=s.employee_id)
+UNION
+SELECT employee_id
+FROM Salaries
+WHERE employee_id NOT IN (
+    SELECT e.employee_id
+    FROM Employees e
+    JOIN Salaries s
+    ON e.employee_id=s.employee_id)
+ORDER BY employee_id
+```
+
+## 1795. Rearrange Products Table
+
+### Solution 1: UNION + DERIVED TABLE + WHERE
+
+```sql
+SELECT *
+FROM (SELECT product_id, 'store1' AS store, store1 AS price
+FROM Products
+UNION
+SELECT product_id, 'store2' AS store, store2 AS price
+FROM Products
+UNION
+SELECT product_id, 'store3' AS store, store3 AS price
+FROM Products) tbl
+WHERE price IS NOT NULL;
+```
+
+### Solution 2: UNION + WITH for CTE (temporary table)
+
+```sql
+WITH tmp_tbl AS (SELECT product_id, 'store1' AS store, store1 AS price
+FROM Products
+UNION
+SELECT product_id, 'store2' AS store, store2 AS price
+FROM Products
+UNION
+SELECT product_id, 'store3' AS store, store3 AS price
+FROM Products)
+SELECT *
+FROM tmp_tbl
+WHERE price IS NOT NULL
+```
+
+## 608. Tree Node
+
+### Solution 1: CASE STATEMENT 
+
+```sql
+SELECT id, 
+CASE
+    WHEN p_id IS NULL THEN 'Root'
+    WHEN id NOT IN (SELECT DISTINCT(p_id) AS id FROM Tree WHERE p_id IS NOT NULL) THEN 'Leaf'
+    ELSE 'Inner'
+END AS type
+FROM Tree;
+```
+
+## 176. Second Highest Salary
 
 ### Solution 1: 
 
@@ -3174,11 +3256,130 @@ OR conditions LIKE 'DIAB1%'
 
 ```
 
+## 1461. Check If a String Contains All Binary Codes of Size K
+
+### Solution 1: set + combinations
+
+Note on how to think about this, for if k = 3, for each index you have two choices '0' or '1'. 
+so you have 2 choices for index=0, 2 choices for index=1, 2 choices for index=2, which gives
+total of 2*2*2=8 ways to create unique binary string.  So you have 
+
+```py
+class Solution:
+    def hasAllCodes(self, s: str, k: int) -> bool:
+        return len(set(s[i-k:i] for i in range(k,len(s)+1))) == 2**k
+```
+
+```py
+class Solution:
+    def hasAllCodes(self, s: str, k: int) -> bool:
+        need = 2**k
+        seen = set()
+        for i in range(k,len(s)+1):
+            subs = s[i-k:i]
+            if subs not in seen:
+                need -= 1
+                seen.add(subs)
+            if need == 0: return True
+        return False
+```
+
+### Solution 2: Rolling Hash with binary numbers formed from a specific size of bits
+
+```py
+class Solution:
+    def hasAllCodes(self, s: str, k: int) -> bool:
+        need = 2**k
+        ones = need-1
+        seen = [False]*need
+        cur_hash = 0
+        for i, bit in enumerate(map(int, s)):
+            cur_hash = ((cur_hash << 1) & ones) | bit
+            if i>=k-1 and not seen[cur_hash]:
+                seen[cur_hash] = True
+                need -= 1
+                if need == 0: return True
+        return False
+```
+
+```py
+class Solution:
+    def hasAllCodes(self, s: str, k: int) -> bool:
+        all_codes = 2**k
+        ones = all_codes-1
+        seen = [False]*all_codes
+        cur_hash = 0
+        for i, bit in enumerate(map(int, s)):
+            cur_hash = ((cur_hash << 1) & ones) | bit
+            if i>=k-1 and not seen[cur_hash]:
+                seen[cur_hash] = True
+        return all(val for val in seen)
+```
+
+## 1480. Running Sum of 1d Array
+
+### Solution 1: accumulate
+
+```py
+class Solution:
+    def runningSum(self, nums: List[int]) -> List[int]:
+        return accumulate(nums)
+```
+
+## 175. Combine Two Tables
+
+### Solution 1: LEFT JOIN
+
+```sql
+SELECT p.firstName, p.lastName, a.city, a.state
+FROM Person p
+LEFT JOIN Address a
+ON p.personId = a.personId
+```
+
+## 1581. Customer Who Visited but Did Not Make Any Transactions
+
+### Solution 1: LEFT JOIN + GROUPBY
+
+```sql
+SELECT v.customer_id, COUNT(v.visit_id) AS count_no_trans
+FROM Visits v
+LEFT JOIN Transactions t
+ON v.visit_id = t.visit_id
+WHERE t.transaction_id IS NULL
+GROUP BY v.customer_id
+```
+
+## 1148. Article Views I
+
+### Solution 1: WHERE + DISTINCT
+
+```sql
+SELECT DISTINCT author_id AS id
+FROM Views
+WHERE author_id = viewer_id
+ORDER BY id
+```
+
+## 586. Customer Placing the Largest Number of Orders
+
+### Solution 1: GROUP BY + HAVING + ORDER BY + LIMIT
+
+```sql
+SELECT customer_number
+FROM Orders
+GROUP BY customer_number
+HAVING COUNT(order_number) = (SELECT COUNT(order_number) AS cnt
+                             FROM Orders
+                             GROUP BY customer_number
+                             ORDER BY cnt DESC LIMIT 1)
+```
+
 ## 
 
 ### Solution 1: 
 
-```sql
+```py
 
 ```
 
@@ -3186,15 +3387,7 @@ OR conditions LIKE 'DIAB1%'
 
 ### Solution 1: 
 
-```sql
-
-```
-
-## 
-
-### Solution 1: 
-
-```sql
+```py
 
 ```
 
@@ -3213,10 +3406,82 @@ OR conditions LIKE 'DIAB1%'
 ```py
 
 ```
+
 ## 
 
 ### Solution 1: 
 
 ```py
+
+```
+
+## 511. Game Play Analysis I
+
+### Solution 1: MIN for dates with GROUP BY
+
+```sql
+SELECT player_id, MIN(event_date) AS first_login
+FROM Activity
+GROUP BY player_id
+```
+
+## 1890. The Latest Login in 2020
+
+### Solution 1: YEAR function with GROUP BY 
+
+```sql
+SELECT user_id, MAX(time_stamp) AS last_stamp
+FROM Logins
+WHERE YEAR(time_stamp) = 2020
+GROUP BY user_id
+```
+
+## 1741. Find Total Time Spent by Each Employee
+
+### Solution 1:
+
+```sql
+SELECT event_day AS day, emp_id, SUM(out_time-in_time) AS total_time
+FROM Employees
+GROUP BY emp_id, event_day
+```
+
+##
+
+### Solution 1:
+
+```sql
+
+```
+
+##
+
+### Solution 1:
+
+```sql
+
+```
+
+##
+
+### Solution 1:
+
+```sql
+
+```
+
+##
+
+### Solution 1:
+
+```sql
+
+```
+
+##
+
+### Solution 1:
+
+```sql
 
 ```
