@@ -3250,10 +3250,32 @@ FROM Tree;
 
 ## 176. Second Highest Salary
 
-### Solution 1: 
+### Solution 1: LIMIT + OFFSET + GROUPBY + SUBQUERY FOR NULL
 
 ```sql
+SELECT (
+    SELECT
+        salary
+    FROM Employee
+    GROUP BY salary
+    ORDER BY salary DESC
+    LIMIT 1 OFFSET 1
+) SecondHighestSalary;
+```
 
+### Solution 2: LIMIT + OFFSET + GROUPBY + IFNULL
+
+```sql
+SELECT
+    IFNULL (
+    (SELECT
+        salary
+    FROM Employee
+    GROUP BY salary
+    ORDER BY salary DESC
+    LIMIT 1 OFFSET 1
+), NULL
+) SecondHighestSalary;
 ```
 
 ## 1461. Check If a String Contains All Binary Codes of Size K
@@ -3375,44 +3397,226 @@ HAVING COUNT(order_number) = (SELECT COUNT(order_number) AS cnt
                              ORDER BY cnt DESC LIMIT 1)
 ```
 
-## 
+## 52. N-Queens II
 
-### Solution 1: 
+### Solution 1: backtracking algorithm
+
+![n-queens](images/n-queens.PNG)
 
 ```py
-
+class Solution:
+    def totalNQueens(self, n: int) -> int:
+        # NEVER PLACE TWO QUEENS IN THE SAME COLUMN, MINOR DIAGONAL OR MAJOR DIAGONAL
+        cols, minor_diagonals, major_diagonals = set(), set(), set()
+        
+        def place(r, c):
+            minor_diagonals.add(r+c)
+            major_diagonals.add(r-c)
+            cols.add(c)
+            
+        def remove(r, c):
+            minor_diagonals.remove(r+c)
+            major_diagonals.remove(r-c)
+            cols.remove(c)
+            
+        def is_free(r,c):
+            return not (c in cols or r+c in minor_diagonals or r-c in major_diagonals)
+        
+        # COUNT THE VALID NUMBER OF BOARDS TO PLACE N QUEENS VIA BACKTRACK ALGORITHM
+        def backtrack(num_queens, r):
+            if num_queens == n:
+                return 1
+            counter = 0
+            for c in range(n):
+                if not is_free(r,c): continue
+                place(r,c)
+                counter += backtrack(num_queens+1, r+1)
+                remove(r,c)
+            return counter
+        
+        return backtrack(0,0)
 ```
 
-## 
+## 51. N-Queens
 
-### Solution 1: 
+### Solution 1: Backtracking algorithm
 
 ```py
-
+class Solution:
+    def solveNQueens(self, n: int) -> List[List[str]]:
+        # NEVER PLACE TWO QUEENS IN THE SAME COLUMN, MINOR DIAGONAL OR MAJOR DIAGONAL
+        cols, minor_diagonals, major_diagonals = set(), set(), set()
+        boards, current_board = [], [['.']*n for _ in range(n)]
+        
+        def place(r, c):
+            minor_diagonals.add(r+c)
+            major_diagonals.add(r-c)
+            cols.add(c)
+            current_board[r][c] = 'Q'
+            
+        def remove(r, c):
+            minor_diagonals.remove(r+c)
+            major_diagonals.remove(r-c)
+            cols.remove(c)
+            current_board[r][c] = '.'
+            
+        def is_free(r,c):
+            return not (c in cols or r+c in minor_diagonals or r-c in major_diagonals)
+        
+        def create_board():
+            return [''.join(row) for row in current_board]
+        
+        def backtrack(num_queens, r):
+            if num_queens == n:
+                boards.append(create_board())
+                return
+            for c in range(n):
+                if not is_free(r,c): continue
+                place(r,c)
+                backtrack(num_queens+1, r+1)
+                remove(r,c)
+        
+        backtrack(0,0)
+        return boards
 ```
 
-## 
+## 2293. Min Max Game
 
-### Solution 1: 
+### Solution 1: min-max game + simulation
 
 ```py
-
+class Solution:
+    def minMaxGame(self, nums: List[int]) -> int:
+        while len(nums) > 1:
+            sz = len(nums)//2
+            new_nums = [0]*sz
+            for i in range(sz):
+                if i%2==0:
+                    new_nums[i] = min(nums[2*i], nums[2*i+1])
+                else:
+                    new_nums[i] = max(nums[2*i], nums[2*i+1])
+            nums = new_nums
+        return nums[0]
 ```
 
-## 
+## 2294. Partition Array Such That Maximum Difference Is K
 
-### Solution 1: 
+### Solution 1: sort + sliding window 
 
 ```py
-
+class Solution:
+    def partitionArray(self, nums: List[int], k: int) -> int:
+        nums.sort()
+        counter = 1
+        start_val = nums[0]
+        for val in nums[1:]:
+            if val-start_val > k:
+                start_val = val
+                counter += 1
+        return counter
 ```
 
-## 
+## 2295. Replace Elements in an Array
 
-### Solution 1: 
+### Solution 1: dictionary to store the value and index and then replace arrays
 
 ```py
+class Solution:
+    def arrayChange(self, nums: List[int], operations: List[List[int]]) -> List[int]:
+        nums_dict = {val: i for i, val in enumerate(nums)}
+        for u, v in operations:
+            index = nums_dict[u]
+            nums[index] = v
+            nums_dict[v] = index
+        return nums
+```
 
+## 2296. Design a Text Editor
+
+### Solution 1:  Doubly Linked List Data Structure implemented from scratch
+
+```py
+class Node:
+    def __init__(self, val='', prev_node=None, next_node=None):
+        self.val = val
+        self.next = next_node
+        self.prev = prev_node
+    
+class DoublyLinkedList:
+    def __init__(self):
+        self.head = Node() # head node
+        self.cursor_node = self.head
+        
+    def add(self, text: str) -> None:
+        node = self.cursor_node
+        node_after = node.next
+        for ch in text:
+            node.next = Node(ch,node)
+            node = node.next
+        node.next = node_after
+        if node_after:
+            node_after.prev = node
+        self.cursor_node = node
+        
+    def remove(self, num: int) -> int:
+        node = self.cursor_node
+        node_after = node.next
+        counter = 0
+        while counter < num:
+            if node.val == '': break
+            node = node.prev
+            counter += 1
+        node.next = node_after
+        if node_after:
+            node_after.prev = node
+        self.cursor_node = node
+        return counter
+
+    def moveLeft(self, num: int) -> str:
+        node = self.cursor_node
+        for _ in range(num):
+            if node.val == '': break
+            node = node.prev
+        self.cursor_node = node
+        left_elements = []
+        for _ in range(10):
+            if node.val == '': break
+            left_elements.append(node.val)
+            node=node.prev
+        return ''.join(reversed(left_elements))
+    
+    def moveRight(self, num: int) -> str:
+        node = self.cursor_node
+        for _ in range(num):
+            if not node.next: break
+            node = node.next
+        self.cursor_node = node
+        left_elements = []
+        for _ in range(10):
+            if node.val == '': break
+            left_elements.append(node.val)
+            node=node.prev
+        return ''.join(reversed(left_elements))
+    
+class TextEditor:
+
+    def __init__(self):
+        self.text = DoublyLinkedList()
+
+    def addText(self, text: str) -> None:
+        self.text.add(text)
+
+    def deleteText(self, k: int) -> int:
+        res = self.text.remove(k)
+        return res
+
+    def cursorLeft(self, k: int) -> str:
+        res = self.text.moveLeft(k)
+        return res
+
+    def cursorRight(self, k: int) -> str:
+        res = self.text.moveRight(k)
+        return res
 ```
 
 ## 511. Game Play Analysis I
@@ -3446,36 +3650,343 @@ FROM Employees
 GROUP BY emp_id, event_day
 ```
 
-##
+## 1729. Find Followers Count
 
-### Solution 1:
+### Solution 1: GROUP BY + ORDER BY
 
 ```sql
+SELECT user_id, COUNT(follower_id) AS followers_count
+FROM Followers
+GROUP BY user_id
+ORDER BY user_id
+```
+
+## 1693. Daily Leads and Partners
+
+### Solution 1: GROUP BY + COUNT DISTINCT
+
+```sql
+SELECT date_id, make_name, COUNT(DISTINCT(lead_id)) AS unique_leads, COUNT(DISTINCT(partner_id)) AS unique_partners
+FROM DailySales
+GROUP BY date_id, make_name
+```
+
+## 1141. User Activity for the Past 30 Days I
+
+### Solution 1: GROUP BY + COUNT DISTINCT + DATEDIFF + BETWEEN
+
+```sql
+SELECT activity_date AS day, COUNT(DISTINCT(user_id)) AS active_users
+FROM Activity
+WHERE DATEDIFF('2019-07-27', activity_date) BETWEEN 0 AND 29
+GROUP BY activity_date
+```
+
+## 607. Sales Person
+
+### Solution 1: NESTED IN + WHERE
+
+```sql
+SELECT name
+FROM SalesPerson
+WHERE sales_id NOT IN (
+    SELECT sales_id
+    FROM Orders
+    WHERE com_id IN (
+        SELECT com_id
+        FROM Company
+        WHERE name = 'RED'
+    )
+)
+```
+
+### Solution 2: RIGHT JOIN
+
+```sql
+SELECT s.name
+FROM Orders o
+JOIN Company c
+ON o.com_id = c.com_id AND c.name = 'RED'
+RIGHT JOIN SalesPerson s
+ON s.sales_id = o.sales_id
+WHERE o.sales_id IS NULL
+```
+
+### Solution 3: JOIN + IN
+
+```sql
+SELECT name FROM salesperson
+where sales_id not in
+(SELECT sales_id FROM orders
+JOIN
+company 
+ON orders.com_id=company.com_id 
+WHERE company.name='RED')
 
 ```
 
-##
+## 197. Rising Temperature
 
-### Solution 1:
+### Solution 1: JOIN + DATEDIFF
 
 ```sql
+SELECT w2.id
+FROM weather w1
+JOIN weather w2
+ON DATEDIFF(w2.recordDate, w1.recordDate) = 1 
+AND w2.temperature > w1.temperature
+```
+
+### Solution 2: LAG WINDOW FUNCTION IN SUBQUERY
+
+```sql
+SELECT 
+    id 
+FROM (
+    SELECT 
+        id, 
+        temperature current_temp, 
+        LAG(temperature,1) OVER(
+            ORDER BY recordDate
+        ) prev_temp,
+        recordDate current_d,
+        LAG(recordDate,1) OVER(
+            ORDER BY recordDate
+        ) prev_d
+    FROM 
+        Weather
+) w
+WHERE current_temp > prev_temp
+AND DATEDIFF(current_d,prev_d) = 1
+```
+
+## 1197. Minimum Knight Moves
+
+### Solution 1: BFS
+
+```py
+class Solution:
+    def minKnightMoves(self, x: int, y: int) -> int:
+        queue = deque([(0,0,0)])
+        vis = set([(0,0)])
+        while queue:
+            steps, cur_x, cur_y = queue.popleft()
+            if cur_x == x and cur_y == y:
+                return steps
+            for nx, ny in [(cur_x+2, cur_y+1), (cur_x+1,cur_y+2), (cur_x+2,cur_y-1), (cur_x+1,cur_y-2), (cur_x-2,cur_y+1), (cur_x-1,cur_y+2,),(cur_x-2,cur_y-1),(cur_x-1,cur_y-2)]:
+                if (nx,ny) not in vis:
+                    vis.add((nx,ny))
+                    queue.append((steps+1,nx,ny))
+        return -1
+```
+
+### Solution 2: Optimized BFS + Double BFS 
+
+```py
 
 ```
 
-##
+### Solution 3: Heuristic BFS + manhattan distance
 
-### Solution 1:
-
-```sql
+```py
 
 ```
 
-##
+## 160. Intersection of Two Linked Lists
+
+### Solution 1: two pointer + math of length of linked lists + single pass
+
+![intersection of linked lists](images/linked_lists_intersection.png)
+
+```py
+class Solution:
+    def getIntersectionNode(self, headA: ListNode, headB: ListNode) -> Optional[ListNode]:
+        pointerA, pointerB = headA, headB
+        while pointerA != pointerB:
+            pointerA = pointerA.next if pointerA else headB
+            pointerB = pointerB.next if pointerB else headA
+        return pointerA
+```
+
+## 
+
+### Solution 1: 
+
+```py
+
+```
+
+## 
+
+### Solution 1: 
+
+```py
+
+```
+
+## 1084. Sales Analysis III
 
 ### Solution 1:
 
 ```sql
+WITH outside_dates_tbl AS (
+    SELECT DISTINCT product_id
+    FROM Sales
+    WHERE sale_date NOT BETWEEN '2019-01-01' AND '2019-03-31'
+),
+inside_dates_tbl AS (
+    SELECT DISTINCT product_id
+    FROM Sales
+    WHERE sale_date BETWEEN '2019-01-01' AND '2019-03-31'
+),
+products_in_range_tbl AS (
+    SELECT i.product_id
+    FROM inside_dates_tbl i
+    LEFT JOIN outside_dates_tbl o
+    ON i.product_id = o.product_id
+    WHERE o.product_id IS NULL
+)
+SELECT p.product_id, p.product_name
+FROM Product p
+JOIN products_in_range_tbl o
+ON p.product_id = o.product_id
+```
 
+```sql
+WITH accepted_products_tbl AS (
+    SELECT DISTINCT product_id
+    FROM Sales
+    WHERE sale_date BETWEEN '2019-01-01' AND '2019-03-31'
+    AND product_id NOT IN (
+        SELECT DISTINCT product_id
+        FROM Sales
+        WHERE sale_date NOT BETWEEN '2019-01-01' AND '2019-03-31'
+    ) 
+)
+SELECT p.product_id, p.product_name
+FROM Product p
+WHERE p.product_id IN (SELECT product_id FROM accepted_products_tbl);
+```
+
+## 1587. Bank Account Summary II
+
+### Solution 1:
+
+```sql
+WITH balance_tbl AS (
+    SELECT account, SUM(amount) AS balance
+    FROM Transactions
+    GROUP BY account
+    HAVING balance > 10000
+)
+SELECT 
+    a.name, b.balance
+FROM
+    Users a
+JOIN
+    balance_tbl b
+ON
+    a.account = b.account
+```
+
+## 182. Duplicate Emails
+
+### Solution 1:
+
+```sql
+SELECT email
+FROM Person
+GROUP BY email
+HAVING COUNT(id) > 1;
+```
+
+## 1050. Actors and Directors Who Cooperated At Least Three Times
+
+### Solution 1:
+
+```sql
+SELECT actor_id, director_id
+FROM ActorDirector
+GROUP BY actor_id, director_id
+HAVING COUNT(timestamp) >= 3;
+```
+
+## 1393. Capital Gain/Loss
+
+### Solution 1:
+
+```sql
+SELECT
+    stock_name,
+    SUM(
+        CASE
+            WHEN operation = 'Buy' THEN -price
+            ELSE price
+        END
+    ) AS capital_gain_loss
+FROM 
+    Stocks
+GROUP BY 
+    stock_name
+```
+
+## 1407. Top Travellers
+
+### Solution 1:
+
+```sql
+WITH dist_tbl AS (
+    SELECT
+        user_id, 
+        SUM(distance) AS travelled_distance
+    FROM
+        Rides
+    GROUP BY 
+        user_id
+)
+SELECT
+    u.name,
+    IFNULL(
+        d.travelled_distance, 
+        0
+    ) AS travelled_distance
+FROM 
+    Users u
+LEFT JOIN
+    dist_tbl d
+ON 
+    u.id = d.user_id
+ORDER BY
+    travelled_distance DESC,
+    name ASC;
+```
+
+## 1158. Market Analysis I
+
+### Solution 1:
+
+```sql
+WITH orders_2019_tbl AS (
+    SELECT 
+        buyer_id,
+        COUNT(order_id) AS orders_in_2019
+    FROM
+        Orders
+    WHERE
+        YEAR(order_date) = 2019
+    GROUP BY
+        buyer_id
+)
+SELECT
+    u.user_id AS buyer_id,
+    u.join_date,
+    IFNULL(o.orders_in_2019, 0) AS orders_in_2019
+FROM
+    Users u
+LEFT JOIN
+    orders_2019_tbl o
+ON
+    u.user_id = o.buyer_id
 ```
 
 ##
