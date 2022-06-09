@@ -3808,20 +3808,49 @@ class Solution:
         return pointerA
 ```
 
-## 
+## 1151. Minimum Swaps to Group All 1's Together
 
-### Solution 1: 
+### Solution 1: two pointers for sliding window algorithm
 
 ```py
-
+class Solution:
+    def minSwaps(self, data: List[int]) -> int:
+        count_ones, count_zeros, min_swaps = sum(data), 0, len(data)
+        if count_ones == 0: return 0
+        for i, bit in enumerate(data):
+            count_zeros += (bit==0)
+            if i>=count_ones-1:
+                min_swaps = min(min_swaps, count_zeros)
+                count_zeros -= (data[i-count_ones+1]==0)
+        return min_swaps
 ```
 
-## 
-
-### Solution 1: 
+### Solution 2: deque for sliding window
 
 ```py
+class Solution:
+    def minSwaps(self, data: List[int]) -> int:
+        queue = deque()
+        count_ones, min_swaps, count_zeros = sum(data), len(data), 0
+        if count_ones == 0: return 0
+        for i, bit in enumerate(data):
+            queue.append(bit)
+            count_zeros += (bit==0)
+            if len(queue) == count_ones:
+                min_swaps = min(min_swaps, count_zeros)
+                count_zeros -= (queue.popleft()==0)
+        return min_swaps
+```
 
+## 1332. Remove Palindromic Subsequences
+
+
+### Solution 1: any with two pointers to check if palindrome
+
+```py
+class Solution:
+    def removePalindromeSub(self, s: str) -> int:
+        return 2 if any(s[i]!=s[~i] for i in range(len(s)//2)) else 1
 ```
 
 ## 1084. Sales Analysis III
@@ -3989,10 +4018,82 @@ ON
     u.user_id = o.buyer_id
 ```
 
+## 2292. Products With Three or More Orders in Two Consecutive Years
+
+### Solution 1: SELF JOIN + GROUP BY WITH HAVING + ABS
+
+```sql
+WITH order_tbl AS (
+    SELECT 
+        COUNT(order_id) AS order_count, 
+        YEAR(purchase_date) AS purchase_year,
+        product_id
+    FROM Orders
+    GROUP BY product_id, YEAR(purchase_date)
+    HAVING COUNT(order_id) >= 3
+)
+SELECT DISTINCT o1.product_id
+FROM order_tbl o1
+JOIN order_tbl o2
+ON o1.product_id = o2.product_id
+AND ABS(o1.purchase_year-o2.purchase_year) = 1
+```
+
+## 167. Two Sum II - Input Array Is Sorted
+
+### Solution 1: 
+
+```py
+class Solution:
+    def twoSum(self, numbers: List[int], target: int) -> List[int]:
+        left, right = 0, len(numbers)-1
+        while left < right:
+            sum_ = numbers[left] + numbers[right]
+            if sum_ == target:
+                return [left+1,right+1]
+            if sum_ < target:
+                left += 1
+            else:
+                right -= 1
+        return [-1,-1]
+```
+
+## 2297. Jump Game IX
+
+### Solution 1: two stacks + dynammic programming
+
+```py
+class Solution:
+    def minCost(self, nums: List[int], costs: List[int]) -> int:
+        n = len(nums)
+        dp = [inf]*n
+        dp[0] = 0
+        dstack, istack = [], []
+        for j in range(n):
+            num, cost = nums[j], costs[j]
+            while dstack and num >= nums[dstack[-1]]:
+                i = dstack.pop()
+                dp[j] = min(dp[j], dp[i]+cost)
+            dstack.append(j)
+            while istack and num < nums[istack[-1]]:
+                i = istack.pop()
+                dp[j] = min(dp[j], dp[i]+cost)
+            istack.append(j)
+        return dp[-1]
+```
+
 ##
 
 ### Solution 1:
 
-```sql
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
 
 ```
