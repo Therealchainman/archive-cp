@@ -49,3 +49,8 @@ class TrieNode:
         self.children = defaultdict(TrieNode)
         self.name = name
         self.value = -1
+
+class TrieNode:
+    def __init__(self, index=-1):
+        self.children = defaultdict(TrieNode)
+        self.index = index

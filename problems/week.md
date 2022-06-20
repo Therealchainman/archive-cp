@@ -743,7 +743,7 @@ class FileSystem:
 ```py
 class UnionFind:
     def __init__(self,n):
-        self.size = [0]*n
+        self.size = [1]*n
         self.parent = list(range(n))
     
     def find(self,i):
@@ -777,6 +777,47 @@ class Solution:
                 minCost += cost
             if dsu.size[u] == n: break
         return minCost
+```
+
+### Solution 2: Union find + min heap datastructure + minimum spanning Tree (MST)
+
+```py
+class UnionFind:
+    def __init__(self,n):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    
+    def find(self,i):
+        if i==self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+
+    def union(self,i,j):
+        i, j = self.find(i), self.find(j)
+        if i!=j:
+            if self.size[i] < self.size[j]:
+                i,j=j,i
+            self.parent[j] = i
+            self.size[i] += self.size[j]
+            return True
+        return False
+class Solution:
+    def minCostConnectPoints(self, points: List[List[int]]) -> int:
+        n = len(points)
+        manhattan_distance = lambda p1, p2: abs(p2[0]-p1[0]) + abs(p2[1]-p1[1])
+        minheap = []
+        for (i, p1), (j, p2) in product(enumerate(points), repeat = 2):
+            if i == j: continue
+            heappush(minheap, (manhattan_distance(p1,p2), i, j))
+        dsu = UnionFind(n)
+        mincost = 0
+        while dsu.size[dsu.find(0)] < n:
+            cost, i, j = heappop(minheap)
+            if dsu.union(i,j):
+                mincost += cost
+        return mincost
+        
 ```
 
 ## 1202. Smallest String With Swaps
@@ -4082,18 +4123,1260 @@ class Solution:
         return dp[-1]
 ```
 
-##
+## 3. Longest Substring Without Repeating Characters
+
+### Solution 1: sliding window + counting + deque
+
+```py
+class Solution:
+    def lengthOfLongestSubstring(self, s: str) -> int:
+        window = deque()
+        counter = Counter()
+        max_window = 0
+        for right_ch in s:
+            counter[right_ch] += 1
+            window.append(right_ch)
+            while counter[right_ch] > 1:
+                left_ch = window.popleft()
+                counter[left_ch] -= 1
+            max_window = max(max_window, len(window))
+        return max_window
+```
+
+### Solution 2: Optimized sliding window with map + two pointers
+
+```py
+class Solution:
+    def lengthOfLongestSubstring(self, s: str) -> int:
+        last_seen = defaultdict(lambda: -inf)
+        max_window = 0
+        left = 0 
+        for right in range(len(s)):
+            ch = s[right]
+            index = last_seen[ch]
+            if index >= left:
+                left = index + 1
+            last_seen[ch] = right
+            max_window = max(max_window, right-left+1)
+        return max_window
+```
+
+## 1658. Minimum Operations to Reduce X to Zero
+
+### Solution 1: sliding window + deque
+
+```py
+class Solution:
+    def minOperations(self, nums: List[int], x: int) -> int:
+        window = deque()
+        subarray_sum, total, min_outer_window = 0, sum(nums), inf
+        for num in nums:
+            window.append(num)
+            subarray_sum += num
+            while window and subarray_sum > total-x:
+                prev_num = window.popleft()
+                subarray_sum -= prev_num
+            if subarray_sum == total-x:
+                min_outer_window = min(min_outer_window, len(nums)-len(window))
+        return min_outer_window if min_outer_window != inf else -1
+```
+
+## 2277. Closest Node to Path in Tree
+
+### Solution 1: BFS + Binary Lifting
+
+```py
+class TreeAncestor:
+
+    def __init__(self, n: int, parent: List[int]):
+        LOG = int(log2(n))+1
+        self.up = [[-1]*LOG for _ in range(n)]
+        for i in range(n):
+            self.up[i][0] = parent[i]
+        for j in range(1,LOG):
+            for i in range(n):
+                if self.up[i][j-1] == -1: continue
+                self.up[i][j] = self.up[self.up[i][j-1]][j-1]
+    def getKthAncestor(self, node: int, k: int) -> int:
+        while node!=-1 and k>0:
+            i = int(log2(k))
+            node = self.up[node][i]
+            k -= (1<<i)
+        return node
+```
+
+## 1695. Maximum Erasure Value
+
+### Solution 1: sliding window with deque
+
+```py
+class Solution:
+    def maximumUniqueSubarray(self, nums: List[int]) -> int:
+        window = deque()
+        counter = Counter()
+        max_window = sum_ = 0
+        for num in nums:
+            counter[num] += 1
+            window.append(num)
+            sum_ += num
+            while counter[num] > 1:
+                lnum = window.popleft()
+                counter[lnum] -= 1
+                sum_ -= lnum
+            max_window = max(max_window, sum_)
+        return max_window
+```
+
+### Solution 2: sliding window with two pointers
+
+```py
+class Solution:
+    def maximumUniqueSubarray(self, nums: List[int]) -> int:
+        counter_dict = Counter()
+        left = sum_ = max_window = 0
+        for num in nums:
+            counter_dict[num] += 1
+            sum_ += num
+            while counter_dict[num] > 1:
+                sum_ -= nums[left]
+                counter_dict[nums[left]] -= 1
+                left += 1
+            max_window = max(max_window, sum_)
+        return max_window
+```
+
+## 2303. Calculate Amount Paid in Taxes
+
+### Solution 1: array
+
+```py
+class Solution:
+    def calculateTax(self, brackets: List[List[int]], income: int) -> float:
+        owe = cur_income = 0
+        for upper, percent in brackets:
+            fraction_in_bracket = min(upper, income) - cur_income
+            owe += fraction_in_bracket*percent/100.0
+            cur_income = upper
+            if cur_income >= income: break
+        return owe
+```
+
+## 2304. Minimum Path Cost in a Grid
+
+### Solution 1: Dijkstra + shortest path problem
+
+```py
+class Solution:
+    def minPathCost(self, grid: List[List[int]], moveCost: List[List[int]]) -> int:
+        R, C = len(grid), len(grid[0])
+        minheap = [(grid[0][c],0,c) for c in range(C)]
+        dist = [[inf]*C for _ in range(R)]
+        heapify(minheap)
+        for c in range(C):
+            dist[0][c] = 0
+        while minheap:
+            cost, r, c = heappop(minheap)
+            if r == R-1:
+                return cost
+            for nc in range(C):
+                ncost = cost + grid[r+1][nc] + moveCost[grid[r][c]][nc]
+                if ncost < dist[r+1][nc]:
+                    heappush(minheap, (ncost,r+1,nc))
+                    dist[r+1][nc] = ncost
+        return -1
+```
+
+## 2305. Fair Distribution of Cookies
+
+### Solution 1: backtracking + early pruning optimization
+
+```py
+class Solution:
+    def distributeCookies(self, cookies: List[int], k: int) -> int:
+        n = len(cookies)
+        if k == n: return max(cookies)
+        end_mask = (1<<n)-1
+        fair = [0]*k 
+        self.fairest = inf
+        def dfs(i):
+            if i == n:
+                self.fairest = min(self.fairest, max(fair))
+                return
+            if max(fair) >= self.fairest: return
+            for j in range(k):
+                fair[j] += cookies[i]
+                dfs(i+1)
+                fair[j] -= cookies[i]
+        dfs(0)
+        return self.fairest
+```
+
+### Solution 2: iterative dynamic programming 
+
+```py
+class Solution:
+    def minPathCost(self, grid: List[List[int]], moveCost: List[List[int]]) -> int:
+        R, C = len(grid), len(grid[0])
+        min_cost_memo = [[inf]*C for _ in range(R)]
+        for c in range(C):
+            min_cost_memo[0][c] = grid[0][c]
+        prev_cells = [0]*C
+        for r in range(1,R):
+            for c in range(C):
+                for prev_c in range(C):
+                    prev_cells[prev_c] = moveCost[grid[r-1][prev_c]][c] + min_cost_memo[r-1][prev_c] + grid[r][c]
+                min_cost_memo[r][c] = min(prev_cells)
+        return min(min_cost_memo[R-1])
+```
+
+## 2306. Naming a Company
+
+### Solution 1:  Combinatinatorics + set theory + intersection of suffix sets
+
+![diagram](images/set_intersection.png)
+
+```py
+class Solution:
+    def distinctNames(self, ideas: List[str]) -> int:
+        num_valid_names = 0
+        suffix_sets = [set() for _ in range(26)]
+        for first_ch_index, suffix in zip(map(lambda x: ord(x[0])-ord('a'), ideas), map(lambda x: x[1:], ideas)):
+            suffix_sets[first_ch_index].add(suffix)
+        for i in range(26):
+            if len(suffix_sets[i]) == 0: continue
+            for j in range(i+1,26):
+                if len(suffix_sets[j]) == 0: continue
+                num_intersections = len(suffix_sets[i] & suffix_sets[j])
+                left_unique = len(suffix_sets[i]) - num_intersections
+                right_unique = len(suffix_sets[j]) - num_intersections
+                num_valid_names += 2*left_unique*right_unique
+        return num_valid_names
+```
+
+## 2299. Strong Password Checker II
+
+### Solution 1: conditional + any
+
+```py
+class Solution:
+    def strongPasswordCheckerII(self, password: str) -> bool:
+        SPECIAL_CHARACTERS = "!@#$%^&*()-+"
+        return not (len(password) < 8 or not any(ch.isupper() for ch in password) or\
+                    not any(ch.islower() for ch in password) or\
+                    not any(ch.isdigit() for ch in password) or \
+                    not any(ch in SPECIAL_CHARACTERS for ch in password) or \
+                    any(pch==ch for pch, ch in zip(password, password[1:])))
+```
+
+## 2300. Successful Pairs of Spells and Potions
+
+### Solution 1: sort + binary search
+
+```py
+class Solution:
+    def successfulPairs(self, spells: List[int], potions: List[int], success: int) -> List[int]:
+        n, m = len(spells), len(potions)
+        result = [0]*n
+        potions.sort(reverse=True)
+        def binary_search(spell):
+            lo, hi = 0, m
+            while lo < hi:
+                mid = (lo+hi)>>1
+                if spell*potions[mid]>=success:
+                    lo=mid+1
+                else:
+                    hi = mid
+            return lo
+        for i in range(n):
+            result[i] = binary_search(spells[i])
+        return result
+```
+
+## 2301. Match Substring After Replacement
+
+### Solution 1: hashmap + substrings slicing + all
+
+```py
+class Solution:
+    def matchReplacement(self, s: str, sub: str, mappings: List[List[str]]) -> bool:
+        mappings_dict = defaultdict(set)
+        for u, v in mappings:
+            mappings_dict[u].add(v)
+        for ch in sub:
+            mappings_dict[ch].add(ch)
+        len_s, len_sub = len(s), len(sub)
+        for i in range(len_sub, len_s+1):
+            subs = s[i-len_sub:i]
+            if all(ch in mappings_dict[sch] for ch, sch in zip(subs, sub)): return True
+        return False
+```
+
+## 2302. Count Subarrays With Score Less Than K
+
+### Solution 1: math + sliding window + deque
+
+```py
+class Solution:
+    def countSubarrays(self, nums: List[int], k: int) -> int:
+        num_ways = window_sum = 0
+        window = deque()
+        for num in nums:
+            window.append(num)
+            window_sum += num
+            while window_sum*len(window) >= k:
+                left_num = window.popleft()
+                window_sum -= left_num
+            num_ways += len(window)
+        return num_ways
+```
+
+## 2298. Tasks Count in the Weekend
+
+### Solution 1: GROUP BY + DAYOFWEEK + HAVING
+
+```sql
+WITH weekend_tbl AS (
+    SELECT
+        COUNT(task_id) AS weekend_cnt,
+        DAYOFWEEK(submit_date) AS day
+    FROM
+        Tasks
+    GROUP BY day IN (1,7)
+    HAVING day IN (1, 7)
+),
+week_tbl AS (
+    SELECT
+        COUNT(task_id) AS working_cnt,
+        DAYOFWEEK(submit_date) AS day
+    FROM
+        tasks
+    GROUP BY day IN (2,3,4,5,6)
+    HAVING day IN (2,3,4,5,6)
+)
+SELECT 
+    weekend_tbl.weekend_cnt,
+    week_tbl.working_cnt
+FROM
+    weekend_tbl, week_tbl
+
+ # 1=Sunday, 2=Monday, 3=Tuesday, 4=Wednesday, 5=Thursday, 6=Friday, 7=Saturday.
+```
+
+### Solution 2: SUM + WEEKDAY
+
+```sql
+SELECT
+    SUM(WEEKDAY(submit_date)>=5) AS weekend_cnt,
+    SUM(WEEKDAY(submit_date)<5) AS working_cnt
+FROM
+    tasks
+# 0=Monday, ..., 5=Saturday, 6=Sunday
+```
+
+## 745. Prefix and Suffix Search
+
+### Solution 1: Wrapped Suffix with suffix#word trie datastructure + Create a virtual word to see if it exists as a prefix to any word in virtual dictionary
+
+```py
+class TrieNode:
+    def __init__(self, index=-1):
+        self.children = defaultdict(TrieNode)
+        self.index = index
+
+class WordFilter:
+
+    def __init__(self, words: List[str]):
+        self.trie = TrieNode()
+        for i, word in enumerate(words):
+            for j in range(len(word)):
+                suffix_wrapped = f'{word[j:]}#{word}'
+                current_node = self.trie
+                for ch in suffix_wrapped:
+                    current_node = current_node.children[ch]
+                    current_node.index = i
+
+    def f(self, prefix: str, suffix: str) -> int:
+        virtual_prefix = f'{suffix}#{prefix}'
+        current_node = self.trie
+        for ch in virtual_prefix:
+            current_node = current_node.children[ch]
+            if current_node.index == -1: return -1
+        return current_node.index
+```
+
+### Solution 2: Pair Trie Data structure + Advanced Trie datastructure
+
+```py
+class TrieNode:
+    def __init__(self, index=-1):
+        self.children = defaultdict(TrieNode)
+        self.index = index
+class WordFilter:
+
+    def __init__(self, words: List[str]):
+        self.trie = TrieNode()
+        for i, word in enumerate(words):
+            current_node = self.trie
+            for j in range(len(word)):
+                tmp_node = current_node
+                for ch in word[j:]:
+                    tmp_node = tmp_node.children[(ch,None)]
+                    tmp_node.index = i
+                tmp_node = current_node
+                for ch in word[::-1][j:]:
+                    tmp_node = tmp_node.children[(None, ch)]
+                    tmp_node.index = i
+                current_node = current_node.children[(word[j],word[~j])]
+                current_node.index = i
+
+    def f(self, prefix: str, suffix: str) -> int:
+        current_node = self.trie
+        for pch, sch in zip_longest(prefix, reversed(suffix)):
+            current_node = current_node.children[(pch, sch)]
+            if current_node.index == -1: return -1
+        return current_node.index
+```
+
+### Solution 3: virtual word 'prefix#suffix' in hashmap
+
+```py
+class WordFilter:
+
+    def __init__(self, words: List[str]):
+        self.words_dict = defaultdict(lambda: -1)
+        for index, word in enumerate(words):
+            for i, j in product(range(len(word)), repeat=2):
+                self.words_dict[f'{word[:i+1]}#{word[j:]}'] = index
+
+    def f(self, prefix: str, suffix: str) -> int:
+        return self.words_dict[f'{prefix}#{suffix}']
+```
+
+## 968. Binary Tree Cameras
+
+### Solution 1: postorder DFS traversal for binary tree + place camera on parent if can else on current node.  Only place camera if it has no adjacent camera
+
+```py
+class Solution:
+    def minCameraCover(self, root: Optional[TreeNode]) -> int:
+        def postorderDFS(parent, node):
+            if not node: return 0
+            num_cameras = 0
+            num_cameras +=  postorderDFS(node, node.left)
+            num_cameras += postorderDFS(node, node.right)
+            if (node.left and node.left.val == 1) or (node.right and node.right.val == 1) or node.val == 1 or (parent and parent.val == 1): return num_cameras
+            if parent:
+                parent.val = 1
+            else:
+                node.val = 1
+            return num_cameras + 1
+        return postorderDFS(None, root)
+```
+
+### Solution 2: postorder dfs + set for the covered pairs, which is always 4 nodes if include Nones
+
+```py
+class Solution:
+    def minCameraCover(self, root: Optional[TreeNode]) -> int:
+        covered = {None}
+        def postorderDFS(node, parent = None):
+            num_cameras = 0
+            if node:
+                num_cameras += postorderDFS(node.left, node)
+                num_cameras += postorderDFS(node.right, node)
+                if node.left not in covered or node.right not in covered or (parent is None and node not in covered):
+                    covered.update({parent, node, node.left, node.right})
+                    return num_cameras + 1
+            return num_cameras
+        return postorderDFS(root, None)
+```
+
+## 28. Implement strStr()
+
+### Solution 1: Rolling hash to find pattern in string
+
+```py
+class Solution:
+    def strStr(self, haystack: str, needle: str) -> int:
+        p, MOD = 31, int(1e9)+7
+        coefficient = lambda x: ord(x) - ord('a') + 1
+        pat_hash = 0
+        for ch in needle:
+            pat_hash = ((pat_hash*p)%MOD + coefficient(ch))%MOD
+        POW = 1
+        for _ in range(len(needle)-1):
+            POW = (POW*p)%MOD
+        cur_hash = 0
+        for i, ch in enumerate(haystack):
+            cur_hash = ((cur_hash*p)%MOD + coefficient(ch))%MOD
+            if i>=len(needle)-1:
+                if cur_hash == pat_hash: return i-len(needle)+1
+                cur_hash = (cur_hash - (POW*coefficient(haystack[i-len(needle)+1]))%MOD + MOD)%MOD
+        return -1
+```
+
+### Solution 2: Generate hash for every substring of same length as needle to find a matching hash
+
+```py
+class Solution:
+    def strStr(self, haystack: str, needle: str) -> int:
+        pat_hash = hash(needle)
+        for i in range(len(needle),len(haystack)+1):
+            cur_hash = hash(haystack[i-len(needle):i])
+            if pat_hash == cur_hash: return i-len(needle)
+        return -1
+```
+
+## 90. Subsets II
+
+### Solution 1: backtracking + dupe handling
+
+```py
+class Solution:
+    def subsetsWithDup(self, nums: List[int]) -> List[List[int]]:
+        nums.sort()
+        n = len(nums)
+        subsets, subset = [], []
+        def backtrack(i):
+            subsets.append(subset[:])
+            if i == n: return
+            for j in range(i, n):
+                if j != i and nums[j] == nums[j-1]: continue
+                subset.append(nums[j])
+                backtrack(j+1)
+                subset.pop()
+        backtrack(0)
+        return subsets
+```
+
+## 1575. Count All Possible Routes
+
+### Solution 1: recursive DP + states are (city_index, fuel_amount)
+
+```py
+class Solution:
+    def countRoutes(self, locations: List[int], start: int, finish: int, fuel: int) -> int:
+        n = len(locations)
+        MOD = int(1e9)+7
+        cost = lambda x, y: abs(locations[x]-locations[y])
+        @cache
+        def dfs(index, fuel_):
+            if fuel_ < 0: return 0
+            num_routes = int(index == finish)
+            for j in range(n):
+                if index == j: continue
+                num_routes = (num_routes + dfs(j, fuel_-cost))%MOD
+            return num_routes
+        return dfs(start, fuel)
+```
+
+```py
+class Solution:
+    def countRoutes(self, locations: List[int], start: int, finish: int, fuel: int) -> int:
+        n = len(locations)
+        MOD = int(1e9)+7
+        cost = lambda x, y: abs(locations[x]-locations[y])
+        @cache
+        def dfs(index, fuel_):
+            if fuel_ < 0: return 0
+            return (sum(dfs(j, fuel_-cost(index, j)) for j in range(n) if index!=j) + (index==finish))%MOD
+        return dfs(start, fuel)
+```
+
+## 1268. Search Suggestions System
+
+### Solution 1:  Trie data structure + minheap 
+
+```py
+class TrieNode:
+    def __init__(self):
+        self.children = defaultdict(TrieNode)
+        self.minheap = []
+class Solution:
+    def suggestedProducts(self, products: List[str], searchWord: str) -> List[List[str]]:
+        trie = TrieNode()
+        for product in products:
+            current_node = trie
+            for ch in product:
+                current_node = current_node.children[ch]
+                heappush(current_node.minheap, product)
+        suggested = []
+        current_node = trie
+        for ch in searchWord:
+            suggest = []
+            current_node = current_node.children[ch]
+            while len(suggest) < 3 and current_node.minheap:
+                product = heappop(current_node.minheap)
+                suggest.append(product)
+            for sug in suggest:
+                heappush(current_node.minheap, sug)
+            suggested.append(suggest)
+        return suggested
+```
+
+### Solution 2: sort products + trie for prefix
+
+![sort + trie](images/search_suggestion_system_trie_sort.PNG)
+
+```py
+class TrieNode:
+    def __init__(self):
+        self.children = defaultdict(TrieNode)
+        self.suggestions = []
+    def add_suggestion(self, suggestion):
+        if len(self.suggestions) < 3:
+            self.suggestions.append(suggestion)
+class Solution:
+    def suggestedProducts(self, products: List[str], searchWord: str) -> List[List[str]]:
+        products.sort()
+        trie = TrieNode()
+        for product in products:
+            current_node = trie
+            for ch in product:
+                current_node = current_node.children[ch]
+                current_node.add_suggestion(product)
+        suggested = []
+        current_node = trie
+        for ch in searchWord:
+            current_node = current_node.children[ch]
+            suggested.append(current_node.suggestions)
+        return suggested
+```
+
+### Solution 3: binary search + optimized pruned search space 
+
+```py
+class Solution:
+    def suggestedProducts(self, products: List[str], searchWord: str) -> List[List[str]]:
+        products.sort()
+        suggested = []
+        prefix = ''
+        start = 0
+        for ch in searchWord:
+            prefix += ch
+            i = bisect_left(products, prefix, lo=start)
+            start = i
+            suggest = []
+            for _ in range(3):
+                if i == len(products) or prefix != products[i][:len(prefix)]: break
+                suggest.append(products[i])
+                i += 1
+            suggested.append(suggest)
+        return suggested
+```
+
+## 1699. Number of Calls Between Two Persons
+
+### Solution 1: GROUP BY WITH PAIRS AND CASE STATEMENT
+
+```sql
+SELECT
+    from_id AS person1,
+    to_id AS person2,
+    COUNT(duration) AS call_count,
+    SUM(duration) AS total_duration
+FROM
+    Calls
+GROUP BY   
+    CASE
+        WHEN from_id < to_id THEN from_id
+        ELSE to_id
+    END, 
+    CASE
+        WHEN from_id > to_id THEN from_id
+        ELSE to_id
+    END
+
+```
+
+### Solution 2: Group by person1 and person2 that are formed from LEAST AND GREATEST
+
+```sql
+SELECT
+    LEAST(from_id, to_id) AS person1,
+    GREATEST(from_id, to_id) AS person2,
+    COUNT(duration) AS call_count,
+    SUM(duration) AS total_duration
+FROM
+    Calls
+GROUP BY person1, person2
+```
+
+## 1251. Average Selling Price
+
+### Solution 1: GROUP BY + JOINS 
+
+```sql
+WITH units_sold_price_tbl AS (
+    SELECT 
+        u.product_id, 
+        u.units,
+        p.price
+    FROM 
+        UnitsSold u
+    JOIN 
+        Prices p
+    ON 
+        u.product_id = p.product_id
+        AND u.purchase_date BETWEEN p.start_date AND p.end_date
+),
+quantity_tbl AS (
+    SELECT
+        product_id,
+        SUM(units) AS quantity
+    FROM 
+        UnitsSold
+    GROUP BY 
+        product_id
+),
+price_tbl AS (
+    SELECT
+        product_id,
+        SUM(units*price) AS price
+    FROM
+        units_sold_price_tbl
+    GROUP BY
+        product_id
+)
+SELECT
+    p.product_id,
+    ROUND(p.price/q.quantity,2) AS average_price
+FROM
+    quantity_tbl q, price_tbl p
+WHERE
+    q.product_id = p.product_id
+
+```
+
+## 1571. Warehouse Manager
+
+### Solution 1: JOIN + SUM + GROUP BY
+
+```sql
+SELECT
+    w.name AS warehouse_name,
+    SUM(p.Width*p.Length*p.Height*w.units) AS volume
+FROM Warehouse w
+JOIN Products p
+ON w.product_id = p.product_id
+GROUP BY warehouse_name
+```
+
+## 1445. Apples & Oranges
+
+### Solution 1: GROUP BY + CASE FOR SUM TO GET POSITIVE OR NEGATIVE
+
+```sql
+SELECT
+    sale_date,
+    SUM(
+    CASE
+        WHEN fruit = 'apples' THEN sold_num
+        ELSE -sold_num
+    END) AS diff
+FROM Sales
+GROUP BY sale_date
+ORDER BY sale_date
+```
+
+## 1193. Monthly Transactions I
 
 ### Solution 1:
+
+```sql
+SELECT
+    DATE_FORMAT(trans_date, '%Y-%m') AS month,
+    country,
+    COUNT(id) AS trans_count,
+    SUM(state='approved') AS approved_count,
+    SUM(amount) AS trans_total_amount,
+    SUM(amount*(state='approved')) AS approved_total_amount
+    
+FROM
+    Transactions
+GROUP BY 
+    month, country
+```
+
+### Solution 2: SUM + IF STATEMENTS
+
+```sql
+SELECT
+    DATE_FORMAT(trans_date, '%Y-%m') AS month,
+    country,
+    COUNT(id) AS trans_count,
+    SUM(IF(state='approved', 1, 0)) AS approved_count,
+    SUM(amount) AS trans_total_amount,
+    SUM(IF(state='approved', amount, 0)) AS approved_total_amount
+FROM
+    Transactions
+GROUP BY 
+    month, country
+```
+
+## 1211. Queries Quality and Percentage
+
+### Solution 1:  GROUP BY + ROUND + AVG
+
+```sql
+SELECT
+    query_name, 
+    ROUND(AVG(rating/position), 2) AS quality,
+    ROUND(AVG(rating<3)*100, 2) AS poor_query_percentage
+FROM
+    Queries
+GROUP BY
+    query_name
+```
+
+## 1173. Immediate Food Delivery I
+
+### Solution 1: ROUND + AVG
+
+```sql
+SELECT
+    ROUND(AVG(order_date = customer_pref_delivery_date)*100, 2) AS immediate_percentage
+FROM
+    Delivery
+```
+
+## 1633. Percentage of Users Attended a Contest
+
+### Solution 1:  ROUND + COUNT + ORDER BY
+
+```sql
+SELECT
+    contest_id,
+    ROUND(COUNT(user_id)*100/(SELECT COUNT(user_id) FROM Users), 2) AS percentage
+FROM
+    Register
+GROUP BY
+    contest_id
+ORDER BY
+    percentage DESC, contest_id ASC
+```
+
+## 1607. Sellers With No Sales
+
+### Solution 1: LEFT JOIN + YEAR
+
+```sql
+SELECT
+    s.seller_name
+FROM Seller s
+LEFT JOIN Orders o
+ON s.seller_id = o.seller_id
+WHERE s.seller_id NOT IN (SELECT seller_id FROM Orders WHERE YEAR(sale_date) = '2020')
+ORDER BY seller_name
+```
+
+## 619. Biggest Single Number
+
+### Solution 1:  SUBQUERY + COUNT + IF
+
+```sql
+WITH single_number_tbl AS (
+    SELECT num
+    FROM MyNumbers
+    GROUP BY num
+    HAVING COUNT(*) = 1
+)
+SELECT 
+    IF(COUNT(*)>0,MAX(num),NULL) AS num
+FROM single_number_tbl
+```
+
+### Solution 2: SELECT single row in subquery that will return null if you have empty table
+
+```sql
+SELECT (SELECT num
+FROM MyNumbers
+GROUP BY num
+HAVING COUNT(*) = 1
+ORDER BY num DESC LIMIT 1) AS num
+```
+
+### Solution 3: UNION ORDER BY NULL IN LAST PLACE + LIMIT 
+
+```sql
+SELECT num
+FROM MyNumbers
+GROUP BY num
+HAVING COUNT(*) = 1
+UNION 
+SELECT NULL
+ORDER BY num DESC
+LIMIT 1
+```
+
+## 1112. Highest Grade For Each Student
+
+### Solution 1:
+
+```sql
+WITH grd_tbl AS (  
+    SELECT MAX(grade) AS grade, student_id
+    FROM Enrollments
+    GROUP BY student_id
+),
+tmp_tbl AS (
+    SELECT e.student_id, e.course_id, e.grade
+    FROM Enrollments e
+    JOIN grd_tbl g
+    ON e.grade = g.grade
+    AND e.student_id = g.student_id
+)
+SELECT student_id, MIN(course_id) as course_id, grade
+FROM tmp_tbl
+GROUP BY student_id
+ORDER BY student_id ASC
+```
+
+## 1398. Customers Who Bought Products A and B but Not C
+
+### Solution 1:
+
+```sql
+WITH tmp_tbl AS (
+    SELECT customer_id
+    FROM Orders
+    WHERE product_name IN ('A', 'B')
+    GROUP BY customer_id
+    HAVING COUNT(DISTINCT(product_name)) = 2
+),
+customer_tbl AS (
+    SELECT DISTINCT t.customer_id
+    FROM tmp_tbl t
+    JOIN Orders o
+    ON t.customer_id = o.customer_id
+    WHERE o.customer_id NOT IN (SELECT DISTINCT customer_id FROM Orders WHERE product_name = 'C')
+)
+SELECT c1.customer_id, c2.customer_name
+FROM customer_tbl c1
+JOIN Customers c2
+ON c1.customer_id = c2.customer_id
+```
+
+## 2309. Greatest English Letter in Upper and Lower Case
+
+### Solution 1:  set intersection for upper and lower + max with default
+
+```py
+class Solution:
+    def greatestLetter(self, s: str) -> str:
+        lower, upper = set(), set()
+        for ch in s:
+            if ch.isupper():
+                upper.add(ch)
+            else:
+                lower.add(ch.upper())
+        return max(lower&upper, default='')
+```
+
+### Solution 2:  string + set + max with default
+
+```py
+class Solution:
+    def greatestLetter(self, s: str) -> str:
+        return max(set(ch for ch in string.ascii_uppercase if ch.lower() in s and ch.upper() in s), default='')
+```
+
+## 2310. Sum of Numbers With Units Digit K
+
+### Solution 1:  iterative DP + memoization
+
+```py
+class Solution:
+    def minimumNumbers(self, num: int, k: int) -> int:
+        if num == 0: return 0
+        memo = [inf]*(num+1)
+        seen = []
+        for i in range(num+1):
+            if i%10 == k:
+                memo[i] = 1
+                seen.append(i)
+                continue
+            for j in seen:
+                memo[i] = min(memo[i], memo[j] + memo[i-j])
+        return memo[-1] if memo[-1] != inf else -1
+```
+
+### Solution 2: math + nk+10a = sum, where 10a = sum - nk
+
+```py
+class Solution:
+    def minimumNumbers(self, num: int, k: int) -> int:
+        if num == 0: return 0
+        for i in range(1,11):
+            if i*k%10 == num%10 and i*k <= num: return i
+        return -1
+```
+
+## 2311. Longest Binary Subsequence Less Than or Equal to K
+
+### Solution 1:  greedy + binary + bit manipulation
+
+```py
+class Solution:
+    def longestSubsequence(self, s: str, k: int) -> int:
+        count_zeros = s.count('0')
+        num = longest = 0
+        for i, bit in enumerate(reversed(s)):
+            count_zeros -= (bit=='0')
+            num |= (1<<i)*int(bit)
+            if num > k: break
+            longest = max(longest, count_zeros+i+1)
+        return longest
+```
+
+## 721. Accounts Merge
+
+### Solution 1:  Union Find + sort
 
 ```py
 
 ```
 
-##
+## 820. Short Encoding of Words
 
-### Solution 1:
+### Solution 1:  sort + suffix set
 
 ```py
+class Solution:
+    def minimumLengthEncoding(self, words: List[str]) -> int:
+        suffix_set = set()
+        words.sort(key=lambda x: len(x), reverse=True)
+        encode_len = 0
+        for word in words:
+            if word in suffix_set: continue
+            suffix_set.update(word[i:] for i in range(len(word)))
+            encode_len += len(word) + 1
+        return encode_len
+```
 
+### Solution 2:  set of words + remove word if it is a suffix of any other word
+
+![diagram](images/short_encoding_of_words.PNG)
+
+```py
+class Solution:
+    def minimumLengthEncoding(self, words: List[str]) -> int:
+        non_suffix_words = set(words)
+        for word in words:
+            for i in range(1,len(word)):
+                non_suffix_words.discard(word[i:])
+        return sum(len(word)+1 for word in non_suffix_words)
+```
+
+## 527. Word Abbreviation
+
+### Solution 1:  Count for all abbreviations
+
+```py
+class Solution:
+    def wordsAbbreviation(self, words: List[str]) -> List[str]:
+        n = len(words)
+        abbrev_count = Counter()
+        for word in words:
+            internal_count = len(word)-2
+            for i in range(1,len(word)-2):
+                abbrev_count[f'{word[:i]}{len(word)-i-1}{word[-1]}'] += 1
+        for i in range(n):
+            for j in range(1,len(words[i])-2):
+                word = f'{words[i][:j]}{len(words[i])-j-1}{words[i][-1]}'
+                if abbrev_count[word] == 1:
+                    words[i] = word
+                    break
+        return words
+```
+
+### Solution 2: groups with (len(word), first_letter, last_letter) + iterate through groups with trie datastructure
+
+![trie](images/word_abbreviation.PNG)
+
+```py
+class TrieNode:
+    def __init__(self):
+        self.children = defaultdict(TrieNode)
+        self.count = 0
+class Solution:
+    def wordsAbbreviation(self, words: List[str]) -> List[str]:
+        n = len(words)
+        groups = defaultdict(list)
+        for i, word in enumerate(words):
+            groups[(len(word), word[0], word[-1])].append((word,i))
+        for group in groups.values():
+            if len(group) == 1:
+                for word, index in group:
+                    if len(word)-2 > 1:
+                        words[index] = f'{word[:1]}{len(word)-2}{word[-1]}'
+                continue
+            trie = TrieNode()
+            for word, _ in group:
+                current_node = trie
+                for ch in word[1:]:
+                    current_node = current_node.children[ch] 
+                    current_node.count += 1
+            for word, index in group:
+                current_node = trie
+                for i in range(1,len(word)):
+                    current_node = current_node.children[word[i]]
+                    if current_node.count == 1:
+                        if len(word)-i-2 > 1:
+                            words[index] = f'{word[:i+1]}{len(word)-i-2}{word[-1]}'
+                        break
+        return words
+```
+
+## 24. Swap Nodes in Pairs
+
+### Solution 1:  linked list +  rearranging
+
+```py
+class Solution:
+    def swapPairs(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        sentinel_node = ListNode(next=head)
+        current_node = sentinel_node
+        while current_node and current_node.next and current_node.next.next:
+            first_node = current_node.next
+            second_node = current_node.next.next
+            third_node = current_node.next.next.next
+            second_node.next = first_node
+            current_node.next = second_node
+            first_node.next = third_node
+            current_node = first_node
+        return sentinel_node.next
+```
+
+### Solution 2: recursion + first and second node
+
+```py
+class Solution:
+    def swapPairs(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        if not head or not head.next: return head
+        first_node = head
+        second_node = head.next
+        first_node.next = self.swapPairs(second_node.next)
+        second_node.next = first_node
+        return second_node
+```
+
+## 2. Add Two Numbers
+
+### Solution 1:  linked list + math
+
+```py
+class Solution:
+    def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:
+        sentinel_node = ListNode()
+        node = sentinel_node
+        carry = 0
+        while l1 or l2 or carry>0:
+            sum_ = carry
+            if l1:
+                sum_ += l1.val
+                l1 = l1.next
+            if l2:
+                sum_ += l2.val
+                l2 = l2.next
+            carry = sum_//10
+            node.next = ListNode(sum_%10)
+            node = node.next
+        return sentinel_node.next
+```
+
+## 1440. Evaluate Boolean Expression
+
+### Solution 1:  multiple joins + case + if statement
+
+```sql
+SELECT 
+    e.left_operand,
+    e.operator, 
+    e.right_operand, 
+    (CASE
+        WHEN e.operator = '<' THEN IF(v1.value < v2.value, 'true', 'false')
+        WHEN e.operator = '=' THEN IF(v1.value = v2.value, 'true', 'false')
+        WHEN e.operator = '>' THEN IF(v1.value > v2.value, 'true', 'false')
+    END) AS value
+FROM Expressions e
+JOIN Variables v1
+ON e.left_operand = v1.name
+JOIN Variables v2
+ON e.right_operand = v2.name
+
+
+```
+
+## 1264. Page Recommendations
+
+### Solution 1:  CASE + JOIN + NOT IN
+
+```sql
+WITH friends_tbl AS (
+    SELECT 
+        (
+        CASE
+            WHEN user1_id != 1 THEN user1_id
+            ELSE user2_id
+        END
+        ) AS user_id
+    FROM Friendship
+    WHERE user1_id = 1 or user2_id = 1
+)
+SELECT 
+    DISTINCT l.page_id AS recommended_page
+FROM friends_tbl f
+JOIN Likes l
+ON f.user_id = l.user_id
+WHERE l.page_id NOT IN (SELECT page_id FROM Likes WHERE user_id = 1)
+```
+
+## 570. Managers with at Least 5 Direct Reports
+
+### Solution 1:  SUBQUERY + HAVING + GROUPBY 
+
+```sql
+SELECT e1.name
+FROM Employee e1
+JOIN (SELECT
+    managerId
+    FROM Employee e1
+    WHERE managerId != 'NULL'
+    GROUP BY managerId
+    HAVING COUNT(*) >= 5) e2
+ON e1.id = e2.managerId
+```
+
+### Solution 2: self join + employee and manager table + having + groupby
+
+```sql
+SELECT e.name
+FROM Employee e
+JOIN Employee m
+ON e.id = m.managerId
+GROUP BY e.id
+HAVING COUNT(*)>=5
+```
+
+## 1303. Find the Team Size
+
+### Solution 1:  Selj Join + Group By
+
+```sql
+SELECT
+    e.employee_id,
+    t.team_size
+FROM Employee e 
+JOIN (SELECT team_id, COUNT(employee_id) AS team_size FROM Employee GROUP BY team_id) t
+ON e.team_id = t.team_id
+```
+
+### Solution 2: WINDOW FUNCTION WITH OVER CLAUSE + PARTITION 
+
+```sql
+SELECT
+    employee_id,
+    COUNT(*) OVER(PARTITION BY team_id) AS team_size
+FROM Employee
 ```
