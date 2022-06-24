@@ -5011,7 +5011,7 @@ LIMIT 1
 
 ## 1112. Highest Grade For Each Student
 
-### Solution 1:
+### Solution 1: JOIN + GROUP BY
 
 ```sql
 WITH grd_tbl AS (  
@@ -5361,7 +5361,7 @@ HAVING COUNT(*)>=5
 
 ## 1303. Find the Team Size
 
-### Solution 1:  Selj Join + Group By
+### Solution 1:  Self Join + Group By
 
 ```sql
 SELECT
@@ -5379,4 +5379,119 @@ SELECT
     employee_id,
     COUNT(*) OVER(PARTITION BY team_id) AS team_size
 FROM Employee
+```
+
+## 1280. Students and Examinations
+
+### Solution 1:  LEFT JOIN + GROUP BY
+
+```sql
+WITH exam_count_tbl AS (
+    SELECT
+        student_id,
+        subject_name,
+        COUNT(*) AS attended_exams
+    FROM Examinations
+    GROUP BY student_id, subject_name
+),
+class_tbl AS (
+    SELECT *
+    FROM students s1
+    JOIN Subjects s2
+)
+SELECT 
+    s.student_id,
+    s.student_name,
+    s.subject_name,
+    IFNULL(e.attended_exams, 0) AS attended_exams
+FROM class_tbl s
+LEFT JOIN exam_count_tbl e
+ON s.student_id = e.student_id AND s.subject_name = e.subject_name
+ORDER BY s.student_id, s.subject_name 
+```
+
+### Soltuion 2: no subqueries
+
+```sql
+SELECT 
+    s1.student_id,
+    s1.student_name,
+    s2.subject_name,
+    COUNT(e.subject_name) as attended_exams
+FROM Students s1
+JOIN Subjects s2
+LEFT JOIN Examinations e
+ON s1.student_id = e.student_id AND s2.subject_name = e.subject_name
+GROUP BY student_id, subject_name
+ORDER BY student_id, subject_name
+```
+
+## 1501. Countries You Can Safely Invest In
+
+### Solution 1: TWO JOINS + AVG + HAVING + GROUP BY
+
+```sql
+SELECT 
+    co.name AS country
+FROM Person p
+JOIN Calls c
+ON p.id IN (c.caller_id, c.callee_id)
+JOIN Country co
+ON SUBSTRING(p.phone_number, 1, 3) = co.country_code
+GROUP BY co.name
+HAVING AVG(c.duration) > (SELECT AVG(duration) FROM Calls)
+```
+
+## 184. Department Highest Salary
+
+### Solution 1:  MULTIPLE JOINS + GROUP BY + MAX
+
+```sql
+WITH highest_salary_tbl AS (
+    SELECT
+        MAX(salary) AS salary,
+        departmentId
+    FROM Employee
+    GROUP BY departmentId
+)
+SELECT
+    d.name AS Department,
+    e.name AS Employee,
+    e.salary
+FROM Employee e
+JOIN highest_salary_tbl AS h
+ON e.salary = h.salary AND e.departmentId = h.departmentId
+JOIN Department d
+ON e.departmentId = d.id
+```
+
+## 580. Count Student Number in Departments
+
+### Solution 1:  LEFT JOIN + DESC AND ASC ORDER BY
+
+```sql
+SELECT
+    d.dept_name,
+    COUNT(s.student_id) AS student_number
+FROM Department d
+LEFT JOIN Student s
+ON d.dept_id = s.dept_id
+GROUP BY d.dept_id
+ORDER BY student_number DESC, d.dept_name ASC
+```
+
+## 
+
+### Solution 1:
+
+```sql
+
+```
+
+## 
+
+### Solution 1:
+
+```py
+
 ```
