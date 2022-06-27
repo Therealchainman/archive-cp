@@ -5480,12 +5480,249 @@ GROUP BY d.dept_id
 ORDER BY student_number DESC, d.dept_name ASC
 ```
 
-## 
+## 1164. Product Price at a Given Date
 
 ### Solution 1:
 
 ```sql
+WITH latest_tbl AS (
+    SELECT 
+        product_id,
+        MAX(change_date) AS recent_date
+    FROM Products
+    WHERE DATEDIFF(change_date, '2019-08-16') <= 0
+    GROUP BY product_id
+),
+product_tbl AS (
+    SELECT DISTINCT product_id
+    FROM Products
+),
+price_tbl AS (
+    SELECT 
+        p.product_id,
+        p.new_price AS price
+    FROM Products p
+    JOIN latest_tbl l
+    ON p.product_id = l.product_id AND p.change_date = l.recent_date
+)
+SELECT 
+    p1.product_id,
+    IFNULL(p2.price, 10) AS price
+FROM product_tbl p1
+LEFT JOIN price_tbl p2
+ON p1.product_id = p2.product_id
+```
 
+## 665. Non-decreasing Array
+
+### Solution 1:  
+
+```py
+class Solution:
+    def checkPossibility(self, nums: List[int]) -> bool:
+        n = len(nums)
+        can_increase = can_decrease = True
+        cnti = cntd = 0
+        for i in range(n):
+            if i + 1 < n and nums[i] > nums[i+1]:
+                if i > 0 and nums[i-1] > nums[i+1]:
+                    can_decrease = False
+                cntd += 1
+            if i > 0 and nums[i] < nums[i-1]:
+                if i + 1 < n and nums[i-1] > nums[i+1]:
+                    can_increase = False
+                cnti += 1
+        return (cnti <= 1 and can_increase) or (cntd <= 1 and can_decrease)
+```
+
+## 2318. Number of Distinct Roll Sequences
+
+### Solution 1:  dynamic programming + math + states are (prev_prev_roll, prev_roll) then you take the next possible roll and add to its state
+
+```py
+class Solution:
+    def distinctSequences(self, n: int) -> int:
+        if n == 1: return 6
+        gcd_lookup = [[0]*6 for _ in range(6)]
+        for i, j in product(range(6), repeat=2):
+            gcd_lookup[i][j] = gcd(i+1,j+1)
+        is_next = lambda r1, r2: gcd_lookup[r1][r2]==1 and r1!=r2
+        last_roll = [[0]*6 for _ in range(6)]
+        for i in range(6):
+            for j in range(6):
+                if not is_next(i,j): continue
+                last_roll[i][j] += 1
+        MOD = int(1e9)+7
+        for i in range(2,n):
+            next_roll = [[0]*6 for _ in range(6)]
+            for r1, r2 in product(range(6), repeat=2):
+                if last_roll[r1][r2] == 0: continue
+                for r3 in range(6):
+                    if not is_next(r2,r3) or r1 == r3: continue
+                    next_roll[r2][r3] = (next_roll[r2][r3] + last_roll[r1][r2])%MOD
+            last_roll = next_roll
+        res = 0
+        for row in last_roll:
+            res = (res+sum(row)%MOD)%MOD
+        return res
+```
+
+## 1294. Weather Type in Each Country
+
+### Solution 1:
+
+```sql
+SELECT 
+    c.country_name,
+    (CASE
+        WHEN AVG(a.weather_state) <= 15 THEN 'Cold'
+        WHEN AVG(a.weather_state) >= 25 THEN 'Hot'
+        ELSE 'Warm'
+    END) AS weather_type
+FROM Countries c
+JOIN Weather a
+ON c.country_id = a.country_id
+WHERE DATE_FORMAT(a.day, '%m-%Y') = '11-2019'
+GROUP BY c.country_id
+```
+
+## 1783. Grand Slam Titles
+
+### Solution 1:
+
+```sql
+SELECT
+    p.player_id,
+    p.player_name,
+    SUM(p.player_id=c.Wimbledon) + SUM(p.player_id=c.Fr_open) + SUM(p.player_id=c.US_open) + SUM(p.player_id=c.Au_open) AS grand_slams_count
+FROM Championships c
+JOIN Players p
+ON p.player_id IN (c.Wimbledon, c.Fr_open, c.US_open, c.Au_open)
+GROUP BY p.player_id
+```
+
+```sql
+WITH unpivot_tbl AS (
+    SELECT 
+        c.Wimbledon AS id
+    FROM Championships c
+    UNION ALL
+    SELECT
+        c.Fr_open AS id
+    FROM Championships c
+    UNION ALL
+    SELECT
+        c.US_open AS id
+    FROM Championships c
+    UNION ALL
+    SELECT
+        c.Au_open AS id
+    FROM Championships c
+)
+SELECT 
+    b.player_id,
+    b.player_name,
+    COUNT(*) AS grand_slams_count
+FROM unpivot_tbl a
+JOIN Players b
+ON a.id = b.player_id
+GROUP BY a.id
+```
+
+## 626. Exchange Seats
+
+### Solution 1:  LEAD + LAG + MOD
+
+```sql
+SELECT
+    id,
+    (CASE
+        WHEN MOD(id,2)!=0 AND LEAD(student) OVER(ORDER BY id) IS NOT NULL THEN LEAD(student) OVER(ORDER BY id)
+        WHEN MOD(id,2)=0 AND LAG(student) OVER(ORDER BY id) IS NOT NULL THEN LAG(student) OVER(ORDER BY id)
+        ELSE student
+    END) AS student
+FROM Seat
+```
+
+## 181. Employees Earning More Than Their Managers
+
+### Solution 1: SELF JOIN + WHERE
+
+```sql
+SELECT
+    e1.name AS Employee
+FROM Employee e1
+JOIN Employee e2
+ON e1.managerId = e2.id
+WHERE e1.salary > e2.salary
+```
+
+## 2320. Count Number of Ways to Place Houses
+
+### Solution 1:  fibonacci derivative + square of fibonacci sequence
+
+```py
+class Solution:
+    def countHousePlacements(self, n: int) -> int:
+        MOD = int(1e9)+7
+        a = b = 1
+        for _ in range(1,n+1):
+            c = (a + b)%MOD
+            b = a
+            a = c
+        return (c*c)%MOD
+```
+
+## 1423. Maximum Points You Can Obtain from Cards
+
+### Solution 1:  prefix + suffix sum + stack
+
+```py
+class Solution:
+    def maxScore(self, cardPoints: List[int], k: int) -> int:
+        psum_stack = [0]
+        for i in range(k):
+            psum_stack.append(psum_stack[-1] + cardPoints[i])
+        max_score = psum_stack[-1]
+        n = len(cardPoints)
+        ssum = 0
+        for i, points in enumerate(reversed(cardPoints)):
+            if i == k: break
+            psum_stack.pop()
+            ssum += points
+            max_score = max(max_score, psum_stack[-1]+ssum)
+        return max_score
+```
+
+### Solution 2: sliding window algorithm
+
+```py
+class Solution:
+    def maxScore(self, cardPoints: List[int], k: int) -> int:
+        min_score = inf
+        n = len(cardPoints)
+        if k == n: return sum(cardPoints)
+        window_size = n - k
+        window_sum = 0
+        window = deque()
+        for point in cardPoints:
+            window.append(point)
+            window_sum += point
+            if len(window) == window_size:
+                min_score = min(min_score, window_sum)
+                left_point = window.popleft()
+                window_sum -= left_point
+        return sum(cardPoints) - min_score
+```
+
+## 1689. Partitioning Into Minimum Number Of Deci-Binary Numbers
+
+### Solution 1:  greedy + observation
+
+```py
+class Solution:
+    def minPartitions(self, n: str) -> int:
+        return max(n)
 ```
 
 ## 
@@ -5493,5 +5730,292 @@ ORDER BY student_number DESC, d.dept_name ASC
 ### Solution 1:
 
 ```py
+
+```
+
+## 1747. Leetflex Banned Accounts
+
+### Solution 1:  SELF JOIN + TEMPORAL JOIN + RANGE JOIN
+
+```sql
+SELECT 
+    DISTINCT l1.account_id
+FROM LogInfo l1
+JOIN LogInfo l2
+ON l1.account_id = l2.account_id 
+AND l2.login BETWEEN l1.login AND l1.logout
+AND l1.ip_address != l2.ip_address
+```
+
+## 1731. The Number of Employees Which Report to Each Employee
+
+### Solution 1:
+
+```sql
+SELECT 
+    e1.employee_id,
+    e1.name,
+    COUNT(e2.employee_id) AS reports_count,
+    ROUND(AVG(e2.age),0) AS average_age
+FROM Employees e1
+JOIN Employees e2
+ON e1.employee_id = e2.reports_to
+GROUP BY e1.employee_id
+ORDER BY e1.employee_id
+```
+
+## 603. Consecutive Available Seats
+
+### Solution 1: SELF JOIN + DISTINCT + WHERE
+
+```sql
+SELECT
+    DISTINCT c1.seat_id
+FROM Cinema c1
+JOIN Cinema c2
+ON abs(c1.seat_id - c2.seat_id) = 1
+WHERE c1.free AND c2.free
+ORDER BY c1.seat_id
+```
+
+## 1459. Rectangles Area
+
+### Solution 1:
+
+```sql
+SELECT 
+    p.id AS p1,
+    q.id AS p2,
+    ABS((p.x_value-q.x_value)*(p.y_value-q.y_value)) AS area
+FROM Points pa
+JOIN Points q
+ON p.id < q.id AND p.x_value != q.x_value AND p.y_value != q.y_value
+ORDER BY area DESC, p1 ASC, p2 ASC
+```
+
+## 180. Consecutive Numbers
+
+### Solution 1:  LEAD(column, steps) + DISTINCT
+
+```sql
+WITH pivot_tbl AS (
+    SELECT 
+        num,
+        LEAD(num) OVER(ORDER BY id) AS num1, 
+        LEAD(num,2) OVER(ORDER BY id) AS num2
+    FROM Logs
+)
+SELECT
+    DISTINCT num AS consecutiveNums
+FROM pivot_tbl
+WHERE num = num1 AND num = num2
+```
+
+### Solution 2: 3 WAY SELF JOIN + DISTINCT
+
+```sql
+SELECT 
+    DISTINCT l1.num AS consecutiveNums
+FROM Logs l1, Logs l2, Logs l3
+WHERE
+    l1.id = l2.id-1 
+    AND l2.id = l3.id-1
+    AND l1.num = l2.num
+    AND l2.num = l3.num
+```
+
+## 1988. Find Cutoff Score for Each School
+
+### Solution 1:  LEFT JOIN + COALESCE + GROUP BY
+
+```sql
+SELECT
+    s.school_id,
+    COALESCE(MIN(e.score),-1) AS score
+FROM Schools s
+LEFT JOIN Exam e
+ON s.capacity >= e.student_count
+GROUP BY s.school_id
+
+```
+
+## 1045. Customers Who Bought All Products
+
+### Solution 1:  GROUP BY + HAVNIG + COUNT + DISTINCT + SUBQUERY
+
+```sql
+SELECT 
+    customer_id
+FROM Customer
+GROUP BY customer_id
+HAVING COUNT(DISTINCT product_key) = (SELECT COUNT(*) FROM Product)
+```
+
+## 1321. Restaurant Growth
+
+### Solution 1:  WINDOW FUNCTION + ROWS BETWEEN IN WINDOW + GROUP BY + OFFSET
+
+```sql
+SELECT 
+    visited_on,
+    SUM(SUM(amount)) OVER(ORDER BY visited_on ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS amount,
+    ROUND(SUM(SUM(amount)) OVER(ORDER BY visited_on ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) / 7.0, 2) as average_amount
+FROM Customer
+GROUP BY visited_on
+ORDER BY visited_on
+LIMIT 99999 OFFSET 6
+```
+
+### Solution 2:  WINDOW FUNCTION + RANGE BETWEEN INTERVAL FOR DATETIME 
+
+```sql
+SELECT 
+    DISTINCT
+    visited_on,
+    SUM(amount) OVER(ORDER BY visited_on RANGE BETWEEN INTERVAL 6 DAY PRECEDING AND CURRENT ROW) AS amount,
+    ROUND(SUM(amount) OVER(ORDER BY visited_on RANGE BETWEEN INTERVAL 6 DAY PRECEDING AND CURRENT ROW)/7.0, 2) AS average_amount
+FROM Customer
+ORDER BY visited_on
+LIMIT 99999 OFFSET 6
+```
+
+### Solution 3:  SELF JOIN + DATEDIFF
+
+```sql
+
+```
+
+## 1549. The Most Recent Orders for Each Product
+
+### Solution 1:
+
+```sql
+WITH most_recent_tbl AS (
+    SELECT
+        product_id,
+        MAX(order_date) AS order_date
+    FROM Orders
+    GROUP BY product_id
+),
+tmp_tbl AS (
+    SELECT 
+    p.product_name,
+    m.product_id,
+    m.order_date
+    FROM most_recent_tbl m
+    JOIN Products p
+    ON m.product_id = p.product_id
+)
+SELECT
+    t.product_name,
+    t.product_id,
+    o.order_id,
+    t.order_date
+FROM tmp_tbl t
+JOIN Orders o
+ON t.product_id = o.product_id
+AND t.order_date = o.order_date
+ORDER BY t.product_name ASC, t.product_id ASC, o.order_id ASC
+```
+
+## 1341. Movie Rating
+
+### Solution 1:
+
+```sql
+WITH rated_tbl AS (
+    SELECT 
+        user_id,
+        COUNT(movie_id) AS movie_count
+    FROM MovieRating
+    GROUP BY user_id
+),
+user_rate_most_tbl AS (
+    SELECT
+        u.name AS results
+    FROM rated_tbl r
+    JOIN Users u
+    ON r.user_Id = u.user_id
+    ORDER BY r.movie_count DESC, results ASC
+    LIMIT 1
+),
+movie_avg_feb_tbl AS (
+    SELECT 
+        movie_id,
+        AVG(rating) AS average_rating
+    FROM MovieRating
+    WHERE DATE_FORMAT(created_at, '%m-%Y') = '02-2020'
+    GROUP BY movie_id
+),
+highest_rated_movie_feb_tbl AS (
+    SELECT
+        m2.title AS results
+    FROM movie_avg_feb_tbl m1
+    JOIN Movies m2
+    ON m1.movie_id = m2.movie_id
+    ORDER BY m1.average_rating DESC, results ASC
+    LIMIT 1
+)
+SELECT *
+FROM user_rate_most_tbl
+UNION
+SELECT *
+FROM highest_rated_movie_feb_tbl
+```
+
+## 1867. Orders With Maximum Quantity Above Average
+
+### Solution 1:  SUBQUERY + AVG + MAX + GROUP BY 
+
+```sql
+WITH quantity_avg_tbl AS (
+    SELECT
+        order_id,
+        ROUND(AVG(quantity), 2) AS average_quantity,
+        MAX(quantity) AS max_quantity
+    FROM OrdersDetails
+    GROUP BY order_id
+)
+SELECT
+    order_id
+FROM quantity_avg_tbl
+WHERE max_quantity > (SELECT MAX(average_quantity) FROM quantity_avg_tbl)
+```
+
+### Solution 2: GROUP BY + HAVING + ALL
+
+```sql
+SELECT
+    order_id
+FROM OrdersDetails
+GROUP BY order_id
+HAVING MAX(quantity) > ALL (SELECT AVG(quantity) FROM OrdersDetails GROUP BY order_id)
+```
+
+## 550. Game Play Analysis IV
+
+### Solution 1:
+
+```sql
+WITH tmp_tbl AS (
+    SELECT
+        player_id,
+        MIN(event_date) AS first_login
+    FROM Activity
+    GROUP BY player_Id
+)
+SELECT 
+    ROUND(COUNT(t.player_id) / (SELECT COUNT(DISTINCT player_id) FROM Activity), 2) AS fraction
+FROM tmp_tbl t
+JOIN Activity a
+ON t.player_id = a.player_id
+AND DATEDIFF(a.event_date, t.first_login) = 1
+```
+
+## 
+
+### Solution 1:
+
+```sql
 
 ```
