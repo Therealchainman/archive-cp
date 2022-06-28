@@ -6019,3 +6019,20 @@ AND DATEDIFF(a.event_date, t.first_login) = 1
 ```sql
 
 ```
+
+## 1647. Minimum Deletions to Make Character Frequencies Unique
+
+### Solution 1:  sorting + greedy
+
+```py
+class Solution:
+    def minDeletions(self, s: str) -> int:
+        counts = sorted(Counter(s).values(), reverse=True)
+        last_count, num_deletions = len(s) + 1, 0
+        for cnt in counts:
+            current_deletes = min(cnt, max(0, cnt-last_count+1))
+            cnt -= current_deletes
+            num_deletions += current_deletes
+            last_count = cnt
+        return num_deletions
+```
