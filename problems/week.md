@@ -6027,12 +6027,66 @@ AND DATEDIFF(a.event_date, t.first_login) = 1
 ```py
 class Solution:
     def minDeletions(self, s: str) -> int:
-        counts = sorted(Counter(s).values(), reverse=True)
         last_count, num_deletions = len(s) + 1, 0
-        for cnt in counts:
-            current_deletes = min(cnt, max(0, cnt-last_count+1))
-            cnt -= current_deletes
-            num_deletions += current_deletes
-            last_count = cnt
+        for cnt in sorted(Counter(s).values(), reverse=True):
+            cur = min(cnt, max(0, last_count-1))
+            num_deletions += (cnt-cur)
+            last_count = cur
         return num_deletions
+```
+
+## 1564. Put Boxes Into the Warehouse I
+
+### Solution 1: 
+
+```py
+class Solution:
+    def maxBoxesInWarehouse(self, boxes: List[int], warehouse: List[int]) -> int:
+        boxes.sort(reverse=True)
+        cnt = i = 0
+        for height in warehouse:
+            while i<len(boxes) and boxes[i] > height:
+                i += 1
+            cnt += (i<len(boxes))
+            i += 1
+        return cnt
+```
+
+## 406. Queue Reconstruction by Height
+
+### Solution 1:  brute force + greedily place smallest h with largest k first, but always some slots back
+
+```py
+class Solution:
+    def reconstructQueue(self, people: List[List[int]]) -> List[List[int]]:
+        n = len(people)
+        rqueue = [-1]*n
+        for h, k in sorted(people, key=lambda x: (x[0],-x[1])):
+            num_slots = 0
+            for i in range(n):
+                if rqueue[i] != -1: continue
+                if num_slots == k:
+                    rqueue[i] = [h,k]
+                    break
+                num_slots += 1
+        return rqueue
+```
+
+### Solution 2:  sort in descending order for height and ascending order for k, then insert at index, because it will have enough larger or equal elements in front of it. 
+
+```py
+class Solution:
+    def reconstructQueue(self, people: List[List[int]]) -> List[List[int]]:
+        output = []
+        for h, k in sorted(people, key=lambda x: (-x[0], x[1])):
+            output.insert(k, [h,k])
+        return output
+```
+
+##
+
+### Solution 1: 
+
+```py
+
 ```
