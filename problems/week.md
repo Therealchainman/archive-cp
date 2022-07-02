@@ -6083,9 +6083,105 @@ class Solution:
         return output
 ```
 
+## 1465. Maximum Area of a Piece of Cake After Horizontal and Vertical Cuts
+
+### Solution 1:  sort + greedy + area = width*height
+
+```py
+class Solution:
+    def maxArea(self, h: int, w: int, horizontalCuts: List[int], verticalCuts: List[int]) -> int:
+        MOD = int(1e9) + 7
+        horizontalCuts = sorted([0] + horizontalCuts + [h])
+        verticalCuts = sorted([0] + verticalCuts + [w])
+        max_height = max(map(lambda x: x[1]-x[0], zip(horizontalCuts, horizontalCuts[1:])))
+        max_width = max(map(lambda x: x[1]-x[0], zip(verticalCuts, verticalCuts[1:])))
+        return max_height*max_width%MOD
+```
+
+## 256. Paint House
+
+### Solution 1:  dynammic programing
+
+```py
+class Solution:
+    def minCost(self, costs: List[List[int]]) -> int:
+        memo = [0]*3
+        for cost in costs:
+            nmemo = [inf]*3
+            for i in range(3):
+                for j in range(3):
+                    if i == j: continue
+                    nmemo[i] = min(nmemo[i], cost[i] + memo[j])
+            memo = nmemo
+        return min(memo)
+```
+
+## 1710. Maximum Units on a Truck
+
+### Solution 1:  sort + greedy
+
+```py
+class Solution:
+    def maximumUnits(self, boxTypes: List[List[int]], truckSize: int) -> int:
+        boxTypes.sort(key=lambda x: (-x[1], x[0]))
+        cnt = 0
+        for numBoxes, units in boxTypes:
+            take = min(truckSize, numBoxes)
+            cnt += take*units
+            truckSize -= take
+            if truckSize == 0: break
+        return cnt
+```
+
+## 462. Minimum Moves to Equal Array Elements II
+
+### Solution 1:  sort + median of array
+
+```py
+class Solution:
+    def minMoves2(self, nums: List[int]) -> int:
+        n = len(nums)
+        nums.sort()
+        return sum(abs(val-nums[n//2]) for val in nums)
+```
+
+## 453. Minimum Moves to Equal Array Elements
+
+### Solution 1:  dynamic programming + moving the smallest numbers to larger value 
+
+```py
+class Solution:
+    def minMoves(self, nums: List[int]) -> int:
+        nums.sort()
+        moves = 0
+        n = len(nums)
+        for i in range(1,n):
+            adjusted_num = nums[i] + moves
+            moves += adjusted_num - nums[i-1]
+            nums[i] = adjusted_num
+        return moves
+```
+
+### Solution 2: math + decrement each individual number to the smallest number + work backwards + relative distance of all numbers after each step is same
+
+```py
+class Solution:
+    def minMoves(self, nums: List[int]) -> int:
+        min_num = min(nums)
+        return reduce(lambda x,y: x-min_num+y, nums, 0)
+```
+
 ##
 
-### Solution 1: 
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
 
 ```py
 
