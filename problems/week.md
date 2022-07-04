@@ -6241,34 +6241,131 @@ class Solution:
 
 ## 135. Candy
 
-### Solution 1:
+### Solution 1:  sort + greedy
 
 ```py
-
+class Solution:
+    def candy(self, ratings: List[int]) -> int:
+        cells = sorted([(rating, i) for i, rating in enumerate(ratings)])
+        n = len(ratings)
+        candies = [1]*n
+        in_bounds = lambda x: 0<=x<n
+        for rating, i in cells:
+            for j in [i-1,i+1]:
+                if not in_bounds(j) or ratings[j] >= rating: continue
+                candies[i] = max(candies[i], candies[j] + 1)
+        return sum(candies)
 ```
 
-##
+## 1213. Intersection of Three Sorted Arrays
 
-### Solution 1:
+### Solution 1:  set intersection + sort
 
 ```py
-
+class Solution:
+    def arraysIntersection(self, arr1: List[int], arr2: List[int], arr3: List[int]) -> List[int]:
+        return sorted(set(arr1)&set(arr2)&set(arr3))
 ```
 
-##
-
-### Solution 1:
+### Solution 2: hash table
 
 ```py
-
+class Solution:
+    def arraysIntersection(self, arr1: List[int], arr2: List[int], arr3: List[int]) -> List[int]:
+        return [key for key, cnt in Counter(arr1+arr2+arr3).items() if cnt == 3]
 ```
 
-##
-
-### Solution 1:
+### Solution 3: three pointers
 
 ```py
+class Solution:
+    def arraysIntersection(self, arr1: List[int], arr2: List[int], arr3: List[int]) -> List[int]:
+        p1 = p2 = p3 = 0
+        n1, n2, n3 = len(arr1), len(arr2), len(arr3)
+        result = []
+        while p1 < n1 and p2 < n2 and p3 < n3:
+            v1, v2, v3 = arr1[p1], arr2[p2], arr3[p3]
+            v = min(v1,v2,v3)
+            if v1 == v2 == v3:
+                result.append(v1)
+            if v1 == v:
+                p1 += 1
+            if v2 == v:
+                p2 += 1
+            if v3 == v:
+                p3 += 1
+        return result
+```
 
+### Solution 4:  binary search
+
+```py
+class Solution:
+    def arraysIntersection(self, arr1: List[int], arr2: List[int], arr3: List[int]) -> List[int]:
+        n1, n2, n3 = len(arr1), len(arr2), len(arr3)
+        result = []
+        for val in arr1:
+            i = bisect_left(arr2, val)
+            j = bisect_left(arr3, val)
+            if i == n2 or j == n3: continue
+            if arr2[i] == arr3[j] == val:
+                result.append(val)
+        return result
+```
+
+## 1099. Two Sum Less Than K
+
+### Solution 1:  two pointers + max
+
+```py
+class Solution:
+    def twoSumLessThanK(self, nums: List[int], k: int) -> int:
+        nums.sort()
+        n = len(nums)
+        left, right = 0, n-1
+        best = -1
+        while left < right:
+            sum_ = nums[left] + nums[right]
+            if sum_ < k:
+                best = max(best, sum_)
+                left += 1
+            else:
+                right -= 1
+        return best
+```
+
+## 261. Graph Valid Tree
+ 
+### Solution 1:  Union Find
+
+```py
+class UnionFind:
+    def __init__(self, n):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    def union(self, i, j):
+        i, j = self.find(i), self.find(j)
+        if i != j:
+            if self.size[i] < self.size[j]:
+                i, j = j, i
+            self.size[i] += self.size[j]
+            self.parent[j] = i
+            return True
+        return False
+    def find(self, i):
+        if i == self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+class Solution:
+    def validTree(self, n: int, edges: List[List[int]]) -> bool:
+        if len(edges) != n-1:
+            return False
+        dsu = UnionFind(n)
+        for u, v in edges:
+            if not dsu.union(u, v):
+                return False
+        return True
 ```
 
 ##
