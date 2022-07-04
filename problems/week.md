@@ -6171,6 +6171,130 @@ class Solution:
         return reduce(lambda x,y: x-min_num+y, nums, 0)
 ```
 
+## 1836. Remove Duplicates From an Unsorted Linked List
+
+### Solution 1:  hash table + linked list
+
+```py
+class Solution:
+    def deleteDuplicatesUnsorted(self, head: ListNode) -> ListNode:
+        counter = Counter()
+        sentinel_node = ListNode(0, head)
+        while head:
+            counter[head.val] += 1
+            head = head.next
+        cur = sentinel_node
+        while cur:
+            while cur.next and counter[cur.next.val] > 1:
+                cur.next = cur.next.next 
+            cur = cur.next
+        return sentinel_node.next
+```
+
+## 1634. Add Two Polynomials Represented as Linked Lists
+
+### Solution 1:  iterate 2 linked lists
+
+```py
+class Solution:
+    def addPoly(self, poly1: 'PolyNode', poly2: 'PolyNode') -> 'PolyNode':
+        sentinel_node = PolyNode()
+        head = sentinel_node
+        while poly1 and poly2:
+            cur_power = max(poly1.power, poly2.power)
+            cur_coef = 0
+            if poly1.power == cur_power:
+                cur_coef += poly1.coefficient
+                poly1 = poly1.next
+            if poly2.power == cur_power:
+                cur_coef += poly2.coefficient
+                poly2 = poly2.next
+            if cur_coef != 0:
+                head.next = PolyNode(cur_coef, cur_power)
+                head = head.next
+        if poly1:
+            head.next = poly1
+        if poly2:
+            head.next = poly2
+        return sentinel_node.next
+```
+
+## 369. Plus One Linked List
+
+### Solution 1:  recursive post order traversal of linked list
+
+```py
+class Solution:
+    def plusOne(self, head: ListNode) -> ListNode:
+        sentinel_node = ListNode(0, head)
+        def postorder(node):
+            if not node:
+                return 1
+            carry = postorder(node.next)
+            node.val += carry
+            carry = max(0, node.val - 9)
+            node.val %= 10
+            return carry
+        postorder(sentinel_node)
+        return sentinel_node if sentinel_node.val > 0 else sentinel_node.next
+```
+
+## 135. Candy
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
