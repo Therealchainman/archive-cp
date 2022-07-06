@@ -6336,7 +6336,7 @@ class Solution:
 
 ## 261. Graph Valid Tree
  
-### Solution 1:  Union Find
+### Solution 1:  Union Find + cycle detection
 
 ```py
 class UnionFind:
@@ -6368,12 +6368,392 @@ class Solution:
         return True
 ```
 
-##
+## 128. Longest Consecutive Sequence
+
+### Solution 1:  hash set + intelligent sequence building
+
+```py
+class Solution:
+    def longestConsecutive(self, nums: List[int]) -> int:
+        nums_set = set(nums)
+        long_streak = cur_streak = 0
+        for num in nums_set:
+            if num-1 in nums_set: continue
+            cur_streak = 1
+            cnum = num
+            while cnum+1 in nums_set:
+                cur_streak += 1
+                cnum += 1
+            long_streak = max(long_streak, cur_streak)
+        return long_streak
+```
+
+## 426. Convert Binary Search Tree to Sorted Doubly Linked List
+
+### Solution 1:  recursion + inorder binary search tree traversal + inplace algorithm + doubly linked list
+
+```py
+class Solution:
+    def treeToDoublyList(self, root: 'Optional[Node]') -> 'Optional[Node]':
+        if not root: return root
+        self.last = self.first = None
+        def inorder(node):
+            if not node: return
+            inorder(node.left)
+            if self.last:
+                self.last.right = node
+                node.left = self.last
+            else:
+                self.first = node
+            self.last = node
+            inorder(node.right)
+        inorder(root)
+        self.last.right = self.first
+        self.first.left = self.last
+        return self.first
+```
+
+## 525. Contiguous Array
+
+### Solution 1:  prefix sum + hash table
+
+```py
+class Solution:
+    def findMaxLength(self, nums: List[int]) -> int:
+        first_index = {0:-1}
+        psum = max_len = 0
+        for i, num in enumerate(nums):
+            psum += (-1 if num==0 else 1)
+            if psum not in first_index:
+                first_index[psum] = i
+            else:
+                max_len = max(max_len, i-first_index[psum])
+        return max_len
+```
+
+## 209. Minimum Size Subarray Sum
+
+### Solution 1:  two pointers + sliding window
+
+```py
+class Solution:
+    def minSubArrayLen(self, target: int, nums: List[int]) -> int:
+        left = 0
+        max_len, window_sum = inf, 0
+        for right, num in enumerate(nums):
+            window_sum += num
+            while window_sum >= target:
+                max_len = min(max_len, right-left+1)
+                window_sum -= nums[left]
+                left += 1
+        return max_len if max_len != inf else 0
+```
+
+## 325. Maximum Size Subarray Sum Equals k
+
+### Solution 1:  hash table + prefix sum + solve equation psum_right - psum_left = k
+
+```py
+class Solution:
+    def maxSubArrayLen(self, nums: List[int], k: int) -> int:
+        first_index = defaultdict(lambda: inf)
+        first_index[0] = -1
+        max_len = psum = 0
+        for i, num in enumerate(nums):
+            psum += num
+            psum_left = psum - k
+            first_index[psum] = min(first_index[psum],i)
+            max_len = max(max_len, i-first_index[psum_left])
+        return max_len
+```
+
+## 684. Redundant Connection
+
+### Solution 1:  Union Find + cycle prevention + modified cycle detection
+
+```py
+class UnionFind:
+    def __init__(self, n):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    def union(self, i, j):
+        i, j = self.find(i), self.find(j)
+        if i != j:
+            if self.size[i] < self.size[j]:
+                i, j = j, i
+            self.size[i] += self.size[j]
+            self.parent[j] = i
+            return True
+        return False
+    def find(self, i):
+        if i == self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+class Solution:
+    def findRedundantConnection(self, edges: List[List[int]]) -> List[int]:
+        result = None
+        n = len(edges)
+        dsu = UnionFind(n+1) 
+        for u, v in edges:
+            if not dsu.union(u,v):
+                result = [u,v]
+        return result
+```
+
+## 685. Redundant Connection II
 
 ### Solution 1:
 
 ```py
 
+```
+
+## 1579. Remove Max Number of Edges to Keep Graph Fully Traversable
+
+### Solution 1:  double union find + greedy
+
+```py
+class UnionFind:
+    def __init__(self, n):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    def union(self, i, j):
+        i, j = self.find(i), self.find(j)
+        if i != j:
+            if self.size[i] < self.size[j]:
+                i, j = j, i
+            self.size[i] += self.size[j]
+            self.parent[j] = i
+            return True
+        return False
+    def find(self, i):
+        if i == self.parent[i]:
+            return iself
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+class Solution:
+    def maxNumEdgesToRemove(self, n: int, edges: List[List[int]]) -> int:
+        dsuA, dsuB = UnionFind(n+1), UnionFind(n+1)
+        num_edges = 0
+        for t, u, v in edges:
+            if t == 3:
+                if not dsuA.union(u,v):
+                    num_edges += 1
+                dsuB.union(u,v)
+        for t, u, v in edges:
+            if t == 1:
+                if not dsuA.union(u,v):
+                    num_edges += 1
+            elif t == 2:
+                if not dsuB.union(u,v):
+                    num_edges += 1
+        return num_edges if dsuA.size[dsuA.find(1)] == n and dsuB.size[dsuB.find(1)] == n else -1
+```
+
+## 1101. The Earliest Moment When Everyone Become Friends
+
+### Solution 1:  union find + single connected component
+
+```py
+class UnionFind:
+    def __init__(self, n):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    def union(self, i, j):
+        i, j = self.find(i), self.find(j)
+        if i != j:
+            if self.size[i] < self.size[j]:
+                i, j = j, i
+            self.size[i] += self.size[j]
+            self.parent[j] = i
+            return True
+        return False
+    def find(self, i):
+        if i == self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+    def single_connected_component(self):
+        return self.size[self.find(0)] == len(self.parent)
+class Solution:
+    def earliestAcq(self, logs: List[List[int]], n: int) -> int:
+        dsu = UnionFind(n)
+        logs.sort()
+        for t, u, v in logs:
+            dsu.union(u,v)
+            if dsu.single_connected_component():
+                return t
+        return -1
+```
+
+## 990. Satisfiability of Equality Equations
+
+### Solution 1:  Union find for equality + check for inequality that they are not in same connected component + variables in same connected component must be equal in value
+
+```py
+class UnionFind:
+    def __init__(self, n):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    def union(self, i, j):
+        i, j = self.find(i), self.find(j)
+        if i != j:
+            if self.size[i] < self.size[j]:
+                i, j = j, i
+            self.size[i] += self.size[j]
+            self.parent[j] = i
+            return True
+        return False
+    def find(self, i):
+        if i == self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+class Solution:
+    def equationsPossible(self, equations: List[str]) -> bool:
+        dsu = UnionFind(26)
+        unicode = lambda x: ord(x) - ord('a')
+        for u, eq, _, v in equations:
+            if eq == '=':
+                dsu.union(unicode(u),unicode(v))
+        for u, eq, _, v in equations:
+            if eq == '!' and dsu.find(unicode(u)) == dsu.find(unicode(v)):
+                return False
+        return True
+```
+
+## 213. House Robber II
+
+### Solution 1:  Iterative DP
+
+```py
+class Solution:
+    def house_robber(self, nums: List[int]) -> int:
+        rob = not_rob = 0
+        for num in nums:
+            not_rob, rob = rob, max(rob, not_rob+num)
+        return rob
+    def rob(self, nums: List[int]) -> int:
+        if len(nums) == 1: return nums[0]
+        return max(self.house_robber(nums[1:]), self.house_robber(nums[:-1]))
+```
+
+## 1150. Check If a Number Is Majority Element in a Sorted Array
+
+### Solution 1:  two binary search to find the range
+
+```py
+class Solution:
+    def isMajorityElement(self, nums: List[int], target: int) -> bool:
+        return bisect_right(nums, target) - bisect_left(nums, target) > len(nums)//2
+```
+
+## 1428. Leftmost Column with at Least a One
+
+### Solution 1:  binary search on each row + API interface
+
+```py
+class Solution:
+    def leftMostColumnWithOne(self, binaryMatrix: 'BinaryMatrix') -> int:
+        R, C = binaryMatrix.dimensions()
+        left_most = C
+        for r in range(R):
+            left, right = 0, C
+            while left < right:
+                mid = (left+right) >> 1
+                try:
+                    is_one = binaryMatrix.get(r,mid)
+                except:
+                    is_one = True
+                if is_one:
+                    right = mid
+                else:
+                    left = mid+1
+            left_most = min(left_most, left)
+        return left_most if left_most < C else -1
+```
+
+## 737. Sentence Similarity II
+
+### Solution 1:  Union Find
+
+```py
+class UnionFind:
+    def __init__(self, n):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    def union(self, i, j):
+        i, j = self.find(i), self.find(j)
+        if i != j:
+            if self.size[i] < self.size[j]:
+                i, j = j, i
+            self.size[i] += self.size[j]
+            self.parent[j] = i
+            return True
+        return False
+    def find(self, i):
+        if i == self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+class Solution:
+    def areSentencesSimilarTwo(self, sentence1: List[str], sentence2: List[str], similarPairs: List[List[str]]) -> bool:
+        if len(sentence1) != len(sentence2): return False
+        sindex_map = {}
+        for s1, s2 in similarPairs:
+            if s1 not in sindex_map:
+                sindex_map[s1] = len(sindex_map)
+            if s2 not in sindex_map:
+                sindex_map[s2] = len(sindex_map)
+        for s1, s2 in zip(sentence1, sentence2):
+            if s1 not in sindex_map:
+                sindex_map[s1] = len(sindex_map)
+            if s2 not in sindex_map:
+                sindex_map[s2] = len(sindex_map)
+        dsu = UnionFind(len(sindex_map))
+        for s1, s2 in similarPairs:
+            u, v = sindex_map[s1], sindex_map[s2]
+            dsu.union(u,v)
+        return all(dsu.find(sindex_map[s1])==dsu.find(sindex_map[s2]) for s1, s2 in zip(sentence1, sentence2))
+```
+
+## 1061. Lexicographically Smallest Equivalent String
+
+### Solution 1:
+
+```py
+
+```
+
+## 509. Fibonacci Number
+
+### Solution 1: dynamic programming + matrix exponentiation + numpy arrays + identity numpy array + matrix product
+
+```py
+import numpy as np   
+class Solution:
+    def fib(self, n: int) -> int:
+        transition_matrix = np.array([[1,1],[1,0]])
+        result = np.identity(2, dtype=np.int64)
+        while n > 0:
+            if n%2==1:
+                result = np.matmul(result,transition_matrix)
+            transition_matrix = np.matmul(transition_matrix,transition_matrix)
+            n >>= 1
+        return result[-1][0]
+```
+
+### Solution 2: Iterative DP + constant memory optimization
+
+```py
+class Solution:
+    def fib(self, n: int) -> int:
+        if n == 0: return 0
+        f1, f2 = 1, 0
+        for _ in range(2, n+1):
+            f2, f1 = f1, f1+f2
+        return f1
 ```
 
 ##
@@ -6405,5 +6785,134 @@ class Solution:
 ### Solution 1:
 
 ```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+## 1831. Maximum Transaction Each Day
+
+### Solution 1: DATE_FORMAT + JOIN + MAX + GROUP BY
+
+```sql
+WITH max_amt_tbl AS (
+    SELECT
+        DATE_FORMAT(day, '%Y-%m-%d') AS date,
+        MAX(amount) AS max_amount
+    FROM Transactions
+    GROUP BY date
+)
+SELECT 
+    t.transaction_id
+FROM Transactions t
+JOIN max_amt_tbl m
+ON t.amount = m.max_amount
+AND DATE_FORMAT(t.day, '%Y-%m-%d') = m.date
+ORDER BY t.transaction_id
+```
+
+### Solution 2: RANK + PARTITION BY + ORDER BY + RANK USED TO FIND WHEN VALUE IS EQUAL TO MAX + MAX VALUE WILL ALWAYS HAVE A RANK OF 1
+
+```sql
+WITH trans_rank_tbl AS (
+    SELECT
+        transaction_id,
+        DATE_FORMAT(day, '%Y-%m-%d') AS date,
+        RANK() OVER(PARTITION BY DATE_FORMAT(day, '%Y-%m-%d') ORDER BY amount DESC) AS trans_rank
+    FROM Transactions
+)
+SELECT transaction_id
+FROM trans_rank_tbl
+WHERE trans_rank = 1
+ORDER BY transaction_id
+```
+
+## 1126. Active Businesses
+
+### Solution 1: AVG + GROUP BY + JOIN
+
+```sql
+WITH avg_tbl AS (
+    SELECT
+        event_type,
+        AVG(occurences) AS average_activity
+    FROM Events
+    GROUP BY event_type
+)
+SELECT 
+    e.business_id
+FROM Events e
+JOIN avg_tbl a
+ON e.event_type = a.event_type
+AND e.occurences > a.average_activity
+GROUP BY e.business_id
+HAVING COUNT(*) > 1
+```
+
+### Solution 2: AVG + WINDOW FUNCTION WITH PARTITION BY + CASE + GROUP BY + HAVING
+
+```sql
+WITH chosen_tbl AS (
+    SELECT
+        business_id,
+        CASE
+            WHEN occurences > AVG(occurences) OVER(PARTITION BY event_type) THEN 1
+            ELSE 0
+        END AS chosen
+    FROM Events
+)
+SELECT business_id
+FROM chosen_tbl
+GROUP BY business_id
+HAVING SUM(chosen) > 1
+```
+
+## 1532. The Most Recent Three Orders
+
+### Solution 1:  RANK + WINDOW FUNCTION WITH PARTITION BY AND ORDER BY + JOIN
+
+Only works because each customer only orders once each day, otherwise would need ROW_NUMBER
+
+```sql
+WITH cust_rank_tbl AS (
+    SELECT 
+        c.name AS customer_name,
+        c.customer_id,
+        o.order_id,
+        o.order_date,
+        RANK() OVER (PARTITION BY customer_id ORDER BY order_date DESC)  AS order_rank
+    FROM Orders o
+    JOIN Customers c
+    ON o.customer_id = c.customer_id
+)
+SELECT 
+    customer_name,
+    customer_id,
+    order_id,
+    order_date
+FROM cust_rank_tbl
+WHERE order_rank <= 3
+ORDER BY customer_name, customer_id, order_date DESC
+```
+
+## 1949. Strong Friendship
+
+### Solution 1:
+
+```sql
+
+```
+
+##
+
+### Solution 1:
+
+```sql
 
 ```

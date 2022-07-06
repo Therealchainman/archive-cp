@@ -19,3 +19,7 @@ class UnionFind:
             self.size[i] += self.size[j]
             return True
         return False
+    def single_connected_component(self):
+        return self.size[self.find(0)] == len(self.parent)
+    def is_same_connected_components(self, i, j):
+        return self.find(i) == self.find(j)
