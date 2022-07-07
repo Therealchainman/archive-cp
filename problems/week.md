@@ -2592,44 +2592,6 @@ class Solution:
         return dp[-1][-1]
 ```
 
-## 32. Longest Valid Parentheses
-
-### Solution 1: stack 
-
-```py
-class Solution:
-    def longestValidParentheses(self, s: str) -> int:
-        stack = [-1]
-        ans = 0
-        for i, ch in enumerate(s):
-            if ch == '(':
-                stack.append(i)
-            else:
-                stack.pop()
-                if not stack:
-                    stack.append(i)
-                else:
-                    ans = max(ans, i - stack[-1])
-        return ans
-```
-
-### Solution 2: stack + dynamicc programming
-
-```py
-class Solution:
-    def longestValidParentheses(self, s: str) -> int:
-        stack = []
-        n = len(s)
-        memo = [0]*(n+1)
-        for i, ch in enumerate(s):
-            if ch == '(':
-                stack.append(i)
-            elif stack:
-                j = stack.pop()
-                memo[i+1] = i-j+1+memo[j]
-        return max(memo)
-```
-
 ## Russian Doll Envelopes
 
 ### Solution 1: dynamic programming with sort + binary search
@@ -6756,44 +6718,117 @@ class Solution:
         return f1
 ```
 
-##
+## 97. Interleaving String
 
-### Solution 1:
+### Solution 1:  bfs + memo + deque
 
 ```py
-
+class Solution:
+    def isInterleave(self, s1: str, s2: str, s3: str) -> bool:
+        n1, n2, n3 = len(s1), len(s2), len(s3)
+        if n1+n2 != n3: return False
+        memo = set([(0,0)])
+        queue = deque([(0,0)])
+        while queue:
+            i, j= queue.popleft()
+            if i+j == n3: return True
+            if i<n1 and s1[i] == s3[i+j] and (i+1,j) not in memo:
+                queue.append((i+1,j))
+                memo.add((i+1,j))
+            if j<n2 and s2[j] == s3[i+j] and (i,j+1) not in memo:
+                queue.append((i,j+1))
+                memo.add((i,j+1))
+        return False
 ```
 
-##
+## 270. Closest Binary Search Tree Value
 
-### Solution 1:
+### Solution 1:  binary search tree + nested function + min with custom comparison key
 
 ```py
-
+class Solution:
+    def __init__(self):
+        self.closest_value = inf
+    def closestValue(self, root: Optional[TreeNode], target: float) -> int:
+        def binary_search(node):
+            if not node: return
+            self.closest_value = min(self.closest_value, node.val, key=lambda x: abs(x-target))
+            if target < node.val:
+                binary_search(node.left)
+            else:
+                binary_search(node.right)
+        binary_search(root)
+        return self.closest_value
 ```
 
-##
-
-### Solution 1:
+### Solution 2:  iterative binary search on tree + min with custom comparison key
 
 ```py
-
+class Solution:
+    def closestValue(self, root: Optional[TreeNode], target: float) -> int:
+        closest = root.val
+        while root:
+            closest = min(root.val, closest, key=lambda x: abs(target-x))
+            root = root.left if target < root.val else root.right
+        return closest
 ```
 
-##
+## 1231. Divide Chocolate
 
-### Solution 1:
+### Solution 1:  binary search + linear scan + greedy check
 
 ```py
-
+class Solution:
+    def maximizeSweetness(self, sweetness: List[int], k: int) -> int:
+        left, right = 1, sum(sweetness)
+        def possible(target):
+            cuts = cur_sweet = 0
+            for sweet in sweetness:
+                cur_sweet += sweet
+                if cur_sweet >= target:
+                    cur_sweet = 0
+                    cuts += 1
+            return cuts > k
+        while left < right:
+            mid = (left+right+1)>>1
+            if possible(mid):
+                left = mid
+            else:
+                right = mid-1
+        return left
 ```
 
-##
+## 153. Find Minimum in Rotated Sorted Array
 
-### Solution 1:
+### Solution 1:  optimized binary search + edge case analysis + pivot
 
 ```py
+class Solution:
+    def findMin(self, nums: List[int]) -> int:
+        n = len(nums)
+        left, right = 0, n-1
+        while left < right:
+            mid = (left+right)>>1
+            if nums[mid]>=nums[left] and nums[mid]>nums[right]:
+                left = mid+1
+            else:
+                right = mid
+        return nums[left]
+```
 
+## 528. Random Pick with Weight
+
+### Solution 1:  prefix sum + random with randint + binary search
+
+```py
+class Solution:
+
+    def __init__(self, w: List[int]):
+        self.psum = list(accumulate(w))
+
+    def pickIndex(self) -> int:
+        val = random.randint(1, self.psum[-1])
+        return bisect_left(self.psum, val)
 ```
 
 ## 1831. Maximum Transaction Each Day
@@ -6909,10 +6944,326 @@ ORDER BY customer_name, customer_id, order_date DESC
 
 ```
 
+## 1613. Find the Missing IDs
+
+### Solution 1:  RECURSIVE CTE
+
+```sql
+WITH RECURSIVE series_tbl AS (
+    SELECT 1 AS value
+    UNION ALL
+    SELECT value + 1
+    FROM series_tbl
+    WHERE value < (SELECT MAX(customer_id) FROM Customers)
+)
+SELECT
+    value AS ids
+FROM series_tbl
+WHERE value NOT IN (SELECT customer_id FROM Customers)
+```
+
+## 1270. All People Report to the Given Manager
+
+### Solution 1:  RECURSIVE CTE WITH HIERARCHICAL DATA + TREE DATA STRUCTURE
+
+```sql
+WITH RECURSIVE tree_tbl AS (
+    SELECT employee_id
+    FROM Employees
+    WHERE manager_id = 1 AND employee_id != 1
+    UNION
+    SELECT e.employee_Id
+    FROM Employees e
+    JOIN tree_tbl t
+    ON e.manager_id = t.employee_id
+)
+SELECT *
+FROM tree_tbl
+```
+
+## 178. Rank Scores
+
+### Solution 1:  WINDOW FUNCTION WITH DENSE_RANK 
+
+```sql
+SELECT 
+    score,
+    DENSE_RANK() OVER(ORDER BY score DESC) AS 'rank'
+FROM Scores
+```
+
+## 177. Nth Highest Salary
+
+### Solution 1:  WINDOW FUNCTION WITH DENSE_RANK + JOIN + LIMIT
+
+```sql
+CREATE FUNCTION getNthHighestSalary(N INT) RETURNS INT
+BEGIN
+  RETURN (
+      WITH rank_tbl AS (
+        SELECT 
+            id,
+            DENSE_RANK() OVER(ORDER BY salary DESC) AS rank_
+        FROM Employee
+      )
+      SELECT 
+         b.salary
+      FROM rank_tbl a
+      JOIN Employee b
+      ON a.id = b.id
+      WHERE a.rank_ = N
+      LIMIT 1
+  );
+END
+```
+
+## 1709. Biggest Window Between Visits
+
+### Solution 1:  WINDOW FUNCTION WITH LAG + PARTITION BY + DATEDIFF + IFNULL + GROUP BY
+
+```sql
+WITH window_tbl AS (
+    SELECT 
+        user_id,
+        visit_date AS visit_date1,
+        LAG(visit_date, 1, '2021-1-1') OVER(PARTITION BY user_id ORDER BY visit_date DESC) AS visit_date2
+    FROM UserVisits
+),
+diff_tbl AS (
+    SELECT
+        user_id,
+        MAX(DATEDIFF(visit_date2, visit_date1)) AS biggest_window
+    FROM window_tbl
+    GROUP BY user_id
+)
+SELECT *
+FROM diff_tbl
+```
+
+## 1951. All the Pairs With the Maximum Number of Common Followers
+
+### Solution 1:  WINDOW FUNCTION WITH RANK BY COMMON FOLLOWER COUNT + GROUP BY + SELF JOIN + GET HIGHEST RANK
+
+```sql
+WITH rank_tbl AS (
+    SELECT 
+        r1.user_id AS user1,
+        r2.user_id AS user2,
+        RANK() OVER(ORDER BY COUNT(r1.follower_id) DESC) AS follower_rank
+    FROM Relations r1
+    JOIN Relations r2
+    ON r1.follower_id = r2.follower_id
+    AND r1.user_id < r2.user_id
+    GROUP BY user1, user2
+)
+SELECT 
+    user1 AS user1_id,
+    user2 AS user2_id
+FROM rank_tbl
+WHERE follower_rank = 1
+```
+
+## 1369. Get the Second Most Recent Activity 
+
+### Solution 1:  WINDOW FUNCTION WITH RANK PARTITION BY + WINDOW FUNCTION FOR COUNT 
+
+```sql
+WITH rank_tbl AS (
+    SELECT
+        username,
+        activity,
+        startDate,
+        endDate,
+        RANK() OVER(PARTITION BY username ORDER BY endDate DESC) AS activity_rank,
+        COUNT(*) OVER(PARTITION BY username) AS cnt
+    FROM UserActivity
+)
+SELECT 
+    username,
+    activity,
+    startDate,
+    endDate
+FROM rank_tbl
+WHERE activity_rank = 2
+OR cnt < 2
+
+```
+
 ##
 
 ### Solution 1:
 
 ```sql
+
+```
+
+##
+
+### Solution 1:
+
+```sql
+
+```
+
+## 300. Longest Increasing Subsequence
+
+### Solution 1:  binary search + dynamic programming
+
+```py
+class Solution:
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        sub = [nums[0]]
+        for num in nums[1:]:
+            if num > sub[-1]:
+                sub.append(num)
+            else:
+                i = bisect_left(sub, num)
+                sub[i] = num
+        return len(sub)
+```
+
+## 1061. Lexicographically Smallest Equivalent String
+
+### Solution 1:  union find + find minimum character in each connected component + union find for the alphabet
+
+```py
+class UnionFind:
+    def __init__(self, n):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    def union(self, i, j):
+        i, j = self.find(i), self.find(j)
+        if i != j:
+            if self.size[i] < self.size[j]:
+                i, j = j, i
+            self.size[i] += self.size[j]
+            self.parent[j] = i
+            return True
+        return False
+    def find(self, i):
+        if i == self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+class Solution:
+    def smallestEquivalentString(self, s1: str, s2: str, baseStr: str) -> str:
+        dsu = UnionFind(26)
+        unicode = lambda ch: ord(ch)-ord('a')
+        char = lambda x: chr(x+ord('a'))
+        for u, v in zip(s1,s2):
+            dsu.union(unicode(u),unicode(v))
+        connected_components = defaultdict(lambda: 'z')
+        for i in range(26):
+            root = dsu.find(i)
+            connected_components[root] = min(connected_components[root], char(i))
+        result = []
+        for v in map(lambda x: unicode(x), baseStr):
+            result.append(connected_components[dsu.find(v)])
+        return ''.join(result)
+```
+
+## 1258. Synonymous Sentences
+
+### Solution 1:  union find + mapping strings to integers for union find + hash table + brute force
+
+```py
+class UnionFind:
+    def __init__(self, n):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    def union(self, i, j):
+        i, j = self.find(i), self.find(j)
+        if i != j:
+            if self.size[i] < self.size[j]:
+                i, j = j, i
+            self.size[i] += self.size[j]
+            self.parent[j] = i
+            return True
+        return False
+    def find(self, i):
+        if i == self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+class Solution:
+    def generateSentences(self, synonyms: List[List[str]], text: str) -> List[str]:
+        sindex = {}
+        for u, v in synonyms:
+            if u not in sindex:
+                sindex[u] = len(sindex)
+            if v not in sindex:
+                sindex[v] = len(sindex)
+        n = len(sindex)
+        dsu = UnionFind(n)
+        for u, v in synonyms:
+            dsu.union(sindex[u], sindex[v])
+        connected_components = defaultdict(list)
+        for word, index in sindex.items():
+            connected_components[dsu.find(index)].append(word)
+        result = [[]]
+        for word in text.split():
+            result2 = []
+            if word not in sindex:
+                for res in result:
+                    result2.append(res + [word])
+            else:
+                for gword in connected_components[dsu.find(sindex[word])]:
+                    for res in result:
+                        result2.append(res + [gword])
+            result = result2
+        return sorted([' '.join(sent) for sent in result])
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
 
 ```
