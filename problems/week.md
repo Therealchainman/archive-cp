@@ -7366,6 +7366,257 @@ class Solution:
         return result
 ```
 
+## 139. Word Break
+
+### Solution 1:  memoization + iterative dynamic programing + set
+
+```py
+class Solution:
+    def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+        n = len(s)
+        max_len = len(max(wordDict, key = lambda x: len(x)))
+        words = set(wordDict)
+        memo = [0]*(n+1)
+        memo[0] = 1
+        for j in range(1,n+1):
+            for i in range(max(0,j-max_len),j):
+                if s[i:j] in words:
+                    memo[j] |= memo[i]
+        return memo[-1]
+```
+
+## 295. Find Median from Data Stream
+
+### Solution 1:  max heap and min heap datastructure + heap + rolling heap
+
+```py
+class MedianFinder:
+
+    def __init__(self):
+        self.minheap, self.maxheap = [], []
+
+    def addNum(self, num: int) -> None:
+        heappush(self.minheap, num)
+        if len(self.minheap) > len(self.maxheap):
+            elem = heappop(self.minheap)
+            heappush(self.maxheap, -elem)
+        elif self.minheap and self.maxheap:
+            elem = -heappop(self.maxheap)
+            heappush(self.minheap, elem)
+            elem2 = heappop(self.minheap)
+            heappush(self.maxheap, -elem2)
+
+    def findMedian(self) -> float:
+        return -self.maxheap[0] if len(self.maxheap) != len(self.minheap) else (self.minheap[0] - self.maxheap[0])/2
+
+```
+
+## 632. Smallest Range Covering Elements from K Lists
+
+### Solution 1:  sort + sliding window + frequencey array + min with custom comparator
+
+```py
+class Solution:
+    def smallestRange(self, nums: List[List[int]]) -> List[int]:
+        arr = sorted([(v, i) for i, row in enumerate(nums) for v in row])
+        rng, left = [-inf,inf], 0
+        kcnt = 0
+        k = len(nums)
+        freq = [0]*k
+        for v, i in arr:
+            kcnt += (freq[i]==0)
+            freq[i] += 1
+            if kcnt < k: continue
+            while freq[arr[left][1]] > 1:
+                freq[arr[left][1]] -= 1
+                left += 1
+            left_v = arr[left][0]
+            rng = min(rng, [left_v,v], key=lambda x: x[1]-x[0])
+        return rng
+```
+
+## 542. 01 Matrix
+
+### Solution 1:  bfs + memoization + iterative dynamic programming + visited array with in place modification + deque
+
+```py
+class Solution:
+    def updateMatrix(self, mat: List[List[int]]) -> List[List[int]]:
+        R, C = len(mat), len(mat[0])
+        queue = deque()
+        dist = [[inf]*C for _ in range(R)]
+        in_bounds = lambda r,c: 0<=r<R and 0<=c<C
+        for r, c in product(range(R), range(C)):
+            if mat[r][c] == 0:
+                queue.append((r,c,0))
+                dist[r][c] = 0
+        while queue:
+            r, c, d = queue.popleft()
+            for nr, nc in [(r+1,c),(r-1,c),(r,c+1),(r,c-1)]:
+                if not in_bounds(nr,nc) or d >= dist[nr][nc]: continue
+                queue.append((nr,nc, d+1))
+                dist[nr][nc] = d + 1
+        return dist
+```
+
+### Solution 2: iterative dynamic programming + from two directions
+
+```py
+class Solution:
+    def updateMatrix(self, mat: List[List[int]]) -> List[List[int]]:
+        R, C = len(mat), len(mat[0])
+        dist = [[inf]*C for _ in range(R)]
+        in_bounds = lambda r,c: 0<=r<R and 0<=c<C
+        for r, c in product(range(R), range(C)):
+            if mat[r][c] == 0:
+                dist[r][c] = 0
+        for r, c in product(range(R), range(C)):
+            if mat[r][c] == 0: continue
+            for nr, nc in [(r-1,c),(r,c-1)]:
+                if not in_bounds(nr,nc): continue
+                dist[r][c] = min(dist[r][c], dist[nr][nc]+1)
+        for r, c in product(range(R)[::-1], range(C)[::-1]):
+            if mat[r][c] == 0: continue
+            for nr, nc in [(r+1,c),(r,c+1)]:
+                if not in_bounds(nr,nc): continue
+                dist[r][c] = min(dist[r][c], dist[nr][nc]+1)
+        return dist
+```
+
+## 221. Maximal Square
+
+### Solution 1:  iterative dynamic programming
+
+```py
+class Solution:
+    def maximalSquare(self, matrix: List[List[str]]) -> int:
+        R, C = len(matrix), len(matrix[0])
+        max_wid = 0
+        memo = [[0]*(C+1) for _ in range(R+1)]
+        for r, c in product(range(R), range(C)):
+            if matrix[r][c] == '0': continue
+            memo[r][c] = min(memo[r-1][c],memo[r][c-1],memo[r-1][c-1]) + 1
+            max_wid = max(max_wid, memo[r][c])
+        return max_wid*max_wid
+```
+
+## 787. Cheapest Flights Within K Stops
+
+### Solution 1:  dijkstra + stops constraint + dynammic programming
+
+```py
+class Solution:
+    def findCheapestPrice(self, n: int, flights: List[List[int]], src: int, dst: int, k: int) -> int:
+        graph = [[] for _ in range(n)]
+        for u, v, price in flights:
+            graph[u].append((v,price))
+        minheap = [(0,0,src)]
+        dist = [[inf]*(k+1) for _ in range(n)]
+        dist[src][0] = 0
+        while minheap:
+            cost, stops, node = heappop(minheap)
+            if node == dst: return cost
+            if stops > k: continue
+            for nei, w in graph[node]:
+                ncost = cost + w
+                if ncost < dist[nei][stops]: 
+                    dist[nei][stops] = ncost
+                    heappush(minheap, (ncost, stops+1, nei))
+        return -1
+```
+
+## 815. Bus Routes
+
+### Solution 1:  multisource bfs + construct undirected graph + set + set intersection
+
+```py
+class Solution:
+    def numBusesToDestination(self, routes: List[List[int]], source: int, target: int) -> int:
+        if source == target: return 0
+        routes = list(map(set, routes))
+        n = len(routes)
+        graph = [[] for _ in range(n)]
+        for i in range(n):
+            for j in range(i+1,n):
+                if len(routes[i]&routes[j])>0:
+                    graph[i].append(j)
+                    graph[j].append(i)
+        seen, targets = set(), set()
+        queue = deque()
+        for i in range(n):
+            if source in routes[i]:
+                seen.add(i)
+                queue.append((i,1))
+            if target in routes[i]:
+                targets.add(i)
+        while queue:
+            bus, stops = queue.popleft()
+            if bus in targets: return stops
+            for nei in graph[bus]:
+                if nei in seen: continue
+                seen.add(nei)
+                queue.append((nei, stops+1))
+        return -1
+```
+
+## 239. Sliding Window Maximum
+
+### Solution 1:  monotonic stack with enqueue and dequeu + deque
+
+```py
+class Solution:
+    def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
+        stack, result = deque(), []
+        for i, num in enumerate(nums):
+            while stack and stack[-1][0]<=num:
+                stack.pop()
+            stack.append((num, i))
+            if i >= k-1: 
+                while stack[0][1] <= i-k:
+                    stack.popleft()
+                result.append(stack[0][0])
+        return result
+```
+
+## 42. Trapping Rain Water
+
+### Solution 1:  stack
+
+```py
+class Solution:
+    def trap(self, height: List[int]) -> int:
+        stack = []
+        res = 0
+        for i,h in enumerate(height):
+            while stack and height[stack[-1]] < h:
+                top = stack.pop()
+                if not stack: continue
+                distance = i - stack[-1] - 1
+                bounded_height = min(h, height[stack[-1]]) - height[top]
+                res += distance*bounded_height
+            stack.append(i)
+        return res
+```
+
+## 1696. Jump Game VI
+
+### Solution 1:  iterative dynamic programming + monotonic stack + deque
+
+```py
+class Solution:
+    def maxResult(self, nums: List[int], k: int) -> int:
+        n = len(nums)
+        queue = deque([(nums[0], 0)])
+        for i, num in enumerate(nums[1:], start=1):
+            while queue[0][1] < i-k:
+                queue.popleft()
+            v = queue[0][0] + num
+            while queue and queue[-1][0]<=v:
+                queue.pop()
+            queue.append((v,i))
+        return queue.pop()[0]
+```
+
 ##
 
 ### Solution 1:
@@ -7374,12 +7625,6 @@ class Solution:
 
 ```
 
-### Solution 1:
-
-```py
-
-```
-
 ##
 
 ### Solution 1:
@@ -7411,6 +7656,16 @@ class Solution:
 ```py
 
 ```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
 
 ### Solution 1:
 
