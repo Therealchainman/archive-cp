@@ -259,6 +259,19 @@ int earliestFullBloom(vector<int>& P, vector<int>& G) {
 }
 ```
 
+### Solution 1: greedy + sort
+
+```py
+class Solution:
+    def earliestFullBloom(self, plantTime: List[int], growTime: List[int]) -> int:
+        bloom_time = time = 0
+        arr = sorted([(x,y) for x,y in zip(plantTime, growTime)], key = lambda x: (-x[1],x[0]))
+        for pl, gr in arr:
+            time += pl
+            bloom_time = max(bloom_time, time + gr)
+        return bloom_time
+```
+
 ### Solution: multiset with custom comparator for plant sort descending order for growing and if tied, ascending order for planting.
 
 

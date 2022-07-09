@@ -7214,6 +7214,180 @@ class Solution:
         return sorted([' '.join(sent) for sent in result])
 ```
 
+## 1891. Cutting Ribbons
+
+### Solution 1:  binary search + greedy
+
+```py
+class Solution:
+    def maxLength(self, ribbons: List[int], k: int) -> int:
+        left, right = 0, sum(ribbons)//k
+        possible = lambda ribbon_len: sum(ribbon//ribbon_len for ribbon in ribbons) >=k
+        while left < right:
+            mid = (left+right+1)>>1
+            if possible(mid):
+                left = mid
+            else:
+                right = mid-1
+        return left
+```
+
+## 1885. Count Pairs in Two Arrays
+
+### Solution 1:  binary seach + math + sorting
+
+```py
+class Solution:
+    def countPairs(self, nums1: List[int], nums2: List[int]) -> int:
+        nums = sorted([x-y for x,y in zip(nums1,nums2)])
+        res = 0
+        n = len(nums)
+        for i, x in enumerate(nums):
+            idx = bisect_right(nums, -x, i+1)
+            res += n - idx
+        return res
+```
+
+## 658. Find K Closest Elements
+
+### Solution 1:  sort with custom comparator
+
+```py
+class Solution:
+    def findClosestElements(self, arr: List[int], k: int, x: int) -> List[int]:
+        pre_arr = sorted([v for v in arr], key=lambda v: abs(v-x))
+        return sorted(pre_arr[:k])
+```
+
+## 36. Valid Sudoku
+
+### Solution 1:  hash table + math + defaultdict
+
+```py
+class Solution:
+    def isValidSudoku(self, board: List[List[str]]) -> bool:
+        rows, cols, subs = [defaultdict(set) for _ in range(3)]
+        R, C = len(board), len(board[0])
+        for r, c in product(range(R), range(C)):
+            digit = board[r][c]
+            if digit == '.': continue
+            if digit in rows[r] or digit in cols[c] or digit in subs[(r//3, c//3)]: return False
+            rows[r].add(digit)
+            cols[c].add(digit)
+            subs[(r//3,c//3)].add(digit)
+        return True
+```
+
+## 37. Sudoku Solver
+
+### Solution 1:  backtracking + hash table + deque
+
+```py
+class Solution:
+    def solveSudoku(self, board: List[List[str]]) -> None:
+        """
+        Do not return anything, modify board in-place instead.
+        """
+        rows, cols, subs = [defaultdict(set) for _ in range(3)]
+        R, C = len(board), len(board[0])
+        empty_cells = deque()
+        for r, c in product(range(R), range(C)):
+            digit = board[r][c]
+            if digit == '.':
+                empty_cells.append((r,c))
+                continue
+            rows[r].add(digit)
+            cols[c].add(digit)
+            subs[(r//3,c//3)].add(digit)
+        def backtrack():
+            if not empty_cells:
+                return True
+            r, c = empty_cells.popleft()
+            for digit in string.digits[1:]:
+                sub = (r//3,c//3)
+                if digit in rows[r] or digit in cols[c] or digit in subs[sub]: continue
+                rows[r].add(digit)
+                cols[c].add(digit)
+                subs[sub].add(digit)
+                board[r][c] = digit
+                if backtrack(): return True
+                rows[r].remove(digit)
+                cols[c].remove(digit)
+                subs[sub].remove(digit)
+                board[r][c] = '.'
+            empty_cells.appendleft((r,c))
+            return False
+        backtrack()
+```
+
+## 79. Word Search
+
+### Solution 1:  dfs with backtracking
+
+```py
+class Solution:
+    def exist(self, board: List[List[str]], word: str) -> bool:
+        n = len(word)
+        R, C = len(board), len(board[0])
+        in_bounds = lambda r, c: 0<=r<R and 0<=c<C
+        def backtrack(i, r, c):
+            if i == n:
+                return True
+            for nr, nc in [(r+1,c),(r-1,c),(r,c+1),(r,c-1)]:
+                if not in_bounds(nr,nc) or board[nr][nc] == '.' or board[nr][nc] != word[i]: continue
+                board[nr][nc] = '.'
+                if backtrack(i+1,nr,nc): return True
+                board[nr][nc] = word[i]
+            return False
+        for r, c in product(range(R), range(C)):
+            if board[r][c] == word[0]:
+                board[r][c] = '.'
+                if backtrack(1,r,c): return True
+                board[r][c] = word[0]
+        return False          
+```
+
+## 17. Letter Combinations of a Phone Number
+
+### Solution 1:  brute force + subset iterative
+
+```py
+class Solution:
+    def letterCombinations(self, digits: str) -> List[str]:
+        if not digits: return []
+        phone = {'2': 'abc', '3': 'def', '4': 'ghi', '5': 'jkl', '6': 'mno', '7': 'pqrs', '8': 'tuv', '9': 'wxyz'}
+        result = ['']
+        for digit in digits:
+            result2 = []
+            for res in result:
+                for ch in phone[digit]:
+                    result2.append(res+ch)
+            result = result2
+        return result
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
