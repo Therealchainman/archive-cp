@@ -7617,6 +7617,174 @@ class Solution:
         return queue.pop()[0]
 ```
 
+## 437. Path Sum III
+
+### Solution 1:  dfs on tree
+
+```py
+class Solution:
+    def pathSum(self, root: Optional[TreeNode], targetSum: int) -> int:
+        def dfs(node, paths):
+            if not node: return 0
+            for i in range(len(paths)):
+                paths[i] += node.val
+            paths.append(node.val)
+            cnt = sum(1 for p in paths if p==targetSum)
+            return cnt + dfs(node.left, paths[:]) + dfs(node.right, paths[:])
+        return dfs(root,[])
+```
+
+## 297. Serialize and Deserialize Binary Tree
+
+### Solution 1:  bfs + dfs + serialize tree into string + map + hash table
+
+```py
+class Codec:
+
+    def serialize(self, root):
+        """Encodes a tree to a single string.
+        
+        :type root: TreeNode
+        :rtype: str
+        """
+        serial_list = []
+        queue = deque([(root, 0)])
+        while queue:
+            node, i = queue.popleft()
+            if not node: continue
+            serial_list.append(f'{i}:{node.val}')
+            queue.append((node.left, 2*i+1))
+            queue.append((node.right, 2*i+2))
+        return ','.join(serial_list)
+        
+
+    def deserialize(self, data):
+        """Decodes your encoded data to tree.
+        
+        :type data: str
+        :rtype: TreeNode
+        """
+        if not data: return None
+        table = {k:v for k, v in map(lambda x: map(int, x.split(':')), data.split(','))}
+        def dfs(node, i):
+            if not node: return None
+            if 2*i+1 in table:
+                node.left = TreeNode(table[2*i+1])
+            if 2*i+2 in table:
+                node.right = TreeNode(table[2*i+2])
+            dfs(node.left, 2*i+1)
+            dfs(node.right, 2*i+2)
+            return node
+        return dfs(TreeNode(table[0]), 0)
+```
+
+## 380 Insert Delete GetRandom O(1)
+
+### Solution 1:  hash table for storing index in array + array for using random.choice + remove in O(1) in array by swaping value to last position 
+
+```py
+class RandomizedSet:
+
+    def __init__(self):
+        self.index_table = {}
+        self.arr = []
+
+    def insert(self, val: int) -> bool:
+        if val in self.index_table: return False
+        self.index_table[val] = len(self.index_table)
+        self.arr.append(val)
+        return True
+
+    def remove(self, val: int) -> bool:
+        if val not in self.index_table: return False
+        index = self.index_table[val]
+        self.arr[index], self.arr[-1] = self.arr[-1], self.arr[index]
+        self.index_table[self.arr[index]] = index
+        del self.index_table[val]
+        self.arr.pop()
+        return True
+
+    def getRandom(self) -> int:
+        return random.choice(self.arr)
+```
+
+## 13. Roman to Integer
+
+### Solution 1:  hash table + math
+
+```py
+class Solution:
+    def romanToInt(self, s: str) -> int:
+        rom_int_table = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}
+        result = 0
+        prev = 'M'
+        for rom in s:
+            prev_val, val = map(lambda x: rom_int_table[x], [prev, rom])
+            if prev_val < val:
+                result -= 2*prev_val
+            result += val
+            prev = rom
+        return result
+```
+
+## 105. Construct Binary Tree from Preorder and Inorder Traversal
+
+### Solution 1:  dfs on binary tree + hash table for value to index in inorder array + divide and conquer + recursion
+
+```py
+class Solution:
+    def buildTree(self, preorder: List[int], inorder: List[int]) -> Optional[TreeNode]:
+        self.index = 0
+        self.inorder_table = {v: i for i, v in enumerate(inorder)}
+        def dfs(left, right):
+            if left > right: return None
+            val = preorder[self.index]
+            mid_index = self.inorder_table[val]
+            root = TreeNode(val)
+            self.index += 1
+            root.left = dfs(left, mid_index-1)
+            root.right = dfs(mid_index+1,right)
+            return root
+        return dfs(0,len(preorder)-1)
+```
+
+## 746. Min Cost Climbing Stairs
+
+### Solution 1:  iterative dynamic programming + constant space
+
+```py
+class Solution:
+    def minCostClimbingStairs(self, cost: List[int]) -> int:
+        prev, cur = 0, 0
+        for v in cost:
+            prev, cur = cur, min(prev,cur) + v
+        return min(prev,cur)
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:

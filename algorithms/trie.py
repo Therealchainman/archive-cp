@@ -54,3 +54,14 @@ class TrieNode:
     def __init__(self, index=-1):
         self.children = defaultdict(TrieNode)
         self.index = index
+
+"""
+This one is perfect for when matching a string to string of characters
+such as does 'bad' exist in the trie datastructure
+"""
+class TrieNode:
+    def __init__(self):
+        self.children = defaultdict(TrieNode)
+        self.isWord = False
+    def __repr__(self):
+        return f'is_word: {self.isWord}, children: {self.children}'
