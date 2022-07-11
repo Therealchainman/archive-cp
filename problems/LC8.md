@@ -70,3 +70,23 @@ class Solution:
                 
         return trim_integer(sign*num)
 ```
+
+## Solution 3:  string manipulation + lstrip + string slice
+
+```py
+class Solution:
+    def myAtoi(self, s: str) -> int:
+        s = s.lstrip()
+        sign = 1
+        if not s: return 0
+        if s[0] in '-+':
+            sign = -1 if s[0]=='-' else 1
+            s = s[1:]
+        s = s.lstrip('0')
+        result = 0
+        for ch in s[:11]:
+            if ch not in string.digits:
+                break
+            result = (result*10) + ord(ch)-ord('0')
+        return min(2**31-1, max(-2**31,sign*result))
+```

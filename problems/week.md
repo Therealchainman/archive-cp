@@ -7761,36 +7761,120 @@ class Solution:
         return min(prev,cur)
 ```
 
-##
+## 199. Binary Tree Right Side View
 
-### Solution 1:
+### Solution 1:  right side leaning dfs
 
 ```py
-
+class Solution:
+    def rightSideView(self, root: Optional[TreeNode]) -> List[int]:
+        result = []
+        def dfs(node, depth):
+            if not node: return
+            if depth == len(result):
+                result.append(node.val)
+            dfs(node.right, depth+1)
+            dfs(node.left, depth+1)
+        dfs(root, 0)
+        return result
 ```
 
-##
-
-### Solution 1:
+### Solution 2:  bfs + sum for concatenation of lists + filter for removing the None
 
 ```py
-
+class Solution:
+    def rightSideView(self, root: Optional[TreeNode]) -> List[int]:
+        if root is None:
+            return []
+        view = []
+        layer = [root]
+        while layer:
+            view.append(layer[-1].val)
+            layer = sum([list(filter(None, (node.left, node.right))) for node in layer], [])
+        return view
 ```
 
-##
+## 739. Daily Temperatures
 
-### Solution 1:
+### Solution 1:  monotonic stack + montonically non-increasing stack
 
 ```py
-
+class Solution:
+    def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
+        stack = []
+        result = [0]*len(temperatures)
+        for i, temp in enumerate(temperatures):
+            while stack and stack[-1][0] < temp:
+                _, j = stack.pop()
+                result[j] = i - j
+            stack.append((temp, i))
+        return result
 ```
 
-##
+## 150. Evaluate Reverse Polish Notation
+
+### Solution 1:  stack + switch case statement
+
+```py
+class Solution:
+    def evalRPN(self, tokens: List[str]) -> int:
+        def evaluate(left, right, op):
+            match op:
+                case '*':
+                    return left*right
+                case '/':
+                    return math.ceil(left/right) if left*right <0 else left//right
+                case '+':
+                    return left+right
+                case '-':
+                    return left-right
+            return 0
+        operand_stk = []
+        for token in tokens:
+            if token in '+*-/':
+                right_operand = operand_stk.pop()
+                left_operand = operand_stk.pop()
+                operand_stk.append(evaluate(left_operand, right_operand, token))
+            else:
+                operand_stk.append(int(token))
+        return operand_stk[-1]
+```
+
+## 25. Reverse Nodes in k-Group
 
 ### Solution 1:
 
 ```py
-
+class Solution:
+    def reverseKGroup(self, head: Optional[ListNode], k: int) -> Optional[ListNode]:
+        if k == 1: 
+            return head
+        groups = []
+        len_ = 0
+        # CREATING THE GROUPS OF SIZE K LINKED LISTS
+        while head:
+            if len_ == 0:
+                groups.append([head, None])
+            len_ += 1
+            if len_ == k:
+                groups[-1][1] = head
+                len_ = 0
+            head = head.next
+        for i, (head, tail) in enumerate(groups):
+            if tail == None: break
+            # REVERSE NODES IN EACH K GROUP
+            prev = None
+            ntail = head
+            for _ in range(k):
+                node = head
+                head = head.next
+                node.next = prev
+                prev = node
+            groups[i] = [node, ntail]
+        # REATTACH THE NEW TAILS TO EACH NEW HEAD FOR EACH K SIZED LINKED LIST
+        for i in range(1,len(groups)):
+            groups[i-1][-1].next = groups[i][0]
+        return groups[0][0]
 ```
 
 ##
