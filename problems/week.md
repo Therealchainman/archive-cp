@@ -2592,44 +2592,6 @@ class Solution:
         return dp[-1][-1]
 ```
 
-## 32. Longest Valid Parentheses
-
-### Solution 1: stack 
-
-```py
-class Solution:
-    def longestValidParentheses(self, s: str) -> int:
-        stack = [-1]
-        ans = 0
-        for i, ch in enumerate(s):
-            if ch == '(':
-                stack.append(i)
-            else:
-                stack.pop()
-                if not stack:
-                    stack.append(i)
-                else:
-                    ans = max(ans, i - stack[-1])
-        return ans
-```
-
-### Solution 2: stack + dynamicc programming
-
-```py
-class Solution:
-    def longestValidParentheses(self, s: str) -> int:
-        stack = []
-        n = len(s)
-        memo = [0]*(n+1)
-        for i, ch in enumerate(s):
-            if ch == '(':
-                stack.append(i)
-            elif stack:
-                j = stack.pop()
-                memo[i+1] = i-j+1+memo[j]
-        return max(memo)
-```
-
 ## Russian Doll Envelopes
 
 ### Solution 1: dynamic programming with sort + binary search
@@ -6073,4 +6035,1971 @@ AND u1.banned = 'No'
 AND u2.banned = 'No'
 AND t.request_at BETWEEN '2013-10-01' AND '2013-10-03'
 GROUP BY t.request_at
+```
+
+## 1647. Minimum Deletions to Make Character Frequencies Unique
+
+### Solution 1:  sorting + greedy
+
+```py
+class Solution:
+    def minDeletions(self, s: str) -> int:
+        last_count, num_deletions = len(s) + 1, 0
+        for cnt in sorted(Counter(s).values(), reverse=True):
+            cur = min(cnt, max(0, last_count-1))
+            num_deletions += (cnt-cur)
+            last_count = cur
+        return num_deletions
+```
+
+## 1564. Put Boxes Into the Warehouse I
+
+### Solution 1: 
+
+```py
+class Solution:
+    def maxBoxesInWarehouse(self, boxes: List[int], warehouse: List[int]) -> int:
+        boxes.sort(reverse=True)
+        cnt = i = 0
+        for height in warehouse:
+            while i<len(boxes) and boxes[i] > height:
+                i += 1
+            cnt += (i<len(boxes))
+            i += 1
+        return cnt
+```
+
+## 406. Queue Reconstruction by Height
+
+### Solution 1:  brute force + greedily place smallest h with largest k first, but always some slots back
+
+```py
+class Solution:
+    def reconstructQueue(self, people: List[List[int]]) -> List[List[int]]:
+        n = len(people)
+        rqueue = [-1]*n
+        for h, k in sorted(people, key=lambda x: (x[0],-x[1])):
+            num_slots = 0
+            for i in range(n):
+                if rqueue[i] != -1: continue
+                if num_slots == k:
+                    rqueue[i] = [h,k]
+                    break
+                num_slots += 1
+        return rqueue
+```
+
+### Solution 2:  sort in descending order for height and ascending order for k, then insert at index, because it will have enough larger or equal elements in front of it. 
+
+```py
+class Solution:
+    def reconstructQueue(self, people: List[List[int]]) -> List[List[int]]:
+        output = []
+        for h, k in sorted(people, key=lambda x: (-x[0], x[1])):
+            output.insert(k, [h,k])
+        return output
+```
+
+## 1465. Maximum Area of a Piece of Cake After Horizontal and Vertical Cuts
+
+### Solution 1:  sort + greedy + area = width*height
+
+```py
+class Solution:
+    def maxArea(self, h: int, w: int, horizontalCuts: List[int], verticalCuts: List[int]) -> int:
+        MOD = int(1e9) + 7
+        horizontalCuts = sorted([0] + horizontalCuts + [h])
+        verticalCuts = sorted([0] + verticalCuts + [w])
+        max_height = max(map(lambda x: x[1]-x[0], zip(horizontalCuts, horizontalCuts[1:])))
+        max_width = max(map(lambda x: x[1]-x[0], zip(verticalCuts, verticalCuts[1:])))
+        return max_height*max_width%MOD
+```
+
+## 256. Paint House
+
+### Solution 1:  dynammic programing
+
+```py
+class Solution:
+    def minCost(self, costs: List[List[int]]) -> int:
+        memo = [0]*3
+        for cost in costs:
+            nmemo = [inf]*3
+            for i in range(3):
+                for j in range(3):
+                    if i == j: continue
+                    nmemo[i] = min(nmemo[i], cost[i] + memo[j])
+            memo = nmemo
+        return min(memo)
+```
+
+## 1710. Maximum Units on a Truck
+
+### Solution 1:  sort + greedy
+
+```py
+class Solution:
+    def maximumUnits(self, boxTypes: List[List[int]], truckSize: int) -> int:
+        boxTypes.sort(key=lambda x: (-x[1], x[0]))
+        cnt = 0
+        for numBoxes, units in boxTypes:
+            take = min(truckSize, numBoxes)
+            cnt += take*units
+            truckSize -= take
+            if truckSize == 0: break
+        return cnt
+```
+
+## 462. Minimum Moves to Equal Array Elements II
+
+### Solution 1:  sort + median of array
+
+```py
+class Solution:
+    def minMoves2(self, nums: List[int]) -> int:
+        n = len(nums)
+        nums.sort()
+        return sum(abs(val-nums[n//2]) for val in nums)
+```
+
+## 453. Minimum Moves to Equal Array Elements
+
+### Solution 1:  dynamic programming + moving the smallest numbers to larger value 
+
+```py
+class Solution:
+    def minMoves(self, nums: List[int]) -> int:
+        nums.sort()
+        moves = 0
+        n = len(nums)
+        for i in range(1,n):
+            adjusted_num = nums[i] + moves
+            moves += adjusted_num - nums[i-1]
+            nums[i] = adjusted_num
+        return moves
+```
+
+### Solution 2: math + decrement each individual number to the smallest number + work backwards + relative distance of all numbers after each step is same
+
+```py
+class Solution:
+    def minMoves(self, nums: List[int]) -> int:
+        min_num = min(nums)
+        return reduce(lambda x,y: x-min_num+y, nums, 0)
+```
+
+## 1836. Remove Duplicates From an Unsorted Linked List
+
+### Solution 1:  hash table + linked list
+
+```py
+class Solution:
+    def deleteDuplicatesUnsorted(self, head: ListNode) -> ListNode:
+        counter = Counter()
+        sentinel_node = ListNode(0, head)
+        while head:
+            counter[head.val] += 1
+            head = head.next
+        cur = sentinel_node
+        while cur:
+            while cur.next and counter[cur.next.val] > 1:
+                cur.next = cur.next.next 
+            cur = cur.next
+        return sentinel_node.next
+```
+
+## 1634. Add Two Polynomials Represented as Linked Lists
+
+### Solution 1:  iterate 2 linked lists
+
+```py
+class Solution:
+    def addPoly(self, poly1: 'PolyNode', poly2: 'PolyNode') -> 'PolyNode':
+        sentinel_node = PolyNode()
+        head = sentinel_node
+        while poly1 and poly2:
+            cur_power = max(poly1.power, poly2.power)
+            cur_coef = 0
+            if poly1.power == cur_power:
+                cur_coef += poly1.coefficient
+                poly1 = poly1.next
+            if poly2.power == cur_power:
+                cur_coef += poly2.coefficient
+                poly2 = poly2.next
+            if cur_coef != 0:
+                head.next = PolyNode(cur_coef, cur_power)
+                head = head.next
+        if poly1:
+            head.next = poly1
+        if poly2:
+            head.next = poly2
+        return sentinel_node.next
+```
+
+## 369. Plus One Linked List
+
+### Solution 1:  recursive post order traversal of linked list
+
+```py
+class Solution:
+    def plusOne(self, head: ListNode) -> ListNode:
+        sentinel_node = ListNode(0, head)
+        def postorder(node):
+            if not node:
+                return 1
+            carry = postorder(node.next)
+            node.val += carry
+            carry = max(0, node.val - 9)
+            node.val %= 10
+            return carry
+        postorder(sentinel_node)
+        return sentinel_node if sentinel_node.val > 0 else sentinel_node.next
+```
+
+## 135. Candy
+
+### Solution 1:  sort + greedy
+
+```py
+class Solution:
+    def candy(self, ratings: List[int]) -> int:
+        cells = sorted([(rating, i) for i, rating in enumerate(ratings)])
+        n = len(ratings)
+        candies = [1]*n
+        in_bounds = lambda x: 0<=x<n
+        for rating, i in cells:
+            for j in [i-1,i+1]:
+                if not in_bounds(j) or ratings[j] >= rating: continue
+                candies[i] = max(candies[i], candies[j] + 1)
+        return sum(candies)
+```
+
+## 1213. Intersection of Three Sorted Arrays
+
+### Solution 1:  set intersection + sort
+
+```py
+class Solution:
+    def arraysIntersection(self, arr1: List[int], arr2: List[int], arr3: List[int]) -> List[int]:
+        return sorted(set(arr1)&set(arr2)&set(arr3))
+```
+
+### Solution 2: hash table
+
+```py
+class Solution:
+    def arraysIntersection(self, arr1: List[int], arr2: List[int], arr3: List[int]) -> List[int]:
+        return [key for key, cnt in Counter(arr1+arr2+arr3).items() if cnt == 3]
+```
+
+### Solution 3: three pointers
+
+```py
+class Solution:
+    def arraysIntersection(self, arr1: List[int], arr2: List[int], arr3: List[int]) -> List[int]:
+        p1 = p2 = p3 = 0
+        n1, n2, n3 = len(arr1), len(arr2), len(arr3)
+        result = []
+        while p1 < n1 and p2 < n2 and p3 < n3:
+            v1, v2, v3 = arr1[p1], arr2[p2], arr3[p3]
+            v = min(v1,v2,v3)
+            if v1 == v2 == v3:
+                result.append(v1)
+            if v1 == v:
+                p1 += 1
+            if v2 == v:
+                p2 += 1
+            if v3 == v:
+                p3 += 1
+        return result
+```
+
+### Solution 4:  binary search
+
+```py
+class Solution:
+    def arraysIntersection(self, arr1: List[int], arr2: List[int], arr3: List[int]) -> List[int]:
+        n1, n2, n3 = len(arr1), len(arr2), len(arr3)
+        result = []
+        for val in arr1:
+            i = bisect_left(arr2, val)
+            j = bisect_left(arr3, val)
+            if i == n2 or j == n3: continue
+            if arr2[i] == arr3[j] == val:
+                result.append(val)
+        return result
+```
+
+## 1099. Two Sum Less Than K
+
+### Solution 1:  two pointers + max
+
+```py
+class Solution:
+    def twoSumLessThanK(self, nums: List[int], k: int) -> int:
+        nums.sort()
+        n = len(nums)
+        left, right = 0, n-1
+        best = -1
+        while left < right:
+            sum_ = nums[left] + nums[right]
+            if sum_ < k:
+                best = max(best, sum_)
+                left += 1
+            else:
+                right -= 1
+        return best
+```
+
+## 261. Graph Valid Tree
+ 
+### Solution 1:  Union Find + cycle detection
+
+```py
+class UnionFind:
+    def __init__(self, n):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    def union(self, i, j):
+        i, j = self.find(i), self.find(j)
+        if i != j:
+            if self.size[i] < self.size[j]:
+                i, j = j, i
+            self.size[i] += self.size[j]
+            self.parent[j] = i
+            return True
+        return False
+    def find(self, i):
+        if i == self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+class Solution:
+    def validTree(self, n: int, edges: List[List[int]]) -> bool:
+        if len(edges) != n-1:
+            return False
+        dsu = UnionFind(n)
+        for u, v in edges:
+            if not dsu.union(u, v):
+                return False
+        return True
+```
+
+## 128. Longest Consecutive Sequence
+
+### Solution 1:  hash set + intelligent sequence building
+
+```py
+class Solution:
+    def longestConsecutive(self, nums: List[int]) -> int:
+        nums_set = set(nums)
+        long_streak = cur_streak = 0
+        for num in nums_set:
+            if num-1 in nums_set: continue
+            cur_streak = 1
+            cnum = num
+            while cnum+1 in nums_set:
+                cur_streak += 1
+                cnum += 1
+            long_streak = max(long_streak, cur_streak)
+        return long_streak
+```
+
+## 426. Convert Binary Search Tree to Sorted Doubly Linked List
+
+### Solution 1:  recursion + inorder binary search tree traversal + inplace algorithm + doubly linked list
+
+```py
+class Solution:
+    def treeToDoublyList(self, root: 'Optional[Node]') -> 'Optional[Node]':
+        if not root: return root
+        self.last = self.first = None
+        def inorder(node):
+            if not node: return
+            inorder(node.left)
+            if self.last:
+                self.last.right = node
+                node.left = self.last
+            else:
+                self.first = node
+            self.last = node
+            inorder(node.right)
+        inorder(root)
+        self.last.right = self.first
+        self.first.left = self.last
+        return self.first
+```
+
+## 525. Contiguous Array
+
+### Solution 1:  prefix sum + hash table
+
+```py
+class Solution:
+    def findMaxLength(self, nums: List[int]) -> int:
+        first_index = {0:-1}
+        psum = max_len = 0
+        for i, num in enumerate(nums):
+            psum += (-1 if num==0 else 1)
+            if psum not in first_index:
+                first_index[psum] = i
+            else:
+                max_len = max(max_len, i-first_index[psum])
+        return max_len
+```
+
+## 209. Minimum Size Subarray Sum
+
+### Solution 1:  two pointers + sliding window
+
+```py
+class Solution:
+    def minSubArrayLen(self, target: int, nums: List[int]) -> int:
+        left = 0
+        max_len, window_sum = inf, 0
+        for right, num in enumerate(nums):
+            window_sum += num
+            while window_sum >= target:
+                max_len = min(max_len, right-left+1)
+                window_sum -= nums[left]
+                left += 1
+        return max_len if max_len != inf else 0
+```
+
+## 325. Maximum Size Subarray Sum Equals k
+
+### Solution 1:  hash table + prefix sum + solve equation psum_right - psum_left = k
+
+```py
+class Solution:
+    def maxSubArrayLen(self, nums: List[int], k: int) -> int:
+        first_index = defaultdict(lambda: inf)
+        first_index[0] = -1
+        max_len = psum = 0
+        for i, num in enumerate(nums):
+            psum += num
+            psum_left = psum - k
+            first_index[psum] = min(first_index[psum],i)
+            max_len = max(max_len, i-first_index[psum_left])
+        return max_len
+```
+
+## 684. Redundant Connection
+
+### Solution 1:  Union Find + cycle prevention + modified cycle detection
+
+```py
+class UnionFind:
+    def __init__(self, n):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    def union(self, i, j):
+        i, j = self.find(i), self.find(j)
+        if i != j:
+            if self.size[i] < self.size[j]:
+                i, j = j, i
+            self.size[i] += self.size[j]
+            self.parent[j] = i
+            return True
+        return False
+    def find(self, i):
+        if i == self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+class Solution:
+    def findRedundantConnection(self, edges: List[List[int]]) -> List[int]:
+        result = None
+        n = len(edges)
+        dsu = UnionFind(n+1) 
+        for u, v in edges:
+            if not dsu.union(u,v):
+                result = [u,v]
+        return result
+```
+
+## 685. Redundant Connection II
+
+### Solution 1:
+
+```py
+
+```
+
+## 1579. Remove Max Number of Edges to Keep Graph Fully Traversable
+
+### Solution 1:  double union find + greedy
+
+```py
+class UnionFind:
+    def __init__(self, n):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    def union(self, i, j):
+        i, j = self.find(i), self.find(j)
+        if i != j:
+            if self.size[i] < self.size[j]:
+                i, j = j, i
+            self.size[i] += self.size[j]
+            self.parent[j] = i
+            return True
+        return False
+    def find(self, i):
+        if i == self.parent[i]:
+            return iself
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+class Solution:
+    def maxNumEdgesToRemove(self, n: int, edges: List[List[int]]) -> int:
+        dsuA, dsuB = UnionFind(n+1), UnionFind(n+1)
+        num_edges = 0
+        for t, u, v in edges:
+            if t == 3:
+                if not dsuA.union(u,v):
+                    num_edges += 1
+                dsuB.union(u,v)
+        for t, u, v in edges:
+            if t == 1:
+                if not dsuA.union(u,v):
+                    num_edges += 1
+            elif t == 2:
+                if not dsuB.union(u,v):
+                    num_edges += 1
+        return num_edges if dsuA.size[dsuA.find(1)] == n and dsuB.size[dsuB.find(1)] == n else -1
+```
+
+## 1101. The Earliest Moment When Everyone Become Friends
+
+### Solution 1:  union find + single connected component
+
+```py
+class UnionFind:
+    def __init__(self, n):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    def union(self, i, j):
+        i, j = self.find(i), self.find(j)
+        if i != j:
+            if self.size[i] < self.size[j]:
+                i, j = j, i
+            self.size[i] += self.size[j]
+            self.parent[j] = i
+            return True
+        return False
+    def find(self, i):
+        if i == self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+    def single_connected_component(self):
+        return self.size[self.find(0)] == len(self.parent)
+class Solution:
+    def earliestAcq(self, logs: List[List[int]], n: int) -> int:
+        dsu = UnionFind(n)
+        logs.sort()
+        for t, u, v in logs:
+            dsu.union(u,v)
+            if dsu.single_connected_component():
+                return t
+        return -1
+```
+
+## 990. Satisfiability of Equality Equations
+
+### Solution 1:  Union find for equality + check for inequality that they are not in same connected component + variables in same connected component must be equal in value
+
+```py
+class UnionFind:
+    def __init__(self, n):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    def union(self, i, j):
+        i, j = self.find(i), self.find(j)
+        if i != j:
+            if self.size[i] < self.size[j]:
+                i, j = j, i
+            self.size[i] += self.size[j]
+            self.parent[j] = i
+            return True
+        return False
+    def find(self, i):
+        if i == self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+class Solution:
+    def equationsPossible(self, equations: List[str]) -> bool:
+        dsu = UnionFind(26)
+        unicode = lambda x: ord(x) - ord('a')
+        for u, eq, _, v in equations:
+            if eq == '=':
+                dsu.union(unicode(u),unicode(v))
+        for u, eq, _, v in equations:
+            if eq == '!' and dsu.find(unicode(u)) == dsu.find(unicode(v)):
+                return False
+        return True
+```
+
+## 213. House Robber II
+
+### Solution 1:  Iterative DP
+
+```py
+class Solution:
+    def house_robber(self, nums: List[int]) -> int:
+        rob = not_rob = 0
+        for num in nums:
+            not_rob, rob = rob, max(rob, not_rob+num)
+        return rob
+    def rob(self, nums: List[int]) -> int:
+        if len(nums) == 1: return nums[0]
+        return max(self.house_robber(nums[1:]), self.house_robber(nums[:-1]))
+```
+
+## 1150. Check If a Number Is Majority Element in a Sorted Array
+
+### Solution 1:  two binary search to find the range
+
+```py
+class Solution:
+    def isMajorityElement(self, nums: List[int], target: int) -> bool:
+        return bisect_right(nums, target) - bisect_left(nums, target) > len(nums)//2
+```
+
+## 1428. Leftmost Column with at Least a One
+
+### Solution 1:  binary search on each row + API interface
+
+```py
+class Solution:
+    def leftMostColumnWithOne(self, binaryMatrix: 'BinaryMatrix') -> int:
+        R, C = binaryMatrix.dimensions()
+        left_most = C
+        for r in range(R):
+            left, right = 0, C
+            while left < right:
+                mid = (left+right) >> 1
+                try:
+                    is_one = binaryMatrix.get(r,mid)
+                except:
+                    is_one = True
+                if is_one:
+                    right = mid
+                else:
+                    left = mid+1
+            left_most = min(left_most, left)
+        return left_most if left_most < C else -1
+```
+
+## 737. Sentence Similarity II
+
+### Solution 1:  Union Find
+
+```py
+class UnionFind:
+    def __init__(self, n):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    def union(self, i, j):
+        i, j = self.find(i), self.find(j)
+        if i != j:
+            if self.size[i] < self.size[j]:
+                i, j = j, i
+            self.size[i] += self.size[j]
+            self.parent[j] = i
+            return True
+        return False
+    def find(self, i):
+        if i == self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+class Solution:
+    def areSentencesSimilarTwo(self, sentence1: List[str], sentence2: List[str], similarPairs: List[List[str]]) -> bool:
+        if len(sentence1) != len(sentence2): return False
+        sindex_map = {}
+        for s1, s2 in similarPairs:
+            if s1 not in sindex_map:
+                sindex_map[s1] = len(sindex_map)
+            if s2 not in sindex_map:
+                sindex_map[s2] = len(sindex_map)
+        for s1, s2 in zip(sentence1, sentence2):
+            if s1 not in sindex_map:
+                sindex_map[s1] = len(sindex_map)
+            if s2 not in sindex_map:
+                sindex_map[s2] = len(sindex_map)
+        dsu = UnionFind(len(sindex_map))
+        for s1, s2 in similarPairs:
+            u, v = sindex_map[s1], sindex_map[s2]
+            dsu.union(u,v)
+        return all(dsu.find(sindex_map[s1])==dsu.find(sindex_map[s2]) for s1, s2 in zip(sentence1, sentence2))
+```
+
+## 1061. Lexicographically Smallest Equivalent String
+
+### Solution 1:
+
+```py
+
+```
+
+## 509. Fibonacci Number
+
+### Solution 1: dynamic programming + matrix exponentiation + numpy arrays + identity numpy array + matrix product
+
+```py
+import numpy as np   
+class Solution:
+    def fib(self, n: int) -> int:
+        transition_matrix = np.array([[1,1],[1,0]])
+        result = np.identity(2, dtype=np.int64)
+        while n > 0:
+            if n%2==1:
+                result = np.matmul(result,transition_matrix)
+            transition_matrix = np.matmul(transition_matrix,transition_matrix)
+            n >>= 1
+        return result[-1][0]
+```
+
+### Solution 2: Iterative DP + constant memory optimization
+
+```py
+class Solution:
+    def fib(self, n: int) -> int:
+        if n == 0: return 0
+        f1, f2 = 1, 0
+        for _ in range(2, n+1):
+            f2, f1 = f1, f1+f2
+        return f1
+```
+
+## 97. Interleaving String
+
+### Solution 1:  bfs + memo + deque
+
+```py
+class Solution:
+    def isInterleave(self, s1: str, s2: str, s3: str) -> bool:
+        n1, n2, n3 = len(s1), len(s2), len(s3)
+        if n1+n2 != n3: return False
+        memo = set([(0,0)])
+        queue = deque([(0,0)])
+        while queue:
+            i, j= queue.popleft()
+            if i+j == n3: return True
+            if i<n1 and s1[i] == s3[i+j] and (i+1,j) not in memo:
+                queue.append((i+1,j))
+                memo.add((i+1,j))
+            if j<n2 and s2[j] == s3[i+j] and (i,j+1) not in memo:
+                queue.append((i,j+1))
+                memo.add((i,j+1))
+        return False
+```
+
+## 270. Closest Binary Search Tree Value
+
+### Solution 1:  binary search tree + nested function + min with custom comparison key
+
+```py
+class Solution:
+    def __init__(self):
+        self.closest_value = inf
+    def closestValue(self, root: Optional[TreeNode], target: float) -> int:
+        def binary_search(node):
+            if not node: return
+            self.closest_value = min(self.closest_value, node.val, key=lambda x: abs(x-target))
+            if target < node.val:
+                binary_search(node.left)
+            else:
+                binary_search(node.right)
+        binary_search(root)
+        return self.closest_value
+```
+
+### Solution 2:  iterative binary search on tree + min with custom comparison key
+
+```py
+class Solution:
+    def closestValue(self, root: Optional[TreeNode], target: float) -> int:
+        closest = root.val
+        while root:
+            closest = min(root.val, closest, key=lambda x: abs(target-x))
+            root = root.left if target < root.val else root.right
+        return closest
+```
+
+## 1231. Divide Chocolate
+
+### Solution 1:  binary search + linear scan + greedy check
+
+```py
+class Solution:
+    def maximizeSweetness(self, sweetness: List[int], k: int) -> int:
+        left, right = 1, sum(sweetness)
+        def possible(target):
+            cuts = cur_sweet = 0
+            for sweet in sweetness:
+                cur_sweet += sweet
+                if cur_sweet >= target:
+                    cur_sweet = 0
+                    cuts += 1
+            return cuts > k
+        while left < right:
+            mid = (left+right+1)>>1
+            if possible(mid):
+                left = mid
+            else:
+                right = mid-1
+        return left
+```
+
+## 153. Find Minimum in Rotated Sorted Array
+
+### Solution 1:  optimized binary search + edge case analysis + pivot
+
+```py
+class Solution:
+    def findMin(self, nums: List[int]) -> int:
+        n = len(nums)
+        left, right = 0, n-1
+        while left < right:
+            mid = (left+right)>>1
+            if nums[mid]>=nums[left] and nums[mid]>nums[right]:
+                left = mid+1
+            else:
+                right = mid
+        return nums[left]
+```
+
+## 528. Random Pick with Weight
+
+### Solution 1:  prefix sum + random with randint + binary search
+
+```py
+class Solution:
+
+    def __init__(self, w: List[int]):
+        self.psum = list(accumulate(w))
+
+    def pickIndex(self) -> int:
+        val = random.randint(1, self.psum[-1])
+        return bisect_left(self.psum, val)
+```
+
+## 1831. Maximum Transaction Each Day
+
+### Solution 1: DATE_FORMAT + JOIN + MAX + GROUP BY
+
+```sql
+WITH max_amt_tbl AS (
+    SELECT
+        DATE_FORMAT(day, '%Y-%m-%d') AS date,
+        MAX(amount) AS max_amount
+    FROM Transactions
+    GROUP BY date
+)
+SELECT 
+    t.transaction_id
+FROM Transactions t
+JOIN max_amt_tbl m
+ON t.amount = m.max_amount
+AND DATE_FORMAT(t.day, '%Y-%m-%d') = m.date
+ORDER BY t.transaction_id
+```
+
+### Solution 2: RANK + PARTITION BY + ORDER BY + RANK USED TO FIND WHEN VALUE IS EQUAL TO MAX + MAX VALUE WILL ALWAYS HAVE A RANK OF 1
+
+```sql
+WITH trans_rank_tbl AS (
+    SELECT
+        transaction_id,
+        DATE_FORMAT(day, '%Y-%m-%d') AS date,
+        RANK() OVER(PARTITION BY DATE_FORMAT(day, '%Y-%m-%d') ORDER BY amount DESC) AS trans_rank
+    FROM Transactions
+)
+SELECT transaction_id
+FROM trans_rank_tbl
+WHERE trans_rank = 1
+ORDER BY transaction_id
+```
+
+## 1126. Active Businesses
+
+### Solution 1: AVG + GROUP BY + JOIN
+
+```sql
+WITH avg_tbl AS (
+    SELECT
+        event_type,
+        AVG(occurences) AS average_activity
+    FROM Events
+    GROUP BY event_type
+)
+SELECT 
+    e.business_id
+FROM Events e
+JOIN avg_tbl a
+ON e.event_type = a.event_type
+AND e.occurences > a.average_activity
+GROUP BY e.business_id
+HAVING COUNT(*) > 1
+```
+
+### Solution 2: AVG + WINDOW FUNCTION WITH PARTITION BY + CASE + GROUP BY + HAVING
+
+```sql
+WITH chosen_tbl AS (
+    SELECT
+        business_id,
+        CASE
+            WHEN occurences > AVG(occurences) OVER(PARTITION BY event_type) THEN 1
+            ELSE 0
+        END AS chosen
+    FROM Events
+)
+SELECT business_id
+FROM chosen_tbl
+GROUP BY business_id
+HAVING SUM(chosen) > 1
+```
+
+## 1532. The Most Recent Three Orders
+
+### Solution 1:  RANK + WINDOW FUNCTION WITH PARTITION BY AND ORDER BY + JOIN
+
+Only works because each customer only orders once each day, otherwise would need ROW_NUMBER
+
+```sql
+WITH cust_rank_tbl AS (
+    SELECT 
+        c.name AS customer_name,
+        c.customer_id,
+        o.order_id,
+        o.order_date,
+        RANK() OVER (PARTITION BY customer_id ORDER BY order_date DESC)  AS order_rank
+    FROM Orders o
+    JOIN Customers c
+    ON o.customer_id = c.customer_id
+)
+SELECT 
+    customer_name,
+    customer_id,
+    order_id,
+    order_date
+FROM cust_rank_tbl
+WHERE order_rank <= 3
+ORDER BY customer_name, customer_id, order_date DESC
+```
+
+## 1949. Strong Friendship
+
+### Solution 1:
+
+```sql
+
+```
+
+## 1613. Find the Missing IDs
+
+### Solution 1:  RECURSIVE CTE
+
+```sql
+WITH RECURSIVE series_tbl AS (
+    SELECT 1 AS value
+    UNION ALL
+    SELECT value + 1
+    FROM series_tbl
+    WHERE value < (SELECT MAX(customer_id) FROM Customers)
+)
+SELECT
+    value AS ids
+FROM series_tbl
+WHERE value NOT IN (SELECT customer_id FROM Customers)
+```
+
+## 1270. All People Report to the Given Manager
+
+### Solution 1:  RECURSIVE CTE WITH HIERARCHICAL DATA + TREE DATA STRUCTURE
+
+```sql
+WITH RECURSIVE tree_tbl AS (
+    SELECT employee_id
+    FROM Employees
+    WHERE manager_id = 1 AND employee_id != 1
+    UNION
+    SELECT e.employee_Id
+    FROM Employees e
+    JOIN tree_tbl t
+    ON e.manager_id = t.employee_id
+)
+SELECT *
+FROM tree_tbl
+```
+
+## 178. Rank Scores
+
+### Solution 1:  WINDOW FUNCTION WITH DENSE_RANK 
+
+```sql
+SELECT 
+    score,
+    DENSE_RANK() OVER(ORDER BY score DESC) AS 'rank'
+FROM Scores
+```
+
+## 177. Nth Highest Salary
+
+### Solution 1:  WINDOW FUNCTION WITH DENSE_RANK + JOIN + LIMIT
+
+```sql
+CREATE FUNCTION getNthHighestSalary(N INT) RETURNS INT
+BEGIN
+  RETURN (
+      WITH rank_tbl AS (
+        SELECT 
+            id,
+            DENSE_RANK() OVER(ORDER BY salary DESC) AS rank_
+        FROM Employee
+      )
+      SELECT 
+         b.salary
+      FROM rank_tbl a
+      JOIN Employee b
+      ON a.id = b.id
+      WHERE a.rank_ = N
+      LIMIT 1
+  );
+END
+```
+
+## 1709. Biggest Window Between Visits
+
+### Solution 1:  WINDOW FUNCTION WITH LAG + PARTITION BY + DATEDIFF + IFNULL + GROUP BY
+
+```sql
+WITH window_tbl AS (
+    SELECT 
+        user_id,
+        visit_date AS visit_date1,
+        LAG(visit_date, 1, '2021-1-1') OVER(PARTITION BY user_id ORDER BY visit_date DESC) AS visit_date2
+    FROM UserVisits
+),
+diff_tbl AS (
+    SELECT
+        user_id,
+        MAX(DATEDIFF(visit_date2, visit_date1)) AS biggest_window
+    FROM window_tbl
+    GROUP BY user_id
+)
+SELECT *
+FROM diff_tbl
+```
+
+## 1951. All the Pairs With the Maximum Number of Common Followers
+
+### Solution 1:  WINDOW FUNCTION WITH RANK BY COMMON FOLLOWER COUNT + GROUP BY + SELF JOIN + GET HIGHEST RANK
+
+```sql
+WITH rank_tbl AS (
+    SELECT 
+        r1.user_id AS user1,
+        r2.user_id AS user2,
+        RANK() OVER(ORDER BY COUNT(r1.follower_id) DESC) AS follower_rank
+    FROM Relations r1
+    JOIN Relations r2
+    ON r1.follower_id = r2.follower_id
+    AND r1.user_id < r2.user_id
+    GROUP BY user1, user2
+)
+SELECT 
+    user1 AS user1_id,
+    user2 AS user2_id
+FROM rank_tbl
+WHERE follower_rank = 1
+```
+
+## 1369. Get the Second Most Recent Activity 
+
+### Solution 1:  WINDOW FUNCTION WITH RANK PARTITION BY + WINDOW FUNCTION FOR COUNT 
+
+```sql
+WITH rank_tbl AS (
+    SELECT
+        username,
+        activity,
+        startDate,
+        endDate,
+        RANK() OVER(PARTITION BY username ORDER BY endDate DESC) AS activity_rank,
+        COUNT(*) OVER(PARTITION BY username) AS cnt
+    FROM UserActivity
+)
+SELECT 
+    username,
+    activity,
+    startDate,
+    endDate
+FROM rank_tbl
+WHERE activity_rank = 2
+OR cnt < 2
+
+```
+
+##
+
+### Solution 1:
+
+```sql
+
+```
+
+##
+
+### Solution 1:
+
+```sql
+
+```
+
+## 300. Longest Increasing Subsequence
+
+### Solution 1:  binary search + dynamic programming
+
+```py
+class Solution:
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        sub = [nums[0]]
+        for num in nums[1:]:
+            if num > sub[-1]:
+                sub.append(num)
+            else:
+                i = bisect_left(sub, num)
+                sub[i] = num
+        return len(sub)
+```
+
+## 1061. Lexicographically Smallest Equivalent String
+
+### Solution 1:  union find + find minimum character in each connected component + union find for the alphabet
+
+```py
+class UnionFind:
+    def __init__(self, n):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    def union(self, i, j):
+        i, j = self.find(i), self.find(j)
+        if i != j:
+            if self.size[i] < self.size[j]:
+                i, j = j, i
+            self.size[i] += self.size[j]
+            self.parent[j] = i
+            return True
+        return False
+    def find(self, i):
+        if i == self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+class Solution:
+    def smallestEquivalentString(self, s1: str, s2: str, baseStr: str) -> str:
+        dsu = UnionFind(26)
+        unicode = lambda ch: ord(ch)-ord('a')
+        char = lambda x: chr(x+ord('a'))
+        for u, v in zip(s1,s2):
+            dsu.union(unicode(u),unicode(v))
+        connected_components = defaultdict(lambda: 'z')
+        for i in range(26):
+            root = dsu.find(i)
+            connected_components[root] = min(connected_components[root], char(i))
+        result = []
+        for v in map(lambda x: unicode(x), baseStr):
+            result.append(connected_components[dsu.find(v)])
+        return ''.join(result)
+```
+
+## 1258. Synonymous Sentences
+
+### Solution 1:  union find + mapping strings to integers for union find + hash table + brute force
+
+```py
+class UnionFind:
+    def __init__(self, n):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    def union(self, i, j):
+        i, j = self.find(i), self.find(j)
+        if i != j:
+            if self.size[i] < self.size[j]:
+                i, j = j, i
+            self.size[i] += self.size[j]
+            self.parent[j] = i
+            return True
+        return False
+    def find(self, i):
+        if i == self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+class Solution:
+    def generateSentences(self, synonyms: List[List[str]], text: str) -> List[str]:
+        sindex = {}
+        for u, v in synonyms:
+            if u not in sindex:
+                sindex[u] = len(sindex)
+            if v not in sindex:
+                sindex[v] = len(sindex)
+        n = len(sindex)
+        dsu = UnionFind(n)
+        for u, v in synonyms:
+            dsu.union(sindex[u], sindex[v])
+        connected_components = defaultdict(list)
+        for word, index in sindex.items():
+            connected_components[dsu.find(index)].append(word)
+        result = [[]]
+        for word in text.split():
+            result2 = []
+            if word not in sindex:
+                for res in result:
+                    result2.append(res + [word])
+            else:
+                for gword in connected_components[dsu.find(sindex[word])]:
+                    for res in result:
+                        result2.append(res + [gword])
+            result = result2
+        return sorted([' '.join(sent) for sent in result])
+```
+
+## 1891. Cutting Ribbons
+
+### Solution 1:  binary search + greedy
+
+```py
+class Solution:
+    def maxLength(self, ribbons: List[int], k: int) -> int:
+        left, right = 0, sum(ribbons)//k
+        possible = lambda ribbon_len: sum(ribbon//ribbon_len for ribbon in ribbons) >=k
+        while left < right:
+            mid = (left+right+1)>>1
+            if possible(mid):
+                left = mid
+            else:
+                right = mid-1
+        return left
+```
+
+## 1885. Count Pairs in Two Arrays
+
+### Solution 1:  binary seach + math + sorting
+
+```py
+class Solution:
+    def countPairs(self, nums1: List[int], nums2: List[int]) -> int:
+        nums = sorted([x-y for x,y in zip(nums1,nums2)])
+        res = 0
+        n = len(nums)
+        for i, x in enumerate(nums):
+            idx = bisect_right(nums, -x, i+1)
+            res += n - idx
+        return res
+```
+
+## 658. Find K Closest Elements
+
+### Solution 1:  sort with custom comparator
+
+```py
+class Solution:
+    def findClosestElements(self, arr: List[int], k: int, x: int) -> List[int]:
+        pre_arr = sorted([v for v in arr], key=lambda v: abs(v-x))
+        return sorted(pre_arr[:k])
+```
+
+## 36. Valid Sudoku
+
+### Solution 1:  hash table + math + defaultdict
+
+```py
+class Solution:
+    def isValidSudoku(self, board: List[List[str]]) -> bool:
+        rows, cols, subs = [defaultdict(set) for _ in range(3)]
+        R, C = len(board), len(board[0])
+        for r, c in product(range(R), range(C)):
+            digit = board[r][c]
+            if digit == '.': continue
+            if digit in rows[r] or digit in cols[c] or digit in subs[(r//3, c//3)]: return False
+            rows[r].add(digit)
+            cols[c].add(digit)
+            subs[(r//3,c//3)].add(digit)
+        return True
+```
+
+## 37. Sudoku Solver
+
+### Solution 1:  backtracking + hash table + deque
+
+```py
+class Solution:
+    def solveSudoku(self, board: List[List[str]]) -> None:
+        """
+        Do not return anything, modify board in-place instead.
+        """
+        rows, cols, subs = [defaultdict(set) for _ in range(3)]
+        R, C = len(board), len(board[0])
+        empty_cells = deque()
+        for r, c in product(range(R), range(C)):
+            digit = board[r][c]
+            if digit == '.':
+                empty_cells.append((r,c))
+                continue
+            rows[r].add(digit)
+            cols[c].add(digit)
+            subs[(r//3,c//3)].add(digit)
+        def backtrack():
+            if not empty_cells:
+                return True
+            r, c = empty_cells.popleft()
+            for digit in string.digits[1:]:
+                sub = (r//3,c//3)
+                if digit in rows[r] or digit in cols[c] or digit in subs[sub]: continue
+                rows[r].add(digit)
+                cols[c].add(digit)
+                subs[sub].add(digit)
+                board[r][c] = digit
+                if backtrack(): return True
+                rows[r].remove(digit)
+                cols[c].remove(digit)
+                subs[sub].remove(digit)
+                board[r][c] = '.'
+            empty_cells.appendleft((r,c))
+            return False
+        backtrack()
+```
+
+## 79. Word Search
+
+### Solution 1:  dfs with backtracking
+
+```py
+class Solution:
+    def exist(self, board: List[List[str]], word: str) -> bool:
+        n = len(word)
+        R, C = len(board), len(board[0])
+        in_bounds = lambda r, c: 0<=r<R and 0<=c<C
+        def backtrack(i, r, c):
+            if i == n:
+                return True
+            for nr, nc in [(r+1,c),(r-1,c),(r,c+1),(r,c-1)]:
+                if not in_bounds(nr,nc) or board[nr][nc] == '.' or board[nr][nc] != word[i]: continue
+                board[nr][nc] = '.'
+                if backtrack(i+1,nr,nc): return True
+                board[nr][nc] = word[i]
+            return False
+        for r, c in product(range(R), range(C)):
+            if board[r][c] == word[0]:
+                board[r][c] = '.'
+                if backtrack(1,r,c): return True
+                board[r][c] = word[0]
+        return False          
+```
+
+## 17. Letter Combinations of a Phone Number
+
+### Solution 1:  brute force + subset iterative
+
+```py
+class Solution:
+    def letterCombinations(self, digits: str) -> List[str]:
+        if not digits: return []
+        phone = {'2': 'abc', '3': 'def', '4': 'ghi', '5': 'jkl', '6': 'mno', '7': 'pqrs', '8': 'tuv', '9': 'wxyz'}
+        result = ['']
+        for digit in digits:
+            result2 = []
+            for res in result:
+                for ch in phone[digit]:
+                    result2.append(res+ch)
+            result = result2
+        return result
+```
+
+## 139. Word Break
+
+### Solution 1:  memoization + iterative dynamic programing + set
+
+```py
+class Solution:
+    def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+        n = len(s)
+        max_len = len(max(wordDict, key = lambda x: len(x)))
+        words = set(wordDict)
+        memo = [0]*(n+1)
+        memo[0] = 1
+        for j in range(1,n+1):
+            for i in range(max(0,j-max_len),j):
+                if s[i:j] in words:
+                    memo[j] |= memo[i]
+        return memo[-1]
+```
+
+## 295. Find Median from Data Stream
+
+### Solution 1:  max heap and min heap datastructure + heap + rolling heap
+
+```py
+class MedianFinder:
+
+    def __init__(self):
+        self.minheap, self.maxheap = [], []
+
+    def addNum(self, num: int) -> None:
+        heappush(self.minheap, num)
+        if len(self.minheap) > len(self.maxheap):
+            elem = heappop(self.minheap)
+            heappush(self.maxheap, -elem)
+        elif self.minheap and self.maxheap:
+            elem = -heappop(self.maxheap)
+            heappush(self.minheap, elem)
+            elem2 = heappop(self.minheap)
+            heappush(self.maxheap, -elem2)
+
+    def findMedian(self) -> float:
+        return -self.maxheap[0] if len(self.maxheap) != len(self.minheap) else (self.minheap[0] - self.maxheap[0])/2
+
+```
+
+## 632. Smallest Range Covering Elements from K Lists
+
+### Solution 1:  sort + sliding window + frequencey array + min with custom comparator
+
+```py
+class Solution:
+    def smallestRange(self, nums: List[List[int]]) -> List[int]:
+        arr = sorted([(v, i) for i, row in enumerate(nums) for v in row])
+        rng, left = [-inf,inf], 0
+        kcnt = 0
+        k = len(nums)
+        freq = [0]*k
+        for v, i in arr:
+            kcnt += (freq[i]==0)
+            freq[i] += 1
+            if kcnt < k: continue
+            while freq[arr[left][1]] > 1:
+                freq[arr[left][1]] -= 1
+                left += 1
+            left_v = arr[left][0]
+            rng = min(rng, [left_v,v], key=lambda x: x[1]-x[0])
+        return rng
+```
+
+## 542. 01 Matrix
+
+### Solution 1:  bfs + memoization + iterative dynamic programming + visited array with in place modification + deque
+
+```py
+class Solution:
+    def updateMatrix(self, mat: List[List[int]]) -> List[List[int]]:
+        R, C = len(mat), len(mat[0])
+        queue = deque()
+        dist = [[inf]*C for _ in range(R)]
+        in_bounds = lambda r,c: 0<=r<R and 0<=c<C
+        for r, c in product(range(R), range(C)):
+            if mat[r][c] == 0:
+                queue.append((r,c,0))
+                dist[r][c] = 0
+        while queue:
+            r, c, d = queue.popleft()
+            for nr, nc in [(r+1,c),(r-1,c),(r,c+1),(r,c-1)]:
+                if not in_bounds(nr,nc) or d >= dist[nr][nc]: continue
+                queue.append((nr,nc, d+1))
+                dist[nr][nc] = d + 1
+        return dist
+```
+
+### Solution 2: iterative dynamic programming + from two directions
+
+```py
+class Solution:
+    def updateMatrix(self, mat: List[List[int]]) -> List[List[int]]:
+        R, C = len(mat), len(mat[0])
+        dist = [[inf]*C for _ in range(R)]
+        in_bounds = lambda r,c: 0<=r<R and 0<=c<C
+        for r, c in product(range(R), range(C)):
+            if mat[r][c] == 0:
+                dist[r][c] = 0
+        for r, c in product(range(R), range(C)):
+            if mat[r][c] == 0: continue
+            for nr, nc in [(r-1,c),(r,c-1)]:
+                if not in_bounds(nr,nc): continue
+                dist[r][c] = min(dist[r][c], dist[nr][nc]+1)
+        for r, c in product(range(R)[::-1], range(C)[::-1]):
+            if mat[r][c] == 0: continue
+            for nr, nc in [(r+1,c),(r,c+1)]:
+                if not in_bounds(nr,nc): continue
+                dist[r][c] = min(dist[r][c], dist[nr][nc]+1)
+        return dist
+```
+
+## 221. Maximal Square
+
+### Solution 1:  iterative dynamic programming
+
+```py
+class Solution:
+    def maximalSquare(self, matrix: List[List[str]]) -> int:
+        R, C = len(matrix), len(matrix[0])
+        max_wid = 0
+        memo = [[0]*(C+1) for _ in range(R+1)]
+        for r, c in product(range(R), range(C)):
+            if matrix[r][c] == '0': continue
+            memo[r][c] = min(memo[r-1][c],memo[r][c-1],memo[r-1][c-1]) + 1
+            max_wid = max(max_wid, memo[r][c])
+        return max_wid*max_wid
+```
+
+## 787. Cheapest Flights Within K Stops
+
+### Solution 1:  dijkstra + stops constraint + dynammic programming
+
+```py
+class Solution:
+    def findCheapestPrice(self, n: int, flights: List[List[int]], src: int, dst: int, k: int) -> int:
+        graph = [[] for _ in range(n)]
+        for u, v, price in flights:
+            graph[u].append((v,price))
+        minheap = [(0,0,src)]
+        dist = [[inf]*(k+1) for _ in range(n)]
+        dist[src][0] = 0
+        while minheap:
+            cost, stops, node = heappop(minheap)
+            if node == dst: return cost
+            if stops > k: continue
+            for nei, w in graph[node]:
+                ncost = cost + w
+                if ncost < dist[nei][stops]: 
+                    dist[nei][stops] = ncost
+                    heappush(minheap, (ncost, stops+1, nei))
+        return -1
+```
+
+## 815. Bus Routes
+
+### Solution 1:  multisource bfs + construct undirected graph + set + set intersection
+
+```py
+class Solution:
+    def numBusesToDestination(self, routes: List[List[int]], source: int, target: int) -> int:
+        if source == target: return 0
+        routes = list(map(set, routes))
+        n = len(routes)
+        graph = [[] for _ in range(n)]
+        for i in range(n):
+            for j in range(i+1,n):
+                if len(routes[i]&routes[j])>0:
+                    graph[i].append(j)
+                    graph[j].append(i)
+        seen, targets = set(), set()
+        queue = deque()
+        for i in range(n):
+            if source in routes[i]:
+                seen.add(i)
+                queue.append((i,1))
+            if target in routes[i]:
+                targets.add(i)
+        while queue:
+            bus, stops = queue.popleft()
+            if bus in targets: return stops
+            for nei in graph[bus]:
+                if nei in seen: continue
+                seen.add(nei)
+                queue.append((nei, stops+1))
+        return -1
+```
+
+## 239. Sliding Window Maximum
+
+### Solution 1:  monotonic stack with enqueue and dequeu + deque
+
+```py
+class Solution:
+    def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
+        stack, result = deque(), []
+        for i, num in enumerate(nums):
+            while stack and stack[-1][0]<=num:
+                stack.pop()
+            stack.append((num, i))
+            if i >= k-1: 
+                while stack[0][1] <= i-k:
+                    stack.popleft()
+                result.append(stack[0][0])
+        return result
+```
+
+## 42. Trapping Rain Water
+
+### Solution 1:  stack
+
+```py
+class Solution:
+    def trap(self, height: List[int]) -> int:
+        stack = []
+        res = 0
+        for i,h in enumerate(height):
+            while stack and height[stack[-1]] < h:
+                top = stack.pop()
+                if not stack: continue
+                distance = i - stack[-1] - 1
+                bounded_height = min(h, height[stack[-1]]) - height[top]
+                res += distance*bounded_height
+            stack.append(i)
+        return res
+```
+
+## 1696. Jump Game VI
+
+### Solution 1:  iterative dynamic programming + monotonic stack + deque
+
+```py
+class Solution:
+    def maxResult(self, nums: List[int], k: int) -> int:
+        n = len(nums)
+        queue = deque([(nums[0], 0)])
+        for i, num in enumerate(nums[1:], start=1):
+            while queue[0][1] < i-k:
+                queue.popleft()
+            v = queue[0][0] + num
+            while queue and queue[-1][0]<=v:
+                queue.pop()
+            queue.append((v,i))
+        return queue.pop()[0]
+```
+
+## 437. Path Sum III
+
+### Solution 1:  dfs on tree
+
+```py
+class Solution:
+    def pathSum(self, root: Optional[TreeNode], targetSum: int) -> int:
+        def dfs(node, paths):
+            if not node: return 0
+            for i in range(len(paths)):
+                paths[i] += node.val
+            paths.append(node.val)
+            cnt = sum(1 for p in paths if p==targetSum)
+            return cnt + dfs(node.left, paths[:]) + dfs(node.right, paths[:])
+        return dfs(root,[])
+```
+
+## 297. Serialize and Deserialize Binary Tree
+
+### Solution 1:  bfs + dfs + serialize tree into string + map + hash table
+
+```py
+class Codec:
+
+    def serialize(self, root):
+        """Encodes a tree to a single string.
+        
+        :type root: TreeNode
+        :rtype: str
+        """
+        serial_list = []
+        queue = deque([(root, 0)])
+        while queue:
+            node, i = queue.popleft()
+            if not node: continue
+            serial_list.append(f'{i}:{node.val}')
+            queue.append((node.left, 2*i+1))
+            queue.append((node.right, 2*i+2))
+        return ','.join(serial_list)
+        
+
+    def deserialize(self, data):
+        """Decodes your encoded data to tree.
+        
+        :type data: str
+        :rtype: TreeNode
+        """
+        if not data: return None
+        table = {k:v for k, v in map(lambda x: map(int, x.split(':')), data.split(','))}
+        def dfs(node, i):
+            if not node: return None
+            if 2*i+1 in table:
+                node.left = TreeNode(table[2*i+1])
+            if 2*i+2 in table:
+                node.right = TreeNode(table[2*i+2])
+            dfs(node.left, 2*i+1)
+            dfs(node.right, 2*i+2)
+            return node
+        return dfs(TreeNode(table[0]), 0)
+```
+
+## 380 Insert Delete GetRandom O(1)
+
+### Solution 1:  hash table for storing index in array + array for using random.choice + remove in O(1) in array by swaping value to last position 
+
+```py
+class RandomizedSet:
+
+    def __init__(self):
+        self.index_table = {}
+        self.arr = []
+
+    def insert(self, val: int) -> bool:
+        if val in self.index_table: return False
+        self.index_table[val] = len(self.index_table)
+        self.arr.append(val)
+        return True
+
+    def remove(self, val: int) -> bool:
+        if val not in self.index_table: return False
+        index = self.index_table[val]
+        self.arr[index], self.arr[-1] = self.arr[-1], self.arr[index]
+        self.index_table[self.arr[index]] = index
+        del self.index_table[val]
+        self.arr.pop()
+        return True
+
+    def getRandom(self) -> int:
+        return random.choice(self.arr)
+```
+
+## 13. Roman to Integer
+
+### Solution 1:  hash table + math
+
+```py
+class Solution:
+    def romanToInt(self, s: str) -> int:
+        rom_int_table = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}
+        result = 0
+        prev = 'M'
+        for rom in s:
+            prev_val, val = map(lambda x: rom_int_table[x], [prev, rom])
+            if prev_val < val:
+                result -= 2*prev_val
+            result += val
+            prev = rom
+        return result
+```
+
+## 105. Construct Binary Tree from Preorder and Inorder Traversal
+
+### Solution 1:  dfs on binary tree + hash table for value to index in inorder array + divide and conquer + recursion
+
+```py
+class Solution:
+    def buildTree(self, preorder: List[int], inorder: List[int]) -> Optional[TreeNode]:
+        self.index = 0
+        self.inorder_table = {v: i for i, v in enumerate(inorder)}
+        def dfs(left, right):
+            if left > right: return None
+            val = preorder[self.index]
+            mid_index = self.inorder_table[val]
+            root = TreeNode(val)
+            self.index += 1
+            root.left = dfs(left, mid_index-1)
+            root.right = dfs(mid_index+1,right)
+            return root
+        return dfs(0,len(preorder)-1)
+```
+
+## 746. Min Cost Climbing Stairs
+
+### Solution 1:  iterative dynamic programming + constant space
+
+```py
+class Solution:
+    def minCostClimbingStairs(self, cost: List[int]) -> int:
+        prev, cur = 0, 0
+        for v in cost:
+            prev, cur = cur, min(prev,cur) + v
+        return min(prev,cur)
+```
+
+## 199. Binary Tree Right Side View
+
+### Solution 1:  right side leaning dfs
+
+```py
+class Solution:
+    def rightSideView(self, root: Optional[TreeNode]) -> List[int]:
+        result = []
+        def dfs(node, depth):
+            if not node: return
+            if depth == len(result):
+                result.append(node.val)
+            dfs(node.right, depth+1)
+            dfs(node.left, depth+1)
+        dfs(root, 0)
+        return result
+```
+
+### Solution 2:  bfs + sum for concatenation of lists + filter for removing the None
+
+```py
+class Solution:
+    def rightSideView(self, root: Optional[TreeNode]) -> List[int]:
+        if root is None:
+            return []
+        view = []
+        layer = [root]
+        while layer:
+            view.append(layer[-1].val)
+            layer = sum([list(filter(None, (node.left, node.right))) for node in layer], [])
+        return view
+```
+
+## 739. Daily Temperatures
+
+### Solution 1:  monotonic stack + montonically non-increasing stack
+
+```py
+class Solution:
+    def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
+        stack = []
+        result = [0]*len(temperatures)
+        for i, temp in enumerate(temperatures):
+            while stack and stack[-1][0] < temp:
+                _, j = stack.pop()
+                result[j] = i - j
+            stack.append((temp, i))
+        return result
+```
+
+## 150. Evaluate Reverse Polish Notation
+
+### Solution 1:  stack + switch case statement
+
+```py
+class Solution:
+    def evalRPN(self, tokens: List[str]) -> int:
+        def evaluate(left, right, op):
+            match op:
+                case '*':
+                    return left*right
+                case '/':
+                    return math.ceil(left/right) if left*right <0 else left//right
+                case '+':
+                    return left+right
+                case '-':
+                    return left-right
+            return 0
+        operand_stk = []
+        for token in tokens:
+            if token in '+*-/':
+                right_operand = operand_stk.pop()
+                left_operand = operand_stk.pop()
+                operand_stk.append(evaluate(left_operand, right_operand, token))
+            else:
+                operand_stk.append(int(token))
+        return operand_stk[-1]
+```
+
+## 25. Reverse Nodes in k-Group
+
+### Solution 1:
+
+```py
+class Solution:
+    def reverseKGroup(self, head: Optional[ListNode], k: int) -> Optional[ListNode]:
+        if k == 1: 
+            return head
+        groups = []
+        len_ = 0
+        # CREATING THE GROUPS OF SIZE K LINKED LISTS
+        while head:
+            if len_ == 0:
+                groups.append([head, None])
+            len_ += 1
+            if len_ == k:
+                groups[-1][1] = head
+                len_ = 0
+            head = head.next
+        for i, (head, tail) in enumerate(groups):
+            if tail == None: break
+            # REVERSE NODES IN EACH K GROUP
+            prev = None
+            ntail = head
+            for _ in range(k):
+                node = head
+                head = head.next
+                node.next = prev
+                prev = node
+            groups[i] = [node, ntail]
+        # REATTACH THE NEW TAILS TO EACH NEW HEAD FOR EACH K SIZED LINKED LIST
+        for i in range(1,len(groups)):
+            groups[i-1][-1].next = groups[i][0]
+        return groups[0][0]
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
 ```
