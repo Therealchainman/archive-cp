@@ -7877,28 +7877,112 @@ class Solution:
         return groups[0][0]
 ```
 
-##
+## 103. Binary Tree Zigzag Level Order Traversal
 
-### Solution 1:
+### Solution 1:  stack
 
 ```py
-
+class Solution:
+    def zigzagLevelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
+        if not root: return []
+        stack = [root]
+        level = [root.val]
+        result = [[root.val]]
+        to_right = 0
+        while stack:
+            to_right ^= 1
+            nstack = []
+            level.clear()
+            while stack:
+                node = stack.pop()
+                if to_right:
+                    if node.right:
+                        nstack.append(node.right)
+                        level.append(node.right.val)
+                    if node.left:
+                        nstack.append(node.left)
+                        level.append(node.left.val)
+                else:
+                    if node.left:
+                        nstack.append(node.left)
+                        level.append(node.left.val)
+                    if node.right:
+                        nstack.append(node.right)
+                        level.append(node.right.val)
+            stack = nstack
+            if level:
+                result.append(level[:])
+        return result
 ```
 
-##
+## 863. All Nodes Distance K in Binary Tree
 
-### Solution 1:
+### Solution 1:  dfs + parent array + convert tree to undirected graph + bfs from source
 
 ```py
-
+class Solution:
+    def distanceK(self, root: TreeNode, target: TreeNode, k: int) -> List[int]:
+        parents = defaultdict(TreeNode)
+        def dfs(node, parent = None):
+            if not node: return
+            parents[node] = parent
+            dfs(node.left, node)
+            dfs(node.right, node)
+        dfs(root)
+        queue = deque([(target, 0)])
+        seen = set([target])
+        while queue:
+            if queue[0][-1] == k: return [node.val for node, _ in queue]
+            node, dist = queue.popleft()
+            for nei in (node.left, node.right, parents[node]):
+                if not nei or nei in seen: continue
+                queue.append((nei, dist+1))
+                seen.add(nei)
+        return []
 ```
 
-##
+## 146. LRU Cache
 
-### Solution 1:
+### Solution 1:  hash table for charge, value + dequeue
 
 ```py
+class LRUCache:
 
+    def __init__(self, capacity: int):
+        self.queue = deque()
+        self.charge_table = {}
+        self.table = {}
+        self.cap = capacity
+        self.charge = 0
+
+    def get(self, key: int) -> int:
+        if key not in self.table: return -1
+        
+        # UPDATE USAGE OF KEY
+        self.charge_table[key] = self.charge
+        self.queue.append((key, self.charge))
+        self.charge += 1
+        
+        return self.table[key]
+
+    def put(self, key: int, value: int) -> None:
+        if key in self.table:
+            self.table[key] = value
+            self.get(key)
+            return
+        # REMOVE THE LEAST RECENTLY USED
+        while len(self.table) == self.cap:
+            prev_key, prev_charge = self.queue.popleft()
+            if self.charge_table[prev_key] == prev_charge:
+                del self.table[prev_key]
+                del self.charge_table[prev_key]
+        
+            
+        # UPDATE USAGE OF KEY AND INSERT INTO TABLE
+        self.charge_table[key] = self.charge
+        self.queue.append((key, self.charge))
+        self.charge += 1
+        self.table[key] = value
 ```
 
 ##
