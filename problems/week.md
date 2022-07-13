@@ -5687,12 +5687,43 @@ class Solution:
         return max(n)
 ```
 
-## 
+## 1229. Meeting Scheduler
 
-### Solution 1:
+### Solution 1:  sort + two pointers
 
 ```py
+class Solution:
+    def minAvailableDuration(self, slots1: List[List[int]], slots2: List[List[int]], duration: int) -> List[int]:
+        slots1.sort()
+        slots2.sort()
+        overlap = lambda s1, e1, s2, e2: min(e2,e1) - max(s1, s2)
+        ptr1 = ptr2 = 0
+        n, m = len(slots1), len(slots2)
+        while ptr1 < n and ptr2 < m:
+            s1, e1 = slots1[ptr1]
+            s2, e2 = slots2[ptr2]
+            if overlap(s1,e1,s2,e2) >= duration:
+                return [max(s1,s2),max(s1,s2)+duration]
+            if e1 < e2:
+                ptr1 += 1
+            else:
+                ptr2 += 1
+        return []
+```
 
+### Solution 2: heap
+
+```py
+class Solution:
+    def minAvailableDuration(self, slots1: List[List[int]], slots2: List[List[int]], duration: int) -> List[int]:
+        timeslots = list(filter(lambda x: x[1]-x[0]>=duration, slots1+slots2))
+        heapify(timeslots)
+        while len(timeslots) > 1:
+            s1, e1 = heappop(timeslots)
+            s2, e2 = timeslots[0]
+            if e1 >= s2+duration:
+                return [s2,s2+duration]
+        return []
 ```
 
 ## 1747. Leetflex Banned Accounts
@@ -5974,12 +6005,36 @@ ON t.player_id = a.player_id
 AND DATEDIFF(a.event_date, t.first_login) = 1
 ```
 
-## 
+## 262. Trips and Users
 
-### Solution 1:
+### Solution 1:  TWO JOINS TO HELP FILTER + GROUP BY + WHERE + LIKE
 
 ```sql
+SELECT 
+    t.request_at AS Day,
+    ROUND(SUM(t.status LIKE 'cancelled%')/COUNT(t.id), 2) AS 'Cancellation Rate'
+FROM Trips t
+JOIN Users u1
+ON t.client_id = u1.users_id AND u1.banned = 'No'
+JOIN Users u2
+ON t.driver_id = u2.users_id AND u2.banned = 'No'
+WHERE t.request_at BETWEEN '2013-10-01' AND '2013-10-03'
+GROUP BY t.request_at
+```
 
+### Solution 2: FROM 3 tables + IMPLICIT JOIN IN WHERE CLAUSE
+
+```sql
+SELECT 
+    t.request_at AS Day,
+    ROUND(SUM(t.status LIKE 'cancelled%')/COUNT(t.id), 2) AS 'Cancellation Rate'
+FROM Trips t, Users u1, Users u2
+WHERE t.client_id = u1.users_id 
+AND t.driver_id = u2.users_id
+AND u1.banned = 'No'
+AND u2.banned = 'No'
+AND t.request_at BETWEEN '2013-10-01' AND '2013-10-03'
+GROUP BY t.request_at
 ```
 
 ## 1647. Minimum Deletions to Make Character Frequencies Unique
