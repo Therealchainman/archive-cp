@@ -8045,7 +8045,28 @@ class LRUCache:
 ### Solution 1:
 
 ```py
-
+class Solution:
+    def makesquare(self, matchsticks: List[int]) -> bool:
+        total_len = sum(matchsticks)
+        n = len(matchsticks)
+        if total_len%4!=0: return False
+        side_len = total_len//4
+        sides = [0]*4
+        endMask = (1<<n)-1
+        matchsticks.sort(reverse=True)
+        @cache
+        def dfs(mask, side):
+            if side == 3:  return sides[0]==sides[1]==sides[2]
+            for i in range(n):
+                if (mask>>i)&1:
+                    sides[side] += matchsticks[i]
+                    if sides[side] == side_len:
+                        if dfs(mask ^ (1<<i), side+1): return True
+                    elif sides[side] < side_len:
+                        if dfs(mask ^ (1<<i), side): return True
+                    sides[side] -= matchsticks[i]
+            return False
+        return dfs(endMask, 0)
 ```
 
 ##
