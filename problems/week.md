@@ -7144,12 +7144,17 @@ OR cnt < 2
 
 ```
 
-##
+## 2339. All the Matches of the League
 
-### Solution 1:
+### Solution 1:  SELF JOIN
 
 ```sql
-
+SELECT 
+    t1.team_name AS home_team,
+    t2.team_name AS away_team
+FROM Teams t1
+JOIN Teams t2
+ON t1.team_name != t2.team_name
 ```
 
 ##
@@ -8067,6 +8072,354 @@ class Solution:
                     sides[side] -= matchsticks[i]
             return False
         return dfs(endMask, 0)
+```
+
+## 695. Max Area of Island
+
+### Solution 1:  dfs + in-place visited array
+
+```py
+class Solution:
+    def maxAreaOfIsland(self, grid: List[List[int]]) -> int:
+        R, C = len(grid), len(grid[0])
+        in_bounds = lambda r, c: 0<=r<R and 0<=c<C
+        def dfs(r, c):
+            if grid[r][c] == 0: return 0
+            grid[r][c] = 0
+            cnt = 1
+            for nr, nc in [(r+1,c),(r-1,c),(r,c+1),(r,c-1)]:
+                if not in_bounds(nr,nc) or grid[nr][nc] == 0: continue
+                cnt += dfs(nr,nc)
+            return cnt
+        return max(dfs(r,c) for r, c in product(range(R), range(C)))
+```
+
+## 1135. Connecting Cities With Minimum Cost
+
+### Solution 1:  union find + minimum spanning tree
+
+```py
+class UnionFind:
+    def __init__(self,n):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    
+    def find(self,i):
+        if i==self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+
+    def union(self,i,j):
+        i, j = self.find(i), self.find(j)
+        if i!=j:
+            if self.size[i] < self.size[j]:
+                i,j=j,i
+            self.parent[j] = i
+            self.size[i] += self.size[j]
+            return True
+        return False
+class Solution:
+    def minimumCost(self, n: int, connections: List[List[int]]) -> int:
+        connections.sort(key=lambda edge: edge[2])
+        dsu = UnionFind(n)
+        num_sets = n
+        minCost = 0
+        for u,v,w in connections:
+            if dsu.union(u-1,v-1):
+                minCost += w
+                num_sets -= 1
+        return minCost if num_sets == 1 else -1
+```
+
+## 778. Swim in Rising Water
+
+### Solution 1:  min heap + shortest path
+
+```py
+class Solution:
+    def swimInWater(self, grid: List[List[int]]) -> int:
+        N = len(grid)
+        minheap = [(grid[0][0], 0, 0)]
+        dist = [[inf]*N for _ in range(N)]
+        dist[0][0] = grid[0][0]
+        in_bounds = lambda r,c: 0<=r<N and 0<=c<N
+        while minheap:
+            val, r, c = heappop(minheap)
+            if r==N-1 and c==N-1:
+                return val
+            for nr, nc in [(r+1,c),(r-1,c),(r,c+1),(r,c-1)]:
+                if not in_bounds(nr,nc): continue
+                nval = max(val, grid[nr][nc])
+                if nval < dist[nr][nc]:
+                    heappush(minheap, (nval, nr, nc))
+                    dist[nr][nc] = nval
+        return -1
+```
+
+## 1489. Find Critical and Pseudo-Critical Edges in Minimum Spanning Tree
+
+### Solution 1:  union find + minimum spanning tree + test exclude or include each node, 
+
+```py
+class UnionFind:
+    def __init__(self,n):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    
+    def find(self,i):
+        if i==self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+
+    def union(self,i,j):
+        i, j = self.find(i), self.find(j)
+        if i!=j:
+            if self.size[i] < self.size[j]:
+                i,j=j,i
+            self.parent[j] = i
+            self.size[i] += self.size[j]
+            return True
+        return False
+class Solution:
+    def minimumSpanningTree(self, n, edges, include_edge = None):
+        minCost = 0
+        dsu = UnionFind(n)
+        if include_edge:
+            u, v, w = include_edge
+            dsu.union(u,v)
+            minCost += w
+        for u, v, w in edges:
+            if dsu.union(u,v):
+                minCost += w
+        return minCost
+    def findCriticalAndPseudoCriticalEdges(self, n: int, edges: List[List[int]]) -> List[List[int]]:
+        edge_index = {tuple(edge): i for i, edge in enumerate(edges)}
+        edges.sort(key=lambda edge: edge[2])
+        mst = self.minimumSpanningTree(n, edges)
+        critical, pseudo = [], []
+        for i, edge in enumerate(edges):
+            mst_exclude = self.minimumSpanningTree(n, edges[:i] + edges[i+1:])
+            if mst_exclude != mst:
+                critical.append(edge_index[tuple(edge)])
+            elif mst_exclude == mst and self.minimumSpanningTree(n, edges, edge) == mst:
+                pseudo.append(edge_index[tuple(edge)])
+        return [critical, pseudo]
+```
+
+## 1168. Optimize Water Distribution in a Village
+
+### Solution 1:  virtual node + minimum spanning tree + union find
+
+```py
+class UnionFind:
+    def __init__(self,n):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    
+    def find(self,i):
+        if i==self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+
+    def union(self,i,j):
+        i, j = self.find(i), self.find(j)
+        if i!=j:
+            if self.size[i] < self.size[j]:
+                i,j=j,i
+            self.parent[j] = i
+            self.size[i] += self.size[j]
+            return True
+        return False
+class Solution:
+    def minCostToSupplyWater(self, n: int, wells: List[int], pipes: List[List[int]]) -> int:
+        for i, weight in enumerate(wells, start=1):
+            pipes.append((0,i,weight))
+        pipes.sort(key=lambda edge: edge[2])
+        dsu = UnionFind(n+1)
+        return sum(w for u,v,w in pipes if dsu.union(u,v))
+```
+
+## 576. Out of Boundary Paths
+
+### Solution 1:  iterative DP + BFS + memoization
+
+```py
+class Solution:
+    def findPaths(self, m: int, n: int, maxMove: int, startRow: int, startColumn: int) -> int:
+        # m rows, n cols
+        MOD = int(1e9)+7
+        paths = [[0]*n for _ in range(m)]
+        paths[startRow][startColumn] = 1
+        in_bounds = lambda r,c: 0<=r<m and 0<=c<n
+        ways = 0
+        for _ in range(maxMove):
+            npaths = [[0]*n for _ in range(m)]
+            for r,c in product(range(m), range(n)):
+                for nr, nc in [(r+1,c),(r-1,c),(r,c+1),(r,c-1)]:
+                    if not in_bounds(nr,nc): 
+                        ways = (ways + paths[r][c])%MOD
+                        continue
+                    npaths[r][c] = (npaths[r][c] + paths[nr][nc])%MOD
+            paths = npaths
+        return ways
+```
+
+## 2331. Evaluate Boolean Binary Tree
+
+### Solution 1:
+
+```py
+class Solution:
+    def evaluateTree(self, root: Optional[TreeNode]) -> bool:
+        if not root.left:
+            return root.val
+        left, right = self.evaluateTree(root.left), self.evaluateTree(root.right)
+        return left|right if root.val == 2 else left&right
+```
+
+## 2332. The Latest Time to Catch a Bus
+
+### Solution 1:
+
+```py
+class Solution:
+    def latestTimeCatchTheBus(self, buses: List[int], passengers: List[int], capacity: int) -> int:
+        passengers.sort()
+        i = 0
+        for time in sorted(buses):
+            cap = capacity
+            while i < len(passengers) and passengers[i] <= time and cap > 0:
+                i += 1
+                cap -= 1
+        best = time if cap > 0 else passengers[i-1]
+        passengers = set(passengers)
+        while best in passengers:
+            best -= 1
+        return best
+```
+
+## 2338. Count the Number of Ideal Arrays
+
+### Solution 1:  combinatorics + combinations + dynamic programming + strictly increasing list + prime sieve
+
+```py
+class Solution:
+    def idealArrays(self, n: int, maxValue: int) -> int:
+        MOD = int(1e9)+7
+        @cache
+        def combinations_(n, r):
+            return math.comb(n,r)%MOD
+        @cache
+        def dfs(last_num, num_increases):
+            result = combinations_(n-1,num_increases)
+            if num_increases == n-1:
+                return result
+            for i in range(last_num+last_num,maxValue+1,last_num):
+                result = (result + dfs(i,num_increases+1))%MOD
+            return result
+        ways = 0
+        for i in range(1, maxValue+1):
+            ways  = (ways+dfs(i,0))%MOD
+        return ways
+```
+
+## 629. K Inverse Pairs Array
+
+### Solution 1:
+
+```py
+
+```
+
+## 2341. Maximum Number of Pairs in Array
+
+### Solution 1:  hash map + counter + sum
+
+```py
+class Solution:
+    def numberOfPairs(self, nums: List[int]) -> List[int]:
+        counts = Counter(nums)
+        return [sum(cnt//2 for cnt in counts.values()), sum(cnt%2 for cnt in counts.values())]
+```
+
+## 2342. Max Sum of a Pair With Equal Sum of Digits
+
+### Solution 1:  hash map + sum
+
+```py
+class Solution:
+    def maximumSum(self, nums: List[int]) -> int:
+        m = {}
+        result = 0
+        for num in nums:
+            digits = sum(int(x) for x in str(num))
+            if digits in m:
+                result = max(result, m[digits] + num)
+                m[digits] = max(m[digits], num)
+            else:
+                m[digits] = num
+        return result if result > 0 else -1
+```
+
+## 2343. Query Kth Smallest Trimmed Number
+ 
+### Solution 1:  offline query + sort queries by length of integers + nsmallest + heap
+
+```py
+class Solution:
+    def smallestTrimmedNumbers(self, nums: List[str], queries: List[List[int]]) -> List[int]:
+        queries = sorted([(j,i,k) for k, (i,j) in enumerate(queries)], reverse=True)
+        answer = [0]*len(queries)
+        len_ = len(nums[0])
+        numI = [(int(x), i) for i,x in enumerate(nums)]
+        for trim, k, i in queries:
+            if trim != len_:
+                nums = [num[len_-trim:] for num in nums]
+                numI = [(int(x), i) for i,x in enumerate(nums)]
+            len_ = len(nums[0])
+            answer[i] = nsmallest(k, numI)[-1][1]
+        return answer
+```
+
+## Solution 2:  custom comparator with single array that contains string and index
+
+
+```py
+class Solution:
+    def smallestTrimmedNumbers(self, nums: List[str], queries: List[List[int]]) -> List[int]:
+        queries = sorted([(j,i,k) for k, (i,j) in enumerate(queries)], reverse=True)
+        answer = [0]*len(queries)
+        len_ = len(nums[0])
+        nums = [(num, i) for i, num in enumerate(nums)]
+        for trim, k, i in queries:
+            if trim != len_:
+                nums = [(num[len_-trim:], i) for num, i in nums]
+            len_ = len(nums[0][0])
+            answer[i] = nsmallest(k, nums, key=lambda x: (x[0], x[1]))[-1][1]
+        return answer
+```
+
+## 2344. Minimum Deletions to Make Array Divisible
+
+### Solution 1:  gcd + reduce + next + default value
+
+```py
+class Solution:
+    def minOperations(self, nums: List[int], numsDivide: List[int]) -> int:
+        n = len(nums)
+        gcd_ = reduce(gcd, numsDivide)
+        return next((i for i, num in enumerate(sorted(nums)) if gcd_%num==0), -1)
+```
+
+##
+
+### Solution 1:
+
+```py
+
 ```
 
 ##
