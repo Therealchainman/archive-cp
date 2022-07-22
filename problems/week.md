@@ -8414,6 +8414,152 @@ class Solution:
         return next((i for i, num in enumerate(sorted(nums)) if gcd_%num==0), -1)
 ```
 
+## 92. Reverse Linked List II
+
+### Solution 1:  iterative + reverse linked list + need two extra pointers for connection_node and tail_node
+
+```py
+class Solution:
+    def reverseBetween(self, head: Optional[ListNode], left: int, right: int) -> Optional[ListNode]:
+        cur_node, prev_node = head, None
+        # FIND THE CONNECTION AND TAIL NODE
+        while left > 1:
+            prev_node = cur_node
+            cur_node = cur_node.next
+            left -= 1
+            right -= 1
+        con_node, tail_node = prev_node, cur_node
+        prev_node = None
+        # REVERSE IN THE RANGE
+        while right > 0:
+            next_node = cur_node.next
+            cur_node.next = prev_node
+            prev_node = cur_node
+            cur_node = next_node
+            right -=1
+        if con_node:
+            con_node.next = prev_node
+        else:
+            head = prev_node
+        tail_node.next = cur_node
+        return head
+```
+
+## 792. Number of Matching Subsequences
+
+### Solution 1:  hash table + str_iterator + pop for dictionary with default + default for iter + 
+
+```py
+class Solution:
+    def numMatchingSubseq(self, s: str, words: List[str]) -> int:
+        char_table = defaultdict(list)
+        for word in map(iter, words):
+            char_table[next(word)].append(word)
+        for ch in s:
+            for it in char_table.pop(ch, ()):
+                char_table[next(it, None)].append(it)
+        return len(char_table[None])
+```
+
+## 1074. Number of Submatrices That Sum to Target
+
+### Solution 1:  2D prefix sum + reduce to 1D in terms of row1, row2 for upper and lower bound + hash table
+
+```py
+class Solution:
+    def numSubmatrixSumTarget(self, matrix: List[List[int]], target: int) -> int:
+        R, C = len(matrix), len(matrix[0])
+        ps = [[0]*(C+1) for _ in range(R+1)]
+        cnt = 0
+        # BUILD 2D PREFIX SUM
+        for r, c in product(range(1,R+1),range(1,C+1)):
+            ps[r][c] = ps[r-1][c] + ps[r][c-1] + matrix[r-1][c-1] - ps[r-1][c-1]
+        for r1 in range(R):
+            for r2 in range(r1+1,R+1):
+                counter = Counter()
+                counter[0] = 1
+                for c in range(1,C+1):
+                    submatrix_presum = ps[r2][c] - ps[r1][c]
+                    sum_ = submatrix_presum-target
+                    cnt += counter[sum_]
+                    counter[submatrix_presum] += 1
+        return cnt
+```
+
+## 86. Partition List
+
+### Solution 1:  before/left and after/right node with a joint between them + connect at joint + two pointer
+
+```py
+class Solution:
+    def partition(self, head: Optional[ListNode], x: int) -> Optional[ListNode]:
+        left_node = ListNode()
+        lhead = left_node
+        right_node = ListNode()
+        rhead = right_node
+        while head:
+            node = head.next
+            if head.val < x:
+                lhead.next = head
+                head.next = None
+                lhead = lhead.next
+            else:
+                rhead.next = head
+                head.next = None
+                rhead = rhead.next
+            head = node
+        lhead.next = right_node.next
+        return left_node.next
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
