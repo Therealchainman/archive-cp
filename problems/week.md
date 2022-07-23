@@ -8512,52 +8512,226 @@ class Solution:
         return left_node.next
 ```
 
-##
+## 1462. Course Schedule IV
 
-### Solution 1:
+### Solution 1:  bfs from each node
 
 ```py
-
+class Solution:
+    def checkIfPrerequisite(self, numCourses: int, prerequisites: List[List[int]], queries: List[List[int]]) -> List[bool]:
+        isReachable = [[0]*numCourses for _ in range(numCourses)]
+        graph = [[] for _ in range(numCourses)]
+        for u, v in prerequisites:
+            graph[u].append(v)
+        def bfs(start_node):
+            queue = deque([start_node])
+            visited = [0]*numCourses
+            visited[start_node] = 1
+            while queue:
+                node = queue.popleft()
+                for nei in graph[node]:
+                    if visited[nei]: continue
+                    isReachable[nei][start_node] = 1 # (start node can reach nei)
+                    visited[nei] = 1
+                    queue.append(nei)
+        for i in range(numCourses):
+            bfs(i)
+        return [bool(isReachable[v][u]) for u,v in queries]
 ```
 
-##
-
-### Solution 1:
+## 207. Course Schedule
+ 
+### Solution 1:  topological order of directed graph + detect cycle
 
 ```py
-
+class Solution:
+    def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
+        indegrees = [0]*numCourses
+        graph = [[] for _ in range(numCourses)]
+        for u, v in prerequisites:
+            graph[u].append(v) # u has edge to v, travel from  u to v
+            indegrees[v] += 1
+        queue = deque([i for i in range(numCourses) if indegrees[i] == 0])
+        while queue:
+            node = queue.popleft()
+            for nei in graph[node]:
+                indegrees[nei] -= 1
+                if indegrees[nei] == 0:
+                    queue.append(nei)
+        return all(indegree==0 for indegree in indegrees)
 ```
 
-##
+## 323. Number of Connected Components in an Undirected Graph
 
-### Solution 1:
+### Solution 1:  union find + number of components
 
 ```py
+class UnionFind:
+    def __init__(self,n):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    
+    def find(self,i):
+        if i==self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
 
+    def union(self,i,j):
+        i, j = self.find(i), self.find(j)
+        if i!=j:
+            if self.size[i] < self.size[j]:
+                i,j=j,i
+            self.parent[j] = i
+            self.size[i] += self.size[j]
+            return True
+        return False
+class Solution:
+    def countComponents(self, n: int, edges: List[List[int]]) -> int:
+        dsu = UnionFind(n)
+        num_components = n
+        for u, v in edges:
+            if dsu.union(u,v):
+                num_components -= 1
+        return num_components
 ```
 
-##
+## 317. Shortest Distance from All Buildings
 
-### Solution 1:
+### Solution 1:  bfs + in place visited array + problem of using multiple visited arrays, unless use trick for inplace 
 
 ```py
-
+class Solution:
+    def shortestDistance(self, grid: List[List[int]]) -> int:
+        R, C = len(grid), len(grid[0])
+        dist = [[0]*C for _ in range(R)]
+        house_count = 0
+        in_bounds = lambda r,c: 0<=r<R and 0<=c<C
+        def bfs(r,c,mark):
+            queue = deque([(r,c,0)])
+            while queue:
+                r,c,d = queue.popleft()
+                dist[r][c] += d
+                for nr,nc in [(r+1,c),(r-1,c),(r,c+1),(r,c-1)]:
+                    if not in_bounds(nr,nc) or grid[nr][nc] != mark+1: continue
+                    queue.append((nr,nc,d+1))
+                    grid[nr][nc] = mark
+        for r,c in product(range(R),range(C)):
+            if grid[r][c] == 1:
+                house_count -= 1
+                bfs(r,c,house_count)
+        return min((dist[r][c] for r,c in product(range(R),range(C)) if grid[r][c] == house_count),default=-1)
 ```
 
-##
+## 1334. Find the City With the Smallest Number of Neighbors at a Threshold Distance
 
-### Solution 1:
+### Solution 1:  shortest path for each node + heap datastructure
 
 ```py
-
+class Solution:
+    def findTheCity(self, n: int, edges: List[List[int]], distanceThreshold: int) -> int:
+        city = 0
+        # BUILD ADJACENCY LIST FOR GRAPH
+        graph = [[] for _ in range(n)]
+        for u, v, w in edges:
+            graph[u].append((v,w))
+            graph[v].append((u,w))
+        # BFS FOR EACH NODE
+        def bfs(snode):
+            minheap = [(0,snode)]
+            visited = [inf]*n
+            visited[snode] = 0
+            while minheap:
+                dist, node = heappop(minheap)
+                for nei, weight in graph[node]:
+                    ndist = dist + weight
+                    if ndist >= visited[nei] or ndist > distanceThreshold: continue
+                    visited[nei] = ndist
+                    heappush(minheap, (ndist, nei))
+            return sum(1 for val in visited if val < inf)
+        return min((i for i in range(n)[::-1]),key=lambda x: bfs(x))
 ```
 
-##
+## 315. Count of Smaller Numbers After Self
 
-### Solution 1:
+### Solution 1: binary index tree + fenwick + hash table for coordinate compression 
 
 ```py
+class FenwickTree:
+    def __init__(self, N):
+        self.sums = [0 for _ in range(N+1)]
 
+    def update(self, i, delta):
+
+        while i < len(self.sums):
+            self.sums[i] += delta
+            i += i & (-i)
+
+    def query(self, i):
+        res = 0
+        while i > 0:
+            res += self.sums[i]
+            i -= i & (-i)
+        return res
+
+    def __repr__(self):
+        return f"array: {self.sums}"
+class Solution:
+    def countSmaller(self, nums: List[int]) -> List[int]:
+        table = {v:i for i,v in enumerate(sorted(set(nums)))}
+        fenwick = FenwickTree(len(table))
+        result = []
+        for num in reversed(nums):
+            result.append(fenwick.query(table[num]))
+            fenwick.update(table[num]+1, 1)
+        return reversed(result)
+```
+
+### Solution 2:  modified merge sort + divide and conquer
+
+```py
+class MergeSort:
+    def __init__(self, arr):
+        self.arr = arr
+        self.count = [0]*len(self.arr)
+        
+    def run(self, left, right):
+        self.merge_sort(left, right)
+        return self.count
+    
+    def merge_sort(self, left, right):
+        if right-left <= 1: return
+        mid = (left+right)>>1
+        self.merge_sort(left, mid)
+        self.merge_sort(mid, right)
+        self.merge(left,right,mid)
+   
+    def merge(self, left, right, mid):
+        i, j = left, mid
+        temp = []
+        while i < mid and j < right:
+            if self.arr[i][0] <= self.arr[j][0]:
+                temp.append(self.arr[i])
+                self.count[self.arr[i][1]] += j-mid
+                i += 1
+            else:
+                temp.append(self.arr[j])
+                j+=1
+        while i < mid:
+            temp.append(self.arr[i])
+            self.count[self.arr[i][1]] += j-mid
+            i += 1
+        while j < right:
+            temp.append(self.arr[j])
+            j += 1
+        for i in range(left, right):
+            self.arr[i] = temp[i-left]
+class Solution:
+    def countSmaller(self, nums: List[int]) -> List[int]:
+        n = len(nums)
+        nums = [[v,i] for i,v in enumerate(nums)]
+        ms = MergeSort(nums)
+        return ms.run(0,n)
 ```
 
 ##

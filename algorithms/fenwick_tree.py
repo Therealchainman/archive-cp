@@ -8,6 +8,8 @@ Initialize it with the following
 self.fenwick = FenwickTree(n)
 
 self.fenwick.update(r+1,-k)
+
+if I query(5) it looks in the range [0,5], so it is inclusive
 """
 class FenwickTree:
     def __init__(self, N):

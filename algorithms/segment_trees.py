@@ -162,3 +162,44 @@ class MaxSegmentTree:
         return self.get_first(l,r,2*x+2,mid,rx,val)
     def __repr__(self):
         return f"array: {self.tree}"
+
+"""
+This is a segment tree that is for range queries for finding the count of elements in range
+this means for the update tree part it performs self.tree[x] += val, so that it increases by the update
+amount, so increase by the number of count that this value increases by
+"""
+class CountSegmentTree:
+    def __init__(self, arr):
+        self.arr = arr
+        n = len(arr)
+        self.neutral = 0
+        self.size = 1
+        while self.size <n:
+            self.size *= 2
+        self.tree = [0 for _ in range(self.size*2)]
+    def update_tree(self, idx, val):
+        self.update(idx,val,0,0,self.size)
+    def build_tree(self):
+        for i, val in enumerate(self.arr):
+            self.update_tree(i,val)
+    def update(self,idx,val,x,lx,rx):
+        if rx-lx==1:
+            self.tree[x] += val
+            return
+        mid = rx+lx>>1
+        if idx<mid:
+            self.update(idx,val,2*x+1,lx,mid)
+        else:
+            self.update(idx,val,2*x+2,mid,rx)
+        self.tree[x] = self.tree[2*x+1] + self.tree[2*x+2]
+    def query(self, l, r, x, lx, rx):
+        if lx>=r or l>=rx:
+            return self.neutral
+        if lx>=l and rx<=r:
+            return self.tree[x]
+        m = lx+rx>>1
+        sl = self.query(l,r,2*x+1,lx,m)
+        sr = self.query(l,r,2*x+2,m,rx)
+        return sl + sr
+    def query_tree(self, l, r):
+        return self.query(l,r,0,0,self.size)
