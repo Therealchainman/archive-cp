@@ -8734,6 +8734,180 @@ class Solution:
         return ms.run(0,n)
 ```
 
+## 2354. Number of Excellent Pairs
+
+### Solution 1:  decompose problem to two sum + sum of bits for pair >= k + binary search + sort
+
+```py
+class Solution:
+    def countExcellentPairs(self, nums: List[int], k: int) -> int:
+        nums = set(nums)
+        n = len(nums)
+        nums = sorted([num.bit_count() for num in nums])
+        cnt = sum(1 for num in nums if 2*num >= k)
+        for i, num in enumerate(nums):
+            j = bisect_left(nums, k-num, lo=i+1)
+            cnt += 2*(n-j)
+        return cnt
+```
+
+### Solution 2: two pointers + sort + set
+
+```py
+class Solution:
+    def countExcellentPairs(self, nums: List[int], k: int) -> int:
+        nums = set(nums)
+        n = len(nums)
+        nums = sorted([num.bit_count() for num in nums])
+        right = n-1
+        cnt = 0
+        for left in range(n):
+            if nums[left] + nums[right] < k: continue
+            while right >= 1 and nums[left] + nums[right-1] >= k:
+                right -= 1
+            cnt += n-right
+        return cnt
+```
+
+## 2351. First Letter to Appear Twice
+
+### Solution 1:
+
+```py
+class Solution:
+    def repeatedCharacter(self, s: str) -> str:
+        seen = set()
+        for ch in s:
+            if ch in seen: return ch
+            seen.add(ch)
+        return 'a'
+```
+
+## 2352. Equal Row and Column Pairs
+
+### Solution 1:  3 nested loops to compare each row and column to check that all values are equal
+
+```py
+class Solution:
+    def equalPairs(self, grid: List[List[int]]) -> int:
+        n = len(grid)
+        return sum(1 for r,c in product(range(n),repeat=2) if all(grid[r][i]==grid[i][c] for i in range(n)))
+```
+
+### Solution 2:  transpose of matrix + hash with counter dictionary
+
+```py
+class Solution:
+    def equalPairs(self, grid: List[List[int]]) -> int:
+        thashes = Counter(zip(*grid))
+        ghashes = Counter(map(tuple,grid))
+        return sum(ghashes[t]*thashes[t] for t in thashes)
+```
+
+## 2353. Design a Food Rating System
+
+### Solution 1:  hash maps + max heap
+
+```py
+class FoodRatings:
+
+    def __init__(self, foods: List[str], cuisines: List[str], ratings: List[int]):
+        self.rating = {}
+        self.cuisine_heaps = defaultdict(list)
+        self.cuisine_dict = {}
+        for food, cuisine, rating in zip(foods, cuisines, ratings):
+            self.rating[food] = rating
+            heappush(self.cuisine_heaps[cuisine], (-rating, food))
+            self.cuisine_dict[food] = cuisine
+
+    def changeRating(self, food: str, newRating: int) -> None:
+        self.rating[food] = newRating
+        cuisine = self.cuisine_dict[food]
+        heappush(self.cuisine_heaps[cuisine], (-newRating, food))
+
+    def highestRated(self, cuisine: str) -> str:
+        while self.cuisine_heaps[cuisine]:
+            rating, food = heappop(self.cuisine_heaps[cuisine])
+            rating = abs(rating)
+            if rating == self.rating[food]:
+                heappush(self.cuisine_heaps[cuisine], (-rating, food))
+                return food
+        return '0'
+```
+
+## 34. Find First and Last Position of Element in Sorted Array
+
+### Solution 1:  two binary search to find start and end of element
+
+```py
+class Solution:
+    def searchRange(self, nums: List[int], target: int) -> List[int]:
+        left = bisect_left(nums, target)
+        right = bisect_right(nums, target)
+        return [-1,-1] if right == left else [left, right-1]
+```
+
+## 240. Search a 2D Matrix II
+
+### Solution 1:  for each row perform binary search
+
+```py
+class Solution:
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        for row in matrix:
+            i = bisect_left(row, target)
+            if i < len(row) and row[i] == target: return True
+        return False
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
