@@ -7157,11 +7157,18 @@ JOIN Teams t2
 ON t1.team_name != t2.team_name
 ```
 
-##
+## 2346. Compute the Rank as a Percentage
 
-### Solution 1:
+### Solution 1:  WINDOW FUNCTION + PERCENT_RANK() + percentile rank
 
 ```sql
+SELECT
+    student_id,
+    department_id,
+    ROUND(100*PERCENT_RANK() OVER(
+    PARTITION BY department_id ORDER BY mark DESC
+    ),2) AS percentage
+FROM Students
 
 ```
 
@@ -8860,6 +8867,250 @@ class Solution:
         return False
 ```
 
+## 236. Lowest Common Ancestor of a Binary Tree
+
+### Solution 1:  binary lifting + dfs + iterative dp table + lca + kth ancestor
+
+```py
+class BinaryLift:
+
+    def __init__(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode'):
+        self.root = root
+        self.p = p
+        self.q = q
+        self.nodesIndex = defaultdict(int) # node to index
+        self.nodes = [] # index to node
+        self.parents = defaultdict(lambda: -1) # index of node to parent index
+        self.levels = defaultdict(int) # index of node to level
+        self.i = -1
+        self.dfs(root)
+        self.build_table(self.i+1)
+        
+    def build_table(self, n: int):
+        self.C = 1+int(math.log2(n))
+        self.table = [[-1 for _ in range(self.C)] for _ in range(n)]
+        for c in range(self.C):
+            for r in range(n):
+                if c==0: self.table[r][c] = self.parents[r]
+                elif self.table[r][c-1] != -1:
+                    self.table[r][c] = self.table[self.table[r][c-1]][c-1]
+    
+    """
+    Finding the parents and level nodes
+    """
+    def dfs(self, node, level=0, parent=-1):
+        if not node: return
+        self.i += 1
+        i = self.i
+        self.nodesIndex[node] = self.i
+        self.nodes.append(node)
+        self.levels[self.i] = level
+        self.parents[self.i] = parent
+        self.dfs(node.left, level+1, i)
+        self.dfs(node.right, level+1, i)
+        
+        
+    def getKthAncestor(self, node: int, k: int) -> int:
+        while node != -1 and k>0:
+            i = int(math.log2(k))
+            node = self.table[node][i]
+            k-=(1<<i)
+        return node
+    
+    def find_lca(self):
+        # p is at deeper level
+        p, q = self.nodesIndex[self.p], self.nodesIndex[self.q]
+        if self.levels[p]<self.levels[q]:
+            p, q = q, p
+        # put on same level by finding the kth ancestor
+        k = self.levels[p] - self.levels[q]
+        p = self.getKthAncestor(p, k)
+        if p == q:
+            return self.nodes[p]
+        for j in range(self.C)[::-1]:
+            if self.table[p][j] != self.table[q][j]:
+                p = self.table[p][j]
+                q = self.table[q][j]
+        return self.nodes[self.table[p][0]]
+        
+class Solution:
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        lca = BinaryLift(root, p, q)
+        return lca.find_lca()
+```
+
+## 114. Flatten Binary Tree to Linked List
+
+### Solution 1:  swap nodes + preorder + recursion
+
+```py
+class Solution:
+    def flatten(self, root: Optional[TreeNode]) -> None:
+        """
+        Do not return anything, modify root in-place instead.
+        """
+        def switchNodes(node):
+            if not node: return
+            node.left, node.right = node.right, node.left
+            switchNodes(node.left)
+            switchNodes(node.right)
+        switchNodes(root)
+        self.prev_node = None
+        def reverse_preorder(node):
+            if not node: return
+            if self.prev_node:
+                self.prev_node.right = node
+            self.prev_node = node
+            reverse_preorder(node.right)
+            reverse_preorder(node.left)
+            node.left = None
+        reverse_preorder(root)
+```
+
+### Solution 2: recursion + subproblem is left and right tails, need four pointers, left, right, leftTail, rightTail
+
+```py
+class Solution:
+    def flatten(self, root: Optional[TreeNode]) -> None:
+        """
+        Do not return anything, modify root in-place instead.
+        """
+        def dfs(node):
+            if not node: return None
+            if not node.left and not node.right: return node
+            leftTail = dfs(node.left)
+            rightTail = dfs(node.right)
+            if leftTail:
+                leftTail.right = node.right
+                node.right = node.left
+                node.left = None
+            return rightTail or leftTail
+        dfs(root)
+```
+
+## 2350. Shortest Impossible Sequence of Rolls
+
+### Solution 1:  hash table + greedy + form complete sets
+
+```py
+class Solution:
+    def shortestSequence(self, rolls: List[int], k: int) -> int:
+        current_set = set()
+        num_completed_sets = 0
+        for num in rolls:
+            current_set.add(num)
+            if len(current_set) == k:
+                num_completed_sets += 1
+                current_set.clear()
+        return num_completed_sets + 1
+```
+
+## 2347. Best Poker Hand
+
+### Solution 1:  hash map + counter + if statements
+
+```py
+class Solution:
+    def bestHand(self, ranks: List[int], suits: List[str]) -> str:
+        max_suits, max_ranks = max(Counter(suits).values()), max(Counter(ranks).values())
+        return 'Flush' if max_suits >= 5 else 'Three of a Kind' if max_ranks >= 3 else 'Pair' if max_ranks >= 2 else 'High Card'
+```
+
+### Solution 2:  pattern matching + switch statements
+
+```py
+class Solution:
+    def bestHand(self, ranks: List[int], suits: List[str]) -> str:
+        if len(set(suits)) == 1: return 'Flush'
+        match max(Counter(ranks).values()):
+            case 3 | 4 | 5:
+                return 'Three of a Kind'
+            case 2:
+                return 'Pair'
+            case _:
+                return 'High Card'
+```
+
+## 2348. Number of Zero-Filled Subarrays
+
+### Solution 1:  math + sum of natural numbers
+
+```py
+class Solution:
+    def zeroFilledSubarray(self, nums: List[int]) -> int:
+        cnt = 0
+        delta = 0
+        for num in nums:
+            if num == 0:
+                delta += 1
+                cnt += delta
+            else:
+                delta = 0
+        return cnt
+```
+
+### Solution 2: sum + map + sum of natural numbers + groupby
+
+```py
+class Solution:
+    def zeroFilledSubarray(self, nums: List[int]) -> int:
+        return sum(n*(n+1)//2 for val, n in map(lambda grp: (grp[0], len(list(grp[1]))), groupby(nums)) if val == 0)
+```
+
+## 2349. Design a Number Container System
+
+### Solution 1:  hash map + min heap + lazy update to the min heap
+
+```py
+class NumberContainers:
+
+    def __init__(self):
+        self.indexNumber = {}
+        self.number_minheaps = defaultdict(list)
+
+    def change(self, index: int, number: int) -> None:
+        self.indexNumber[index] = number
+        heappush(self.number_minheaps[number], index)
+
+    def find(self, number: int) -> int:
+        while self.number_minheaps[number]:
+            pindex = self.number_minheaps[number][0]
+            if self.indexNumber[pindex] == number: return pindex
+            heappop(self.number_minheaps[number])
+        return -1
+```
+
+### Solution 2:  hash map + sorted list 
+
+```py
+from sortedcontainers import SortedList
+class NumberContainers:
+
+    def __init__(self):
+        self.indexNumber = {}
+        self.numberIndex = defaultdict(SortedList)
+
+    def change(self, index: int, number: int) -> None:
+        if index in self.indexNumber:
+            old_num = self.indexNumber[index]
+            self.numberIndex[old_num].discard(index)
+            if not self.numberIndex[old_num]:
+                del self.numberIndex[old_num]
+        self.indexNumber[index] = number
+        self.numberIndex[number].add(index)
+
+    def find(self, number: int) -> int:
+        return self.numberIndex.get(number, [-1])[0]
+```
+
+## 2345. Finding the Number of Visible Mountains
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
@@ -8874,6 +9125,50 @@ class Solution:
 
 ```py
 
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+## 2308. Arrange Table by Gender
+
+### Solution 1:  DENSE RANK + rank on gender with IF + rank for each gender partition + ORDER BY rankings
+
+```sql
+WITH rank_tbl AS (
+    SELECT
+        user_id,
+        gender,
+        DENSE_RANK() OVER(PARTITION BY gender ORDER BY user_id) AS user_rank_per_gender,
+        IF(gender = 'female', 1, IF(gender = 'other', 2, 3)) AS gender_rank
+    FROM Genders
+)
+SELECT 
+    user_id,
+    gender
+FROM rank_tbl
+ORDER BY user_rank_per_gender, gender_rank
 ```
 
 ##
