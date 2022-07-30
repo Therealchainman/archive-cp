@@ -1880,6 +1880,27 @@ class Vector2D:
         return self.outer < len(self.vec)
 ```
 
+### Solution 3: hold the next value in peek always + Use None to mark the end of the iterator
+
+```py
+class Vector2D:
+
+    def __init__(self, vec: List[List[int]]):
+        self.flatten = chain.from_iterable(vec)
+        self.peek()
+        
+    def peek(self) -> None:
+        self.next_val = next(self.flatten, None)
+
+    def next(self) -> int:
+        elem = self.next_val
+        self.peek()
+        return elem
+
+    def hasNext(self) -> bool:
+        return self.next_val is not None
+```
+
 ## 216 Combination Sum III
 
 ### Solution 1: Uses itertools.combinations in python to generate combinations of an iterage of range(1,10) with length of k
@@ -9111,28 +9132,47 @@ class NumberContainers:
 
 ```
 
-##
+## 916. Word Subsets
 
-### Solution 1:
+### Solution 1:  hash table + counter + counter subset of another counter + create a superset from words2, superset must be a subset of each word
 
 ```py
-
+class Solution:
+    def wordSubsets(self, words1: List[str], words2: List[str]) -> List[str]:
+        charLimit = reduce(lambda c1, c2: c1|c2, map(Counter, words2))
+        return filter(lambda word: charLimit <= Counter(word), words1)
 ```
 
-##
+## 890. Find and Replace Pattern
 
-### Solution 1:
+### Solution 1:  two maps + forward and backwards for the bijection + check that it never fails
 
 ```py
-
+class Solution:
+    def findAndReplacePattern(self, words: List[str], pattern: str) -> List[str]:
+        def match(word):
+            forward, backward = {}, {}
+            for p, w in zip(pattern, word):
+                if p not in forward: forward[p] = w
+                if w not in backward: backward[w] = p
+                if (forward[p], backward[w]) != (w,p): return False
+            return True
+        return filter(match, words)
 ```
 
-##
+## 83. Remove Duplicates from Sorted List
 
-### Solution 1:
+### Solution 1:  looping + remove node in linked list
 
 ```py
-
+class Solution:
+    def deleteDuplicates(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        sentinel_node = ListNode(0, head)
+        while head:
+            while head.next and head.val == head.next.val:
+                head.next = head.next.next
+            head = head.next
+        return sentinel_node.next
 ```
 
 ##
