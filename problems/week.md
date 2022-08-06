@@ -9175,20 +9175,35 @@ class Solution:
         return sentinel_node.next
 ```
 
-##
+## 458. Poor Pigs
 
-### Solution 1:
+### Solution 1:  math + quantum bits + count number of states
 
 ```py
-
+class Solution:
+    def poorPigs(self, buckets: int, minutesToDie: int, minutesToTest: int) -> int:
+        if buckets == 1: return 0
+        states, cur_buckets, cur_pigs = minutesToTest//minutesToDie + 1, 1, 0
+        while cur_buckets < buckets:
+            cur_buckets *= states
+            cur_pigs += 1
+        return cur_pigss
 ```
 
-##
+## 377. Combination Sum IV
 
-### Solution 1:
+### Solution 1:  dynamic programming
 
 ```py
-
+class Solution:
+    def combinationSum4(self, nums: List[int], target: int) -> int:
+        dp = [0]*(target+1)
+        dp[0] = 1
+        for combo_sum in range(1, target+1):
+            for num in nums:
+                if combo_sum-num>=0:
+                    dp[combo_sum] += dp[combo_sum-num]
+        return dp[target]
 ```
 
 ## 2308. Arrange Table by Gender
@@ -9211,12 +9226,47 @@ FROM rank_tbl
 ORDER BY user_rank_per_gender, gender_rank
 ```
 
-##
+## 858. Mirror Reflection
 
-### Solution 1:
+### Solution 1:  iterative + unique math solution, stacking the configurtions and waiting until it hits a top corner
 
 ```py
+class Solution:
+    def mirrorReflection(self, p: int, q: int) -> int:
+        k = 1
+        while (q*k)%p: k += 1
+        return 2 if k%2==0 else 1 if ((q*k)//p)%2 else 0
+```
 
+## 366. Find Leaves of Binary Tree
+
+### Solution 1:  dfs + post order traversal + add leaves at the bottom
+
+```py
+class Solution:
+    def findLeaves(self, root: Optional[TreeNode]) -> List[List[int]]:
+        leaves = []
+        def get_height(node):
+            if not node: return -1
+            left_h, right_h = get_height(node.left), get_height(node.right)
+            cur_h = 1 + max(left_h, right_h)
+            if cur_h == len(leaves):
+                leaves.append([])
+            leaves[cur_h].append(node.val)
+            return cur_h
+        get_height(root)
+        return leaves
+```
+
+## 378. Kth Smallest Element in a Sorted Matrix
+
+### Solution 1:  sort
+
+```py
+class Solution:
+    def kthSmallest(self, matrix: List[List[int]], k: int) -> int:
+        minheap = sorted([matrix[r][c] for r,c in product(range(len(matrix)), repeat=2)])
+        return minheap[k-1]
 ```
 
 ##
@@ -9267,26 +9317,14 @@ ORDER BY user_rank_per_gender, gender_rank
 
 ```
 
-##
+## 2356. Number of Unique Subjects Taught by Each Teacher
 
-### Solution 1:
+### Solution 1:  GROUP By + COUNT DISTINCT
 
-```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
+```sql
+SELECT
+    teacher_id,
+    COUNT(DISTINCT(subject_id)) AS cnt
+FROM Teacher
+GROUP BY teacher_id
 ```
