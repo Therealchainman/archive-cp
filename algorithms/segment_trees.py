@@ -203,3 +203,48 @@ class CountSegmentTree:
         return sl + sr
     def query_tree(self, l, r):
         return self.query(l,r,0,0,self.size)
+
+"""
+segment tree for sum 
+
+to query range [1,4], query_tree(1,5), note that it is exclusive for the right endpoint
+so that means it queries [left, right)
+"""
+class PreSumSegmentTree:
+    def __init__(self,arr):
+        self.arr = arr
+        n = len(arr)
+        self.neutral = 0
+        self.size = 1
+        while self.size<n:
+            self.size*=2
+        self.tree = [0 for _ in range(self.size*2)]
+        self.build_tree()
+    def update_tree(self, idx, val):
+        self.update(idx,val,0,0,self.size)
+    def build_tree(self):
+        for i, val in enumerate(self.arr):
+            self.update_tree(i,val)
+    def update(self,idx,val,x,lx,rx):
+        if rx-lx==1:
+            self.tree[x] = val
+            return
+        mid = rx+lx>>1
+        if idx<mid:
+            self.update(idx,val,2*x+1,lx,mid)
+        else:
+            self.update(idx,val,2*x+2,mid,rx)
+        self.tree[x] = self.tree[2*x+1] + self.tree[2*x+2]
+    def query(self, l, r, x, lx, rx):
+        if lx>=r or l>=rx:
+            return self.neutral
+        if lx>=l and rx<=r:
+            return self.tree[x]
+        m = lx+rx>>1
+        sl = self.query(l,r,2*x+1,lx,m)
+        sr = self.query(l,r,2*x+2,m,rx)
+        return sl + sr
+    def query_tree(self, l, r):
+        return self.query(l,r,0,0,self.size)
+    def __repr__(self):
+        return f"array: {self.tree}"
