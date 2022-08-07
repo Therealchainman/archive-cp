@@ -9269,52 +9269,139 @@ class Solution:
         return minheap[k-1]
 ```
 
-##
+## 1220. Count Vowels Permutation
 
-### Solution 1:
+### Solution 1:  dynamic programming + constant memory + space optimized + state transitions
 
 ```py
-
+class Solution:
+    def countVowelPermutation(self, n: int) -> int:
+        dpa = dpe = dpi = dpo = dpu = 1
+        mod = int(1e9)+7
+        for i in range(1,n):
+            dpa, dpe, dpi, dpo, dpu = (dpe+dpu+dpi)%mod, (dpa+dpi)%mod, (dpe+dpo)%mod, dpi, (dpo+dpi)%mod
+        return (dpa+dpe+dpi+dpo+dpu)%mod
 ```
 
-##
+## 864. Shortest Path to Get All Keys
 
-### Solution 1:
+### Solution 1:  minheap + shortest path (dijkstra) + hash table + bitmask
 
 ```py
-
+class Solution:
+    def shortestPathAllKeys(self, grid: List[str]) -> int:
+        R, C = len(grid), len(grid[0])
+        minheap = []
+        min_dist = defaultdict(lambda: inf)
+        endMask = 1
+        for r, c in product(range(R), range(C)):
+            if grid[r][c] == '@':
+                heappush(minheap, (0, r, c, 0))
+                min_dist[(r,c,0)] = 0
+            if grid[r][c] in string.ascii_lowercase:
+                endMask <<= 1
+        endMask -= 1
+        in_bounds = lambda r, c: 0<=r<R and 0<=c<C
+        unicode = lambda ch: ord(ch)-ord('a')
+        is_lock = lambda ch: ch in string.ascii_uppercase
+        have_key = lambda mask, ch: (mask>>unicode(ch.lower()))&1
+        is_key = lambda ch: ch in string.ascii_lowercase
+        is_blocked = lambda r, c: grid[r][c] == '#'
+        while minheap:
+            dist, r, c, mask = heappop(minheap)
+            if mask == endMask: return dist
+            for nr, nc in [(r+1,c),(r-1,c),(r,c+1),(r,c-1)]:
+                if not in_bounds(nr,nc) or is_blocked(nr,nc): continue
+                nmask = mask
+                char = grid[nr][nc]
+                if is_key(char):
+                    nmask |= (1<<unicode(char))
+                # LOCK AND DON'T HAVE KEY CAN'T CONTINUE
+                if is_lock(char) and not have_key(nmask, char): continue
+                ndist = dist + 1
+                if ndist >= min_dist[(nr,nc,nmask)]: continue
+                min_dist[(nr,nc,nmask)] = ndist
+                heappush(minheap, (ndist,nr,nc,nmask))
+        return -1
 ```
 
-##
+## 2367. Number of Arithmetic Triplets
 
 ### Solution 1:
 
 ```py
-
+class Solution:
+    def arithmeticTriplets(self, nums: List[int], diff: int) -> int:
+        n = len(nums)
+        cnt = 0
+        for i in range(n):
+            for j in range(i+1,n):
+                for k in range(j+1,n):
+                    if nums[k]-nums[j] == nums[j]-nums[i] == diff:
+                        cnt += 1
+        return cnt
 ```
 
-##
+## 2368. Reachable Nodes With Restrictions
 
-### Solution 1:
+### Solution 1:  undirected graph + bfs from the 0 node
 
 ```py
-
+class Solution:
+    def reachableNodes(self, n: int, edges: List[List[int]], restricted: List[int]) -> int:
+        restrict_set = set(restricted)
+        graph = defaultdict(list)
+        cnt = 0
+        for u, v in edges:
+            graph[u].append(v)
+            graph[v].append(u)
+        queue = deque([0])
+        seen = set([0])
+        while queue:
+            node = queue.popleft()
+            cnt += 1
+            for nei in graph[node]:
+                if nei in seen or nei in restrict_set: continue
+                seen.add(nei)
+                queue.append(nei)
+        return cnt
 ```
 
-##
+## 2369. Check if There is a Valid Partition For The Array
 
-### Solution 1:
+### Solution 1:  dynamic programming + constant memory + space optimized
 
 ```py
-
+class Solution:
+    def validPartition(self, nums: List[int]) -> bool:
+        n = len(nums)
+        prev3, prev2, prev1 = 0, 1, 0
+        for i in range(1, n):
+            cur = 0
+            if nums[i-1] == nums[i]:
+                cur |= prev2
+            if i > 1 and (nums[i-2]==nums[i-1]==nums[i] or nums[i-2]+2==nums[i-1]+1==nums[i]):
+                cur |= prev3
+            prev3, prev2, prev1 = prev2, prev1, cur
+        return cur
 ```
 
-##
+## 2370. Longest Ideal Subsequence
 
-### Solution 1:
+### Solution 1:  dynamic programming + store longest ideal string ending with character
 
 ```py
-
+class Solution:
+    def longestIdealString(self, s: str, k: int) -> int:
+        ideal = [0]*26
+        unicode = lambda ch: ord(ch)-ord('a')
+        for ch in s:
+            index = unicode(ch)
+            ideal[index] += 1
+            for i in range(max(0,index-k), min(index+k+1,26)):
+                if i == index: continue
+                ideal[index] = max(ideal[index], ideal[i]+1)
+        return max(ideal)
 ```
 
 ## 2356. Number of Unique Subjects Taught by Each Teacher
@@ -9327,4 +9414,100 @@ SELECT
     COUNT(DISTINCT(subject_id)) AS cnt
 FROM Teacher
 GROUP BY teacher_id
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
 ```
