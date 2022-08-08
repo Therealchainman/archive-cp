@@ -9416,79 +9416,158 @@ FROM Teacher
 GROUP BY teacher_id
 ```
 
-##
+## 314. Binary Tree Vertical Order Traversal
+
+### Solution 1:  hash map + queue + bfs + sort
+
+```py
+class Solution:
+    def verticalOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
+        vertical_table = defaultdict(list)
+        queue = deque([(root,0)])
+        while queue:
+            node, offset = queue.popleft()
+            if not node: continue
+            vertical_table[offset].append(node.val)
+            queue.extend([(node.left, offset-1), (node.right, offset+1)])
+        return [vertical_table[i] for i in sorted(vertical_table)]
+```
+
+## 2366. Minimum Replacements to Sort the Array
+
+### Solution 1:  backwards iteration + math + division + greedy
+
+```py
+class Solution:
+    def minimumReplacement(self, nums: List[int]) -> int:
+        n = len(nums)
+        prev = nums[-1]
+        cnt = 0
+        for i in range(n-2,-1,-1):
+            num_times = ceil(nums[i]/prev)
+            cnt += num_times-1
+            prev = nums[i]//num_times
+        return cnt
+```
+
+## 2365. Task Scheduler II
+
+### Solution 1:  hash map
+
+```py
+class Solution:
+    def taskSchedulerII(self, tasks: List[int], space: int) -> int:
+        last = defaultdict(lambda: -len(tasks))
+        time = 0
+        for task in tasks:
+            last[task] = time = max(time, last[task]+space)+1
+        return time
+```
+
+## 2364. Count Number of Bad Pairs
 
 ### Solution 1:
 
 ```py
-
+class Solution:
+    def countBadPairs(self, nums: List[int]) -> int:
+        vis = Counter()
+        cnt = 0
+        for i, num in enumerate(nums):
+            key = i-num
+            cnt += (i-vis[key])
+            vis[key] += 1
+        return cnt
 ```
 
-##
+## 2363. Merge Similar Items
 
-### Solution 1:
+### Solution 1:  counter dictionary + add + sort
 
 ```py
-
+class Solution:
+    def mergeSimilarItems(self, items1: List[List[int]], items2: List[List[int]]) -> List[List[int]]:
+        return sorted((Counter(dict(items1))+Counter(dict(items2))).items())
 ```
 
-##
+## 2361. Minimum Costs Using the Train Line
 
-### Solution 1:
+### Solution 1:  dynammic programming + constant memory + space optimized
 
 ```py
-
+class Solution:
+    def minimumCosts(self, regular: List[int], express: List[int], expressCost: int) -> List[int]:
+        min_regular, min_express = 0, inf
+        n = len(regular)
+        result = [0]*n
+        for i, reg, exp in zip(range(n),regular, express):
+            min_regular, min_express = min(min_regular,min_express)+reg, min(min_express,min_regular+expressCost)+exp
+            result[i] = min(min_regular, min_express)
+        return result
 ```
 
-##
+## 2362. Generate the Invoice
 
-### Solution 1:
+### Solution 1:  GROUP BY + JOIN + LIMIT 1
+
+```sql
+WITH purchase_tbl AS (
+    SELECT
+        p1.invoice_id,
+        p1.product_id,
+        p1.quantity,
+        p2.price*p1.quantity AS price
+    FROM Purchases p1
+    JOIN Products p2
+    ON p1.product_id = p2.product_id
+)
+SELECT 
+    product_id,
+    quantity,
+    price
+FROM purchase_tbl
+WHERE invoice_id = (SELECT 
+    invoice_id
+FROM purchase_tbl
+GROUP BY invoice_id
+ORDER BY SUM(price) DESC, invoice_id
+LIMIT 1)
+```
+
+## 671. Second Minimum Node In a Binary Tree
+
+### Solution 1:  bfs + queue + early termination
 
 ```py
-
+class Solution:
+    def findSecondMinimumValue(self, root: Optional[TreeNode]) -> int:
+        queue = deque([root])
+        min_val = root.val
+        result = inf
+        while queue:
+            node = queue.popleft()
+            if node.val > min_val:
+                result = min(result, node.val)
+                continue
+            queue.extend(filter(None, (node.left, node.right)))
+        return result if result < inf else -1
 ```
 
-##
+## 679. 24 Game
 
-### Solution 1:
+### Solution 1:  dfs + backtracking + permutation + any + math isclose + rounding error + real division
 
 ```py
-
+class Solution:
+    def judgePoint24(self, cards: List[int]) -> bool:
+        if len(cards) == 1:
+            return math.isclose(cards[0], 24.0, rel_tol=0.01)
+        return any(self.judgePoint24(rest+[ret])
+            for a,b,*rest in permutations(cards)
+                for ret in [a+b,a-b,a*b,b and a/b])
 ```
 
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
+## 959. Regions Cut By Slashes
 
 ### Solution 1:
 
