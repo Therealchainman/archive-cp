@@ -9575,6 +9575,194 @@ class Solution:
 
 ```
 
+## 101. Symmetric Tree
+
+### Solution 1:  recursion on opposing nodes
+
+```py
+class Solution:
+    def isSymmetric(self, root: Optional[TreeNode]) -> bool:
+        def dfs(node1, node2):
+            if not node1 and not node2: return True
+            if not node1 or not node2 or node1.val != node2.val: return False
+            return dfs(node1.left, node2.right) and dfs(node1.right, node2.left)
+        return dfs(root.left, root.right)
+```
+
+## 823. Binary Trees With Factors
+
+### Solution 1:  dynamic programming + counter + hash table
+
+```py
+class Solution:
+    def numFactoredBinaryTrees(self, arr: List[int]) -> int:
+        cnt = Counter()
+        arr.sort()
+        n = len(arr)
+        mod = int(1e9)+7
+        for i in range(n):
+            cnt[arr[i]] += 1
+            for j in range(0,i):
+                if arr[i]%arr[j]==0:
+                    f1, f2 = arr[j], arr[i]//arr[j]
+                    cnt[arr[i]] += cnt[f1]*cnt[f2]%mod
+        return sum(cnt.values())%mod
+```
+
+## 108. Convert Sorted Array to Binary Search Tree
+
+### Solution 1:  recursion
+
+```py
+class Solution:
+    def sortedArrayToBST(self, nums: List[int]) -> Optional[TreeNode]:
+        if not nums: return None
+        m = len(nums)//2
+        root = TreeNode(nums[m])
+        root.left = self.sortedArrayToBST(nums[:m])
+        root.right = self.sortedArrayToBST(nums[m+1:])
+        return root
+```
+
+## 98. Validate Binary Search Tree
+
+### Solution 1:  binary search + recursion
+
+```py
+class Solution:
+    def isValidBST(self, root: Optional[TreeNode], lower_bound=-inf, upper_bound=inf) -> bool:
+        if not root: return True
+        if root.val <= lower_bound or root.val >= upper_bound: return False
+        return self.isValidBST(root.left, lower_bound, root.val) and self.isValidBST(root.right, root.val, upper_bound)
+```
+
+## 235. Lowest Common Ancestor of a Binary Search Tree
+
+### Solution 1:  binary search + recursion
+
+```py
+class Solution:
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        pval, pv, qv = root.val, p.val, q.val
+        if pv > pval and qv > pval:
+            return self.lowestCommonAncestor(root.right, p, q)
+        if pv < pval and qv < pval:
+            return self.lowestCommonAncestor(root.left, p, q)
+        return root
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
