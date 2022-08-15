@@ -9651,12 +9651,276 @@ class Solution:
         return root
 ```
 
-##
+## 30. Substring with Concatenation of All Words
+
+### Solution 1:  multiple sliding windows (up to 30) + deque + counter hash table
+
+```py
+class Solution:
+    def findSubstring(self, s: str, words: List[str]) -> List[int]:
+        word_len, num_words = len(words[0]), len(words)
+        word_counts = Counter(words)
+        window = [deque() for _ in range(word_len)]
+        window_counts = [Counter() for _ in range(word_len)]
+        result = []
+        for i in range(word_len, len(s)+1):
+            word = s[i-word_len:i]
+            window_counts[i%word_len][word] += 1
+            window[i%word_len].append((i-word_len, word))
+            while window_counts[i%word_len][word] > word_counts[word]:
+                _, pword = window[i%word_len].popleft()
+                window_counts[i%word_len][pword] -= 1
+            if len(window[i%word_len]) == num_words:
+                start_index, pword = window[i%word_len].popleft()
+                result.append(start_index)
+                window_counts[i%word_len][pword] -= 1
+        return result    
+```
+
+## 1786. Number of Restricted Paths From First to Last Node
+
+### Solution 1:  dfs + recursive dynamic programming + minheap
+
+```py
+class Solution:
+    def countRestrictedPaths(self, n: int, edges: List[List[int]]) -> int:
+        mod = int(1e9)+7
+        # ARRAY TO STORE THE NUMBER OF PATHS
+        num_restricted_paths = [0]*(n+1)
+        num_restricted_paths[n] = 1
+        # BUILDING THE ADJACENCY LIST FOR THE GRAPH
+        graph = [[] for _ in range(n+1)]
+        for u, v, w in edges:
+            graph[u].append((v,w))
+            graph[v].append((u,w))
+        # SHORTEST PATH ALGO TO FIND SHORTEST DISTANCE TO ALL NODES FROM LAST NODE
+        distanceToLastNode = [inf]*(n+1)
+        minheap = [(0,n)]
+        distanceToLastNode[n] = 0
+        while minheap:
+            dist, node = heappop(minheap)
+            for nei, wei in graph[node]:
+                ndist = dist + wei
+                if ndist < distanceToLastNode[nei]:
+                    distanceToLastNode[nei] = ndist
+                    heappush(minheap, (ndist, nei))
+        # GRAPH TRAVERSAL DFS
+        @cache
+        def dfs(node):
+            if node == n: return 1
+            paths = 0
+            for nei, _ in graph[node]:
+                if distanceToLastNode[nei] < distanceToLastNode[node]:
+                    paths = (paths+dfs(nei))%mod
+            return paths
+        return dfs(1)
+```
+
+## 490. The Maze
+
+### Solution 1:  bfs + memoization
+
+```py
+class Solution:
+    def hasPath(self, maze: List[List[int]], start: List[int], destination: List[int]) -> bool:
+        empty, wall, visited = 0, 1, 2
+        R, C = len(maze), len(maze[0])
+        queue = deque([tuple(start)])
+        maze[start[0]][start[1]] = visited
+        is_ball_moving = lambda r, c: 0<=r<R and 0<=c<C and maze[r][c] != wall
+        while queue:
+            r, c = queue.popleft()
+            if [r,c] == destination: return True
+            for dr, dc in [(1,0),(-1,0),(0,1),(0,-1)]:
+                nr, nc = r+dr, c+dc
+                while is_ball_moving(nr,nc):
+                    nr += dr
+                    nc += dc
+                nr -= dr
+                nc -= dc
+                if maze[nr][nc] != visited:
+                    queue.append((nr,nc))
+                    maze[nr][nc] = visited
+        return False
+```
+
+## 505. The Maze II
+
+### Solution 1:  minheap + dijkstra + generator
+
+```py
+class Solution:
+    def shortestDistance(self, maze: List[List[int]], start: List[int], destination: List[int]) -> int:
+        empty, wall = 0, 1
+        R, C = len(maze), len(maze[0])
+        minheap = [(0, *start)]
+        min_dist = [[inf]*C for _ in range(R)]
+        min_dist[start[0]][start[1]] = 0
+        is_ball_moving = lambda r, c: 0<=r<R and 0<=c<C and maze[r][c] != wall
+        def neighbors(r, c):
+            for dr, dc in [(1,0),(0,1),(-1,0),(0,-1)]:
+                nr, nc, gap = r + dr, c + dc, 1
+                while is_ball_moving(nr,nc):
+                    nr, nc, gap = nr + dr, nc + dc, gap + 1
+                yield (nr-dr,nc-dc,gap-1)
+        while minheap:
+            dist, r, c = heappop(minheap)
+            if [r,c] == destination: return dist
+            for nr, nc, gap in neighbors(r,c):
+                ndist = dist + gap
+                if ndist < min_dist[nr][nc]:
+                    min_dist[nr][nc] = ndist
+                    heappush(minheap, (ndist, nr, nc))
+        return -1
+```
+
+## 499. The Maze III
+
 
 ### Solution 1:
 
 ```py
 
+```
+
+## 1368. Minimum Cost to Make at Least One Valid Path in a Grid
+
+### Solution 1:  minheap + dijkstra algo
+
+```py
+class Solution:
+    def minCost(self, grid: List[List[int]]) -> int:
+        right, left, down, up = 1, 2, 3, 4
+        R, C = len(grid), len(grid[0])
+        minheap = [(0,0,0)]
+        min_dist = [[inf]*C for _ in range(R)]
+        min_dist[0][0] = 0
+        in_bounds = lambda r,c: 0<=r<R and 0<=c<C
+        while minheap:
+            dist, r, c = heappop(minheap)
+            if [r,c] == [R-1,C-1]: return dist
+            for di, (nr,nc) in zip([1,2,3,4],[(r,c+1),(r,c-1),(r+1,c),(r-1,c)]):
+                if not in_bounds(nr,nc): continue
+                ndist = dist + int(grid[r][c]!=di)
+                if ndist < min_dist[nr][nc]:
+                    min_dist[nr][nc] = ndist
+                    heappush(minheap, (ndist,nr,nc))
+        return -1
+```
+
+## 1928. Minimum Cost to Reach Destination in Time
+
+### Solution 1: minheap + dijkstra algo + memoization for time and node
+
+```py
+class Solution:
+    def minCost(self, maxTime: int, edges: List[List[int]], passingFees: List[int]) -> int:
+        n = len(passingFees)
+        min_cost = [[inf]*(maxTime+1) for _ in range(n)] #(node,time)
+        min_cost[0][0] = passingFees[0]
+        # CONSTRUCT THE GRAPH
+        graph = [[] for _ in range(n)]
+        for u, v, t in edges:
+            graph[u].append((v,t))
+            graph[v].append((u,t))
+        minheap = [(passingFees[0], 0, 0)]
+        while minheap:
+            cost, time, node = heappop(minheap)
+            if node == n-1: return cost
+            for nei, wei in graph[node]:
+                ncost = cost + passingFees[nei]
+                ntime = time + wei
+                if ntime > maxTime: continue
+                if ncost < min_cost[nei][ntime]:
+                    min_cost[nei][ntime] = ncost
+                    heappush(minheap,(ncost,ntime,nei))
+        return -1
+```
+
+## 1514. Path with Maximum Probability
+
+### Solution 1:
+
+```py
+
+```
+
+## 126. Word Ladder II
+
+### Solution 1:
+
+```py
+class Solution:
+    def findLadders(self, beginWord: str, endWord: str, wordList: List[str]) -> List[List[str]]:
+        wildcard = '*'
+        word_len = len(beginWord)
+        wordList = set([beginWord, *wordList])
+        if endWord not in wordList: return []
+        get_pattern = lambda word: word[:i]+wildcard+word[i+1:]
+        # CONSTRUCT THE ADJACENCY LIST THAT IS FOR A PATTERN WHAT WOULD BE THE NEXT NODES FROM IT
+        adjList = defaultdict(list)
+        for word in wordList:
+            for i in range(word_len):
+                pattern = get_pattern(word)
+                adjList[pattern].append(word)
+        wordList -= set([beginWord])
+        graph = defaultdict(list)
+        # BFS AND BUILD A DIRECTED GRAPH THAT IS BACKWARDS, THAT IS CREATING BACKEDGES FROM NODE TO PARENT NODE
+        queue = deque([beginWord])
+        while queue:
+            sz = len(queue)
+            cur_level_visited = set()
+            for _ in range(sz):
+                node = queue.popleft()
+                for i in range(word_len):
+                    pattern = get_pattern(node)                   
+                    for nnode in adjList[pattern]:
+                        if nnode not in wordList: continue
+                        if nnode not in cur_level_visited:
+                            cur_level_visited.add(nnode)
+                            queue.append(nnode)
+                        graph[nnode].append(node)
+            wordList -= cur_level_visited
+        # PERFORM BFS ON THE BACKWARDS GRAPH
+        layer = [[endWord]]
+        found_begin = False
+        while layer:
+            nlayer = []
+            for node_list in layer:
+                node = node_list[0]
+                for nei in graph[node]:
+                    nlayer.append([nei] + node_list)
+                    found_begin |= (nei == beginWord)
+            layer = nlayer
+            if found_begin: break
+        return layer
+```
+
+## 1570. Dot Product of Two Sparse Vectors
+
+### Solution 1:  two pointers + reduce space by creating list of tuples
+
+```py
+class SparseVector:
+    def __init__(self, nums: List[int]):
+        self.vec = [(i, num) for i, num in enumerate(nums) if num != 0]
+        
+    # Return the dotProduct of two sparse vectors
+    def dotProduct(self, vec: 'SparseVector') -> int:
+        v1, v2 = self.vec, vec.vec
+        n, m = len(v1), len(v2)
+        if n > m:
+            v1, v2 = v2, v1
+            n, m = m, n
+        j = 0
+        result = 0
+        for i, vi in v1:
+            while j < m and v2[j][0] < i:
+                j += 1
+            if j == m: break
+            if i == v2[j][0]:
+                result += vi*v2[j][1]
+        return result
 ```
 
 ##
@@ -9746,17 +10010,6 @@ class Solution:
 ```py
 
 ```
-
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
-
 ### Solution 1:
 
 ```py
