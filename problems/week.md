@@ -9944,60 +9944,138 @@ class Solution:
 
 ```
 
-##
+## 871. Minimum Number of Refueling Stops
 
-### Solution 1:
+### Solution 1:  dynamic programming 
 
 ```py
+class Solution:
+    def minRefuelStops(self, target: int, startFuel: int, stations: List[List[int]]) -> int:
+        n = len(stations)
+        maxPos = [startFuel] + [0]*n
+        for i, (pos, fuel) in enumerate(stations, start=1):
+            for j in reversed(range(i)):
+                if pos <= maxPos[j]:
+                    maxPos[j+1] = max(maxPos[j+1], maxPos[j]+fuel)
+        for i, dist in enumerate(maxPos):
+            if dist >= target: return i
+        return -1
+```
+
+## 659. Split Array into Consecutive Subsequences
+
+### Solution 1: deque + doubly linked list
+
+```py
+class Solution:
+    def isPossible(self, nums: List[int]) -> bool:
+        queue = deque()
+        for num in nums:
+            while queue and queue[0][0] < num - 1: 
+                _, cnt = queue.popleft()
+                if cnt < 3: return False 
+            if queue and queue[0][0]+1 == num:
+                _, cnt = queue.popleft()
+                queue.append((num, cnt+1))
+            else:
+                queue.appendleft((num, 1))
+        return not any(cnt < 3 for _, cnt in queue)
+```
+
+## 1338. Reduce Array Size to The Half
+
+### Solution 1:  custom sort comparator sort + greedy
+
+```py
+class Solution:
+    def minSetSize(self, arr: List[int]) -> int:
+        cnts = Counter(arr)
+        n = len(arr)
+        removed_cnt = 0
+        for i, k in enumerate(sorted(cnts,key=lambda x: cnts[x], reverse=True), start=1):
+            removed_cnt += cnts[k]
+            if removed_cnt >= n//2:
+                return i
+        return len(cnts)
+```
+
+## 804. Unique Morse Code Words
+
+### Solution 1:  string parsing + map
+
+```py
+class Solution:
+    def uniqueMorseRepresentations(self, words: List[str]) -> int:
+        morse_to_alpha = [".-","-...","-.-.","-..",".","..-.","--.","....","..",".---","-.-",".-..","--","-.","---",".--.","--.-",".-.","...","-","..-","...-",".--","-..-","-.--","--.."]
+        return len({''.join(map(lambda ch: morse_to_alpha[ord(ch)-ord('a')], word)) for word in words})
 
 ```
 
-##
+## 2373. Largest Local Values in a Matrix
 
-### Solution 1:
+### Solution 1:  find max for neighbors
 
 ```py
-
+class Solution:
+    def largestLocal(self, grid: List[List[int]]) -> List[List[int]]:
+        n = len(grid)
+        result = [[0]*(n-2) for _ in range(n-2)]
+        for r,c in product(range(1,n-1),repeat=2):
+            result[r-1][c-1] = max(grid[nr][nc] for nr,nc in [(r-1,c),(r+1,c),(r,c+1),(r,c-1),(r-1,c-1),(r-1,c+1),(r+1,c-1),(r+1,c+1),(r,c)])
+        return result
 ```
 
-##
+## 2374. Node With Highest Edge Score
 
-### Solution 1:
+### Solution 1:  array + custom max function
 
 ```py
-
+class Solution:
+    def edgeScore(self, edges: List[int]) -> int:
+        n = len(edges)
+        scores = [0]*n
+        for out, in_ in enumerate(edges):
+            scores[in_] += out
+        return max(range(n), key=lambda i: scores[i])
 ```
 
-##
+## 2375. Construct Smallest Number From DI String
 
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
+### Solution 1:  backtracking + visited set
 
 ```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
+class Solution:
+    def smallestNumber(self, pattern: str) -> str:
+        digits = '123456789'
+        self.cur_num = []
+        n = len(pattern)
+        self.ans = '9'*(n+1)
+        used = set()
+        def backtrack(i):
+            if i == n:
+                self.ans = min(self.ans, ''.join(self.cur_num))
+                return
+            for dig in digits:
+                if dig in used: continue
+                if pattern[i] == 'I' and dig > self.cur_num[-1]:
+                    self.cur_num.append(dig)
+                    used.add(dig)
+                    backtrack(i+1)
+                    self.cur_num.pop()
+                    used.remove(dig)
+                elif pattern[i] == 'D' and dig < self.cur_num[-1]:
+                    self.cur_num.append(dig)
+                    used.add(dig)
+                    backtrack(i+1)
+                    self.cur_num.pop()
+                    used.remove(dig)
+        for dig in digits:
+            self.cur_num.append(dig)
+            used.add(dig)
+            backtrack(0)
+            self.cur_num.pop()
+            used.remove(dig)
+        return self.ans
 ```
 
 ##
