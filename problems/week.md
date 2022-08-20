@@ -9923,15 +9923,20 @@ class SparseVector:
         return result
 ```
 
-##
+## 387. First Unique Character in a String
 
-### Solution 1:
+### Solution 1:  counter + hash table
 
 ```py
-
+class Solution:
+    def firstUniqChar(self, s: str) -> int:
+        cnts = Counter(s)
+        for i, ch in enumerate(s):
+            if cnts[ch] == 1: return i
+        return -1
 ```
 
-##
+## 1203. Sort Items by Groups Respecting Dependencies
 
 ### Solution 1:
 
