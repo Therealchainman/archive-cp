@@ -10078,6 +10078,131 @@ class Solution:
         return self.ans
 ```
 
+## 2379. Minimum Recolors to Get K Consecutive Black Blocks
+
+### Solution 1:  sliding window
+
+```py
+class Solution:
+    def minimumRecolors(self, blocks: str, k: int) -> int:
+        n = len(blocks)
+        cnt_black = 0
+        max_black = 0
+        for i in range(n):
+            cnt_black += (blocks[i] == 'B')
+            if i >= k:
+                cnt_black -= (blocks[i-k] == 'B')     
+            max_black = max(max_black, cnt_black)
+        return k-max_black
+```
+
+## 2380. Time Needed to Rearrange a Binary String
+
+### Solution 1:  brute force + find substring in string + string replace
+
+```py
+class Solution:
+    def secondsToRemoveOccurrences(self, s: str) -> int:
+        time = 0
+        while '01' in s:
+            s = s.replace('01', '10')
+            time += 1
+        return time
+```
+
+### Solution 2:  dynammic programming + prefix sum
+
+```py
+class Solution:
+    def secondsToRemoveOccurrences(self, s: str) -> int:
+        prefix = 0
+        cnt_zeros = 0
+        for ch in s:
+            cnt_zeros += (ch=='0')
+            if ch == '1' and cnt_zeros > 0:
+                prefix = max(cnt_zeros, prefix+1)
+        return prefix
+```
+
+## 2381. Shifting Letters II
+
+### Solution 1:  mark start and end of each shift + prefix sum over the shifts + mod + line sweep
+
+```py
+class Solution:
+    def shiftingLetters(self, s: str, shifts: List[List[int]]) -> str:
+        mod = 26
+        n = len(s)
+        offsets = [0]*(n+1)
+        for start, end, dir in shifts:
+            if dir == 1:
+                offsets[start] += 1
+                offsets[end+1] -= 1
+            else:
+                offsets[start] -= 1
+                offsets[end+1] += 1
+        result = ['a']*n
+        rolling_shift = 0
+        for i, ch in enumerate(s):
+            rolling_shift += offsets[i]
+            val = (ord(ch) - ord('a') + rolling_shift + mod)%mod + ord('a')
+            result[i] = chr(val)
+        return ''.join(result)
+```
+
+## 2382. Maximum Segment Sum After Removals
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
