@@ -87,6 +87,8 @@ if __name__ == '__main__':
         print(f'Case #{t}: {main()}')
 ```
 
+![image](images/matching_palindromes.png)
+
 ##
 
 ### Solution 1: 

@@ -10152,10 +10152,25 @@ class Solution:
 
 ## 2382. Maximum Segment Sum After Removals
 
-### Solution 1:
+### Solution 1:  hash table + backwards + merge segments with a hash table
 
 ```py
-
+class Solution:
+    def maximumSegmentSum(self, nums: List[int], removeQueries: List[int]) -> List[int]:
+        n = len(nums)
+        Segment = namedtuple('Segment', ['val', 'len'])
+        seg_dict = defaultdict(lambda: Segment(0,0))
+        arr = []
+        maxSegmentVal = 0
+        for i in reversed(removeQueries):
+            arr.append(maxSegmentVal)
+            left_segment, right_segment = seg_dict[i-1], seg_dict[i+1]
+            len_ = left_segment.len + right_segment.len + 1
+            segment_val = left_segment.val + right_segment.val + nums[i]
+            maxSegmentVal = max(maxSegmentVal, segment_val)
+            seg_dict[i-left_segment.len] = Segment(segment_val, len_)
+            seg_dict[i+right_segment.len] = Segment(segment_val, len_)
+        return reversed(arr)
 ```
 
 ## 549. Binary Tree Longest Consecutive Sequence II
@@ -10200,6 +10215,74 @@ class Solution:
         return n > 0 and n & (n-1) == 0 and 0xaaaaaaaa&n == 0
 ```
 
+## 2376. Count Special Integers
+
+### Solution 1:  digit dynamic programming + math + permutations + statistics + bitmask
+
+![image](images/count_special_integers.png)
+
+```py
+class Solution:
+    def countSpecialNumbers(self, n: int) -> int:
+        # math.perm(n,r) total objects is n, and can pick r objects
+        snum = str(n)
+        num_digits = len(snum)
+        num_objects = 9
+        result = 0
+        # PART 1 permutations
+        for num_spaces in range(num_digits-1):
+            result += math.perm(num_objects,num_spaces)
+        result *= 9
+        # PART 2
+        bitmask = 0
+        num_digits -= 1
+        is_last_digit = lambda cur_dig, upper_dig, num_digits: cur_dig == upper_dig and num_digits > 0
+        is_leading_zero = lambda num_digits, cur_dig: num_digits == len(snum)-1 and cur_dig == 0
+        is_marked_digit = lambda bitmask, cur_dig: (bitmask>>cur_dig)&1
+        for dig in map(int, snum):
+            cur_perm = math.perm(num_objects, num_digits)
+            for cur_dig in range(dig+1):
+                if is_last_digit(cur_dig, dig, num_digits) or is_leading_zero(num_digits, cur_dig) or is_marked_digit(bitmask, cur_dig): continue 
+                result += cur_perm
+            if is_marked_digit(bitmask, dig): break
+            bitmask |= (1<<dig)
+            num_objects -= 1
+            num_digits -= 1
+        return result 
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
@@ -10236,6 +10319,11 @@ class Solution:
 ```py
 
 ```
+### Solution 1:
+
+```py
+
+```
 
 ##
 
@@ -10244,6 +10332,85 @@ class Solution:
 ```py
 
 ```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:##
+
+### Solution 1:
+
+```py
+
+```
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
 ### Solution 1:
 
 ```py
