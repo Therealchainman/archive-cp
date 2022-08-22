@@ -10158,20 +10158,46 @@ class Solution:
 
 ```
 
-##
+## 549. Binary Tree Longest Consecutive Sequence II
 
-### Solution 1:
+### Solution 1:  dfs + dataclasses + binary tree
 
 ```py
-
+from dataclasses import make_dataclass
+class Solution:
+    def longestConsecutive(self, root: Optional[TreeNode]) -> int:
+        Delta = make_dataclass('Delta', [('incr', int), ('decr', int)], frozen=True)
+        self.ans = 0
+        def dfs(node):
+            if not node: return Delta(0,0)
+            incr = decr = 1
+            val = node.val
+            if node.left:
+                left = dfs(node.left)
+                if node.left.val == val - 1:
+                    decr += left.decr
+                elif node.left.val == val + 1:
+                    incr += left.incr
+            if node.right:
+                right = dfs(node.right)
+                if node.right.val == val - 1:
+                    decr = max(decr, 1 + right.decr)
+                if node.right.val == val + 1:
+                    incr = max(incr, 1 + right.incr)
+            self.ans = max(self.ans, incr+decr-1)
+            return Delta(incr, decr)
+        dfs(root)
+        return self.ans
 ```
 
-##
+## 342. Power of Four
 
-### Solution 1:
+### Solution 1:  bit manipulation + hexadecimal + find it is power of two + find it is even bit with hexadecimal bitmask
 
 ```py
-
+class Solution:
+    def isPowerOfFour(self, n: int) -> bool:
+        return n > 0 and n & (n-1) == 0 and 0xaaaaaaaa&n == 0
 ```
 
 ##
