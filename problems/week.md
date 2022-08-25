@@ -10351,25 +10351,171 @@ class Solution:
         return prev
 ```
 
-##
+## 1857. Largest Color Value in a Directed Graph
 
-### Solution 1:
+### Solution 1:  topological sort + store count for each path + deque
 
 ```py
-
+class Solution:
+    def largestPathValue(self, colors: str, edges: List[List[int]]) -> int:
+        n = len(colors)
+        # CONSTRUCT GRAPH
+        graph = [[] for _ in range(n)]
+        indegrees = [0]*n
+        for node_out, node_in in edges:
+            graph[node_out].append(node_in)
+            indegrees[node_in] += 1
+        queue = deque()
+        counters = [[0]*26 for _ in range(n)]
+        get_unicode = lambda ch: ord(ch) - ord('a')
+        for i in range(n):
+            if indegrees[i] == 0:
+                queue.append(i)
+        largest_path = processed_nodes = 0
+        while queue:
+            node = queue.popleft()
+            color = get_unicode(colors[node])
+            counters[node][color] += 1
+            largest_path = max(largest_path, counters[node][color])
+            processed_nodes += 1
+            for nei in graph[node]:
+                indegrees[nei] -= 1
+                for i in range(26):
+                    counters[nei][i] = max(counters[nei][i], counters[node][i])
+                if indegrees[nei] == 0:
+                    queue.append(nei)
+        return largest_path if processed_nodes == n else -1
 ```
-### Solution 1:
+
+## 1203. Sort Items by Groups Respecting Dependencies
+
+### Solution 1:  topological sort + double topological sort + groups
 
 ```py
-
+class Solution:
+    def topSort(self, item: int, graph: defaultdict[List[int]]) -> List[int]:
+        result = []
+        queue = deque([item])
+        while queue:
+            item = queue.popleft()
+            result.append(item)
+            for nei in graph[item]:
+                self.indegrees[nei] -= 1
+                if self.indegrees[nei] == 0:
+                    queue.append(nei)
+        return result
+    def sortItems(self, n: int, m: int, group: List[int], beforeItems: List[List[int]]) -> List[int]:
+        nogroup = -1
+        Group = namedtuple('Group', ['start', 'end'])
+        groups = [Group(i, i+1) for i in range(n,n+2*m,2)]
+        # for debug purpose used defaultdict
+        # graph = defaultdict(list)
+        self.indegrees = [0]*(n+2*m)
+        graph = [[] for _ in range(n+2*m)]
+        for i, gi in enumerate(group):
+            if gi == nogroup: continue
+            grp = groups[gi]
+            graph[grp.start].append(i)
+            graph[i].append(grp.end)
+            self.indegrees[i] += 1
+            self.indegrees[grp.end] += 1
+        for node_in, nodes_out in enumerate(beforeItems):
+            for node_out in nodes_out:
+                if group[node_in] != nogroup and group[node_out] != nogroup and group[node_in] != group[node_out]:
+                    grp_out, grp_in = groups[group[node_out]], groups[group[node_in]]
+                    graph[grp_out.end].append(grp_in.start)
+                    self.indegrees[grp_in.start] += 1
+                elif group[node_in] == group[node_out]:
+                    graph[node_out].append(node_in)
+                    self.indegrees[node_in] += 1
+                elif group[node_in] == nogroup:
+                    grp_out = groups[group[node_out]]
+                    graph[grp_out.end].append(node_in)
+                    self.indegrees[node_in] += 1
+                else:
+                    grp_in = groups[group[node_in]]
+                    graph[node_out].append(grp_in.start)
+                    self.indegrees[grp_in.start] += 1
+        result = []
+        start_nodes = [i for i in range(n+2*m) if self.indegrees[i] == 0]
+        for node in start_nodes:
+            result.extend(self.topSort(node,graph))
+        return [] if any(indegree > 0 for indegree in self.indegrees) else filter(lambda x: x < n, result)
 ```
 
-##
+## 1591. Strange Printer II
 
-### Solution 1:
+### Solution 1:  topological sort + dataclass + default value + graphlib library + detect cycle in graph
 
 ```py
+from dataclasses import make_dataclass, field
+from graphlib import TopologicalSorter
+class Solution:
+    def isPrintable(self, targetGrid: List[List[int]]) -> bool:
+        Rectangle = make_dataclass('Rectangle', [('maxRow', int, field(default=-inf)), ('minCol', int, field(default=inf)), ('minRow', int, field(default=inf)), ('maxCol', int, field(default=-inf))])
+        R, C = len(targetGrid), len(targetGrid[0])
+        rect_dict = defaultdict(Rectangle)
+        for r, c in product(range(R), range(C)):
+            color = targetGrid[r][c]
+            rect = rect_dict[color]
+            rect.maxRow = max(rect.maxRow, r)
+            rect.minRow = min(rect.minRow, r)
+            rect.maxCol = max(rect.maxCol, c)
+            rect.minCol = min(rect.minCol, c)
+        in_bounds = lambda r, c, rect: rect.minRow<=r<=rect.maxRow and rect.minCol<=c<=rect.maxCol
+        indegrees = Counter()
+        graph = defaultdict(set)
+        for r, c in product(range(R), range(C)):
+            color_out = targetGrid[r][c]
+            for color_in, rect in rect_dict.items():
+                if color_out == color_in or not in_bounds(r,c,rect): continue
+                graph[color_in].add(color_out)
+        ts = TopologicalSorter(graph)
+        try:
+            ts.prepare()
+            return True
+        except:
+            return False
+```
 
+### Solution 2:  topological sort + deque
+
+```py
+from dataclasses import make_dataclass, field
+class Solution:
+    def isPrintable(self, targetGrid: List[List[int]]) -> bool:
+        Rectangle = make_dataclass('Rectangle', [('maxRow', int, field(default=-inf)), ('minCol', int, field(default=inf)), ('minRow', int, field(default=inf)), ('maxCol', int, field(default=-inf))])
+        R, C = len(targetGrid), len(targetGrid[0])
+        rect_dict = defaultdict(Rectangle)
+        for r, c in product(range(R), range(C)):
+            color = targetGrid[r][c]
+            rect = rect_dict[color]
+            rect.maxRow = max(rect.maxRow, r)
+            rect.minRow = min(rect.minRow, r)
+            rect.maxCol = max(rect.maxCol, c)
+            rect.minCol = min(rect.minCol, c)
+        in_bounds = lambda r, c, rect: rect.minRow<=r<=rect.maxRow and rect.minCol<=c<=rect.maxCol
+        indegrees = Counter()
+        graph = defaultdict(set)
+        for r, c in product(range(R), range(C)):
+            color_out = targetGrid[r][c]
+            for color_in, rect in rect_dict.items():
+                if color_out == color_in or not in_bounds(r,c,rect): continue
+                graph[color_in].add(color_out)
+        for node_ins in graph.values():
+            for node_in in node_ins:
+                indegrees[node_in] += 1
+        queue = deque()
+        for color in rect_dict.keys():
+            if indegrees[color] == 0:
+                queue.append(color)
+        while queue:
+            node = queue.popleft()
+            for nei in graph[node]:
+                indegrees[nei] -= 1
+                if indegrees[nei] == 0:
+                    queue.append(nei)
+        return sum(indegrees.values()) == 0
 ```
 
 ##
