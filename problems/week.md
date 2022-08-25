@@ -10251,6 +10251,148 @@ class Solution:
         return result 
 ```
 
+## 383. Ransom Note
+
+### Solution 1:  two hashmaps + all
+
+```py
+class Solution:
+    def count_arr(self, s: str) -> List[int]:
+        cnter = [0]*26
+        get_unicode = lambda ch: ord(ch) - ord('a')
+        for ch in s:
+            cnter[get_unicode(ch)] += 1
+        return cnter
+    def canConstruct(self, ransomNote: str, magazine: str) -> bool:
+        ranCnt, magCnt = self.count_arr(ransomNote), self.count_arr(magazine)
+        return all(cnt1>=cnt2 for cnt1, cnt2 in zip(magCnt, ranCnt))
+```
+
+### Solution 2:  one hashmap 
+
+```py
+class Solution:
+    def canConstruct(self, ransomNote: str, magazine: str) -> bool:
+        magCnt = Counter(magazine)
+        for ch in ransomNote:
+            magCnt[ch] -= 1
+            if magCnt[ch] < 0: return False
+        return True
+```
+
+### Solution 3:  counter subtraction + set difference
+
+```py
+class Solution:
+    def canConstruct(self, ransomNote: str, magazine: str) -> bool:
+        return not Counter(ransomNote) - Counter(magazine)
+```
+
+## 326. Power of Three
+
+### Solution 1:  numpy convert to base 10 (decimal) to base 3 
+
+```py
+import numpy as np
+class Solution:
+    def isPowerOfThree(self, n: int) -> bool:
+        return n > 0 and sum(map(int, np.base_repr(n, base=3))) == 1
+```
+
+### Solution 2:  prime integers find the if the largest value is divisible by n
+
+```py
+class Solution:
+    def isPowerOfThree(self, n: int) -> bool:
+        return n > 0 and 3**19 % n == 0
+```
+
+## 342. Power of Four
+
+### Solution 1:  bit manipulation + bitmask + find that it is power of 2 by trick + find it is 1 at an odd position in binary
+
+```py
+class Solution:
+    def isPowerOfFour(self, n: int) -> bool:
+        return n > 0 and n & (n-1) == 0 and 0xaaaaaaaa&n == 0
+```
+
+## 234. Palindrome Linked List
+
+### Solution 1:  slow and fast pointer get middle + reversed linked list with (prev, cur, next) pointer 
+
+```py
+class Solution:
+    def isPalindrome(self, head: Optional[ListNode]) -> bool:
+        # SLOW AND FAST POINTER
+        middle = self.get_middle(head)
+        right = self.reversed_list(middle.next)
+        while right:
+            if head.val != right.val: return False
+            head = head.next
+            right = right.next
+        return True
+    
+    def get_middle(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        slow = fast = head
+        while fast.next and fast.next.next:
+            slow = slow.next
+            fast = fast.next.next
+        return slow
+
+    def reversed_list(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        prev = None
+        cur = head
+        while cur:
+            next_ = cur.next
+            cur.next = prev
+            prev = cur
+            cur = next_
+        return prev
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
@@ -10279,79 +10421,7 @@ class Solution:
 
 ### Solution 1:
 
-```py
-
-```
-
 ##
-
-### Solution 1:
-
-```py
-
-```
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
-```
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:##
 
 ### Solution 1:
 
