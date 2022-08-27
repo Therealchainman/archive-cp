@@ -10518,20 +10518,59 @@ class Solution:
         return sum(indegrees.values()) == 0
 ```
 
-##
+## 869. Reordered Power of 2
 
-### Solution 1:
+### Solution 1:  permutations + backtracking + filter + map + any
 
 ```py
-
+class Solution:
+    def reorderedPowerOf2(self, n: int) -> bool:
+        perm_gen = permutations(str(n))
+        perm_filter = filter(lambda p: p[0]!='0', perm_gen)
+        perm_map = map(lambda p: int(''.join(p)), perm_filter)
+        return any(v&(v-1) == 0 for v in perm_map)
 ```
 
-##
-
-### Solution 1:
+### Solution 2:  counter + generate every possible counter for power of 2, and check if it is equal to current number
 
 ```py
+class Solution:
+    def reorderedPowerOf2(self, n: int) -> bool:
+        counts = Counter(str(n))
+        return any(counts == Counter(str(1<<i)) for i in range(30))
+```
 
+## 363. Max Sum of Rectangle No Larger Than K
+
+### Solution 1:  sortedset + transpose + binary search + 2d prefix sum + convert 2d to 1d array
+
+```py
+from sortedcontainers import SortedSet
+import numpy as np
+class Solution:
+    def maxSumSubmatrix(self, matrix: List[List[int]], k: int) -> int:
+        R, C = len(matrix), len(matrix[0])
+        # tranpose so that the shorter dimension is in the nested loop
+        if R > C:
+            matrix = np.transpose(matrix)
+            R, C = C, R
+        self.result = -inf
+        def colRangeSum(rowSum):
+            seen = SortedSet([0])
+            for s in accumulate(rowSum):
+                idx = seen.bisect_left(s-k)
+                if idx < len(seen):
+                    self.result = max(self.result, s-seen[idx])
+                seen.add(s)
+        for r1 in range(R):
+            rowSum = [0]*C
+            for r2 in range(r1,R):
+                for c in range(C):
+                    rowSum[c] += matrix[r2][c]
+                colRangeSum(rowSum)
+                if self.result == k: return self.result
+        return self.result
+                    
 ```
 ### Solution 1:
 
