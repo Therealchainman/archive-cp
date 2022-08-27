@@ -5114,7 +5114,7 @@ class Solution:
 
 ## 721. Accounts Merge
 
-### Solution 1:  Union Find + sort
+### Solution 1:  DFS
 
 ```py
 
@@ -10572,7 +10572,33 @@ class Solution:
         return self.result
                     
 ```
-### Solution 1:
+
+## 1567. Maximum Length of Subarray With Positive Product
+
+### Solution 1:  sliding window
+
+```py
+class Solution:
+    def getMaxLen(self, nums: List[int]) -> int:
+        left = maxLen = negativeCount = 0
+        leftMostNegative = None
+        n = len(nums)
+        for right in range(n):
+            if nums[right] == 0:
+                left = right + 1
+                negativeCount = 0
+            elif nums[right] < 0:
+                if negativeCount == 0:
+                    leftMostNegative = right
+                negativeCount += 1
+            if negativeCount%2 == 0:
+                maxLen = max(maxLen, right-left+1)
+            else:
+                maxLen = max(maxLen, right-leftMostNegative)
+        return maxLen 
+```
+
+### Solution 2:  dynamic programming
 
 ```py
 

@@ -1,13 +1,17 @@
-from collections import Counter
 import sys
 problem = sys.argv[0].split('.')[0]
-validation = 'validation_'
+validation = ''
+def grow(R, C):
+    return ('^'*C for _ in range(R))
 def main():
-    n, k = map(int,f.readline().split())
-    styles = list(map(int,f.readline().split()))
-    if len(styles) > 2*k or any(cnt > 2 for cnt in Counter(styles).values()):
-        return 'NO'
-    return 'YES'
+    R, C = map(int,f.readline().split())
+    empty, tree = '.', '^'
+    arr = [f.readline().rstrip() for _ in range(R)]
+    if all(t==empty for row in arr for t in row):
+        return 'Possible\n' + '\n'.join(arr)
+    if R ==1 or C == 1:
+        return 'Impossible'
+    return 'Possible\n' + '\n'.join(grow(R, C))
 
 if __name__ == '__main__':
     result = []
