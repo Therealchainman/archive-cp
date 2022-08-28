@@ -10604,8 +10604,164 @@ class Solution:
 
 ```
 
+## 2389. Longest Subsequence With Limited Sum
+
+### Solution 1: sort + offline queries
+
+```py
+class Solution:
+    def answerQueries(self, nums: List[int], queries: List[int]) -> List[int]:
+        n, m = len(nums), len(queries)
+        nums.sort()
+        answer = [0]*m
+        j = psum = 0
+        for q, i in sorted([(q, i) for i, q in enumerate(queries)]):
+            while j < n and psum <= q:
+                psum += nums[j]
+                j += 1
+            answer[i] = j
+            if psum > q:
+                answer[i] -= 1
+        return answer
+```
+
+## 2390. Removing Stars From a String
+
+### Solution 1:  stack 
+
+```py
+class Solution:
+    def removeStars(self, s: str) -> str:
+        star = '*'
+        stack = []
+        for ch in s:
+            if ch == star:
+                if stack:
+                    stack.pop()
+            else:
+                stack.append(ch)
+        return ''.join(stack)
+```
+
+## 2391. Minimum Amount of Time to Collect Garbage
+
+### Solution 1:  greedy + iterate over each garbage material
+
+```py
+class Solution:
+    def garbageCollection(self, garbage: List[str], travel: List[int]) -> int:
+        n = len(travel)
+        glass, paper, metal = 'G', 'P', 'M'
+        def compute_time(material: str) -> int:
+            cnt = sum(g.count(material) for g in garbage)
+            time = 0
+            for i, garb in enumerate(garbage):
+                cur_count = garb.count(material)
+                time += cur_count
+                cnt -= cur_count
+                if cnt == 0: break
+                time += travel[i]
+            return time
+        return compute_time(glass) + compute_time(paper) + compute_time(metal)
+```
+
+## 2392. Build a Matrix With Conditions
+
+### Solution 1: topological sort for row and col + hash map + cycle detection + queue + set
+
+```py
+class Solution:
+    def topoSort(self, k: int, conditions: List[List[int]]) -> List[int]:
+        condSet = set([tuple(edge) for edge in conditions])
+        topoList = []
+        graph = [[] for _ in range(k+1)]
+        indegrees = [0]*(k+1)
+        for u, v in condSet:
+            graph[u].append(v)
+            indegrees[v] += 1
+        queue = deque()
+        for i in range(1,k+1):
+            if indegrees[i] == 0:
+                queue.append(i)
+        while queue:
+            node = queue.popleft()
+            topoList.append(node)
+            for nei_node in graph[node]:
+                indegrees[nei_node] -= 1
+                if indegrees[nei_node] == 0:
+                    queue.append(nei_node)
+        return topoList
+    def buildMatrix(self, k: int, rowConditions: List[List[int]], colConditions: List[List[int]]) -> List[List[int]]:
+        row = self.topoSort(k, rowConditions)
+        if len(row) < k: return []
+        col = self.topoSort(k, colConditions)
+        if len(col) < k: return []
+        col_mapper = {v:i for i,v in enumerate(col)}
+        matrix = [[0]*k for _ in range(k)]    
+        for r, rv in enumerate(row):
+            c = col_mapper[rv]
+            matrix[r][c] = rv
+        return matrix
+```
+
+## 1329. Sort the Matrix Diagonally
+
+### Solution 1:  heap + hash map
+
+```py
+class Solution:
+    def diagonalSort(self, mat: List[List[int]]) -> List[List[int]]:
+        R, C = len(mat), len(mat[0])
+        diagonals = defaultdict(list)
+        for r, c in product(range(R), range(C)):
+            diagonals[r-c].append(mat[r][c])
+        for diagonal in diagonals.values():
+            heapify(diagonal)
+        for r, c in product(range(R), range(C)):
+            val = heappop(diagonals[r-c])
+            mat[r][c] = val
+        return mat
+```
+
 ##
 
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
 ### Solution 1:
 
 ```py
@@ -10631,6 +10787,18 @@ class Solution:
 ##
 
 ### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
 
 ##
 
