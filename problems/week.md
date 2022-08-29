@@ -10723,12 +10723,26 @@ class Solution:
         return mat
 ```
 
-##
+## 200. Number of Islands
 
 ### Solution 1:
 
 ```py
-
+class Solution:
+    def numIslands(self, grid: List[List[str]]) -> int:
+        R, C = len(grid), len(grid[0])
+        water, land = '0', '1'
+        num_islands = 0
+        def dfs(r,c):
+            is_land = lambda r, c: 0<=r<R and 0<=c<C and grid[r][c] == land
+            for nr, nc in filter(lambda x: is_land(x[0],x[1]), [(r+1,c),(r-1,c),(r,c+1),(r,c-1)]):
+                grid[nr][nc] = water
+                dfs(nr,nc)
+        for r, c in product(range(R), range(C)):
+            if grid[r][c] == land:
+                dfs(r,c)
+                num_islands += 1
+        return num_islands
 ```
 
 ##
