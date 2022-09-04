@@ -1,3 +1,6 @@
+"""
+prime sieve to generate prime numbers
+"""
 def prime_sieve(lim):
     sieve,primes = [[] for _ in range(lim)], []
     for integer in range(2,lim):

@@ -10745,6 +10745,512 @@ class Solution:
         return num_islands
 ```
 
+## 2398. Maximum Number of Robots Within Budget
+
+### Solution 1:  two sliding window algorithms for running cost and max charge time + monotonic sliding window + deque
+
+```py
+class Solution:
+    def maximumRobots(self, chargeTimes: List[int], runningCosts: List[int], budget: int) -> int:
+        n = len(chargeTimes)
+        maxRobots = 0
+        cur_cost = 0
+        charge_window = deque()
+        window = deque()
+        for i in range(n):
+            charge = chargeTimes[i]
+            cost = runningCosts[i]
+            cur_cost += cost
+            window.append(i)
+            while charge_window and charge_window[-1][0] < charge:
+                charge_window.pop()
+            charge_window.append((charge, i))
+            while window and charge_window[0][0] + len(window)*cur_cost > budget:
+                j = window.popleft()
+                prev_cost = runningCosts[j]
+                while charge_window and charge_window[0][1]<=j:
+                    charge_window.popleft()
+                cur_cost -= prev_cost
+            maxRobots = max(maxRobots, len(window))
+        return maxRobots
+```
+
+## 2397. Maximum Rows Covered by Columns
+
+### Solution 1: bitmask + array to store count for each row to quickly check if it is covered
+
+```py
+class Solution:
+    def maximumRows(self, mat: List[List[int]], cols: int) -> int:
+        maxCover = 0
+        R, C = len(mat), len(mat[0])
+        count_rows = [0]*R
+        for r, c in product(range(R), range(C)):
+            count_rows[r] += mat[r][c]
+        for i in range(1<<C):
+            if i.bit_count() != cols: continue
+            cur_rows = [0]*R
+            for j in range(C):
+                if (i>>j)&1:
+                    for r in range(R):
+                        cur_rows[r] += mat[r][j]
+            maxCover = max(maxCover, sum(cnt1==cnt2 for cnt1,cnt2 in zip(count_rows, cur_rows)))
+        return maxCover
+```
+
+## 2396. Strictly Palindromic Number
+
+### Solution 1:  loop + convert to base 10 number to arbitrary base + reverse to check it is palindrome
+
+```py
+class Solution:
+    def isStrictlyPalindromic(self, n: int) -> bool:
+        for base in range(2,n-1):
+            arr = []
+            num = n
+            while num > 0:
+                digit = int(num%base)
+                arr.append(digit)
+                num //= base
+            if arr[::-1] != arr:
+                return False
+        return True
+```
+
+## 2395. Find Subarrays With Equal Sum
+
+### Solution 1:  loop + zip + dictionary
+
+```py
+class Solution:
+    def findSubarrays(self, nums: List[int]) -> bool:
+        n = len(nums)
+        seen = set()
+        for x,y in zip(nums,nums[1:]):
+            if x+y in seen: return True
+            seen.add(x+y)
+        return False
+                
+```
+
+## 967. Numbers With Same Consecutive Differences
+
+### Solution 1:  recursion + backtrack
+
+```py
+class Solution:
+    def numsSameConsecDiff(self, n: int, k: int) -> List[int]:
+        result = []
+        def backtrack(i):
+            if i == n:
+                result.append(int(''.join(map(str,number))))
+                return
+            for j in range(10):
+                if abs(number[-1]-j) == k:
+                    number.append(j)
+                    backtrack(i+1)
+                    number.pop()
+        number = []
+        for i in range(1,10):
+            number.append(i)
+            backtrack(1)
+            number.pop()
+        return result
+```
+
+## 924. Minimize Malware Spread
+
+### Solution 1:
+
+```py
+
+```
+
+## 928. Minimize Malware Spread II
+
+### Solution 1:
+
+```py
+
+```
+
+## 1697. Checking Existence of Edge Length Limited Paths
+
+### Solution 1:  union find + offline query + sort edge and query lists
+
+```py
+class UnionFind:
+    def __init__(self,n):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    
+    def find(self,i):
+        if i==self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+
+    def union(self,i,j):
+        i, j = self.find(i), self.find(j)
+        if i!=j:
+            if self.size[i] < self.size[j]:
+                i,j=j,i
+            self.parent[j] = i
+            self.size[i] += self.size[j]
+            return True
+        return False
+    
+class Solution:
+    def distanceLimitedPathsExist(self, n: int, edgeList: List[List[int]], queries: List[List[int]]) -> List[bool]:
+        dsu = UnionFind(n)
+        edgeList.sort(key = lambda edge: edge[2])
+        queries = [(*query,i) for i, query in enumerate(queries)]
+        i = 0
+        edge_len = len(edgeList)
+        query_len = len(queries)
+        answer = [False]*query_len
+        for p, q, lim, index in sorted(queries, key = lambda query: query[2]):
+            while i < edge_len and edgeList[i][2] < lim:
+                dsu.union(edgeList[i][0], edgeList[i][1])
+                i += 1
+            answer[index] = dsu.find(p) == dsu.find(q)
+        return answer
+```
+
+## 1724. Checking Existence of Edge Length Limited Paths II
+
+### Solution 1:
+
+```py
+class UnionFind:
+    def __init__(self,n):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    
+    def find(self,i):
+        if i==self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+
+    def union(self,i,j):
+        i, j = self.find(i), self.find(j)
+        if i!=j:
+            if self.size[i] < self.size[j]:
+                i,j=j,i
+            self.parent[j] = i
+            self.size[i] += self.size[j]
+            return True
+        return False
+    
+class BinaryLift:
+    def __init__(self, node_count, graph):
+        self.size = node_count
+        self.graph = graph # pass in an adjacency list to represent the graph
+        self.depth = [0]*node_count
+        self.parents = [-1]*node_count
+        self.parentsWeight = [0]*node_count
+        self.visited = [False]*node_count
+        for node in range(node_count):
+            if self.visited[node]: continue
+            self.visited[node] = True
+            self.get_parent_depth(node)
+        # print(self.parents, self.parentsWeight, self.depth)
+        self.maxAncestor = 18
+        self.jump = [[-1]*self.maxAncestor for _ in range(self.size)]
+        self.maxJumpWeight = [[0]*self.maxAncestor for _ in range(self.size)]
+        self.build_sparse_table()
+        
+    def build_sparse_table(self):
+        """
+        builds the jump and maxWeightJump sparse arrays for computing the 2^jth ancestor of ith node in any given query
+        """
+        for j in range(self.maxAncestor):
+            for i in range(self.size):
+                if j == 0:
+                    self.jump[i][j] = self.parents[i]
+                    self.maxJumpWeight[i][j] = self.parentsWeight[i]
+                elif self.jump[i][j-1] != -1:
+                    prev_ancestor = self.jump[i][j-1]
+                    # print('i', i, 'j', j, 'prev_anc', prev_ancestor)
+                    self.jump[i][j] = self.jump[prev_ancestor][j-1]
+                    current_jump_weight = self.maxJumpWeight[i][j-1]
+                    prev_max_weight = self.maxJumpWeight[prev_ancestor][j-1]
+                    if prev_max_weight == 0: continue
+                    self.maxJumpWeight[i][j] = max(current_jump_weight, prev_max_weight)
+                    
+    def get_parent_depth(self, node, parent_node = -1, weight = 0, depth = 0):
+        """
+        Fills out the depth array for each node and the parent array for each node
+        """
+        self.parents[node] = parent_node
+        self.parentsWeight[node] = weight
+        self.depth[node] = depth
+        for nei_node, wei in self.graph[node]:
+            if self.visited[nei_node]: continue
+            self.visited[nei_node] = True
+            self.get_parent_depth(nei_node, node, wei, depth+1)
+            
+    def max_weight_lca(self, p: int, q: int) -> int:
+        self.maxWeight = 0
+        # ASSUME NODE P IS DEEPER THAN NODE Q   
+        if self.depth[p] < self.depth[q]:
+            p, q = q, p
+        k = self.depth[p] - self.depth[q]
+        p = self.kthAncestor(p, k)
+        if p == q: return self.maxWeight
+        for j in range(self.maxAncestor)[::-1]:
+            if self.jump[p][j] != self.jump[q][j]:
+                self.maxWeight = max(self.maxWeight, self.maxJumpWeight[p][j], self.maxJumpWeight[q][j])
+                p, q = self.jump[p][j], self.jump[q][j] # jump to 2^jth ancestor nodes
+        self.maxWeight = max(self.maxWeight, self.maxJumpWeight[p][0], self.maxJumpWeight[q][0])
+        return self.maxWeight
+    
+    def kthAncestor(self, node: int, k: int) -> int:
+        while node != -1 and k > 0:
+            j = int(math.log2(k))
+            self.maxWeight = max(self.maxWeight, self.maxJumpWeight[node][j])
+            node = self.jump[node][j]
+            k -= (1<<j)
+        return node
+        
+class DistanceLimitedPathsExist:
+
+    def __init__(self, n: int, edgeList: List[List[int]]):
+        # CONSTRUCT THE MINIMUM SPANNING TREE 
+        edgeList.sort(key=lambda edge: edge[2])
+        self.dsu = UnionFind(n)
+        graph = [[] for _ in range(n)]
+        weight = defaultdict(int)
+        for u, v, w in edgeList:
+            if self.dsu.union(u,v):
+                graph[u].append((v,w))
+                graph[v].append((u,w))
+        self.binary_lift = BinaryLift(n, graph)
+
+    def query(self, p: int, q: int, limit: int) -> bool:
+        # CHECK THAT BOTH P AND Q BELONG TO SAME MINIMUM SPANNING TREE, THAT IS ARE IN THE SAME DISJOINT SET OF NODES
+        if self.dsu.find(p) != self.dsu.find(q): return False
+        # COMPUTE THE MAX WEIGHT WHILE FINDING THE LOWEST COMMON ANCESTOR
+        maxWeight = self.binary_lift.max_weight_lca(p,q)
+        return maxWeight < limit
+
+```
+
+## 1627. Graph Connectivity With Threshold
+
+### Solution 1:  union find + prime sieve + memoization
+
+```py
+class UnionFind:
+    def __init__(self,n):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    
+    def find(self,i):
+        if i==self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+
+    def union(self,i,j):
+        i, j = self.find(i), self.find(j)
+        if i!=j:
+            if self.size[i] < self.size[j]:
+                i,j=j,i
+            self.parent[j] = i
+            self.size[i] += self.size[j]
+            return True
+        return False
+    def __repr__(self):
+        return f'parents: {[(i, parent) for i, parent in enumerate(self.parent)]}, sizes: {self.size}'
+    
+class Solution:
+    def areConnected(self, n: int, threshold: int, queries: List[List[int]]) -> List[bool]:
+        if threshold == 0: return [True]*len(queries)
+        def prime_sieve(lim):
+            sieve, primes = [[] for _ in range(lim)], []
+            for integer in range(2,lim):
+                if not len(sieve[integer]):
+                    primes.append(integer)
+                    for possibly_divisible_integer in range(integer,lim,integer):
+                        current_integer = possibly_divisible_integer
+                        while not current_integer%integer:
+                            sieve[possibly_divisible_integer].append(integer)
+                            current_integer //= integer
+            return primes
+        dsu = UnionFind(n+1)
+        queue = deque(prime_sieve(n+1))
+        visited = [False]*(n+1)
+        while queue:
+            integer = queue.popleft()
+            visited[integer] = True
+            for i in range(integer+integer, n+1, integer):
+                if integer > threshold:
+                    dsu.union(integer, i)
+                if not visited[i]:
+                    queue.append(i)
+                    visited[i] = True
+        return [dsu.find(x)==dsu.find(y) for x,y in queries]
+```
+
+## 2399. Check Distances Between Same Letters
+
+### Solution 1:  string + re.finditer
+
+```py
+class Solution:
+    def checkDistances(self, s: str, distance: List[int]) -> bool:
+        for ch in string.ascii_lowercase:
+            v = ord(ch)-ord('a')
+            indices = [i.start() for i in re.finditer(ch, s)]
+            if indices and indices[1]-indices[0]-1 != distance[v]: return False
+        return True
+```
+
+## 2400. Number of Ways to Reach a Position After Exactly k Steps
+
+### Solution 1:  iterative dynamic programming + set of previous positions + memoization
+
+```py
+class Solution:
+    def numberOfWays(self, startPos: int, endPos: int, k: int) -> int:
+        mod = int(1e9)+7
+        memo = defaultdict(int)
+        prev_positions = set([startPos])
+        memo[(startPos,0)] = 1
+        for i in range(k):
+            next_positions = set()
+            for pos in prev_positions:
+                if k-i < abs(pos-endPos): continue
+                for step in [-1,1]:
+                    state = (pos+step, i+1)
+                    memo[state] = (memo[state]+memo[(pos,i)])%mod
+                    next_positions.add(pos+step)
+            prev_positions = next_positions
+        return memo[(endPos, k)]
+```
+
+## 2401. Longest Nice Subarray
+
+### Solution 1:  sliding window + bit manipulation + count of bits must be less than or equal to 1 for subarray to work
+
+```py
+class Solution:
+    def longestNiceSubarray(self, nums: List[int]) -> int:
+        left = 0
+        bit_counts = [0]*32
+        maxWindow = 0
+        over = 0
+        for right, num in enumerate(nums):
+            for i in range(32):
+                if (num>>i)&1:
+                    bit_counts[i] += 1
+                    if bit_counts[i] > 1:
+                        over += 1
+            while over:
+                pnum = nums[left]
+                left += 1
+                for i in range(32):
+                    if (pnum>>i)&1:
+                        bit_counts[i] -= 1
+                        if bit_counts[i] == 1:
+                            over -= 1
+            maxWindow = max(maxWindow, right-left+1)
+        return maxWindow
+```
+
+## 2402. Meeting Rooms III
+
+### Solution 1:  two minheap + minheap for room indices + minheap for (endtime, room_index)
+
+```py
+class Solution:
+    def mostBooked(self, n: int, meetings: List[List[int]]) -> int:
+        num_meetings = [0]*n
+        next_rooms = []
+        avail_rooms = [i for i in range(n)]
+        heapify(avail_rooms)
+        for start, end in sorted(meetings):
+            while next_rooms and next_rooms[0][0] <= start:
+                _, room = heappop(next_rooms)
+                heappush(avail_rooms, room)
+            if avail_rooms:
+                room_index = heappop(avail_rooms)
+                heappush(next_rooms, (end, room_index))
+            else:
+                time, room_index = heappop(next_rooms)
+                duration = end-start
+                heappush(next_rooms, (time + duration, room_index))
+            num_meetings[room_index] += 1
+        return max(range(n), key = lambda i: num_meetings[i])
+```
+
+## 987. Vertical Order Traversal of a Binary Tree
+
+### Solution 1:  bfs + deque + sort + hash table
+
+```py
+class Solution:
+    def verticalTraversal(self, root: Optional[TreeNode]) -> List[List[int]]:
+        cols = defaultdict(list)
+        cols[0].append(root.val)
+        queue = deque([(root, 0)])
+        while queue:
+            sz = len(queue)
+            row = defaultdict(list)
+            for _ in range(sz):
+                node, col = queue.popleft()
+                for nei, nc in zip([node.left, node.right], [col-1, col+1]):
+                    if not nei: continue
+                    queue.append((nei, nc))
+                    row[nc].append(nei.val)
+            for c in row: cols[c].extend(sorted(row[c]))
+        return [cols[c] for c in sorted(cols)]
+```
+
+## 2393. Count Strictly Increasing Subarrays
+
+### Solution 1:  math + space optimized dyanmic programming
+
+```py
+class Solution:
+    def countSubarrays(self, nums: List[int]) -> int:
+        delta = pnum = result = 0
+        for num in nums:
+            if num > pnum:
+                delta += 1
+            else:
+                delta = 1
+            result += delta
+            pnum = num
+        return result
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
@@ -10776,11 +11282,6 @@ class Solution:
 ```py
 
 ```
-### Solution 1:
-
-```py
-
-```
 
 ##
 
@@ -10800,64 +11301,6 @@ class Solution:
 
 ##
 
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
-```
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
-```
 ### Solution 1:
 
 ```py
