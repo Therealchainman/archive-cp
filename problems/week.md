@@ -9776,11 +9776,34 @@ class Solution:
 
 ## 499. The Maze III
 
-
-### Solution 1:
+### Solution 1: minheap variation + dijkstra algorithm + shortest path + seen set + continual movement
 
 ```py
-
+class Solution:
+    def findShortestWay(self, maze: List[List[int]], ball: List[int], hole: List[int]) -> str:
+        empty, wall = 0, 1
+        R, C = len(maze), len(maze[0])
+        is_ball_moving = lambda r,c: 0<=r<R and 0<=c<C and maze[r][c] != wall
+        def neighbors(r,c):
+            for di, (dr, dc) in zip('durl', [(1,0),(-1,0),(0,1),(0,-1)]):
+                nr, nc, gap = r+dr,c+dc,1
+                while is_ball_moving(nr,nc) and [nr,nc] != hole:
+                    nr,nc,gap = nr+dr,nc+dc,gap+1
+                if [nr,nc]!=hole:
+                    nr, nc, gap = nr-dr,nc-dc, gap-1
+                yield (nr,nc,gap, di)
+        minheap = [(0, '', *ball)]
+        seen = set()
+        while minheap:
+            dist, path, r, c = heappop(minheap)
+            if [r,c]==hole: 
+                return path
+            if (r,c) in seen: continue
+            seen.add((r,c))
+            for nr,nc,gap,di in neighbors(r,c):
+                ndist = dist + gap
+                heappush(minheap,(ndist,path+di,nr,nc))
+        return 'impossible'
 ```
 
 ## 1368. Minimum Cost to Make at Least One Valid Path in a Grid
@@ -10860,18 +10883,75 @@ class Solution:
 
 ## 924. Minimize Malware Spread
 
-### Solution 1:
+### Solution 1:  color connected components with dfs + intial nodes are only interesting if they are only infected belonging to connected component
+
+![minimize malware spread](images/minimize_malware_spread.png)
 
 ```py
-
+class Solution:
+    def minMalwareSpread(self, graph: List[List[int]], initial: List[int]) -> int:
+        n = len(graph)
+        index = sorted(initial)[0]
+        initial = set(initial)
+        colorSize = Counter()
+        infected_color = defaultdict(list)
+        visited = [0]*n
+        def dfs(i: int) -> int:
+            cnt = 1
+            if i in initial:
+                infected_color[color].append(i)
+            for j in range(n):
+                if i == j or graph[i][j]==0 or visited[j]: continue
+                visited[j] = 1
+                cnt += dfs(j)
+            return cnt
+        color = 0
+        for i in range(n):
+            if visited[i]: continue
+            visited[i] = 1
+            colorSize[color] = dfs(i)
+            color += 1
+        maxSize = 0
+        for color in colorSize.keys():
+            if len(infected_color[color]) == 1:
+                node = infected_color[color][0]
+                if colorSize[color] > maxSize:
+                    maxSize = colorSize[color]
+                    index = node
+                elif colorSize[color] == maxSize and node < index:
+                    index = node
+        return index
 ```
 
 ## 928. Minimize Malware Spread II
 
-### Solution 1:
+### Solution 1:  dfs from each infected node + dictionary to store what normal nodes can be reached from infected nodes
 
 ```py
-
+class Solution:
+    def minMalwareSpread(self, graph: List[List[int]], initial: List[int]) -> int:
+        n = len(graph)
+        malware_reached = defaultdict(list)
+        initialSet = set(initial)
+        def dfs(node: int) -> None:
+            for nei_node, is_nei in enumerate(graph[node]):
+                if not is_nei or nei_node in visited or nei_node in initialSet: continue
+                visited.add(nei_node)
+                malware_reached[nei_node].append(infected_node)
+                dfs(nei_node)
+        for infected_node in initial:
+            visited = set([infected_node])
+            dfs(infected_node)
+        count_singly_infected = Counter()
+        for infected_nodes in malware_reached.values():
+            if len(infected_nodes) > 1: continue
+            count_singly_infected[infected_nodes[0]] += 1
+        smallest_index, maxSaved = 0, -1
+        for infected in sorted(initial):
+            if count_singly_infected[infected] > maxSaved:
+                smallest_index = infected
+                maxSaved = count_singly_infected[infected]
+        return smallest_index
 ```
 
 ## 1697. Checking Existence of Edge Length Limited Paths
@@ -10923,17 +11003,17 @@ class Solution:
 
 ```py
 class UnionFind:
-    def __init__(self,n):
+    def __init__(self,n: int):
         self.size = [1]*n
         self.parent = list(range(n))
     
-    def find(self,i):
+    def find(self,i: int) -> int:
         if i==self.parent[i]:
             return i
         self.parent[i] = self.find(self.parent[i])
         return self.parent[i]
 
-    def union(self,i,j):
+    def union(self,i: int,j: int) -> bool:
         i, j = self.find(i), self.find(j)
         if i!=j:
             if self.size[i] < self.size[j]:
@@ -10944,24 +11024,28 @@ class UnionFind:
         return False
     
 class BinaryLift:
-    def __init__(self, node_count, graph):
+    """
+    This binary lift function works on any undirected graph that is composed of
+    an adjacency list defined by graph
+    """
+    def __init__(self, node_count: int, graph: List[List[int]]):
         self.size = node_count
         self.graph = graph # pass in an adjacency list to represent the graph
         self.depth = [0]*node_count
         self.parents = [-1]*node_count
         self.parentsWeight = [0]*node_count
         self.visited = [False]*node_count
+        # ITERATE THROUGH EACH POSSIBLE TREE
         for node in range(node_count):
             if self.visited[node]: continue
             self.visited[node] = True
             self.get_parent_depth(node)
-        # print(self.parents, self.parentsWeight, self.depth)
-        self.maxAncestor = 18
+        self.maxAncestor = 18 # set it so that only up to 2^18th ancestor can exist for this example
         self.jump = [[-1]*self.maxAncestor for _ in range(self.size)]
         self.maxJumpWeight = [[0]*self.maxAncestor for _ in range(self.size)]
         self.build_sparse_table()
         
-    def build_sparse_table(self):
+    def build_sparse_table(self) -> None:
         """
         builds the jump and maxWeightJump sparse arrays for computing the 2^jth ancestor of ith node in any given query
         """
@@ -10972,14 +11056,13 @@ class BinaryLift:
                     self.maxJumpWeight[i][j] = self.parentsWeight[i]
                 elif self.jump[i][j-1] != -1:
                     prev_ancestor = self.jump[i][j-1]
-                    # print('i', i, 'j', j, 'prev_anc', prev_ancestor)
                     self.jump[i][j] = self.jump[prev_ancestor][j-1]
                     current_jump_weight = self.maxJumpWeight[i][j-1]
                     prev_max_weight = self.maxJumpWeight[prev_ancestor][j-1]
-                    if prev_max_weight == 0: continue
+                    if prev_max_weight == 0: continue 
                     self.maxJumpWeight[i][j] = max(current_jump_weight, prev_max_weight)
                     
-    def get_parent_depth(self, node, parent_node = -1, weight = 0, depth = 0):
+    def get_parent_depth(self, node: int, parent_node: int = -1, weight: int = 0, depth: int = 0) -> None:
         """
         Fills out the depth array for each node and the parent array for each node
         """
@@ -11034,7 +11117,6 @@ class DistanceLimitedPathsExist:
         # COMPUTE THE MAX WEIGHT WHILE FINDING THE LOWEST COMMON ANCESTOR
         maxWeight = self.binary_lift.max_weight_lca(p,q)
         return maxWeight < limit
-
 ```
 
 ## 1627. Graph Connectivity With Threshold
@@ -11227,60 +11309,306 @@ class Solution:
         return result
 ```
 
-##
+## 429. N-ary Tree Level Order Traversal
 
-### Solution 1:
+### Solution 1:  bfs + deque
 
 ```py
-
+class Solution:
+    def levelOrder(self, root: 'Node') -> List[List[int]]:
+        result = []
+        if not root: return result
+        queue = deque([root])
+        while queue:
+            sz = len(queue)
+            level = []
+            for _ in range(sz):
+                node = queue.popleft()
+                level.append(node.val)
+                for child in node.children:
+                    queue.append(child)
+            result.append(level)
+        return result
 ```
 
-##
+## 814. Binary Tree Pruning
 
-### Solution 1:
+### Solution 1:  recursion + postorder traversal to update binary tree
 
 ```py
-
+class Solution:
+    def pruneTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        def containsOne(node: TreeNode) -> bool:
+            if not node: return False
+            left_contains_one = containsOne(node.left)
+            right_contains_one = containsOne(node.right)
+            if not left_contains_one:
+                node.left = None
+            if not right_contains_one:
+                node.right = None
+            return node.val or left_contains_one or right_contains_one
+        containsOne(root)
+        return root if containsOne(root) else None
 ```
 
-##
+## 2394. Employees With Deductions
 
-### Solution 1:
+### Solution 1:  ifnull + left join + group by + timestampdiff
 
-```py
-
+```sql
+WITH work_tbl AS (
+    SELECT
+        l.employee_id,
+        IFNULL(SUM(CEIL(TIMESTAMPDIFF(SECOND, r.in_time, r.out_time)/60)), 0) AS work_time,
+        l.needed_hours*60 AS needed_minutes
+    FROM Employees l
+    LEFT JOIN Logs r
+    ON l.employee_id = r.employee_id
+    GROUP BY employee_id
+),
+deduct_tbl AS (
+    SELECT employee_id
+    FROM work_tbl
+    WHERE work_time < needed_minutes
+)
+SELECT *
+FROM deduct_tbl
 ```
 
-##
+## 305. Number of Islands II
 
-### Solution 1:
+### Solution 1:  union find + set + disjoint connected components
 
 ```py
+class UnionFind:
+    def __init__(self,n: int):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    
+    def find(self,i: int) -> int:
+        if i==self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
 
+    def union(self,i: int,j: int) -> bool:
+        i, j = self.find(i), self.find(j)
+        if i!=j:
+            if self.size[i] < self.size[j]:
+                i,j=j,i
+            self.parent[j] = i
+            self.size[i] += self.size[j]
+            return True
+        return False
+    
+    def __repr__(self) -> str:
+        return f'parents: {[(i, parent) for i, parent in enumerate(self.parent)]}, sizes: {self.size}'
+    
+class Solution:
+    def numIslands2(self, m: int, n: int, positions: List[List[int]]) -> List[int]:
+        get_index = lambda row, col: row*n+col
+        dsu = UnionFind(m*n)
+        k = len(positions)
+        answer = [0]*k
+        connected_components = 0
+        processed = set()
+        def neighbors(r: int, c: int) -> Iterable[Tuple]:
+            in_bounds = lambda r, c: 0<=r<m and 0<=c<n
+            for nr, nc in [(r+1,c), (r-1,c), (r,c+1), (r,c-1)]:
+                if not in_bounds(nr,nc): continue
+                yield (nr, nc)
+        for i, (r,c) in enumerate(positions):
+            index = get_index(r,c)
+            if index in processed: 
+                answer[i] = connected_components
+                continue
+            surrounding_components = set()
+            for nr, nc in neighbors(r,c):
+                ni = get_index(nr,nc)
+                if ni not in processed: continue
+                surrounding_components.add(dsu.find(ni))
+            processed.add(index)
+            for si in surrounding_components:
+                dsu.union(index,si)
+            if len(surrounding_components) > 0:
+                connected_components -= (len(surrounding_components)-1)
+            else:
+                connected_components += 1
+            answer[i] = connected_components
+        return answer
 ```
 
-##
-
-### Solution 1:
+### Solution 2:  compact union find + union find with dictionary and sets + space optimized union find
 
 ```py
+class UnionFind:
+    def __init__(self):
+        self.size = dict()
+        self.parent = dict()
+        self.connected_components = set()
+        self.count_connected_components = 0
+        
+    def add(self, i: int) -> None:
+        if i not in self.connected_components:
+            self.connected_components.add(i)
+            self.parent[i] = i
+            self.size[i] = 1
+        self.count_connected_components += 1
+    
+    def find(self,i: int) -> int:
+        if i==self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
 
+    def union(self,i: int,j: int) -> bool:
+        # FIND THE REPRESENTATIVE NODE FOR THESE NODES IF THEY ARE ALREADY BELONGING TO CONNECTED COMPONENTS
+        i, j = self.find(i), self.find(j)
+        if i!=j:
+            if self.size[i] < self.size[j]:
+                i,j=j,i
+            self.parent[j] = i
+            self.size[i] += self.size[j]
+            self.count_connected_components -= 1
+            return True
+        return False
+    
+    def __repr__(self) -> str:
+        return f'parents: {self.parent}, sizes: {self.size}, connected_components: {self.connected_components}'
+    
+class Solution:
+    def numIslands2(self, m: int, n: int, positions: List[List[int]]) -> List[int]:
+        get_index = lambda row, col: row*n+col
+        dsu = UnionFind()
+        k = len(positions)
+        answer = [0]*k
+        def neighbors(r: int, c: int) -> Iterable[Tuple]:
+            in_bounds = lambda r, c: 0<=r<m and 0<=c<n
+            for nr, nc in [(r+1,c), (r-1,c), (r,c+1), (r,c-1)]:
+                if not in_bounds(nr,nc): continue
+                yield (nr, nc)
+        for i, (r,c) in enumerate(positions):
+            index = get_index(r,c)
+            # POSITION THAT IS ALREADY LAND
+            if index in dsu.connected_components: 
+                answer[i] = dsu.count_connected_components
+                continue
+            # ADD CURRENT NODE TO CONNECTED COMPONENTS
+            dsu.add(index)
+            for nr, nc in neighbors(r,c):
+                ni = get_index(nr,nc)
+                if ni not in dsu.connected_components: continue
+                # FIND THE ROOT NODE AND ADD IT, (ROOT NODE IS ALSO CALLED REPRESENTATIVE NODE IN UNION FIND)
+                dsu.union(index, ni)
+            # UPDATING THE TOTAL COUNT OF CONNECTED COMPONENTS, IF THERE ARE MULTIPLE SURROUNDING COMPONENTS, THEY GET MERGED SO IT NEEDS TO DECREASE
+            answer[i] = dsu.count_connected_components
+        return answer
+            
 ```
 
-##
+## 362. Design Hit Counter
 
-### Solution 1:
+### Solution 1:  Scales with regards to the time range + queue
 
 ```py
+class HitCounter:
 
+    def __init__(self):
+        self.queue = deque()
+        self.hit_counts = 0
+        self.time_range = 300
+
+    def hit(self, timestamp: int) -> None:
+        if self.queue and self.queue[-1][0] == timestamp:
+            self.queue[-1][1] += 1
+        else:
+            self.queue.append([timestamp, 1])
+        self.hit_counts += 1
+
+    def getHits(self, timestamp: int) -> int:
+        while self.queue and self.queue[0][0] <= timestamp-self.time_range:
+            _, count = self.queue.popleft()
+            self.hit_counts -= count
+        return self.hit_counts
 ```
 
-##
-
-### Solution 1:
+### Solution 2:  mutable dataclass for hit data
 
 ```py
+from dataclasses import make_dataclass, field
+class HitCounter:
 
+    def __init__(self):
+        self.queue = deque()
+        self.hit_counts = 0
+        self.time_range = 300
+        self.HitData = make_dataclass('HitData', [('timestamp', int), ('count', int, field(default=1))])
+
+    def hit(self, timestamp: int) -> None:
+        if self.queue and self.queue[-1].timestamp == timestamp:
+            self.queue[-1].count += 1
+        else:
+            self.queue.append(self.HitData(timestamp))
+        self.hit_counts += 1
+
+    def getHits(self, timestamp: int) -> int:
+        while self.queue and self.queue[0].timestamp <= timestamp-self.time_range:
+            self.hit_counts -= self.queue.popleft().count
+        return self.hit_counts
+```
+
+## 1996. The Number of Weak Characters in the Game
+
+### Solution 1:  greedy + group by attack in descending order + store maxDefence
+
+![weak characters](images/weak_character.png)
+
+```py
+class Solution:
+    def numberOfWeakCharacters(self, properties: List[List[int]]) -> int:
+        attack_dict = defaultdict(list)
+        for attack, defence in properties:
+            attack_dict[attack].append(defence)
+        maxDefence = 0
+        result = 0
+        for attack in sorted(attack_dict, reverse=True):
+            tmp_maxDefence = 0
+            for defence in attack_dict[attack]:
+                result += (defence<maxDefence)
+                tmp_maxDefence = max(tmp_maxDefence, defence)
+            maxDefence = max(maxDefence, tmp_maxDefence)
+        return result
+```
+
+## 352. Data Stream as Disjoint Intervals
+
+### Solution 1:  dictionary + set + look at the left and right intervals to find the start and end point
+
+![data stream](images/data_stream_as_disjoint_intervals.png)
+
+```py
+class SummaryRanges:
+
+    def __init__(self):
+        self.start = {}
+        self.end = {}
+        self.seen = set()
+
+    def addNum(self, val: int) -> None:
+        if val in self.seen: return
+        self.seen.add(val)
+        start = end = val
+        if val+1 in self.start:
+            end = self.start[val+1]
+            self.start.pop(val+1)
+        if val-1 in self.end:
+            start = self.end[val-1]
+            self.end.pop(val-1)
+        self.start[start] = end
+        self.end[end] = start
+        
+    def getIntervals(self) -> List[List[int]]:
+        return sorted([interval for interval in self.start.items()])
 ```
 
 ##
