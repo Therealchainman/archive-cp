@@ -11611,6 +11611,118 @@ class SummaryRanges:
         return sorted([interval for interval in self.start.items()])
 ```
 
+## 1179. Reformat Department Table
+
+### Solution 1: pivot table with sum and if statements + group by
+
+```sql
+SELECT 
+    id,
+    sum(if(month='Jan', revenue, null)) AS Jan_Revenue,
+    sum(if(month='Feb', revenue, null)) AS Feb_Revenue,
+    sum(if(month='Mar', revenue, null)) AS Mar_Revenue,
+    sum(if(month='Apr', revenue, null)) AS Apr_Revenue,
+    sum(if(month='May', revenue, null)) AS May_Revenue,
+    sum(if(month='Jun', revenue, null)) AS Jun_Revenue,
+    sum(if(month='Jul', revenue, null)) AS Jul_Revenue,
+    sum(if(month='Aug', revenue, null)) AS Aug_Revenue,
+    sum(if(month='Sep', revenue, null)) AS Sep_Revenue,
+    sum(if(month='Oct', revenue, null)) AS Oct_Revenue,
+    sum(if(month='Nov', revenue, null)) AS Nov_Revenue,
+    sum(if(month='Dec', revenue, null)) AS Dec_Revenue
+FROM Department
+GROUP BY id
+```
+
+## 2404. Most Frequent Even Element
+
+### Solution 1:
+
+```py
+class Solution:
+    def mostFrequentEven(self, nums: List[int]) -> int:
+        m = Counter(nums)
+        maxCount = 0
+        val = -1
+        for key in sorted(m.keys()):
+            if key%2==0:
+                if m[key]>maxCount:
+                    maxCount = m[key]
+                    val = key
+        return val
+```
+
+## 2405. Optimal Partition of String
+
+### Solution 1:
+
+```py
+class Solution:
+    def partitionString(self, s: str) -> int:
+        result = 1
+        cnt = [0]*26
+        get_unicode = lambda ch: ord(ch)-ord('a')
+        for ch in s:
+            val = get_unicode(ch)
+            cnt[val] += 1
+            if cnt[val] > 1:
+                cnt = [0]*26
+                cnt[val] += 1
+                result += 1
+        return result
+```
+
+## 2406. Divide Intervals Into Minimum Number of Groups
+
+### Solution 1: line sweep + sort
+
+```py
+class Solution:
+    def minGroups(self, intervals: List[List[int]]) -> int:
+        events = []
+        for start, end in intervals:
+            events.append((start, 1))
+            events.append((end+1,-1))
+        events.sort()
+        count = maxCount = 0
+        for event, delta in events:
+            count += delta
+            maxCount = max(maxCount, count)
+        return maxCount
+```
+
+## 2407. Longest Increasing Subsequence II
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
