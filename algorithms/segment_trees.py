@@ -1,4 +1,5 @@
 from math import inf
+from typing import Callable
 
 # Implement an algorithm to find the first element greater than a given amount
 # design a query algorithm that will find the first element greater than a given amount
@@ -247,4 +248,59 @@ class PreSumSegmentTree:
     def query_tree(self, l, r):
         return self.query(l,r,0,0,self.size)
     def __repr__(self):
+        return f"array: {self.tree}"
+
+"""
+General Segment Tree
+
+Iterative implementation because it has a better runtime compared to recursive implementation
+
+Accepts n which is the size of what you need for the leaf nodes in the segment tree, so if need segment tree for an array
+of size 4, then n =4
+Accepts a neutral value, which is what the value should be set as if no value has exists yet, usually 0 for sum and -inf for max
+and inf for min function
+Accepts an update function that takes two arguments
+Also accepts a count variable, for if you want the tree to keep count
+cause then it neesd to set values at root to be incremented
+
+For the range queries it is [l,r), that is l is inclusive and r is exclusive bound. 
+So if you query [2,5), it be computing values 2,3,4 in that range
+"""
+
+class SegmentTree:
+    def __init__(self, n: int, neutral: int, func: Callable[[int, int], int], is_count: bool = False):
+        self.neutral = neutral
+        self.size = 1
+        self.is_count = is_count
+        self.func = func
+        self.n = n
+        while self.size<n:
+            self.size*=2
+        self.tree = [0 for _ in range(self.size*2)]
+        
+    def update(self, idx: int, val: int) -> None:
+        idx += self.size - 1
+        self.tree[idx] = self.tree[idx] + val if self.is_count else val
+        while idx > 0:
+            idx -= 1
+            idx >>= 1
+            self.tree[idx] = self.func(self.tree[2*idx+1], self.tree[2*idx+2])
+            
+    def query(self, l: int, r: int) -> int:
+        stack = [(0, self.size, 0)]
+        result = 0
+        while stack:
+            # BOUNDS FOR CURRENT INTERVAL and idx for tree
+            left_bound, right_bound, idx = stack.pop()
+            # OUT OF BOUNDS
+            if left_bound >= r or right_bound <= l: continue
+            # CHECK IF CURRENT BOUNDS ARE WITHIN THE l and r
+            if left_bound >= l and right_bound <= r:
+                result = self.func(result, self.tree[idx])
+                continue
+            mid = (left_bound + right_bound)>>1
+            stack.extend([(left_bound, mid, 2*idx+1), (mid, right_bound, 2*idx+2)])
+        return result
+    
+    def __repr__(self) -> str:
         return f"array: {self.tree}"

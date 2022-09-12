@@ -42,53 +42,34 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-# Source: https://usaco.guide/general/io
-
-from math import log2
-from collections import deque
-
-class LCA:
-    def main(self):
-        n, q = map(int,input().split())
-        parents_gen = map(int, input().split())
-        self.LOG = int(log2(n))+1
-        self.up = [[-1]*self.LOG for _ in range(n+1)]
-        graph = [[] for _ in range(n+1)] # travel from parent to child node
-        for i, par in zip(range(2,n+1), parents_gen):
-            self.up[i][0] = par
-            graph[par].append(i)
-        self.depth = [0]*(n+1)
-        queue = deque([(1, 0)]) # (node, depth)
-        while queue:
-            node, dep = queue.popleft()
-            self.depth[node] = dep
-            for child in graph[node]:
-                for j in range(1,self.LOG):
-                    if self.up[child][j-1] == -1: break
-                    self.up[child][j] = self.up[self.up[child][j-1]][j-1]
-                queue.append((child, dep+1))
-        result = []
-        for _ in range(q):
-            u, v = map(int,input().split())
-            result.append(self.lca(u,v))
-        return '\n'.join(map(str,result))
-
-    def lca(self, u, v):
-        # always depth[u] < depth[v], v is deeper node
-        if self.depth[u] > self.depth[v]:
-            u, v = v, u # swap the nodes
-        k = self.depth[v] - self.depth[u]
-        while k > 0:
-            i = int(log2(k))
-            v = self.up[v][i]
-            k-=(1<<i)
-        if u == v: return u
-        for j in range(self.LOG)[::-1]:
-            if self.up[u][j]==-1 or self.up[v][j]==-1 or self.up[u][j] == self.up[v][j]: continue
-            u = self.up[u][j]
-            v = self.up[v][j]
-        return self.up[u][0]
+def main():
+    text = input()
+    pat = input()
+    sentinel_char = '$'
+    s = pat + sentinel_char + text
+    sLen = len(s)
+    patLen = len(pat)
+    z = [0]*sLen
+    left=right=0
+    for i in range(1,sLen):
+        if i>right:
+            left=right=i
+            while right<sLen and s[right-left]==s[right]:
+                right+=1
+            z[i]=right-left
+            right-=1
+        else:
+            k=i-left
+            if z[k]<right-i+1:
+                z[i]=z[k]
+            else:
+                left=i
+                while right<sLen and s[right-left]==s[right]:
+                    right+=1
+                z[i]=right-left
+                right-=1
+    return z.count(patLen)
 
 
 if __name__ == '__main__':
-    print(LCA().main())
+    print(main())

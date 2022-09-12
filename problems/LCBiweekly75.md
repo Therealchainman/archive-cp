@@ -76,5 +76,29 @@ class Solution:
 ### Solution 2: optimized z-algorithm
 
 ```py
-
+class Solution:
+    def sumScores(self, s: str) -> int:
+        n = len(s)
+        z = [0]*n
+        z[0] = n
+        left = right = 0
+        for i in range(1,n):
+            if i > right:
+                left = right = i
+                while right < n and s[right-left] == s[right]:
+                    right += 1
+                z[i] = right - left
+                right -= 1
+            else:
+                k = i - left
+                # IF PREVIOUS MATCHED SEGMENT IS NOT TOUCHING BOUNDARIES OF CURRENT MATCHED SEGMENT
+                if z[k] < right - i + 1:
+                    z[i] = z[k]
+                else:
+                    left = i
+                    while right < n and s[right-left] == s[right]:
+                        right += 1
+                    z[i] = right - left
+                    right -= 1
+        return sum(z)
 ```

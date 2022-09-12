@@ -11693,26 +11693,103 @@ class Solution:
 
 ## 2407. Longest Increasing Subsequence II
 
-### Solution 1:
+### Solution 1:  max segment tree + max range queries + LIS ending at each element
 
 ```py
+class SegmentTree:
+    def __init__(self, n: int, neutral: int, func: Callable[[int, int], int], is_count: bool = False):
+        self.neutral = neutral
+        self.size = 1
+        self.is_count = is_count
+        self.func = func
+        self.n = n
+        while self.size<n:
+            self.size*=2
+        self.tree = [0 for _ in range(self.size*2)]
+        
+    def update(self, idx: int, val: int) -> None:
+        idx += self.size - 1
+        self.tree[idx] = self.tree[idx] + val if self.is_count else val
+        while idx > 0:
+            idx -= 1
+            idx >>= 1
+            self.tree[idx] = self.func(self.tree[2*idx+1], self.tree[2*idx+2])
+            
+    def query(self, l: int, r: int) -> int:
+        stack = [(0, self.size, 0)]
+        result = 0
+        while stack:
+            # BOUNDS FOR CURRENT INTERVAL and idx for tree
+            left_bound, right_bound, idx = stack.pop()
+            # OUT OF BOUNDS
+            if left_bound >= r or right_bound <= l: continue
+            # CHECK IF CURRENT BOUNDS ARE WITHIN THE l and r
+            if left_bound >= l and right_bound <= r:
+                result = self.func(result, self.tree[idx])
+                continue
+            mid = (left_bound + right_bound)>>1
+            stack.extend([(left_bound, mid, 2*idx+1), (mid, right_bound, 2*idx+2)])
+        return result
+    
+    def __repr__(self) -> str:
+        return f"array: {self.tree}"
 
+class Solution:
+    def lengthOfLIS(self, nums: List[int], k: int) -> int:
+        max_func = lambda x, y: x if x > y else y
+        n, ans = max(nums), 1
+        maxSeg = SegmentTree(n+1, -inf, max_func)
+        for num in nums:
+            premax = maxSeg.query(max(0, num - k), num)
+            if premax + 1 > ans:
+                ans = premax+1
+            maxSeg.update(num, premax + 1)
+        return ans
 ```
 
-##
+## 948. Bag of Tokens
 
-### Solution 1:
+### Solution 1:  sort + greedy + place face up cards with lowest power consumption + place face down cards with highest power consumption
 
 ```py
-
+class Solution:
+    def bagOfTokensScore(self, tokens: List[int], power: int) -> int:
+        tokens.sort()
+        n = len(tokens)
+        maxScore, left, right, score = 0, 0, n-1, 0
+        while left <= right:
+            while left <= right and power >= tokens[left]:
+                power -= tokens[left]
+                left += 1
+                score += 1
+            maxScore = max(maxScore, score)
+            if score == 0: break
+            power += tokens[right] 
+            right -= 1
+            score -= 1
+        return maxScore
 ```
 
-##
+## 1383. Maximum Performance of a Team
 
-### Solution 1:
+### Solution 1:  minheap + sort based on efficiency since taking minimum
 
 ```py
-
+class Solution:
+    def maxPerformance(self, n: int, speed: List[int], efficiency: List[int], k: int) -> int:
+        mod = int(1e9)+7
+        maxPerf = 0
+        stats = sorted([(eff, spd) for eff, spd in zip(efficiency, speed)], reverse=True)
+        speed_sum = 0
+        minheap = []
+        for eff, spd in stats:
+            speed_sum += spd
+            heappush(minheap, spd)
+            if len(minheap) > k:
+                prev_spd = heappop(minheap)
+                speed_sum -= prev_spd
+            maxPerf = max(maxPerf, eff*speed_sum)
+        return maxPerf%mod
 ```
 
 ##
