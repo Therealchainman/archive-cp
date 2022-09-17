@@ -11695,6 +11695,8 @@ class Solution:
 
 ### Solution 1:  max segment tree + max range queries + LIS ending at each element
 
+![lis](images/lis2.png)
+
 ```py
 class SegmentTree:
     def __init__(self, n: int, neutral: int, func: Callable[[int, int], int], is_count: bool = False):
@@ -11790,6 +11792,88 @@ class Solution:
                 speed_sum -= prev_spd
             maxPerf = max(maxPerf, eff*speed_sum)
         return maxPerf%mod
+```
+
+## 1457. Pseudo-Palindromic Paths in a Binary Tree
+
+### Solution 1:  bitmask + queue + deque + bfs
+
+```py
+class Solution:
+    def pseudoPalindromicPaths (self, root: Optional[TreeNode]) -> int:
+        result = 0
+        is_leaf = lambda node: not node.left and not node.right
+        isppalindrome = lambda mask: mask.bit_count()<=1
+        queue = deque([(root, 0)])
+        while queue:
+            node, bitmask = queue.popleft()
+            bitmask ^= (1<<(node.val-1))
+            if is_leaf(node):
+                result += isppalindrome(bitmask)
+            queue.extend([(child_node, bitmask) for child_node in filter(None, (node.left, node.right))])
+        return result
+```
+
+## 2007. Find Original Array From Doubled Array
+
+### Solution 1:  bfs + deque
+
+```py
+class Solution:
+    def findOriginalArray(self, changed: List[int]) -> List[int]:
+        queue = deque()
+        result = []
+        for num in sorted(changed):
+            if queue and num == queue[0]:
+                queue.popleft()
+            else:
+                queue.append(2*num)
+                result.append(num)
+        return result if len(queue) == 0 else []
+```
+
+## 1770. Maximum Score from Performing Multiplication Operations
+
+### Solution 1:  iterative dynamic programming
+
+![dp](images/maximum_score_from_performing_multiplication_operations.png)
+
+```py
+class Solution:
+    def maximumScore(self, nums: List[int], multipliers: List[int]) -> int:
+        n, m = len(nums), len(multipliers)
+        memo = [[0]*(m+1) for _ in range(m+1)]
+        for i in reversed(range(m)):
+            for left in range(i+1):
+                right = left+n-i-1
+                take_left = multipliers[i]*nums[left]+memo[i+1][left+1]
+                take_right = multipliers[i]*nums[right]+memo[i+1][left]
+                memo[i][left] = max(take_left, take_right)
+        return memo[0][0]
+```
+
+## 336. Palindrome Pairs
+
+### Solution 1:
+
+```py
+
+```
+
+## 393. UTF-8 Validation
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
 ```
 
 ##

@@ -3,6 +3,7 @@ This is an implementation of the Z algorithm for computing matching substrings i
 This part will return the z-arra which can be used for a few things.
 """
 
+
 def z_algorithm(s: str) -> list[int]:
     n = len(s)
     z = [0]*n
