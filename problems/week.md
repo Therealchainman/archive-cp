@@ -11854,13 +11854,213 @@ class Solution:
 
 ## 336. Palindrome Pairs
 
+### Solution 1:  three cases to solve
+
+![palindrome pairs](images/palindrome_pairs.png)
+
+```py
+class Solution:
+    def is_palindrome(self, word: str) -> bool:
+        left, right = 0, len(word)-1
+        while left < right and word[left] == word[right]:
+            left += 1
+            right -= 1
+        return left >= right
+    def palindromePairs(self, words: List[str]) -> List[List[int]]:
+        n = len(words)
+        word_dict = {word: i for i, word in enumerate(words)}
+        result = set()
+        for i in range(n):
+            for j in range(len(words[i])+1):
+                prefix_word = words[i][:j]
+                suffix_palindrome = words[i][j:]
+                rev_word1 = prefix_word[::-1]
+                if rev_word1 in word_dict and word_dict[rev_word1] != i and self.is_palindrome(suffix_palindrome):
+                    result.add((i, word_dict[rev_word1]))
+                prefix_palindrome = prefix_word
+                suffix_word = suffix_palindrome
+                rev_word2 = suffix_word[::-1]
+                if rev_word2 in word_dict and word_dict[rev_word2] != i and self.is_palindrome(prefix_palindrome):
+                    result.add((word_dict[rev_word2], i))
+        return result
+```
+
+## 393. UTF-8 Validation
+
+### Solution 1:  bit manipulation + bitmask
+
+```py
+class Solution:
+    def validUtf8(self, data: List[int]) -> bool:
+        filler_bitmask = int('10', 2)
+        is_1byte = lambda mask: (mask>>7)==0
+        def is_nbyte(n, cand):
+            mask = ''
+            for _ in range(n):
+                mask += '1'
+            mask += '0'
+            shifts = 7-n
+            return (cand>>shifts) == int(mask,2)
+        n = len(data)
+        i = 0
+        while i < n:
+            d = data[i]
+            if is_1byte(d):
+                i += 1
+                continue
+            b = None
+            for j in range(2,5):
+                if is_nbyte(j,d):
+                    b = j
+                    break
+            if b is None: return False
+            i += 1
+            for _ in range(b-1):
+                if i == n: return False
+                if (data[i]>>6) != filler_bitmask: return False
+                i += 1
+
+        return True
+```
+
+## 609. Find Duplicate File in System
+
+### Solution 1:  regex for pattern matching in strings + dictionary + filter
+
+```py
+class Solution:
+    def findDuplicate(self, paths: List[str]) -> List[List[str]]:
+        paths_dict = defaultdict(list)
+        for path in paths:
+            directory = path.split()[0]
+            for file_name, file_content in zip(re.findall('\w*\.txt', path), re.findall('\(.*?\)', path)):
+                file_path = f'{directory}/{file_name}'
+                paths_dict[file_content].append(file_path)
+        return filter(lambda lst: len(lst)>1, paths_dict.values())
+```
+
+## 2413. Smallest Even Multiple
+
+### Solution 1:  greedy + simple cases
+
+```py
+class Solution:
+    def smallestEvenMultiple(self, n: int) -> int:
+        return n if n%2==0 else 2*n
+```
+
+## 2414. Length of the Longest Alphabetical Continuous Substring
+
+### Solution 1:  two pointer
+
+```py
+class Solution:
+    def longestContinuousSubstring(self, s: str) -> int:
+        cur = result = 1
+        n = len(s)
+        for i in range(1,n):
+            if ord(s[i]) == ord(s[i-1])+1:
+                cur += 1
+            else:
+                cur = 1
+            result = max(result, cur)
+        return result
+```
+
+## 2415. Reverse Odd Levels of Binary Tree
+
+### Solution 1:  dictionary + dfs
+
+```py
+class Solution:
+    def reverseOddLevels(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        levels = defaultdict(list)
+        def dfs(node: Optional[TreeNode], depth: int = 0) -> None:
+            if not node: return
+            levels[depth].append(node)
+            dfs(node.left,depth+1)
+            dfs(node.right,depth+1)
+        dfs(root)
+        for level in levels.keys():
+            if level&1:
+                row = levels[level]
+                values = [node.val for node in row]
+                for node, val in zip(row, reversed(values)):
+                    node.val = val
+        return root
+```
+
+## 2416. Sum of Prefix Scores of Strings
+
+### Solution 1:  rolling hash + cannot use mod 1e9+7 because it somehow has a hash collision
+
+```py
+class Solution:
+    def sumPrefixScores(self, words: List[str]) -> List[int]:
+        p = 31
+        coefficient = lambda x: ord(x) - ord('a') + 1
+        n = len(words)
+        prefix_dict = defaultdict(list)
+        for i, word in enumerate(words):
+            rolling_hash = 0
+            for ch in word:
+                rolling_hash = rolling_hash*p+coefficient(ch)
+                prefix_dict[rolling_hash].append(i)
+        answer = [0]*n
+        for array in prefix_dict.values():
+            cnt = len(array)
+            for i in array:
+                answer[i] += cnt
+        return answer
+```
+
+### Solution 2:  trie datastructure
+
+```py
+class TrieNode:
+    def __init__(self, count_: int = 0):
+        self.children = defaultdict(TrieNode)
+        self.count = count_
+        
+    def __repr__(self) -> str:
+        return f'count: {self.count}, children: {self.children}'
+        
+class Solution:
+    def sumPrefixScores(self, words: List[str]) -> List[int]:
+        root = TrieNode()
+        for word in words:
+            node = root
+            for ch in word:
+                node.children[ch].count += 1
+                node = node.children[ch]
+        answer = []
+        for word in words:
+            cnt = 0
+            node = root
+            for ch in word:
+                node = node.children[ch]
+                cnt += node.count
+            answer.append(cnt)
+        return answer
+```
+
+##
+
 ### Solution 1:
 
 ```py
 
 ```
 
-## 393. UTF-8 Validation
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
 
 ### Solution 1:
 

@@ -2,6 +2,8 @@
 This works for when you have only lowercase english letters, 
 This is an implementation of a rolling hash to find pattern in 
 string
+
+This can lead to collision sometimes, so it is 100% guaranteed to work
 """
 
 def find_pattern_rolling_hash(string: str, pattern: str) -> int:
