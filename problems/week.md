@@ -12044,6 +12044,339 @@ class Solution:
         return answer
 ```
 
+## 839. Similar String Groups
+
+### Solution 1:  union find + count number of disjoint connected components
+
+```py
+class UnionFind:
+    def __init__(self,n: int):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    
+    def find(self,i: int) -> int:
+        if i==self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+
+    def union(self,i: int,j: int) -> bool:
+        i, j = self.find(i), self.find(j)
+        if i!=j:
+            if self.size[i] < self.size[j]:
+                i,j=j,i
+            self.parent[j] = i
+            self.size[i] += self.size[j]
+            return True
+        return False
+    def num_connected_components(self) -> int:
+        return len(set(map(self.find, self.parent)))
+    def __repr__(self) -> str:
+        return f'parents: {[(i, parent) for i, parent in enumerate(self.parent)]}, sizes: {self.size}'
+class Solution:
+    def is_similar(self, word1: str, word2: str) -> bool:
+        num_swaps = 0
+        for x,y in zip(word1,word2):
+            if x!=y:
+                num_swaps += 1
+            if num_swaps > 2: return False
+        return True
+    def numSimilarGroups(self, strs: List[str]) -> int:
+        n = len(strs)
+        dsu = UnionFind(n)
+        for i, j in product(range(n),repeat=2):
+            if i == j or dsu.find(i) == dsu.find(j): continue
+            if self.is_similar(strs[i], strs[j]):
+                dsu.union(i,j)
+        return dsu.num_connected_components()
+
+```
+
+## 269. Alien Dictionary
+
+### Solution 1:  topological sort + cycle detection + dfs graph traversal with recursion
+
+```py
+class Solution:
+    def alienOrder(self, words: List[str]) -> str:
+        graph = defaultdict(list)
+        indegrees = Counter()
+        characters = set()
+        for word in words:
+            characters.update(word)
+        def dfs(word_group: List[str]) -> bool:
+            cur_chars = [cword[0] for cword in word_group]
+            for x, y in zip(cur_chars, cur_chars[1:]):
+                if x != y:
+                    indegrees[y] += 1
+                    graph[x].append(y)
+            result = True
+            for key, cand_next_batch in groupby(word_group, key=lambda word: word[0]):
+                next_batch = []
+                for word in cand_next_batch:
+                    if len(word) == 1 and next_batch: return False
+                    if len(word) > 1:
+                        next_batch.append(word[1:])
+                result &= dfs(next_batch)
+            return result
+        if not dfs(words): return ''
+        queue = deque()
+        for char in characters:
+            if indegrees[char] == 0:
+                queue.append(char)
+        alien_alphabet = []
+        while queue:
+            char = queue.popleft()
+            alien_alphabet.append(char)
+            for nei_char in graph[char]:
+                indegrees[nei_char] -= 1
+                if indegrees[nei_char] == 0:
+                    queue.append(nei_char)
+        return '' if any(ind > 0 for ind in indegrees.values()) else ''.join(alien_alphabet)
+```
+
+## 1494. Parallel Courses II
+
+### Solution 1:  topological sort using dependency masks + memoization to minimize semesters for any courses taken + bfs + reduce with using | bit operator
+
+```py
+class Solution:
+    def minNumberOfSemesters(self, n: int, dependencies: List[List[int]], k: int) -> int:
+        memo = [16]*(1<<n)
+        dep_masks = [0]*n
+        for u, v in dependencies:
+            u -= 1
+            v -= 1
+            dep_masks[v] |= (1<<u)
+        queue = deque([(0, 0)]) # (mask, semesters)
+        end_mask = (1<<n)-1
+        while queue:
+            mask, semester = queue.popleft()
+            if mask == end_mask: return semester
+            semester += 1
+            courses = []
+            for course in range(n):
+                if (mask>>course)&1: continue # course has already been taken
+                if (dep_masks[course]&mask) != dep_masks[course]: continue # prerequisites not complete for course
+                courses.append(course)
+            if len(courses) <= k: # take all courses
+                mask |= reduce(lambda x, y: x | (1<<y), courses, 0) # mark all courses as taken
+                if semester < memo[mask]:
+                    memo[mask] = semester
+                    queue.append((mask, semester))
+            else:
+                for course_plan in combinations(courses, k):
+                    course_plan = list(course_plan)
+                    mask_plan = mask | reduce(lambda x, y: x | (1<<y), course_plan, 0)
+                    if semester < memo[mask_plan]:
+                        memo[mask_plan] = semester
+                        queue.append((mask_plan, semester))
+        return -1
+```
+
+## 685. Redundant Connection II
+
+### Solution 1:  remove each edge and perform a topological sort on the rooted tree + filterfalse
+
+```py
+class Solution:
+    def findRedundantDirectedConnection(self, edges: List[List[int]]) -> List[int]:
+        n = len(edges)
+        edges = edges[::-1]
+        indegrees = [0]*(n+1)
+        graph = defaultdict(list)
+        for u, v in edges:
+            indegrees[v] += 1
+            graph[u].append(v)
+        root_node = 0
+        for i in range(1,n+1):
+            if indegrees[i] == 0:
+                root_node = i
+        two_root_nodes = lambda node: indegrees[node] == 1 and root_node != 0
+        no_root_nodes = lambda node: indegrees[node] > 1 and root_node == 0
+        for u, v in filterfalse(lambda edge: two_root_nodes(edge[1]) or no_root_nodes(edge[1]), edges):
+            temp_indegrees = indegrees[:]
+            temp_indegrees[v] -= 1
+            queue = deque()
+            if root_node != 0:
+                queue.append(root_node)
+            if temp_indegrees[v] == 0:
+                queue.append(v)
+            cnt_nodes = 0
+            while queue:
+                node = queue.popleft()
+                cnt_nodes += 1
+                for nei_node in graph[node]:
+                    if [node, nei_node] == [u,v]: continue # removed edge
+                    temp_indegrees[nei_node] -= 1
+                    if temp_indegrees[nei_node] == 0:
+                        queue.append(nei_node)
+            if cnt_nodes == n: return [u,v]
+        return [0,0]
+```
+
+## 2421. Number of Good Paths
+
+### Solution 1:  union find + undirected graph + sort
+
+```py
+class UnionFind:
+    def __init__(self,n: int):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    
+    def find(self,i: int) -> int:
+        if i==self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+
+    def union(self,i: int,j: int) -> bool:
+        i, j = self.find(i), self.find(j)
+        if i!=j:
+            if self.size[i] < self.size[j]:
+                i,j=j,i
+            self.parent[j] = i
+            self.size[i] += self.size[j]
+            return True
+        return False
+    def __repr__(self) -> str:
+        return f'parents: {[(i, parent) for i, parent in enumerate(self.parent)]}, sizes: {self.size}'
+class Solution:
+    def numberOfGoodPaths(self, vals: List[int], edges: List[List[int]]) -> int:
+        n = len(vals)
+        adjList = [[] for _ in range(n)] # adjacency representation
+        for u, v in edges:
+            adjList[u].append(v)
+            adjList[v].append(u)
+        dsu = UnionFind(n)
+        order_nodes = defaultdict(list)
+        for i, v in enumerate(vals):
+            order_nodes[v].append(i)
+        result = 0
+        for val in sorted(order_nodes.keys()):
+            nodes_list = order_nodes[val]
+            for node in nodes_list:
+                for nei_nodes in adjList[node]:
+                    if vals[nei_nodes] <= val:
+                        dsu.union(node, nei_nodes)
+            cnt = Counter()
+            for node in nodes_list:
+                root_node = dsu.find(node)
+                cnt[root_node] += 1
+                result += cnt[root_node]
+        return result
+```
+
+## 2417. Closest Fair Integer
+
+### Solution 1:  count parity of integer + brute force on special case + special state
+
+```py
+class Solution:
+    def odd_len(self, len_: int) -> int:
+        size = (len_+1)//2
+        integer_list = [1]+[0]*(size)+[1]*(size-1)
+        return int(''.join(map(str,integer_list)))
+    def count_parity(self, integer: int) -> Tuple[int,int]:
+        odd = sum(1 for dig in map(int, str(integer)) if dig&1)
+        even = sum(1 for dig in map(int, str(integer)) if dig%2==0)
+        return odd, even 
+    def closestFair(self, n: int) -> int:
+        odd, even = self.count_parity(n)
+        while even != odd:
+            len_n = len(str(n))
+            n = self.odd_len(len_n) if len_n&1 else n + 1
+            odd, even = self.count_parity(n)
+        return n
+```
+
+## 2420. Find All Good Indices
+
+### Solution 1:  set union + monotonic stack
+
+```py
+class Solution:
+    def build(self, it: Iterable[int], nums: List[int], k: int) -> Iterable[int]:
+        stack = []
+        for i in it:
+            if len(stack) >= k:
+                yield i
+            if stack and nums[stack[-1]] < nums[i]:
+                stack.clear()
+            stack.append(i)
+    def goodIndices(self, nums: List[int], k: int) -> List[int]:
+        n = len(nums)
+        g1 = self.build(range(n), nums, k)
+        g2 = self.build(reversed(range(n)), nums, k)
+        return sorted(list(set(g1)&set(g2)))
+```
+
+## 2419. Longest Subarray With Maximum Bitwise AND
+
+### Solution 1:  maximum value will be the max bitwise and in the array, so just find longest group with that key
+
+```py
+class Solution:
+    def longestSubarray(self, nums: List[int]) -> int:
+        m = max(nums)
+        longest = 0
+        for k, g in groupby(nums):
+            if k == m:
+                longest = max(longest, len(list(g)))
+        return longest
+```
+
+## 2418. Sort the People
+
+### Solution 1:  sort + zip
+
+```py
+class Solution:
+    def sortPeople(self, names: List[str], heights: List[int]) -> List[str]:
+        return [names[i] for i in sorted(range(len(names)), key=lambda i: heights[i], reverse=True)]
+```
+
+## 622. Design Circular Queue
+
+### Solution 1:  two pointers for front and rear + array
+
+```py
+class MyCircularQueue:
+
+    def __init__(self, k: int):
+        self.rear_ptr = -1
+        self.front_ptr = self.cnt = 0
+        self.cap = k
+        self.arr = [0]*k
+
+    def enQueue(self, value: int) -> bool:
+        if self.cnt == self.cap: return False
+        self.rear_ptr = (self.rear_ptr+1)%self.cap
+        self.arr[self.rear_ptr] = value
+        self.cnt += 1
+        return True
+
+    def deQueue(self) -> bool:
+        if self.cnt == 0: return False
+        self.front_ptr = (self.front_ptr+1)%self.cap
+        self.cnt -= 1
+        return True
+        
+
+    def Front(self) -> int:
+        return self.arr[self.front_ptr] if self.cnt > 0 else -1
+
+    def Rear(self) -> int:
+        return self.arr[self.rear_ptr] if self.cnt > 0 else -1
+
+    def isEmpty(self) -> bool:
+        return self.cnt == 0
+
+    def isFull(self) -> bool:
+        return self.cnt == self.cap
+```
+
 ##
 
 ### Solution 1:

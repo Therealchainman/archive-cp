@@ -25,6 +25,8 @@ class UnionFind:
         return self.size[self.find(0)] == len(self.parent)
     def is_same_connected_components(self, i: int, j: int) -> bool:
         return self.find(i) == self.find(j)
+    def num_connected_components(self) -> int:
+        return len(set(map(self.find, self.parent)))
     def __repr__(self) -> str:
         return f'parents: {[(i, parent) for i, parent in enumerate(self.parent)]}, sizes: {self.size}'
 
