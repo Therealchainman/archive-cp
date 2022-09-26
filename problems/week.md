@@ -12377,23 +12377,104 @@ class MyCircularQueue:
         return self.cnt == self.cap
 ```
 
-##
+## 913. Cat and Mouse
 
 ### Solution 1:
 
 ```py
-
+class Solution:
+    def catMouseGame(self, graph: List[List[int]]) -> int:
+        mouse_wins, cat_wins, draw = 0, 2, 1
+        mouse_start_pos, cat_start_pos, hole_pos, start_turn = 1, 2, 0, 0
+        initial_node = (mouse_start_pos, cat_start_pos, start_turn)
+        queue = deque([initial_node])
+        visited = set([initial_node])
+        previous_nodes = set()
+        path = []
+        reverse_adj_list = defaultdict(list)
+        outdegrees = Counter()
+        memo = dict()
+        cnt = 0
+        def get_neighbors(pos):
+            for nei_pos in graph[pos]:
+                yield nei_pos
+        is_cat_turn = lambda turn: turn&1
+        is_mouse_turn = lambda turn: turn%2==0
+        while queue:
+            node = queue.popleft()
+            mouse_pos, cat_pos, turn = node
+            if mouse_pos == cat_pos: 
+                memo[node] = cat_wins
+                continue
+            if mouse_pos == hole_pos:
+                memo[node] = mouse_wins
+                continue
+            if (mouse_pos, cat_pos, turn%2) in previous_nodes: 
+                memo[node] = draw
+                continue
+            previous_nodes.add((mouse_pos, cat_pos, turn%2))
+            path.append(node)
+            neighbors = get_neighbors(mouse_pos) if is_mouse_turn(turn) else get_neighbors(cat_pos)
+            for nei_pos in neighbors:
+                if is_cat_turn(turn) and nei_pos == hole_pos: continue
+                nei_node = (nei_pos, cat_pos, turn+1) if is_mouse_turn(turn) else (mouse_pos, nei_pos, turn+1)
+                reverse_adj_list[nei_node].append(node)
+                outdegrees[node] += 1
+                if nei_node in visited: continue
+                visited.add(nei_node)
+                queue.append(nei_node)
+        queue = deque(memo.keys())
+        while queue:
+            node = queue.popleft()
+            _, _, turn = node
+            if turn&1:
+                for nei_node in reverse_adj_list[node]:
+                    outdegrees[nei_node] -= 1
+                    memo[nei_node] = min(memo.get(nei_node, inf), memo[node])
+                    if outdegrees[nei_node] == 0:
+                        queue.append(nei_node)
+            else:
+                for nei_node in reverse_adj_list[node]:
+                    outdegrees[nei_node] -= 1
+                    memo[nei_node] = max(memo.get(nei_node, -inf), memo[node])
+                    if outdegrees[nei_node] == 0:
+                        queue.append(nei_node)
+        result = memo[(1,2,0)]
+        return result if result == 2 else result^1
 ```
 
-##
+## 1192. Critical Connections in a Network
 
-### Solution 1:
+### Solution 1:  tarjan's algorithm + dfs
 
 ```py
-
+class Solution:
+    def criticalConnections(self, n: int, connections: List[List[int]]) -> List[List[int]]:
+        adjList = [[] for _ in range(n)]
+        for u, v in connections:
+            adjList[u].append(v)
+            adjList[v].append(u)
+        unvisited = inf
+        self.disc = [unvisited]*n
+        self.low = [unvisited]*n
+        self.bridges = []
+        self.cnt = 0
+        def dfs(node: int = 0, parent_node: Optional[int] = None) -> None:
+            if self.disc[node] != unvisited:
+                return
+            self.disc[node] = self.low[node] = self.cnt
+            self.cnt += 1
+            for nei_node in adjList[node]:
+                if nei_node == parent_node: continue
+                dfs(nei_node, node)
+                if self.disc[node] < self.low[nei_node]:
+                    self.bridges.append([node, nei_node])
+                self.low[node] = min(self.low[node], self.low[nei_node])
+        dfs()
+        return self.bridges
 ```
 
-##
+## 834. Sum of Distances in Tree
 
 ### Solution 1:
 

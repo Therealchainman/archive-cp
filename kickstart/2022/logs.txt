@@ -1,0 +1,12 @@
+maxheap: [(-3, 1), (-2, 1)]
+profit: 3
+current_day: 2
+maxheap: [(-10, 1), (-2, 1)]
+profit: 13
+current_day: 1
+maxheap: [(-5, 1), (-2, 1)]
+profit: 18
+current_day: 0
+maxheap: [(-1, 1)]
+profit: 1
+current_day: 3
