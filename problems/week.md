@@ -12662,33 +12662,72 @@ class Solution:
         return result
 ```
 
-##
+## 2427. Number of Common Factors
 
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
+### Solution 1: math
 
 ```py
-
+class Solution:
+    def commonFactors(self, a: int, b: int) -> int:
+        if a > b:
+            a, b = b, a
+        return sum(1 for i in range(1,a+1) if a%i==0 and b%i==0)
 ```
 
-##
+## 2428. Maximum Sum of an Hourglass
 
-### Solution 1:
+### Solution 1:  matrix
 
 ```py
-
+class Solution:
+    def maxSum(self, grid: List[List[int]]) -> int:
+        R, C = len(grid), len(grid[0])
+        maxsum = 0
+        def getHour(r: int, c: int) -> int:
+            return grid[r-1][c-1]+grid[r-1][c]+grid[r-1][c+1]+grid[r][c]+grid[r+1][c-1]+grid[r+1][c]+grid[r+1][c+1]
+        for r, c in product(range(1,R-1), range(1,C-1)):
+            maxsum = max(maxsum, getHour(r,c))
+        return maxsum
 ```
 
-##
+## 2429. Minimize XOR
 
-### Solution 1:
+### Solution 1:  greedy + bit manipulation
+
+```py
+class Solution:
+    def minimizeXor(self, num1: int, num2: int) -> int:
+        num_bits = num2.bit_count()
+        result = 0
+        for i in reversed(range(31)):
+            result<<=1
+            if (num1>>i)&1 and num_bits>0:
+                result |= 1
+                num_bits -= 1
+            if num_bits > i:
+                result |= 1
+                num_bits -= 1
+        return result
+```
+
+## 2430. Maximum Deletions on a String
+
+### Solution 1: dynamic programming + string slicing + o(n^3) but still passes if you check the worst case when it is all just a single character
+
+```py
+class Solution:
+    def deleteString(self, s: str) -> int:
+        n = len(s)
+        if len(set(s)) == 1: return n
+        dp = [1]*n
+        for i in range(n-2,-1,-1):
+            for j in range(1,(n-i)//2+1):
+                if s[i:i+j] == s[i+j:i+2*j]:
+                    dp[i] = max(dp[i], dp[i+j]+1)
+        return dp[0]
+```
+
+### Solution 2:  O(n^2) + two dynamic programming + longest common prefix
 
 ```py
 
