@@ -1,5 +1,7 @@
 import os,sys
 from io import BytesIO, IOBase
+from typing import List
+import math
 
 # Fast IO Region
 BUFSIZE = 8192
@@ -42,34 +44,51 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
+
+class BinaryLift:
+    """
+    This binary lift function works on any undirected graph that is composed of
+    an adjacency list defined by graph
+    """
+    def __init__(self, node_count: int, adj_list: List[List[int]]):
+        self.size = node_count
+        self.parents = adj_list
+        # ITERATE THROUGH EACH POSSIBLE TREE
+        self.maxAncestor = 32 # set it so that only up to 2^32th ancestor
+        self.jump = [[-1]*self.maxAncestor for _ in range(self.size)]
+        self.build_sparse_table()
+        
+    def build_sparse_table(self) -> None:
+        """
+        builds the jump and maxWeightJump sparse arrays for computing the 2^jth ancestor of ith node in any given query
+        """
+        for j in range(self.maxAncestor):
+            for i in range(self.size):
+                if j == 0:
+                    self.jump[i][j] = self.parents[i]
+                elif self.jump[i][j-1] != -1:
+                    prev_ancestor = self.jump[i][j-1]
+                    self.jump[i][j] = self.jump[prev_ancestor][j-1]
+
+    
+    def kthAncestor(self, node: int, k: int) -> int:
+        while node != -1 and k > 0:
+            j = int(math.log2(k))
+            node = self.jump[node][j]
+            k -= (1<<j)
+        return node
+
 def main():
-    text = input()
-    pat = input()
-    sentinel_char = '$'
-    s = pat + sentinel_char + text
-    sLen = len(s)
-    patLen = len(pat)
-    z = [0]*sLen
-    left=right=0
-    for i in range(1,sLen):
-        if i>right:
-            left=right=i
-            while right<sLen and s[right-left]==s[right]:
-                right+=1
-            z[i]=right-left
-            right-=1
-        else:
-            k=i-left
-            if z[k]<right-i+1:
-                z[i]=z[k]
-            else:
-                left=i
-                while right<sLen and s[right-left]==s[right]:
-                    right+=1
-                z[i]=right-left
-                right-=1
-    return z.count(patLen)
+    n, q = map(int,input().split())
+    t = list(map(lambda x: int(x)-1,input().split()))
+    adj_list = [0]*n
+    for i, v in enumerate(t):
+        adj_list[i] = v
+    binary_lift = BinaryLift(n, adj_list)
+    for _ in range(q):
+        x, k = map(int, input().split())
+        print(binary_lift.kthAncestor(x-1,k)+1)
 
 
 if __name__ == '__main__':
-    print(main())
+    main()

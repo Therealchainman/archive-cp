@@ -96,6 +96,8 @@ class BinaryLift:
 """
 Binary Lift that was used on a forest datastructure (multiple trees).  It also computes the maximum edge weight till reaches the lca.
 That is assumed to be the maximum edge weight in the path.  
+
+requires 0-indexed nodes, so you may need to perform a coordinate compression
 """
 
 class maxBinaryLift:

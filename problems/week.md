@@ -12482,6 +12482,226 @@ class Solution:
 
 ```
 
+## 1345. Jump Game IV
+
+### Solution 1:
+
+```py
+class Solution:
+    def minJumps(self, arr: List[int]) -> int:
+        n = len(arr)
+        jump_locations = defaultdict(list)
+        for i, num in enumerate(arr):
+            jump_locations[num].append(i)
+        queue = deque([(0,0)])
+        visited = [0]*n
+        visited[0] = 1
+        while queue:
+            index, jump = queue.popleft()
+            if index == n-1: return jump
+            if index > 0 and not visited[index-1]:
+                visited[index-1] = 1
+                queue.append((index-1,jump+1))
+            if index < n-1 and not visited[index+1]:
+                visited[index+1]=1
+                queue.append((index+1,jump+1))
+            for nei_index in jump_locations[arr[index]]:
+                if visited[nei_index]: continue
+                visited[nei_index] = 1
+                queue.append((nei_index,jump+1))
+            jump_locations.pop(arr[index])
+        return -1
+```
+
+## 2423. Remove Letter To Equalize Frequency
+
+### Solution 1:  counter + set
+
+```py
+class Solution:
+    def equalFrequency(self, word: str) -> bool:
+        freq = Counter(word)
+        for ch in set(word):
+            freq[ch] -= 1
+            if freq[ch] == 0:
+                freq.pop(ch)
+            if len(set(freq.values())) == 1: return True
+            freq[ch] += 1
+        return False
+```
+
+## 2424. Longest Uploaded Prefix
+
+### Solution 1:  array + pointer
+
+```py
+class LUPrefix:
+
+    def __init__(self, n: int):
+        self.video_arr = [0]*(n+1)
+        self.prefix_ptr = 0
+
+    def upload(self, video: int) -> None:
+        self.video_arr[video-1] = 1
+
+    def longest(self) -> int:
+        while self.video_arr[self.prefix_ptr] == 1:
+            self.prefix_ptr += 1
+        return self.prefix_ptr
+```
+
+## 2425. Bitwise XOR of All Pairings
+
+### Solution 1:  boolean algebra + bit manipulation
+
+```py
+class Solution:
+    def xorAllNums(self, nums1: List[int], nums2: List[int]) -> int:
+        n1 = reduce(xor, nums1) if len(nums2)&1 else 0
+        n2 = reduce(xor, nums2) if len(nums1)&1 else 0
+        return n1^n2
+```
+
+## 2426. Number of Pairs Satisfying Inequality
+
+### Solution 1:  sorted list + binary search + backwards iteration
+
+```py
+from sortedcontainers import SortedList
+class Solution:
+    def numberOfPairs(self, nums1: List[int], nums2: List[int], diff: int) -> int:
+        seenList = SortedList()
+        n = len(nums1)
+        result = 0
+        for i in reversed(range(n)):
+            j = seenList.bisect_left(nums1[i]-nums2[i])
+            delta = len(seenList)-j
+            result += delta
+            seenList.add(nums1[i]-nums2[i]+diff)
+        return result
+```
+
+### Solution 2:  fenwick tree + binary indexed tree + find count of elements
+
+```py
+class FenwickTree:
+    def __init__(self, N):
+        self.sums = [0 for _ in range(N+1)]
+
+    def update(self, i, delta):
+
+        while i < len(self.sums):
+            self.sums[i] += delta
+            i += i & (-i)
+
+    def query(self, i):
+        res = 0
+        while i > 0:
+            res += self.sums[i]
+            i -= i & (-i)
+        return res
+
+    def __repr__(self):
+        return f"array: {self.sums}"
+    
+class Solution:
+    def numberOfPairs(self, nums1: List[int], nums2: List[int], diff: int) -> int:
+        n = len(nums1)
+        minval, maxval = min(nums1+nums2), max(nums1+nums2)
+        limit = 2*max(abs(minval), maxval)+1
+        fenwick_tree = FenwickTree(2*limit)
+        result = 0
+        for i, j in enumerate(reversed(range(n))):
+            query_val = min(2*limit-1, max(0, nums1[j]-nums2[j]-diff+limit-1))
+            countPairs = fenwick_tree.query(query_val)
+            delta = i-countPairs
+            result += delta
+            fenwick_tree.update(nums1[j]-nums2[j]+limit, 1)
+        return result
+```
+
+## 531. Lonely Pixel I
+
+### Solution 1:
+
+```py
+class Solution:
+    def findLonelyPixel(self, picture: List[List[str]]) -> int:
+        R, C = len(picture), len(picture[0])
+        black = 'B'
+        rows, cols = [0]*R, [0]*C
+        for r, c in product(range(R), range(C)):
+            pixel = picture[r][c]
+            rows[r] += (pixel==black)
+            cols[c] += (pixel==black)
+        return sum(1 for r, c in product(range(R), range(C)) if rows[r]==cols[c]==1 and picture[r][c]==black)
+```
+
+## 2422. Merge Operations to Turn Array Into a Palindrome
+
+### Solution 1:  greedy + two pointer
+
+```py
+class Solution:
+    def minimumOperations(self, nums: List[int]) -> int:
+        n = len(nums)
+        left, right = 0, n-1
+        result = 0
+        while left < right:
+            if nums[left] == nums[right]: 
+                left += 1
+                right -= 1
+            elif nums[left] < nums[right]:
+                result += 1
+                left += 1
+                nums[left] += nums[left-1]
+            else:
+                result += 1
+                right -= 1
+                nums[right] += nums[right+1]
+        return result
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
