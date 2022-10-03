@@ -12727,18 +12727,81 @@ class Solution:
         return dp[0]
 ```
 
-### Solution 2:  O(n^2) + two dynamic programming + longest common prefix
+### Solution 2:  O(n^2) + two dynamic programming + longest common substring
 
 ```py
-
+class Solution:
+    def deleteString(self, s: str) -> int:
+        n = len(s)
+        if len(set(s)) == 1: return n
+        dp = [1]*n
+        lcs = [[0]*(n+1) for _ in range(n+1)]
+        for i in range(n-1,-1,-1):
+            for j in range(i+1,n):
+                if s[i] == s[j]:
+                    lcs[i][j] = lcs[i+1][j+1]+1
+                if lcs[i][j] >= j-i:
+                    dp[i] = max(dp[i], dp[j]+1)
+        return dp[0]
 ```
 
-##
+### Solution 3: z array 
 
-### Solution 1:
+```cpp
+class Solution {
+public:
+    vector<int> z_function(string s) {
+    int n = (int) s.length();
+    vector<int> z(n);
+    for (int i = 1, l = 0, r = 0; i < n; ++i) {
+        if (i <= r)
+            z[i] = min (r - i + 1, z[i - l]);
+        while (i + z[i] < n && s[z[i]] == s[i + z[i]])
+            ++z[i];
+        if (i + z[i] - 1 > r)
+            l = i, r = i + z[i] - 1;
+    }
+    return z;
+    }
+    int deleteString(string s) {
+        int n = s.size();
+        string ns = "";
+        vector<int> dp(n,1), z;
+        for(int i=n-1;i>=0;i--){
+            ns = s[i] + ns;
+            z = z_function(ns);
+            for(int j=i+1;j<n && ((i + 2*(j-i)) <= n);j++){
+                if(z[j-i] >= (j-i))
+                    dp[i] = max(dp[i], 1+dp[j]);
+            }
+        }
+        return dp[0];
+    }
+};
+```
+
+## 1578. Minimum Time to Make Rope Colorful
+
+### Solution 1:  greedy + groupby + remove the largest value
 
 ```py
-
+class Solution:
+    def minCost(self, colors: str, neededTime: List[int]) -> int:
+        n = len(colors)
+        color_groups = groupby(colors)
+        result = 0
+        i = 0
+        while i < n:
+            _, grp = next(color_groups)
+            sz = len(list(grp))
+            groupSum = groupMaxCost = 0
+            for _ in range(sz):
+                groupMaxCost = max(groupMaxCost, neededTime[i])
+                groupSum += neededTime[i]
+                i += 1
+            if sz > 1:
+                result += groupSum - groupMaxCost
+        return result
 ```
 
 ##
