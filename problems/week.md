@@ -12804,12 +12804,23 @@ class Solution:
         return result
 ```
 
-##
+## 112. Path Sum
 
-### Solution 1:
+### Solution 1:  dfs + stack implementation + iterative implementation + modify tree to keep accumulated sum along each path from root
 
 ```py
-
+class Solution:
+    def hasPathSum(self, root: Optional[TreeNode], targetSum: int) -> bool:
+        if not root: return False
+        frontier = [root]
+        while frontier:
+            node = frontier.pop()
+            children = list(filter(None, (node.left, node.right)))
+            if len(children) == 0 and node.val == targetSum: return True
+            for child_node in children:
+                child_node.val += node.val
+                frontier.append(child_node)
+        return False
 ```
 
 ##
