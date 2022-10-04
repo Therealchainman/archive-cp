@@ -1,3 +1,8 @@
+# Planet Queries 1
+
+## Solution 1:  binary jumping or binary lifting + sparse table + kth ancestor
+
+```cpp
 #include <bits/stdc++.h>
 using namespace std;
 const int maxn = 2e5+5;
@@ -41,3 +46,4 @@ int main() {
         cout<<kthAncestor(x,k)<<endl;
     }
 }
+```
