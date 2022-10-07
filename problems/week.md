@@ -12823,17 +12823,48 @@ class Solution:
         return False
 ```
 
-##
+## 623. Add One Row to Tree
 
-### Solution 1:
+### Solution 1:  bfs + deque + sentinel root node
 
 ```py
-
+class Solution:
+    def addOneRow(self, root: Optional[TreeNode], val: int, depth: int) -> Optional[TreeNode]:
+        sentinel_root = TreeNode(0, root)
+        queue = deque([(sentinel_root, 1)])
+        while queue:
+            node, level = queue.popleft()
+            if level == depth:
+                node.left, node.right = TreeNode(val, node.left), TreeNode(val, None, node.right)
+                continue
+            for child_node in filter(None, (node.left, node.right)):
+                queue.append((child_node, level+1))
+        return sentinel_root.left
 ```
 
-##
+## 732. My Calendar III
 
-### Solution 1:
+### Solution 1:  boundary count + sort + linear scan
+
+```py
+class MyCalendarThree:
+
+    def __init__(self):
+        self.delta = Counter()
+        self.max_booking = 0
+        
+    def book(self, start: int, end: int) -> int:
+        self.delta[start] += 1
+        self.delta[end] -= 1
+        active = 0
+        for time in sorted(self.delta.keys()):
+            active += self.delta[time]
+            if active > self.max_booking:
+                self.max_booking = active
+        return self.max_booking
+```
+
+### Solution 2:  lazy segment tree datastructure
 
 ```py
 
