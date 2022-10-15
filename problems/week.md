@@ -12870,6 +12870,103 @@ class MyCalendarThree:
 
 ```
 
+## 16. 3Sum Closest
+
+### Solution 1:  two pointer approach + reduce variables
+
+```py
+class Solution:
+    def threeSumClosest(self, nums: List[int], target: int) -> int:
+        diff = inf
+        n = len(nums)
+        nums.sort()
+        for i, num in enumerate(nums):
+            if i > 0 and nums[i-1] == num: continue
+            left, right = i+1, n-1
+            while left < right:
+                sum_ = num+nums[left]+nums[right]
+                if abs(sum_-target) < abs(diff):
+                    diff = sum_-target
+                if sum_ < target:
+                    left += 1
+                else:
+                    right -= 1
+            if diff == 0: break
+        return target + diff
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
