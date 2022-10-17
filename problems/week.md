@@ -12895,52 +12895,403 @@ class Solution:
         return target + diff
 ```
 
-##
+## 1531. String Compression II
 
-### Solution 1:
+### Solution 1:  recursive dynammic programming
+
+```py
+class Solution:
+    def getLengthOfOptimalCompression(self, s: str, k: int) -> int:  
+        @cache
+        def dfs(index: int, last_char: str, last_char_cnt: int, delete: int) -> int:
+            if delete < 0: return inf
+            if index == len(s): return 0
+            delete_char = dfs(index+1,last_char,last_char_cnt,delete-1)
+            if s[index] != last_char:
+                keep_char = dfs(index+1,s[index],1,delete)+1
+            else:
+                keep_char = dfs(index+1,last_char,last_char_cnt+1,delete) + (1 if last_char_cnt in [1,9,99] else 0)
+            return min(keep_char, delete_char)
+        return dfs(0,'0',0,k)
+```
+
+## 2440. Create Components With Same Value
+
+### Solution 1:  factorization + math + bfs + topological sort + undirected tree
+
+```py
+class Solution:
+    def componentValue(self, nums: List[int], edges: List[List[int]]) -> int:
+        n = len(nums)
+        if n == 1: return 0
+        adj_list = [[] for _ in range(n)]
+        degrees = [0]*n
+        for u, v in edges:
+            adj_list[u].append(v)
+            adj_list[v].append(u)
+            degrees[u] += 1
+            degrees[v] += 1
+        # leaf nodes have indegree equal to 1
+        default_deque = deque([i for i, d in enumerate(degrees) if d == 1])
+        maxNum, sum_ = max(nums), sum(nums)
+        def component_values_work(target: int) -> bool:
+            values, deg, queue = nums[:], degrees[:], default_deque.copy()
+            while queue:
+                node = queue.popleft()
+                if deg[node] == 0: continue
+                deg[node] = 0
+                if values[node] == target: # create new component
+                    for nei_node in adj_list[node]:
+                        if deg[nei_node] == 0: continue
+                        deg[nei_node] -= 1
+                        if deg[nei_node] == 0:
+                            return values[nei_node] == target # parent node is the last node in the tree
+                        elif deg[nei_node] == 1:
+                            queue.append(nei_node)
+                else:
+                    for nei_node in adj_list[node]:
+                        if deg[nei_node] == 0: continue # must be child node
+                        deg[nei_node] -= 1
+                        values[nei_node] += values[node]
+                        if deg[nei_node] == 0:
+                            return values[nei_node] == target
+                        elif deg[nei_node] == 1:
+                            queue.append(nei_node)
+            return False
+        for cand in range(maxNum,sum_):
+            if sum_%cand==0 and component_values_work(cand):
+                num_components = sum_//cand
+                return num_components-1
+        return 0
+```
+
+## 2438. Range Product Queries of Powers
+
+### Solution 1:  prefix product + multiplicative modular inverse + bit manipulation
+
+```py
+class Solution:
+    def productQueries(self, n: int, queries: List[List[int]]) -> List[int]:
+        powers = []
+        mod = int(1e9)+7
+        for i in range(31):
+            if (n>>i)&1:
+                powers.append((1<<i))
+        prefixProduct = [1]
+        for i, p in enumerate(powers):
+            prefixProduct.append((prefixProduct[-1]*p)%mod)
+        n = len(queries)
+        answer = [0]*n
+        for i, (left, right) in enumerate(queries):
+            resp = (prefixProduct[right+1]*pow(prefixProduct[left], -1, mod))%mod
+            answer[i] = resp
+        return answer
+```
+
+## 2439. Minimize Maximum of Array
+
+### Solution 1:  backwards traversal + prefix sum average
+
+```py
+class Solution:
+    def minimizeArrayValue(self, nums: List[int]) -> int:
+        remaining_sum = sum(nums)
+        slots = len(nums)
+        maxTarget = -inf
+        for i in range(slots-1,0,-1):
+            target = remaining_sum//slots
+            nums[i-1] += max(0,nums[i]-target)
+            nums[i] = min(nums[i], target)
+            maxTarget = max(maxTarget, nums[i])
+            remaining_sum -= nums[i]
+            slots -= 1
+        return max(maxTarget, nums[0])
+```
 
 ```py
 
 ```
 
-##
+## 2437. Number of Valid Clock Times
 
-### Solution 1:
+### Solution 1:  regex full match + iterate through all hours and minutes + f string with 0 padding + the '.' means any character in regex
+
+```py
+class Solution:
+    def countTime(self, time: str) -> int:
+        pattern = time.replace('?', '.')
+        return sum(re.fullmatch(pattern, f"{hour:02}:{minute:02}") is not None for hour in range(24) for minute in range(60))
+```
+
+## 2441. Largest Positive Integer That Exists With Its Negative
+
+### Solution 1:  set + max with default
+
+```py
+class Solution:
+    def findMaxK(self, nums: List[int]) -> int:
+        seen = set(nums)
+        return max([abs(num) for num in seen if -num in seen], default=-1)
+```
+
+## 2442. Count Number of Distinct Integers After Reverse Operations
+
+### Solution 1:  set 
+
+```py
+class Solution:
+    def countDistinctIntegers(self, nums: List[int]) -> int:
+        s = set(nums)
+        for num in nums:
+            reversed_num = int(str(num)[::-1])
+            s.add(reversed_num)
+        return len(s)
+```
+
+## 2443. Sum of Number and Its Reverse
+
+### Solution 1:  reverse string + any
+
+```py
+class Solution:
+    def sumOfNumberAndReverse(self, num: int) -> bool:
+        return any(i+int(str(i)[::-1]) == num for i in range(num+1))
+```
+
+## 2444. Count Subarrays With Fixed Bounds
+
+### Solution 1:  3 pointers 
+
+```py
+class Solution:
+    def countSubarrays(self, nums: List[int], minK: int, maxK: int) -> int:
+        neutral = -1
+        minRight = maxRight = neutral
+        result = left = 0
+        for i, num in enumerate(nums):
+            if num < minK or num > maxK:
+                left = i+1 # update the leftmost pointer
+                minRight = maxRight = neutral # reset the 2 right pointers for min and max
+            if num == minK:
+                minRight = max(minRight, i)
+            if num == maxK:
+                maxRight = max(maxRight, i)
+            delta = max(0, min(minRight, maxRight) - left + 1)
+            result += delta
+        return result
+```
+
+## 1335. Minimum Difficulty of a Job Schedule
+
+### Solution 1:  recurisve dynamic programming + precompute the max value in every interval in the array
+
+```py
+class Solution:
+    def minDifficulty(self, jobDifficulty: List[int], d: int) -> int:
+        n = len(jobDifficulty)
+        if d > n: return -1
+        @cache
+        def dfs(index: int, day: int) -> int:
+            if index == n and day == 0: return 0
+            if index == n and day < 0: return inf
+            if day == 0: return inf
+            best = inf
+            max_diff_job = 0
+            for j in range(index, n):
+                max_diff_job = max(max_diff_job, jobDifficulty[j])
+                best = min(best, max_diff_job + dfs(j+1,day-1))
+            return best
+        result = dfs(0,d)
+        return result
+```
+
+### Solution 2:  recursive dynamic programming + binary options, at each step + take minimal value
+
+```py
+class Solution:
+    def minDifficulty(self, jobDifficulty: List[int], d: int) -> int:
+        n = len(jobDifficulty)
+        if d > n: return -1
+        @cache
+        def dfs(index: int, day: int, maxCost: int = -1) -> int:
+            if day == 0: return inf
+            if index == n:
+                return maxCost if day == 1 else inf
+            newDayCost = maxCost + dfs(index+1,day-1,jobDifficulty[index]) if maxCost > -1 else inf
+            sameDayCost = dfs(index+1,day,max(maxCost, jobDifficulty[index]))
+            return min(newDayCost, sameDayCost)
+        result = dfs(0,d)
+        return result
+```
+
+## 800. Similar RGB Color
+
+### Solution 1:  brute force + generator + convert hexadecimal to integer value + max function with custom comparator
+
+```py
+class Solution:
+    def similarRGB(self, color: str) -> str:
+        base = 16
+        chars = string.digits + 'abcdef'
+        color = color[1:]
+        def getHexVal(c: string) -> Iterable[str]:
+            for i in range(2,7,2):
+                yield int(c[i-2:i], base)
+        def similarity_eval(c1: str, c2: str) -> int:
+            x1, x2, x3 = getHexVal(c1)
+            y1, y2, y3 = getHexVal(c2)
+            return -(x1-y1)*(x1-y1)-(x2-y2)*(x2-y2)-(x3-y3)*(x3-y3)
+        similar_color = max((x*2+y*2+z*2 for x,y,z in product(chars, repeat=3)), key = lambda c: similarity_eval(color, c))
+        return f'#{similar_color}'
+```
+
+### Solution 2:  Optimization on brute force + find closest hexadecimal value for each of the 3 segments + no longer 3 nested for loops
+
+```py
+class Solution:
+    def similarRGB(self, color: str) -> str:
+        base = 16
+        chars = string.digits + 'abcdef'
+        def getClosest(h: str) -> str:
+            return min((ch+ch for ch in chars), key = lambda x: abs(int(h, base)-int(x, base)))
+        result = [getClosest(color[i-2:i]) for i in range(3,8,2)]
+        return '#' + ''.join(result)
+```
+
+## 2432. The Employee That Worked on the Longest Task
+
+### Solution 1:  max
+
+```py
+class Solution:
+    def hardestWorker(self, n: int, logs: List[List[int]]) -> int:
+        longest_time = -inf
+        longest_time_id = inf
+        current_time = 0
+        for id, leave_time in logs:
+            delta_time = leave_time - current_time
+            if delta_time > longest_time or delta_time==longest_time and id < longest_time_id:
+                longest_time = delta_time
+                longest_time_id = id
+            current_time = leave_time
+        return longest_time_id
+```
+
+## 2433. Find The Original Array of Prefix Xor
+
+### Solution 1:  bit manipulation + math properties of xor + a = b^c, c = a^b, b = a^b
+
+```py
+class Solution:
+    def findArray(self, pref: List[int]) -> List[int]:
+        n = len(pref)
+        arr = [0]*n
+        prefixXor = pref[0]
+        arr[0] = prefixXor
+        for i in range(1,n):
+            arr[i] = prefixXor^pref[i]
+            prefixXor ^= arr[i]
+        return arr
+```
+
+## 2434. Using a Robot to Print the Lexicographically Smallest String
+
+### Solution 1:  suffix min array + stack + greedy
+
+```py
+class Solution:
+    def robotWithString(self, s: str) -> str:
+        n = len(s)
+        s = list(s)
+        suffixMin = ['{']*(n+1)
+        for i in reversed(range(n)):
+            suffixMin[i] = min(suffixMin[i+1], s[i])
+        p, t = [], []
+        left = 0
+        for i in range(1, n+1):
+            if suffixMin[i] > suffixMin[i-1] or (s[i-1] == suffixMin[i-1] and s[i] > suffixMin[i]):
+                t.extend(s[left:i])
+                left = i
+            while t and t[-1] <= suffixMin[i]:
+                p.append(t.pop())
+        return ''.join(p)
+```
+
+## 2435. Paths in Matrix Whose Sum Is Divisible by K
+
+### Solution 1:  dynamic programming + state is (row, col, remainder) + memo with 3 dimensional list
+
+```py
+class Solution:
+    def numberOfPaths(self, grid: List[List[int]], k: int) -> int:
+        R, C = len(grid), len(grid[0])
+        memo = [[[0]*k for _ in range(C)] for _ in range(R)]
+        memo[0][0][grid[0][0]%k] = 1
+        mod = int(1e9)+7
+        for r, c in product(range(R),range(C)):
+                if r == c == 0: continue
+                for i in range(k):
+                    if c > 0:
+                        left_count = memo[r][c-1][i]
+                        left_val = (grid[r][c] + i)%k
+                        memo[r][c][left_val] = (memo[r][c][left_val]+left_count)%mod
+                    if r > 0:
+                        above_count = memo[r-1][c][i]
+                        above_val = (grid[r][c] + i)%k
+                        memo[r][c][above_val] = (memo[r][c][above_val]+above_count)%mod
+        return memo[-1][-1][0] # number of paths to reach the bottom right corner cell with remainder of 0, divisible by k
+```
+
+### Solution 2: space optimized + state optimized
 
 ```py
 
 ```
 
-##
+## 2431. Maximize Total Tastiness of Purchased Fruits
 
-### Solution 1:
+### Solution 1:  recursive dynamic programming + state (index, amount_remain, coupons_remain) + maximize on tastiness + 3 choices at each state
 
 ```py
-
+class Solution:
+    def maxTastiness(self, price: List[int], tastiness: List[int], maxAmount: int, maxCoupons: int) -> int:
+        @cache
+        def dfs(index: int, amt: int, coup: int) -> int:
+            if amt < 0: return -inf
+            if index == len(price): return 0 
+            buyFruitCoupon = dfs(index+1,amt-(price[index]//2),coup-1)+tastiness[index] if coup > 0 else -inf
+            buyFruit = dfs(index+1,amt-price[index],coup)+tastiness[index]
+            skipFruit = dfs(index+1,amt,coup)
+            return max(buyFruitCoupon, buyFruit, skipFruit)
+        return dfs(0,maxAmount,maxCoupons)
 ```
 
-##
+## 1832. Check if the Sentence Is Pangram
 
-### Solution 1:
+### Solution 1:  set + string module
 
 ```py
-
+class Solution:
+    def checkIfPangram(self, sentence: str) -> bool:
+        return len(set(sentence)) == len(string.ascii_lowercase)
 ```
 
-##
+## 2436. Minimum Split Into Subarrays With GCD Greater Than One
 
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
+### Solution 1:  math + gcd + sliding window
 
 ```py
-
+class Solution:
+    def minimumSplits(self, nums: List[int]) -> int:
+        neutral = 0
+        cur_gcd = neutral
+        numSplits = neutral
+        for num in nums:
+            cur_gcd = gcd(cur_gcd, num)
+            if cur_gcd == 1:
+                cur_gcd = num
+                numSplits += 1
+        return numSplits + 1
 ```
 
 ##
