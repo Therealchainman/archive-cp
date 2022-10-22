@@ -1,5 +1,7 @@
 from math import inf
-from typing import Callable
+from typing import Callable, Type, List
+from copy import deepcopy
+
 
 # Implement an algorithm to find the first element greater than a given amount
 # design a query algorithm that will find the first element greater than a given amount
@@ -301,6 +303,77 @@ class SegmentTree:
             mid = (left_bound + right_bound)>>1
             stack.extend([(left_bound, mid, 2*idx+1), (mid, right_bound, 2*idx+2)])
         return result
+
+    # computes the kth one from right to left, so finds index where there are k ones to the right.  
+    def k_query(self, k: int) -> int:
+        left_bound, right_bound, idx = 0, self.size, 0
+        while right_bound - left_bound != 1:
+            left_index, right_index = 2*idx+1, 2*idx+2
+            mid = (left_bound+right_bound)>>1
+            if k > self.tree[right_index]: # continue in the left branch
+                idx, right_bound = left_index, mid
+                k -= self.tree[right_index]
+            else: # continue in the right branch
+                idx, left_bound = right_index, mid
+        return left_bound
+    
+    def __repr__(self) -> str:
+        return f"array: {self.tree}"
+"""
+An even more general segment tree that solves a wide range of functions, because it allows unique update and merge function 
+
+It also allows unique nodes to be provided, this has an example with inversion count
+"""
+class Node:
+    def __init__(self, inversion_count: int, freq: List[int]):
+        self.inversion_count = inversion_count
+        self.freq = freq
+class SegmentTree:
+    def __init__(self, n: int, neutral: int, func: Callable[[int, int], int]):
+        self.neutral = neutral
+        self.size = 1
+        self.merge = func
+        self.n = n
+        while self.size<n:
+            self.size*=2
+        self.tree = [deepcopy(neutral) for _ in range(self.size*2)]
+        
+    def update(self, idx: int, val: int, update_func: Callable[[List[List[int]],int,int], None]) -> None:
+        idx += self.size - 1
+        update_func(self.tree, idx, val)
+        while idx > 0:
+            idx -= 1
+            idx >>= 1
+            self.tree[idx] = self.merge(self.tree[2*idx+1], self.tree[2*idx+2])
+            
+    def query(self, l: int, r: int) -> int:
+        stack = [(0, self.size, 0)]
+        result = self.neutral
+        while stack:
+            # BOUNDS FOR CURRENT INTERVAL and idx for tree
+            left_bound, right_bound, idx = stack.pop()
+            # OUT OF BOUNDS
+            if left_bound >= r or right_bound <= l: continue
+            # CHECK IF CURRENT BOUNDS ARE WITHIN THE l and r
+            if left_bound >= l and right_bound <= r:
+                result = self.merge(result, self.tree[idx])
+                continue
+            mid = (left_bound + right_bound)>>1
+            stack.extend([(mid, right_bound, 2*idx+2), (left_bound, mid, 2*idx+1)])
+        return result
+
+    # computes the kth one from right to left, so finds index where there are k ones to the right.  
+    def k_query(self, k: int) -> int:
+        left_bound, right_bound, idx = 0, self.size, 0
+        while right_bound - left_bound != 1:
+            left_index, right_index = 2*idx+1, 2*idx+2
+            mid = (left_bound+right_bound)>>1
+            if k > self.tree[right_index]: # continue in the left branch
+                idx, right_bound = left_index, mid
+                k -= self.tree[right_index]
+            else: # continue in the right branch
+                idx, left_bound = right_index, mid
+        return left_bound
     
     def __repr__(self) -> str:
         return f"array: {self.tree}"
