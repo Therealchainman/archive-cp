@@ -13294,12 +13294,28 @@ class Solution:
         return numSplits + 1
 ```
 
-##
+## 76. Minimum Window Substring
 
-### Solution 1:
+### Solution 1:  sliding window with counter for frequency
 
 ```py
-
+class Solution:
+    def minWindow(self, s: str, t: str) -> str:
+        result = ""
+        chars_t = set(t)
+        freq = Counter(t)
+        score = len(t)
+        left, n = 0, len(s)
+        for right in range(n):
+            score -= (freq[s[right]]>0)
+            freq[s[right]] -= 1
+            while score == 0:
+                if len(result) == 0 or right-left+1 < len(result):
+                    result = s[left:right+1]
+                freq[s[left]] += (s[left] in chars_t)
+                score += (freq[s[left]]>0)
+                left += 1
+        return result
 ```
 
 ##
