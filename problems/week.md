@@ -13318,6 +13318,245 @@ class Solution:
         return result
 ```
 
+## 645. Set Mismatch
+
+### Solution 1:  bit manipulation + xor + in place modification of array to find duplicate element
+
+```py
+class Solution:
+    def findErrorNums(self, nums: List[int]) -> List[int]:
+        dupe, missing, n = 0, 0, len(nums)
+        for i in range(n):
+            num = abs(nums[i])
+            missing ^= (i+1)^num
+            if nums[num-1] < 0: dupe = num
+            else: nums[num-1] *= -1
+        return [dupe, missing^dupe]
+```
+
+## 217. Contains Duplicate
+
+### Solution 1:  set
+
+```py
+class Solution:
+    def containsDuplicate(self, nums: List[int]) -> bool:
+        seen = set()
+        for num in nums:
+            if num in seen: return True
+            seen.add(num)
+        return False
+```
+
+### Solution 2: sort + bit manipulation + inverse of xor 
+
+```py
+class Solution:
+    def containsDuplicate(self, nums: List[int]) -> bool:
+        nums.sort()
+        for i in range(1,len(nums)):
+            if (nums[i]^nums[i-1])==0: return True
+        return False
+```
+
+## 2445. Number of Nodes With Value One
+
+### Solution 1:  counter + bit manipulation + loop through and find parent nodes and what was the value of parents
+
+```py
+class Solution:
+    def numberOfNodes(self, n: int, queries: List[int]) -> int:
+        queries_counter = Counter()
+        for qu in queries:
+            queries_counter[qu] ^= 1
+        res = 0
+        value_nodes = Counter()
+        for node in range(1, n+1):
+            parent_node = node//2
+            val_parent = value_nodes[parent_node]
+            if queries_counter[node]:
+                val_parent ^= 1
+            res += val_parent
+            value_nodes[node] = val_parent
+        return res
+```
+
+### Solution 1:  prefix xor + bit manipulation
+
+```py
+class Solution:
+    def numberOfNodes(self, n: int, queries: List[int]) -> int:
+        prefix_flips = [0]*(n+1)
+        for i in queries:
+            prefix_flips[i] ^= 1
+        for i in range(1,n+1):
+            parent = i//2
+            prefix_flips[i] = prefix_flips[parent]^prefix_flips[i]
+        return sum(prefix_flips)
+```
+
+## 2446. Determine if Two Events Have Conflict
+
+### Solution 1:  intersection for two intervals
+
+```py
+class Solution:
+    def haveConflict(self, event1: List[str], event2: List[str]) -> bool:
+        def get_minutes(event):
+            ev = event.split(':')
+            return int(ev[0])*60+int(ev[1])
+        s1, e1, s2, e2 = get_minutes(event1[0]), get_minutes(event1[1]), get_minutes(event2[0]), get_minutes(event2[1])
+        return min(e1,e2) >= max(s1,s2)
+```
+
+## 2447. Number of Subarrays With GCD Equal to K
+
+### Solution 1:  brute force solution 
+
+```py
+class Solution:
+    def subarrayGCD(self, nums: List[int], k: int) -> int:
+        n = len(nums)
+        res = 0
+        for i in range(n):
+            g = 0
+            for j in range(i,n):
+                g = gcd(g, nums[j])
+                res += (g==k)
+                if g < k:
+                    break
+        return res
+```
+
+### Solution 2:  Count greatest common denominators
+
+```py
+class Solution:
+    def subarrayGCD(self, nums: List[int], k: int) -> int:
+        gcds = Counter()
+        res = 0
+        for num in nums:
+            next_gcds = Counter()
+            if num%k==0:
+                gcds[num] += 1
+            for prev_gcd, cnt in gcds.items():
+                next_gcds[gcd(prev_gcd,num)] += cnt
+            gcds = next_gcds
+            res += gcds[k]
+        return res
+```
+
+## 2448. Minimum Cost to Make Array Equal
+
+### Solution 1:  prefix sum + suffix sum + sort + counter
+
+```py
+class Solution:
+    def minCost(self, nums: List[int], cost: List[int]) -> int:
+        unique_nums = sorted(list(set(nums)))
+        cost_cnt = Counter()
+        for i, num in enumerate(nums):
+            cost_cnt[num] += cost[i]
+        mincost = inf
+        prefixCost = suffixCost = initial_cost = prev_num = 0
+        for num, val in cost_cnt.items():
+            initial_cost += num*val
+            suffixCost += val
+        mincost = initial_cost
+        for val in unique_nums:
+            delta = val - prev_num
+            initial_cost = (initial_cost + delta*prefixCost - delta*suffixCost)
+            mincost = min(mincost, initial_cost)
+            prefixCost += cost_cnt[val]
+            suffixCost -= cost_cnt[val]
+            prev_num = val
+            if prefixCost > suffixCost: break # pass the global maximum value, on the downward slope
+        return mincost
+```
+
+### Solution 2:  zip + sort + prefix sum + suffix sum
+
+```py
+class Solution:
+    def minCost(self, nums: List[int], cost: List[int]) -> int:
+        mincost = inf
+        prefixCost = suffixCost = totalCost = prev_num = 0
+        for num, val in zip(nums, cost):
+            totalCost += num*val
+            suffixCost += val
+        for n, c in sorted(zip(nums, cost)):
+            delta = n - prev_num
+            totalCost = (totalCost + delta*prefixCost - delta*suffixCost)
+            prefixCost += c
+            suffixCost -= c
+            mincost = min(mincost, totalCost)
+            if prefixCost > suffixCost: break
+            prev_num = n
+        return mincost
+```
+
+### Solution 3:  binary search + quadratic function + positive and negative slope
+
+```py
+class Solution:
+    def minCost(self, nums: List[int], cost: List[int]) -> int:
+        mincost = inf
+        def getCost(target: int) -> int:
+            return sum([c*abs(target-x) for x, c in zip(nums, cost)])
+        left, right = min(nums), max(nums)
+        while left < right:
+            mid = (left+right)>>1
+            if getCost(mid) < getCost(mid+1):
+                right = mid
+            else:
+                left = mid+1
+        return getCost(left)
+```
+
+## 2449. Minimum Number of Operations to Make Arrays Similar
+
+### Solution 1:  greedy + split into odds and evens, since you are increment/decrement by 2 + sort
+
+```py
+class Solution:
+    def makeSimilar(self, nums: List[int], target: List[int]) -> int:
+        odd_nums, even_nums = sorted([x for x in nums if x&1]), sorted([x for x in nums if x%2==0])
+        odd_tar, even_tar = sorted([x for x in target if x&1]), sorted([x for x in target if x%2==0])
+        return (sum(x-y for x,y in zip(odd_nums, odd_tar) if x>y) + sum(x-y for x,y in zip(even_nums, even_tar) if x>y))//2
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
