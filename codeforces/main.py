@@ -1,76 +1,97 @@
 from math import inf
-from typing import Callable, Type, List
-from copy import deepcopy
-class Node:
-    def __init__(self, even_val: int = 0, odd_val: int = 0):
-        self.even_sum = even_val
-        self.odd_sum = odd_val
-    def __repr__(self) -> str:
-        return f"even: {self.even_sum}, odd: {self.odd_sum}"
 class SegmentTree:
-    def __init__(self, n: int, neutral: Type[Node], func: Callable[[int, int], int]):
+    def __init__(self, n: int, neutral: int, initial: int):
+        self.mod = int(1e9) + 7
         self.neutral = neutral
         self.size = 1
-        self.func = func
         self.n = n
+        self.initial_val = initial
         while self.size<n:
             self.size*=2
-        self.tree = [deepcopy(neutral) for _ in range(self.size*2)]
+        self.operations = [initial for _ in range(self.size*2)]
+        self.values = [neutral for _ in range(self.size*2)]
+        self.build()
+
+    def build(self):
+        for segment_idx in range(self.n):
+            segment_idx += self.size - 1
+            self.values[segment_idx]  = self.initial_val
+            self.ascend(segment_idx, 1)
+
+    def modify_op(self, x: int, y: int) -> int:
+        return x + y
+    
+    def calc_op(self, x: int, y: int, z: int) -> int:
+        return (x + y)*z
+
+    def ascend(self, segment_idx: int, segment_len: int) -> None:
+        while segment_idx > 0:
+            segment_idx -= 1
+            segment_idx >>= 1
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            segment_len <<= 1
+            self.values[segment_idx] = self.calc_op(self.values[left_segment_idx], self.values[right_segment_idx], segment_len)
+            self.values[segment_idx] = self.modify_op(self.values[segment_idx], self.operations[segment_idx])
         
-    def update(self, idx: int, val: int, update_func: Callable[[List[List[int]],int,int], None]) -> None:
-        is_odd = idx&1
-        idx += self.size - 1
-        update_func(self.tree, idx, val, is_odd)
-        while idx > 0:
-            idx -= 1
-            idx >>= 1
-            self.tree[idx] = self.func(self.tree[2*idx+1], self.tree[2*idx+2])
-            
-    def query(self, l: int, r: int) -> int:
+    def update(self, left: int, right: int, val: int) -> None:
         stack = [(0, self.size, 0)]
+        segments = []
+        while stack:
+            segment_left_bound, segment_right_bound, segment_idx = stack.pop()
+            # NO OVERLAP
+            if segment_left_bound >= right or segment_right_bound <= left: continue
+            # COMPLETE OVERLAP
+            if segment_left_bound >= left and segment_right_bound <= right:
+                self.operations[segment_idx] = self.modify_op(self.operations[segment_idx], val)
+                self.values[segment_idx] = self.modify_op(self.values[segment_idx], val)
+                segments.append((segment_idx, min(segment_right_bound, right) - max(segment_left_bound, left)))
+                continue
+            # PARTIAL OVERLAP
+            mid_point = (segment_left_bound + segment_right_bound) >> 1
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            stack.extend([(mid_point, segment_right_bound, right_segment_idx), (segment_left_bound, mid_point, left_segment_idx)])
+        for segment_idx, segment_len in segments:
+            self.ascend(segment_idx, segment_len)
+            
+    def query(self, left: int, right: int) -> int:
+        stack = [(0, self.size, 0, self.initial_val)]
         result = self.neutral
         while stack:
             # BOUNDS FOR CURRENT INTERVAL and idx for tree
-            left_bound, right_bound, idx = stack.pop()
-            # OUT OF BOUNDS
-            if left_bound >= r or right_bound <= l: continue
-            # CHECK IF CURRENT BOUNDS ARE WITHIN THE l and r
-            if left_bound >= l and right_bound <= r:
-                result = self.func(result, self.tree[idx])
+            segment_left_bound, segment_right_bound, segment_idx, operation_val = stack.pop()
+            # NO OVERLAP
+            if segment_left_bound >= right or segment_right_bound <= left: continue
+            # COMPLETE OVERLAP
+            if segment_left_bound >= left and segment_right_bound <= right:
+                modified_val = self.modify_op(self.values[segment_idx], operation_val)
+                result = self.calc_op(result, modified_val, min(segment_right_bound, right) - max(segment_left_bound, left))
                 continue
-            mid = (left_bound + right_bound)>>1
-            stack.extend([(mid, right_bound, 2*idx+2), (left_bound, mid, 2*idx+1)])
+            # PARTIAL OVERLAP
+            mid_point = (segment_left_bound + segment_right_bound) >> 1
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            operation_val = self.modify_op(operation_val, self.operations[segment_idx])
+            stack.extend([(mid_point, segment_right_bound, right_segment_idx, operation_val), (segment_left_bound, mid_point, left_segment_idx, operation_val)])
         return result
     
     def __repr__(self) -> str:
-        return f"array: {self.tree}"
-
-def update_func(tree: List[Node], idx: int, val: int, is_odd: bool) -> None:
-    if is_odd:
-        tree[idx].odd_sum = val
-    else:
-        tree[idx].even_sum = val
-
-def sum_func(node_left: Type[Node], node_right: Type[Node]) -> Node:
-    return Node(node_left.even_sum+node_right.even_sum, node_left.odd_sum+node_right.odd_sum)
+        return f"operations array: {self.operations}, values array: {self.values}"
 
 def main():
-    n = int(input())
-    arr = map(int,input().split())
-    m = int(input())
-    neutral = Node(0)
-    sumSeg = SegmentTree(n, neutral, sum_func)
+    n, m = map(int, input().split())
+    neutral = 0
+    initial = 0
+    segTree = SegmentTree(n, neutral, initial)
     results = []
-    for i, num in enumerate(arr):
-        sumSeg.update(i, num, update_func)
     for _ in range(m):
-        type_, x, y = map(int,input().split())
-        if type_ == 1:
-            node = sumSeg.query(x-1,y)
-            result = node.even_sum - node.odd_sum if x&1 else node.odd_sum - node.even_sum
-            results.append(result)
+        query = list(map(int, input().split()))
+        if query[0] == 1:
+            # range update
+            _, left, right, val = query
+            segTree.update(left, right, val)
         else:
-            sumSeg.update(x-1, y, update_func)
+            # point query
+            _, left, right = query
+            results.append(segTree.query(left, right))
     return '\n'.join(map(str,results))
 
 if __name__ == '__main__':

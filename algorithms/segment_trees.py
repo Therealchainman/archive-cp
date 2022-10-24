@@ -377,3 +377,170 @@ class SegmentTree:
     
     def __repr__(self) -> str:
         return f"array: {self.tree}"
+        
+
+class Node:
+    def __init__(self, val: int):
+        self.val = val
+
+    def __repr__(self) -> str:
+        return f"val: {self.val}"
+"""
+Lazy segment tree data structure that works with 
+- range updates
+- point 
+
+This particular implementation works for assignment operation, but can always switch out the operation
+
+A segment tree datastructure that can solve range updates that are non-commutative, that is order matters
+
+This uses lazy propagation to optimally perform these range updates.  This means that it updates the value
+when it needs to.  
+
+Nodes represent segments in segment tree datastructure, in other words nodes represent ranges or intervals.
+
+No overlap: The query range does not overlap with the segment range
+complete overlap: The segment range is completely contained within the query range
+partial overlap: The segment range is not completely contained within the query range, but it does have a non-zero intersection with it.
+"""
+class LazySegmentTree:
+    def __init__(self, n: int, neutral_node: Type[Node], noop: int):
+        self.neutral = neutral_node
+        self.size = 1
+        self.noop = noop
+        self.n = n 
+        while self.size<n:
+            self.size*=2
+        self.tree = [deepcopy(neutral_node) for _ in range(self.size*2)]
+
+    def is_leaf_node(self, segment_right_bound, segment_left_bound) -> bool:
+        return segment_right_bound - segment_left_bound == 1
+
+    def operation(self, val: int) -> Node:
+        return Node(val)
+
+    def propagate(self, segment_idx: int, segment_left_bound: int, segment_right_bound: int) -> None:
+        # do not want to propagate if it is a leaf node or if it is no operation (means there are no updates stored there).
+        if self.is_leaf_node(segment_right_bound, segment_left_bound) or self.tree[segment_idx].val == self.noop: return
+        left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+        self.tree[left_segment_idx] = self.operation(self.tree[segment_idx].val)
+        self.tree[right_segment_idx] = self.operation(self.tree[segment_idx].val)
+        self.tree[segment_idx].val = self.noop
+    
+    def update(self, left: int, right: int, val: int) -> None:
+        stack = [(0, self.size, 0)]
+        while stack:
+            segment_left_bound, segment_right_bound, segment_idx = stack.pop()
+            # NO OVERLAP
+            if segment_left_bound >= right or segment_right_bound <= left: continue
+            # COMPLETE OVERLAP
+            if segment_left_bound >= left and segment_right_bound <= right:
+                self.tree[segment_idx] = self.operation(val)
+                continue
+            # PARTIAL OVERLAP
+            mid_point = (segment_left_bound + segment_right_bound) >> 1
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            self.propagate(segment_idx, segment_left_bound, segment_right_bound)
+            stack.extend([(mid_point, segment_right_bound, right_segment_idx), (segment_left_bound, mid_point, left_segment_idx)])
+
+    def query(self, i: int) -> int:
+        stack = [(0, self.size, 0)]
+        while stack:
+            segment_left_bound, segment_right_bound, segment_idx = stack.pop()
+            # NO OVERLAP
+            if i < segment_left_bound or i >= segment_right_bound: continue
+            # LEAF NODE
+            if self.is_leaf_node(segment_right_bound, segment_left_bound): 
+                return self.tree[segment_idx].val
+            mid_point = (segment_left_bound + segment_right_bound) >> 1
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            self.propagate(segment_idx, segment_left_bound, segment_right_bound)            
+            stack.extend([(mid_point, segment_right_bound, right_segment_idx), (segment_left_bound, mid_point, left_segment_idx)])
+    
+    def __repr__(self) -> str:
+        return f"array: {self.tree}"
+
+
+"""
+Segment tree datastructure for 
+- range updates
+- range queries
+when the update and query function are distributive such as
+min(a,b)+v = min(a+v,b+v)
+(a+b)*v = a*v+b*v
+"""
+class SegmentTree:
+    def __init__(self, n: int, neutral: int, initial: int):
+        self.mod = int(1e9) + 7
+        self.neutral = neutral
+        self.size = 1
+        self.n = n
+        self.initial_val = initial
+        while self.size<n:
+            self.size*=2
+        self.operations = [initial for _ in range(self.size*2)]
+        self.values = [neutral for _ in range(self.size*2)]
+        self.build()
+
+    def build(self):
+        for segment_idx in range(self.n):
+            segment_idx += self.size - 1
+            self.values[segment_idx]  = self.initial_val
+            self.ascend(segment_idx)
+
+    def modify_op(self, x: int, y: int) -> int:
+        return x + y
+    
+    def calc_op(self, x: int, y: int) -> int:
+        return min(x, y)
+
+    def ascend(self, segment_idx: int) -> None:
+        while segment_idx > 0:
+            segment_idx -= 1
+            segment_idx >>= 1
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            self.values[segment_idx] = self.calc_op(self.values[left_segment_idx], self.values[right_segment_idx])
+            self.values[segment_idx] = self.modify_op(self.values[segment_idx], self.operations[segment_idx])
+        
+    def update(self, left: int, right: int, val: int) -> None:
+        stack = [(0, self.size, 0)]
+        segments = []
+        while stack:
+            segment_left_bound, segment_right_bound, segment_idx = stack.pop()
+            # NO OVERLAP
+            if segment_left_bound >= right or segment_right_bound <= left: continue
+            # COMPLETE OVERLAP
+            if segment_left_bound >= left and segment_right_bound <= right:
+                self.operations[segment_idx] = self.modify_op(self.operations[segment_idx], val)
+                self.values[segment_idx] = self.modify_op(self.values[segment_idx], val)
+                segments.append(segment_idx)
+                continue
+            # PARTIAL OVERLAP
+            mid_point = (segment_left_bound + segment_right_bound) >> 1
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            stack.extend([(mid_point, segment_right_bound, right_segment_idx), (segment_left_bound, mid_point, left_segment_idx)])
+        for segment_idx in segments:
+            self.ascend(segment_idx)
+            
+    def query(self, left: int, right: int) -> int:
+        stack = [(0, self.size, 0, self.initial_val)]
+        result = self.neutral
+        while stack:
+            # BOUNDS FOR CURRENT INTERVAL and idx for tree
+            segment_left_bound, segment_right_bound, segment_idx, operation_val = stack.pop()
+            # NO OVERLAP
+            if segment_left_bound >= right or segment_right_bound <= left: continue
+            # COMPLETE OVERLAP
+            if segment_left_bound >= left and segment_right_bound <= right:
+                modified_val = self.modify_op(self.values[segment_idx], operation_val)
+                result = self.calc_op(result, modified_val)
+                continue
+            # PARTIAL OVERLAP
+            mid_point = (segment_left_bound + segment_right_bound) >> 1
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            operation_val = self.modify_op(operation_val, self.operations[segment_idx])
+            stack.extend([(mid_point, segment_right_bound, right_segment_idx, operation_val), (segment_left_bound, mid_point, left_segment_idx, operation_val)])
+        return result
+    
+    def __repr__(self) -> str:
+        return f"operations array: {self.operations}, values array: {self.values}"
