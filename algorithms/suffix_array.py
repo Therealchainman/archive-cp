@@ -1,5 +1,11 @@
+"""
+Suffix array is an array of integers, where the integers represent the suffix from a string.
+the integer in suffix array represents the starting index for the suffix. 
+suffix array is these suffix index sorted in order of suffix order from ascending order
+
+"""
 from typing import List
-def suffix_array(s: str) -> List[int]:
+def suffix_array(s: str) -> str:
     n = len(s)
     p, c = [0]*n, [0]*n
     arr = [None]*n
@@ -26,10 +32,3 @@ def suffix_array(s: str) -> List[int]:
             is_finished &= (c[p[i]] != c[p[i-1]])
         k <<= 1
     return ' '.join(map(str, p))
-
-def main():
-    s = input() + '$'
-    return suffix_array(s)
-
-if __name__ == '__main__':
-    print(main())

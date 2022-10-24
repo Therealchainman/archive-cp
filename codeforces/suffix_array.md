@@ -1,5 +1,11 @@
-from typing import List
-def suffix_array(s: str) -> List[int]:
+
+
+## A. Suffix Array - 1
+
+### Solution 1:  suffix array algorithm
+
+```py
+def suffix_array(s: str) -> str:
     n = len(s)
     p, c = [0]*n, [0]*n
     arr = [None]*n
@@ -33,3 +39,28 @@ def main():
 
 if __name__ == '__main__':
     print(main())
+```
+
+## A. Suffix Array - 2
+
+### Solution 1: 
+
+```py
+
+```
+
+## 
+
+### Solution 1: 
+
+```py
+
+```
+
+## 
+
+### Solution 1: 
+
+```py
+
+```
