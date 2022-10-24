@@ -1,4 +1,4 @@
-
+from typing import List
 
 """
 heap sort algorithm
@@ -46,3 +46,24 @@ class MergeSort:
             j += 1
         for i in range(left, right):
             self.arr[i] = temp[i-left]
+
+"""
+radix sort
+
+O(n+k), where k is the range of values that are going to be sorted
+"""
+
+def radix_sort(p: List[int], c: List[int]) -> List[int]:
+    n = len(p)
+    cnt = [0]*n
+    next_p = [0]*n
+    for cls_ in c:
+        cnt[cls_] += 1
+    pos = [0]*n
+    for i in range(1,n):
+        pos[i] = pos[i-1] + cnt[i-1]
+    for pi in p:
+        cls_i = c[pi]
+        next_p[pos[cls_i]] = pi
+        pos[cls_i] += 1
+    return next_p
