@@ -1,3 +1,12 @@
+# Salary Queries
+
+## Summary
+
+Python Solution TLEs
+
+### Solution 1:  segment tree + point updates + range queries + coordinate compression
+
+```py
 import os,sys
 from io import BytesIO, IOBase
 from typing import List
@@ -44,11 +53,10 @@ sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
 """
-Kth Segment Tree 
+Assignment Segment Tree 
 
 - point updates
-- point query
-- kth element query
+- range queries
 
 Sets the value at segment tree equal to val
 
@@ -72,38 +80,70 @@ class SegmentTree:
         
     def update(self, segment_idx: int, val: int) -> None:
         segment_idx += self.size - 1
-        self.tree[segment_idx] = val
+        self.tree[segment_idx] += val
         self.ascend(segment_idx)
-
-    # computes the kth one from right to left, so finds index where there are k ones to the right.  
-    def k_query(self, k: int) -> int:
-        left_segment_bound, right_segment_bound, segment_idx = 0, self.size, 0
-        while right_segment_bound - left_segment_bound != 1:
-            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            
+    def query(self, left: int, right: int) -> int:
+        stack = [(0, self.size, 0)]
+        result = self.neutral
+        while stack:
+            # BOUNDS FOR CURRENT INTERVAL and idx for tree
+            left_segment_bound, right_segment_bound, segment_idx = stack.pop()
+            # NO OVERLAP
+            if left_segment_bound >= right or right_segment_bound <= left: continue
+            # COMPLETE OVERLAP
+            if left_segment_bound >= left and right_segment_bound <= right:
+                result += self.tree[segment_idx]
+                continue
+            # PARTIAL OVERLAP
             mid_point = (left_segment_bound + right_segment_bound) >> 1
-            if k <= self.tree[left_segment_idx]: # continue in the left branch
-                segment_idx, right_segment_bound = left_segment_idx, mid_point
-            else: # continue in right branch and decrease the number of 1s needed in the right branch
-                segment_idx, left_segment_bound = right_segment_idx, mid_point
-                k -= self.tree[left_segment_idx]
-        return left_segment_bound
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            stack.extend([(left_segment_bound, mid_point, left_segment_idx), (mid_point, right_segment_bound, right_segment_idx)])
+        return result
     
     def __repr__(self) -> str:
         return f"array: {self.tree}"
 
 def main():
-    n = int(input())
-    arr = list(map(int,input().split()))
-    segTree = SegmentTree(n, 0)
-    for idx in range(n):
-        segTree.update(idx, 1)
-    result = [0]*n
-    queries = map(int, input().split())
-    for i, idx in enumerate(queries):
-        index = segTree.k_query(idx)
-        segTree.update(index, 0)
-        result[i] = arr[index]
-    return ' '.join(map(str, result))
+    n, q = map(int,input().split())
+    p = list(map(int,input().split()))
+    seen = set(p)
+    query_indicator, update_indicator = '?', '!'
+    coordCompressed = dict()
+    values = []
+    queries = [None]*q
+    for i in range(q):
+        query = input().split()
+        if query[0] == update_indicator:
+            seen.add(int(query[2]))
+        else:
+            seen.update(map(int, [query[1], query[2]]))
+        queries[i] = query
+    for i, v in enumerate(sorted(list(seen))):
+        coordCompressed[v] = i
+        values.append(v)
+    segTree = SegmentTree(len(values), 0)
+    for v in map(lambda v: coordCompressed[v], p):
+        segTree.update(v, 1)
+    result = []
+    for query in queries:
+        if query[0] == update_indicator:
+            employee_idx, salary = map(int, query[1:])
+            employee_idx -= 1 # 1 indexed
+            segTree.update(coordCompressed[p[employee_idx]], -1)
+            segTree.update(coordCompressed[salary], 1)
+            p[employee_idx] = salary
+        else:
+            left, right = map(lambda v: coordCompressed[int(v)], query[1:])
+            result.append(segTree.query(left, right + 1))
+    return '\n'.join(map(str, result))
 
 if __name__ == '__main__':
     print(main())
+```
+
+### Solution 2: segment tree
+
+```cpp
+
+```

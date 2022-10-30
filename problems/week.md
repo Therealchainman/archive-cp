@@ -13525,6 +13525,195 @@ class Solution:
         return (sum(x-y for x,y in zip(odd_nums, odd_tar) if x>y) + sum(x-y for x,y in zip(even_nums, even_tar) if x>y))//2
 ```
 
+## 487. Max Consecutive Ones II
+
+### Solution 1:  sliding window with two variables + track count of consecutive ones to the left and right from 0 as pivot point
+
+```py
+class Solution:
+    def findMaxConsecutiveOnes(self, nums: List[int]) -> int:
+        left_count = right_count = result = 0
+        for num in nums:
+            right_count += 1
+            if num == 0:
+                left_count, right_count = right_count, 0
+            result = max(result, left_count + right_count)
+        return result
+```
+
+## 2450. Number of Distinct Binary Strings After Applying Operations
+
+### Solution 1:  greedy + math + result is independent of s characters + depends on length of s and k + can either flip or not flip at each index + binary tree + 2^(number of flips)
+
+```py
+class Solution:
+    def countDistinctStrings(self, s: str, k: int) -> int:
+        n = len(s)
+        mod = int(1e9) + 7
+        return (2**(n-k+1))%mod
+```
+
+## 2451. Odd String Difference
+
+### Solution 1:  dictionary + tuple
+
+```py
+class Solution:
+    def oddString(self, words: List[str]) -> str:
+        n = len(words[0])
+        diffArray = [[0]*(n-1) for _ in range(len(words))]
+        for i, word in enumerate(words):
+            for j in range(1,n):
+                diffArray[i][j-1] = ord(word[j])-ord(word[j-1])
+        diffDict = Counter()
+        dd = {}
+        for i in range(len(words)):
+            key = tuple(diffArray[i])
+            diffDict[key] += 1
+            dd[key] = words[i]
+        for key, cnt in diffDict.items():
+            if cnt == 1:
+                return dd[key]
+        return ''
+```
+
+## 2452. Words Within Two Edits of Dictionary
+
+### Solution 1:  levenshtein distance + dictionary + filter
+
+```py
+class Solution:
+    def twoEditWords(self, queries: List[str], dictionary: List[str]) -> List[str]:
+        minEditDistance = defaultdict(lambda: inf)
+        def edit_distance(w1, w2):
+            return sum(c1 != c2 for c1, c2 in zip(w1, w2))
+        for word in queries:
+            for dword in dictionary:
+                dist = edit_distance(word, dword)
+                minEditDistance[word] = min(minEditDistance[word], dist)
+        return filter(lambda word: minEditDistance[word] <= 2, queries)
+```
+ 
+## 2453. Destroy Sequential Targets
+
+### Solution 1:  bucket + place each integer into correct bucket it belongs to
+
+```py
+class Solution:
+    def destroyTargets(self, nums: List[int], space: int) -> int:
+        bucket = Counter()
+        minInt = defaultdict(lambda: inf)
+        for num in map(lambda x: x-1, nums):
+            bucket[num%space] += 1
+            minInt[num%space] = min(minInt[num%space], num + 1)
+        maxDestroy, minIndex = 0, inf
+        for key, cnt in bucket.items():
+            if cnt > maxDestroy or (cnt == maxDestroy and minInt[key] < minIndex):
+                maxDestroy = cnt
+                minIndex = minInt[key]
+        return minIndex
+```
+
+## 2454. Next Greater Element IV
+
+### Solution 1:  sortedlist + greedy + binary search + set
+
+```py
+from sortedcontainers import SortedList
+class Solution:
+    def secondGreaterElement(self, nums: List[int]) -> List[int]:
+        sl = SortedList()
+        seen = set()
+        n = len(nums)
+        default = -1
+        answer = [default]*n
+        for i, num in  enumerate(nums):
+            j = sl.bisect_left((num,)) - 1
+            while j >= 0:
+                index = sl[j][1]
+                if index in seen:
+                    answer[index] = num
+                    sl.pop(j)
+                seen.add(index)
+                j -= 1
+            sl.add((num, i))
+        return answer
+```
+
+### Solution 2:  two stacks + temporary list 
+
+```py
+class Solution:
+    def secondGreaterElement(self, nums: List[int]) -> List[int]:
+        n = len(nums)
+        stack, first, second = [], [], [-1]*n
+        for i, num in enumerate(nums):
+            while first and nums[first[-1]] < num:
+                j = first.pop()
+                second[j] = num
+            temp = []
+            while stack and nums[stack[-1]] < num:
+                j = stack.pop()
+                temp.append(j)
+            stack.append(i)
+            first.extend(temp[::-1])
+        return second
+```
+
+## 1293. Shortest Path in a Grid with Obstacles Elimination
+
+### Solution 1:  best first search/informed search/A-star Search + memoization with set + estimated cost function is manhattan distance from target
+
+```py
+class Solution:
+    def shortestPath(self, grid: List[List[int]], k: int) -> int:
+        R, C = len(grid), len(grid[0])
+        obstacle = 1
+        state = (0, 0, 0)
+        visited = set()
+        neighbors = lambda r, c: ((r+1,c),(r-1,c),(r,c+1),(r,c-1))
+        in_bounds = lambda r, c: 0 <= r < R and 0 <= c < C
+        manhattan_distance = lambda r, c: R - 1 - r + C - 1 - c
+        minheap = [(manhattan_distance(0, 0), 0, state)]
+        while minheap:
+            estimated_cost, steps, (r, c, removals) = heappop(minheap)
+            if r == R-1 and c == C-1: return steps
+            for nr, nc in neighbors(r, c):
+                if not in_bounds(nr, nc): continue
+                nremovals = removals + grid[nr][nc]
+                nstate = (nr, nc, nremovals)
+                if nremovals > k or nstate in visited: continue
+                nsteps = steps + 1
+                ncost = nsteps + manhattan_distance(nr, nc)
+                heappush(minheap, (ncost, nsteps, nstate))
+                visited.add(nstate)
+        return -1
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:

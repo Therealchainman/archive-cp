@@ -388,7 +388,7 @@ class Node:
 """
 Lazy segment tree data structure that works with 
 - range updates
-- point 
+- point queries
 
 This particular implementation works for assignment operation, but can always switch out the operation
 
