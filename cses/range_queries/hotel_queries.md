@@ -1,3 +1,10 @@
+# Hotel Queries
+
+## Summary
+
+### Solution 1:  segment tree + point updates + range query + first element greater than x
+
+```py
 import os,sys
 from io import BytesIO, IOBase
 from typing import List
@@ -102,3 +109,4 @@ def main():
 
 if __name__ == '__main__':
     print(main())
+```

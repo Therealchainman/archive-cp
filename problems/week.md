@@ -13690,44 +13690,120 @@ class Solution:
         return -1
 ```
 
-##
+## 433. Minimum Genetic Mutation
 
-### Solution 1:
+### Solution 1:  queue + bfs + hamming distance
 
 ```py
-
+class Solution:
+    def minMutation(self, start: str, end: str, bank: List[str]) -> int:
+        queue = deque([start])
+        visited = set([start])
+        mutations = 0
+        def get_neighbors(gene: str) -> Iterable[str]:
+            hamming_distance = lambda g1, g2: sum(1 for x, y in zip(g1, g2) if x != y)
+            for nei_gene in bank:
+                if nei_gene in visited or hamming_distance(gene, nei_gene) != 1: continue
+                yield nei_gene
+        while queue:
+            sz = len(queue)
+            for _ in range(sz):
+                gene = queue.popleft()
+                if gene == end: return mutations
+                for neighbor in get_neighbors(gene):
+                    visited.add(neighbor)
+                    queue.append(neighbor)
+            mutations += 1
+        return -1
+                
 ```
 
-##
+## 1198. Find Smallest Common Element in All Rows
 
-### Solution 1:
+### Solution 1:  counter + first element to count equal to number of rows
 
 ```py
-
+class Solution:
+    def smallestCommonElement(self, mat: List[List[int]]) -> int:
+        cnt = Counter()
+        R, C = len(mat), len(mat[0])
+        for r, c in product(range(R), range(C)):
+            v = mat[r][c]
+            cnt[v] += 1
+            if cnt[v] == R: return v
+        return -1
 ```
 
-##
+## 1706. Where Will the Ball Fall
 
-### Solution 1:
+### Solution 1:  simulation
 
 ```py
-
+class Solution:
+    def findBall(self, grid: List[List[int]]) -> List[int]:
+        R, C = len(grid), len(grid[0])
+        ans = [-1]*C
+        is_vShaped = lambda r, c: (c < C-1 and grid[r][c] == 1 and grid[r][c+1] == -1) or (c > 0 and grid[r][c] == -1 and grid[r][c-1] == 1)
+        in_bounds = lambda c: 0 <= c < C
+        for i in range(C):
+            hor_pos = i
+            reach_bottom = True
+            for vert_pos in range(R):
+                board = grid[vert_pos][hor_pos]
+                if is_vShaped(vert_pos, hor_pos): 
+                    reach_bottom = False
+                    break
+                hor_pos += (board == 1)
+                hor_pos -= (board == -1)
+                if not in_bounds(hor_pos): 
+                    reach_bottom = False
+                    break
+            if reach_bottom:
+                ans[i] = hor_pos
+        return ans
 ```
 
-##
+## 70. Climbing Stairs
 
-### Solution 1:
+### Solution 1: iterative dp + space optimized + depends on previous two states + fibonacci sequence
 
 ```py
-
+class Solution:
+    def climbStairs(self, n: int) -> int:
+        cur, prev = 1, 0
+        for _ in range(n):
+            cur, prev = cur + prev, cur
+        return cur
 ```
 
-##
+## 1137. N-th Tribonacci Number
 
-### Solution 1:
+### Solution 1:  memory optimized dynamic programming
 
 ```py
+class Solution:
+    def tribonacci(self, n: int) -> int:
+        t0, t1, t2 = 0, 1, 1
+        if n == 0: return t0
+        for _ in range(n-2):
+            t2, t1, t0 = t0 + t1 + t2, t2, t1
+        return t2
+```
 
+### Solution 2:  matrix exponentiation + linear algebra
+
+```py
+import numpy as np
+class Solution:
+    def tribonacci(self, n: int) -> int:
+        transition_matrix = np.array([[1,1,1],[1,0,0],[0,1,0]])
+        result = np.identity(3, dtype=np.int64)
+        while n > 0:
+            if n&1:
+                result  = np.matmul(result, transition_matrix)
+            transition_matrix = np.matmul(transition_matrix, transition_matrix)
+            n >>= 1
+        return result[0][-1]
 ```
 
 ##

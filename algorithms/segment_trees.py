@@ -346,20 +346,22 @@ class SegmentTree:
             idx >>= 1
             self.tree[idx] = self.merge(self.tree[2*idx+1], self.tree[2*idx+2])
             
-    def query(self, l: int, r: int) -> int:
+    def query(self, left: int, right: int) -> int:
         stack = [(0, self.size, 0)]
         result = self.neutral
         while stack:
             # BOUNDS FOR CURRENT INTERVAL and idx for tree
-            left_bound, right_bound, idx = stack.pop()
-            # OUT OF BOUNDS
-            if left_bound >= r or right_bound <= l: continue
-            # CHECK IF CURRENT BOUNDS ARE WITHIN THE l and r
-            if left_bound >= l and right_bound <= r:
-                result = self.merge(result, self.tree[idx])
+            left_segment_bound, right_segment_bound, segment_idx = stack.pop()
+            # NO OVERLAP
+            if left_segment_bound >= right or right_segment_bound <= left: continue
+            # COMPLETE OVERLAP
+            if left_segment_bound >= left and right_segment_bound <= right:
+                result += self.tree[segment_idx]
                 continue
-            mid = (left_bound + right_bound)>>1
-            stack.extend([(mid, right_bound, 2*idx+2), (left_bound, mid, 2*idx+1)])
+            # PARTIAL OVERLAP
+            mid_point = (left_segment_bound + right_segment_bound) >> 1
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            stack.extend([(left_segment_bound, mid_point, left_segment_idx), (mid_point, right_segment_bound, right_segment_idx)])
         return result
 
     # computes the kth one from right to left, so finds index where there are k ones to the right.  
@@ -544,3 +546,51 @@ class SegmentTree:
     
     def __repr__(self) -> str:
         return f"operations array: {self.operations}, values array: {self.values}"
+
+"""
+Kth Segment Tree 
+
+- point updates
+- point query
+- kth element query
+
+Sets the value at segment tree equal to val
+
+Can be used to get the count of elements in a range, by setting val=1
+"""
+class SegmentTree:
+    def __init__(self, n: int, neutral: int):
+        self.neutral = neutral
+        self.size = 1
+        self.n = n
+        while self.size<n:
+            self.size*=2
+        self.tree = [0 for _ in range(self.size*2)]
+
+    def ascend(self, segment_idx: int) -> None:
+        while segment_idx > 0:
+            segment_idx -= 1
+            segment_idx >>= 1
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            self.tree[segment_idx] = self.tree[left_segment_idx] + self.tree[right_segment_idx]
+        
+    def update(self, segment_idx: int, val: int) -> None:
+        segment_idx += self.size - 1
+        self.tree[segment_idx] = val
+        self.ascend(segment_idx)
+
+    # computes the kth one from right to left, so finds index where there are k ones to the right.  
+    def k_query(self, k: int) -> int:
+        left_segment_bound, right_segment_bound, segment_idx = 0, self.size, 0
+        while right_segment_bound - left_segment_bound != 1:
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            mid_point = (left_segment_bound + right_segment_bound) >> 1
+            if k <= self.tree[left_segment_idx]: # continue in the left branch
+                segment_idx, right_segment_bound = left_segment_idx, mid_point
+            else: # continue in right branch and decrease the number of 1s needed in the right branch
+                segment_idx, left_segment_bound = right_segment_idx, mid_point
+                k -= self.tree[left_segment_idx]
+        return left_segment_bound
+    
+    def __repr__(self) -> str:
+        return f"array: {self.tree}"
