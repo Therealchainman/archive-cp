@@ -13806,6 +13806,206 @@ class Solution:
         return result[0][-1]
 ```
 
+## 212. Word Search II
+
+### Solution 1:  trie data structure + backtracking recursion
+
+```py
+class TrieNode:
+    def __init__(self, word: str = '$'):
+        self.children = defaultdict(TrieNode)
+        self.word = word
+    def __repr__(self):
+        return f'word: {self.word}, children: {self.children}'
+class Solution:
+    def findWords(self, board: List[List[str]], words: List[str]) -> List[str]:
+        visited = '$'
+        words = set(words)
+        trie = TrieNode()
+        # CONSTRUCT TRIE TREE
+        for word in words:
+            node = trie
+            for ch in word:
+                node = node.children[ch]
+            node.word = word
+        R, C = len(board), len(board[0])
+        self.result = set()      
+        in_bounds = lambda r, c: 0 <= r < R and 0 <= c < C
+        neighborhood = lambda r, c: [(r-1,c),(r+1,c),(r,c-1),(r,c+1)]
+        # BACKTRACK IN BOARD
+        def backtrack(r, c):
+            # GET CURRENT CHARACTER
+            unvisited = board[r][c]
+            # CHECK IF THERE IS NO PREFIX MATCHING IN THE TRIE
+            if unvisited not in self.node.children: return # early termination when there is no word with current prefix
+            prev_node = self.node
+            self.node = self.node.children[unvisited]
+            # IF THIS PREFIX MATCHES A WORD
+            if self.node.word != visited: 
+                self.result.add(self.node.word)
+            # MARK AS VISITED SO THIS PATH DOESN'T REUSE THE SAME CELL
+            board[r][c] = visited
+            # FIND THE NEIGHBORS TO CONTINUE PATH IF IT IS NOT VISITED IN THE CURRENT PATH
+            for nr, nc in neighborhood(r, c):
+                if not in_bounds(nr, nc) or board[nr][nc] == visited: continue
+                backtrack(nr, nc)
+            # UNDO CHANGES, SO MARK THIS CELL AS UNVISITED SO THAT ANOTHER PATH CAN VISIT IT
+            board[r][c] = unvisited
+            # IF AT A TERMINAL NODE IN TRIE, REMOVE THE NODE TO PREVENT REVISITING A COMPLETELY MATCHED PREFIX
+            if len(self.node.children) == 0:
+                prev_node.children.pop(unvisited)
+            self.node = prev_node
+        for r, c in product(range(R), range(C)):
+            self.node = trie # initialize node to the root of trie tree
+            backtrack(r,c)
+        return self.result
+```
+
+### Solution 2:  trie node inheriting from defaultdict class
+
+```py
+class TrieNode(defaultdict):
+    def __init__(self):
+        super().__init__(TrieNode)
+        self.word = '$'
+class Solution:
+    def findWords(self, board: List[List[str]], words: List[str]) -> List[str]:
+        visited = '$'
+        words = set(words)
+        trie = TrieNode()
+        # CONSTRUCT TRIE TREE
+        for word in words:
+            node = trie
+            for ch in word:
+                node = node[ch]
+            node.word = word
+        R, C = len(board), len(board[0])
+        self.result = set()      
+        in_bounds = lambda r, c: 0 <= r < R and 0 <= c < C
+        neighborhood = lambda r, c: [(r-1,c),(r+1,c),(r,c-1),(r,c+1)]
+        # BACKTRACK IN BOARD
+        def backtrack(r, c):
+            # GET CURRENT CHARACTER
+            unvisited = board[r][c]
+            # CHECK IF THERE IS NO PREFIX MATCHING IN THE TRIE
+            if unvisited not in self.node: return # early termination when there is no word with current prefix
+            prev_node = self.node
+            self.node = self.node[unvisited]
+            # IF THIS PREFIX MATCHES A WORD
+            if self.node.word != visited: 
+                self.result.add(self.node.word)
+            # MARK AS VISITED SO THIS PATH DOESN'T REUSE THE SAME CELL
+            board[r][c] = visited
+            # FIND THE NEIGHBORS TO CONTINUE PATH IF IT IS NOT VISITED IN THE CURRENT PATH
+            for nr, nc in neighborhood(r, c):
+                if not in_bounds(nr, nc) or board[nr][nc] == visited: continue
+                backtrack(nr, nc)
+            # UNDO CHANGES, SO MARK THIS CELL AS UNVISITED SO THAT ANOTHER PATH CAN VISIT IT
+            board[r][c] = unvisited
+            # IF AT A TERMINAL NODE IN TRIE, REMOVE THE NODE TO PREVENT REVISITING A COMPLETELY MATCHED PREFIX
+            if len(self.node) == 0:
+                prev_node.pop(unvisited)
+            self.node = prev_node
+        for r, c in product(range(R), range(C)):
+            self.node = trie # initialize node to the root of trie tree
+            backtrack(r,c)
+        return self.result
+```
+
+## 45. Jump Game II
+
+### Solution 1:  greedy + dynamic programming with constant space + always keep track of farthest can jump for the next jump while working way to need to jump. 
+
+```py
+class Solution:
+    def jump(self, nums: List[int]) -> int:
+        jumps = farthest = needJump = 0
+        for i in range(len(nums) - 1):
+            farthest = max(farthest, i + nums[i])
+            if i == needJump:
+                jumps += 1
+                needJump = farthest
+        return jumps
+```
+
+## 918. Maximum Sum Circular Subarray
+
+### Solution 1:  max sum subarray + prefix and suffix max
+
+```py
+class Solution:
+    def maxSubarraySumCircular(self, nums: List[int]) -> int:
+        n = len(nums)
+        prefixMax, suffixMax = [-inf], [-inf]
+        prefixSum = suffixSum = 0
+        maxSum = sum_ = -inf
+        for i in range(n):
+            prefixSum += nums[i]
+            suffixSum += nums[n-i-1]
+            sum_ = max(nums[i], sum_ + nums[i])
+            maxSum = max(maxSum, sum_)
+            prefixMax.append(max(prefixMax[-1], prefixSum))
+            suffixMax.append(max(suffixMax[-1], suffixSum))
+        return max(maxSum, max((pre+suf for pre, suf in zip(prefixMax, reversed(suffixMax)))))
+```
+
+### Solution 2:  max sum subarray + nonempty min sum subarray (max sum subarray forming prefix and suffix is total_sum - min_sum) + find minimum sum subarray to remove
+
+```py
+class Solution:
+    def maxSubarraySumCircular(self, nums: List[int]) -> int:
+        n = len(nums)
+        maxSum = sum_ = -inf
+        total = 0
+        for num in nums:
+            sum_ = max(num, sum_ + num)
+            maxSum = max(maxSum, sum_)
+            total += num
+        minSum = sum_ = inf
+        for num in nums[1:]:
+            sum_ = min(num, sum_ + num)
+            minSum = min(minSum, sum_)
+        maxSum = max(maxSum, total - minSum)
+        minSum = sum_ = inf
+        for num in nums[:-1]:
+            sum_ = min(num, sum_ + num)
+            minSum = min(minSum, sum_)
+        maxSum = max(maxSum, total - minSum)
+        return maxSum
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:

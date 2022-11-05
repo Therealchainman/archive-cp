@@ -73,3 +73,11 @@ class TrieNode:
         self.isWord = False
     def __repr__(self):
         return f'is_word: {self.isWord}, children: {self.children}'
+
+"""
+Trie inherit from defaultdict, doesn't need the children defaultdict
+"""
+class TrieNode(defaultdict):
+    def __init__(self):
+        super().__init__(TrieNode)
+        self.word = '$'

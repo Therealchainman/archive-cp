@@ -1,16 +1,16 @@
-from collections import defaultdict
-from heapq import heappop, heappush
 def main():
-    d, n, x = map(int, f.readline().split())
-
-
+    n = int(input())
+    arr = list(map(int, input().split()))
+    total = 0
+    for i in range(n):
+        prefix = 0
+        for j in range(i, n):
+            prefix += arr[j]
+            if prefix < 0: break
+            total += prefix
+    return total
     
 if __name__ == '__main__':
-    result = []
-    with open('logs.txt', 'w') as f1:
-        with open(f'/home/therealchainman/cp/archive-cp/kickstart/2022/inputs/input.txt', 'r') as f:
-            T = int(f.readline())
-            for t in range(1,T+1):
-                result.append(f'Case #{t}: {main()}')
-    with open('/home/therealchainman/cp/archive-cp/kickstart/2022/outputs/output.txt', 'w') as f:
-        f.write('\n'.join(result))
+    T = int(input())
+    for t in range(1, T+1):
+        print(f'Case #{t}: {main()}')
