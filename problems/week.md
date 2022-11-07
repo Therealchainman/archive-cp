@@ -14115,36 +14115,113 @@ class Solution:
         return int(snum.replace('6', '9', 1))
 ```
 
-##
+## 2460. Apply Operations to an Array
 
-### Solution 1:
+### Solution 1:  two pointers
 
 ```py
-
+class Solution:
+    def applyOperations(self, A: List[int]) -> List[int]:
+        nonzero_front = 0
+        for i in range(len(A)):
+            if i < len(A) - 1 and A[i] == A[i+1]:
+                A[i] *= 2
+                A[i+1] = 0
+            if A[i]:
+                A[i], A[nonzero_front] = A[nonzero_front], A[i]
+                nonzero_front += 1
+        return A
 ```
 
-##
+## 2461. Maximum Sum of Distinct Subarrays With Length K
 
-### Solution 1:
+### Solution 1:  keep pointer to the last duplicat integer + store position of last index of each integer + sliding window of fixed size
 
 ```py
-
+class Solution:
+    def maximumSubarraySum(self, nums: List[int], k: int) -> int:
+        m = max(nums) + 1
+        pos = [-1]*m
+        n = len(nums)
+        cur = result = 0
+        last_dupe = -1
+        for i in range(n):
+            cur += nums[i]
+            if i>=k:    cur -= nums[i-k]
+            if i-pos[nums[i]] < k:  last_dupe = max(last_dupe, pos[nums[i]])
+            if i-last_dupe >= k:    result = max(result, cur)
+            pos[nums[i]] = i
+        return result
 ```
 
-##
+## 2462. Total Cost to Hire K Workers
 
-### Solution 1:
+### Solution 1:  minheap + deque
 
 ```py
-
+class Solution:
+    def totalCost(self, costs: List[int], k: int, candidates: int) -> int:
+        minheap = []
+        total_cost = 0
+        first, last = 0, 1
+        costs = deque([(cost, index) for index, cost in enumerate(costs)])
+        for _ in range(candidates):
+            if not costs: break
+            cost, index = costs.popleft()
+            heappush(minheap, (cost, index, first))
+            if not costs: break
+            cost, index = costs.pop()
+            heappush(minheap, (cost, index, last))
+        for _ in range(k):
+            cost, index, pos = heappop(minheap)
+            total_cost += cost
+            if not costs: continue
+            if pos == first:
+                cost, index = costs.popleft()
+                heappush(minheap, (cost, index, first))
+            else:
+                cost, index = costs.pop()
+                heappush(minheap, (cost, index, last))
+        return total_cost
 ```
 
-##
+## 2463. Minimum Total Distance Traveled
 
-### Solution 1:
+### Solution 1:  recursive dynamic programming + two states, repair robot at current factory or skip + O(nmk)
 
 ```py
+class Solution:
+    def minimumTotalDistance(self, robot: List[int], factory: List[List[int]]) -> int:
+        robot.sort()
+        factory.sort()
+        @cache
+        def dp(i: int, j: int, k: int) -> int:
+            if i == len(robot): return 0
+            if j == len(factory): return inf
+            # repair robot at current factory
+            current = dp(i+1, j, k-1) + abs(robot[i] - factory[j][0]) if k > 0 else inf
+            # skip repair robot at current factory
+            if j < len(factory)-1:
+                current = min(current, dp(i, j+1, factory[j+1][1]))
+            return current
+        return dp(0,0,factory[0][1])
+```
 
+### Solution 2:  iterative dynamic programming + flatten factories + find all robots that can be placed at current factory and find the cheapest cost to place the robot at that location.
+
+```py
+class Solution:
+    def minimumTotalDistance(self, rob, factory):
+        rob.sort()
+        factory.sort()
+        fac = [f for f, lim in factory for _ in range(lim)]
+        n, m = len(rob), len(fac)
+        dp = [0] + [inf]*n
+        for j, f in enumerate(fac):
+            left, right = max(n - (m-j), 0), min(j, n-1)
+            for i in reversed(range(left, right+1)):
+                dp[i+1] = min(abs(f-rob[i])+dp[i], dp[i+1])
+        return dp[-1]
 ```
 
 ##
