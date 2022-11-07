@@ -13974,20 +13974,145 @@ class Solution:
         return maxSum
 ```
 
-##
+## 899. Orderly Queue
 
-### Solution 1:
+### Solution 1:  suffix array + lexicographically smallest suffix with string s+s + make that suffix the prefix for the result
 
 ```py
 
+class Solution:
+    def radix_sort(self, p: List[int], c: List[int]) -> List[int]:
+        n = len(p)
+        cnt = [0]*n
+        next_p = [0]*n
+        for cls_ in c:
+            cnt[cls_] += 1
+        pos = [0]*n
+        for i in range(1,n):
+            pos[i] = pos[i-1] + cnt[i-1]
+        for pi in p:
+            cls_i = c[pi]
+            next_p[pos[cls_i]] = pi
+            pos[cls_i] += 1
+        return next_p
+
+    def suffix_array(self, s: str) -> str:
+        n = len(s)
+        p, c = [0]*n, [0]*n
+        arr = [None]*n
+        for i, ch in enumerate(s):
+            arr[i] = (ch, i)
+        arr.sort()
+        for i, (_, j) in enumerate(arr):
+            p[i] = j
+        c[p[0]] = 0
+        for i in range(1,n):
+            c[p[i]] = c[p[i-1]] + (arr[i][0] != arr[i-1][0])
+        k = 1
+        is_finished = False
+        while k < n and not is_finished:
+            for i in range(n):
+                p[i] = (p[i] - k + n)%n
+            p = self.radix_sort(p, c)
+            next_c = [0]*n
+            next_c[p[0]] = 0
+            is_finished = True
+            for i in range(1,n):
+                prev_segments = (c[p[i-1]], c[(p[i-1]+k)%n])
+                current_segments = (c[p[i]], c[(p[i]+k)%n])
+                next_c[p[i]] = next_c[p[i-1]] + (prev_segments != current_segments)
+                is_finished &= (next_c[p[i]] != next_c[p[i-1]])
+            k <<= 1
+            c = next_c
+        return p[0]
+    
+    def orderlyQueue(self, s: str, k: int) -> str:
+        if k > 1: 
+            counts = Counter(s)
+            return ''.join([char*counts[char] for char in string.ascii_lowercase])
+        n = len(s)
+        # suffix index for the lexicographically smallest suffix in the string s
+        suffix_index = self.suffix_array(s+s)%n
+        return s[suffix_index:] + s[:suffix_index]
 ```
 
-##
-
-### Solution 1:
+### Solution 2: brute force + find the minimum of every possible rotated string + optimized sort of limited character search space by using bucket sort = O(n+k) + O(n^2)
 
 ```py
+class Solution:
+    def orderlyQueue(self, s: str, k: int) -> str:
+        if k > 1: 
+            counts = Counter(s)
+            return ''.join([char*counts[char] for char in string.ascii_lowercase])
+        result = s
+        n = len(s)
+        for i in range(n):
+            cand_s = s[i:] + s[:i]
+            result = min(cand_s, result)
+        return result
+```
 
+### Solution 3:  Tournament Algorithm + Dual Elimination + Finds the champion of the tournament + O(nlogn)
+
+```py
+class Solution:
+    def orderlyQueue(self, s: str, k: int) -> str:
+        if k > 1: 
+            counts = Counter(s)
+            return ''.join([char*counts[char] for char in string.ascii_lowercase])
+        min_char = min(s)
+        s_len = len(s)
+        advance = lambda index: (index + 1)%s_len
+        champions = deque()
+        for i, ch in enumerate(s):
+            if ch == min_char:
+                champions.append(i)
+        # DUAL ELIMINATION UNTIL ONE CHAMPION REMAINS
+        while len(champions) > 1:
+            champion1 = champions.popleft()
+            champion2 = champions.popleft()
+            # ASSUME CHAMPION1 IS SMALLER INDEX
+            if champion2 < champion1:
+                champion1, champion2 = champion2, champion1
+            # length of substring for champions is champion2-champion1
+            # abcdefg
+            # ^  ^
+            # substring should be abc for champion 1, and def for champion 2
+            current_champion = champion1
+            left_champion, right_champion = champion1, champion2
+            for _ in range(champion2 - champion1):
+                if s[left_champion] < s[right_champion]: break
+                if s[left_champion] > s[right_champion]:
+                    current_champion = champion2
+                    break
+                left_champion = advance(left_champion)
+                right_champion = advance(right_champion)
+            champions.append(current_champion)
+        champion_index = champions.pop()
+        return s[champion_index:] + s[:champion_index]
+```
+
+## 1323. Maximum 69 Number
+
+### Solution 1:  find first element equal to 6 in string representation of number + linear in terms of the number of digits in the number
+
+```py
+class Solution:
+    def maximum69Number (self, num: int) -> int:
+        snum = str(num)
+        for i in range(len(snum)):
+            if snum[i] == '6':
+                return int(snum[:i]+'9'+snum[i+1:])
+        return num
+```
+
+### Solution 2: string replace with occurrence of 1
+
+```py
+class Solution:
+    def maximum69Number (self, num: int) -> int:
+        snum = str(num)
+        return int(snum.replace('6', '9', 1))
 ```
 
 ##

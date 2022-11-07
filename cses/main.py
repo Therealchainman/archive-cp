@@ -1,6 +1,7 @@
 import os,sys
 from io import BytesIO, IOBase
 from typing import List
+from collections import deque
 
 # Fast IO Region
 BUFSIZE = 8192
@@ -43,62 +44,35 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-"""
-Segment Tree 
-
-- point updates
-- range query
-"""
-class SegmentTree:
-    def __init__(self, n: int, neutral: int):
-        self.neutral = neutral
-        self.size = 1
-        self.n = n
-        while self.size<n:
-            self.size*=2
-        self.tree = [0 for _ in range(self.size*2)]
-
-    def ascend(self, segment_idx: int) -> None:
-        while segment_idx > 0:
-            segment_idx -= 1
-            segment_idx >>= 1
-            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
-            self.tree[segment_idx] = max(self.tree[left_segment_idx], self.tree[right_segment_idx])
-        
-    def update(self, segment_idx: int, val: int) -> None:
-        segment_idx += self.size - 1
-        self.tree[segment_idx] += val
-        self.ascend(segment_idx)
-
-    def leftmost_query(self, k: int) -> int:
-        left_segment_bound, right_segment_bound, segment_idx = 0, self.size, 0
-        while right_segment_bound - left_segment_bound != 1:
-            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
-            mid_point = (left_segment_bound + right_segment_bound) >> 1
-            if k <= self.tree[left_segment_idx]: # continue in the left branch
-                segment_idx, right_segment_bound = left_segment_idx, mid_point
-            else: # continue in the right branch
-                segment_idx, left_segment_bound = right_segment_idx, mid_point
-        return left_segment_bound if self.tree[segment_idx] >= k else -1
-    
-    def __repr__(self) -> str:
-        return f"array: {self.tree}"
+def min_string_rotation(s: str) -> str:
+    min_char = min(s)
+    s_len = len(s)
+    advance = lambda index: (index + 1)%s_len
+    champions = deque()
+    for i, ch in enumerate(s):
+        if ch == min_char:
+            champions.append(i)
+    while len(champions) > 1:
+        champion1 = champions.popleft()
+        champion2 = champions.popleft()
+        if champion2 < champion1:
+            champion1, champion2 = champion2, champion1
+        current_champion = champion1
+        left_champion, right_champion = champion1, champion2
+        for _ in range(champion2 - champion1):
+            if s[left_champion] < s[right_champion]: break
+            if s[left_champion] > s[right_champion]:
+                current_champion = champion2
+                break
+            left_champion = advance(left_champion)
+            right_champion = advance(right_champion)
+        champions.append(current_champion)
+    champion_index = champions.pop()
+    return s[champion_index:] + s[:champion_index]
 
 def main():
-    n, m = map(int, input().split())
-    hotels = list(map(int,input().split()))
-    segTree = SegmentTree(n, 0)
-    for i in range(n):
-        segTree.update(i, hotels[i])
-    result = [0]*m
-    queries = map(int, input().split())
-    for i, guests in enumerate(queries):
-        index = segTree.k_query(guests)
-        # returns index = -1 if there is no hotel that can support the guests count, thus don't update for that
-        if index >= 0:
-            segTree.update(index, -guests) # remove the guests from the room that they could get
-        result[i] = index + 1
-    return ' '.join(map(str, result))
+    s = input()
+    return min_string_rotation(s)
 
 if __name__ == '__main__':
     print(main())
