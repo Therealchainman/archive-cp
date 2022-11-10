@@ -14224,6 +14224,182 @@ class Solution:
         return dp[-1]
 ```
 
+## 1047. Remove All Adjacent Duplicates In String
+
+### Solution 1:  stack
+
+```py
+class Solution:
+    def removeDuplicates(self, s: str) -> str:
+        stack = []
+        for ch in s:
+            if stack and stack[-1] == ch:
+                stack.pop()
+            else:
+                stack.append(ch)
+        return ''.join(stack)
+```
+
+## 339. Nested List Weight Sum
+
+### Solution 1:  sum + recursion
+
+```py
+class Solution:
+    def depthSum(self, nestedList: List[NestedInteger], depth: int = 1) -> int:
+        return sum([depth*nestInt.getInteger() if nestInt.isInteger() else self.depthSum(nestInt.getList(), depth+1) for nestInt in nestedList])
+```
+
+## 901. Online Stock Span
+
+### Solution 1:  stack
+
+```py
+class StockSpanner:
+
+    def __init__(self):
+        self.stack = [(inf, 1)]
+
+    def next(self, price: int) -> int:
+        span = 1
+        while self.stack[-1][0] <= price:
+            _, prev_span = self.stack.pop()
+            span += prev_span
+        self.stack.append((price, span))
+        return span
+```
+
+## 1014. Best Sightseeing Pair
+
+### Solution 1:  iterative dp + prefix max
+
+```py
+class Solution:
+    def maxScoreSightseeingPair(self, values: List[int]) -> int:
+        prefixMax = values[0]
+        maxScore = -inf
+        for j, val in enumerate(values[1:], start = 1):
+            score = prefixMax + val - j
+            maxScore = max(maxScore, score)
+            prefixMax = max(prefixMax, val + j)
+        return maxScore
+```
+
+## 122. Best Time to Buy and Sell Stock II
+
+### Solution 1:  recursive dp
+
+```py
+class Solution:
+    def maxProfit(self, prices: List[int]) -> int:
+        buy, sell = 0, 1
+        @cache
+        def stock(i, state):
+            if i == len(prices): return 0
+            # action
+            transaction = stock(i+1, state^1) + (prices[i] if state == sell else -prices[i])
+            # nothin
+            skip = stock(i + 1, state)
+            return max(transaction, skip)
+        return stock(0, buy)
+```
+
+## 309. Best Time to Buy and Sell Stock with Cooldown
+
+### Solution 1:  recursive dp
+
+```py
+class Solution:
+    def maxProfit(self, prices: List[int]) -> int:
+        buy, sell = 0, 1
+        @cache
+        def stock(i, state):
+            if i >= len(prices): return 0
+            if state == buy:
+                transaction = stock(i+1, state^1) - prices[i]
+            else:
+                transaction = stock(i+2, state^1) + prices[i]
+            skip = stock(i + 1, state)
+            return max(transaction, skip)
+        return stock(0, buy)
+```
+
+## 714. Best Time to Buy and Sell Stock with Transaction Fee
+
+### Solution 1:  recursive dp
+
+```py
+class Solution:
+    def maxProfit(self, prices: List[int], fee: int) -> int:
+        buy, sell = 0, 1
+        @cache
+        def stock(i, state):
+            if i >= len(prices): return 0
+            if state == buy:
+                transaction = stock(i+1,state^1) - prices[i]
+            else:
+                transaction = stock(i+1,state^1) + prices[i] - fee
+            skip = stock(i+1,state)
+            return max(skip, transaction)
+        return stock(0, buy)
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
