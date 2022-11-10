@@ -2,6 +2,7 @@ import os,sys
 from io import BytesIO, IOBase
 from typing import List
 from collections import deque
+from math import inf
 
 # Fast IO Region
 BUFSIZE = 8192
@@ -44,35 +45,79 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-def min_string_rotation(s: str) -> str:
-    min_char = min(s)
-    s_len = len(s)
-    advance = lambda index: (index + 1)%s_len
-    champions = deque()
-    for i, ch in enumerate(s):
-        if ch == min_char:
-            champions.append(i)
-    while len(champions) > 1:
-        champion1 = champions.popleft()
-        champion2 = champions.popleft()
-        if champion2 < champion1:
-            champion1, champion2 = champion2, champion1
-        current_champion = champion1
-        left_champion, right_champion = champion1, champion2
-        for _ in range(champion2 - champion1):
-            if s[left_champion] < s[right_champion]: break
-            if s[left_champion] > s[right_champion]:
-                current_champion = champion2
-                break
-            left_champion = advance(left_champion)
-            right_champion = advance(right_champion)
-        champions.append(current_champion)
-    champion_index = champions.pop()
-    return s[champion_index:] + s[:champion_index]
+class Node:
+    def __init__(self):
+        self.segment_max = -inf
+        self.maxLeftSubArray = -inf
+        self.maxRightSubArray = -inf
+        self.segment_sum = 0
+
+    def __repr__(self):
+        return f"Node(max: {self.segment_max}, max_left: {self.maxLeftSubArray}, max_right: {self.maxRightSubArray}, sum: {self.segment_sum})"
+
+class SegmentTree:
+    def __init__(self, n: int, neutral: int):
+        self.neutral = neutral
+        self.size = 1
+        self.n = n
+        while self.size<n:
+            self.size*=2
+        self.tree = [Node() for _ in range(self.size*2)]
+
+    def ascend(self, segment_idx: int) -> None:
+        while segment_idx > 0:
+            segment_idx -= 1
+            segment_idx >>= 1
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            node = self.tree[segment_idx]
+            node.segment_sum = self.tree[left_segment_idx].segment_sum + self.tree[right_segment_idx].segment_sum
+            node.maxLeftSubArray = max(self.tree[left_segment_idx].maxLeftSubArray, self.tree[left_segment_idx].segment_sum + self.tree[right_segment_idx].maxLeftSubArray)
+            node.maxRightSubArray = max(self.tree[right_segment_idx].maxRightSubArray, self.tree[right_segment_idx].segment_sum + self.tree[left_segment_idx].maxRightSubArray)
+            node.segment_max = max(self.tree[left_segment_idx].segment_max, self.tree[right_segment_idx].segment_max, self.tree[left_segment_idx].maxRightSubArray + self.tree[right_segment_idx].maxLeftSubArray)
+        
+    def update(self, segment_idx: int, val: int) -> None:
+        segment_idx += self.size - 1
+        self.tree[segment_idx].segment_sum = val
+        self.tree[segment_idx].segment_max = val
+        self.tree[segment_idx].maxLeftSubArray = val
+        self.tree[segment_idx].maxRightSubArray = val
+        self.ascend(segment_idx)
+            
+    def query(self, left: int, right: int) -> int:
+        stack = [(0, self.n, 0)]
+        result = self.neutral
+        while stack:
+            # BOUNDS FOR CURRENT INTERVAL and idx for tree
+            left_segment_bound, right_segment_bound, segment_idx = stack.pop()
+            # NO OVERLAP
+            if left_segment_bound >= right or right_segment_bound <= left: continue
+            # COMPLETE OVERLAP
+            if left_segment_bound >= left and right_segment_bound <= right:
+                result = max(result, self.tree[segment_idx].segment_max)
+                continue
+            # PARTIAL OVERLAP
+            mid_point = (left_segment_bound + right_segment_bound) >> 1
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            stack.extend([(left_segment_bound, mid_point, left_segment_idx), (mid_point, right_segment_bound, right_segment_idx)])
+        return result
+    
+    def __repr__(self) -> str:
+        return f"array: {self.tree}"
 
 def main():
-    s = input()
-    return min_string_rotation(s)
+    n, m = map(int, input().split())
+    arr = list(map(int, input().split()))
+    neutral = 0
+    st = SegmentTree(n, neutral)
+    for i, x in enumerate(arr):
+        st.update(i, x)
+    result = []
+    for _ in range(m):
+        idx, val = map(int, input().split())
+        idx -= 1
+        st.update(idx, val)
+        result.append(st.query(0, n))
+    return '\n'.join(map(str, result))
 
 if __name__ == '__main__':
     print(main())
