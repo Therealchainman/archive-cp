@@ -68,3 +68,38 @@ class CompactUnionFind:
     
     def __repr__(self) -> str:
         return f'parents: {self.parent}, sizes: {self.size}, connected_components: {self.connected_components}'
+
+"""
+This union find implementation is using iterative approach to find the representative node for a given node.
+It also uses dictionary for size and parent, so it is space optimized and compact
+"""
+class UnionFind:
+    def __init__(self):
+        self.size = dict()
+        self.parent = dict()
+    
+    def find(self,i: int) -> int:
+        if i not in self.parent:
+            self.size[i] = 1
+            self.parent[i] = i
+        while i != self.parent[i]:
+            self.parent[i] = self.parent[self.parent[i]]
+            i = self.parent[i]
+        return i
+
+    def union(self,i: int,j: int) -> bool:
+        i, j = self.find(i), self.find(j)
+        if i!=j:
+            if self.size[i] < self.size[j]:
+                i,j=j,i
+            self.parent[j] = i
+            self.size[i] += self.size[j]
+            return True
+        return False
+    
+    @property
+    def root_count(self):
+        return sum(node == self.find(node) for node in self.parent)
+
+    def __repr__(self) -> str:
+        return f'parents: {[(i, parent) for i, parent in enumerate(self.parent)]}, sizes: {self.size}'

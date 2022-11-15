@@ -14344,28 +14344,122 @@ class Solution:
         return stock(0, buy)
 ```
 
-##
+## 26. Remove Duplicates from Sorted Array
 
-### Solution 1:
+### Solution 1:  two pointers + inplace
 
 ```py
-
+class Solution:
+    def removeDuplicates(self, nums: List[int]) -> int:
+        left = 1
+        n = len(nums)
+        for right in range(1, n):
+            if nums[right] != nums[right-1]:
+                nums[left] = nums[right]
+                left += 1
+        return left
 ```
 
-##
+## 947. Most Stones Removed with Same Row or Column
 
-### Solution 1:
+### Solution 1:  union find + size of each disjoint connected component
 
 ```py
+class UnionFind:
+    def __init__(self,n: int):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    
+    def find(self,i: int) -> int:
+        if i==self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
 
+    def union(self,i: int,j: int) -> bool:
+        i, j = self.find(i), self.find(j)
+        if i!=j:
+            if self.size[i] < self.size[j]:
+                i,j=j,i
+            self.parent[j] = i
+            self.size[i] += self.size[j]
+            return True
+        return False
+    
+    @property
+    def root_count(self):
+        return sum(node == self.find(node) for node in range(len(self.parent)))
+
+    def __repr__(self) -> str:
+        return f'parents: {[(i, parent) for i, parent in enumerate(self.parent)]}, sizes: {self.size}'
+    
+class Solution:
+    def removeStones(self, stones: List[List[int]]) -> int:
+        n = len(stones)
+        dsu = UnionFind(n)
+        rows, cols = defaultdict(list), defaultdict(list)
+        for i, (r, c) in enumerate(stones):
+            rows[r].append(i)
+            cols[c].append(i)
+        for row in rows.values():
+            for r in range(1, len(row)):
+                dsu.union(row[r-1], row[r])
+        for col in cols.values():
+            for c in range(1, len(col)):
+                dsu.union(col[c-1], col[c])
+        return len(stones) - dsu.root_count
 ```
 
-##
-
-### Solution 1:
+### solution 2:  iterative union find + dictionary
 
 ```py
+class UnionFind:
+    def __init__(self):
+        self.size = dict()
+        self.parent = dict()
+    
+    def find(self,i: int) -> int:
+        if i not in self.parent:
+            self.size[i] = 1
+            self.parent[i] = i
+        while i != self.parent[i]:
+            self.parent[i] = self.parent[self.parent[i]]
+            i = self.parent[i]
+        return i
 
+    def union(self,i: int,j: int) -> bool:
+        i, j = self.find(i), self.find(j)
+        if i!=j:
+            if self.size[i] < self.size[j]:
+                i,j=j,i
+            self.parent[j] = i
+            self.size[i] += self.size[j]
+            return True
+        return False
+    
+    @property
+    def root_count(self):
+        return sum(node == self.find(node) for node in self.parent)
+
+    def __repr__(self) -> str:
+        return f'parents: {[(i, parent) for i, parent in enumerate(self.parent)]}, sizes: {self.size}'
+    
+class Solution:
+    def removeStones(self, stones: List[List[int]]) -> int:
+        dsu = UnionFind()
+        for x, y in stones:
+            dsu.union(f'x: {x}', f'y: {y}')
+        return len(stones) - dsu.root_count
+```
+
+## 151. Reverse Words in a String
+
+### Solution 1:  reverse + split with delimiter as whitespace
+
+```py
+class Solution:
+    def reverseWords(self, s: str) -> str:
+        return ' '.join(reversed(s.split()))
 ```
 
 ##

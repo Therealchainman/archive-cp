@@ -1,8 +1,7 @@
 import os,sys
 from io import BytesIO, IOBase
 from typing import List
-from collections import deque
-from math import inf
+from collections import defaultdict
 
 # Fast IO Region
 BUFSIZE = 8192
@@ -45,46 +44,29 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-class Node:
-    def __init__(self):
-        self.segment_max = -inf
-        self.maxLeftSubArray = -inf
-        self.maxRightSubArray = -inf
-        self.segment_sum = 0
-
-    def __repr__(self):
-        return f"Node(max: {self.segment_max}, max_left: {self.maxLeftSubArray}, max_right: {self.maxRightSubArray}, sum: {self.segment_sum})"
-
 class SegmentTree:
-    def __init__(self, n: int, neutral: int):
+    def __init__(self, num_elements: int, neutral: int):
         self.neutral = neutral
         self.size = 1
-        self.n = n
-        while self.size<n:
+        self.num_elements = num_elements
+        while self.size < num_elements:
             self.size*=2
-        self.tree = [Node() for _ in range(self.size*2)]
+        self.tree = [0 for _ in range(self.size*2)]
 
     def ascend(self, segment_idx: int) -> None:
         while segment_idx > 0:
             segment_idx -= 1
             segment_idx >>= 1
             left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
-            node = self.tree[segment_idx]
-            node.segment_sum = self.tree[left_segment_idx].segment_sum + self.tree[right_segment_idx].segment_sum
-            node.maxLeftSubArray = max(self.tree[left_segment_idx].maxLeftSubArray, self.tree[left_segment_idx].segment_sum + self.tree[right_segment_idx].maxLeftSubArray)
-            node.maxRightSubArray = max(self.tree[right_segment_idx].maxRightSubArray, self.tree[right_segment_idx].segment_sum + self.tree[left_segment_idx].maxRightSubArray)
-            node.segment_max = max(self.tree[left_segment_idx].segment_max, self.tree[right_segment_idx].segment_max, self.tree[left_segment_idx].maxRightSubArray + self.tree[right_segment_idx].maxLeftSubArray)
+            self.tree[segment_idx] = self.tree[left_segment_idx] + self.tree[right_segment_idx]
         
     def update(self, segment_idx: int, val: int) -> None:
         segment_idx += self.size - 1
-        self.tree[segment_idx].segment_sum = val
-        self.tree[segment_idx].segment_max = val
-        self.tree[segment_idx].maxLeftSubArray = val
-        self.tree[segment_idx].maxRightSubArray = val
+        self.tree[segment_idx] = val
         self.ascend(segment_idx)
             
     def query(self, left: int, right: int) -> int:
-        stack = [(0, self.n, 0)]
+        stack = [(0, self.size, 0)]
         result = self.neutral
         while stack:
             # BOUNDS FOR CURRENT INTERVAL and idx for tree
@@ -93,7 +75,7 @@ class SegmentTree:
             if left_segment_bound >= right or right_segment_bound <= left: continue
             # COMPLETE OVERLAP
             if left_segment_bound >= left and right_segment_bound <= right:
-                result = max(result, self.tree[segment_idx].segment_max)
+                result += self.tree[segment_idx]
                 continue
             # PARTIAL OVERLAP
             mid_point = (left_segment_bound + right_segment_bound) >> 1
@@ -105,18 +87,25 @@ class SegmentTree:
         return f"array: {self.tree}"
 
 def main():
-    n, m = map(int, input().split())
+    n, q = map(int, input().split())
     arr = list(map(int, input().split()))
+    queries = defaultdict(list)
+    result = [0]*q
     neutral = 0
     st = SegmentTree(n, neutral)
-    for i, x in enumerate(arr):
-        st.update(i, x)
-    result = []
-    for _ in range(m):
-        idx, val = map(int, input().split())
-        idx -= 1
-        st.update(idx, val)
-        result.append(st.query(0, n))
+    last_index = dict()
+    for i in range(q):
+        left, right = map(int, input().split())
+        left -= 1
+        right -= 1
+        queries[left].append((right, i))
+    for left in reversed(range(n)):
+        if arr[left] in last_index:
+            st.update(last_index[arr[left]], 0)
+        last_index[arr[left]] = left
+        st.update(last_index[arr[left]], 1)
+        for right, i in queries[left]:
+            result[i] = st.query(left, right+1)
     return '\n'.join(map(str, result))
 
 if __name__ == '__main__':
