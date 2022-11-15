@@ -14477,6 +14477,8 @@ class Solution:
 
 ### Solution 2:  navigate grid with combinations of down and right moves + math + combinations
 
+![combinations](images/unique_paths_combinations.png)
+
 ```py
 class Solution:
     def uniquePaths(self, m: int, n: int) -> int:
