@@ -14462,6 +14462,141 @@ class Solution:
         return ' '.join(reversed(s.split()))
 ```
 
+## 62. Unique Paths 
+
+### Solution 1:  space optimized iterative dp + O(nm) time and O(n) space
+
+```py
+class Solution:
+    def uniquePaths(self, m: int, n: int) -> int:
+        layer = [1]*n
+        for _, j in product(range(1, m), range(1, n)):
+            layer[j] += layer[j-1]
+        return layer[-1]
+```
+
+### Solution 2:  navigate grid with combinations of down and right moves + math + combinations
+
+```py
+class Solution:
+    def uniquePaths(self, m: int, n: int) -> int:
+        return math.comb(n+m-2, m-1)
+```
+
+## 222. Count Complete Tree Nodes
+
+### Solution 1:  math + O(log^2(n)) time
+
+```py
+class Solution:
+    def height(self, root: Optional[TreeNode]) -> int:
+        h = -1
+        while root:
+            root = root.left
+            h += 1
+        return h
+    def countNodes(self, root: Optional[TreeNode]) -> int:
+        result = 0
+        while root:
+            h_left, h_right = self.height(root), self.height(root.right) + 1
+            result += (1 << h_right)
+            root = root.left if h_left != h_right else root.right
+        return result
+```
+
+## 63. Unique Paths II
+
+### Solution 1:  space optimized iterative dp + O(nm) time and O(n) space
+
+```py
+class Solution:
+    def uniquePathsWithObstacles(self, obstacleGrid: List[List[int]]) -> int:
+        R, C = len(obstacleGrid), len(obstacleGrid[0])
+        layer = [0]*C
+        for c in range(C):
+            if obstacleGrid[0][c] == 1: break
+            layer[c] = 1
+        for r, c in product(range(1, R), range(C)):
+            if c > 0:
+                layer[c] += layer[c-1]
+            if obstacleGrid[r][c] == 1:
+                layer[c] = 0
+        return layer[-1]
+```
+
+## 304. Range Sum Query 2D - Immutable
+
+### Solution 1:  2 dimensional prefix sum + O(1) queries
+
+```py
+class NumMatrix:
+
+    def __init__(self, matrix: List[List[int]]):
+        R, C = len(matrix), len(matrix[0])
+        self.psum = [[0]*(C+1) for _ in range(R+1)]
+        for r, c in product(range(R), range(C)):
+            self.psum[r+1][c+1] = self.psum[r][c+1] + self.psum[r+1][c] + matrix[r][c] - self.psum[r][c]
+
+    def sumRegion(self, row1: int, col1: int, row2: int, col2: int) -> int:
+        return self.psum[row2+1][col2+1] - self.psum[row2+1][col1] - self.psum[row1][col2+1] + self.psum[row1][col1]
+```
+
+## 1314. Matrix Block Sum
+
+### Solution 1:  2 dimensional prefix sum
+
+```py
+class Solution:
+    def matrixBlockSum(self, mat: List[List[int]], k: int) -> List[List[int]]:
+        R, C = len(mat), len(mat[0])
+        ans = [[0]*C for _ in range(R)]
+        # CONSTRUCT 2 DIMENSIONAL PREFIX SUM
+        psum = [[0]*(C+1) for _ in range(R+1)]
+        for r, c in product(range(R), range(C)):
+            psum[r+1][c+1] = psum[r][c+1] + psum[r+1][c] + mat[r][c] - psum[r][c]
+        # 2 DIMENSIONAL RANGE QUERIES
+        for r, c in product(range(R), range(C)):
+            # UPPER LEFT CORNER
+            ul_row, ul_col = max(0, r-k), max(0, c-k)
+            # BOTTOM RIGHT CORNER
+            br_row, br_col = min(R-1, r+k), min(C-1, c+k)
+            ans[r][c] = psum[br_row+1][br_col+1] - psum[br_row+1][ul_col] - psum[ul_row][br_col+1] + psum[ul_row][ul_col]
+        return ans
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+
 ##
 
 ### Solution 1:
@@ -14518,21 +14653,6 @@ class Solution:
 
 ```
 
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
-```
 
 ##
 
