@@ -14566,12 +14566,263 @@ class Solution:
         return ans
 ```
 
-##
+## 2465. Number of Distinct Averages
+
+### Solution 1:  set + two pointers + tilde i trick for when right pointer moves with left pointer each time + increment equals decrement at each iteration
+
+```py
+class Solution:
+    def distinctAverages(self, nums: List[int]) -> int:
+        n = len(nums)
+        nums.sort()
+        return len({nums[i] + nums[~i] for i in range(n//2)})
+```
+
+## 2466. Count Ways To Build Good Strings
+
+### Solution 1:  iterative dp + python list
+
+```py
+class Solution:
+    def countGoodStrings(self, low: int, high: int, zero: int, one: int) -> int:
+        memo = [0]*(high+1)
+        memo[0], mod = 1, int(1e9) + 7
+        result = 0
+        for i in range(1, high + 1):
+            if i >= zero:
+                memo[i] = (memo[i] + memo[i-zero])%mod
+            if i >= one:
+                memo[i] = (memo[i] + memo[i-one])%mod
+            if i >= low:
+                result = (result + memo[i])%mod
+        return result
+```
+
+### Solution 2: counter
+
+```py
+class Solution:
+    def countGoodStrings(self, low: int, high: int, zero: int, one: int) -> int:
+        memo = Counter({0:1})
+        mod = int(1e9) + 7
+        result = 0
+        for i in range(1, high + 1):
+            memo[i] = (memo[i] + memo[i-zero] + memo[i-one])%mod
+            if i >= low:
+                result = (result + memo[i])%mod
+        return result
+```
+
+## 2467. Most Profitable Path in a Tree
+
+### Solution 1:  rooted tree represented with undirected graph + dfs to find path from root to leaf + construct parent map + bfs for alice to leaf nodes
+
+```py
+class Solution:
+    def mostProfitablePath(self, edges: List[List[int]], bob: int, amount: List[int]) -> int:
+        n = len(amount)
+        adj_list = defaultdict(list)
+        for u, v in edges:
+            adj_list[u].append(v)
+            adj_list[v].append(u)
+        parent = [-1]*n
+        dist_from_root = [inf]*n
+        def dfs(node: int, cur_dist: int) -> None:
+            dist_from_root[node] = cur_dist
+            for child_node in adj_list[node]:
+                if child_node == parent[node]: continue
+                parent[child_node] = node
+                dfs(child_node, cur_dist + 1)
+        dfs(0, 0)
+        bob_dist = 0
+        while bob != 0:
+            if bob_dist < dist_from_root[bob]:
+                amount[bob] = 0
+            elif bob_dist == dist_from_root[bob]:
+                amount[bob] //= 2
+            bob = parent[bob]
+            bob_dist += 1
+        queue = deque([(0, 0)]) # (node, profit)
+        best = -inf
+        is_leaf = lambda node: parent[node] != -1 and len(adj_list[node]) == 1
+        while queue:
+            node, profit = queue.popleft()
+            profit += amount[node]
+            if is_leaf(node): best = max(best, profit)
+            for child_node in adj_list[node]:
+                if child_node == parent[node]: continue
+                queue.append((child_node, profit))
+        return best
+```
+
+## 2468. Split Message Based on Limit
 
 ### Solution 1:
 
 ```py
+class Solution:
+    def splitMessage(self, message: str, limit: int) -> List[str]:
+        n = len(message)
+        def num_parts() -> int:
+            for i in range(1, 5):
+                num_chars = limit - i - 3
+                parts = 0
+                remaining_chars = n
+                m = 9
+                for j in range(1, i+1):
+                    num_chars -= 1
+                    chars = num_chars*m
+                    if chars >= remaining_chars:
+                        return parts + (remaining_chars + num_chars - 1)//num_chars
+                    parts += m
+                    remaining_chars -= chars
+                    m *= 10
+            return -1
+        nparts = num_parts()
+        result = []
+        if nparts == -1: return result
+        index = 0
+        for i in range(1, nparts + 1):
+            suffix = f'<{i}/{nparts}>'
+            part_len = limit - len(suffix)
+            result.append(f'{message[index:index+part_len]}{suffix}')
+            index += part_len
+        return result
+```
 
+## 374. Guess Number Higher or Lower
+
+### Solution 1:  bisect + binary search with custom key comparator
+
+```py
+class Solution:
+    def guessNumber(self, n: int) -> int:
+        return bisect.bisect_right(range(1, n+1), 0, key = lambda num: -guess(num))
+```
+
+## 2472. Maximum Number of Non-overlapping Palindrome Substrings
+
+### Solution 1:  iterative dp + counter + palindrome
+
+```py
+class Solution:
+    def maxPalindromes(self, s: str, k: int) -> int:
+        n = len(s)
+        memo = Counter()
+        def palindrome_len(i: int , j: int) -> int:
+            while i > 0 and j < n-1 and s[i] == s[j] and j-i+1 < k:
+                i -= 1
+                j += 1
+            return j-i+1-(2 if s[i] != s[j] else 0)
+        for i in range(n):
+            p1 = palindrome_len(i, i)
+            if p1 >= k:
+                memo[i+p1//2] = max(memo[i+p1//2], memo[i-p1//2-1] + 1)
+            if i < n -1:
+                p2 = palindrome_len(i, i+1)
+                if p2 >= k:
+                    memo[i+p2//2] = max(memo[i+p2//2], memo[i-p2//2] + 1)
+            memo[i] = max(memo[i], memo[i-1])
+        return memo[n-1] 
+```
+
+## 2469. Convert the Temperature
+
+### Solution 1:  trivial
+
+```py
+class Solution:
+    def convertTemperature(self, celsius: float) -> List[float]:
+        return [celsius + 273.15, celsius*1.80+32.00]
+```
+
+## 2470. Number of Subarrays With LCM Equal to K
+
+### Solution 1:  brute force + math + lcm
+
+```py
+class Solution:
+    def subarrayLCM(self, nums: List[int], k: int) -> int:
+        n = len(nums)
+        result = 0
+        for i in range(n):
+            lcm_ = 1
+            for j in range(i, n):
+                lcm_ = lcm(lcm_, nums[j])
+                if lcm_ > k: break
+                result += (lcm_ == k)
+        return result
+```
+
+## 2471. Minimum Number of Operations to Sort a Binary Tree by Level
+
+### Solution 1:  queue + bfs + build array for each level + construct (directed graph for each level) + calculate the cycle lengths for each level
+
+```py
+class Solution:
+    def minimumOperations(self, root: Optional[TreeNode]) -> int:
+        def calc_swaps(arr):
+            sarr = sorted(arr)
+            compressed = dict()
+            for i, num in enumerate(sarr):
+                compressed[num] = i
+            adj_list = dict()
+            for i, num in enumerate(arr):
+                correct_index = compressed[num]
+                adj_list[i] = correct_index
+            visited = [0]*len(arr)
+            num_swaps = 0
+            queue = [(num, 0) for num in range(len(arr))]
+            while queue:
+                node, cycle_len = queue.pop()
+                if visited[node]: continue
+                visited[node] = 1
+                nei_node = adj_list[node]
+                if visited[nei_node]:
+                    num_swaps += cycle_len
+                    continue
+                queue.append((nei_node, cycle_len + 1))
+            return num_swaps
+        index_dict = defaultdict(list)
+        queue = deque([root])
+        cnt = 0
+        while queue:
+            sz = len(queue)
+            for _ in range(sz):
+                node = queue.popleft()
+                index_dict[cnt].append(node.val)
+                queue.extend(filter(None, (node.left, node.right)))
+            cnt += 1
+        result = 0
+        for arr in index_dict.values():
+            result += calc_swaps(arr)
+        return result
+```
+
+## 2403. Minimum Time to Kill All Monsters
+
+### Solution 1:  bitmask + minheap
+
+```py
+class Solution:
+    def minimumTime(self, power: List[int]) -> int:
+        n = len(power)
+        power.sort()
+        endmask = (1 << n) - 1
+        dp = defaultdict(lambda: inf)
+        dp[0] = 0
+        minheap = [(0, 1, 0)] # (day, gain mask)
+        while minheap:
+            day, gain, mask = heappop(minheap)
+            if day > dp[mask]: continue
+            if mask == endmask: return day
+            for i in range(n):
+                if (mask>>i)&1: continue # monster already killed in this mask
+                num_days = math.ceil(power[i]/gain) + dp[mask]
+                nstate = mask|(1<<i)
+                if num_days < dp[nstate]:
+                    dp[nstate] = num_days
+                    heappush(minheap, (num_days, gain+1, nstate))
 ```
 
 ##
@@ -14582,38 +14833,6 @@ class Solution:
 
 ```
 
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
-```
-
-
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
-```
 
 ##
 
