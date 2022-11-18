@@ -14825,6 +14825,125 @@ class Solution:
                     heappush(minheap, (num_days, gain+1, nstate))
 ```
 
+## 263. Ugly Number
+
+### Solution 1:  math + simulation
+
+```py
+class Solution:
+    def isUgly(self, n: int) -> bool:
+        for p in [2, 3, 5]:
+            while n%p == 0 < n:
+                n //= p
+        return n == 1
+```
+
+## 119. Pascal's Triangle II
+
+### Solution 1:  iterative dp + O(n) time and O(n) space
+
+```py
+class Solution:
+    def getRow(self, rowIndex: int) -> List[int]:
+        prev_row = [1]
+        for i in range(1, rowIndex + 1):
+            row = [1]
+            for j in range(1, i):
+                row.append(prev_row[j-1]+prev_row[j])
+            prev_row = row + [1]
+        return prev_row
+```
+
+## 931. Minimum Falling Path Sum
+
+### Solution 1:  in-place + space optimized iterative dp + O(1) space
+
+```py
+class Solution:
+    def minFallingPathSum(self, matrix: List[List[int]]) -> int:
+        n = len(matrix)
+        for i, j in product(range(1, n), range(n)):
+            matrix[i][j] = min(matrix[i-1][max(0, j-1)], matrix[i-1][j], matrix[i-1][min(n-1, j+1)]) + matrix[i][j]
+        return min(matrix[-1])
+```
+
+## 120. Triangle
+
+### Solution 1:  iterative dp
+
+```py
+class Solution:
+    def minimumTotal(self, triangle: List[List[int]]) -> int:
+        row = triangle[-1]
+        for cur_row in reversed(triangle[:-1]):
+            next_row = [inf]*len(cur_row)
+            for i, val in enumerate(cur_row):
+                next_row[i] = min(row[i], row[i+1]) + val
+            row = next_row
+        return row[0]
+```
+
+## 516. Longest Palindromic Subsequence
+
+### Solution 1:
+
+```py
+
+```
+
+## 64. Minimum Path Sum
+
+### Solution 1:  iterative dp + space optimized O(C) space + accumulate
+
+```py
+class Solution:
+    def minPathSum(self, grid: List[List[int]]) -> int:
+        R, C = len(grid), len(grid[0])
+        row = list(accumulate(grid[0]))
+        for r in range(1, R):
+            nrow = [inf]*C
+            for c in range(C):
+                nrow[c] = min(nrow[c], row[c] + grid[r][c])
+                if c > 0:
+                    nrow[c] = min(nrow[c], nrow[c-1] + grid[r][c])
+            row = nrow            
+        return row[-1]
+```
+
+## 264. Ugly Number II
+
+### Solution 1:  set + minheap
+
+```py
+class Solution:
+    def nthUglyNumber(self, n: int) -> int:
+        seen = set([1])
+        minheap = [1]
+        for _ in range(n):
+            num = heappop(minheap)
+            for mul in map(lambda x: num*x, (2, 3, 5)):
+                if mul in seen: continue
+                seen.add(mul)
+                heappush(minheap, mul)
+        return num
+```
+
+```py
+class Solution:
+    def nthUglyNumber(self, n: int) -> int:
+        pointers = [0]*3
+        numbers = [1]
+        for _ in range(n-1):
+            min_val = inf
+            for i, val in enumerate([2, 3, 5]):
+                cand = numbers[pointers[i]]*val
+                min_val = min(min_val, cand)
+            for i, val in enumerate([2, 3, 5]):
+                pointers[i] += (min_val == numbers[pointers[i]]*val)
+            numbers.append(min_val)
+        return numbers[-1]
+```
+
 ##
 
 ### Solution 1:
@@ -14833,7 +14952,6 @@ class Solution:
 
 ```
 
-
 ##
 
 ### Solution 1:
@@ -14865,15 +14983,6 @@ class Solution:
 ```py
 
 ```
-
-##
-
-### Solution 1:
-
-```py
-
-```
-
 
 ##
 
