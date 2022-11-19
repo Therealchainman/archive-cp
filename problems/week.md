@@ -14944,6 +14944,131 @@ class Solution:
         return numbers[-1]
 ```
 
+## 96. Unique Binary Search Trees
+
+### Solution 1:  Catalan Numbers + iterative dp
+
+```py
+class Solution:
+    def numTrees(self, n: int) -> int:
+        dp = [0]*(n+1)
+        dp[0] = 1
+        for i in range(1, n + 1):
+            for j in range(i):
+                dp[i] += dp[j]*dp[i-j-1]
+        return dp[-1]
+```
+
+## 1143. Longest Common Subsequence
+
+### Solution 1:  iterative dp + space optimized O(C) space
+
+```py
+class Solution:
+    def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        R, C = len(text1), len(text2)
+        dp = [0]*(C+1)
+        for r in range(R):
+            ndp = [0]*(C+1)
+            len_ = 0
+            for c in range(C):
+                len_ = max(ndp[c], dp[c+1])
+                ndp[c+1] = max(len_, dp[c] + (text1[r] == text2[c]))
+            dp = ndp
+        return max(dp)
+```
+
+## 72. Edit Distance
+
+### Solution 1: recursive dp + 4 decisions at each state
+
+```py
+class Solution:
+    def minDistance(self, word1: str, word2: str) -> int:
+        n1, n2 = len(word1), len(word2)
+        @cache
+        def dp(i, j):
+            if j == n2: return n1 - i
+            replace = dp(i+1, j+1)+1 if i < n1 else inf
+            insert = dp(i, j+1)+1
+            remove = dp(i+1, j)+1 if i < n1 else inf
+            noop = dp(i+1, j+1) if i < n1 and word1[i] == word2[j] else inf
+            return min(noop, replace, insert, remove)
+        return dp(0, 0)
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
