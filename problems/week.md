@@ -12476,10 +12476,30 @@ class Solution:
 
 ## 834. Sum of Distances in Tree
 
-### Solution 1:
+### Solution 1:  preorder dfs + postorder dfs + math + dp on tree + ancestor and descendent sum + rooting undirected tree
 
 ```py
-
+class Solution:
+    def sumOfDistancesInTree(self, n: int, edges: List[List[int]]) -> List[int]:
+        adj_list = [[] for _ in range(n)]
+        for u, v in edges:
+            adj_list[u].append(v)
+            adj_list[v].append(u)
+        sizes, ancestor_dist, descendent_dist = [1]*n, [0]*n, [0]*n
+        def postorder(parent: int, node: int) -> None:
+            for child in adj_list[node]:
+                if child == parent: continue
+                postorder(node, child)
+                sizes[node] += sizes[child]
+                descendent_dist[node] += descendent_dist[child] + sizes[child]
+        def preorder(parent: int, node: int) -> None:
+            for child in adj_list[node]:
+                if child == parent: continue
+                ancestor_dist[child] = ancestor_dist[node] + (descendent_dist[node] - descendent_dist[child] - sizes[child]) + (n - sizes[child])
+                preorder(node, child)
+        postorder(-1, 0) # choose 0 as arbitrary root of tree
+        preorder(-1, 0)
+        return [anc_dist + des_dist for anc_dist, des_dist in zip(ancestor_dist, descendent_dist)]
 ```
 
 ## 1345. Jump Game IV
@@ -14997,7 +15017,44 @@ class Solution:
         return dp(0, 0)
 ```
 
-##
+## 152. Maximum Product Subarray
+
+### Solution 1:  prefix max + iterative dp
+
+```py
+class Solution:
+    def maxProduct(self, nums: List[int]) -> int:
+        result = -inf
+        pos, neg = 1, 1
+        for num in nums:
+            npos, nneg = num*pos, num*neg
+            neg = min(nneg, npos)
+            pos = max(npos, nneg)
+            result = max(result, pos)
+            pos = max(pos, 1)
+            if neg >= 0:
+                neg = 1
+        return result
+```
+
+## 322. Coin Change
+
+### Solution 1:  iterative dp + O(amount*len(coins)) time
+
+```py
+class Solution:
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        n = len(coins)
+        dp = [inf]*(amount+1)
+        dp[0] = 0
+        for amt in range(1, amount+1):
+            for coin in coins:
+                if coin <= amt:
+                    dp[amt] = min(dp[amt], dp[amt-coin] + 1)
+        return dp[-1] if dp[-1] < inf else -1
+```
+
+## 518. Coin Change II
 
 ### Solution 1:
 
@@ -15005,28 +15062,67 @@ class Solution:
 
 ```
 
-##
+## 1263. Minimum Moves to Move a Box to Their Target Location
 
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
+### Solution 1:  bfs
 
 ```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
+class Solution:
+    def is_reachable(self, grid: List[List[str]], start: Tuple[int, int], target: Tuple[int, int], box: Tuple[int, int]) -> bool:
+        R, C = len(grid), len(grid[0])
+        wall = '#'
+        in_bounds = lambda r, c: 0 <= r < R and 0 <= c < C
+        queue = deque([start])
+        seen = set([start])
+        while queue:
+            r, c = queue.popleft()
+            if (r, c) == target: return True
+            for nr, nc in [(r+1, c), (r-1, c), (r, c+1), (r, c-1)]:
+                if not in_bounds(nr, nc) or grid[nr][nc] == wall or (nr, nc) == box or (nr, nc) in seen: continue
+                seen.add((nr, nc))
+                queue.append((nr, nc))
+        return False
+    def minPushBox(self, grid: List[List[str]]) -> int:
+        R, C = len(grid), len(grid[0])
+        in_bounds = lambda r, c: 0 <= r < R and 0 <= c < C
+        def is_vertical(r: int, c: int) -> bool:
+            for nr, nc in [(r+1, c), (r-1, c)]:
+                if not in_bounds(nr, nc) or grid[nr][nc] == wall: return False
+            return True
+        def is_horizontal(r: int, c: int) -> bool:
+            for nr, nc in [(r, c+1), (r, c-1)]:
+                if not in_bounds(nr, nc) or grid[nr][nc] == wall: return False
+            return True
+        seen = set()
+        player, wall, floor, target, box = 'S', '#', '.', 'T', 'B'
+        initial = [0, 0, 0, 0]
+        for r, c in product(range(R), range(C)):
+            if grid[r][c] == player:
+                initial[0], initial[1] = r, c
+            if grid[r][c] == box:
+                initial[2], initial[3] = r, c
+        queue = deque([tuple(initial)])
+        pushes = 0
+        while queue:
+            sz = len(queue)
+            for _ in range(sz):
+                sr, sc, br, bc = queue.popleft() # (player_r, player_c, box_r, box_c)
+                if grid[br][bc] == target: return pushes
+                nei_cells = []
+                if is_vertical(br, bc):
+                    nei_cells.extend([(br+1, bc), (br-1, bc)])
+                if is_horizontal(br, bc):
+                    nei_cells.extend([(br, bc+1), (br, bc-1)])
+                nei_cells = list(filter(lambda x: self.is_reachable(grid, (sr, sc), x, (br, bc)), nei_cells))
+                for nr, nc in nei_cells:
+                    dr, dc = br - nr, bc - nc
+                    nbr, nbc = br + dr, bc + dc
+                    nstate = (br, bc, nbr, nbc)
+                    if nstate in seen: continue
+                    seen.add(nstate)
+                    queue.append(nstate)
+            pushes += 1
+        return -1
 ```
 
 ##
