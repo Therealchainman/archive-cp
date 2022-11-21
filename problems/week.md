@@ -15056,10 +15056,19 @@ class Solution:
 
 ## 518. Coin Change II
 
-### Solution 1:
+### Solution 1:  recursive dp + O(amount*len(coins)) time + trick to avoid repeat combinations by increasing i + greedy aspect
 
 ```py
-
+class Solution:
+    def change(self, amount: int, coins: List[int]) -> int:
+        n = len(coins)
+        @cache
+        def dfs(i: int, amt: int) -> int:
+            if amt == 0: return 1
+            if amt < 0 or i == n: return 0
+            cur = dfs(i+1, amt) + dfs(i, amt - coins[i])
+            return cur
+        return dfs(0, amount)
 ```
 
 ## 1263. Minimum Moves to Move a Box to Their Target Location
@@ -15125,12 +15134,39 @@ class Solution:
         return -1
 ```
 
-##
+## 224. Basic Calculator
 
-### Solution 1:
+### Solution 1:  greedy + stack
 
 ```py
-
+class Solution:
+    def calculate(self, s: str) -> int:
+        num = 0
+        sign = 1
+        stack = [0]
+        for ch in s:
+            if ch.isspace(): continue
+            elif ch.isdigit():
+                num = num*10 + int(ch)
+            elif ch == '+':
+                stack[-1] += sign*num
+                sign = 1
+                num = 0
+            elif ch == '-':
+                stack[-1] += sign*num
+                sign = -1
+                num = 0
+            elif ch == '(':
+                stack.extend([sign, 0])
+                sign = 1
+                num = 0
+            else:
+                last_num = stack.pop() + sign*num
+                last_sign = stack.pop()
+                stack[-1] += last_sign*last_num
+                sign = 1
+                num = 0
+        return stack[0]+sign*num
 ```
 
 ##
@@ -15149,52 +15185,222 @@ class Solution:
 
 ```
 
-##
+## 2477. Minimum Fuel Cost to Report to the Capital
 
-### Solution 1:
+### Solution 1:  postorder traversal of rooted tree to get the size of each subtree + preorder traversal of rooted tree to compute the number of cars needed to travel from child node to node.
+
+```py
+class Solution:
+    def minimumFuelCost(self, roads: List[List[int]], seats: int) -> int:
+        n = len(roads) + 1
+        adj_list = [[] for _ in range(n)]
+        sizes = [1]*n
+        for u, v in roads:
+            adj_list[u].append(v)
+            adj_list[v].append(u)
+        self.fuel = 0
+        def postorder(parent: int, node: int) -> None:
+            for child in adj_list[node]:
+                if child == parent: continue
+                postorder(node, child)
+                sizes[node] += sizes[child]
+        def preorder(parent: int, node: int) -> None:
+            for child in adj_list[node]:
+                if child == parent: continue
+                num_cars = math.ceil(sizes[child]/seats)
+                self.fuel += num_cars
+                preorder(node, child)
+        postorder(-1, 0)
+        preorder(-1, 0)
+        return self.fuel
+```
+
+### Solution 2:  single dfs with postorder traversal
+
+```py
+class Solution:
+    def minimumFuelCost(self, roads: List[List[int]], seats: int) -> int:
+        n = len(roads) + 1
+        adj_list = [[] for _ in range(n)]
+        sizes = [1]*n
+        for u, v in roads:
+            adj_list[u].append(v)
+            adj_list[v].append(u)
+        self.fuel = 0
+        def dfs(parent: int, node: int, people: int = 1) -> int:
+            for child in adj_list[node]:
+                if child == parent: continue
+                people += dfs(node, child)
+            self.fuel += (math.ceil(people/seats) if node else 0) # cost to move all these people from this subtree to parent node
+            return people
+        dfs(-1, 0)
+        return self.fuel
+                
+```
+
+## 2478. Number of Beautiful Partitions
+
+### Solution 1:  
 
 ```py
 
 ```
 
-##
+## 516. Longest Palindromic Subsequence
 
-### Solution 1:
+### Solution 1:  iterative dp + counter
 
 ```py
-
+class Solution:
+    def longestPalindromeSubseq(self, s: str) -> int:
+        n = len(s)
+        dp = Counter()
+        for i in reversed(range(n)):
+            dp[(i, i)] = 1
+            for j in range(i+1, n):
+                if s[i] == s[j]:
+                    dp[(i, j)] = dp[(i+1, j-1)] + 2
+                else:
+                    dp[(i, j)] = max(dp[(i+1, j)], dp[(i, j-1)])
+        return dp[(0, n-1)]
 ```
 
-##
-
-### Solution 1:
+### Solution 2:  iterative dp + space optimized O(n) space
 
 ```py
-
+class Solution:
+    def longestPalindromeSubseq(self, s: str) -> int:
+        n = len(s)
+        dp = Counter()
+        for i in reversed(range(n)):
+            ndp = Counter()
+            ndp[(i, i)] = 1
+            for j in range(i+1, n):
+                if s[i] == s[j]:
+                    ndp[(i, j)] = dp[(i+1, j-1)] + 2
+                else:
+                    ndp[(i, j)] = max(dp[(i+1, j)], ndp[(i, j-1)])
+            dp = ndp
+        return dp[(0, n-1)]
 ```
 
-##
+## 279. Perfect Squares
 
-### Solution 1:
+### Solution 1:  iterative dp + O(n*sqrt(n)) time
 
 ```py
-
+class Solution:
+    def numSquares(self, n: int) -> int:
+        perfect_squares = []
+        i = 1
+        while i*i <= n:
+            perfect_squares.append(i*i)
+            i += 1
+        dp = [inf]*(n+1)
+        dp[0] = 0
+        for i in range(1, n+1):
+            for ps in perfect_squares:
+                if ps > i: break
+                dp[i] = min(dp[i], dp[i-ps] + 1)
+        return dp[-1]
 ```
 
-##
-
-### Solution 1:
+### Solution 2:  minheap + find shortest path to n
 
 ```py
-
+class Solution:
+    def numSquares(self, n: int) -> int:
+        perfect_squares = []
+        i = 1
+        while i*i <= n:
+            perfect_squares.append(i*i)
+            i += 1
+        minheap = [(0, 0)]
+        seen = set()
+        while minheap:
+            steps, val = heappop(minheap)
+            val = abs(val)
+            if val == n: return steps
+            for ps in perfect_squares:
+                if val + ps > n: break
+                if val + ps in seen: continue
+                seen.add(val+ps)
+                heappush(minheap, (steps + 1, -(val + ps)))
+        return -1
 ```
 
-##
-
-### Solution 1:
+### Solution 3:  bfs on n-ary tree
 
 ```py
+class Solution:
+    def numSquares(self, n: int) -> int:
+        perfect_squares = []
+        i = 1
+        while i*i <= n:
+            perfect_squares.append(i*i)
+            i += 1
+        queue = deque([0])
+        seen = [0]*(n+1)
+        steps = 0
+        while queue:
+            sz = len(queue)
+            for _ in range(sz):
+                v = queue.popleft()
+                if v == n: return steps
+                for ps in perfect_squares:
+                    nv = v + ps
+                    if nv > n: break
+                    if seen[nv]: continue
+                    seen[nv] = 1
+                    queue.append(nv)
+            steps += 1
+        return -1
+```
 
+## 343. Integer Break
+
+### Solution 1:  iterative dp + O(n^2) time
+
+```py
+class Solution:
+    def integerBreak(self, n: int) -> int:
+        dp = [0]*(n+1)
+        dp[1] = 1
+        for i in range(2, n+1):
+            dp[i] = i if i < n else 0
+            for j in range(1, i//2+1):
+                dp[i] = max(dp[i], dp[j]*dp[i-j])
+        return dp[-1]
+```
+
+## 1926. Nearest Exit from Entrance in Maze
+
+### Solution 1:  bfs
+
+```py
+class Solution:
+    def nearestExit(self, maze: List[List[str]], entrance: List[int]) -> int:
+        R, C = len(maze), len(maze[0])
+        floor, wall = '.', '+'
+        queue = deque([tuple(entrance)])
+        steps = 0
+        seen = set([tuple(entrance)])
+        in_bounds = lambda r, c: 0 <= r < R and 0 <= c < C
+        is_border = lambda r, c: r in (0, R-1) or c in (0, C-1)
+        def neighborhood(r: int, c: int) -> Iterable[int]:
+            for nr, nc in [(r+1, c), (r-1, c), (r, c+1), (r, c-1)]:
+                if not in_bounds(nr, nc) or maze[nr][nc] == wall or (nr, nc) in seen: continue
+                yield nr, nc
+        while queue:
+            sz = len(queue)
+            for _ in range(sz):
+                r, c = queue.popleft()
+                if steps > 0 and is_border(r, c): return steps
+                for nr, nc in neighborhood(r, c):
+                    seen.add((nr, nc))
+                    queue.append((nr, nc))
+            steps += 1
+        return -1
 ```
 
 ##
