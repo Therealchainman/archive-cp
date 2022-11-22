@@ -102,6 +102,215 @@ if __name__ == '__main__':
     print(main())
 ```
 
+## A. Substring Search
+
+### Solution 1:  suffix array + binary search
+
+```py
+from typing import List
+def radix_sort(leaderboard: List[int], equivalence_class: List[int]) -> List[int]:
+    n = len(leaderboard)
+    bucket_size = [0]*n
+    for eq_class in equivalence_class:
+        bucket_size[eq_class] += 1
+    bucket_pos = [0]*n
+    for i in range(1, n):
+        bucket_pos[i] = bucket_pos[i-1] + bucket_size[i-1]
+    updated_leaderboard = [0]*n
+    for i in range(n):
+        eq_class = equivalence_class[leaderboard[i]]
+        pos = bucket_pos[eq_class]
+        updated_leaderboard[pos] = leaderboard[i]
+        bucket_pos[eq_class] += 1
+    return updated_leaderboard
+
+def suffix_array(s: str) -> List[int]:
+    n = len(s)
+    arr = [None]*n
+    for i, ch in enumerate(s):
+        arr[i] = (ch, i)
+    arr.sort()
+    leaderboard = [0]*n
+    equivalence_class = [0]*n
+    for i, (_, j) in enumerate(arr):
+        leaderboard[i] = j
+    equivalence_class[leaderboard[0]] = 0
+    for i in range(1, n):
+        left_segment = arr[i-1][0]
+        right_segment = arr[i][0]
+        equivalence_class[leaderboard[i]] = equivalence_class[leaderboard[i-1]] + (left_segment != right_segment)
+    is_finished = False
+    k = 1
+    while k < n and not is_finished:
+        for i in range(n):
+            leaderboard[i] = (leaderboard[i] - k + n)%n # create left segment, keeps sort of the right segment
+        leaderboard = radix_sort(leaderboard, equivalence_class) # radix sort for the left segment
+        updated_equivalence_class = [0]*n
+        updated_equivalence_class[leaderboard[0]] = 0
+        for i in range(1, n):
+            left_segment = (equivalence_class[leaderboard[i-1]], equivalence_class[(leaderboard[i-1]+k)%n])
+            right_segment = (equivalence_class[leaderboard[i]], equivalence_class[(leaderboard[i]+k)%n])
+            updated_equivalence_class[leaderboard[i]] = updated_equivalence_class[leaderboard[i-1]] + (left_segment != right_segment)
+            is_finished &= (updated_equivalence_class[leaderboard[i]] != updated_equivalence_class[leaderboard[i-1]])
+        k <<= 1
+        equivalence_class = updated_equivalence_class
+    return leaderboard
+
+def lower_bound(s: str, target: str, leaderboard: List[int]) -> int:
+    n = len(target)
+    left, right = 0, len(s)-1
+    while left < right:
+        mid = (left + right + 1)>>1
+        i = leaderboard[mid]
+        if s[i:i+n] <= target:
+            left = mid
+        else:
+            right = mid - 1
+    return left
+
+def main():
+    t = input() + '$'
+    n = int(input())
+    leaderboard = suffix_array(t) 
+    result = ['No']*n
+    for i in range(n):
+        s = input()
+        lower_bound_index = lower_bound(t, s, leaderboard)
+        index = leaderboard[lower_bound_index]
+        if lower_bound_index < len(t) and t[index: index+len(s)] == s:
+            result[i] = 'Yes'
+    return '\n'.join(result)
+
+if __name__ == '__main__':
+    print(main())
+```
+
+## B. Counting Substrings
+
+### Solution 1: suffix array + lower and upper bound binary search
+
+```py
+from typing import List
+def radix_sort(leaderboard: List[int], equivalence_class: List[int]) -> List[int]:
+    n = len(leaderboard)
+    bucket_size = [0]*n
+    for eq_class in equivalence_class:
+        bucket_size[eq_class] += 1
+    bucket_pos = [0]*n
+    for i in range(1, n):
+        bucket_pos[i] = bucket_pos[i-1] + bucket_size[i-1]
+    updated_leaderboard = [0]*n
+    for i in range(n):
+        eq_class = equivalence_class[leaderboard[i]]
+        pos = bucket_pos[eq_class]
+        updated_leaderboard[pos] = leaderboard[i]
+        bucket_pos[eq_class] += 1
+    return updated_leaderboard
+
+def suffix_array(s: str) -> List[int]:
+    n = len(s)
+    arr = [None]*n
+    for i, ch in enumerate(s):
+        arr[i] = (ch, i)
+    arr.sort()
+    leaderboard = [0]*n
+    equivalence_class = [0]*n
+    for i, (_, j) in enumerate(arr):
+        leaderboard[i] = j
+    equivalence_class[leaderboard[0]] = 0
+    for i in range(1, n):
+        left_segment = arr[i-1][0]
+        right_segment = arr[i][0]
+        equivalence_class[leaderboard[i]] = equivalence_class[leaderboard[i-1]] + (left_segment != right_segment)
+    is_finished = False
+    k = 1
+    while k < n and not is_finished:
+        for i in range(n):
+            leaderboard[i] = (leaderboard[i] - k + n)%n # create left segment, keeps sort of the right segment
+        leaderboard = radix_sort(leaderboard, equivalence_class) # radix sort for the left segment
+        updated_equivalence_class = [0]*n
+        updated_equivalence_class[leaderboard[0]] = 0
+        for i in range(1, n):
+            left_segment = (equivalence_class[leaderboard[i-1]], equivalence_class[(leaderboard[i-1]+k)%n])
+            right_segment = (equivalence_class[leaderboard[i]], equivalence_class[(leaderboard[i]+k)%n])
+            updated_equivalence_class[leaderboard[i]] = updated_equivalence_class[leaderboard[i-1]] + (left_segment != right_segment)
+            is_finished &= (updated_equivalence_class[leaderboard[i]] != updated_equivalence_class[leaderboard[i-1]])
+        k <<= 1
+        equivalence_class = updated_equivalence_class
+    return leaderboard
+
+def lower_bound(s: str, target: str, leaderboard: List[int]) -> int:
+    n = len(target)
+    left, right = 0, len(s)
+    while left < right:
+        mid = (left + right)>>1
+        i = leaderboard[mid]
+        if s[i:i+n] >= target:
+            right = mid
+        else:
+            left = mid + 1
+    return left
+
+def upper_bound(s: str, target: str, leaderboard: List[int]) -> int:
+    n = len(target)
+    left, right = 0, len(s)
+    while left < right:
+        mid = (left + right)>>1
+        i = leaderboard[mid]
+        if s[i:i+n] <= target:
+            left = mid + 1
+        else:
+            right = mid 
+    return left
+
+def main():
+    t = input() + '$'
+    n = int(input())
+    leaderboard = suffix_array(t) 
+    result = [0]*n
+    for i in range(n):
+        s = input()
+        lower_bound_index = lower_bound(t, s, leaderboard)
+        upper_bound_index = upper_bound(t, s, leaderboard)
+        result[i] = upper_bound_index - lower_bound_index
+    return '\n'.join(map(str, result))
+
+if __name__ == '__main__':
+    print(main())
+```
+
+## A. Suffix Array and LCP
+
+### Solution 1: 
+
+```py
+
+```
+
+## 
+
+### Solution 1: 
+
+```py
+
+```
+
+## 
+
+### Solution 1: 
+
+```py
+
+```
+
+## 
+
+### Solution 1: 
+
+```py
+
+```
+
 ## 
 
 ### Solution 1: 

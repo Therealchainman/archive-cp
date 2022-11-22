@@ -7,49 +7,50 @@ sorting is O(n+k) where k is the range of values in the string.
 
 """
 from typing import List
+def radix_sort(leaderboard: List[int], equivalence_class: List[int]) -> List[int]:
+    n = len(leaderboard)
+    bucket_size = [0]*n
+    for eq_class in equivalence_class:
+        bucket_size[eq_class] += 1
+    bucket_pos = [0]*n
+    for i in range(1, n):
+        bucket_pos[i] = bucket_pos[i-1] + bucket_size[i-1]
+    updated_leaderboard = [0]*n
+    for i in range(n):
+        eq_class = equivalence_class[leaderboard[i]]
+        pos = bucket_pos[eq_class]
+        updated_leaderboard[pos] = leaderboard[i]
+        bucket_pos[eq_class] += 1
+    return updated_leaderboard
 
-def radix_sort(p: List[int], c: List[int]) -> List[int]:
-    n = len(p)
-    cnt = [0]*n
-    next_p = [0]*n
-    for cls_ in c:
-        cnt[cls_] += 1
-    pos = [0]*n
-    for i in range(1,n):
-        pos[i] = pos[i-1] + cnt[i-1]
-    for pi in p:
-        cls_i = c[pi]
-        next_p[pos[cls_i]] = pi
-        pos[cls_i] += 1
-    return next_p
-
-
-def suffix_array(s: str) -> str:
+def suffix_array(s: str) -> List[int]:
     n = len(s)
-    p, c = [0]*n, [0]*n
     arr = [None]*n
     for i, ch in enumerate(s):
         arr[i] = (ch, i)
     arr.sort()
+    leaderboard = [0]*n
+    equivalence_class = [0]*n
     for i, (_, j) in enumerate(arr):
-        p[i] = j
-    c[p[0]] = 0
-    for i in range(1,n):
-        c[p[i]] = c[p[i-1]] + (arr[i][0] != arr[i-1][0])
-    k = 1
+        leaderboard[i] = j
+    equivalence_class[leaderboard[0]] = 0
+    for i in range(1, n):
+        left_segment = arr[i-1][0]
+        right_segment = arr[i][0]
+        equivalence_class[leaderboard[i]] = equivalence_class[leaderboard[i-1]] + (left_segment != right_segment)
     is_finished = False
+    k = 1
     while k < n and not is_finished:
         for i in range(n):
-            p[i] = (p[i] - k + n)%n
-        p = radix_sort(p, c)
-        next_c = [0]*n
-        next_c[p[0]] = 0
-        is_finished = True
-        for i in range(1,n):
-            prev_segments = (c[p[i-1]], c[(p[i-1]+k)%n])
-            current_segments = (c[p[i]], c[(p[i]+k)%n])
-            next_c[p[i]] = next_c[p[i-1]] + (prev_segments != current_segments)
-            is_finished &= (next_c[p[i]] != next_c[p[i-1]])
+            leaderboard[i] = (leaderboard[i] - k + n)%n # create left segment, keeps sort of the right segment
+        leaderboard = radix_sort(leaderboard, equivalence_class) # radix sort for the left segment
+        updated_equivalence_class = [0]*n
+        updated_equivalence_class[leaderboard[0]] = 0
+        for i in range(1, n):
+            left_segment = (equivalence_class[leaderboard[i-1]], equivalence_class[(leaderboard[i-1]+k)%n])
+            right_segment = (equivalence_class[leaderboard[i]], equivalence_class[(leaderboard[i]+k)%n])
+            updated_equivalence_class[leaderboard[i]] = updated_equivalence_class[leaderboard[i-1]] + (left_segment != right_segment)
+            is_finished &= (updated_equivalence_class[leaderboard[i]] != updated_equivalence_class[leaderboard[i-1]])
         k <<= 1
-        c = next_c
-    return ' '.join(map(str, p))
+        equivalence_class = updated_equivalence_class
+    return leaderboard
