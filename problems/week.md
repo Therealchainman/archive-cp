@@ -12478,6 +12478,9 @@ class Solution:
 
 ### Solution 1:  preorder dfs + postorder dfs + math + dp on tree + ancestor and descendent sum + rooting undirected tree
 
+![image](images/Sum_of_distances_in_tree_1.png)
+![image](images/Sum_of_distances_in_tree_2.png)
+
 ```py
 class Solution:
     def sumOfDistancesInTree(self, n: int, edges: List[List[int]]) -> List[int]:
@@ -14968,6 +14971,9 @@ class Solution:
 
 ### Solution 1:  Catalan Numbers + iterative dp
 
+![image](images/unique_BUT_1.png)
+![image](images/unique_BUT_2.png)
+
 ```py
 class Solution:
     def numTrees(self, n: int) -> int:
@@ -15056,7 +15062,9 @@ class Solution:
 
 ## 518. Coin Change II
 
-### Solution 1:  recursive dp + O(amount*len(coins)) time + trick to avoid repeat combinations by increasing i + greedy aspect
+### Solution 1:  recursive dp + O(amount*len(coins)) time + trick to avoid repeat combinations by increasing i + greedy aspect + unbounded knapsack
+
+![image](images/unbounded_knapsack.png)
 
 ```py
 class Solution:
@@ -15360,6 +15368,8 @@ class Solution:
 ## 343. Integer Break
 
 ### Solution 1:  iterative dp + O(n^2) time
+
+![image](images/integer_break.png)
 
 ```py
 class Solution:
