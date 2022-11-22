@@ -15413,6 +15413,91 @@ class Solution:
         return -1
 ```
 
+## 1201. Ugly Number III
+
+### Solution 1:  binary search + number theory + lcm (least common multiple)
+
+```py
+class Solution:
+    def nthUglyNumber(self, n: int, a: int, b: int, c: int) -> int:
+        left, right = 0, 2*10**9
+        num_terms = lambda target, integers: target//lcm(*integers)
+        def possible(target: int) -> bool:
+            total_terms = num_terms(target, [a]) + num_terms(target, [b]) + num_terms(target, [c]) - num_terms(target, [a,b]) - num_terms(target, [a, c]) - num_terms(target, [b, c]) + num_terms(target, [a, b, c])
+            return total_terms >= n
+        while left < right:
+            mid = (left + right) >> 1
+            if possible(mid):
+                right = mid
+            else:
+                left = mid + 1
+        return left
+```
+
+## 246. Strobogrammatic Number
+
+### Solution 1:  set + map + reversed
+
+```py
+class Solution:
+    def isStrobogrammatic(self, num: str) -> bool:
+        for x in ['2', '3', '4', '5', '7']:
+            if x in num: return False
+        flipped_num = {'8': '8', '6': '9', '9': '6', '1': '1', '0': '0'}
+        return num == ''.join(map(lambda dig: flipped_num[dig], reversed(num)))
+```
+
+### Solution 2:  two pointers + math.ceil
+
+```py
+class Solution:
+    def isStrobogrammatic(self, num: str) -> bool:
+        for x in ['2', '3', '4', '5', '7']:
+            if x in num: return False
+        flipped_num = {'8': '8', '6': '9', '9': '6', '1': '1', '0': '0'}
+        for i in range(math.ceil(len(num)/2)):
+            if flipped_num[num[i]] != num[~i]: return False
+        return True
+```
+
+## 319. Bulb Switcher
+
+### Solution 1:  math + count of perfect squares
+
+### Description 
+
+realization that all divisors of any integer that is not a perfect square, come in pairs x = 12, (1, 12), (2, 6), (3, 4) + but perfect squares come in pairs but the last pair is always going to be duplicate cause x*x = x^2 is a perfect square, so for example x = 36: (1, 36), (2, 18), (3, 12), (4, 9), (6, 6), but that 6 counts only once, so with an odd number of divisors it will be switched into on. 
+
+```py
+class Solution:
+    def bulbSwitch(self, n: int) -> int:
+        return isqrt(n)
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
