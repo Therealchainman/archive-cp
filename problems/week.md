@@ -15474,15 +15474,30 @@ class Solution:
         return isqrt(n)
 ```
 
-##
+## 907. Sum of Subarray Minimums
 
-### Solution 1:
+### Solution 1:  monotonic stack + for each index find left and right boundary 
 
 ```py
-
+class Solution:
+    def sumSubarrayMins(self, arr: List[int]) -> int:
+        mod = int(1e9)+7
+        n = len(arr)
+        arr = [-1] + arr + [0]
+        stack = [0]
+        res = 0
+        for i, v in enumerate(arr[1:], start = 1):
+            while v <= arr[stack[-1]]:
+                mid = stack.pop()
+                left = stack[-1]
+                right = i
+                cnt = (mid-left)*(right-mid)
+                res = (res + cnt*arr[mid])%mod
+            stack.append(i)
+        return res
 ```
 
-##
+## 2104. Sum of Subarray Ranges
 
 ### Solution 1:
 
