@@ -15499,10 +15499,34 @@ class Solution:
 
 ## 2104. Sum of Subarray Ranges
 
-### Solution 1:
+### Solution 1:  increasing monotonic stack + decreasing monotonic stack
 
 ```py
-
+class Solution:
+    def subArrayRanges(self, nums: List[int]) -> int:
+        stack = [0]
+        max_num = int(1e9)
+        arr = [-max_num-2] + nums + [-max_num-1]
+        res = 0
+        for i, v in enumerate(arr[1:], start = 1):
+            while v <= arr[stack[-1]]:
+                mid = stack.pop()
+                left = stack[-1]
+                right = i
+                cnt = (mid-left)*(right-mid)
+                res -= cnt*arr[mid]
+            stack.append(i)
+        arr = [max_num+2] + nums + [max_num+1]
+        stack = [0]
+        for i, v in enumerate(arr[1:], start = 1):
+            while v >= arr[stack[-1]]:
+                mid = stack.pop()
+                left = stack[-1]
+                right = i
+                cnt = (mid-left)*(right-mid)
+                res += cnt*arr[mid]
+            stack.append(i)
+        return res
 ```
 
 ##
