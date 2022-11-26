@@ -15529,6 +15529,96 @@ class Solution:
         return res
 ```
 
+## 2481. Minimum Cuts to Divide a Circle
+
+### Solution 1:  math
+
+```py
+class Solution:
+    def numberOfCuts(self, n: int) -> int:
+        if n == 1: return 0
+        return n if n&1 else n//2
+```
+
+## 2482. Difference Between Ones and Zeros in Row and Column
+
+### Solution 1:  store the count for row and column to avoid recomputation + simulation
+
+```py
+class Solution:
+    def onesMinusZeros(self, grid: List[List[int]]) -> List[List[int]]:
+        R, C = len(grid), len(grid[0])
+        rows, cols = [0]*R, [0]*C
+        for r, c in product(range(R), range(C)):
+            rows[r] += grid[r][c]
+            cols[c] += grid[r][c]
+        for r, c in product(range(R), range(C)):
+            onesRow, onesCol, zerosRow, zerosCol = rows[r], cols[c], R-rows[r], C-cols[c]
+            grid[r][c] = onesRow + onesCol - zerosRow - zerosCol
+        return grid
+```
+
+## 2483. Minimum Penalty for a Shop
+
+### Solution 1:  prefix and suffix count
+
+```py
+class Solution:
+    def bestClosingTime(self, customers: str) -> int:
+        customers += '$'
+        suffixY = customers.count('Y')
+        prefixN = 0
+        minPenalty, minHour = inf, inf
+        for i, cust in enumerate(customers):
+            penalty = suffixY + prefixN
+            if penalty < minPenalty:
+                minPenalty = penalty
+                minHour = i
+            prefixN += (cust == 'N')
+            suffixY -= (cust == 'Y')
+        return minHour
+```
+
+## 2484. Count Palindromic Subsequences
+
+### Solution 1:  recursive dp + state is (index, two starting characters, remaining characters)
+
+```py
+class Solution:
+    def countPalindromes(self, s: str) -> int:
+        n = len(s)
+        mod = int(1e9) + 7
+        @cache
+        def dp(i: int, start: str, remaining: int) -> int:
+            if remaining == 0: return 1
+            if i == n: return 0
+            if remaining > 3:
+                take = dp(i + 1, start + s[i], remaining - 1)
+                skip = dp(i + 1, start, remaining)
+            elif remaining == 3:
+                take = dp(i + 1, start, remaining - 1)
+                skip = dp(i + 1, start, remaining)
+            else:
+                take = dp(i + 1, start, remaining - 1) if s[i] == start[remaining-1] else 0
+                skip = dp(i + 1, start, remaining)
+            return (take + skip)%mod
+            
+        return dp(0, '', 5)
+```
+
+## 2480. Form a Chemical Bond
+
+### Solution 1: self join
+
+```sql
+select
+    l.symbol as metal,
+    r.symbol as nonmetal
+from Elements l, Elements r
+where l.type = 'Metal' 
+and r.type = 'Nonmetal'
+```
+
 ##
 
 ### Solution 1:
