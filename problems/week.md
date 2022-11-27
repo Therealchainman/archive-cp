@@ -6154,6 +6154,30 @@ class Solution:
         return min(memo)
 ```
 
+### Solution 2:  iterative dp + space optimized O(1) and O(nk) time if number of colors can be larger than 3
+
+```py
+class Solution:
+    def minCost(self, costs: List[List[int]]) -> int:
+        prev_min_color, prev_min_cost, prev_second_min_cost = None, inf, inf
+        for house in costs:
+            min_color, min_cost, second_min_cost = None, inf, inf
+            for color, cost in enumerate(house):
+                ncost = cost
+                if prev_min_color is not None and prev_min_color == color:
+                    ncost += prev_second_min_cost
+                elif prev_min_color is not None:
+                    ncost += prev_min_cost
+                if ncost <= min_cost:
+                    second_min_cost = min_cost
+                    min_cost = ncost
+                    min_color = color
+                elif ncost < second_min_cost:
+                    second_min_cost = ncost
+            prev_min_color, prev_min_cost, prev_second_min_cost = min_color, min_cost, second_min_cost
+        return prev_min_cost
+```
+
 ## 1710. Maximum Units on a Truck
 
 ### Solution 1:  sort + greedy
@@ -6667,14 +6691,14 @@ class Solution:
 
 ```py
 class Solution:
-    def house_robber(self, nums: List[int]) -> int:
-        rob = not_rob = 0
+    def rob_houses(self, nums: List[int]) -> int:
+        prev_robbed = prev_prev_robbed = 0
         for num in nums:
-            not_rob, rob = rob, max(rob, not_rob+num)
-        return rob
+            robbed = prev_prev_robbed + num
+            prev_robbed, prev_prev_robbed = max(prev_robbed, robbed), prev_robbed
+        return max(prev_robbed, prev_prev_robbed)
     def rob(self, nums: List[int]) -> int:
-        if len(nums) == 1: return nums[0]
-        return max(self.house_robber(nums[1:]), self.house_robber(nums[:-1]))
+        return max(nums[0], self.rob_houses(nums[1:]), self.rob_houses(nums[:-1]))
 ```
 
 ## 1150. Check If a Number Is Majority Element in a Sorted Array
@@ -15789,6 +15813,64 @@ class Solution:
             res += right_sums[x] + right_sums[y]
             left_sum -= num
         return res
+```
+
+## 265. Paint House II
+
+### Solution 1:  iterative dp + space optimized O(1) and O(nk) time
+
+```py
+class Solution:
+    def minCostII(self, costs: List[List[int]]) -> int:
+        prev_min_color, prev_min_cost, prev_second_min_cost = None, inf, inf
+        for house in costs:
+            min_color, min_cost, second_min_cost = None, inf, inf
+            for color, cost in enumerate(house):
+                ncost = cost
+                if prev_min_color is not None and prev_min_color == color:
+                    ncost += prev_second_min_cost
+                elif prev_min_color is not None:
+                    ncost += prev_min_cost
+                if ncost <= min_cost:
+                    second_min_cost = min_cost
+                    min_cost = ncost
+                    min_color = color
+                elif ncost < second_min_cost:
+                    second_min_cost = ncost
+            prev_min_color, prev_min_cost, prev_second_min_cost = min_color, min_cost, second_min_cost
+        return prev_min_cost
+```
+
+## 206. Reverse Linked List
+
+### Solution 1:  O(1) space + linked list
+
+```py
+class Solution:
+    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        tail = None
+        while head:
+            nxt = head.next
+            head.next = tail
+            tail = head
+            head = nxt
+        return tail
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
 ```
 
 ##
