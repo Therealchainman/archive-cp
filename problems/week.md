@@ -15602,8 +15602,56 @@ class Solution:
                 take = dp(i + 1, start, remaining - 1) if s[i] == start[remaining-1] else 0
                 skip = dp(i + 1, start, remaining)
             return (take + skip)%mod
-            
         return dp(0, '', 5)
+```
+
+### Solution 2: prefix and suffix count + multiply prefix and suffix about pivot i + xy_yx count
+
+```py
+class Solution:
+    def countPalindromes(self, s: str) -> int:
+        n = len(s)
+        mod = int(1e9) + 7
+        pref, cnts = [[[0]*10 for _ in range(10)] for _ in range(n)], [0]*10
+        cnts[ord(s[0]) - ord('0')] += 1
+        for i in range(1, n):
+            dig = ord(s[i]) - ord('0')
+            for j, k in product(range(10), repeat = 2):
+                pref[i][j][k] = pref[i-1][j][k]
+                if k == dig: pref[i][j][k] += cnts[j]
+            cnts[dig] += 1
+        suf, cnts = [[[0]*10 for _ in range(10)] for _ in range(n)], [0]*10
+        cnts[ord(s[-1]) - ord('0')] += 1
+        for i in reversed(range(n-1)):
+            dig = ord(s[i]) - ord('0')
+            for j, k in product(range(10), repeat = 2):
+                suf[i][j][k] = suf[i+1][j][k]
+                if k == dig: suf[i][j][k] += cnts[j]
+            cnts[dig] += 1
+        res = 0
+        for i, j, k in product(range(2, n-2), range(10), range(10)):
+            res = (res + pref[i-1][j][k]*suf[i+1][j][k])%mod
+        return res
+```
+
+### Solution 3:  iterative dp + perform count for number of match for each 100 patterns
+
+```py
+class Solution:
+    def countPalindromes(self, s: str) -> int:
+        ans = 0
+        mod = int(1e9) + 7
+        n = len(s)
+        for x in range(10):
+            for y in range(10):
+                pat = f'{x}{y}${y}{x}'
+                dp = [0]*6
+                dp[-1] = 1
+                for i in range(n):
+                    for j in range(5):
+                        if s[i] == pat[j] or j == 2: dp[j] += dp[j+1]
+                ans = (ans + dp[0])%mod
+        return ans 
 ```
 
 ## 2480. Form a Chemical Bond
@@ -15617,6 +15665,138 @@ select
 from Elements l, Elements r
 where l.type = 'Metal' 
 and r.type = 'Nonmetal'
+```
+
+## 2485. Find the Pivot Integer
+
+### Solution 1:  prefix and suffix sum + O(n) time
+
+```py
+class Solution:
+    def pivotInteger(self, n: int) -> int:
+        psum = 0
+        ssum = n*(n+1)//2
+        for i in range(1, n+1):
+            psum += i
+            if psum == ssum: return i
+            ssum -= i
+        return -1
+```
+
+### Solution 2:  math + algebra + algebraic equation + O(sqrt(n)) time
+
+```py
+class Solution:
+    def pivotInteger(self, n: int) -> int:
+        sum_ = n*(n+1)//2
+        pi = int(sqrt(sum_))
+        return pi if pi*pi == sum_ else -1
+```
+
+## 2486. Append Characters to String to Make Subsequence
+
+### Solution 1:  two pointers + greedy
+
+```py
+class Solution:
+    def appendCharacters(self, s: str, t: str) -> int:
+        n = len(t)
+        i = 0
+        for ch in s:
+            if i < n and t[i] == ch: i += 1
+        return n - i
+```
+
+## 2487. Remove Nodes From Linked List
+
+### Solution 1:  stack + linked list + O(n) space
+
+```py
+class Solution:
+    def removeNodes(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        stack = []
+        while head:
+            while stack and stack[-1] < head.val:
+                stack.pop()
+            stack.append(head.val)
+            head = head.next
+        sentinel_node = ListNode()
+        cur = sentinel_node
+        for v in stack:
+            cur.next = ListNode(v)
+            cur = cur.next
+        return sentinel_node.next
+```
+
+### Solution 2:  reverse linked list twice + remove linked list node when the value is less than max value seen so far + O(1) space
+
+```py
+class Solution:
+    def reverse(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        tail = None
+        while head:
+            nxt = head.next
+            head.next = tail
+            tail = head
+            head = nxt
+        return tail
+    def removeNodes(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        node = tail = self.reverse(head)
+        maxVal = node.val
+        while node.next:
+            if maxVal > node.next.val:
+                node.next = node.next.next
+            else:
+                node = node.next
+                maxVal = node.val
+        return self.reverse(tail)
+```
+
+## 2488. Count Subarrays With Median K
+
+### Solution 1:  convert to 0, 1, -1 + prefix sum + find x = 0 - prefix_sum and y = 1 - prefix_sum + balance look for 0 and 1
+
+```py
+class Solution:
+    def countSubarrays(self, nums: List[int], k: int) -> int:
+        n = len(nums)
+        res = 1
+        for i, num in enumerate(nums):
+            if num < k:
+                nums[i] = -1
+            elif num > k:
+                nums[i] = 1
+            else:
+                nums[i] = 0
+        right_sums = Counter()
+        right_sum = 0
+        left_sum = 0
+        found = False
+        for num in nums:
+            if num == 0: 
+                found = True
+            if found:
+                right_sum += num
+                right_sums[right_sum] += 1
+            else:
+                left_sum += num
+        for num in nums:
+            if num == 0: 
+                res += right_sums[1] + right_sums[0] - 1
+                break
+            x = 0 - left_sum
+            y = 1 - left_sum
+            res += right_sums[x] + right_sums[y]
+            left_sum -= num
+        return res
+```
+
+##
+
+### Solution 1:
+
+```py
+
 ```
 
 ##

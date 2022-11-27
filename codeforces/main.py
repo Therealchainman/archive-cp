@@ -60,24 +60,22 @@ def lcp(leaderboard: List[int], equivalence_class: List[int], s: str) -> List[in
     return lcp
 
 def main():
-    s1 = input()
-    s2 = input()
-    n1 = len(s1)
-    s = s1 + '#' + s2 + '$'
+    s = input()
     n = len(s)
+    s += '$'
     suffix_arr, equivalence_class = suffix_array(s)
-    lcp_arr = lcp(suffix_arr, equivalence_class, s)
-    max_len = max_idx = 0
-    for i in range(n-1):
-        suffix_i = suffix_arr[i]
-        suffix_j = suffix_arr[i+1]
-        if suffix_i > suffix_j:
-            suffix_i, suffix_j = suffix_j, suffix_i
-        if suffix_i < n1 and suffix_j > n1:
-            if lcp_arr[i] > max_len:
-                max_len = lcp_arr[i]
-                max_idx = suffix_i
-    return s1[max_idx: max_idx + max_len]
+    lcp_arr = [-1] + lcp(suffix_arr, equivalence_class, s) + [0]
+    stack = [0]
+    ans = 0
+    for i in range(1, len(lcp_arr)):
+        while lcp_arr[i] <= lcp_arr[stack[-1]]:
+            mid = stack.pop()
+            left = stack[-1]
+            right = i
+            cnt = (mid - left)*(right - mid)
+            ans += cnt*lcp_arr[mid]
+        stack.append(i)
+    return ans + n*(n+1)//2
 
 if __name__ == '__main__':
     print(main())
