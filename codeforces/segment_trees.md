@@ -1079,7 +1079,7 @@ if __name__ == '__main__':
 
 ## C. Bitwise OR and AND
 
-### Solution 1: segment tree + range update + range query + update function and value function are distributive + update and value function are commutative
+### Solution 1: segment tree + range update + range query + update function and value function are distributive + update and value function are commutative + or update function + and range query function
 
 ```py
 from math import inf
@@ -1190,7 +1190,7 @@ class LazySegmentTree:
     def __init__(self, n: int, neutral: int, noop: int, initial_val: int = 0):
         self.neutral = neutral
         self.size = 1
-        self.noop = noop
+        self.noop = noopmodify_op
         self.n = n 
         while self.size<n:
             self.size*=2

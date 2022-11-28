@@ -44,43 +44,33 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-class LazySegmentTree:
-    def __init__(self, n: int, neutral: int, noop: int, initial_val: int = 0):
+from math import inf
+class SegmentTree:
+    def __init__(self, n: int, neutral: int, initial: int):
         self.neutral = neutral
         self.size = 1
-        self.noop = noop
-        self.n = n 
+        self.n = n
+        self.initial_val = initial
         while self.size<n:
             self.size*=2
-        self.operations = [noop for _ in range(self.size*2)]
-        self.values = [initial_val for _ in range(self.size*2)]
+        self.operations = [initial for _ in range(self.size*2)]
+        self.values = [neutral for _ in range(self.size*2)]
 
-    def modify_op(self, x: int, y: int, segment_len: int = 1) -> int:
+    def modify_op(self, x: int, y: int, segment_len: int) -> int:
         return x + y*segment_len
-
+    
     def calc_op(self, x: int, y: int) -> int:
         return x + y
-
-    def is_leaf_node(self, segment_right_bound, segment_left_bound) -> bool:
-        return segment_right_bound - segment_left_bound == 1
-
-    def propagate(self, segment_idx: int, segment_left_bound: int, segment_right_bound: int) -> None:
-        if self.is_leaf_node(segment_right_bound, segment_left_bound) or self.operations[segment_idx] == self.noop: return
-        left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
-        children_segment_len = (segment_right_bound - segment_left_bound) >> 1
-        self.operations[left_segment_idx] = self.modify_op(self.operations[left_segment_idx], self.operations[segment_idx], 1)
-        self.operations[right_segment_idx] = self.modify_op(self.operations[right_segment_idx], self.operations[segment_idx], 1)
-        self.values[left_segment_idx] = self.modify_op(self.values[left_segment_idx], self.operations[segment_idx], children_segment_len)
-        self.values[right_segment_idx] = self.modify_op(self.values[right_segment_idx], self.operations[segment_idx], children_segment_len)
-        self.operations[segment_idx] = self.noop
 
     def ascend(self, segment_idx: int) -> None:
         while segment_idx > 0:
             segment_idx -= 1
             segment_idx >>= 1
             left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            segment_len = right_segment_idx - left_segment_idx
             self.values[segment_idx] = self.calc_op(self.values[left_segment_idx], self.values[right_segment_idx])
-
+            self.values[segment_idx] = self.modify_op(self.values[segment_idx], self.operations[segment_idx], segment_len)
+        
     def update(self, left: int, right: int, val: int) -> None:
         stack = [(0, self.size, 0)]
         segments = []
@@ -90,55 +80,59 @@ class LazySegmentTree:
             if segment_left_bound >= right or segment_right_bound <= left: continue
             # COMPLETE OVERLAP
             if segment_left_bound >= left and segment_right_bound <= right:
-                self.operations[segment_idx] = self.modify_op(self.operations[segment_idx], val, 1)
                 segment_len = segment_right_bound - segment_left_bound
+                self.operations[segment_idx] = self.modify_op(self.operations[segment_idx], val, 1)
                 self.values[segment_idx] = self.modify_op(self.values[segment_idx], val, segment_len)
                 segments.append(segment_idx)
                 continue
             # PARTIAL OVERLAP
             mid_point = (segment_left_bound + segment_right_bound) >> 1
             left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
-            self.propagate(segment_idx, segment_left_bound, segment_right_bound)
             stack.extend([(mid_point, segment_right_bound, right_segment_idx), (segment_left_bound, mid_point, left_segment_idx)])
         for segment_idx in segments:
             self.ascend(segment_idx)
-
+            
     def query(self, left: int, right: int) -> int:
-        stack = [(0, self.size, 0)]
+        stack = [(0, self.size, 0, self.initial_val)]
         result = self.neutral
         while stack:
-            segment_left_bound, segment_right_bound, segment_idx = stack.pop()
+            # BOUNDS FOR CURRENT INTERVAL and idx for tree
+            segment_left_bound, segment_right_bound, segment_idx, operation_val = stack.pop()
             # NO OVERLAP
             if segment_left_bound >= right or segment_right_bound <= left: continue
-            # LEAF NODE
+            # COMPLETE OVERLAP
             if segment_left_bound >= left and segment_right_bound <= right:
-                result = self.calc_op(result, self.values[segment_idx])
+                segment_len = segment_right_bound - segment_left_bound
+                modified_val = self.modify_op(self.values[segment_idx], operation_val, segment_len)
+                result = self.calc_op(result, modified_val)
                 continue
+            # PARTIAL OVERLAP
             mid_point = (segment_left_bound + segment_right_bound) >> 1
-            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2    
-            self.propagate(segment_idx, segment_left_bound, segment_right_bound)      
-            stack.extend([(mid_point, segment_right_bound, right_segment_idx), (segment_left_bound, mid_point, left_segment_idx)])
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            segment_len = min(right, segment_right_bound) - max(left, segment_left_bound)
+            operation_val = self.modify_op(operation_val, self.operations[segment_idx], segment_len)
+            stack.extend([(mid_point, segment_right_bound, right_segment_idx, operation_val), (segment_left_bound, mid_point, left_segment_idx, operation_val)])
         return result
     
     def __repr__(self) -> str:
-        return f"values: {self.values}, operations: {self.operations}"
+        return f"operations array: {self.operations}, values array: {self.values}"
 
 def main():
     n, m = map(int, input().split())
     neutral = 0
-    noop = 0
-    st = LazySegmentTree(n, neutral, noop)
+    initial = 0
+    segTree = SegmentTree(n, neutral, initial)
     results = []
     for _ in range(m):
         query = list(map(int, input().split()))
         if query[0] == 1:
-            # range add update
+            # range update
             _, left, right, val = query
-            st.update(left, right, val)
-        elif query[0] == 2:
-            # range sum query
+            segTree.update(left, right, val)
+        else:
+            # point query
             _, left, right = query
-            results.append(st.query(left, right))
+            results.append(segTree.query(left, right))
     return '\n'.join(map(str,results))
 
 if __name__ == '__main__':
