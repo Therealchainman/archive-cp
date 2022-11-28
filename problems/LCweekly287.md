@@ -61,7 +61,7 @@ class Solution:
         return [sorted(list(winners-set(losers.keys()))), sorted(one_losses)]
 ```
 
-## 2225. Find Players With Zero or One Losses
+## 2226. Maximum Candies Allocated to K Children
  
 ### Solution 1: binary search for the maximum number of candies to give to k children
 

@@ -15857,36 +15857,122 @@ class Solution:
         return tail
 ```
 
-##
+## 242. Valid Anagram
 
-### Solution 1:
+### Solution 1:  sort
 
 ```py
-
+class Solution:
+    def isAnagram(self, s: str, t: str) -> bool:
+        return sorted(s) == sorted(t)
 ```
 
-##
+## 74. Search a 2D Matrix
 
-### Solution 1:
+### Solution 1:  binary search row + binary search column + O(logm+logn) time
 
 ```py
-
+class Solution:
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        R, C = len(matrix), len(matrix[0])
+        left, right = 0, R-1
+        while left < right:
+            mid = (left + right + 1) >> 1
+            if target < matrix[mid][0]:
+                right = mid - 1
+            else:
+                left = mid
+        i = bisect_right(matrix[left], target) - 1
+        return matrix[left][i] == target
 ```
 
-##
+## 1020. Number of Enclaves
 
-### Solution 1:
+### Solution 1:  bfs + queue + in place + matrix + O(mn) time
 
 ```py
-
+class Solution:
+    def numEnclaves(self, grid: List[List[int]]) -> int:
+        sea, land = 0, 1
+        R, C = len(grid), len(grid[0])
+        in_bounds = lambda r, c: 0 <= r < R and 0 <= c < C
+        on_boundary = lambda r, c: r in (0, R-1) or c in (0, C-1)
+        neighborhood = lambda r, c: ((r+1, c), (r-1, c), (r, c+1), (r, c-1))
+        def bfs(r: int, c: int) -> None:
+            queue = deque([(r, c)])
+            grid[r][c] = sea
+            while queue:
+                r, c = queue.popleft()
+                for nr, nc in neighborhood(r, c):
+                    if not in_bounds(nr, nc) or grid[nr][nc] == sea: continue
+                    grid[nr][nc] = sea
+                    queue.append((nr, nc))
+        for r, c in product(range(R), range(C)):
+            if grid[r][c] == sea: continue
+            if on_boundary(r, c):
+                bfs(r, c)
+        return sum(map(sum, grid))
 ```
 
-##
+## 1905. Count Sub Islands
 
-### Solution 1:
+### Solution 1:  bfs + queue + in place + matrix + O(mn) time
 
 ```py
+class Solution:
+    def countSubIslands(self, grid1: List[List[int]], grid2: List[List[int]]) -> int:
+        water, land = 0, 1
+        R, C = len(grid1), len(grid1[0])
+        in_bounds = lambda r, c: 0 <= r < R and 0 <= c < C
+        neighborhood = lambda r, c: ((r+1, c), (r-1, c), (r, c+1), (r, c-1))
+        def bfs(r: int, c: int) -> bool:
+            queue = deque([(r, c)])
+            is_subisland = grid1[r][c] == grid2[r][c]
+            grid2[r][c] = water # mark as visited
+            while queue:
+                r, c = queue.popleft()
+                for nr, nc in neighborhood(r, c):
+                    if not in_bounds(nr, nc) or grid2[nr][nc] == water: continue
+                    is_subisland &= grid1[nr][nc] == grid2[nr][nc]
+                    grid2[nr][nc] = water
+                    queue.append((nr, nc))
+            return is_subisland
+        res = 0
+        for r, c in product(range(R), range(C)):
+            if grid2[r][c] == land:
+                res += bfs(r, c)
+        return res
+```
 
+### Solution 2:  bfs + queue + remove all non sub islands + count remaining islands in grid2
+
+```py
+class Solution:
+    def countSubIslands(self, grid1: List[List[int]], grid2: List[List[int]]) -> int:
+        water, land = 0, 1
+        R, C = len(grid1), len(grid1[0])
+        in_bounds = lambda r, c: 0 <= r < R and 0 <= c < C
+        neighborhood = lambda r, c: ((r+1, c), (r-1, c), (r, c+1), (r, c-1))
+        def bfs(r: int, c: int) -> None:
+            queue = deque([(r, c)])
+            grid2[r][c] = water # mark as visited
+            while queue:
+                r, c = queue.popleft()
+                for nr, nc in neighborhood(r, c):
+                    if not in_bounds(nr, nc) or grid2[nr][nc] == water: continue
+                    grid2[nr][nc] = water
+                    queue.append((nr, nc))
+        res = 0
+        # REMOVING ANY ISLAND IN GRID 2 THAT IS NOT A SUB ISLAND OF SOME ISLAND IN GRID1
+        for r, c in product(range(R), range(C)):
+            if grid2[r][c] == land and grid1[r][c] == water:
+                bfs(r, c)
+        # COUNT THE REMAINING ISLANDS IN GRID2 BECAUSE THEY ARE SUBISLANDS
+        for r, c in product(range(R), range(C)):
+            if grid2[r][c] == land:
+                res += 1
+                bfs(r, c)
+        return res  
 ```
 
 ##
