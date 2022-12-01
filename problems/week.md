@@ -15975,12 +15975,19 @@ class Solution:
         return res  
 ```
 
-##
+## 1207. Unique Number of Occurrences
 
-### Solution 1:
+### Solution 1:  set + counter + O(n) time
 
 ```py
-
+class Solution:
+    def uniqueOccurrences(self, arr: List[int]) -> bool:
+        cnts = Counter(arr)
+        seen = set()
+        for cnt in cnts.values():
+            if cnt in seen: return False
+            seen.add(cnt)
+        return True
 ```
 
 ##
