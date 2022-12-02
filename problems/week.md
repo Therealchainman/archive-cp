@@ -1575,22 +1575,28 @@ class MyQueue:
 
 ```py
 class MyQueue:
+
     def __init__(self):
-        self.stack1, self.stack2 = [], []
+        self.activeStack, self.inactiveStack = [], []
+ 
     def push(self, x: int) -> None:
-        self.stack1.append(x)  
+        self.inactiveStack.append(x)
+
     def pop(self) -> int:
         self.move()
-        return self.stack2.pop()
+        return self.activeStack.pop()
+        
     def peek(self) -> int:
         self.move()
-        return self.stack2[-1]
+        return self.activeStack[-1]
+    
     def move(self) -> None:
-        if not self.stack2:
-            while self.stack1:
-                self.stack2.append(self.stack1.pop())
+        if not self.activeStack:
+            while self.inactiveStack:
+                self.activeStack.append(self.inactiveStack.pop())
+
     def empty(self) -> bool:
-        return not bool(self.stack1) and not bool(self.stack2)
+        return not self.activeStack and not self.inactiveStack
 ```
 
 ## 456. 132 Pattern
@@ -15977,17 +15983,239 @@ class Solution:
 
 ## 1207. Unique Number of Occurrences
 
-### Solution 1:  set + counter + O(n) time
+### Solution 1:  set + counter + O(n) time + walrus operator
 
 ```py
 class Solution:
     def uniqueOccurrences(self, arr: List[int]) -> bool:
-        cnts = Counter(arr)
-        seen = set()
-        for cnt in cnts.values():
-            if cnt in seen: return False
-            seen.add(cnt)
-        return True
+        return len(c := Counter(arr)) == len(set(c.values()))
+```
+
+## 1704. Determine if String Halves Are Alike
+
+### Solution 1:  sum + string
+
+```py
+class Solution:
+    def halvesAreAlike(self, s: str) -> bool:
+        return sum([1 if i < len(s)//2 else -1 for i, ch in enumerate(s) if ch in 'aeiouAEIOU']) == 0
+```
+
+## 1165. Single-Row Keyboard
+
+### Solution 1:  string + convert characters to integer value (ascii value) + array as hash table
+
+```py
+class Solution:
+    def calculateTime(self, keyboard: str, word: str) -> int:
+        word = keyboard[0] + word
+        n = len(word)
+        pos = [0]*26
+        unicode = lambda ch: ord(ch) - ord('a')
+        for i, ch in enumerate(keyboard):
+            pos[unicode(ch)] = i
+        return sum([abs(pos[unicode(word[i])] - pos[unicode(word[i-1])]) for i in range(1, n)])
+            
+```
+
+## 144. Binary Tree Preorder Traversal
+
+### Solution 1: iterative + stack + filter + left sided preorder traversal + dfs
+
+```py
+class Solution:
+    def preorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
+        stack, res = [root] if root else [], []
+        while stack:
+            node = stack.pop()
+            res.append(node.val)
+            stack.extend(list(filter(None, (node.right, node.left))))
+        return res
+```
+
+## 94. Binary Tree Inorder Traversal
+
+### Solution 1:  stack + iterative + inorder traversal
+
+```py
+class Solution:
+    def inorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
+        stack, res = [], []
+        while root or stack:
+            while root:
+                stack.append(root)
+                root = root.left
+            root = stack.pop()
+            res.append(root.val)
+            root = root.right
+        return res
+```
+
+## 145. Binary Tree Postorder Traversal
+
+### Solution 1:
+
+```py
+
+```
+
+## 102. Binary Tree Level Order Traversal
+
+### Solution 1:  bfs + sum of lists (concatenation of lists) + filter
+
+```py
+class Solution:
+    def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
+        res = []
+        levels = [root] if root else []
+        while levels:
+            res.append([node.val for node in levels])
+            levels = sum([list(filter(None, (node.left, node.right))) for node in levels], start = [])
+        return res
+```
+
+## 104. Maximum Depth of Binary Tree
+
+### Solution 1:  level order traversal + bfs + concatenation of lists + filter
+
+```py
+class Solution:
+    def maxDepth(self, root: Optional[TreeNode]) -> int:
+        depth = 0
+        levels = [root] if root else []
+        while levels:
+            levels = sum([list(filter(None, (node.left, node.right))) for node in levels], start = [])
+            depth += 1
+        return depth
+```
+
+## 203. Remove Linked List Elements
+
+### Solution 1:  linked list + dummy node + removing
+
+```py
+class Solution:
+    def removeElements(self, head: Optional[ListNode], val: int) -> Optional[ListNode]:
+        sentinel = ListNode(next = head)
+        cur = sentinel
+        while cur and cur.next:
+            if cur.next.val == val:
+                cur.next = cur.next.next
+            else:
+                cur = cur.next
+        return sentinel.next
+```
+
+## 53. Maximum Subarray
+
+### Solution 1:  iterative dp + O(1) space + kadane's algorithm
+
+```py
+class Solution:
+    def maxSubArray(self, nums: List[int]) -> int:
+        curSum, maxSum = 0, -inf
+        for num in nums:
+            curSum = max(num, curSum + num)
+            maxSum = max(maxSum, curSum)
+        return maxSum
+```
+
+## 1. Two Sum
+
+### Solution 1:  dictionary + O(n) space + O(n) time
+
+```py
+class Solution:
+    def twoSum(self, nums: List[int], target: int) -> List[int]:
+        seen = {}
+        for i, num in enumerate(nums):
+            cand = target-num
+            if cand in seen:
+                return [seen[cand], i]
+            seen[num] = i
+        return [0,0]
+```
+
+## 88. Merge Sorted Array
+
+### Solution 1:  backwards scan
+
+```py
+class Solution:
+    def merge(self, nums1: List[int], m: int, nums2: List[int], n: int) -> None:
+        """
+        Do not return anything, modify nums1 in-place instead.
+        """
+        n -= 1
+        m -= 1
+        for i in reversed(range(n+m+2)):
+            if n < 0:
+                nums1[i] = nums1[m]
+                m -= 1
+            elif m < 0:
+                nums1[i] = nums2[n]
+                n -= 1
+            elif nums1[m] > nums2[n]:
+                nums1[i] = nums1[m]
+                m -= 1
+            else:
+                nums1[i] = nums2[n]
+                n -= 1
+```
+
+## 350. Intersection of Two Arrays II
+
+### Solution 1:  bucket sort + bucket count
+
+```py
+class Solution:
+    def bucket_count(self, nums: List[int]) -> List[int]:
+        bucket = [0]*1001
+        for num in nums:
+            bucket[num] += 1
+        return bucket
+    def intersect(self, nums1: List[int], nums2: List[int]) -> List[int]:
+        b1, b2 = self.bucket_count(nums1), self.bucket_count(nums2)
+        res = []
+        for i in range(1001):
+            cnt = min(b1[i], b2[i])
+            res.extend([i]*cnt)
+        return res
+```
+
+## 566. Reshape the Matrix
+
+### Solution 1:  matrix + looping 
+
+```py
+class Solution:
+    def matrixReshape(self, mat: List[List[int]], r: int, c: int) -> List[List[int]]:
+        m, n = len(mat), len(mat[0])
+        if m*n != r*c: return mat
+        row = col = 0
+        res = [[0]*c for _ in range(r)]
+        for i, j in product(range(m), range(n)):
+            res[row][col] = mat[i][j]
+            col += 1
+            if col == c:
+                col = 0
+                row += 1
+        return res
+```
+
+### Solution 2:  matrix + modulus + internal storage of 2d matrix is in a 1d array
+
+```py
+class Solution:
+    def matrixReshape(self, mat: List[List[int]], r: int, c: int) -> List[List[int]]:
+        m, n = len(mat), len(mat[0])
+        if m*n != r*c: return mat
+        cnt = 0
+        res = [[0]*c for _ in range(r)]
+        for i, j in product(range(m), range(n)):
+            res[cnt//c][cnt%c] = mat[i][j]
+            cnt += 1
+        return res
 ```
 
 ##
@@ -16000,6 +16228,100 @@ class Solution:
 
 ##
 
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
 ### Solution 1:
 
 ```py
