@@ -16276,12 +16276,14 @@ class Solution:
         return root
 ```
 
-##
+## 1657. Determine if Two Strings Are Close
 
-### Solution 1:
+### Solution 1:  counter + set to check for character occurrences + sort the values of counter to check equal frequencies of characters
 
 ```py
-
+class Solution:
+    def closeStrings(self, word1: str, word2: str) -> bool:
+        return set(c1 := Counter(word1)) == set(c2 := Counter(word2)) and sorted(c1.values()) == sorted(c2.values())
 ```
 
 ##
