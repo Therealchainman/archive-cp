@@ -9619,6 +9619,21 @@ class Solution:
         return dfs(root.left, root.right)
 ```
 
+### Solution 2:  bfs + queue
+
+```py
+class Solution:
+    def isSymmetric(self, root: Optional[TreeNode]) -> bool:
+        queue = deque([(root, root)])
+        while queue:
+            left_node, right_node = queue.popleft()
+            if bool(left_node) ^ bool(right_node) == 1: return False
+            if not left_node: continue
+            if left_node.val != right_node.val: return False
+            queue.extend([(left_node.left, right_node.right), (left_node.right, right_node.left)])
+        return True
+```
+
 ## 823. Binary Trees With Factors
 
 ### Solution 1:  dynamic programming + counter + hash table
@@ -16053,10 +16068,25 @@ class Solution:
 
 ## 145. Binary Tree Postorder Traversal
 
-### Solution 1:
+### Solution 1:  two stacks + main stack + right child stack + iterative postorder traversal
 
 ```py
-
+class Solution:
+    def postorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
+        stack, rightChildStack, res = [], [], []
+        while root or stack:
+            if root:
+                stack.append(root)
+                if root.right:
+                    rightChildStack.append(root.right)
+                root = root.left
+            elif stack and rightChildStack and stack[-1].right == rightChildStack[-1]:
+                root = rightChildStack.pop()
+            else:
+                root = stack.pop()
+                res.append(root.val)
+                root = None
+        return res
 ```
 
 ## 102. Binary Tree Level Order Traversal
@@ -16218,12 +16248,32 @@ class Solution:
         return res
 ```
 
-##
+## 226. Invert Binary Tree
 
-### Solution 1:
+### Solution 1:  bfs + swap children nodes for node in level + sum of lists
 
 ```py
+class Solution:
+    def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        levels = [node := root] if root else []
+        while levels:
+            for node in levels:
+                node.left, node.right = node.right, node.left
+            levels = sum([list(filter(None, (node.left, node.right))) for node in levels], start = [])
+        return root
+```
 
+```py
+class Solution:
+    def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        level = [node := root] if root else []
+        while level:
+            nlevel = []
+            for node in level:
+                node.left, node.right = node.right, node.left
+                nlevel.extend(list(filter(None, (node.left, node.right))))
+            level = nlevel
+        return root
 ```
 
 ##
@@ -16291,7 +16341,6 @@ class Solution:
 ```
 
 ##
-##
 
 ### Solution 1:
 
@@ -16322,6 +16371,9 @@ class Solution:
 ```py
 
 ```
+
+##
+
 ### Solution 1:
 
 ```py
