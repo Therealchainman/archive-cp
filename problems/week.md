@@ -16286,12 +16286,36 @@ class Solution:
         return set(c1 := Counter(word1)) == set(c2 := Counter(word2)) and sorted(c1.values()) == sorted(c2.values())
 ```
 
-##
+## 451. Sort Characters By Frequency
 
 ### Solution 1:
 
 ```py
+class Solution:
+    def frequencySort(self, s: str) -> str:
+        res = ''
+        for key, vals in groupby(Counter(s).most_common(), key = lambda pair: pair[0]):
+            freq = list(vals)[0][1]
+            res += key*freq
+        return res
+```
 
+```py
+class Solution:
+    def frequencySort(self, s: str) -> str:
+        return ''.join(sum([[key*freq] for key, freq in map(lambda pair: (pair[0], list(pair[1])[0][1]), groupby(Counter(s).most_common(), key = lambda pair: pair[0]))], start = []))
+```
+
+```py
+class Solution:
+    def frequencySort(self, s: str) -> str:
+        return ''.join(chain([key*freq for key, freq in map(lambda pair: (pair[0], list(pair[1])[0][1]), groupby(Counter(s).most_common(), key = lambda pair: pair[0]))]))
+```
+
+```py
+class Solution:
+    def frequencySort(self, s: str) -> str:
+        return ''.join([key*freq for key, freq in sorted(Counter(s).items(), key = lambda pair: pair[1], reverse = True)])
 ```
 
 ##
