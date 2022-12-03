@@ -16288,7 +16288,7 @@ class Solution:
 
 ## 451. Sort Characters By Frequency
 
-### Solution 1:
+### Solution 1:  string + map + sort + counter
 
 ```py
 class Solution:
@@ -16318,12 +16318,29 @@ class Solution:
         return ''.join([key*freq for key, freq in sorted(Counter(s).items(), key = lambda pair: pair[1], reverse = True)])
 ```
 
-##
+## 1162. As Far from Land as Possible
 
 ### Solution 1:
 
 ```py
-
+class Solution:
+    def maxDistance(self, grid: List[List[int]]) -> int:
+        water, land = 0, 1
+        n = len(grid)
+        queue = deque([(r, c, 0) for r, c in product(range(n), repeat = 2) if grid[r][c] == land])
+        seen = set([(r, c) for r, c in product(range(n), repeat = 2) if grid[r][c] == land])
+        res = -1
+        in_bounds = lambda r, c: 0 <= r < n and 0 <= c < n
+        neighborhood = lambda r, c: [(r-1, c), (r+1, c), (r, c-1), (r, c+1)]
+        while queue:
+            r, c, dist = queue.popleft()
+            if grid[r][c] == water:
+                res = max(res, dist)
+            for nr, nc in neighborhood(r, c):
+                if not in_bounds(nr, nc) or (nr, nc) in seen: continue
+                seen.add((nr, nc))
+                queue.append((nr, nc, dist+1))
+        return res
 ```
 
 ##
