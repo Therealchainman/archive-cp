@@ -16343,6 +16343,131 @@ class Solution:
         return res
 ```
 
+## 806. Number of Lines To Write String
+
+### Solution 1:  simulation + string
+
+```py
+class Solution:
+    def numberOfLines(self, widths: List[int], s: str) -> List[int]:
+        unicode = lambda ch: ord(ch) - ord('a')
+        row, pixels = 1, 0
+        for width in map(lambda ch: widths[unicode(ch)], s):
+            pixels += width
+            if pixels > 100:
+                pixels = width
+                row += 1
+        return [row, pixels]
+```
+
+## 841. Keys and Rooms
+
+### Solution 1: iterative dfs + stack + memoized
+
+```py
+class Solution:
+    def canVisitAllRooms(self, rooms: List[List[int]]) -> bool:
+        n = len(rooms)
+        stack = [0]
+        vis = [0]*n
+        vis[0] = 1
+        while stack:
+            i = stack.pop()
+            n -= 1
+            for key in rooms[i]:
+                if vis[key]: continue
+                stack.append(key)
+                vis[key] = 1
+        return n == 0
+```
+
+## 934. Shortest Bridge
+
+### Solution 1:  queue + iterative + dfs + bfs + memoized
+
+```py
+class Solution:
+    def shortestBridge(self, grid: List[List[int]]) -> int:
+        n = len(grid)
+        water, land, baseIsland = 0, 1, 2
+        in_bounds = lambda r, c: 0 <= r < n and 0 <= c < n
+        neighborhood = lambda r, c: [(r-1, c), (r+1, c), (r, c-1), (r, c+1)]
+        seen = set()
+        queue = deque()
+        def fill(r: int, c: int):
+            stack = [(r, c)]
+            seen.add((r, c))
+            while stack:
+                r, c = stack.pop()
+                grid[r][c] = baseIsland
+                queue.append((r, c, 0))
+                for nr, nc in neighborhood(r, c):
+                    if not in_bounds(nr, nc) or (nr, nc) in seen or grid[nr][nc] == water: continue
+                    stack.append((nr, nc))
+                    seen.add((nr, nc))
+        for r, c in product(range(n), repeat = 2):
+            if grid[r][c] == land:
+                fill(r, c)
+                break
+        while queue:
+            r, c, dist = queue.popleft()
+            if grid[r][c] == land: return dist - 1
+            for nr, nc in neighborhood(r, c):
+                if not in_bounds(nr, nc) or (nr, nc) in seen: continue
+                queue.append((nr, nc, dist + 1))
+                seen.add((nr, nc))
+        return -1
+```
+
+## 417. Pacific Atlantic Water Flow
+
+### Solution 1:  Find all the cells that can flow into atlantic and pacific ocean separately + dfs + set intersection + intersectin of what can reach atlantic and pacific gives the result of what can flow into both oceans
+
+```py
+class Solution:
+    def pacificAtlantic(self, heights: List[List[int]]) -> List[List[int]]:
+        R, C = len(heights), len(heights[0])
+        pacific = [(r, c) for r, c in product(range(R), range(C)) if r == 0 or c == 0]
+        atlantic = [(r, c) for r, c in product(range(R), range(C)) if r == R-1 or c == C-1]
+        pacificReach = set(pacific)
+        atlanticReach = set(atlantic)
+        in_bounds = lambda r, c: 0 <= r < R and 0 <= c < C
+        neighborhood = lambda r, c: [(r-1, c), (r+1, c), (r, c-1), (r, c+1)]
+        def dfs(stack: List[Tuple[int, int]], visited: Set[Tuple[int, int]]) -> Set[Tuple[int, int]]:
+            while stack:
+                r, c = stack.pop()
+                for nr, nc in neighborhood(r, c):
+                    if not in_bounds(nr, nc) or heights[nr][nc] < heights[r][c] or (nr, nc) in visited: continue
+                    visited.add((nr, nc))
+                    stack.append((nr, nc))
+            return visited
+        return dfs(pacific, pacificReach) & dfs(atlantic, atlanticReach)
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
