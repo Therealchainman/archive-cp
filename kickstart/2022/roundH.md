@@ -1,8 +1,8 @@
 # Google Kickstart 2022 Round H
 
-## 
+## Running in Circles
 
-### Solution 1: 
+### Solution 1:  modular arithmetic + traveling along a circle + use remaining distance + what was previous direction when touch start
 
 ```py
 def main():
@@ -12,20 +12,15 @@ def main():
     for _ in range(N):
         dist, dir = input().split()
         dist = int(dist)
-        if start is None:
+        remainingLaps = pos if dir == 'A' else (L - pos)%L
+        sign = 1 if dir == 'C' else -1
+        pos = (pos + sign*dist) % L
+        if dist >= remainingLaps:
+            currentLaps = 1 if remainingLaps > 0 and start == dir else 0
+            dist -= remainingLaps
+            currentLaps += dist // L
+            laps += currentLaps
             start = dir
-        if dir == 'C':
-            pos += dist
-            cur = max(0, pos // L - (dir != start))
-        else:
-            pos -= dist
-            cur = max(0, -pos // L - (dir != start) + 1)
-        # print('dist, dir, pos, cur, start', dist, dir, pos, cur, start)
-        if pos >= L or pos <= 0:
-            start = dir
-        pos %= L
-        laps += cur
-        # print('laps', laps)
     return laps
 if __name__ == '__main__':
     T = int(input())
@@ -33,7 +28,7 @@ if __name__ == '__main__':
         print(f'Case #{t}: {main()}')
 ```
 
-## 
+## Magical Well Of Lilies
 
 ### Solution 1: 
 
@@ -52,9 +47,9 @@ if __name__ == '__main__':
         print(f'Case #{t}: {main()}')
 ```
 
-## 
+## Electricity
 
-### Solution 1: 
+### Solution 1:  two dfs + dfs to compute the size of decreasing segments in subtree of current node + dfs to compute the size of a larger parent and it's size of decreasing segments
 
 ```py
 from sys import *
@@ -92,8 +87,67 @@ if __name__ == '__main__':
 
 ## Level Design
 
-### Solution 1: 
+### Solution 1:  union find + graph + connected components + knapsack + iterative dp + O(n^2) time
+
+TLEs on test case 2
 
 ```py
+from math import *
+class UnionFind:
+    def __init__(self):
+        self.size = dict()
+        self.parent = dict()
+    
+    def find(self,i: int) -> int:
+        if i not in self.parent:
+            self.size[i] = 1
+            self.parent[i] = i
+        while i != self.parent[i]:
+            self.parent[i] = self.parent[self.parent[i]]
+            i = self.parent[i]
+        return i
 
+    def union(self,i: int,j: int) -> bool:
+        i, j = self.find(i), self.find(j)
+        if i!=j:
+            if self.size[i] < self.size[j]:
+                i,j=j,i
+            self.parent[j] = i
+            self.size[i] += self.size[j]
+            return True
+        return False
+    
+    @property
+    def root_count(self):
+        return sum(node == self.find(node) for node in self.parent)
+
+    def __repr__(self) -> str:
+        return f'parents: {[(i, parent) for i, parent in enumerate(self.parent)]}, sizes: {self.size}'
+        
+def main():
+    N = int(input())
+    arr = list(map(int, input().split()))
+    dsu = UnionFind()
+    for i, num in enumerate(arr, start = 1):
+        dsu.union(i, num)
+    cycleSizes = []
+    for i in range(1, N+1):
+        # i is a representative (root) node for a connected component
+        if i == dsu.find(i):
+            cycleSizes.append(dsu.size[i])
+    dp = [inf]*(N+1)
+    dp[0] = 0
+    for size in cycleSizes:
+        for i in range(N-size, -1, -1):
+            dp[i+size] = min(dp[i+size], dp[i]+1)
+        for i in range(1, size):
+            dp[i] = min(dp[i], 1)
+        dp[size] = 0
+    return ' '.join(map(str, dp[1:]))
+    
+
+if __name__ == '__main__':
+    T = int(input())
+    for t in range(1, T+1):
+        print(f'Case #{t}: {main()}')
 ```
