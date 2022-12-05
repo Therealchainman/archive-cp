@@ -16444,52 +16444,210 @@ class Solution:
         return dfs(pacific, pacificReach) & dfs(atlantic, atlanticReach)
 ```
 
-##
+## 2490. Circular Sentence
 
-### Solution 1:
+### Solution 1:  modular arithmetic + string to array with space delimiter
+
+```py
+class Solution:
+    def isCircularSentence(self, sentence: str) -> bool:
+        arr = sentence.split()
+        n = len(arr)
+        for i in range(1, n+1):
+            if arr[i%n][0] != arr[i-1][-1]: return False
+        return True
+```
+
+## 2491. Divide Players Into Teams of Equal Skill
+
+### Solution 1:  two pointer + sort + greedy pair strongest with weakest player + O(nlogn) time
+
+```py
+class Solution:
+    def dividePlayers(self, skill: List[int]) -> int:
+        skill.sort()
+        n = len(skill)
+        expectedSkill = 2*sum(skill)//n
+        res = 0
+        for i in range(n//2):
+            cur = skill[i] + skill[~i]
+            if cur != expectedSkill: return -1
+            res += skill[i]*skill[~i]
+        return res
+```
+
+### Solution 2:  counter + expected skill value + checking that the skill and the complement skill value have equal number of occurrences + O(n) time
+
+```py
+class Solution:
+    def dividePlayers(self, skill: List[int]) -> int:
+        n = len(skill)
+        expected = 2*sum(skill)//n
+        res = 0
+        counts = Counter(skill)
+        for key, vals in counts.items():
+            if vals != counts[expected-key]: return -1
+            res += vals*key*(expected-key)
+        return res//2
+```
+
+## 2492. Minimum Score of a Path Between Two Cities
+
+### Solution 1: modified union find + compute minimum score in each connected graph
+
+```py
+class UnionFind:
+    def __init__(self):
+        self.size = dict()
+        self.parent = dict()
+        self.minRoad = dict()
+    
+    def find(self,i: int, w: int) -> int:
+        if i not in self.parent:
+            self.size[i] = 1
+            self.parent[i] = i
+            self.minRoad[i] = w
+        while i != self.parent[i]:
+            self.parent[i] = self.parent[self.parent[i]]
+            i = self.parent[i]
+        return i
+
+    def union(self,i: int, j: int, w: int) -> bool:
+        i, j = self.find(i, w), self.find(j, w)
+        self.minRoad[i] = min(self.minRoad[i], self.minRoad[j], w)
+        self.minRoad[j] = self.minRoad[i]
+        if i!=j:
+            if self.size[i] < self.size[j]:
+                i,j=j,i
+            self.parent[j] = i
+            self.size[i] += self.size[j]
+            return True
+        return False
+    
+    @property
+    def root_count(self):
+        return sum(node == self.find(node) for node in self.parent)
+
+    def __repr__(self) -> str:
+        return f'minRoad: {self.minRoad}, parents: {[(i+1, parent) for i, parent in enumerate(self.parent)]}, sizes: {self.size}'
+    
+class Solution:
+    def minScore(self, n: int, roads: List[List[int]]) -> int:
+        m = len(roads)
+        dsu = UnionFind()
+        for u, v, w in roads:
+            dsu.union(u, v, w)
+        return min(dsu.minRoad[dsu.find(1, inf)], dsu.minRoad[dsu.find(n, inf)])
+```
+
+### Solution 2:  bfs from city 1 + store the minimum score for all the cities connected to city 1 + 1 connected graph
+
+```py
+class Solution:
+    def minScore(self, n: int, roads: List[List[int]]) -> int:
+        adj_list = defaultdict(list)
+        for u, v, w in roads:
+            adj_list[u].append((v, w))
+            adj_list[v].append((u, w))
+        queue = deque([1])
+        vis = set()
+        res = inf
+        while queue:
+            node = queue.popleft()
+            for nei_node, nei_w in adj_list[node]:
+                res = min(res, nei_w)
+                if nei_node in vis: continue
+                vis.add(nei_node)
+                queue.append((nei_node))
+        return res
+```
+
+## 2493. Divide Nodes Into the Maximum Number of Groups
+
+### Solution 1:  all pairs shortest path problem with bfs (no weights) + bipartite graph if no odd length cycles + dfs for detecting odd length cycles with coloring
 
 ```py
 
 ```
 
-##
+## 1319. Number of Operations to Make Network Connected
 
-### Solution 1:
+### Solution 1:  Union find + You need at least n-1 edges to connected all the nodes + It takes one edge to merge two connected graphs
 
 ```py
+class UnionFind:
+    def __init__(self,n: int):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    
+    def find(self,i: int) -> int:
+        if i==self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
 
+    def union(self,i: int,j: int) -> bool:
+        i, j = self.find(i), self.find(j)
+        if i!=j:
+            if self.size[i] < self.size[j]:
+                i,j=j,i
+            self.parent[j] = i
+            self.size[i] += self.size[j]
+            return True
+        return False
+    
+    @property
+    def root_count(self):
+        return sum(node == self.find(node) for node in range(len(self.parent)))
+    def __repr__(self) -> str:
+        return f'parents: {[(i, parent) for i, parent in enumerate(self.parent)]}, sizes: {self.size}'
+    
+class Solution:
+    def makeConnected(self, n: int, connections: List[List[int]]) -> int:
+        dsu = UnionFind(n)
+        cnt = sum([1 for u, v in connections if not dsu.union(u, v)])
+        needed = dsu.root_count - 1
+        return needed if needed <= cnt else -1
 ```
 
-##
-
-### Solution 1:
+### Solution 2: count connected graphs with dfs to mark islands as visited + count number of islands
 
 ```py
-
+class Solution:
+    def makeConnected(self, n: int, connections: List[List[int]]) -> int:
+        if len(connections) < n - 1: return -1
+        adj_list = [[] for _ in range(n)]
+        for u, v in connections:
+            adj_list[u].append(v)
+            adj_list[v].append(u)
+            
+        def dfs(node: int) -> None:
+            if vis[node]: return
+            vis[node] = 1
+            for nei_node in adj_list[node]:
+                dfs(nei_node)
+                
+        components = 0
+        vis = [0]*n
+        for i in range(n):
+            if vis[i]: continue
+            dfs(i)
+            components += 1
+        return components - 1
 ```
 
-##
+## 876. Middle of the Linked List
 
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
+### Solution 1:  slow and fast pointer + linked list
 
 ```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
+class Solution:
+    def middleNode(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        slow, fast = head, head
+        while fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+        return slow
 ```
 
 ##

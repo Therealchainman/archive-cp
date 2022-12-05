@@ -19,19 +19,18 @@ class Solution:
 ```py
 class Solution:
     def minimumAverageDifference(self, nums: List[int]) -> int:
-        psum, ssum = 0, sum(nums)
         n = len(nums)
-        bestVal, bestIdx = inf, 0
+        psum, ssum = 0, sum(nums)
+        minVal, index = inf, 0
         for i, num in enumerate(nums):
-            psum += num
             ssum -= num
+            psum += num
             pavg = psum//(i+1)
             savg = ssum//(n-i-1) if n-i-1 > 0 else 0
-            curVal = abs(pavg-savg)
-            if curVal < bestVal:
-                bestVal = curVal
-                bestIdx = i
-        return bestIdx
+            if (avgDiff := abs(pavg-savg)) < minVal:
+                minVal = avgDiff
+                index = i
+        return index
 ```
 
 ## 2257. Count Unguarded Cells in the Grid
