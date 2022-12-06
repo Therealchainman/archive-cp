@@ -16650,12 +16650,23 @@ class Solution:
         return slow
 ```
 
-##
+## 328. Odd Even Linked List
 
-### Solution 1:
+### Solution 1:  two pointers + linked list + swapping even and odd
 
 ```py
-
+class Solution:
+    def oddEvenList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        if not head: return head
+        odd, even = head, head.next
+        evenHead = even
+        while even and even.next:
+            odd.next = even.next
+            odd = odd.next
+            even.next = odd.next
+            even = even.next
+        odd.next = evenHead
+        return head
 ```
 
 ##
