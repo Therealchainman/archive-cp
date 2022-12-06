@@ -1,18 +1,18 @@
-import string
+from collections import defaultdict, deque, Counter
+from math import inf
+import re
 def main():
     with open('input.txt', 'r') as f:
-        data = f.read()
-        best = len(data)
-        for rem_ch in string.ascii_lowercase:
-            stack = []
-            for ch in data:
-                if ch.lower() == rem_ch:
-                    continue
-                if stack and stack[-1].lower() == ch.lower() and stack[-1] != ch:
-                    stack.pop()
-                else:
-                    stack.append(ch)
-            best = min(best, len(stack))
-        return best
+        data = list(map(lambda coords: re.findall(r"\d+", coords), f.read().splitlines()))
+        res = 0
+        threshold = 10000
+        for i in range(0, 400):
+            for j in range(0, 400):
+                dist = 0
+                for pair in data:
+                    x, y = map(int, pair)
+                    dist += abs(x - i) + abs(y - j)
+                res += (dist < threshold)
+        return res
 if __name__ == "__main__":
     print(main())
