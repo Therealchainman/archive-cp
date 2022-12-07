@@ -16669,12 +16669,20 @@ class Solution:
         return head
 ```
 
-##
+## 938. Range Sum of BST
 
-### Solution 1:
+### Solution 1:  recursion + binary search tree
 
 ```py
-
+class Solution:
+    def rangeSumBST(self, root: Optional[TreeNode], low: int, high: int) -> int:
+        if not root: return 0
+        res = root.val if low <= root.val <= high else 0
+        if root.val < high:
+            res += self.rangeSumBST(root.right, low, high)
+        if root.val > low:
+            res += self.rangeSumBST(root.left, low, high)
+        return res 
 ```
 
 ##
