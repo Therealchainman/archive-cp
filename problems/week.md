@@ -16705,12 +16705,38 @@ class Solution:
         return True
 ```
 
-##
+## 1026. Maximum Difference Between Node and Ancestor
 
-### Solution 1:
+### Solution 1:  postorder recursion with maximus and minimus of the subtrees
 
 ```py
+class Solution:
+    def maxAncestorDiff(self, root: Optional[TreeNode]) -> int:
+        
+        self.max_diff = -inf
+        def maximus(node):
+            res = -inf
+            if node.left:
+                res = max(res, maximus(node.left))
+            if node.right:
+                res = max(res, maximus(node.right))
+            if res != -inf:
+                self.max_diff = max(self.max_diff, abs(res - node.val))
+            return max(node.val, res)
+        maximus(root)
 
+        def minimus(node):
+            res = inf 
+            if node.left:
+                res = min(res, minimus(node.left))
+            if node.right:
+                res = min(res, minimus(node.right))
+            if res != inf:
+                self.max_diff = max(self.max_diff, abs(res - node.val))
+            return min(node.val, res)
+        minimus(root)
+        
+        return self.max_diff
 ```
 
 ##
