@@ -16761,6 +16761,142 @@ class Solution:
         return self.res%mod
 ```
 
+## 2496. Maximum Value of a String in an Array
+
+### Solution 1:  max function + set to find if any characters is lowercase alphabet + list comprehension
+
+```py
+class Solution:
+    def maximumValue(self, strs: List[str]) -> int:
+        return max([len(s) if set(string.ascii_lowercase)&set(s) else int(s) for s in strs])
+```
+
+```py
+class Solution:
+    def maximumValue(self, strs: List[str]) -> int:
+        return max([len(s) if any(ch in string.ascii_lowercase for ch in s)else int(s) for s in strs])
+```
+
+## 2497. Maximum Star Sum of a Graph
+
+### Solution 1:  maxheap + adjacency list
+
+```py
+class Solution:
+    def maxStarSum(self, vals: List[int], edges: List[List[int]], k: int) -> int:
+        n = len(vals)
+        adj_list = [[] for _ in range(n)]
+        for u, v in edges:
+            heappush(adj_list[u], (-vals[v], v))
+            heappush(adj_list[v], (-vals[u], u))
+        res = -inf
+        for i in range(n):
+            cur = vals[i]
+            res = max(res, cur)
+            for _ in range(k):
+                if not adj_list[i]: break
+                nv, _ = heappop(adj_list[i])
+                cur -= nv
+                res = max(res, cur)
+        return res
+```
+
+### Solution 2: compute sum star for each one + adjacency list of index with set (no duplicate) + compute sorted of values for neighbor of k elements for each star + take max
+
+```py
+class Solution:
+    def maxStarSum(self, vals: List[int], edges: List[List[int]], k: int) -> int:
+        n = len(vals)
+        adj_list = defaultdict(set)
+        for u, v in edges:
+            if vals[u] > 0:
+                adj_list[v].add(u)
+            if vals[v] > 0:
+                adj_list[u].add(v)
+        star = -inf
+        for i, v in enumerate(vals):
+            curStar = v + sum(sorted(map(lambda j: vals[j], adj_list[i]), reverse = True)[:k])
+            star = max(star, curStar)
+        return star
+```
+
+## 2498. Frog Jump II
+
+### Solution 1:  greedy + binary search 
+
+```py
+class Solution:
+    def maxJump(self, stones: List[int]) -> int:
+        n = len(stones)
+        left, right = 1, stones[-1] - stones[0]
+        def possible(target: int) -> bool:
+            vis = [0]*n
+            vis[0] = 1
+            pos = 0
+            for i in range(1, n):
+                if stones[i] - pos > target:
+                    if vis[i-1]: return False
+                    pos = stones[i-1]
+                    vis[i-1] = 1
+            if pos - stones[-1] > target: return False # couldn't reach last stone
+            # backwards pass now starting from last to first stone
+            pos = stones[-1]
+            for i in reversed(range(n-1)):
+                if not vis[i]:
+                    if pos - stones[i] > target: return False
+                    pos = stones[i]
+            return pos - stones[0] <= target
+        while left < right:
+            mid = (left + right) >> 1
+            res = possible(mid)
+            if res:
+                right = mid
+            else:
+                left = mid + 1
+        return left
+```
+
+### Solution 2: greedy + always skip one step on both trips + optimal way to minimize the difference + jump to each rock in both directions
+
+```py
+class Solution:
+    def maxJump(self, stones: List[int]) -> int:
+        return max([stones[1] - stones[0]] + [stones[i] - stones[i-2] for i in range(2, len(stones))], default = 0)
+```
+
+## 2499. Minimum Total Cost to Make Arrays Unequal
+
+### Solution 1:  greedy + the max occurring value for index that need be swapped, if it occurrs more than half the index need swap then will need to look outside the necessary index to swap to swap with an index that was good + But can only do it if the nums1 and nums2 are not equal to that max occurring value, cause else it is not helpful to swap with it. 
+
+```py
+class Solution:
+    def minimumTotalCost(self, nums1: List[int], nums2: List[int]) -> int:
+        n = len(nums1)
+        freq = Counter()
+        res = swapCnt = maxFreqVal = 0
+        for i, (n1, n2) in enumerate(zip(nums1, nums2)):
+            if n1 != n2: continue
+            swapCnt += 1
+            res += i
+            freq[n1] += 1
+            maxFreqVal = max((maxFreqVal, n1), key = lambda num: freq[num])
+        i = 0
+        while freq[maxFreqVal] > swapCnt//2 and i < n:
+            if nums1[i] != nums2[i] and maxFreqVal not in (nums1[i], nums2[i]):
+                res += i
+                swapCnt += 1
+            i += 1
+        return res if freq[maxFreqVal] <= swapCnt//2 else -1
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
