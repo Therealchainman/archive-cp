@@ -16739,6 +16739,68 @@ class Solution:
         return self.max_diff
 ```
 
+## 1339. Maximum Product of Splitted Binary Tree
+
+### Solution 1:  dfs + postorder traversal
+
+```py
+class Solution:
+    def getSum(self, root: Optional[TreeNode]) -> int:
+        if not root: return 0
+        return root.val + self.getSum(root.left) + self.getSum(root.right)
+    def maxProduct(self, root: Optional[TreeNode]) -> int:
+        total = self.getSum(root)
+        self.res = 0
+        mod = int(1e9)+7
+        def dfs(node: Optional[TreeNode]) -> int:
+            if not node: return 0
+            subSum = dfs(node.left) + dfs(node.right) + node.val
+            self.res = max(self.res, subSum*(total-subSum))
+            return subSum
+        dfs(root)
+        return self.res%mod
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
