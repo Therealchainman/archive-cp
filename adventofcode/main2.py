@@ -1,37 +1,52 @@
-from collections import *
-from itertools import *
+import math
+import operator
+import functools
 
-"""
-if sprit_pos = 4
-sprite position: ...xxx....
-sprite size as 3
-"""
+class Monkey:
+    def __init__(self, items, ops, div, if_true, if_false):
+        self.items = items
+        self.ops = ops
+        self.div = div
+        self.if_true = if_true
+        self.if_false = if_false
+
+    # determines what monkey to throw the item to
+    def throw(self, val: int) -> int:
+        return self.if_true if val%self.div == 0 else self.if_false
+
+    def apply_ops(self, val: int) -> int:
+        op, operand = self.ops
+        if op == '+':
+            return val + int(operand)
+        elif operand == 'old':
+            return val*val
+        return val*int(operand)
 
 def main():
     with open('input.txt', 'r') as f:
         data = f.read().splitlines()
-        screen_len = 40
-        grid = [['.' for _ in range(screen_len)] for y in range(6)]
-        cycle, sprite_pos = 0, 1
-        neighborhood = lambda i: (i-1, i, i+1)
-        row = lambda i: i//screen_len
-        col = lambda i: i%screen_len
-        def update_grid():
-            c = col(cycle)
-            if c in neighborhood(sprite_pos):
-                grid[row(cycle)][c] = '#'
-        for ins in data:
-            if ins == 'noop':
-                update_grid()
-                cycle += 1
-            else:
-                _, delta = ins.split()
-                delta = int(delta)
-                update_grid()
-                cycle += 1
-                update_grid()
-                cycle += 1
-                sprite_pos += delta
-        return "\n".join(["".join(row) for row in grid])
+        monkeys = []
+        divisors = set()
+        for i in range(7, len(data)+8, 7):
+            monk = data[i-7:i]
+            items = list(map(int, monk[1].replace(',', '').split()[2:]))
+            ops = monk[2].split()[-2:]
+            div = int(monk[3].strip().split()[-1])
+            divisors.add(div)
+            if_true = int(monk[4].strip().split()[-1])
+            if_false = int(monk[5].strip().split()[-1])
+            monkeys.append(Monkey(items, ops, div, if_true, if_false))
+        inspect = [0]*8
+        num_rounds = 10000
+        lcm_ = math.lcm(*divisors)
+        for _ in range(num_rounds):
+            for i, m in enumerate(monkeys):
+                while m.items:
+                    val = m.items.pop()
+                    val = m.apply_ops(val)%lcm_
+                    monkeys[m.throw(val)].items.append(val)
+                    inspect[i] += 1
+        inspect.sort(reverse = True)
+        return functools.reduce(operator.mul, inspect[:2])
 if __name__ == "__main__":
     print(main())
