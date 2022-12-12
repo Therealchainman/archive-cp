@@ -16889,20 +16889,41 @@ class Solution:
         return res if freq[maxFreqVal] <= swapCnt//2 else -1
 ```
 
-##
+## 2500. Delete Greatest Value in Each Row
 
-### Solution 1:
+### Solution 1:  sort
 
 ```py
-
+class Solution:
+    def deleteGreatestValue(self, grid: List[List[int]]) -> int:
+        R, C = len(grid), len(grid[0])
+        ans = [0]*C
+        for row in grid:
+            row.sort()
+            for c in range(C):
+                ans[c] = max(ans[c], row[c])
+        return sum(ans)
 ```
 
-##
+## 2501. Longest Square Streak in an Array
 
-### Solution 1:
+### Solution 1:  counter + longest streak is 5 elements
 
 ```py
-
+class Solution:
+    def longestSquareStreak(self, nums: List[int]) -> int:
+        res = -1
+        nums.sort()
+        n = len(nums)
+        freq = Counter()
+        for num in nums:
+            root = int(math.sqrt(num))
+            if root*root == num:
+                freq[num] = freq[root] + 1
+            else:
+                freq[num] = 1
+        res = freq.most_common()[0][1]
+        return res if res > 1 else -1
 ```
 
 ##
