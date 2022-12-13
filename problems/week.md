@@ -16926,6 +16926,102 @@ class Solution:
         return res if res > 1 else -1
 ```
 
+## 2504. Concatenate the Name and the Profession
+
+### Solution 1:  concat + left + order by
+
+```py
+select
+    person_id,
+    concat(name, '(', left(profession, 1), ')') as name
+from Person
+order by person_id desc
+```
+
+## 2502. Design Memory Allocator
+
+### Solution 1:  dictionary + array + brute force
+
+```py
+class Allocator:
+
+    def __init__(self, n: int):
+        self.used = defaultdict(list)
+        self.arr = [0]*n
+
+    def allocate(self, size: int, mID: int) -> int:
+        curFree = 0
+        for i, v in enumerate(self.arr):
+            if v == 0:
+                curFree += 1
+            else:
+                curFree = 0
+            if curFree == size:
+                for j in range(i-size+1, i+1):
+                    self.arr[j] = mID
+                    self.used[mID].append(j)
+                return i - size + 1
+        return -1
+
+    def free(self, mID: int) -> int:
+        res = len(self.used[mID])
+        for i in self.used[mID]:
+            self.arr[i] = 0
+        self.used[mID].clear()
+        return res
+```
+SS
+## 2503. Maximum Number of Points From Grid Queries
+
+### Solution 1:  minheap to traverse graph from smallest to largest + offline query + sort queries + minheap bfs + O(RCLog(RC) + kLog(k)) time
+
+```py
+class Solution:
+    def maxPoints(self, grid: List[List[int]], queries: List[int]) -> List[int]:
+        R, C = len(grid), len(grid[0])
+        k = len(queries)
+        queries = sorted([(q, i) for i, q in enumerate(queries)])
+        minheap = [(grid[0][0], 0, 0)]
+        vis = set([(0,0)])
+        q = 0
+        steps = 0
+        
+        ans = [0]*k
+        neighborhood = lambda r, c: ((r+1, c), (r-1,c), (r,c+1), (r,c-1))
+        in_bounds = lambda r, c: 0<=r<R and 0<=c<C
+        while minheap:
+            val, r, c = heappop(minheap)
+            while q < k and val >= queries[q][0]:
+                ans[queries[q][1]] = steps
+                q += 1
+            for nr, nc in neighborhood(r, c):
+                if not in_bounds(nr, nc) or (nr, nc) in vis: continue
+                vis.add((nr, nc))
+                heappush(minheap, (grid[nr][nc], nr, nc))
+            steps += 1
+        while q < k:
+            ans[queries[q][1]] = steps
+            q += 1
+        return ans
+        
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
