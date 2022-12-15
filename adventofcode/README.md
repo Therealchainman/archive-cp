@@ -103,8 +103,3 @@ sys.stdout = open('outputs/output.txt', 'w')
 sys.stdout.close()
 ```
 
-        if story in self.user_creates_story[user]:
-            return 2
-        if story in self.user_follows_story[user]:
-            return 1
-        return 0
