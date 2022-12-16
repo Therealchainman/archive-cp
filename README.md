@@ -48,3 +48,18 @@ inline int read()
 	return x * y;
 }
 ```
+
+### How to export a conda environment
+
+```sh
+conda env export > environment.yaml
+```
+
+### Monitoring resources on ubuntu
+
+1. htop: This is a interactive process viewer for the terminal. It allows you to view detailed information about the processes running on your system, including their CPU and memory usage. To install htop, open a terminal and type sudo apt-get install htop. Then, to run htop, simply type htop in the terminal.
+1. top: This is a similar tool to htop, but it is not as interactive. To run top, simply type top in the terminal.
+1. free: This command displays information about the amount of free and used memory in the system. To run it, type free in the terminal.
+1. df: This command displays information about the amount of free space on your system's disks. To run it, type df in the terminal.
+1. lscpu: This command displays information about the CPU in your system, including the number of cores, the architecture, and the clock speed. To run it, type lscpu in the terminal.
+1. lshw: This command displays detailed information about all of the hardware in your system. To run it, type sudo lshw in the terminal. You may need to install the lshw package first by running sudo apt-get install lshw.

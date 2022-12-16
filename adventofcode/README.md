@@ -74,6 +74,18 @@ target area: x=20..30, y=-10..-5
 xmin, xmax, ymin, ymax = list(map(int, re.findall(r'[-\d]+', f.read())))
 ```
 
+The best trick perhaps for complex inputs that have a pattern to them is to use this
+
+For this example I had to create two patterns, because there were two possible variants, then all you have to do is pat.parse(line)
+
+```py
+from parse import compile
+pat = compile("Valve {} has flow rate={:d}; tunnels lead to valves {}")
+pat2 = compile("Valve {} has flow rate={:d}; tunnel leads to valve {}")
+
+valve, flow, neighbors = pat.parse(line) if not isinstance(pat.parse(line), type(None)) else pat2.parse(line)
+```
+
 # Outputing 
 
 This is a method to create an output when I'm given points that should be marked.  This will create a grid
