@@ -111,7 +111,7 @@ def displayData(self):
 This is a method to write all print statements in the python script to a file before you close it. 
 it sets the system stdout to be piped to this file.  
 ```py
-sys.stdout = open('outputs/output.txt', 'w')
+sys.stdout = open('output.txt', 'w')
 sys.stdout.close()
 ```
 

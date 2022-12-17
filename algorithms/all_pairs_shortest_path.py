@@ -72,3 +72,17 @@ dijkstra algorithm with O(VElogV) time complexity which in worse case is O(V^3 *
 So dijkstra is faster than floyd warshall for sparse graphs
 - non-negative edge weights
 """
+
+def shortest_path_dijkstra(edges: List[List[int]]) -> Dict[Tuple[int, int], int]:
+    adj_list = defaultdict(list)
+    nodes = set()
+    for src, dst in edges:
+        adj_list[src].append(dst)
+        adj_list[dst].append(src)
+        nodes.update([src, dst])
+    shortestPath = {}
+    for src in nodes:
+        for dst in nodes:
+            if src == dst: continue
+            shortestPath[(src, dst)] = bfs(src, dst, adj_list)
+    return shortestPath
