@@ -12,110 +12,102 @@ inline int read()
 	return x * y;
 }
 
-int neutral = INT_MAX;
-
-struct SegmentTree {
-    vector<int> nodes;
-    vector<int> next;
-    int size;
-
-    void init(int n, vector<int> &init_arr) {
-        size = 1;
-        while (size < n) size *= 2;
-        nodes.assign(2 * size, neutral);
-        next.assign(n, neutral);
-        build(init_arr);
-    }
-
-    void build(vector<int> &init_arr) {
-        unordered_map<int, int> last;
-        for (int i = 0; i < init_arr.size(); i++) {
-            int segment_idx = i + size -1;
-            int val = init_arr[i];
-            if (last.find(val) != last.end()) {
-                nodes[segment_idx] = i - last[val];
-                next[last[val]] = i;
+vector<int> bellmanFord(int n, int src, vector<vector<int>>& edges) {
+    vector<int> dist(n, INT_MAX);
+    dist[src] = 0;
+    for (int i = 0; i < n-1; i++) {
+        bool any_relaxed = false;
+        for (auto& e : edges) {
+            int u = e[0], v = e[1], w = e[2];
+            if (dist[u] != INT_MAX && dist[u] + w < dist[v]) {
+                dist[v] = dist[u] + w;
+                any_relaxed = true;
             }
-            last[val] = i;
-            ascend(segment_idx);
+        }
+        if (!any_relaxed) break;
+    }
+    for (auto& e : edges) {
+        int u = e[0], v = e[1], w = e[2];
+        if (dist[u] != INT_MAX && dist[u] + w < dist[v]) {
+            return {};
         }
     }
+    return dist;
+}
 
-    int calc_op(int x, int y) {
-        return min(x, y);
-    }
-
-    void ascend(int segment_idx) {
-        while (segment_idx > 0) {
-            segment_idx--;
-            segment_idx >>= 1;
-            int left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
-            nodes[segment_idx] = calc_op(nodes[left_segment_idx], nodes[right_segment_idx]);
-        }
-    }
-
-    void update(int segment_idx, int val) {
-        segment_idx += size - 1;
-        nodes[segment_idx] = val;
-        ascend(segment_idx);
-    }
-
-    int query(int left, int right) {
-        vector<tuple<int, int, int>> stack;
-        stack.push_back({0, size, 0});
-        int result = neutral;
-        while (!stack.empty()) {
-            // BOUNDS FOR CURRENT INTERVAL AND IDX FOR TREE
-            int segment_left_bound = get<0>(stack.back());
-            int segment_right_bound = get<1>(stack.back());
-            int segment_idx = get<2>(stack.back());
-            stack.pop_back();
-            // NO OVERLAP
-            if (segment_left_bound >= right || segment_right_bound <= left) continue;
-            // COMPLETE OVERLAP
-            if (segment_left_bound >= left && segment_right_bound <= right) {
-                result = calc_op(result, nodes[segment_idx]);
-                continue;
+vector<int> dijkstra(int n, int src, vector<vector<pair<int, int>>>& adj) {
+    vector<int> dist(n, INT_MAX);
+    dist[src] = 0;
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+    pq.push({0, src});
+    while (!pq.empty()) {
+        int u = pq.top().second;
+        int d = pq.top().first;
+        pq.pop();
+        if (d > dist[u]) continue;
+        for (auto& e : adj[u]) {
+            int v = e.first, w = e.second;
+            if (dist[u] + w < dist[v]) {
+                dist[v] = dist[u] + w;
+                pq.push({dist[v], v});
             }
-            // PARTIAL OVERLAP
-            int left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
-            int mid = (segment_left_bound + segment_right_bound) >> 1;
-            stack.push_back({mid, segment_right_bound, right_segment_idx});
-            stack.push_back({segment_left_bound, mid, left_segment_idx});
         }
-        return result;
     }
-};
+    return dist;
+}
+
+vector<vector<int>> johnsons(int n, vector<vector<int>>& edges) {
+    vector<int> h = bellmanFord(n, n-1, edges);
+    if (h.empty()) return {};
+    for (auto& e : edges) {
+        int u = e[0], v = e[1], w = e[2];
+        e[2] = w + h[u] - h[v];
+    }
+    if (h.empty()) return {};
+    vector<vector<pair<int, int>>> adj(n);
+    for (auto& e : edges) {
+        int u = e[0], v = e[1], w = e[2];
+        adj[u].push_back({v, w});
+    }
+    vector<vector<int>> dist(n);
+    for (int i = 0; i < n; i++) {
+        dist[i] = dijkstra(n, i, adj);
+        for (int j = 0; j < n; j++) {
+            if (dist[i][j] != INT_MAX) {
+                dist[i][j] += h[j] - h[i];
+            }
+        }
+    }
+    return dist;
+}
+
+int shortest_path() {
+    int n = read(), m = read();
+    vector<vector<int>> edges;
+    for (int i = 0; i < m; i++) {
+        int u = read(), v = read(), w = read();
+        edges.push_back({u-1, v-1, w});
+    }
+    vector<vector<int>> dist = johnsons(n, edges);
+    if (dist.empty()) return INT_MIN;
+    int result = INT_MAX;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0;j < n; j++) {
+            result = min(result, dist[i][j]);
+        }
+    }
+    return result;
+}
 
 int main() {
-    int n = read(), m = read();
-    vector<int> arr(n);
-    for (int i = 0; i < n; i++) {
-        arr[i] = read();
-    }
-    vector<tuple<int, int, int>> queries;
-    for (int i = 0; i < m; i++) {
-        int left = read(), right = read();
-        queries.push_back({left-1, right-1, i});
-    }
-    sort(queries.begin(), queries.end());
-    SegmentTree minSegTree;
-    minSegTree.init(n, arr);
-    vector<int> answer;
-    answer.assign(m, -1);
-    int index = 0;
-    for (int i = 0; i < m; i++) {
-        int left = get<0>(queries[i]);
-        int right = get<1>(queries[i]);
-        int id = get<2>(queries[i]);
-        while (index < left) {
-            if (minSegTree.next[index] != neutral) minSegTree.update(minSegTree.next[index], neutral);
-            index++;
+    int t = read();
+    for (int i = 0; i < t; i++) {
+        int res = shortest_path();
+        if (res == INT_MIN) {
+            cout << "-inf" << endl;
+        } else {
+            cout << res << endl;
         }
-        int query_res = minSegTree.query(left, right+1);
-        if (query_res != neutral) answer[id] = query_res;
     }
-    for (int ans : answer) {
-        cout << ans << endl;
-    }
+    return 0;
 }

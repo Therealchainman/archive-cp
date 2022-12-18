@@ -1,59 +1,37 @@
-from collections import defaultdict
-import sys
-sys.stdout = open('output.txt', 'w')
+from collections import defaultdict, deque
+from parse import compile
+import math
+
+pat = compile("{:d},{:d},{:d}")
+
 def main():
     with open("input.txt", 'r') as f:
-        data = f.read()
-        rocks = [[['#','#','#','#']], [['.','#','.'],['#','#','#'],['.','#','.']], [['.','.','#'],['.','.','#'],['#','#','#']], [['#'],['#'],['#'],['#']], [['#','#'],['#','#']]]
-        width = 8
-        index = 0
-        n = len(data)
-        # total = 1000000000000
-        total = 100000
-        height = 0
-        heights = [0]
-        diffs = []
-        done = set()
-        for k in range(total):
-            rock = rocks[k%len(rocks)]
-            coords = []
-            R, C = len(rock), len(rock[0])
-            for r in range(R):
-                for c in range(C):
-                    if rock[~r][c] == '#':
-                        coords.append((r + height + 4, c + 3))
-            while True:
-                blow = data[index]
-                if blow == '>':
-                    if not any(c == width-1 or (r, c+1) in done for r, c in coords): 
-                        for i in range(len(coords)):
-                            r, c = coords[i]
-                            coords[i] = (r, c+1) # shift right by 1
-                else:
-                    if not any(c == 1 or (r, c-1) in done for r, c in coords): 
-                        for i in range(len(coords)):
-                            r, c = coords[i]
-                            coords[i] = (r, c-1) # shift left by 1
-                index = (index + 1) % n
-                if any(r == 1 or (r-1, c) in done for r, c in coords): break # stopped reach ground or another rock
-                for i in range(len(coords)):
-                    r, c = coords[i]
-                    coords[i] = (r-1, c) # shift down by 1
-
-            height = max([height] + [r for r, c in coords])
-            heights.append(height)
-            diffs.append(heights[-1] - heights[-2])
-            done.update(coords)
-        print(','.join(map(str, diffs)))
-        return height
-        
-
+        data = f.read().splitlines()
+        cubes = set()
+        mx, mn = -math.inf, math.inf
+        for x, y, z in map(lambda x: pat.parse(x), data):
+            cubes.add((x, y, z))
+            mx = max([mx, x, y, z])
+            mn = min([mn, x, y, z])
+        res = 0
+        neighborhood = lambda x, y, z: [(x+1,y,z),(x-1,y,z),(x,y+1,z),(x,y-1,z),(x,y,z+1),(x,y,z-1)]
+        def in_interior(x, y, z):
+            queue = deque([(x, y, z)])
+            vis = set([(x,y,z)])
+            while queue:
+                x, y, z = queue.popleft()
+                for nx, ny, nz in neighborhood(x, y, z):
+                    if (nx, ny, nz) in cubes or (nx, ny, nz) in vis: continue
+                    if nx > mx or ny > mx or nz > mx or nx < mn or ny < mn or nz < mn:
+                        return False
+                    queue.append((nx, ny, nz))
+                    vis.add((nx,ny,nz))
+            return True
+        for x, y, z in cubes:
+            for nx, ny, nz in neighborhood(x, y, z):
+                if (nx, ny, nz) in cubes or in_interior(nx, ny, nz): continue
+                res += 1
+        return res
 
 if __name__ == '__main__':
     print(main())
-
-sys.stdout.close()
-
-"""
-
-"""

@@ -17006,12 +17006,86 @@ class Solution:
         
 ```
 
-##
+## 1066. Campus Bikes II
 
-### Solution 1:
+### Solution 1: recursive dynamic programming with bitmask + O(n * m * 2^m) time
 
 ```py
+class Solution:
+    def assignBikes(self, workers: List[List[int]], bikes: List[List[int]]) -> int:
+        n, m = len(workers), len(bikes)
+        manhattan = lambda x1, y1, x2, y2: abs(x1-x2) + abs(y1-y2)
+        # (bike mask, distance) The bitmask to represent the assigned bikes and the total distance
+        @cache
+        def dp(worker: int, bike: int, bike_mask: int) -> int:
+            if worker == n == bike_mask.bit_count(): return 0
+            if worker == n or bike == m: return inf
+            take = dp(worker + 1, 0, bike_mask | (1<<bike)) if bike_mask & (1 << bike) == 0 else inf
+            skip = dp(worker, bike + 1, bike_mask)
+            return min(take + manhattan(*workers[worker], *bikes[bike]), skip)
+        return dp(0, 0, 0)
+```
 
+```py
+class Solution:
+    def assignBikes(self, workers: List[List[int]], bikes: List[List[int]]) -> int:
+        n, m = len(workers), len(bikes)
+        manhattan = lambda x1, y1, x2, y2: abs(x1-x2) + abs(y1-y2)
+        # (bike mask, distance) The bitmask to represent the assigned bikes and the total distance
+        memo = {}
+        states = deque([(0, 0)])
+        for i, (x, y) in enumerate(workers):
+            sz = len(states)
+            for _ in range(sz):
+                bike_mask, dist = states.popleft()
+                for j, (x1, y1) in enumerate(bikes):
+                    nmask = bike_mask | (1<<j)
+                    if nmask == bike_mask: continue
+                    ndist = dist + manhattan(x, y, x1, y1)
+                    if nmask in memo and ndist >= memo[nmask]: continue
+                    memo[nmask] = ndist
+                    states.append((nmask, ndist))
+        return min(dist for _, dist in states)
+```
+
+```py
+class Solution:
+    def assignBikes(self, workers: List[List[int]], bikes: List[List[int]]) -> int:
+        n, m = len(workers), len(bikes)
+        manhattan = lambda x1, y1, x2, y2: abs(x1-x2) + abs(y1-y2)
+        memo = {}
+        states = [(0, 0, 0)] # (dist, bike_mask, worker index)
+        while states:
+            dist, bike_mask, worker = heappop(states)
+            if worker == n: return dist
+            for i in range(m):
+                nmask = bike_mask | (1<<i)
+                if nmask == bike_mask: continue
+                ndist = dist + manhattan(*workers[worker], *bikes[i]) 
+                if nmask in memo and ndist >= memo[nmask]: continue
+                memo[nmask] = ndist
+                heappush(states, (ndist, nmask, worker + 1))
+        return -1
+```
+
+```py
+class Solution:
+    def assignBikes(self, workers: List[List[int]], bikes: List[List[int]]) -> int:
+        n, m = len(workers), len(bikes)
+        manhattan = lambda x1, y1, x2, y2: abs(x1-x2) + abs(y1-y2)
+        vis = set()
+        states = [(0, 0, 0)] # (dist, bike_mask, worker index)
+        while states:
+            dist, bike_mask, worker = heappop(states)
+            if (worker, bike_mask) in vis: continue
+            vis.add((worker, bike_mask))
+            if worker == n: return dist
+            for i in range(m):
+                nmask = bike_mask | (1<<i)
+                if nmask == bike_mask: continue
+                ndist = dist + manhattan(*workers[worker], *bikes[i]) 
+                heappush(states, (ndist, nmask, worker + 1))
+        return -1
 ```
 
 ##
