@@ -1,5 +1,16 @@
-import time
+# Circular Doubly Linked List Data Structure
 
+I know this implementation is slower than implementing a deque in python, but it is still quite fast for the advent of code problems. I also wanted to practice implementing a circular doubly linked list.
+
+It has the ability to perform
+- construct circular doubly linked list from an array of integers
+- iterate forward to locate the new_next and new_prev for the movement of the node
+- remove a node
+- insert a node
+- move forward through the nodes to return a node that is at some displacement
+- These functions work using modular arithmetic to speed it up and avoid iterating multiple times through the circular linked list
+
+```py
 """
 constructs circular doubly linked list from an array of integers
 """
@@ -59,33 +70,4 @@ class ListNode:
 
     def __repr__(self):
         return f'val: {self.val}'
-
-def main():
-    with open("input.txt", 'r') as f:
-        decryption_key = 1
-        data = list(map(lambda num: int(num)*decryption_key, f.read().splitlines()))
-        cdl = CircularDoublyLinkedList()
-        node = cdl.build(data) # constructs doubly linked list our of the array and returns the head
-        rounds = 1
-        for _ in range(rounds):
-            for i in range(cdl.size):
-                while node.index != i:
-                    node = node.next
-                if node.val%(cdl.size-1) == 0: continue
-                cdl.remove(node)
-                new_prev, new_next = cdl.locate(node)
-                cdl.insert(node, new_next, new_prev)
-        res = 0
-        distance = [1000, 2000, 3000]
-        for i in distance:
-            while node.val != 0:
-                node = node.next
-            node = cdl.forward(node, i)
-            res += node.val
-        return res
-
-if __name__ == '__main__':
-    start_time = time.perf_counter()
-    print(main())
-    end_time = time.perf_counter()
-    print(f'Time Elapsed: {end_time - start_time} seconds')
+```
