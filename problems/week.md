@@ -17088,12 +17088,28 @@ class Solution:
         return -1
 ```
 
-##
+## 1971. Find if Path Exists in Graph
 
-### Solution 1:
+### Solution 1:  bfs + adjacency list + graph algorithm
 
 ```py
-
+class Solution:
+    def validPath(self, n: int, edges: List[List[int]], source: int, destination: int) -> bool:
+        m = len(edges)
+        queue = deque([source])
+        vis = set([source])
+        adj_list = [[] for _ in range(n)]
+        for u, v in edges:
+            adj_list[u].append(v)
+            adj_list[v].append(u)
+        while queue:
+            node = queue.popleft()
+            if node == destination: return True
+            for nei in adj_list[node]:
+                if nei in vis: continue
+                vis.add(nei)
+                queue.append(nei)
+        return False
 ```
 
 ##
