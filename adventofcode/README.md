@@ -116,3 +116,9 @@ sys.stdout = open('output.txt', 'w')
 sys.stdout.close()
 ```
 
+https://github.com/taylorott/Advent_of_Code/blob/main/src/Year_2022/Day22/Solution.py
+My solution is able to programmatically determine how edges line up on the cube. The key intuition is to identify "inner corners" of the 2D pattern (for example where regions 1/3/4 meet, 3/4/5 meet, or 4/5/6 in the test case provided in the problem). These corners correspond to the starting points for how you would "zip up the cube".
+
+Once these inner corners have been identified, you can travel along the perimeter of the 2D pattern in the two opposite directions (moving one unit-length line segment at a time). Each of these line-segment pair (one segment for the two directions we are traveling) will end up fusing when we fold the cube, so we can convert this into adjacency information for the corresponding grid-points in the 2D pattern.
+
+The one thing to keep track of is that you need to know when to stop this zipping process. The termination criterion for a single zip is to see if, while traveling along the perimeter of the 2D pattern in opposite directions, you have to round two corners simultaneously (rounding a single corner corresponds to a single fold in the 2D pattern).
