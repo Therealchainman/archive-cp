@@ -1,66 +1,76 @@
 from collections import *
 from itertools import *
+from heapq import *
 import time
-
 def main():
     with open('input.txt', 'r') as f:
         data = f.read().splitlines()
         grid = [list(line) for line in data]
         R, C = len(grid), len(grid[0])
-        occupied = set()
-        elf = '#'
+        wall, empty = '#', '.'
+        left, right, up, down = (0, -1), (0, 1), (-1, 0), (1, 0)
+        directions = {'>': right, '<': left, '^': up, 'v': down}
+        target = None
+        start = None
+        vertical, horizontals = [], []
         for r, c in product(range(R), range(C)):
-            if grid[r][c] == elf:
-                occupied.add((r, c))
-        north, south, west, east = (-1, 0), (1, 0), (0, -1), (0, 1)
-        northwest, southwest, northeast, southeast = (-1, -1), (1, -1), (-1, 1), (1, 1)
-        proposals = [north, south, west, east]
-        rounds = 10
-        for round in range(1, rounds+1):
-            next_move = {}
-            counter = Counter()
-            for r, c in occupied:
-                for proposal in proposals:
-                    taken = False
-                    proposed = None
-                    if proposal == north:
-                        for dr, dc in [north, northwest, northeast]:
-                            nr, nc = r + dr, c + dc
-                            if (nr, nc) in occupied:
-                                taken = True
-                                break
-                    elif proposal == south:
-                        for dr, dc in [south, southwest, southeast]:
-                            nr, nc = r + dr, c + dc
-                            if (nr, nc) in occupied:
-                                taken = True
-                                break
-                    elif proposal == west:
-                        for dr, dc in [west, northwest, southwest]:
-                            nr, nc = r + dr, c + dc
-                            if (nr, nc) in occupied:
-                                taken = True
-                                break
-                    elif proposal == east:
-                        for dr, dc in [east, northeast, southeast]:
-                            nr, nc = r + dr, c + dc
-                            if (nr, nc) in occupied:
-                                taken = True
-                                break
-                    if not taken: 
-                        proposed = proposal
-                        nr, nc = r + proposed[0], c + proposed[1]
-                        next_move[(r, c)] = (nr, nc)
-                        counter[(nr, nc)] += 1
-                        break
-
-            for (r, c), (nr, nc) in next_move.items():
-                if counter[(nr, nc)] == 1:
-                    occupied.discard((r, c))
-                    occupied.add((nr, nc))
-            proposals = proposals[1:] + proposals[:1]
-        minRow, maxRow, minCol, maxCol = min(r for r, c in occupied), max(r for r, c in occupied), min(c for r, c in occupied), max(c for r, c in occupied)
-        return sum(1 for r, c in product(range(minRow, maxRow+1), range(minCol, maxCol+1)) if (r, c) not in occupied)
+            if grid[r][c] == empty and r == 0:
+                start = (r, c)
+            elif grid[r][c] == empty and r == R-1:
+                target = (r, c)
+            elif grid[r][c] not in (wall, empty):
+                if grid[r][c] in '><':
+                    horizontals.append((r, c, grid[r][c]))
+                elif grid[r][c] in '^v':
+                    vertical.append((r, c, grid[r][c]))
+        ri, ci = start
+        neighborhood = lambda r, c: ((r-1, c), (r+1, c), (r, c-1), (r, c+1))
+        in_bounds = lambda r, c: 0 <= r < R and 0 <= c < C
+        manhattan = lambda r, c: abs(r-target[0]) + abs(c-target[1])
+        minheap = [(0, manhattan(ri, ci), ri, ci)]
+        horizontal_blizzard_cache = {}
+        vertical_blizzard_cache = {}
+        for i in range(C-2):
+            horizontal_blizzard_cache[i] = Counter()
+            for j, (r, c, d) in enumerate(horizontals):
+                horizontal_blizzard_cache[i][(r, c)] += 1
+                nr, nc = r + directions[d][0], c + directions[d][1]
+                if nc == C-1:
+                    nc = 1
+                elif nc == 0:
+                    nc = C-2
+                horizontals[j] = (nr, nc, d)
+        for i in range(R-2):
+            vertical_blizzard_cache[i] = Counter()
+            for j, (r, c, d) in enumerate(vertical):
+                vertical_blizzard_cache[i][(r, c)] += 1
+                nr, nc = r + directions[d][0], c + directions[d][1]
+                if nr == R-1:
+                    nr = 1
+                elif nr == 0:
+                    nr = R-2
+                vertical[j] = (nr, nc, d)
+        seen = set()
+        vis = set()
+        while minheap:
+            time, _, row, col = heappop(minheap)
+            if time not in seen:
+                print(f'time: {time}, heap size: {len(minheap)}')
+                seen.add(time)
+            ntime = time + 1
+            if (row, col) == target: return time
+            for nr, nc in neighborhood(row, col):
+                nstate = (ntime, manhattan(nr, nc), nr, nc)
+                if not in_bounds(nr, nc) or grid[nr][nc] == wall or nstate in vis or horizontal_blizzard_cache[ntime%(C-2)][(nr, nc)] > 0 or \
+                    vertical_blizzard_cache[ntime%(R-2)][(nr, nc)] > 0: continue
+                heappush(minheap, nstate)
+                vis.add(nstate)
+            # waiting
+            if horizontal_blizzard_cache[ntime%(C-2)][(row, col)] == 0 and vertical_blizzard_cache[ntime%(R-2)][(row, col)] == 0:
+                nstate = (ntime, manhattan(row, col), row, col)
+                if nstate in vis: continue
+                heappush(minheap, nstate)
+                vis.add(nstate)
 
 if __name__ == '__main__':
     start_time = time.perf_counter()
