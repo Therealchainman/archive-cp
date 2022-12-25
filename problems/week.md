@@ -10693,6 +10693,22 @@ class Solution:
         return answer
 ```
 
+### Solution 2: sort + online query + binary search + O(mlogn + nlogn + n) = O(mlogn + nlogn) time
+
+```py
+class Solution:
+    def answerQueries(self, nums: List[int], queries: List[int]) -> List[int]:
+        n, m = len(nums), len(queries)
+        psum = [0]*(n+1)
+        nums.sort()
+        for i in range(n):
+            psum[i+1] = psum[i] + nums[i]
+        answer = [0]*m
+        for i in range(m):
+            answer[i] = bisect.bisect_right(psum, queries[i]) - 1
+        return answer
+```
+
 ## 2390. Removing Stars From a String
 
 ### Solution 1:  stack 
