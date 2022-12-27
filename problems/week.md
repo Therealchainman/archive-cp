@@ -17128,6 +17128,454 @@ class Solution:
         return False
 ```
 
+## 790. Domino and Tromino Tiling
+
+### Solution 1:  recursive dp + partial and full tiling + O(n) time
+
+```py
+class Solution:
+    def numTilings(self, n: int) -> int:
+        mod = int(1e9) + 7
+        @cache
+        def full(i: int) -> int:
+            return i if i <= 2 else (full(i-2) + full(i-1) + partial(i-1))%mod
+        @cache 
+        def partial(i: int) -> int:
+            return i if i == 2 else (partial(i-1) + 2*full(i-2))%mod
+        return full(n)
+```
+
+### Solution 2:  modular arithmetic + numpy linalg.matrix_power function + transition matrix + O(logn) time
+
+```py
+import numpy as np
+class Solution:
+    # A = TB linear algebra equation 
+    def numTilings(self, n: int) -> int:
+        MOD = int(1e9+7)
+        B = np.array([[1,1,0]]).T
+        T = np.linalg.matrix_power(np.array([[2,0,1], [1,0,0], [0, 1,0]], dtype='object'), n-1)
+        A = np.matmul(T, B)
+        return A[0,0] % MOD
+```
+
+### Solution 3: Iterative Dynamic Programming via recurrence relation observed via brute force. 
+
+```c++
+const int MOD = 1e9+7;
+int numTilings(int n) {
+    if (n<=2) {
+        return n==1 ? 1 : 2;
+    }
+    vector<int> dp(n+1,0);
+    dp[0]=1; dp[1]=1, dp[2]=2;
+    for (int i=3;i<=n;i++) {
+        dp[i] = ((2*dp[i-1])%MOD+dp[i-3])%MOD;
+    }
+    return dp.back();
+}
+```
+
+### Solution 4: Only the three previous values are needed, so we can use dynamic programming with O(1) space.
+
+```c++
+const int MOD = 1e9+7;
+int numTilings(int n) {
+    if (n<=2) {
+        return n==1 ? 1 : 2;
+    }
+    int a = 1, b = 1, c = 2;
+    for (int i=3;i<=n;i++) {
+        int tmp = c;
+        c = ((2*c)%MOD + a)%MOD;
+        a = b;
+        b = tmp;
+    }
+    return c;
+}
+```
+
+### Solution 5:  it looks like you can use modular exponentiation to solve this in O(log(n)) for further speedup if necessary. 
+
+```c++
+const int MOD = 1e9 + 7;
+struct Matrix {
+    int numRows, numCols;
+    vector<vector<int>> M;
+    // initialize the 2-dimensional array representation for the matrix with 
+    // a given value. 
+    void init(int r, int c, int val) {
+        numRows = r, numCols = c;
+        M.resize(r);
+        for (int i = 0;i<r;i++) {
+            M[i].assign(c, val);
+        }
+    }
+    // neutral matrix is just one's along the main diagonal (identity matrix)
+    void neutral(int r, int c) {
+        numRows = r, numCols = c;
+        M.resize(r);
+        for (int i = 0;i<r;i++) {
+            M[i].assign(c, 0);
+        }
+        for (int i = 0;i<r;i++) {
+            for (int j = 0; j < c;j++) {
+                if (i==j) {
+                    M[i][j]=1;
+                }
+            }
+        }
+
+    }
+    // Set's a pair of coordinates on the matrix with the specified value, works for a transition matrix
+    // where you need ones in places. 
+    void set(vector<pair<int,int>>& locs, int val) {
+        int r, c;
+        for (auto loc : locs) {
+            tie(r, c) = loc;
+            M[r][c] = val;
+        }
+    }
+    void setSingle(int r, int c, int val) {
+        M[r][c] = val;
+    }
+    // this matrix times another matrix. 
+    void operator*=(const Matrix& B) {
+        int RB = B.M.size(), CB = B.M[0].size();
+        vector<vector<int>> result(numRows, vector<int>(CB, 0));
+        for (int i = 0;i < numRows;i++) {
+            for (int j = 0;j < CB;j++) {
+                int sum = 0;
+                for (int k = 0;k < RB;k++) {
+                    sum = (sum + ((long long)M[i][k]*B.M[k][j])%MOD)%MOD;
+                }
+                result[i][j] = sum;
+            }
+        }
+        numRows = numCols, numCols = RB;
+        swap(M, result);
+    }
+
+    void transpose() {
+        int R = numCols, C = numRows;
+        vector<vector<int>> matrix(R, vector<int>(C,0));
+        for (int i = 0;i < numRows;i++) {
+            for (int j = 0;j < numCols;j++) {
+                matrix[j][i]=M[i][j];
+            }
+        }
+        swap(numRows,numCols); // transpose swaps the rows and columns
+        swap(M,matrix); // swap these two
+    }
+    // Method to convert a row and column to a unique integer that identifies a row, column combination
+    // that can be used in hashing
+    int getId(int row, int col) {
+        return numRows*row+col;
+    }
+
+};
+
+Matrix operator*(const Matrix& A, const Matrix& B) {
+    int RA = A.M.size(), CA = A.M[0].size(), RB = B.M.size(), CB = B.M[0].size();
+    if (CA!=RB) {
+        printf("CA and RB are not equal\n");
+        return A;
+    }
+    Matrix result;
+    result.init(RA,CB,0);
+    for (int i = 0;i < RA;i++) {
+        for (int j = 0; j < CB; j++) {
+            int sum = 0;
+            for (int k = 0;k < RB;k++) {
+                sum = (sum+((long long)A.M[i][k]*B.M[k][j])%MOD)%MOD;
+            }
+            result.M[i][j]=sum;
+        }
+    }
+    return result;
+}
+
+// matrix exponentiation
+Matrix matrix_power(Matrix& A, int b) {
+    Matrix result;
+    result.neutral(A.numRows, A.numCols);
+    while (b > 0) {
+        if (b % 2 == 1) {
+            result = (result*A);
+        }
+        A *= A;
+        b /= 2;
+    }
+    return result;
+}
+class Solution {
+public:
+    const int MOD = 1e9+7;
+    int N;
+    int numTilings(int n) {
+        Matrix transition, base;
+        transition.init(3, 3, 0);
+        base.init(3, 1, 1);
+        vector<pair<int,int>> ones = {{0,2}, {1,0},{2,1}};
+        transition.set(ones, 1);
+        transition.setSingle(0,0,2);
+        base.setSingle(2,0,0);
+        Matrix expo = matrix_power(transition, n-1); // exponentiated transition matrix
+        Matrix result = expo*base;
+        return result.M[0][0];
+    }
+};
+```
+
+## 2506. Count Pairs Of Similar Strings
+
+### Solution 1:  similar if sets are equal between words + implies words have same characters
+
+```py
+class Solution:
+    def similarPairs(self, words: List[str]) -> int:
+        n = len(words)
+        res = 0
+        for i in range(n):
+            for j in range(i+1, n):
+                s1, s2 = set(words[i]), set(words[j])
+                res += (s1 == s2)
+        return res
+```
+
+## 2507. Smallest Value After Replacing With Sum of Prime Factors
+
+### Solution 1:  prime sieve + sum of prime factors
+
+```py
+class Solution:
+    def smallestValue(self, n: int) -> int:
+        def prime_sieve(lim):
+            sieve,primes = [[] for _ in range(lim + 1)], set()
+            for integer in range(2,lim + 1):
+                if not len(sieve[integer]):
+                    primes.add(integer)
+                    for possibly_divisible_integer in range(integer,lim+1,integer):
+                        current_integer = possibly_divisible_integer
+                        while not current_integer%integer:
+                            sieve[possibly_divisible_integer].append(integer)
+                            current_integer //= integer
+            return sieve
+        sieve = prime_sieve(n)
+        while len(sieve[n]) > 1:
+            nxt = sum(sieve[n])
+            if nxt == n: break
+            n = nxt
+        return n
+```
+
+## 2508. Add Edges to Make Degrees of All Nodes Even
+
+### Solution 1:
+
+```py
+class Solution:
+    def isPossible(self, n: int, edges: List[List[int]]) -> bool:
+        degrees = [0]*(n+1)
+        adj_list = [set() for _ in range(n+1)]
+        for u, v in edges:
+            adj_list[u].add(v)
+            adj_list[v].add(u)
+            degrees[u] += 1
+            degrees[v] += 1
+        nodes = []
+        for i, deg in enumerate(degrees):
+            if deg&1:
+                nodes.append(i)
+        m = len(nodes)
+        if m == 0: return True
+        if m > 4 or m&1: return False
+                
+        def bad_adjacent(nodes):
+            if len(nodes) == 2: return False
+            x1, x2, x3, x4 = nodes
+            return len(adj_list[x1] & {x2, x3, x4}) > 2 or len(adj_list[x2] & {x1, x3, x4}) > 2 or len(adj_list[x3] & {x1, x2, x4}) > 2 or len(adj_list[x4] & {x1, x2, x3}) > 2
+        if bad_adjacent(nodes): return False
+        def good_pair(pair):
+            if not pair: return True
+            x, y = pair
+            if x in adj_list[y]: 
+                for node in range(1, n+1):
+                    if x in adj_list[node] or y in adj_list[node]: continue
+                    return True
+                return False
+            return True
+        def non_adjacent(pair):
+            x, y = pair
+            if x in adj_list[y]: return False
+            return True
+        for mask in range(1, 1 << m):
+            if mask.bit_count() != 2: continue
+            pairs = [[] for _ in range(2)]
+            for i in range(m):
+                if (mask>>i)&1:
+                    pairs[0].append(nodes[i])
+                else:
+                    pairs[1].append(nodes[i])
+            if m == 2:
+                if good_pair(pairs[0]) and good_pair(pairs[1]): return True
+            else:
+                if non_adjacent(pairs[0]) and non_adjacent(pairs[1]): return True
+        return False
+```
+
+## 2509. Cycle Length Queries in a Tree
+
+### Solution 1:  online queries + binary jumping + size of tree is at most 30 in depth + two pointers + the parent_node = current_node//2 + at the point that both pointers meet at same node that will give the depth for both nodes and so you can get the cycle length + O(nlogn) time since it is a complete binary tree + could think of it as you are finding the lowest common ancestor + or think of it like sum of distances to LCA
+
+```py
+class Solution:
+    def cycleLengthQueries(self, n: int, queries: List[List[int]]) -> List[int]:
+        m = len(queries)
+        def height(u: int, v: int) -> int:
+            du = dv = 0
+            while  u != v:
+                if u > v:
+                    u >>= 1
+                    du += 1
+                if v > u:
+                    v >>= 1
+                    dv += 1
+            return du + dv
+        answer = [0]*m
+        for i, (u, v) in enumerate(queries):
+            answer[i] = height(u, v) + 1
+        return answer
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
