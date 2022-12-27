@@ -17369,9 +17369,29 @@ class Solution:
         return n
 ```
 
+### Solution 2:  find all prime factors for each number + early termination in the loop + sum of prime factors + sqrt(n) time about
+
+```py
+class Solution:
+    def smallestValue(self, n: int) -> int:
+        def sopf(n: int) -> int:
+            sum_ = 0
+            for i in range(2, int(math.sqrt(n)) + 1):
+                if n < i: break
+                while n%i == 0:
+                    sum_ += i
+                    n //= i
+            return sum_ + (n if n > 1 else 0)
+
+        def pivot_sopf(n: int) -> int:
+            while n != (n := sopf(n)): pass
+            return n
+        return pivot_sopf(n)
+```
+
 ## 2508. Add Edges to Make Degrees of All Nodes Even
 
-### Solution 1:
+### Solution 1:  Since can only add at most 2 edges, you can only consider the cases of 0, 2, 4 odd degree edges.  if 0 it is trivially true + if 2 it is true if you can find an external node to connect them to if they are adjacent can use just intersection of adjacency list needs to be less than n + case 4 just requires that you can find two pairs of non adjacent nodes to connect to each other and thus using the 2 edges you are given
 
 ```py
 class Solution:
@@ -17383,45 +17403,28 @@ class Solution:
             adj_list[v].add(u)
             degrees[u] += 1
             degrees[v] += 1
-        nodes = []
+        odd_nodes = []
         for i, deg in enumerate(degrees):
             if deg&1:
-                nodes.append(i)
-        m = len(nodes)
-        if m == 0: return True
-        if m > 4 or m&1: return False
-                
-        def bad_adjacent(nodes):
-            if len(nodes) == 2: return False
-            x1, x2, x3, x4 = nodes
-            return len(adj_list[x1] & {x2, x3, x4}) > 2 or len(adj_list[x2] & {x1, x3, x4}) > 2 or len(adj_list[x3] & {x1, x2, x4}) > 2 or len(adj_list[x4] & {x1, x2, x3}) > 2
-        if bad_adjacent(nodes): return False
-        def good_pair(pair):
-            if not pair: return True
-            x, y = pair
-            if x in adj_list[y]: 
-                for node in range(1, n+1):
-                    if x in adj_list[node] or y in adj_list[node]: continue
-                    return True
-                return False
-            return True
-        def non_adjacent(pair):
-            x, y = pair
-            if x in adj_list[y]: return False
-            return True
-        for mask in range(1, 1 << m):
-            if mask.bit_count() != 2: continue
-            pairs = [[] for _ in range(2)]
-            for i in range(m):
-                if (mask>>i)&1:
-                    pairs[0].append(nodes[i])
-                else:
-                    pairs[1].append(nodes[i])
-            if m == 2:
-                if good_pair(pairs[0]) and good_pair(pairs[1]): return True
-            else:
-                if non_adjacent(pairs[0]) and non_adjacent(pairs[1]): return True
-        return False
+                odd_nodes.append(i)
+        def non_adjacent(pairs: List[List[int]]) -> bool:
+            (x1, y1), (x2, y2) = map(lambda x: x, pairs)
+            return False if x1 in adj_list[y1] or x2 in adj_list[y2] else True
+        m = len(odd_nodes)
+        if m == 2:
+            x, y = odd_nodes
+            return len(adj_list[x] | adj_list[y]) < n
+        if m == 4:
+            for mask in range(1, 1 << 4):
+                if mask.bit_count() != 2: continue
+                pairs = [[] for _ in range(2)]
+                for i in range(4):
+                    if (mask>>i)&1:
+                        pairs[1].append(odd_nodes[i])
+                    else:
+                        pairs[0].append(odd_nodes[i])
+                if non_adjacent(pairs): return True
+        return m == 0
 ```
 
 ## 2509. Cycle Length Queries in a Tree
