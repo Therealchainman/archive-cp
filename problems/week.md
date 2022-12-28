@@ -17451,12 +17451,19 @@ class Solution:
         return answer
 ```
 
-##
+## 1962. Remove Stones to Minimize the Total
 
-### Solution 1:
+### Solution 1:  maxheap + map
 
 ```py
-
+class Solution:
+    def minStoneSum(self, piles: List[int], k: int) -> int:
+        heapify(maxheap := list(map(lambda x: -x, piles)))
+        for _ in range(k):
+            x = abs(heappop(maxheap))
+            x -= x//2
+            heappush(maxheap, -x)
+        return sum(map(abs, maxheap))
 ```
 
 ##
