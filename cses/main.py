@@ -52,14 +52,16 @@ class MaxFlow:
 
     def build(self, n: int, edges: List[Tuple[int, int, int]]) -> None:
         self.adj_list = {}
+        self.delta = 0
         for u, v, cap in edges:
             if u not in self.adj_list:
                 self.adj_list[u] = Counter()
             self.adj_list[u][v] += cap
             if v not in self.adj_list:
                 self.adj_list[v] = Counter()
+            self.delta = max(self.delta, cap)
 
-    def main(self, source: int, sink: int) -> int:
+    def main_dfs(self, source: int, sink: int) -> int:
         self.build(self.size, self.edges)
         maxflow = 0
         while True:
@@ -71,19 +73,78 @@ class MaxFlow:
         return maxflow
 
     def reset(self) -> None:
-        self.vis = [False] * self.size
+        self.parents = [-1] * self.size
 
     def dfs(self, node: int, sink: int, flow: int) -> int:
         if node == sink:
             return flow
-        self.vis[node] = True
+        self.parents[node] = 1
         cap = self.adj_list[node]
         for nei, cap in cap.items():
-            if not self.vis[nei] and cap > 0:
+            if self.parents[nei] == -1 and cap > 0:
                 cur_flow = self.dfs(nei, sink, min(flow, cap))
                 if cur_flow > 0:
                     self.adj_list[node][nei] -= cur_flow
                     self.adj_list[nei][node] += cur_flow
+                    return cur_flow
+        return 0
+    
+    def main_edmonds_karp(self, source: int, sink: int) -> int:
+        self.build(self.size, self.edges)
+        maxflow = 0
+        while True:
+            self.reset()
+            cur_flow = self.edmonds_karp(source, sink)
+            if cur_flow == 0:
+                break
+            maxflow += cur_flow
+        return maxflow
+
+    def edmonds_karp(self, source: int, sink: int) -> int:
+        queue = deque([(source, math.inf)])
+        self.parents[source] = -2
+        while queue:
+            node, flow = queue.popleft()
+            if node == sink:
+                break
+            capacity = self.adj_list[node]
+            for nei, cap in capacity.items():
+                if self.parents[nei] == -1 and cap > 0:
+                    self.parents[nei] = node
+                    queue.append((nei, min(flow, cap)))
+        if node == sink:
+            while node != source:
+                parent = self.parents[node]
+                self.adj_list[parent][node] -= flow
+                self.adj_list[node][parent] += flow # residual edge
+                node = parent
+            return flow
+        return 0
+
+    def main_capacity_scaling(self, source: int, sink: int) -> int:
+        self.build(self.size, self.edges)
+        maxflow = 0
+        while self.delta > 0:
+            while True:
+                self.reset()
+                cur_flow = self.capacity_scaling(source, sink, math.inf)
+                if cur_flow == 0:
+                    break
+                maxflow += cur_flow
+            self.delta >>= 1
+        return maxflow
+
+    def capacity_scaling(self, source: int, sink: int, flow: int) -> int:
+        if source == sink:
+            return flow
+        self.parents[source] = 1
+        capacity = self.adj_list[source]
+        for nei, cap in capacity.items():
+            if self.parents[nei] == -1 and cap > self.delta:
+                cur_flow = self.capacity_scaling(nei, sink, min(flow, cap))
+                if cur_flow > 0:
+                    self.adj_list[source][nei] -= cur_flow
+                    self.adj_list[nei][source] += cur_flow
                     return cur_flow
         return 0
 
@@ -97,7 +158,7 @@ def main():
         mx = max(mx, cap)
     source, sink = 0, n - 1
     maxflow = MaxFlow(n, edges)
-    return maxflow.main(source, sink)
+    return maxflow.main_dfs(source, sink)
 
 if __name__ == '__main__':
     print(main())

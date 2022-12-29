@@ -17466,12 +17466,29 @@ class Solution:
         return sum(map(abs, maxheap))
 ```
 
-##
+## 1834. Single-Threaded CPU
 
-### Solution 1:
+### Solution 1:  minheap + sort + greedy + O(nlogn) time + using the minheap to store the tasks that are currently enqueued and to have them sorted by smallest processing time and then index
 
 ```py
-
+class Solution:
+    def getOrder(self, tasks: List[List[int]]) -> List[int]:
+        n = len(tasks)
+        arr = sorted([(enqueue, process, i) for i, (enqueue, process) in enumerate(tasks)])
+        i = time = 0
+        minheap = []
+        answer = []
+        while minheap or i < n:
+            if (i < n and arr[i][0] <= time) or not minheap:
+                cand_time, process, index = arr[i]
+                time = max(time, cand_time)
+                heappush(minheap, (process, index))
+                i += 1
+            else:
+                x, index = heappop(minheap)
+                time += x
+                answer.append(index)
+        return answer
 ```
 
 ##
