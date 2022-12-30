@@ -1,0 +1,67 @@
+Test case 0 passed
+dfs: 0.03157599894620944 milliseconds
+edmonds-karp: 0.01743299981171731 milliseconds
+capacity scaling: 0.019139999494655058 milliseconds
+dinics: 0.019088000044575892 milliseconds
+Test case 1 passed
+dfs: 0.08477200026391074 milliseconds
+edmonds-karp: 0.04752400127472356 milliseconds
+capacity scaling: 0.04356200042821001 milliseconds
+dinics: 0.04602899934980087 milliseconds
+Test case 2 passed
+dfs: 0.06654299977526534 milliseconds
+edmonds-karp: 0.0345779990311712 milliseconds
+capacity scaling: 0.0692449993948685 milliseconds
+dinics: 0.032698999348212965 milliseconds
+Test case 3 passed
+dfs: 0.07162099973356817 milliseconds
+edmonds-karp: 0.030152999897836708 milliseconds
+capacity scaling: 0.04189700121060014 milliseconds
+dinics: 0.02439600029902067 milliseconds
+Test case 4 passed
+dfs: 2.622571999381762 milliseconds
+edmonds-karp: 1.964944000064861 milliseconds
+capacity scaling: 2.0339249986136565 milliseconds
+dinics: 2.024875999268261 milliseconds
+Test case 5 passed
+dfs: 6.746938999640406 milliseconds
+edmonds-karp: 4.215986999042798 milliseconds
+capacity scaling: 4.797696999958134 milliseconds
+dinics: 4.426231000252301 milliseconds
+Test case 6 passed
+dfs: 14.084679000006872 milliseconds
+edmonds-karp: 5.338969000149518 milliseconds
+capacity scaling: 11.243589999139658 milliseconds
+dinics: 6.43846699858841 milliseconds
+Test case 7 passed
+dfs: 0.08465999962936621 milliseconds
+edmonds-karp: 0.04445200102054514 milliseconds
+capacity scaling: 0.03219599966541864 milliseconds
+dinics: 0.041573000999051146 milliseconds
+Test case 8 passed
+dfs: 0.13435599976219237 milliseconds
+edmonds-karp: 0.0897999998414889 milliseconds
+capacity scaling: 0.07407200064335484 milliseconds
+dinics: 0.08454099952359684 milliseconds
+Test case 9 passed
+dfs: 0.04298800013202708 milliseconds
+edmonds-karp: 0.030760998924961314 milliseconds
+capacity scaling: 0.024931001462391578 milliseconds
+dinics: 0.037316998714231886 milliseconds
+Test case 10 passed
+dfs: 1.7212120001204312 milliseconds
+edmonds-karp: 1.3678499999514315 milliseconds
+capacity scaling: 1.4325230004033074 milliseconds
+dinics: 1.14961500003119 milliseconds
+Test case 11 passed
+dfs: 0.09587800013832748 milliseconds
+edmonds-karp: 0.07138999899325427 milliseconds
+capacity scaling: 0.05500000042957254 milliseconds
+dinics: 0.08348499977728352 milliseconds
+Test case 12 passed
+dfs: 17.25488400006725 milliseconds
+edmonds-karp: 75.80916500046442 milliseconds
+capacity scaling: 8.481142000164255 milliseconds
+dinics: 17.285809000895824 milliseconds
+CPU times: user 529 ms, sys: 19.4 ms, total: 548 ms
+Wall time: 8.73 s
