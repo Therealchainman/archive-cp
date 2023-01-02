@@ -17491,12 +17491,22 @@ class Solution:
         return answer
 ```
 
-##
+## 520. Detect Capital
 
-### Solution 1:
+### Solution 1: check true conditions
 
 ```py
+class Solution:
+    def detectCapitalUse(self, word: str) -> bool:
+        return word.upper() == word or word.lower() == word or f'{word[:1].upper()}{word[1:].lower()}' == word
+```
 
+## Solution 2: check true conditions
+
+```c++
+bool detectCapitalUse(string word) {
+    return all_of(word.begin(),word.end(),[](const auto& a) { return isupper(a);}) || (all_of(word.begin(),word.end(),[](const auto& a) {return islower(a);})) || (isupper(word[0]) && all_of(word.begin()+1,word.end(),[](const auto& a) {return islower(a);}));
+}
 ```
 
 ##
