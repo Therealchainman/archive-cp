@@ -17511,7 +17511,7 @@ bool detectCapitalUse(string word) {
 
 ## 944. Delete Columns to Make Sorted
 
-### Solution 1:  array to mark columns to delete + comparison in loop through array + O(RC) time + O(C) extra space
+### Solution 1: array to mark columns to delete + comparison in loop through array + O(RC) time + O(C) extra space
 
 ```py
 class Solution:
