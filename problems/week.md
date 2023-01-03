@@ -17509,12 +17509,46 @@ bool detectCapitalUse(string word) {
 }
 ```
 
-##
+## 944. Delete Columns to Make Sorted
 
-### Solution 1:
+### Solution 1:  array to mark columns to delete + comparison in loop through array + O(RC) time + O(C) extra space
 
 ```py
+class Solution:
+    def minDeletionSize(self, strs: List[str]) -> int:
+        R, C = len(strs), len(strs[0])
+        mark = [False]*C # mark for deletion
+        for r, c in product(range(1, R), range(C)):
+            if strs[r][c] < strs[r-1][c]: mark[c] = True
+        return sum(mark)
+```
 
+### Solution 2: Alternative approaches + using sum function + zip to create transpose of the input + compare if the sorted list is equal to the original list
+
+```py
+class Solution:
+    def minDeletionSize(self, strs: List[str]) -> int:
+        return sum(1 for row in zip(*strs) if any(x != y for x, y in zip(sorted(row), row)))
+```
+
+```py
+class Solution:
+    def minDeletionSize(self, strs: List[str]) -> int:
+        return sum(row > sorted(row) for row in map(list, zip(*strs)))
+```
+
+### Solution 3:  Using numpy to create transpose matrix from a python 2d list
+
+```py
+import numpy as np
+class Solution:
+    def minDeletionSize(self, strs: List[str]) -> int:
+        matrix = [list(row) for row in strs]
+        T_matrix = np.transpose(matrix)
+        res = 0
+        for row in T_matrix:
+            if any(x != y for x, y in zip(sorted(row), row)): res += 1
+        return res
 ```
 
 ##
@@ -17552,7 +17586,8 @@ bool detectCapitalUse(string word) {
 ##
 
 ### Solution 1:
-
+(self, strs: List[str]) -> int:
+        return sum(1 for
 ```py
 
 ```
