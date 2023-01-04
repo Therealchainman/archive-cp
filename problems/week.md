@@ -17551,12 +17551,22 @@ class Solution:
         return res
 ```
 
-##
+## 1056. Confusing Number
 
-### Solution 1:
+### Solution 1:  dictionary + integer + convert to list to string to int
 
 ```py
-
+class Solution:
+    def confusingNumber(self, n: int) -> bool:
+        transformations = {0: 0, 1: 1, 6: 9, 8: 8, 9: 6}
+        res = []
+        num = n
+        while n > 0:
+            dig = n%10
+            if dig not in transformations: return False
+            res.append(transformations[dig])
+            n //= 10
+        return num != int(''.join(map(str, res))) if len(res) > 0 else False
 ```
 
 ##
@@ -17586,8 +17596,7 @@ class Solution:
 ##
 
 ### Solution 1:
-(self, strs: List[str]) -> int:
-        return sum(1 for
+
 ```py
 
 ```

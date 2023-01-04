@@ -2,6 +2,7 @@ import os,sys
 from io import BytesIO, IOBase
 from typing import *
 import math
+from collections import deque
 
 
 # Fast IO Region
@@ -56,15 +57,18 @@ FordFulkeron algorithm for maximum flow problem
 - capacity scaling algorithm
 - dinics algorithm
 -- deadend elimination
+TODO: May need to merge parallel edges at some point
+
 """
 class FlowEdge:
     def __init__(self, src: int, dst: int, cap: int):
         self.src = src # source node
         self.dst = dst # destination node
         self.cap = cap
+        self.flow = 0
 
     def __repr__(self):
-        return f'source node: {self.src}, destination node: {self.dst}, capacity: {self.cap} ======'
+        return f'source node: {self.src}, destination node: {self.dst}, capacity: {self.cap}, flow: {self.flow} ======'
 
 class FordFulkersonMaxFlowV2:
     """
@@ -111,17 +115,20 @@ class FordFulkersonMaxFlowV2:
     def neighborhood(self, node: int) -> List[int]:
         return (i for i in self.adj_list[node])
 
+    def residual_capacity(self, edge: FlowEdge) -> int:
+        return edge.cap - edge.flow
+
     def dfs(self, node: int, sink: int, flow: int) -> int:
         if node == sink:
             return flow
         self.vis[node] = 1
         for index in self.neighborhood(node):
             nei = self.flowedges[index]
-            if self.vis[nei.dst] == 0 and nei.cap > 0:
-                cur_flow = self.dfs(nei.dst, sink, min(flow, nei.cap))
+            if self.vis[nei.dst] == 0 and self.residual_capacity(nei) > 0:
+                cur_flow = self.dfs(nei.dst, sink, min(flow, self.residual_capacity(nei)))
                 if cur_flow > 0:
-                    nei.cap -= cur_flow
-                    self.flowedges[index ^ 1].cap += cur_flow
+                    nei.flow += cur_flow
+                    self.flowedges[index ^ 1].flow -= cur_flow
                     return cur_flow
         return 0
     
@@ -146,15 +153,15 @@ class FordFulkersonMaxFlowV2:
                 break
             for index in self.neighborhood(node):
                 nei = self.flowedges[index]
-                if self.vis[nei.dst] == 0 and nei.cap > 0:
+                if self.vis[nei.dst] == 0 and self.residual_capacity(nei) > 0:
                     self.vis[nei.dst] = 1
                     self.parents[index] = prev_index
-                    queue.append((nei.dst, min(flow, nei.cap), index))
+                    queue.append((nei.dst, min(flow, self.residual_capacity(nei)), index))
         if node == sink:
             while prev_index != -1:
                 parent_index = self.parents[prev_index]
-                self.flowedges[prev_index].cap -= flow
-                self.flowedges[prev_index^1].cap += flow # residual edge
+                self.flowedges[prev_index].flow += flow
+                self.flowedges[prev_index^1].flow -= flow # residual edge
                 prev_index = parent_index
             return flow
         return 0
@@ -178,11 +185,11 @@ class FordFulkersonMaxFlowV2:
         self.vis[node] = 1
         for index in self.neighborhood(node):
             nei = self.flowedges[index]
-            if self.vis[nei.dst] == 0 and nei.cap >= self.delta:
-                cur_flow = self.capacity_scaling(nei.dst, sink, min(flow, nei.cap))
+            if self.vis[nei.dst] == 0 and self.residual_capacity(nei) >= self.delta:
+                cur_flow = self.capacity_scaling(nei.dst, sink, min(flow, self.residual_capacity(nei)))
                 if cur_flow > 0:
-                    nei.cap -= cur_flow
-                    self.flowedges[index ^ 1].cap += cur_flow
+                    nei.flow += cur_flow
+                    self.flowedges[index ^ 1].flow -= cur_flow
                     return cur_flow
         return 0
 
@@ -194,7 +201,7 @@ class FordFulkersonMaxFlowV2:
             node = queue.popleft()
             for index in self.neighborhood(node):
                 nei = self.flowedges[index]
-                if self.distances[nei.dst] == -1 and nei.cap > 0:
+                if self.distances[nei.dst] == -1 and self.residual_capacity(nei) > 0:
                     self.distances[nei.dst] = self.distances[node] + 1
                     queue.append(nei.dst)
         return self.distances[sink] != -1
@@ -206,11 +213,11 @@ class FordFulkersonMaxFlowV2:
             index = self.adj_list[node][self.ptr[node]]
             self.ptr[node] += 1
             nei = self.flowedges[index]
-            if self.distances[nei.dst] == self.distances[node] + 1 and nei.cap > 0:
-                cur_flow = self.dinics_dfs(nei.dst, sink, min(flow, nei.cap))
+            if self.distances[nei.dst] == self.distances[node] + 1 and self.residual_capacity(nei) > 0:
+                cur_flow = self.dinics_dfs(nei.dst, sink, min(flow, self.residual_capacity(nei)))
                 if cur_flow > 0:
-                    nei.cap -= cur_flow
-                    self.flowedges[index ^ 1].cap += cur_flow
+                    nei.flow += cur_flow
+                    self.flowedges[index ^ 1].flow -= cur_flow
                     return cur_flow
         return 0
 
@@ -226,18 +233,52 @@ class FordFulkersonMaxFlowV2:
                     break
                 maxflow += cur_flow
         return maxflow
+    
+    def general_path_cover(self, source: int, sink: int) -> int:
+        self.path, self.paths = [], []
+        self.vis = [0] * len(self.flowedges)
+        for index in self.neighborhood(source):
+            fedge = self.flowedges[index]
+            if fedge.flow != 1: continue
+            self.vis[index] = 1
+            self.path.append(source)
+            self.path_dfs(self.flowedges[index].dst, sink, source)
+            self.path.pop()
+        return self.paths
+
+    def path_dfs(self, node: int, sink: int, parent: int) -> None:
+        # print('node', node, 'path', self.path)
+        if node == sink:
+            self.paths.append([i + 1 for i in self.path + [node]])
+            return
+        # print('node', node, 'neighbors', list(self.neighborhood(node)))
+        for index in self.neighborhood(node):
+            fedge = self.flowedges[index]
+            if self.vis[index]: continue
+            self.vis[index] = 1
+            # print('node', node, 'fedge', fedge)
+            if fedge.flow == 1:
+                self.path.append(node)
+                self.path_dfs(fedge.dst, sink, node)
+                self.path.pop()
+                return
 
 def main():
     n, m = map(int, input().split())
     edges = [None] * m
-    mx = 0
     for i in range(m):
-        u, v, cap = map(int, input().split())
-        edges[i] = (u - 1, v - 1, cap)
-        mx = max(mx, cap)
+        u, v = map(int, input().split())
+        edges[i] = (u - 1, v - 1, 1)
     source, sink = 0, n - 1
     maxflow = FordFulkersonMaxFlowV2(n, edges)
-    return maxflow.main_dfs(source, sink)
-
+    mf = maxflow.main_dinics(source, sink)
+    # print(maxflow.flowedges)
+    print(mf)
+    paths = maxflow.general_path_cover(source, sink)
+    for path in paths:
+        print(len(path))
+        print(*path)
+    
+    
 if __name__ == '__main__':
-    print(main())
+    main()

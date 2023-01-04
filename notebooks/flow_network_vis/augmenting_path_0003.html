@@ -88,8 +88,8 @@
                   
 
                   // parsing and collecting nodes and edges from the python
-                  nodes = new vis.DataSet([{"color": "#97c2fc", "id": 0, "label": "pin: 0\npout: 0\nin: []\nout: []", "shape": "dot", "size": 10, "title": "0"}, {"color": "#97c2fc", "id": 1, "label": "pin: 0\npout: 0\nin: []\nout: []", "shape": "dot", "size": 10, "title": "1"}, {"color": "#97c2fc", "id": 2, "label": "pin: 0\npout: 0\nin: []\nout: []", "shape": "dot", "size": 10, "title": "2"}, {"color": "#97c2fc", "id": 3, "label": "pin: 0\npout: 0\nin: []\nout: []", "shape": "dot", "size": 10, "title": "3"}, {"color": "#97c2fc", "id": 4, "label": "pin: 0\npout: 0\nin: []\nout: []", "shape": "dot", "size": 10, "title": "4"}, {"color": "#97c2fc", "id": 5, "label": "pin: 0\npout: 0\nin: []\nout: []", "shape": "dot", "size": 10, "title": "5"}]);
-                  edges = new vis.DataSet([{"arrows": "to", "from": 0, "label": "flow: 0/\ncapacity: 5", "to": 1}, {"arrows": "to", "from": 1, "label": "flow: 0/\ncapacity: 4", "to": 2}, {"arrows": "to", "from": 2, "label": "flow: 0/\ncapacity: 3", "to": 3}, {"arrows": "to", "from": 3, "label": "flow: 0/\ncapacity: 5", "to": 4}, {"arrows": "to", "from": 4, "label": "flow: 0/\ncapacity: 10", "to": 5}]);
+                  nodes = new vis.DataSet([{"color": "#97c2fc", "id": 2, "label": "2", "shape": "dot", "size": 20, "title": "2"}, {"color": "#97c2fc", "id": 5, "label": "5", "shape": "dot", "size": 20, "title": "5"}, {"color": "#97c2fc", "id": 4, "label": "4", "shape": "dot", "size": 20, "title": "4"}, {"color": "#97c2fc", "id": 1, "label": "1", "shape": "dot", "size": 20, "title": "1"}, {"color": "#97c2fc", "id": 3, "label": "3", "shape": "dot", "size": 20, "title": "3"}, {"color": "#97c2fc", "id": 6, "label": "6", "shape": "dot", "size": 20, "title": "6"}, {"color": "#97c2fc", "id": 0, "label": "0", "shape": "dot", "size": 20, "title": "0"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "from": 2, "label": "flow: 1/\ncapacity: 1", "to": 5}, {"arrows": "to", "from": 4, "label": "flow: 1/\ncapacity: 1", "to": 1}, {"arrows": "to", "from": 4, "label": "flow: 0/\ncapacity: 1", "to": 3}, {"arrows": "to", "from": 2, "label": "flow: 0/\ncapacity: 1", "to": 4}, {"arrows": "to", "from": 4, "label": "flow: 1/\ncapacity: 1", "to": 6}, {"arrows": "to", "from": 3, "label": "flow: 1/\ncapacity: 1", "to": 4}, {"arrows": "to", "from": 5, "label": "flow: 1/\ncapacity: 1", "to": 6}, {"arrows": "to", "from": 1, "label": "flow: 1/\ncapacity: 1", "to": 2}, {"arrows": "to", "from": 0, "label": "flow: 1/\ncapacity: 1", "to": 1}, {"arrows": "to", "from": 5, "label": "flow: 0/\ncapacity: 1", "to": 0}, {"arrows": "to", "from": 5, "label": "flow: 0/\ncapacity: 1", "to": 2}, {"arrows": "to", "from": 1, "label": "flow: 1/\ncapacity: 1", "to": 4}, {"arrows": "to", "from": 0, "label": "flow: 1/\ncapacity: 1", "to": 3}, {"arrows": "to", "from": 6, "label": "flow: 0/\ncapacity: 1", "to": 3}, {"arrows": "to", "from": 6, "label": "flow: 0/\ncapacity: 1", "to": 5}]);
 
                   nodeColors = {};
                   allNodes = nodes.get({ returnType: "Object" });
@@ -100,35 +100,7 @@
                   // adding nodes and edges to the graph
                   data = {nodes: nodes, edges: edges};
 
-                  var options = {
-    "configure": {
-        "enabled": false
-    },
-    "edges": {
-        "color": {
-            "inherit": true
-        },
-        "smooth": {
-            "enabled": true,
-            "type": "dynamic"
-        }
-    },
-    "interaction": {
-        "dragNodes": true,
-        "hideEdgesOnDrag": false,
-        "hideNodesOnDrag": false
-    },
-    "physics": {
-        "enabled": true,
-        "stabilization": {
-            "enabled": true,
-            "fit": true,
-            "iterations": 1000,
-            "onlyDynamicEdges": false,
-            "updateInterval": 50
-        }
-    }
-};
+                  var options = {"nodes": {"borderWidth": 4, "borderWidthSelected": null, "opacity": null, "size": null}, "edges": {"color": {"inherit": true}, "selfReferenceSize": null, "selfReference": {"angle": 0.7853981633974483}, "smooth": {"forceDirection": "none"}}, "physics": {"barnesHut": {"springConstant": 0.005, "damping": 1}, "minVelocity": 0.75}};
 
                   
 
