@@ -1,41 +1,58 @@
 #include <bits/stdc++.h>
 using namespace std;
+using ll = long long;
 
-string min_string_rotation(string& s) {
-    char min_char = *min_element(s.begin(), s.end());
-    deque<int> champions;
-    int n = s.size();
-    for (int i = 0;i<n;i++) {
-        if (s[i] == min_char) {
-            champions.push_back(i);
-        }
-    }
-    while (champions.size() > 1) {
-        int champion1 = champions.front();
-        champions.pop_front();
-        int champion2 = champions.front();
-        champions.pop_front();
-        if (champion2 < champion1) swap(champion1, champion2);
-        int current_champion = champion1;
-        for (int left = champion1, right = champion2, sz = champion2-champion1; sz > 0; sz--, left++, right++) {
-            if (left == n) left = 0;
-            if (right == n) right = 0;
-            if (s[left] < s[right]) break;
-            if (s[left] > s[right]) {
-                current_champion = champion2;
-                break;
-            }
-        }
-        champions.push_back(current_champion);
-    }
-    int champion_index = champions.front();
-    return s.substr(champion_index) + s.substr(0, champion_index);
+struct edge {
+	int from, to; ll weight;
+};
+
+const int MAXN = 2505;
+
+int n, m, parent[MAXN];
+ll dist[MAXN];
+vector<edge> graph;
+
+void BellmanFord(int source) {
+	fill(parent+1, parent+n+1, 0);
+	fill(dist+1, dist+n+1, 1e18);
+	dist[source] = 0;
+	int last_node_updated;
+	for(int i=1; i<=n; i++) {
+		last_node_updated = -1;
+		for(edge &e : graph) {
+			if(dist[e.from] + e.weight < dist[e.to]) {
+				dist[e.to] = dist[e.from] + e.weight;
+				parent[e.to] = e.from;
+				last_node_updated = e.to;
+			}
+		}
+	}
+	if(last_node_updated == -1) {
+		cout << "NO" << '\n';
+	} else {
+		cout << "YES" << '\n';
+		vector<int> cycle;
+		for(int i=0; i<n-1; i++) {
+			last_node_updated=parent[last_node_updated];
+		}
+		for(int x=last_node_updated; ; x=parent[x]) {
+			cycle.push_back(x);
+			if (x==last_node_updated && cycle.size()>1) break;
+		}
+		reverse(cycle.begin(), cycle.end());
+		for(int x : cycle) cout << x << ' ';
+		cout << '\n';
+	}
 }
 
 int main() {
-    ios_base::sync_with_stdio(false);
-	cin.tie(NULL);
-    string s;
-    cin>>s;
-    cout<<min_string_rotation(s)<<endl;
+	cin.tie(0)->sync_with_stdio(0);
+
+	cin >> n >> m;
+	while(m--) {
+		int a, b; ll c;
+		cin >> a >> b >> c;
+		graph.push_back({a, b, c});
+	}
+	BellmanFord(1);
 }
