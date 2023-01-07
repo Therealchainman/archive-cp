@@ -48,6 +48,3 @@ if __name__ == '__main__':
         if not main(t): break
         t += 1
 
-
-Negative weight cycle
-

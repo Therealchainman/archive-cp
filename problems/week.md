@@ -17569,7 +17569,27 @@ class Solution:
         return num != int(''.join(map(str, res))) if len(res) > 0 else False
 ```
 
-##
+## 1833. Maximum Ice Cream Bars
+
+### Solution 1:  counter/bucket sort + O(n + m) time + O(m) extra space where m = max(costs) + take least expensive ice creams first
+
+```py
+class Solution:
+    def maxIceCream(self, costs: List[int], coins: int) -> int:
+        buckets = [0]*(max(costs) + 1)
+        for cost in costs:
+            buckets[cost] += 1
+        res = 0
+        for i, cnt in enumerate(buckets):
+            if cnt == 0: continue
+            take = min(cnt, coins//i)
+            if take == 0: break
+            coins -= i*take
+            res += take
+        return res
+```
+
+## 2511. Maximum Enemy Forts That Can Be Captured
 
 ### Solution 1:
 
@@ -17577,7 +17597,7 @@ class Solution:
 
 ```
 
-##
+## 2512. Reward Top K Students
 
 ### Solution 1:
 
@@ -17585,7 +17605,7 @@ class Solution:
 
 ```
 
-##
+## 2513. Minimize the Maximum of Two Arrays
 
 ### Solution 1:
 
@@ -17593,15 +17613,7 @@ class Solution:
 
 ```
 
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
+## 2514. Count Anagrams
 
 ### Solution 1:
 
