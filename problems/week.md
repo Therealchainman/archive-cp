@@ -17621,7 +17621,43 @@ class Solution:
 
 ```
 
-##
+## 2525. Categorize Box According to Criteria
+
+### Solution 1:  case statements + conditionals
+
+```py
+class Solution:
+    def categorizeBox(self, length: int, width: int, height: int, mass: int) -> str:
+        vol = length*width*height
+        thres1, thres2, thres3 = 10**4, 10**9, 100
+        bulky = length >= thres1 or width >= thres1 or height >= thres1 or vol >= thres2
+        heavy = mass >= thres3
+        if bulky and heavy: return 'Both'
+        if bulky: return 'Bulky'
+        if heavy: return 'Heavy'
+        return 'Neither'
+```
+
+## 2526. Find Consecutive Integers from a Data Stream
+
+### Solution 1:  pointer to the count of consecutive values
+
+```py
+class DataStream:
+
+    def __init__(self, value: int, k: int):
+        self.value, self.k = value, k
+        self.cnt = 0
+        
+
+    def consec(self, num: int) -> bool:
+        if num != self.value:
+            self.cnt = 0
+        self.cnt += (num == self.value)
+        return self.cnt >= self.k
+```
+
+## 2527. Find Xor-Beauty of Array
 
 ### Solution 1:
 
@@ -17629,7 +17665,7 @@ class Solution:
 
 ```
 
-##
+## 2528. Maximize the Minimum Powered City
 
 ### Solution 1:
 
@@ -17637,60 +17673,190 @@ class Solution:
 
 ```
 
-##
+## 2530. Maximal Score After Applying K Operations
 
-### Solution 1:
+### Solution 1:  maxheap + simulation + O(k + nlogn) time
 
 ```py
-
+class Solution:
+    def maxKelements(self, nums: List[int], k: int) -> int:
+        heapify(maxheap := [-num for num in nums])
+        res = 0
+        for _ in range(k):
+            num = abs(heappop(maxheap))
+            res += num
+            nnum = math.ceil(num/3)
+            heappush(maxheap, -nnum)
+        return res
 ```
 
-##
+## 2532. Time to Cross a Bridge
 
-### Solution 1:
+### Solution 1:  simulation + minheap for events + two max heaps for the left and right side of the bridge + (time, location, worker_index) for each state, put a bridge event for each possible instance want to make a decision who to cross the bridge next + O(nlogn + klogk) time + time series problem
 
 ```py
-
+class Solution:
+    def findCrossingTime(self, n: int, k: int, time: List[List[int]]) -> int:
+        old_warehouse, new_warehouse, bridge = range(3)
+        heapify(minheap := [(0, bridge, None)])
+        heapify(left_bank_queue := [(-ltor-rtol, -i) for i, (ltor, old, rtol, new) in enumerate(time)])
+        right_bank_queue = []
+        last_worker_reach_left_bank = 0
+        bridge_next_available = 0
+        remaining_old = n
+        efficiency = lambda index: time[index][0] + time[index][2]
+        while minheap:
+            t, location, worker = heappop(minheap)
+            if location == bridge:
+                if t < bridge_next_available: # bridge in use
+                    pass
+                elif right_bank_queue:
+                    _, i = map(abs, heappop(right_bank_queue))
+                    left_to_right, pick_old, right_to_left, put_new = time[i]
+                    bridge_next_available = max(bridge_next_available, t + right_to_left)
+                    last_worker_reach_left_bank = max(last_worker_reach_left_bank, t + right_to_left)
+                    heappush(minheap, (t + right_to_left, bridge, None))
+                    heappush(minheap, (t + right_to_left + put_new, new_warehouse, i))
+                    heappush(minheap, (t + right_to_left + put_new, bridge, None))
+                elif remaining_old > 0 and left_bank_queue:
+                    _, i = map(abs, heappop(left_bank_queue))
+                    left_to_right, pick_old, right_to_left, put_new = time[i]
+                    bridge_next_available = max(bridge_next_available, t + left_to_right)
+                    heappush(minheap, (t + left_to_right, bridge, None))
+                    heappush(minheap, (t + left_to_right + pick_old, old_warehouse, i))
+                    heappush(minheap, (t + left_to_right + pick_old, bridge, None))
+                    remaining_old -= 1
+            elif location == old_warehouse:
+                heappush(right_bank_queue, (-efficiency(worker), -worker))
+            elif location == new_warehouse:
+                heappush(left_bank_queue, (-efficiency(worker), -worker))
+        return last_worker_reach_left_bank
 ```
 
-##
-
-### Solution 1:
+### Solution 2:  simulation + event minheap + left and right maxheap + event class and worker efficiency class + class has custom comparator for it to work in the heap 
 
 ```py
+class Event:
+    def __init__(self, timestamp: int, location: str, worker_index: int = None):
+        self.timestamp = timestamp
+        self.location = location
+        self.worker_index = worker_index
+        self.location_priority = ['old_warehouse', 'new_warehouse', 'bridge']
 
+    def __repr__(self) -> str:
+        return f'timestamp: {self.timestamp}, location: {self.location}'
+
+    def __lt__(self, other) -> bool:
+        if self.timestamp != other.timestamp: return self.timestamp < other.timestamp
+        return self.location_priority.index(self.location) < other.location_priority.index(other.location)
+
+class WorkerEfficiency:
+    def __init__(self, efficiency: int, worker_index: int):
+        self.efficiency = efficiency
+        self.worker_index = worker_index
+
+    def __lt__(self, other) -> bool:
+        return self.efficiency > other.efficiency if self.efficiency != other.efficiency else self.worker_index > other.worker_index
+
+class Solution:
+    def findCrossingTime(self, n: int, k: int, time: List[List[int]]) -> int:
+        # LOCATION VARIABLES
+        old_warehouse, new_warehouse, bridge = ('old_warehouse', 'new_warehouse', 'bridge')
+        # EFFICIENCY FUNCTION
+        efficiency = lambda index: time[index][0] + time[index][2]
+        # 3 HEAPS
+        heapify(minheap := [Event(0, bridge)])
+        heapify(left_bank_queue := [WorkerEfficiency(efficiency(i), i) for i in range(k)])
+        right_bank_queue = []
+        # TRACKING VARIABLES
+        last_worker_reach_left_bank = 0
+        bridge_next_available = 0
+        remaining_old = n
+        # SIMULATION TILL NO MORE EVENTS
+        while minheap:
+            event = heappop(minheap)
+            if event.location == bridge:
+                if event.timestamp < bridge_next_available: # bridge in use
+                    pass
+                elif right_bank_queue:
+                    worker_eff = heappop(right_bank_queue)
+                    i = worker_eff.worker_index
+                    left_to_right, pick_old, right_to_left, put_new = time[i]
+                    bridge_next_available = max(bridge_next_available, event.timestamp + right_to_left)
+                    last_worker_reach_left_bank = max(last_worker_reach_left_bank, event.timestamp + right_to_left)
+                    heappush(minheap, Event(event.timestamp + right_to_left, bridge))
+                    heappush(minheap, Event(event.timestamp + right_to_left + put_new, new_warehouse, i))
+                    heappush(minheap, Event(event.timestamp + right_to_left + put_new, bridge))
+                elif remaining_old > 0 and left_bank_queue:
+                    worker_eff = heappop(left_bank_queue)
+                    i = worker_eff.worker_index
+                    left_to_right, pick_old, right_to_left, put_new = time[i]
+                    bridge_next_available = max(bridge_next_available, event.timestamp + left_to_right)
+                    heappush(minheap, Event(event.timestamp + left_to_right, bridge))
+                    heappush(minheap, Event(event.timestamp + left_to_right + pick_old, old_warehouse, i))
+                    heappush(minheap, Event(event.timestamp + left_to_right + pick_old, bridge))
+                    remaining_old -= 1
+            elif event.location == old_warehouse:
+                heappush(right_bank_queue, WorkerEfficiency(efficiency(event.worker_index), event.worker_index))
+            elif event.location == new_warehouse:
+                heappush(left_bank_queue, WorkerEfficiency(efficiency(event.worker_index), event.worker_index))
+        return last_worker_reach_left_bank
 ```
 
-##
+## 2531. Make Number of Distinct Characters Equal
 
-### Solution 1:
+### Solution 1:  frequency array + swap + undo + count of distinct characters + O(26*26) time
 
 ```py
-
+class Solution:        
+    def isItPossible(self, word1: str, word2: str) -> bool:
+        freq1, freq2 = Counter(word1), Counter(word2)
+        for ch1, ch2 in product(freq1, freq2):
+            # SWAP THE TWO CHARACTERS
+            freq1[ch1] -= 1
+            freq2[ch1] += 1
+            freq2[ch2] -= 1
+            freq1[ch2] += 1
+            # THE SUM OF DISTINCT CHARACTERS
+            sum1, sum2 = sum(1 for v in freq1.values() if v > 0), sum(1 for v in freq2.values() if v > 0)
+            # UNDO SWAPS
+            freq1[ch1] += 1
+            freq2[ch1] -= 1
+            freq2[ch2] += 1
+            freq1[ch2] -= 1
+            # IF THE SUM OF DISTINCT CHARACTERS IS EQUAL
+            if sum1 == sum2: return True
+        return False
 ```
 
-##
+## 2529. Maximum Count of Positive Integer and Negative Integer
 
-### Solution 1:
+### Solution 1:  binary search + O(logn) time
 
 ```py
-
+class Solution:
+    def maximumCount(self, nums: List[int]) -> int:
+        left = bisect.bisect_left(nums, 0)
+        right = bisect.bisect_right(nums, 0)
+        return max(left, len(nums) - right)
 ```
 
-##
+## 149. Max Points on a Line
 
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
+### Solution 1:  math + geometry + arc tangent + slope + O(n^2) time + hash table
 
 ```py
-
+class Solution:
+    def maxPoints(self, points: List[List[int]]) -> int:
+        res = 0
+        for x1, y1 in points:
+            cnt = Counter()
+            for x2, y2 in points:
+                if x1 == x2 and y1 == y2: continue
+                arctan = math.atan2(y2 - y1, x2 - x1)
+                cnt[arctan] += 1
+                res = max(res, cnt[arctan])
+        return res + 1
 ```
 
 ##
