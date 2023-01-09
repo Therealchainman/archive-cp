@@ -17659,18 +17659,48 @@ class DataStream:
 
 ## 2527. Find Xor-Beauty of Array
 
-### Solution 1:
+### Solution 1:  If you check it turns out the result is just the xor of all the elements in the array, because the rest cancel each other + math + bit manipulation
 
 ```py
-
+class Solution:
+    def xorBeauty(self, nums: List[int]) -> int:
+        return reduce(operator.xor, nums)
 ```
 
 ## 2528. Maximize the Minimum Powered City
 
-### Solution 1:
+### Solution 1:  binary search + greedy + sliding window sum  + early termination in the function when it exceeds and will guarantee a false return + sliding window with pivot point and radius + radius sliding window + greedily add additions to the farthest to the right element that will affect the current element + O(nlog(k)) time
 
 ```py
-
+class Solution:
+    def maxPower(self, stations: List[int], r: int, k: int) -> int:
+        n = len(stations)
+        init_sum = sum(stations[:r])
+        def possible(target: int) -> bool:
+            res, window_sum = 0, init_sum
+            additions = [0]*n
+            for i in range(n):
+                # window sum for the elements [i-r, i-r+1, ..., i, ..., i+r-1, i+r]
+                if i + r < n:
+                    window_sum += stations[i+r]
+                need = max(0, target - window_sum)
+                res += need
+                if res > k: return False
+                if need > 0:
+                    window_sum += need
+                    additions[min(i + r, n - 1)] += need # optimal location to add cause it will affect this one and r more elements that have not been processed
+                if i - r >= 0:
+                    window_sum -= stations[i-r]
+                    window_sum -= additions[i-r]
+            return res <= k
+        left, right = 0, int(1e11)
+        while left < right:
+            mid = (left + right + 1) >> 1
+            if possible(mid):
+                left = mid
+            else:
+                right = mid - 1
+        return left
 ```
 
 ## 2530. Maximal Score After Applying K Operations
@@ -17857,6 +17887,155 @@ class Solution:
                 cnt[arctan] += 1
                 res = max(res, cnt[arctan])
         return res + 1
+```
+
+## 2214. Minimum Health to Beat Game
+
+### Solution 1:  sum + greedily use the armor on the turn you take most damage
+
+```py
+class Solution:
+    def minimumHealth(self, damage: List[int], armor: int) -> int:
+        max_dmg = max(damage)
+        min_health = sum(damage) + 1
+        return min_health - min(armor, max_dmg)
+```
+
+## 2515. Shortest Distance to Target String in a Circular Array
+
+### Solution 1:  visualize the circle and how if you take the distance between two pints on the circle, then there is a second distance which is the entire length of the circle minuse the distance between those two points + O(n) time
+
+```py
+class Solution:
+    def closetTarget(self, words: List[str], target: str, startIndex: int) -> int:
+        n = len(words)
+        res = math.inf
+        for i in range(n):
+            if target == words[i]:
+                res = min(res, abs(i - startIndex), n - abs(i - startIndex))
+        return res if res < math.inf else -1
+```
+
+## 2516. Take K of Each Character From Left and Right
+
+### Solution 1:  sliding window for the middle exclusion part + frequency array + maximize the size of the sliding window + solution is the total length minuse the size of the maximum sliding window
+
+```py
+class Solution:
+    def takeCharacters(self, s: str, k: int) -> int:
+        n = len(s)
+        freq = Counter(s)
+        if freq['a'] < k or freq['b'] < k or freq['c'] < k: return -1
+        left = res = 0
+        for right in range(n):
+            freq[s[right]] -= 1
+            while freq[s[right]] < k:
+                freq[s[left]] += 1
+                left += 1
+            res = max(res, right - left + 1)
+        return n - res
+```
+
+## 2517. Maximum Tastiness of Candy Basket
+
+### Solution 1:  binary search + sort + greedily pick the candies as soon as you can, and pick the next one that exceeds the current delta or absolute difference needed between two prices + O(nlog(m)) time where m = max(prices)
+
+```py
+class Solution:
+    def maximumTastiness(self, price: List[int], k: int) -> int:
+        price.sort()
+        def possible(delta: int) -> bool:
+            cnt, last = 0, -math.inf
+            for p in price:
+                if p - last >= delta:
+                    cnt += 1
+                    last = p
+                if cnt >= k: return True
+            return cnt >= k
+        left, right = 0, 10**9
+        while left < right:
+            mid = (left + right + 1) >> 1
+            if possible(mid):
+                left = mid
+            else:
+                right = mid - 1
+        return left
+```
+
+## 2518. Number of Great Partitions
+
+### Solution 1:  0/1 knapsack problem applied to find the count of subsets with sum equal to a capacity + inclusion/exclusion of item with no splitting + count the invalid subsets that are under k and multiple by 2 because each one can represent two pairs
+
+```py
+class Solution:
+    def countPartitions(self, nums: List[int], k: int) -> int:
+        if sum(nums) < 2*k: return 0
+        mod = int(1e9) + 7
+        n = len(nums)
+        # the subproblem is the count of subsets for on the ith item at the jth sum
+        dp = [[0]*(k) for _ in range(n+1)] 
+        for i in range(n+1):
+            dp[i][0] = 1 # i items, 0 sum/capacity 
+            # only 1 unique solution which is the empty subset for this subproblem
+        # i represents an item, j represents the current sum
+        for i, j in product(range(1, n+1), range(1, k)):
+            if nums[i-1] > j: # cannot place an item that exceeds the j, so it can only be excluded
+                dp[i][j] = dp[i-1][j]
+            else: # the subset count up to this sum is going to be if you combine the exclusion of this item added to the inclusion of this item
+                dp[i][j] = (dp[i-1][j] + dp[i-1][j-nums[i-1]])%mod
+        # count of subsets for when the sum < k, these
+        count_invalid_subsets = (2 * sum(dp[-1]))%mod
+        total_subsets = 1
+        for _ in range(n):
+            total_subsets = (total_subsets*2)%mod
+        return (total_subsets - count_invalid_subsets + mod)%mod
+```
+
+### Solution 2:  Same as above without all the extra mod, just need to perform it at the end. 
+
+```py
+class Solution:
+    def countPartitions(self, nums: List[int], k: int) -> int:
+        mod = int(1e9) + 7
+        n = len(nums)
+        # the subproblem is the count of subsets for on the ith item at the jth sum
+        dp = [[0]*(k) for _ in range(n+1)] 
+        for i in range(n+1):
+            dp[i][0] = 1 # i items, 0 sum/capacity 
+            # only 1 unique solution which is the empty subset for this subproblem
+        # i represents an item, j represents the current sum
+        for i, j in product(range(1, n+1), range(1, k)):
+            if nums[i-1] > j: # cannot place an item that exceeds the j, so it can only be excluded
+                dp[i][j] = dp[i-1][j]
+            else: # the subset count up to this sum is going to be if you combine the exclusion of this item added to the inclusion of this item
+                dp[i][j] = dp[i-1][j] + dp[i-1][j-nums[i-1]]
+        # count of subsets for when the sum < k, these
+        count_invalid_subsets = 2 * sum(dp[-1])
+        return max(0, 2**n - count_invalid_subsets)%mod
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
 ```
 
 ##
