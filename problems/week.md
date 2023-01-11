@@ -18014,12 +18014,26 @@ class Solution:
         return max(0, 2**n - count_invalid_subsets)%mod
 ```
 
-##
+## 1443. Minimum Time to Collect All Apples in a Tree
 
-### Solution 1:
+### Solution 1:  post order dfs + rooted tree from undirected graph + O(n) time and space
 
 ```py
-
+class Solution:
+    def minTime(self, n: int, edges: List[List[int]], hasApple: List[bool]) -> int:
+        adj_list = [[]*n for _ in range(n)]
+        for u, v in edges:
+            adj_list[u].append(v)
+            adj_list[v].append(u)
+        def dfs(node: int, parent: int) -> int:
+            time = 0
+            for nei in adj_list[node]:
+                if nei == parent: continue
+                vertex_time = dfs(nei, node)
+                if hasApple[nei] or vertex_time > 0:
+                    time += 2 + vertex_time
+            return time
+        return dfs(0, None)
 ```
 
 ##
