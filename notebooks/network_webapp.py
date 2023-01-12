@@ -3,6 +3,8 @@ import streamlit.components.v1 as components
 import pyautogui
 from pathlib import Path
 
+# run with streamlit run network_webapp.py
+
 # Set header title
 st.title('Network Graph Visualization of network flow algorithms')
 

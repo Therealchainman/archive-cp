@@ -18036,12 +18036,78 @@ class Solution:
         return dfs(0, None)
 ```
 
-##
+## 1519. Number of Nodes in the Sub-Tree With the Same Label
 
-### Solution 1:
+### Solution 1:  postorder dfs + rooted tree from undirected graph + O(26*n) time and space
+
+```py
+class Solution:
+    def countSubTrees(self, n: int, edges: List[List[int]], labels: str) -> List[int]:
+        adj_list =  [[] for _ in range(n)]
+        for u, v in edges:
+            adj_list[u].append(v)
+            adj_list[v].append(u)
+        self.ans = [1]*n
+        unicode = lambda ch: ord(ch) - ord('a')
+        def dfs(node: int, parent: int) -> List[int]:
+            cnts = [0]*26
+            for nei in adj_list[node]:
+                if nei == parent: continue
+                for i, cnt in enumerate(dfs(nei, node)):
+                    cnts[i] += cnt
+            cnts[unicode(labels[node])] += 1
+            self.ans[node] = cnts[unicode(labels[node])]
+            return cnts
+
+        dfs(0, None)
+        return self.ans
+```
+
+### Solution 2:  Virtual/auxillary trees
 
 ```py
 
+```
+
+```cpp
+class Solution {
+public:
+    void DFS1(int u, int prv, vector<vector<int>>& curAdj, vector<vector<int>>& newAdj, unordered_map<char, int>& vir, string& labels, vector<int>& roots) {
+        if(vir.find(labels[u]) != vir.end()) newAdj[vir[labels[u]]].push_back(u);
+        int prevNode = (vir.find(labels[u]) != vir.end() ? vir[labels[u]] : -1);
+        vir[labels[u]] = u;
+        for(auto& i: curAdj[u]){
+            if(i == prv) continue;
+            DFS1(i, u, curAdj, newAdj, vir, labels, roots);
+        }
+        if(prevNode != -1) vir[labels[u]] = prevNode;
+        else {
+            vir.erase(labels[u]);
+            roots.push_back(u);
+        }
+    }
+    void DFS2(int u, vector<int>& freq, vector<vector<int>>& adj) {
+        int cnt = 1;
+        for(auto& i: adj[u]) {
+            DFS2(i, freq, adj);
+            cnt += freq[i];
+        }
+        freq[u] = cnt;
+    }
+    vector<int> countSubTrees(int n, vector<vector<int>>& edges, string labels) {
+        vector<vector<int>> curAdj(n), adj(n);
+        vector<int> roots;
+        for(auto& i: edges) {
+            curAdj[i[0]].push_back(i[1]);
+            curAdj[i[1]].push_back(i[0]);
+        }
+        unordered_map<char, int> UM;
+        DFS1(0, -1, curAdj, adj, UM, labels, roots);
+        vector<int> ret(n, 0);
+        for(auto& i: roots) DFS2(i, ret, adj);
+        return ret;
+    }
+};
 ```
 
 ##
