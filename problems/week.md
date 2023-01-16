@@ -7280,6 +7280,36 @@ class Solution:
         return ''.join(result)
 ```
 
+### Solution 2: dfs + dictionaries + array
+
+```py
+class Solution:
+    def smallestEquivalentString(self, s1: str, s2: str, baseStr: str) -> str:S
+        groups = []
+        char_groups = {}
+        group_chars = defaultdict(list)
+        vis = set()
+        adj_list = defaultdict(list)
+        for u, v in zip(s1, s2):
+            adj_list[u].append(v)
+            adj_list[v].append(u)
+        def dfs(node: str) -> str:
+            if node in vis: return
+            vis.add(node)
+            char_groups[node] = group_index
+            group_chars[group_index].append(node)
+            for nei in adj_list[node]:
+                if nei in vis: continue
+                dfs(nei)
+        group_index = 0
+        for ch in string.ascii_lowercase:
+            if ch in vis: continue
+            dfs(ch)
+            groups.append(min(group_chars[group_index]))
+            group_index += 1
+        return ''.join(map(lambda ch: groups[char_groups[ch]], baseStr))
+```
+
 ## 1258. Synonymous Sentences
 
 ### Solution 1:  union find + mapping strings to integers for union find + hash table + brute force
@@ -18110,6 +18140,431 @@ public:
 };
 ```
 
+## 2520. Count the Digits That Divide a Number
+
+### Solution 1:  sum function + string + divisibility
+
+```py
+class Solution:
+    def countDigits(self, num: int) -> int:
+        return sum(1 for dig in map(int, str(num)) if num%dig == 0)
+```
+
+## 2521. Distinct Prime Factors of Product of Array
+
+### Solution 1: prime factorization + O(n*sqrt(max(nums))) time and space
+
+```py
+class Solution:
+    def distinctPrimeFactors(self, nums: List[int]) -> int:
+        res = set()
+        def get_factors(x: int) -> int:
+            f = 2
+            factors = set()
+            while x > 1:
+                while x % f == 0:
+                    x //= f
+                    factors.add(f)
+                f += 1
+            return factors
+        for num in nums:
+            res.update(get_factors(num))
+        return len(res)
+```
+
+### Solution 2: prime sieve + precompute the prime factorizations of each integer in range of 1000 + O(mlog(logm) + n) time
+
+```py
+class Solution:
+    def distinctPrimeFactors(self, nums: List[int]) -> int:
+        thres = 1001
+        sieve = [set() for _ in range(thres)]
+        for integer in range(2, thres):
+            if len(sieve[integer]) > 0: continue
+            for possibly_divisible_integer in range(integer, thres, integer):
+                cur_integer = possibly_divisible_integer
+                while cur_integer % integer == 0:
+                    sieve[possibly_divisible_integer].add(integer)
+                    cur_integer //= integer
+        res = set()
+        for num in nums:
+            res.update(sieve[num])
+        return len(res)
+```
+
+### Solution 3: optimizations on above approach
+
+```py
+class Solution:
+    def distinctPrimeFactors(self, nums: List[int]) -> int:
+        res = set()
+        nums = set(nums)
+        thres = max(nums) + 1
+        is_prime = [True]*thres
+        for integer in range(2, thres):
+            if not is_prime[integer]: continue # skips if it is not a prime integer
+            for possibly_divisible_integer in range(integer, thres, integer):
+                is_prime[possibly_divisible_integer] = False # since this is divisible by a prime integer
+                if possibly_divisible_integer in nums: # possibly this integer is in nums and so this integer is a prime integer for it
+                    res.add(integer)
+        return len(res)
+```
+
+## 2522. Partition String Into Substrings With Values at Most K
+
+### Solution 1:  greedy + take longest partition + O(n) time
+
+```py
+class Solution:
+    def minimumPartition(self, s: str, k: int) -> int:
+        n = len(s)
+        val = res = 0
+        for num in map(int, s):
+            val = val*10 + num
+            if num > k: return -1
+            if val > k:
+                res += 1
+                val = num
+        return res + 1
+```
+
+### Solution 2: recursive knapsack problem + O(n*log(k)) time
+
+```py
+class Solution:
+    def minimumPartition(self, s: str, k: int) -> int:
+        n = len(s)
+        if any(num > k for num in map(int, s)): return -1
+        @cache
+        def knapsack(i: int, cur: int) -> int:
+            if i == n: return 1
+            ncur = cur*10 + int(s[i])
+            skip = knapsack(i + 1, ncur) if ncur <= k else math.inf
+            take = knapsack(i + 1, int(s[i])) + 1
+            return min(skip, take)
+        return knapsack(0, 0)
+```
+
+## 2523. Closest Prime Numbers in Range
+
+### Solution 1:  prime sieve + early termination + O(nloglogn) time and space
+
+```py
+class Solution:
+    def closestPrimes(self, left: int, right: int) -> List[int]:
+        is_prime, primes = [True]*(right + 1), []
+        res = [-1, -1]
+        delta = math.inf
+        for integer in range(2, right + 1):
+            if not is_prime[integer]: continue
+            if integer >= left and integer <= right:
+                if primes and integer - primes[-1] < delta:
+                    delta = integer - primes[-1]
+                    res = [primes[-1], integer]
+                if delta <= 2: return res
+                primes.append(integer)
+            for possibly_divisible_integer in range(integer, right + 1, integer):
+                is_prime[possibly_divisible_integer] = False
+        return res
+```
+
+### Solution 2:  twin primes + smallest set of primes except for (2, 3) and occurr frequently in integers smaller than 1,000,000 + O(nsqrt(n)) time
+
+```py
+class Solution:
+    def closestPrimes(self, left: int, right: int) -> List[int]:
+        def is_prime(x: int) -> bool:
+            if x < 2: return False
+            for i in range(2, int(math.sqrt(x)) + 1):
+                if x % i == 0: return False
+            return True
+        pair = [-1, -1]
+        primes = []
+        delta = math.inf
+        for i in range(left, right + 1):
+            if not is_prime(i): continue
+            primes.append(i)
+            if len(primes) > 1:
+                x, y = primes[-2], primes[-1]
+                if y - x < delta:
+                    pair = [x, y]
+                    delta = y - x
+                if delta <= 2: break # twin prime (common and smallest difference between primes other than (2, 3))
+        return pair
+```
+
+## 1533. Find the Index of the Large Integer
+
+### Solution 1:  binary search + make it always even length, with extra element + O(logn) time
+
+```py
+class Solution:
+    def getIndex(self, reader: 'ArrayReader') -> int:
+        left, right = 0, reader.length() - 1
+        while left < right:
+            mid = (left + right + 1) >> 1
+            size = right - left + 1
+            check = reader.compareSub(left, mid - 1, mid, right) if size%2 == 0 else reader.compareSub(left, mid - 1, mid, right - 1)
+            if check == 1:
+                right = mid - 1
+            elif check == -1:
+                left = mid
+            else:
+                return right
+        return left
+```
+
+### Solution 2:  ternary search + break into three segments and compare to figure out which segment has the largest integer + O(logn) time
+
+```py
+class Solution:
+    def getIndex(self, reader: 'ArrayReader') -> int:
+        left, right = 0, reader.length() - 1
+        while left + 1 < right:
+            mid = (right - left + 1) // 3
+            check = reader.compareSub(left, left + mid - 1, left + mid, left + 2*mid - 1)
+            if check == 1:
+                right = left + mid - 1
+            elif check == -1:
+                left, right = left + mid, left + 2*mid - 1
+            else:
+                left = left + 2*mid
+        if left != right:
+            return left if reader.compareSub(left, left, right, right) == 1 else right
+        return left 
+```
+
+## 2535. Difference Between Element Sum and Digit Sum of an Array
+
+### Solution 1:  strings + sum
+
+```py
+class Solution:
+    def differenceOfSum(self, nums: List[int]) -> int:
+        s = ds = 0
+        for num in nums:
+            s += num
+            for dig in map(int, str(num)):
+                ds += dig
+        return abs(s - ds)
+```
+
+## 2536. Increment Submatrices by One
+
+### Solution 1:  for each row store prefix sum + store the delta at index, and then that range will be updated + O(n^2 + n*q) time
+
+```py
+class Solution:
+    def rangeAddQueries(self, n: int, queries: List[List[int]]) -> List[List[int]]:
+        mat = [[0]*n for _ in range(n)]
+        for r1, c1, r2, c2 in queries:
+            for r in range(r1, r2 + 1):
+                mat[r][c1] += 1
+                if c2 + 1 < n:
+                    mat[r][c2 + 1] -= 1
+        for r in range(n):
+            delta = 0
+            for c in range(n):
+                delta += mat[r][c]
+                mat[r][c] = delta
+        return mat
+```
+
+### Solution 2:  rows that hold events for start and end events + diff array that holds the current count of starts and end points + iterate over rows to update the diff array + solve in O(n^2 + q) time
+
+```py
+class Solution:
+    def rangeAddQueries(self, n: int, queries: List[List[int]]) -> List[List[int]]:
+        mat = [[0]*n for _ in range(n)]
+        rows = [[] for _ in range(n + 1)]
+        for r1, c1, r2, c2 in queries:
+            rows[r1].append((1, c1, c2 + 1)) # starts interval
+            rows[r2 + 1].append((-1, c1, c2 + 1)) # ends interval
+        diff = [0]*(n + 1)
+        for r in range(n):
+            for delta, c1, c2 in rows[r]:
+                diff[c1] += delta
+                diff[c2] -= delta
+            cur = 0
+            for c in range(n):
+                cur += diff[c]
+                mat[r][c] = cur
+        return mat
+```
+
+## 2537. Count the Number of Good Subarrays
+ 
+### Solution 1: sliding window + math + number is added to subarray it increases the number of pairs by its previous frequency + similarly when removed
+
+```py
+class Solution:
+    def countGood(self, nums: List[int], k: int) -> int:
+        n = len(nums)
+        pairs = Counter()
+        freq = Counter()
+        res = left = cur_pairs = 0
+        for right in range(n):
+            num = nums[right]
+            cur_pairs += freq[num]
+            pairs[num] += freq[num]
+            freq[num] += 1
+            while cur_pairs >= k:
+                res += n - right
+                freq[nums[left]] -= 1
+                pairs[nums[left]] -= freq[nums[left]]
+                cur_pairs -= freq[nums[left]]
+                left += 1
+        return res
+```
+
+## 2538. Difference Between Maximum and Minimum Price Sum
+
+### Solution 1:  two dfs + store two children path sum + store parent path sum + reroot tree + O(n) time and space
+
+```py
+class Solution:
+    def maxOutput(self, n: int, edges: List[List[int]], price: List[int]) -> int:
+        adj_list = [[] for _ in range(n)]
+        for u, v in edges:
+            adj_list[u].append(v)
+            adj_list[v].append(u)
+        self.res = 0
+        path_sums1, path_sums2 = Counter(), Counter()
+        path_child1, path_child2 = {}, {}
+        parent_sums = Counter()
+        def dfs1(node: int, parent: int) -> int:
+            p1 = p2 = price[node]
+            c1 = c2 = None
+            for nei in adj_list[node]:
+                if nei == parent: continue
+                psum = price[node] + dfs1(nei, node)
+                if psum > p2:
+                    c1, c2 = c2, nei
+                    p1, p2 = p2, psum
+                elif psum > p1:
+                    c1 = nei
+                    p1 = psum
+            if c1 is not None:
+                path_sums1[node] = p1
+                path_child1[node] = c1
+            path_sums2[node] = p2
+            path_child2[node] = c2
+            return max(p1, p2)
+        dfs1(0, -1)
+        def dfs2(node: int, parent: int) -> None:
+            # update the path from node to parents
+            parent_sums[node] = parent_sums[parent] + price[node]
+            if parent in path_child1 and node != path_child1[parent]:
+                parent_sums[node] = max(parent_sums[node], path_sums1[parent] + price[node])
+            if parent in path_child2 and node != path_child2[parent]:
+                parent_sums[node] = max(parent_sums[node], path_sums2[parent] + price[node])
+            # find the best path from this node as root
+            psum = max(path_sums1[node], path_sums2[node], parent_sums[node]) - price[node]
+            self.res = max(self.res, psum)
+            for nei in adj_list[node]:
+                if nei == parent: continue
+                dfs2(nei, node)
+        dfs2(0, -1)
+        return self.res
+```
+[(0, i) for i in range(1, 10000)], [1] * 10000
+
+### Solution 2:  dynamic programming + traverse each edge once + except for star case would still be O(n^2), so it only works with a dataset that doesn't include a star tree
+
+```py
+class Solution:
+    def maxOutput(self, n: int, edges: List[List[int]], price: List[int]) -> int:
+        adj_list = [[] for _ in range(n)]
+        for u, v in edges:
+            adj_list[u].append(v)
+            adj_list[v].append(u)
+        @cache
+        def dfs(node: int, parent: int) -> int:
+            psum = price[node]
+            for nei in adj_list[node]:
+                if nei == parent: continue
+                psum = max(psum, dfs(nei, node) + price[node])
+            return psum
+        res = 0
+        for node in range(n):
+            psum = dfs(node, -1)
+            res = max(res, psum - price[node])
+        return res
+```
+
+## 57. Insert Interval
+
+### Solution 1:  insert interval + sort + merge overlapping intervals in linear scan + O(nlogn) time
+
+```py
+class Solution:
+    def insert(self, intervals: List[List[int]], newInterval: List[int]) -> List[List[int]]:
+        intervals.append(newInterval)
+        intervals.sort()
+        res = [intervals[0]]
+        length = lambda s1, e1, s2, e2: min(e1, e2) - max(s1, s2)
+        for s2, e2 in intervals[1:]:
+            s1, e1 = res[-1]
+            if length(s1, e1, s2, e2) >= 0:
+                res[-1][0] = min(s1, s2)
+                res[-1][1] = max(e1, e2)
+            else:
+                res.append([s2, e2])
+        return res
+```
+
+### Solution 2:  merge overlapping intervals in linear scan + O(n) time
+
+```py
+class Solution:
+    def insert(self, intervals: List[List[int]], newInterval: List[int]) -> List[List[int]]:
+        length = lambda s1, e1, s2, e2: min(e1, e2) - max(s1, s2)
+        intervals = [newInterval] + intervals
+        def merge() -> None:
+            x1, x2 = res[-2], res[-1]
+            if length(*x1, *x2) >= 0:
+                res.pop()
+                res[-1][0] = min(x1[0], x2[0])
+                res[-1][1] = max(x1[1], x2[1])
+            elif x2[0] < x1[0]:
+                res[-1], res[-2] = res[-2], res[-1]
+        res = [intervals[0]]
+        for x in intervals[1:]:
+            res.append([*x])
+            merge()
+        return res
+```
+
+### Solution 3:  find intervals strictly to the left and right of the new interval + O(1) extra space + space optimized + only need to merge the extremes.
+
+```py
+class Solution:
+    def insert(self, intervals: List[List[int]], newInterval: List[int]) -> List[List[int]]:
+        start, end = newInterval
+        left = [[s, e] for s, e in intervals if e < start]
+        right = [[s, e] for s, e in intervals if s > end]
+        if left + right != intervals:
+            start = min(start, intervals[len(left)][0])
+            end = max(end, intervals[~len(right)][1])
+        return left + [[start, end]] + right
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
@@ -18138,6 +18593,52 @@ public:
 
 ### Solution 1:
 
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
 ```py
 
 ```
