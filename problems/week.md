@@ -14088,6 +14088,19 @@ class Solution:
         return maxSum
 ```
 
+```py
+class Solution:
+    def maxSubarraySumCircular(self, nums: List[int]) -> int:
+        max_sum, min_sum, cur_min, cur_max, sum_ = -math.inf, math.inf, 0, 0, 0
+        for num in nums:
+            cur_min = min(cur_min + num, num)
+            cur_max = max(cur_max + num, num)
+            max_sum = max(max_sum, cur_max)
+            min_sum = min(min_sum, cur_min)
+            sum_ += num
+        return max_sum if min_sum == sum_ else max(max_sum, sum_ - min_sum)
+```
+
 ## 899. Orderly Queue
 
 ### Solution 1:  suffix array + lexicographically smallest suffix with string s+s + make that suffix the prefix for the result
@@ -18549,12 +18562,137 @@ class Solution:
         return left + [[start, end]] + right
 ```
 
-##
+## 491. Non-decreasing Subsequences
 
-### Solution 1:
+### Solution 1: n*2^n time
 
 ```py
+class Solution:
+    def findSubsequences(self, nums: List[int]) -> List[List[int]]:
+        n = len(nums)
+        result = set()
+        for i in range(1, 1<<n):
+            is_decreasing = False
+            arr = []
+            for j in range(n):
+                if (i>>j)&1:
+                    if arr and nums[j] < arr[-1]:
+                        is_decreasing = True
+                        break
+                    arr.append(nums[j])
+            if is_decreasing or len(arr) < 2: continue
+            result.add(tuple(arr))
+        return result
+```
 
+```py
+class Solution:
+    def findSubsequences(self, nums: List[int]) -> List[List[int]]:
+        n = len(nums)
+        result = set()
+        arr = []
+        def backtrack(index: int) -> None:
+            if index == n:
+                if len(arr) >= 2:
+                    result.add(tuple(arr[:]))
+                return
+            if arr and nums[index] < arr[-1]:
+                return backtrack(index + 1)
+            arr.append(nums[index])
+            backtrack(index + 1)
+            arr.pop()
+            backtrack(index + 1)
+        backtrack(0)
+        return result
+```
+
+## 974. Subarray Sums Divisible by K
+
+### Solution 1: prefix sum + remainders + O(n + k) time
+
+```py
+class Solution:
+    def subarraysDivByK(self, nums: List[int], k: int) -> int:
+        res = 0
+        counts = [0]*(k + 1)
+        counts[0] = 1
+        for psum in accumulate(nums):
+            rem = psum%k 
+            res += counts[rem]
+            counts[rem] += 1
+        return res
+```
+
+## 93. Restore IP Addresses
+
+### Solution 1:  iterative brute force
+
+```py
+class Solution:
+    def restoreIpAddresses(self, s: str) -> List[str]:
+        res = []
+        n = len(s)
+        valid_size = lambda ch: 0 <= int(ch) <= 255
+        valid_int = lambda ch: not (ch[0] == '0' and len(ch) > 1)
+        is_valid = lambda ch: len(ch) > 0 and valid_size(ch) and valid_int(ch)
+        for i, j, k in product(range(n), repeat = 3):
+            if not (k > j > i): continue
+            cands = [s[:i], s[i:j], s[j:k], s[k:]]
+            if all(is_valid(cand) for cand in cands):
+                ip_addr = '.'.join(cands)
+                res.append(ip_addr)
+        return res
+```
+
+### Solution 2:  iterative + O(1) time + loop through the lengths of segments of the ip address
+
+```py
+class Solution:
+    def restoreIpAddresses(self, s: str) -> List[str]:
+        res = []
+        valid_size = lambda ch: 0 <= int(ch) <= 255
+        valid_int = lambda ch: not (ch[0] == '0' and len(ch) > 1)
+        is_valid = lambda ch: len(ch) > 0 and valid_size(ch) and valid_int(ch)
+        for len1 in range(1, 4):
+            seg1 = s[:len1]
+            if not is_valid(seg1): continue
+            for len2 in range(1, 4):
+                seg2 = s[len1:len1 + len2]
+                if not is_valid(seg2): continue
+                for len3 in range(1, 4):
+                    total_len = len1 + len2 + len3
+                    seg3 = s[len1 + len2:total_len]
+                    if not is_valid(seg3): continue
+                    seg4 = s[total_len:]
+                    if not is_valid(seg4): continue
+                    res.append('.'.join([seg1, seg2, seg3, seg4]))
+        return res
+```
+
+### Solution 3:  backtrack
+
+```py
+class Solution:
+    def restoreIpAddresses(self, s: str) -> List[str]:
+        res = []
+        valid_size = lambda ch: 0 <= int(ch) <= 255
+        valid_int = lambda ch: not (ch[0] == '0' and len(ch) > 1)
+        is_valid = lambda ch: len(ch) > 0 and valid_size(ch) and valid_int(ch)
+        self.path = []
+        def backtrack(cur_len: int) -> None:
+            if len(self.path) > 4: return
+            if cur_len == len(s):
+                if len(self.path) == 4:
+                    res.append('.'.join(self.path))
+                return
+            for seg_len in range(1, 4):
+                cur_seg = s[cur_len : cur_len + seg_len]
+                if not is_valid(cur_seg): return
+                self.path.append(s[cur_len:cur_len + seg_len])
+                backtrack(cur_len + seg_len)
+                self.path.pop()
+        backtrack(0)
+        return res
 ```
 
 ##
@@ -18605,17 +18743,6 @@ class Solution:
 
 ```
 
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
 ##
 
 ### Solution 1:
