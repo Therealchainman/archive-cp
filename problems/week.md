@@ -18695,33 +18695,156 @@ class Solution:
         return res
 ```
 
-##
+## 2540. Minimum Common Value
+
+### Solution 1: two pointers
+
+```py
+class Solution:
+    def getCommon(self, nums1: List[int], nums2: List[int]) -> int:
+        p1 = p2 = 0
+        n1, n2 = len(nums1), len(nums2)
+        while p1 < n1 and p2 < n2:
+            if nums1[p1] == nums2[p2]: return nums1[p1]
+            if nums1[p1] < nums2[p2]:
+                p1 += 1
+            else:
+                p2 += 1
+        return -1
+```
+
+### Solution 2: set intersection + O(n) time
+
+```py
+class Solution:
+    def getCommon(self, nums1: List[int], nums2: List[int]) -> int:
+        return min(common) if (common := set(nums1) & set(nums2)) else -1
+```
+
+## 2541. Minimum Operations to Make Array Equal II
+
+### Solution 1:  greedy + can't do it if increment != decrement + can only increment a num if it is too small or decrement if too large by a fixed k integer + increment must be reachable by k which means divisible + each individual delta must be divisible by k + O(n) time
+
+```py
+class Solution:
+    def minOperations(self, nums1: List[int], nums2: List[int], k: int) -> int:
+        if k == 0:
+            return 0 if nums1 == nums2 else -1
+        n = len(nums1)
+        increment = decrement = 0
+        for i in range(n):
+            delta = abs(nums1[i] - nums2[i])
+            if delta%k != 0: return -1
+            if nums1[i] > nums2[i]:
+                increment += delta
+            else:
+                decrement += delta
+        return increment//k if increment%k == 0 and increment == decrement else -1
+```
+
+```py
+class Solution:
+    def minOperations(self, nums1: List[int], nums2: List[int], k: int) -> int:
+        if k == 0:
+            return 0 if nums1 == nums2 else -1
+        n = len(nums1)
+        increment = moves = 0
+        for i in range(n):
+            delta = abs(nums1[i] - nums2[i])
+            if delta%k != 0: return -1
+            if nums1[i] > nums2[i]:
+                increment += delta
+                moves += delta//k
+            else:
+                increment -= delta
+        return moves if increment == 0 else -1
+```
+
+## 2542. Maximum Subsequence Score
 
 ### Solution 1:
 
 ```py
-
+class Solution:
+    def maxScore(self, nums1: List[int], nums2: List[int], k: int) -> int:
+        n = len(nums1)
+        heapify(max_heap := [(-x, i) for i, x in enumerate(nums1)])
+        max_score = 0
+        max_set = set()
+        max_sum = 0
+        processed = set()
+        for _ in range(k-1):
+            val, i = heappop(max_heap)
+            val = abs(val)
+            max_sum += val
+            max_set.add(i)
+        nums2 = sorted([(x, i) for i, x in enumerate(nums2)])
+        for i in range(n - k + 1):
+            min_val, index = nums2[i]
+            # print('min_val', min_val, 'index', index)
+            # CREATE THE LARGEST SUM POSSIBLE WHILE INCLUDING THIS CURRENT INDEX
+            if index in max_set:
+                while len(max_set) < k:
+                    val, j = heappop(max_heap)
+                    if j in processed: continue
+                    val = abs(val)
+                    max_sum += val
+                    max_set.add(j)
+            else:
+                max_sum += nums1[index]
+                max_set.add(index)
+            # print('max_sum', max_sum, 'max_set', max_set)
+            # UPDATE SCORE
+            score = min_val*max_sum
+            max_score = max(max_score, score)
+            # MARK THIS INDEX AS PROCESSED, CAN'T NOT BE USED AGAIN
+            processed.add(index)
+            # REMOVE THIS PROCESSED INDEX FROM CURRENT MAX SUM SET
+            max_set.remove(index)
+            max_sum -= nums1[index]
+        return max_score
 ```
 
-##
+## 2543. Check if Point Is Reachable
 
-### Solution 1:
+### Solution 1:  prime factorization + O(sqrt(max(targetX, targetY))) time + if targetX and targetY have any prime factors in common it is impossible to reach that state
 
 ```py
-
+class Solution:
+    def isReachable(self, targetX: int, targetY: int) -> bool:
+        def prime_factors(num: int) -> Set[int]:
+            factors = set()
+            while num % 2 == 0:
+                num //= 2
+            for i in range(3, int(math.sqrt(num)) + 1, 2):
+                while num % i == 0:
+                    factors.add(i)
+                    num //= i
+            if num > 2:
+                factors.add(num)
+            return factors
+        f1, f2 = prime_factors(targetX), prime_factors(targetY)
+        return len(f1 & f2) == 0
 ```
 
-##
-
-### Solution 1:
+### Solution 2:  prime factorization + O(sqrt(max(targetX, targetY))) time + if targetX and targetY have any prime factors in common it is impossible to reach that state + factorize targetX and targetY in the same loop
 
 ```py
-
+class Solution:
+    def isReachable(self, targetX: int, targetY: int) -> bool:
+        def factorize(num: int, factor: int) -> int:
+            while num % factor == 0:
+                num //= factor
+            return num
+        targetX, targetY = factorize(targetX, 2), factorize(targetY, 2)
+        num = max(targetX, targetY)
+        for i in range(3, int(math.sqrt(num)) + 1, 2):
+            if targetX%i==0 and targetY%i==0: return False
+            targetX, targetY = factorize(targetX, i), factorize(targetY, i)
+        return targetX != targetY if targetX > 2 and targetY > 2 else True
 ```
 
-##
-
-### Solution 1:
+### Solution 3: number theory + gcd + derivation from input + work backwards
 
 ```py
 
