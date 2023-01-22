@@ -18762,46 +18762,20 @@ class Solution:
 
 ## 2542. Maximum Subsequence Score
 
-### Solution 1:
+### Solution 1:  min heap + sort to be in decreasing order for the min_value multiplier, that way you will be always considering nums2[i] to be the minimum of the current subsequence + min_heap will allow to remove the smallest integer, and keep the maximum sum along with the current minimum multiplier + O(nlogn) time
 
 ```py
 class Solution:
     def maxScore(self, nums1: List[int], nums2: List[int], k: int) -> int:
-        n = len(nums1)
-        heapify(max_heap := [(-x, i) for i, x in enumerate(nums1)])
-        max_score = 0
-        max_set = set()
-        max_sum = 0
-        processed = set()
-        for _ in range(k-1):
-            val, i = heappop(max_heap)
-            val = abs(val)
-            max_sum += val
-            max_set.add(i)
-        nums2 = sorted([(x, i) for i, x in enumerate(nums2)])
-        for i in range(n - k + 1):
-            min_val, index = nums2[i]
-            # print('min_val', min_val, 'index', index)
-            # CREATE THE LARGEST SUM POSSIBLE WHILE INCLUDING THIS CURRENT INDEX
-            if index in max_set:
-                while len(max_set) < k:
-                    val, j = heappop(max_heap)
-                    if j in processed: continue
-                    val = abs(val)
-                    max_sum += val
-                    max_set.add(j)
-            else:
-                max_sum += nums1[index]
-                max_set.add(index)
-            # print('max_sum', max_sum, 'max_set', max_set)
-            # UPDATE SCORE
-            score = min_val*max_sum
-            max_score = max(max_score, score)
-            # MARK THIS INDEX AS PROCESSED, CAN'T NOT BE USED AGAIN
-            processed.add(index)
-            # REMOVE THIS PROCESSED INDEX FROM CURRENT MAX SUM SET
-            max_set.remove(index)
-            max_sum -= nums1[index]
+        min_heap = []
+        max_score = sum_ = 0
+        for x, y in sorted(zip(nums1, nums2), key = lambda p: -p[1]):
+            sum_ += x
+            heappush(min_heap, x)
+            if len(min_heap) == k:
+                max_score = max(max_score, y*sum_)
+                v = heappop(min_heap)
+                sum_ -= v
         return max_score
 ```
 
@@ -18850,12 +18824,272 @@ class Solution:
 
 ```
 
-##
+## 2544. Alternating Digit Sum
 
-### Solution 1:
+### Solution 1:  sum with conditional + O(n) time
 
 ```py
+class Solution:
+    def alternateDigitSum(self, n: int) -> int:
+        return sum(x if i%2==0 else -x for i, x in enumerate(map(int, str(n))))
+```
 
+## 2545. Sort the Students by Their Kth Score
+
+### Solution 1:  custom sort with key + O(nlogn) time
+
+```py
+class Solution:
+    def sortTheStudents(self, score: List[List[int]], k: int) -> List[List[int]]:
+        score.sort(key = lambda row: -row[k])
+        return score
+```
+
+## 2546. Apply Bitwise Operations to Make Strings Equal
+
+### Solution 1:  bitwise operations + O(n) time + if s has no 1s then target must have no ones + if s has at least one 1, than target must have at least a 1 + so eitther both are true or both are false
+
+```py
+class Solution:
+    def makeStringsEqual(self, s: str, target: str) -> bool:
+        return (s.count('1') == 0) == (target.count('1') == 0)
+```
+
+## 2547. Minimum Cost to Split an Array
+
+### Solution 1:  recursive dynammic programming + frequency counter for calculate importance value + consider every possible partition + O(n^2) time complexity
+
+```py
+class Solution:
+    def minCost(self, nums: List[int], k: int) -> int:
+        @cache
+        def dp(start_index: int) -> int:
+            if start_index == len(nums): return 0
+            counts_one, best = 0, math.inf
+            freq = Counter()
+            for end_index in range(start_index, len(nums)):
+                val = nums[end_index]
+                freq[val] += 1
+                if freq[val] == 1:
+                    counts_one += 1
+                elif freq[val] == 2:
+                    counts_one -= 1
+                segment_len = end_index - start_index + 1
+                importance_val = k + segment_len - counts_one
+                best = min(best, dp(end_index + 1) + importance_val)
+            return best
+        return dp(0)
+```
+
+### Solution 2:  iterative dp
+
+```py
+class Solution:
+    def minCost(self, nums: List[int], k: int) -> int:
+        n = len(nums)
+        dp = [math.inf]*(n + 1)
+        dp[0] = 0
+        for left in range(n):
+            freq = [0]*n
+            count_ones = 0
+            for right in range(left, n):
+                val = nums[right]
+                freq[val] += 1
+                if freq[val] == 1:
+                    count_ones += 1
+                elif freq[val] == 2:
+                    count_ones -= 1
+                segment_len = right - left + 1
+                importance_val = k + segment_len - count_ones
+                dp[right + 1] = min(dp[right + 1], dp[left] + importance_val)
+        return dp[n]
+```
+
+## 1088. Confusing Number II
+
+### Solution 1:  recursive backtrack + O(5^n) time + store rotated dig in the backtrack by storing the unit
+
+```py
+class Solution:
+    def confusingNumberII(self, n: int) -> int:
+        valid_map = [[0, 0], [1, 1], [6, 9], [8, 8], [9, 6]]
+        self.res = 0
+
+        def backtrack(num: int, rotated_num: int, unit: int) -> None:
+            if num > n: return 0
+            if num != rotated_num: self.res += 1
+            for dig, rotated_dig in valid_map:
+                if dig == 0 and num == 0: continue # inifinite zero
+                backtrack(num*10 + dig, rotated_dig*unit + rotated_num, unit*10)
+        backtrack(0, 0, 1)
+        return self.res
+```
+
+## 131. Palindrome Partitioning
+
+### Solution 1:  is palindrome for string in O(n) time + recursive backtrack + O(n*2^n) time + builds palindromic partitions and finds if it can get to the end with a partition of the string into all partitions that are palindromes
+
+```py
+class Solution:
+    def is_palindrome(self, part: str) -> bool:
+        left, right = 0, len(part) - 1
+        while left < right and part[left] == part[right]:
+            left += 1
+            right -= 1
+        return left >= right
+    def partition(self, s: str) -> List[List[str]]:
+        palindrome_partitions, cur_partitions = [], []
+        def backtrack(left: int) -> None:
+            if left == len(s):
+                palindrome_partitions.append(cur_partitions[:])
+                return
+            for right in range(left, len(s)):
+                cur_part = s[left: right + 1]
+                if not self.is_palindrome(cur_part): continue
+                cur_partitions.append(cur_part)
+                backtrack(right + 1)
+                cur_partitions.pop()
+        backtrack(0)
+        return palindrome_partitions
+```
+
+### Solution 2: bitmask
+
+```c++
+bool indices[16] = {};
+vector<vector<string>> partition(string s) {
+    int n = s.size();
+    vector<vector<string>> result;
+    auto isPalindrome = [&](int i, int j) {
+        while (i<j) {
+            if (s[i]!=s[j]) {return false;}
+            i++;
+            j--;
+        }
+        return true;
+    };
+    for (int i = 0;i<(1<<(n-1));i++) {
+        memset(indices,false,sizeof(indices));
+        bool isValidPartition = true;
+        for (int j = 0, start = 0;j<n;j++) {
+            if ((i>>j)&1 || j==n-1) {
+                indices[j]=true;
+                if (!isPalindrome(start,j)) {
+                    isValidPartition = false;
+                    break;
+                }
+                start = j+1;
+            }
+        }
+        if (isValidPartition) {
+            vector<string> partition;
+            string pally = "";
+            for (int j = 0;j<n;j++) {
+                pally+=s[j];
+                if (indices[j]) {
+                    partition.push_back(pally);
+                    pally.clear();
+                }
+            }
+            result.push_back(partition);
+        }
+    }
+    return result;
+}
+```
+
+### Solution 3: DFS + backtracking
+
+```c++
+vector<vector<string>> result;
+void dfs(int start, string& s, vector<string>& pally) {
+    int n = s.size();
+    if (start==n) {
+        result.push_back(pally);
+        return;
+    }
+    auto isPalindrome = [&](int i, int j) {
+        while (i<j) {
+            if (s[i]!=s[j]) {return false;}
+            i++;
+            j--;
+        }
+        return true;
+    };
+    for (int i = start;i<n;i++) {
+        if (!isPalindrome(start, i)) continue;
+        pally.push_back(s.substr(start,i-start+1));
+        dfs(i+1,s,pally);
+        pally.pop_back();
+    }
+}
+vector<vector<string>> partition(string s) {
+    vector<string> pally;
+    dfs(0,s,pally);
+    return result;
+}
+```
+
+
+```c++
+vector<vector<string>> partition(string s) {
+    vector<vector<string>> result;
+    vector<string> pally;
+    int n = s.size();
+    auto isPalindrome = [&](int i, int j) {
+        while (i<j) {
+            if (s[i]!=s[j]) {return false;}
+            i++;
+            j--;
+        }
+        return true;
+    };
+    function<void(int)> dfs = [&](int start) {
+        if (start==n) {
+            result.push_back(pally);
+            return;
+        }
+        for (int i = start;i<n;i++) {
+            if (!isPalindrome(start,i)) continue;
+            pally.push_back(s.substr(start,i-start+1));
+            dfs(i+1);
+            pally.pop_back();
+        }
+    };
+    dfs(0);
+    return result;
+}
+```
+
+### Solution 4: DFS + backtracking with memoization of palindromes
+
+```c++
+vector<vector<string>> partition(string s) {
+    vector<vector<string>> result;
+    vector<string> pally;
+    int n = s.size();
+    vector<vector<int>> dp(n, vector<int>(n, -1));
+    function<int(int,int)> isPalindrome = [&](int i, int j) {
+        if (dp[i][j]>=0) {return dp[i][j];}
+        if (i==j) {return dp[i][j]=1;}
+        if (j-i==1) {return dp[i][j] = s[i]==s[j];}
+        return dp[i][j] = s[i]==s[j] && isPalindrome(i+1,j-1);
+    };
+    function<void(int)> dfs = [&](int start) {
+        if (start==n) {
+            result.push_back(pally);
+            return;
+        }
+        for (int i = start;i<n;i++) {
+            if (isPalindrome(start,i)==0) continue;
+            pally.push_back(s.substr(start,i-start+1));
+            dfs(i+1);
+            pally.pop_back();
+        }
+    };
+    dfs(0);
+    return result;
+}
 ```
 
 ##
@@ -18889,6 +19123,27 @@ class Solution:
 ```py
 
 ```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1: 
+
 ```py
 
 ```
