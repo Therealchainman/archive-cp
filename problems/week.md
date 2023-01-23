@@ -19092,12 +19092,36 @@ vector<vector<string>> partition(string s) {
 }
 ```
 
-##
+## 997. Find the Town Judge
 
-### Solution 1:
+### Solution 1: dropwhile + default value for end of iterator + count total degrees of each vertex + no parallel edges + no self loops + the vertex that is called the judge will have n - 1 degrees because there will be n - 1 indegrees and 0 outdegrees
 
 ```py
+class Solution:
+    def findJudge(self, n: int, trust: List[List[int]]) -> int:
+        degrees = [0] * (n + 1)
+        for u, v in trust:
+            degrees[v] += 1
+            degrees[u] -= 1
+        return next(dropwhile(lambda i: degrees[i] != n - 1, range(1, n + 1)), default := -1)
+```
 
+### Solution 2: Count indegrees and outdegrees, judge should have all nodes with indegree on it and have no outdegree edges.
+
+```c++
+int findJudge(int n, vector<vector<int>>& trust) {
+    vector<int> indegrees(n+1,0), outdegrees(n+1,0);
+    for (vector<int>& p : trust) {
+        indegrees[p[1]]++;
+        outdegrees[p[0]]++;
+    }
+    for (int i = 1;i<=n;i++) {
+        if (indegrees[i]-outdegrees[i]==n-1) {
+            return i;
+        } 
+    }
+    return -1;
+}
 ```
 
 ##
