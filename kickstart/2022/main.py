@@ -1,74 +1,50 @@
-
-import math
-from collections import deque
-class UnionFind:
-    def __init__(self):
-        self.size = dict()
-        self.parent = dict()
-    
-    def find(self,i: int) -> int:
-        if i not in self.parent:
-            self.size[i] = 1
-            self.parent[i] = i
-        while i != self.parent[i]:
-            self.parent[i] = self.parent[self.parent[i]]
-            i = self.parent[i]
-        return i
-
-    def union(self,i: int,j: int) -> bool:
-        i, j = self.find(i), self.find(j)
-        if i!=j:
-            if self.size[i] < self.size[j]:
-                i,j=j,i
-            self.parent[j] = i
-            self.size[i] += self.size[j]
-            return True
-        return False
-    
-    @property
-    def root_count(self):
-        return sum(node == self.find(node) for node in self.parent)
-
-    def __repr__(self) -> str:
-        return f'parents: {[(i, parent) for i, parent in enumerate(self.parent)]}, sizes: {self.size}'
+from heapq import *
         
 def main():
-    N = int(input())
-    arr = list(map(int, input().split()))
-    dsu = UnionFind()
-    for i, num in enumerate(arr, start = 1):
-        dsu.union(i, num)
-    cycleSizes = [0]*(N+1)
-    for i in range(1, N+1):
-        # i is a representative (root) node for a connected component
-        if i == dsu.find(i):
-            cycleSizes[dsu.size[i]] += 1
-    # bounded knapsack problem
-    dp = [math.inf]*(N+1)
-    dp[0] = 0
-    for cycle_len in range(1, N + 1):
-        cnt = cycleSizes[cycle_len]
-        if cnt == 0: continue
-        # simulates adding to existing solutions
-        # this will be ran approximatley sqrt(N) times
-        # sliding window for each gap
-        for i in range(N, N - cycle_len, -1):
-            min_window = deque()
-            for right in range(i, -1, -cycle_len):
-                left = right - cnt*cycle_len
-                if min_window and min_window[0][1] >= right:
-                    min_window.popleft()
-                while min_window and dp[left] + cnt <= min_window[-1][0] + (right - min_window[-1][1])//cycle_len:
-                    min_window.pop()
-                min_window.append((dp[left], left))
-                dp[right] = min(dp[right], min_window[0][0] + (right - min_window[0][1])//cycle_len)
-    # simulates breaking, can always perform minimum swaps and then you can always break to get something smaller so that requires 1 extra move
-    min_swaps = math.inf
-    for i in reversed(range(1, N+1)):
-        dp[i] = min(dp[i], min_swaps+1) # +1 for breaking
-        min_swaps = min(min_swaps, dp[i])
-    return ' '.join(map(str, [x -1 for x in dp[1:]]))
-    
+    D, N, X = map(int, input().split())
+    seeds = [None]*N
+    for i in range(N):
+        Q, L, V = map(int, input().split())
+        seeds[i] = (L, Q, V)
+    seeds.sort()
+    max_heap = [] # (value, seed index)
+    cur_day = res = seed_index = remaining_harvest_cur_day = 0 # counting backwards from day D
+    while cur_day < D:
+        if not max_heap and seed_index == N: # planted all and harvested all seeds
+            break
+        if seed_index < N and seeds[seed_index][0] == cur_day: # push some more seeds into the max heap
+            maturation_time, quantity, value = seeds[seed_index]
+            heappush(max_heap, (-value, -quantity))
+            seed_index += 1
+        elif not max_heap: # if no seeds to plant, move to the next day when you can plant a seed that you will be able to harvest on time
+            maturation_time, quantity, value = seeds[seed_index]
+            heappush(max_heap, (-value, -quantity))
+            seed_index += 1
+            remaining_harvest_cur_day = 0
+            cur_day = maturation_time
+        elif remaining_harvest_cur_day == 0: # harvest the seeds with the full day available
+            value, quantity = map(abs, heappop(max_heap))
+            max_days = min(D, seeds[seed_index][0]) if seed_index < N else D # it has at least maximum value up to max_days
+            days_to_harvest = max_days - cur_day
+            harvest = min(X * days_to_harvest, quantity)
+            res += harvest * value
+            num_days_to_harvest = harvest//X
+            cur_day += num_days_to_harvest
+            remaining_harvest_cur_day = 0
+            if harvest % X != 0:
+                remaining_harvest_cur_day = X - harvest % X
+            if quantity - harvest > 0: # if there are still seeds left, push them back into the max heap
+                heappush(max_heap, (-value, -(quantity - harvest)))
+        else: # remaining_harvest_cur_day > 0
+            value, quantity = map(abs, heappop(max_heap))
+            harvest = min(remaining_harvest_cur_day, quantity)
+            res += harvest * value
+            remaining_harvest_cur_day -= harvest
+            if quantity - harvest > 0: # if there are still seeds left, push them back into the max heap
+                heappush(max_heap, (-value, -(quantity - harvest)))
+            if remaining_harvest_cur_day == 0:
+                cur_day += 1
+    return res
 
 if __name__ == '__main__':
     T = int(input())
