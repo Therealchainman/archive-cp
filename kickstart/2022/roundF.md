@@ -127,7 +127,74 @@ if __name__ == '__main__':
 
 ## Scheduling a Meeting
 
-### Solution 1:
+### Solution 1:  sliding window + prefix count + storing variables to allow O(1) time update for each window so can solve in O(D + N + Mlog(M)) time
+
+```py
+import math
+
+def main():
+    N, K, X, D = map(int, input().split())
+    M = int(input())
+    meeting_starts, meeting_ends = [None] * M, [None] * M
+    for i in range(M):
+        P, L, R = map(int, input().split())
+        meeting_starts[i] = (L, P)
+        meeting_ends[i] = (R, P)
+    meeting_starts.sort()
+    meeting_ends.sort()
+    tech_lead_meeting_counts = [0] * (N+1) # The count of meetings for each tech lead in the window
+    meeting_counts = [0] * (M + 1) # The count of tech leads with this many meetings in the window
+    meeting_counts[0] = N # Initially, all tech leads have 0 meetings
+    start = end = cur_count = 0
+    prefix_count_meetings = N
+    window_meeting_count = 0 # The number of meetings in the window for K tech leads
+    res = math.inf
+    # sliding window of size X
+    for right in range(D + 1):
+        # PROCESS MEETINGS THAT END FOR CURRENT WINDOW
+        left = right - X
+        while left >= 0 and end < M and meeting_ends[end][0] == left:
+            tech_lead = meeting_ends[end][1]
+            prev_count = tech_lead_meeting_counts[tech_lead]
+            meeting_counts[prev_count] -= 1
+            tech_lead_meeting_counts[tech_lead] -= 1
+            meeting_counts[prev_count - 1] += 1
+            if prev_count <= cur_count:
+                window_meeting_count -= 1
+            if prev_count == cur_count and prefix_count_meetings - meeting_counts[cur_count] == K:
+                cur_count -= 1
+                prefix_count_meetings = K
+            elif prev_count == cur_count + 1:
+                prefix_count_meetings += 1
+            end += 1
+        # PERFORM ACTION TO UPDATE RESULTS
+        if left >= 0:
+            res = min(res, window_meeting_count)
+        # PROCESS NEW MEETINGS THAT START FOR NEXT WINDOW
+        while start < M and meeting_starts[start][0] == right:
+            tech_lead = meeting_starts[start][1]
+            prev_count = tech_lead_meeting_counts[tech_lead]
+            meeting_counts[prev_count] -= 1
+            tech_lead_meeting_counts[tech_lead] += 1
+            meeting_counts[prev_count + 1] += 1
+            if prev_count < cur_count:
+                window_meeting_count += 1
+            elif prev_count == cur_count: # if this tech lead was at the border of the window
+                prefix_count_meetings -= 1 # The number of tech leads with this many meetings in the window
+            if prefix_count_meetings < K: # the prefix has become too small so that means this tech lead was pivotal, so you need to increment window meeting to include this meeting this person added
+                window_meeting_count += 1
+                prefix_count_meetings += meeting_counts[prev_count + 1] # add the number of tech leads with this many meetings in the window
+                cur_count += 1 # increment the current count
+            start += 1
+    return res
+
+if __name__ == '__main__':
+    T = int(input())
+    for t in range(1, T+1):
+        print(f'Case #{t}: {main()}')
+```
+
+### Solution 2: prefix sums + tree searching
 
 ```py
 

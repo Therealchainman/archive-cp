@@ -19124,20 +19124,67 @@ int findJudge(int n, vector<vector<int>>& trust) {
 }
 ```
 
-##
+## 2359. Find Closest Node to Given Two Nodes
 
-### Solution 1:
+### Solution 1:  linear path through each nodes path + find the first node that is visited from both paths
 
 ```py
-
+class Solution:
+    def closestMeetingNode(self, edges: List[int], node1: int, node2: int) -> int:
+        n = len(edges)
+        vis = [[False]*2 for _ in range(n)]
+        while True:
+            # NODE AT EQUAL DISTANCE FROM INITIAL NODE1 AND NODE2 OR VISIT NODE THAT IS ALREADY VISITED FROM THE OTHER PATH
+            if node1 == node2: return node1
+            elif vis[node1][1] or vis[node2][0]: return min(node1 if vis[node1][1] else math.inf, node2 if vis[node2][0] else math.inf)
+            # CHILD NODES IF UNVISITED
+            c1, c2 = edges[node1] if not vis[node1][0] else -1, edges[node2] if not vis[node2][1] else -1
+            # MARK NODES AS VISITED FOR RESPECTIVE PATH 0 AND PATH 1
+            vis[node1][0] = True
+            vis[node2][1] = True
+            # IF NO MORE CHILD NODES, BREAK
+            if c1 == -1 and c2 == -1: break
+            # UPDATE CURRENT NODE1 AND NODE2 VALUES
+            node1, node2 = c1 if c1 != -1 else node1, c2 if c2 != -1 else node2
+        return -1
 ```
 
-##
+## 909. Snakes and Ladders
 
-### Solution 1:
+### Solution 1:  bfs + O(n^2) time
 
 ```py
-
+class Solution:
+    def snakesAndLadders(self, board: List[List[int]]) -> int:
+        vis = set({1})
+        n = len(board)
+        target = n**2
+        queue = deque([1])
+        moves = 0
+        while queue:
+            sz = len(queue)
+            for _ in range(sz):
+                cell = queue.popleft()
+                if cell == target: return moves
+                for nei in range(cell + 1, min(cell + 6, target) + 1):
+                    row = (nei - 1)//n
+                    col = (nei - 1)%n
+                    if row%2 == 0 and board[~row][col] != -1:
+                        new_nei = board[~row][col]
+                        if new_nei in vis: continue
+                        vis.add(new_nei)
+                        queue.append(new_nei)
+                    elif row%2 != 0 and board[~row][~col] != -1:
+                        new_nei = board[~row][~col]
+                        if new_nei in vis: continue
+                        vis.add(new_nei)
+                        queue.append(new_nei)
+                    else:
+                        if nei in vis: continue
+                        vis.add(nei)
+                        queue.append(nei)
+            moves += 1
+        return -1
 ```
 
 ##
