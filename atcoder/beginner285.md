@@ -1,6 +1,6 @@
 # Atcoder Beginner Contest 285
 
-## Edge Checker 2
+## A. Edge Checker 2
 
 ### Solution 1:  tree structured in a way where the parent is just the floor division by 2
 
@@ -13,7 +13,7 @@ if __name__ == '__main__':
     print(main())
 ```
 
-## Longest Uncommon Prefix
+## B. Longest Uncommon Prefix
 
 ### Solution 1: brute force + O(n^2)
 
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     print(main())
 ```
 
-## abc285_brutmhyhiizp
+## C. abc285_brutmhyhiizp
 
 ### Solution 1:
 
@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
 ```
 
-## Change Usernames
+## D. Change Usernames
 
 ### Solution 1:  detect cycle in directed graph with dfs 
 
@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
 ```
 
-## Substring of Sorted String
+## F. Substring of Sorted String
 
 ### Solution 1:  segment tree + tle
 
