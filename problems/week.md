@@ -19187,12 +19187,31 @@ class Solution:
         return -1
 ```
 
-##
+## 472. Concatenated Words
 
-### Solution 1:
+### Solution 1:  dynammic programming
 
 ```py
-
+class Solution:
+    def concatenated(self, word: str, dictionary: Set[str]) -> bool:
+        n = len(word)
+        dp = [False]*(n + 1)
+        dp[0] = True
+        for right in range(1, n + 1):
+            for left in range(right - 1, -1, -1):
+                infix_word = word[left:right]
+                if infix_word == word: continue
+                if infix_word in dictionary:
+                    dp[right] = dp[left]
+                if dp[right]: break
+        return dp[n]
+    def findAllConcatenatedWordsInADict(self, words: List[str]) -> List[str]:
+        words = set(words)
+        result = []
+        for word in words:
+            if self.concatenated(word, words):
+                result.append(word)
+        return result
 ```
 
 ##

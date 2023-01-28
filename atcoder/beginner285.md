@@ -1,3 +1,99 @@
+# Atcoder Beginner Contest 285
+
+## Edge Checker 2
+
+### Solution 1:  tree structured in a way where the parent is just the floor division by 2
+
+```py
+def main():
+    a, b = map(int, input().split())
+    return 'Yes' if b//2 == a else 'No'
+
+if __name__ == '__main__':
+    print(main())
+```
+
+## Longest Uncommon Prefix
+
+### Solution 1: brute force + O(n^2)
+
+```py
+def main():
+    n = int(input())
+    s = input()
+    result = [None]*(n - 1)
+    for i in range(1, n):
+        l = n - i
+        for j in range(n - i):
+            if s[j] == s[j + i]:
+                l = j
+                break
+        result[i - 1] = l
+    return '\n'.join(map(str, result))
+
+if __name__ == '__main__':
+    print(main())
+```
+
+## abc285_brutmhyhiizp
+
+### Solution 1:
+
+```py
+
+```
+
+## Change Usernames
+
+### Solution 1:  detect cycle in directed graph with dfs 
+
+```py
+import sys
+sys.setrecursionlimit(1000000)
+"""
+a graph where each node has at most one outgoing edge
+"""
+def main():
+    n = int(input())
+    adj_list = {}
+    for _ in range(n):
+        s, t = input().split()
+        adj_list[s] = t
+    visited = set()
+    in_path = set()
+    def detect_cycle(node: str) -> bool:
+        visited.add(node)
+        in_path.add(node)
+        nei = adj_list.get(node, None)
+        if nei is not None:
+            if nei in in_path:
+                return True
+            if nei not in visited and detect_cycle(nei):
+                return True
+        in_path.remove(node)
+        return False
+    for node in adj_list:
+        if node not in visited and detect_cycle(node):
+            return "No"
+    return "Yes"
+
+if __name__ == '__main__':
+    print(main())
+```
+
+## 
+
+### Solution 1:
+
+```py
+
+```
+
+## Substring of Sorted String
+
+### Solution 1:  segment tree + tle
+
+```py
 from typing import List
 import os,sys
 from io import BytesIO, IOBase
@@ -158,3 +254,160 @@ def main():
 
 if __name__ == '__main__':
     print(main())
+```
+
+
+### Solution 2: Fenwick Tree for frequency of characters in a range
+
+```cpp## 
+
+### Solution 1:
+
+```py
+
+```
+
+## 
+
+### Solution 1:
+
+```py
+
+```
+#include <bits/stdc++.h>
+using namespace std;
+
+int neutral = 0;
+
+struct FenwickTree {
+    vector<int> nodes;
+    
+    void init(int n) {
+        nodes.assign(n + 1, neutral);
+    }
+
+    void update(int idx, int val) {
+        while (idx < (int)nodes.size()) {
+            nodes[idx] += val;
+            idx += (idx & -idx);
+        }
+    }
+
+    int query(int left, int right) {
+        return query(ri## 
+
+### Solution 1:
+
+```py
+
+```
+
+## 
+
+### Solution 1:
+
+```py
+
+```ght) - query(left);
+    }
+
+    int query(int idx) {
+        int result = neutral;
+        while (idx > 0) {
+            result += nodes[idx];
+            idx -= (idx & -idx);
+        }
+        return result;
+    }
+
+};
+
+vector<FenwickTree> trees(26, FenwickTree());
+vector<int> freq(26, 0);
+
+bool is_sorted(vector<int> &range_char_freq, int left, int right) {
+    for (int i = 0; i<26; i++) {
+        if (left == right) break;
+        if (range_char_freq[i] == 0) continue;
+        if (trees[i].query(left, left + range_char_freq[i]) != range_char_freq[i]) return false;
+        left += range_char_freq[i];
+    }
+    return true;
+}
+
+bool check(int min_i, int max_i, vector<int> &range_char_freq) {
+    for (int i = min_i + 1; i < max_i; i++) {
+        if (range_char_freq[i] != freq[i]) return false;
+    }
+    return true;
+}
+
+int main() {
+    int n, q, idx, left, right, query_type;
+    string s;
+    char ch;
+    cin>>n>>s>>q;
+
+    for (int i = 0; i < 26; i++) {
+        trees[i].init(n);
+    }
+
+    for (int i = 0; i < n; i++) {
+        trees[s[i] - 'a'].update(i + 1, 1);
+        freq[s[i] - 'a']++;
+    }
+    
+    while (q--) {
+        cin>>query_type;
+        if (query_type == 1) {
+            cin>>idx>>ch;
+            idx--;
+            int old_char = s[idx] - 'a';
+            int new_char = ch - 'a';
+            trees[old_char].update(idx + 1, -1);
+            trees[new_char].update(idx + 1, 1);
+            s[idx] = ch;
+            freq[old_char]--;
+            freq[new_char]++;
+        } else {
+            cin>>left>>right;
+            left--;
+            bool ans = true;
+            int min_i = 0, max_i = 25;
+            vector<int> range_char_freq(26, 0);
+            for (int i = 0; i < 26; i++) {
+                if (freq[i] == 0) continue;
+                int curr = trees[i].query(left, right);
+                range_char_freq[i] = curr;
+            }
+            while (range_char_freq[min_i] == 0) min_i++;
+            while (range_char_freq[max_i] == 0) max_i--;
+            if (!check(min_i, max_i, range_char_freq)) {
+                cout << "No" << endl;
+                continue;
+            }
+
+            if (is_sorted(range_char_freq, left, right)) {
+                cout << "Yes" << endl;
+            } else {
+                cout << "No" << endl;
+            }
+        }
+    }
+    return 0;
+}## 
+
+### Solution 1:
+
+```py
+
+```
+
+## 
+
+### Solution 1:
+
+```py
+
+```
+```
