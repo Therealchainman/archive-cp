@@ -19214,6 +19214,169 @@ class Solution:
         return result
 ```
 
+## 2549. Count Distinct Numbers on Board
+
+### Solution 1:  math + if n > 2 it is true that at each day n % (n - 1) == 1, so it will keep doing this all the way till it reaches 2, 5, 4, 3, 2 + O(1) time
+
+```py
+class Solution:
+    def distinctIntegers(self, n: int) -> int:
+        return n - 1 if n > 2 else 1
+```
+
+## 2550. Count Collisions of Monkeys on a Polygon
+
+### Solution 1:  math + observe pattern + pow + fast mod algorithm + O(logn) time
+
+```py
+class Solution:
+    def monkeyMove(self, n: int) -> int:
+        return (pow(2, n, mod := int(1e9) + 7) - 2 + mod)%mod
+```
+
+## 2551. Put Marbles in Bags
+
+### Solution 1:  greedy + sort + nlogn time
+
+```py
+class Solution:
+    def putMarbles(self, weights: List[int], k: int) -> int:
+        if k == 1: return 0
+        n = len(weights)
+        min_pairs = sorted([weights[i] + weights[i-1] for i in range(1, n)])
+        min_score = weights[0] + sum(min_pairs[:k - 1]) + weights[-1]
+        max_score = weights[0] + sum(min_pairs[-k + 1:]) + weights[-1]
+        return max_score - min_score
+```
+
+### Solution 2: pairwise + k - 1 cuts + nlargest and nsmallest + heapq + O(nlogk) time
+
+```py
+class Solution:
+    def putMarbles(self, weights: List[int], k: int) -> int:
+        pairs = [x + y for x, y in pairwise(weights)]
+        return sum(nlargest(k - 1, pairs)) - sum(nsmallest(k - 1, pairs))
+```
+
+## 2552. Count Increasing Quadruplets
+
+### Solution 1:  iterative dp + O(n^2) time + compute count for i < j < k and uses them later when it can consider l index
+
+```py
+class Solution:
+    def countQuadruplets(self, nums: List[int]) -> int:
+        n = len(nums)
+        dp = [0]*n
+        res = 0
+        for j in range(n):
+            prev_smaller = 0
+            for i in range(j):
+                if nums[i] < nums[j]: # imagine i = k and j = l, so this is when k < l and nums[k] < nums[l]
+                    prev_smaller += 1
+                    res += dp[i] # where i = k and j = l, so this is k < l and nums[k] < nums[l]
+                else: # imagine i = k and j = j, so nums[k] > nums[j], so add this so can use it later
+                    dp[i] += prev_smaller
+        return res
+```
+
+### Solution 2: precompute count of smaller and count of larger elements for a range + iterate through each j, k pair that satisfies condition of j < k and nums[j] > nums[k] + multiple the count of smaller elements and larger elements in proper ranges + O(n^2) time
+
+```cpp
+class Solution {
+public:
+    long long countQuadruplets(vector<int>& nums) {
+        long long res = 0;
+        int n = nums.size();
+        // construct count_smaller which is a precomputed count array  of the count of smaller elements in a 
+        // range [i, j], where all elements in that range are smaller than nums[i] and i > j
+        vector<vector<int>> countSmaller(n, vector<int>(n, 0));
+        for (int i = n-1;i>=0;i--) {
+            int cnt = 0;
+            for (int j = i-1;j>=0;j--) {
+                if (nums[j] < nums[i]) {
+                    countSmaller[i][j] = ++cnt;
+                } else {
+                    countSmaller[i][j] = cnt;
+                }
+            }
+        }
+        // construct count_larger which is precomputed count array of the count of larger elements in a
+        // range [i, j], where all elements in that range are greater than nums[i] and i < j
+        vector<vector<int>> countLarger(n, vector<int>(n, 0));
+        for (int i = 0;i<n;i++) {
+            int cnt = 0;
+            for (int j = i+1;j<n;j++) {
+                if (nums[i] < nums[j]) {
+                    countLarger[i][j] = ++cnt;
+                } else {
+                    countLarger[i][j] = cnt;
+                }
+            }
+        }
+        for (int j = 1;j<n-2;j++) {
+            for (int k=j+1;k<n-1;k++) {
+                if (nums[j] > nums[k]) {
+                    // elements smaller than nums[k] in the range [0, k] and subtract the elments that are smaller on range [j, k] because want elements smaller than k in range [0, j]
+                    long long count_smaller = countSmaller[k][0] - countSmaller[k][j];
+                    // elements larger than nums[j] in the range [j, n-1] and subtract the elements that are larger in the range [j, k] because want elements larger than j in range [k, n-1
+                    long long count_larger = countLarger[j][n-1] - countLarger[j][k];
+                    res += count_smaller * count_larger;
+                }
+            }
+        }
+        return res;
+    }
+};
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1: 
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
