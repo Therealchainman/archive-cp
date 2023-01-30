@@ -1,9 +1,6 @@
 import os,sys
 from io import BytesIO, IOBase
 from typing import *
-import math
-from collections import deque, defaultdict
-
 
 # Fast IO Region
 BUFSIZE = 8192
@@ -46,39 +43,16 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-def bellmanFord(n: int, source: int, edges: List[List[int]]) -> List[int]:
-    dist = [int(1e18)]*n
-    parents = [-1]*n
-    dist[source] = 0
-    last_node_updated = None
-    for _ in range(n):
-        last_node_updated = None
-        for src, dst, wei in edges:
-            if dist[src] + wei < dist[dst]:
-                dist[dst] = dist[src] + wei
-                parents[dst] = src
-                last_node_updated = dst
-    if last_node_updated is None: 
-        print('NO')
-        return
-    cycle = []
-    for _ in range(n):
-        last_node_updated = parents[last_node_updated]
-    node = last_node_updated
-    while True:
-        cycle.append(node + 1)
-        if node == last_node_updated and len(cycle) > 1: break
-        node = parents[node]
-    print('YES')
-    print(*reversed(cycle))
+# sys.setrecursionlimit(1_000_000)
+from functools import reduce
+import operator
 
 def main():
-    n, m = map(int, input().split())
-    edges = [None] * m
-    for i in range(m):
-        u, v, w = map(int, input().split())
-        edges[i] = (u - 1, v - 1, w)
-    bellmanFord(n, 0, edges)
-    
+    n = int(input())
+    heaps = list(map(int, input().split()))
+    return 'first' if reduce(operator.xor, heaps) > 0 else 'second'
+
 if __name__ == '__main__':
-    main()
+    T = int(input())
+    for _ in range(T):
+        print(main())

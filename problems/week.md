@@ -8133,9 +8133,30 @@ class LRUCache:
         self.table[key] = value
 ```
 
-##
+### Solution 2:  OrderedDict + move_to_end + the leftmost keys are the most recently accessed + rightmost keys are the least recently accessed 
 
-### Solution 1:
+```py
+class LRUCache:
+
+    def __init__(self, capacity: int):
+        self.cache = OrderedDict()
+        self.cap = capacity
+
+    def get(self, key: int) -> int:
+        if key not in self.cache: return -1
+        self.cache.move_to_end(key)
+        return self.cache[key]
+
+    def put(self, key: int, value: int) -> None:
+        self.cache[key] = value
+        self.cache.move_to_end(key)
+        if len(self.cache) > self.cap:
+            self.cache.popitem(last = False)
+```
+
+## 473. Matchsticks to Square
+
+### Solution 1:  bitmask dp + recursive dp
 
 ```py
 class Solution:
@@ -19329,9 +19350,201 @@ public:
 };
 ```
 
-##
+# 460. LFU Cache
 
-### Solution 1:
+### Solution 1: hashmaps + minfreq quick eviction => (freq -> doubly linked lists) => (key -> node)
+
+```c++
+struct Node {
+    int key, val, freq;
+    list<int>::iterator it;
+};
+class LFUCache {
+public:
+    unordered_map<int,Node*> vmap;
+    unordered_map<int, list<int>> D;
+    int cap, minFreq;
+    LFUCache(int capacity) {
+        cap=capacity;
+        minFreq = 0;
+    }
+    
+    int get(int key) {
+        if (vmap.find(key)==vmap.end()) {return -1;}
+        Node *node = vmap[key];
+        int f = node->freq;
+        D[f].erase(node->it);
+        if (f==minFreq && D[f].empty()) {
+            minFreq++;
+        }
+        node->freq++;
+        D[f+1].push_front(key);
+        node->it = D[f+1].begin();
+        return node->val;
+    }
+    
+    void put(int key, int value) {
+        if (cap==0 && minFreq==0) return;
+        if (vmap.find(key)==vmap.end()) {
+            if (cap==0) {
+                int rmk = D[minFreq].back();
+                D[minFreq].pop_back();
+                vmap.erase(rmk);
+            } else {
+                cap--;
+            }
+            Node *node = new Node();
+            node->key = key;
+            node->val = value;
+            node->freq = 1;
+            D[1].push_front(key);
+            node->it = D[1].begin();
+            vmap[key]=node;
+            minFreq = 1;
+        } else {
+            Node *node = vmap[key];
+            int f = node->freq;
+            D[f].erase(node->it);
+            if (f==minFreq && D[f].empty()) {
+                minFreq++;
+            }
+            node->val = value;
+            node->freq++;
+            D[f+1].push_front(key);
+            node->it = D[f+1].begin();
+        }
+    }
+};
+```
+
+## Solution 2:  min heap + hash table for charge + hash table for counter + hash table for values
+
+```py
+class LFUCache:
+
+    def __init__(self, capacity: int):
+        self.minheap = []
+        self.charge_table = {}
+        self.table = {}
+        self.counter_table = defaultdict(int)
+        self.cap = capacity
+        self.charge = 0
+
+    def get(self, key: int) -> int:
+        if key not in self.table: return -1
+        
+        self.charge_table[key] = self.charge
+        self.counter_table[key] += 1
+        heappush(self.minheap, (self.counter_table[key], self.charge, key))
+        self.charge += 1
+        
+        return self.table[key]
+
+    def put(self, key: int, value: int) -> None:
+        if key in self.table:
+            self.table[key] = value
+            self.get(key)
+            return
+        if self.cap == 0: return
+        while len(self.table) == self.cap:
+            cnt, chrg, k = heappop(self.minheap)
+            if chrg == self.charge_table[k]:
+                del self.table[k]
+                del self.charge_table[k]
+                del self.counter_table[k]
+        self.charge_table[key] = self.charge
+        self.counter_table[key] += 1
+        heappush(self.minheap, (self.counter_table[key], self.charge, key))
+        self.charge += 1
+        self.table[key] = value
+```
+
+### Solution 3:  lru cache with infinite capacity + frequency dictionary and frequency lru cache dictionary + pointers to min frequency
+
+```py
+class LRUCache:
+
+    def __init__(self, capacity: int = math.inf):
+        self.cache = OrderedDict()
+        self.cap = capacity
+
+    def get(self, key: int) -> int:
+        if key not in self.cache: return -1
+        self.put(key, self.cache[key])
+        return self.cache[key]
+
+    def put(self, key: int, value: int) -> None:
+        self.cache[key] = value
+        self.cache.move_to_end(key)
+        if len(self.cache) > self.cap:
+            self.cache.popitem(last = False)
+
+    def discard(self, key: int) -> None:
+        if key not in self.cache: return
+        self.cache.move_to_end(key)
+        self.cache.popitem() # pops item from the end
+
+    """
+    returns key of lru item or -1 if lru cache is empty
+    """
+    def pop(self) -> int:
+        try:
+            return self.cache.popitem(last = False)[0] # pops item from start and returns just the key
+        except:
+            return -1
+
+    def __repr__(self):
+        return str(self.cache)
+    
+    def __len__(self):
+        return len(self.cache)
+
+    def __getitem__(self, key):
+        return self.cache[key]
+
+class LFUCache:
+
+    def __init__(self, capacity: int):
+        self.freq_key = dict() # points to the frequency of this key in lfu cache
+        self.freq_lru_cache = defaultdict(LRUCache) # frequency cache construct of lru caches with infinite capacities
+        self.min_freq_ptr = 0 # pointer to the least frequency with key or keys
+        self.total_count = 0 # count of objects in lfu cache
+        self.capacity = capacity # capacity of the lfu
+
+    def get(self, key: int) -> int:
+        if key not in self.freq_key: return -1
+        freq = self.freq_key[key]
+        val = self.freq_lru_cache[freq][key]
+        self.put(key, val)
+        return val
+
+    def put(self, key: int, value: int) -> None:
+        if self.capacity == 0: return
+        freq = self.freq_key.get(key, 0)
+        if freq == 0:
+            self.total_count += 1
+        if self.total_count > self.capacity:
+            lfu_key = self.freq_lru_cache[self.min_freq_ptr].pop()
+            self.freq_key.pop(lfu_key)
+            self.total_count -= 1
+        self.freq_lru_cache[freq].discard(key)
+        if freq == 0 or (freq == self.min_freq_ptr and len(self.freq_lru_cache[freq]) == 0):
+            self.min_freq_ptr = freq + 1
+        self.freq_lru_cache[freq + 1].put(key, value)
+        self.freq_key[key] = freq + 1
+```
+
+## 1908. Game of Nim
+
+### Solution 1:  nim game theory solution + xor + xor sum greater than 0 is winning state, and xor sum equal to 0 is losing state + O(n) time
+
+```py
+class Solution:
+    def nimGame(self, piles: List[int]) -> bool:
+        return reduce(operator.xor, piles) > 0
+```
+
+### Solution 2:  sprague grundy game theory
 
 ```py
 
