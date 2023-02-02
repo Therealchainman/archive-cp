@@ -19550,36 +19550,81 @@ class Solution:
 
 ```
 
-##
+## 953. Verifying an Alien Dictionary
 
-### Solution 1:
+### Solution 1:  recursion + groupby + custom comparator for groupby + dropwhile to remove 1 length words from front + O(m) time
 
 ```py
-
+class Solution:
+    def isAlienSorted(self, words: List[str], order: str) -> bool:
+        if len(words) == 1: return True
+        char_index = 0
+        for key, grp in groupby(words, key = lambda word: word[0]):
+            while char_index < len(order) and key != order[char_index]:
+                char_index += 1
+            if char_index == len(order): return False
+            next_words = []
+            for word in dropwhile(lambda word: len(word) == 1, grp):
+                if len(word) == 1: return False # SHOULDN'T SEE ANOTHER 1 LENGTH WORD
+                if len(word) > 1:
+                    next_words.append(word[1:])
+            if not self.isAlienSorted(next_words, order): return False
+        return True
 ```
 
-##
-
-### Solution 1:
+### Solution 2:  convert characters to index values + lexicographical ordering of the list of integers +  O(m) time, where m = count_chars_in(words)
 
 ```py
-
+class Solution:
+    def isAlienSorted(self, words: List[str], order: str) -> bool:
+        order_index_map = {ch: i for i, ch in enumerate(order)}
+        words = [[order_index_map[ch] for ch in word] for word in words]
+        return not any(x > y for x, y in zip(words, words[1:]))
 ```
 
-##
+## 1071. Greatest Common Divisor of Strings
 
-### Solution 1: 
+### Solution 1:  gcd + math + euclidean algorithm to find gcd O(logn) + O(n1 + n2) time
 
 ```py
-
+class Solution:
+    def gcdOfStrings(self, s1: str, s2: str) -> str:
+        return s1[:math.gcd(len(s1), len(s2))] if s1 + s2 == s2 + s1 else ''
 ```
 
-##
+## 734. Sentence Similarity
 
-### Solution 1:
+### Solution 1:  adjacency list + graph
 
 ```py
+class Solution:
+    def areSentencesSimilar(self, sentence1: List[str], sentence2: List[str], similarPairs: List[List[str]]) -> bool:
+        if len(sentence1) != len(sentence2): return False
+        adj_list = defaultdict(set)
+        for u, v in similarPairs:
+            adj_list[u].add(v)
+            adj_list[v].add(u)
+        for s1, s2 in zip(sentence1, sentence2):
+            if s1 != s2 and s1 not in adj_list[s2]: return False
+        return True
+```
 
+## 1626. Best Team With No Conflicts
+
+### Solution 1:  iterative dp + maximum sum increasing subsequence + O(n^2) time + O(n) extra space
+
+```py
+class Solution:
+    def bestTeamScore(self, scores: List[int], ages: List[int]) -> int:
+        n = len(scores)
+        dp = [0]*n
+        scores = [scores[i] for i in sorted(range(n), key = lambda i: (ages[i], scores[i]))]
+        for i in range(n):
+            dp[i] = scores[i]
+            for j in range(i):
+                if scores[i] >= scores[j]:
+                    dp[i] = max(dp[i], dp[j] + scores[i])
+        return max(dp)
 ```
 
 ##
