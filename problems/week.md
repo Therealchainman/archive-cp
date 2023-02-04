@@ -19627,6 +19627,136 @@ class Solution:
         return max(dp)
 ```
 
+## 567. Permutation in String
+
+### Solution 1:  sliding window + O(n) time + counter
+
+```py
+class Solution:
+    def checkInclusion(self, s1: str, s2: str) -> bool:
+        unicode = lambda ch: ord(ch) - ord('a')
+        freq, window_freq = [0]*26, [0]*26
+        for ch in s1:
+            freq[unicode(ch)] += 1
+        n1 = len(s1)
+        for i in range(len(s2)):
+            window_freq[unicode(s2[i])] += 1
+            if i >= n1 - 1:
+                if freq == window_freq: return True
+                window_freq[unicode(s2[i - n1 + 1])] -= 1
+        return False
+```
+
+## 2553. Separate the Digits in an Array
+
+### Solution 1:  map + chain from iterables 
+
+```py
+class Solution:
+    def separateDigits(self, nums: List[int]) -> List[int]:
+        return [dig for dig in map(int, chain.from_iterable(map(str, nums)))]
+```
+
+## 2554. Maximum Number of Integers to Choose From a Range I
+
+### Solution 1:  sort + greedy 
+
+```py
+class Solution:
+    def maxCount(self, banned: List[int], n: int, maxSum: int) -> int:
+        banned.sort()
+        banned.append(math.inf)
+        res = cur_sum = ptr = 0
+        for i in range(1, n + 1):
+            while banned[ptr] < i:
+                ptr += 1
+            if cur_sum + i > maxSum: break
+            if i != banned[ptr]:
+                res += 1
+                cur_sum += i
+        return res
+```
+
+## 2555. Maximize Win From Two Segments
+
+### Solution 1:  max heap + greedy + O(nlogn) time + O(n) extra space
+
+```py
+class Solution:
+    def maximizeWin(self, pos: List[int], k: int) -> int:
+        maxheap = []
+        left = 0
+        n = len(pos)
+        for right in range(n):
+            while pos[right] - pos[left] > k:
+                left += 1
+            val = right - left + 1
+            heappush(maxheap, (-val, pos[left]))
+        left += 1
+        while left < n:
+            val = n - left
+            heappush(maxheap, (-val, pos[left]))
+            left += 1
+        res = left = 0
+        for right in range(n):
+            while pos[right] - pos[left] > k:
+                left += 1
+            left_seg_val = right - left + 1
+            while maxheap and maxheap[0][-1] <= pos[right]:
+                heappop(maxheap)
+            right_seg_val = abs(maxheap[0][0]) if maxheap else 0
+            res = max(res, left_seg_val + right_seg_val)
+        return res
+```
+
+## 2556. Disconnect Path in a Binary Matrix by at Most One Flip
+
+### Solution 1:z
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1: 
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
