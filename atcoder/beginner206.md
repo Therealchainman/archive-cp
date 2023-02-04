@@ -1,6 +1,13 @@
+# Atcoder Beginner Contest 206
+
+## Notes:
+
+if the implementation is in python it will have this at the top of the python script for fast IO operations
+
+```py
 import os,sys
 from io import BytesIO, IOBase
-sys.setrecursionlimit(10**6)
+sys.setrecursionlimit(1_000_000)
 
 # Fast IO Region
 BUFSIZE = 8192
@@ -42,7 +49,13 @@ class IOWrapper(IOBase):
         self.readline = lambda: self.buffer.readline().decode("ascii")
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
+```
 
+## F. Interval Game 2 
+
+### Solution 1:  Sprague Grundy Theorem + recursive dp + nimbers + independent sub games + O(mn^2), n = range, m = number of segments
+
+```py
 from functools import lru_cache
 from itertools import dropwhile
 
@@ -70,3 +83,4 @@ if __name__ == '__main__':
     T = int(input())
     for _ in range(T):
         print(main())
+```
