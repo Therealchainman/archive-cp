@@ -19711,18 +19711,47 @@ class Solution:
 
 ## 2556. Disconnect Path in a Binary Matrix by at Most One Flip
 
-### Solution 1:z
+### Solution 1:
 
 ```py
 
 ```
 
-##
+## 1470. Shuffle the Array
 
-### Solution 1:
+### Solution 1:  bit manipulation + using first and second 10 bits to represent the pair (xi, yi), put them in the first n places, and then place the ones in the end first + O(n) time + O(1) space
 
 ```py
+class Solution:
+    def shuffle(self, nums: List[int], n: int) -> List[int]:
+        shift = 10
+        # PACK UP THE PAIRS (XI, YI)
+        for i in range(n):
+            nums[n - i - 1] |= (nums[~i] << shift)
+        # UNPACK THE PAIRS INTO CORRECT LOCATION IN ARRAY
+        for i in range(n):
+            num = nums[n - i - 1]
+            x, y = num & ((1 << shift) - 1), num >> 10
+            nums[~(2*i) - 1], nums[~(2*i)] = x, y
+        return nums
+```
 
+```py
+class Solution:
+    def shuffle(self, nums: List[int], n: int) -> List[int]:
+        shift = 10
+        # PACK UP THE PAIRS (XI, YI)
+        # STORE first 10 bits are for y and last 10 bits are for x if looking at bits from left to right with msb being on the left
+        for i in range(n, 2*n):
+            y = nums[i] << 10
+            nums[i - n] |= y
+        mask_for_x = ((1 << shift) - 1)
+        # UNPACK THE PAIRS INTO CORRECT LOCATION IN ARRAY
+        for i in reversed(range(n)):
+            x = nums[i] & mask_for_x
+            y = nums[i] >> shift
+            nums[2*i], nums[2*i + 1] = x, y
+        return nums
 ```
 
 ##
