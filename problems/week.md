@@ -4342,6 +4342,23 @@ class Solution:
         return num_valid_names
 ```
 
+```py
+class Solution:
+    def distinctNames(self, ideas: List[str]) -> int:
+        res = 0
+        unicode = lambda ch: ord(ch) - ord('a')
+        groups = [set() for _ in range(26)]
+        for ch, suffix in map(lambda word: (word[0], word[1:]), ideas):
+            groups[unicode(ch)].add(suffix)
+        for i in range(26):
+            for j in range(i + 1, 26):
+                num_mutuals = len(groups[i] & groups[j])
+                left_unique = len(groups[i]) - num_mutuals
+                right_unique = len(groups[j]) - num_mutuals
+                res += 2*left_unique*right_unique
+        return res
+```
+
 ## 2299. Strong Password Checker II
 
 ### Solution 1: conditional + any
