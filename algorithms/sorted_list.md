@@ -1,47 +1,9 @@
-import os,sys
-from io import BytesIO, IOBase
+# SORTED LIST
 
-# Fast IO Region
-BUFSIZE = 8192
-class FastIO(IOBase):
-    newlines = 0
-    def __init__(self, file):
-        self._fd = file.fileno()
-        self.buffer = BytesIO()
-        self.writable = "x" in file.mode or "r" not in file.mode
-        self.write = self.buffer.write if self.writable else None
-    def read(self):
-        while True:
-            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))
-            if not b:
-                break
-            ptr = self.buffer.tell()
-            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)
-        self.newlines = 0
-        return self.buffer.read()
-    def readline(self):
-        while self.newlines == 0:
-            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))
-            self.newlines = b.count(b"\n") + (not b)
-            ptr = self.buffer.tell()
-            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)
-        self.newlines -= 1
-        return self.buffer.readline()
-    def flush(self):
-        if self.writable:
-            os.write(self._fd, self.buffer.getvalue())
-            self.buffer.truncate(0), self.buffer.seek(0)
-class IOWrapper(IOBase):
-    def __init__(self, file):
-        self.buffer = FastIO(file)
-        self.flush = self.buffer.flush
-        self.writable = self.buffer.writable
-        self.write = lambda s: self.buffer.write(s.encode("ascii"))
-        self.read = lambda: self.buffer.read().decode("ascii")
-        self.readline = lambda: self.buffer.readline().decode("ascii")
-sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
-input = lambda: sys.stdin.readline().rstrip("\r\n")
+This is a sorted list implementation in Python. It allows O(logn) insert, delete, lookup for a value in a list.  
+It also allows index access to elements.  
 
+```py
 from bisect import bisect_left, bisect_right, insort
 from itertools import chain, repeat, starmap
 from math import log2
@@ -1678,38 +1640,4 @@ class SortedList(MutableSequence):
             print('len_lists', len(self._lists))
             print('lists', self._lists)
             raise
-
-def main():
-    n = int(input())
-    hp = list(map(int, input().split()))
-    used_sum = 0
-    used, extra = SortedList(), SortedList()
-    for h in sorted(hp):
-        if h > len(used):
-            used.add(h)
-            used_sum += h
-        else:
-            extra.add(h)
-    arith_seq_sum = lambda x: x*(x+1)//2
-    result = [0]*n
-    for i in reversed(range(n)):
-        result[i] = used_sum - arith_seq_sum(len(used))
-        ei = extra.bisect_left(hp[i])
-        ui = used.bisect_left(hp[i])
-        # IF AN EXTRA IS MORE THAN OR EQUAL TO CURRENT HP, YOU WILL WANT TO MOVE THAT EXTRA INTO USED AND UPDATED THE SUM OF USED HP
-        if ei < len(extra):
-            used.add(extra[ei])
-            used_sum += extra.pop(ei)
-        # IF HP IS IN USED REMOVE IT AND UPDATE
-        if ui < len(used):
-            ui = used.bisect_left(hp[i])
-            used.pop(ui)
-            used_sum -= hp[i]
-
-    return ' '.join(map(str, result))
-
-
-if __name__ == '__main__':
-    t = int(input())
-    for _ in range(t):
-        print(main())
+```

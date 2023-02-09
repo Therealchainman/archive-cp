@@ -14054,12 +14054,13 @@ class Solution:
 ```py
 class Solution:
     def jump(self, nums: List[int]) -> int:
-        jumps = farthest = needJump = 0
-        for i in range(len(nums) - 1):
-            farthest = max(farthest, i + nums[i])
-            if i == needJump:
+        max_reach = jumps = reach = 0
+        n = len(nums)
+        for i in range(n - 1):
+            max_reach = max(max_reach, i + nums[i])
+            if i == reach: # MUST JUMP NOW OR SOME TIME BEFORE
                 jumps += 1
-                needJump = farthest
+                reach = max_reach
         return jumps
 ```
 
@@ -19754,7 +19755,40 @@ class Solution:
         return nums
 ```
 
-##
+## 904. Fruit into Baskets
+
+### Solution 1: count + sliding window
+
+```py
+class Solution:
+    def totalFruit(self, fruits: List[int]) -> int:
+        cnta = cntb = 0
+        fruita = fruitb = -1
+        j = 0
+        maxFruit = 0
+        for i, fruit in enumerate(fruits):
+            if fruita == -1 or fruit==fruita: 
+                fruita = fruit
+                cnta += 1
+            elif fruitb == -1 or fruit==fruitb:
+                fruitb = fruit
+                cntb += 1
+            else:
+                while cnta > 0 and cntb > 0:
+                    cnta -= int(fruits[j]==fruita)
+                    cntb -= int(fruits[j]==fruitb)
+                    j+=1
+                if cnta == 0:
+                    fruita = fruit
+                    cnta += 1
+                else:
+                    fruitb = fruit
+                    cntb += 1
+            maxFruit = max(maxFruit, i - j + 1)
+        return maxFruit
+```
+
+## 2556. Disconnect Path in a Binary Matrix by at Most One Flip
 
 ### Solution 1:
 
@@ -19762,14 +19796,47 @@ class Solution:
 
 ```
 
-##
+## 280. Wiggle Sorts
 
-### Solution 1:
+### Solution 1:  bucket sort + extra space + two pointers, take from smallest then largest + O(n) time + O(n) space
 
 ```py
-
+class Solution:
+    def wiggleSort(self, nums: List[int]) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        def bucket_sort(nums: List[int]) -> List[int]:
+            m = max(nums)
+            bucket = [0] * (m + 1)
+            for num in nums:
+                bucket[num] += 1
+            return bucket
+        buckets = bucket_sort(nums)
+        n, m = len(nums), len(buckets)
+        left, right = 0, m - 1
+        for i in range(n):
+            if i%2 == 0:
+                left = next(dropwhile(lambda idx: buckets[idx] == 0, range(left, m)))
+                nums[i] = left
+                buckets[left] -= 1
+            else:
+                right = next(dropwhile(lambda idx: buckets[idx] == 0, range(right, -1, -1)))
+                nums[i] = right
+                buckets[right] -= 1
 ```
 
+### Solution 2:  greedy, sort when wiggle sort invariant is false + wiggle sort + O(n) time + O(1) space
+
+```py
+class Solution:
+    def wiggleSort(self, nums: List[int]) -> None:
+        for i in range(len(nums) - 1):
+            if i%2 == 0 and nums[i] > nums[i + 1]:
+                nums[i], nums[i + 1] = nums[i + 1], nums[i]
+            elif i%2 == 1 and nums[i] < nums[i + 1]:
+                nums[i], nums[i + 1] = nums[i + 1], nums[i]
+```
 ##
 
 ### Solution 1: 
