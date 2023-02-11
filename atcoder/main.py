@@ -1,6 +1,7 @@
 import os,sys
 from io import BytesIO, IOBase
 sys.setrecursionlimit(10**6)
+from typing import *
 
 # Fast IO Region
 BUFSIZE = 8192
@@ -43,30 +44,97 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-from functools import lru_cache
-from itertools import dropwhile
+import heapq
+import math
+from collections import deque
 
 def main():
-    n = int(input())
-    segments = [None]*n
-    for i in range(n):
-        left, right = map(int, input().split())
-        segments[i] = (left, right)
-    
-    @lru_cache(None)
-    def dp(start: int, end: int) -> int:
-        if start >= end: return 0
-        nimbers = [False]*101
-        for left_seg, right_seg in segments:
-            if start <= left_seg and right_seg <= end:
-                nimbers[dp(start, left_seg) ^ dp(right_seg, end)] = True
-        return next(dropwhile(lambda i: nimbers[i], range(len(nimbers))))
-    outcome = dp(1, 100)
-    if outcome:
-        return 'Alice'
-    return 'Bob'
+    n, m = map(int, input().split())
+    colors = [0] + list(map(int, input().split()))
+    adj_list = [[] for _ in range(n + 1)]
+    for _ in range(m):
+        u, v = map(int, input().split())
+        adj_list[u].append(v)
+        adj_list[v].append(u)
+    dist = [[math.inf]*(n + 1) for _ in range(n + 1)]
+    dist[1][n] = 0
+    queue = deque([(1, n, 0)])
+    while queue:
+        u, v, d = queue.popleft()
+        if (u, v) == (n, 1): return d
+        for nei_u in adj_list[u]:
+            for nei_v in adj_list[v]:
+                if colors[nei_u] == colors[nei_v]: continue
+                if d + 1 < dist[nei_u][nei_v]:
+                    dist[nei_u][nei_v] = d + 1
+                    queue.append((nei_u, nei_v, d + 1))
+    return -1
 
 if __name__ == '__main__':
     T = int(input())
     for _ in range(T):
         print(main())
+
+
+
+
+
+from typing import *
+
+class Node:
+    def __init__(self, x: int, next: 'Node' = None, random: 'Node' = None):
+        self.val = int(x)
+        self.next = next
+        self.random = random
+    
+    def __repr__(self):
+        return f'val: {self.val}, random val: {self.random.val if self.random else -1}'
+
+def main(head: 'Node'):
+    # INTERLEAVING OLD WITH NEW NODES
+    cur = head
+    while cur:
+        new_node = Node(cur.val, cur.next)
+        cur.next = new_node
+        cur = cur.next.next
+    # SETTING THE RANDOM POINTERS FOR NEW NODES
+    cur = head
+    while cur:
+        new_node = cur.next
+        if cur.random:
+            new_node.random = cur.random.next
+        cur = cur.next.next
+    # SEPARATE THE NODES LISTS
+    sentinel_node = Node(0)
+    new_cur = sentinel_node
+    cur = head
+    # old -> new -> None
+    while cur:
+        new_node = cur.next
+        new_cur.next = new_node 
+        cur.next = cur.next.next
+        cur = cur.next
+        new_cur = new_cur.next
+    return sentinel_node.next
+        
+
+
+def create_dataset(arr):
+    nodes = []
+    for u, _ in arr:
+        nodes.append(Node(u))
+    for node, (_, random_ptr) in zip(nodes, arr):
+        if random_ptr is not None:
+            node.random = nodes[random_ptr]
+    for i in range(len(nodes) - 1):
+        nodes[i].next = nodes[i + 1]
+    return nodes[0]
+
+if __name__ == '__main__':
+    data1 = [[7,None],[13,0],[11,4],[10,2],[1,0]] 
+    data2 = [[1,1],[2,1]]
+    data3 = [[3,None],[3,0],[3,None]]
+    dataset1, dataset2, dataset3 = map(create_dataset, [data1, data2, data3])
+    main(dataset1)
+    main(dataset2)
+    main(dataset3)

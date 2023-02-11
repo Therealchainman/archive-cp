@@ -19854,12 +19854,32 @@ class Solution:
             elif i%2 == 1 and nums[i] < nums[i + 1]:
                 nums[i], nums[i + 1] = nums[i + 1], nums[i]
 ```
-##
 
-### Solution 1: 
+## 1129. Shortest Path with Alternating Colors
+
+### Solution 1:  bfs + memoization + shortest path
 
 ```py
-
+class Solution:
+    def shortestAlternatingPaths(self, n: int, redEdges: List[List[int]], blueEdges: List[List[int]]) -> List[int]:
+        dist = [[math.inf]*n for _ in range(2)]
+        red, blue = 0, 1
+        dist[red][0] = dist[blue][0] = 0
+        adj_list = [[[] for _ in range(n)] for _ in range(2)]
+        for u, v in redEdges:
+            adj_list[red][u].append(v)
+        for u, v in blueEdges:
+            adj_list[blue][u].append(v)
+        queue = deque([(0, red), (0, blue)])
+        while queue:
+            node, prev_edge_color = queue.popleft()
+            color = prev_edge_color ^ 1
+            for nei in adj_list[color][node]:
+                ndist = dist[prev_edge_color][node] + 1
+                if ndist < dist[color][nei]:
+                    dist[color][nei] = ndist
+                    queue.append((nei, color))
+        return [min(rd, bd) if rd != math.inf or bd != math.inf else -1 for rd, bd in zip(dist[red], dist[blue])]
 ```
 
 ##
