@@ -19955,7 +19955,150 @@ class Solution:
         return sentinel.next
 ```
 
+## 2562. Find the Array Concatenation Value
+
+### Solution 1:  two pointers
+
+```py
+class Solution:
+    def findTheArrayConcVal(self, nums: List[int]) -> int:
+        n = len(nums)
+        left, right = 0, n - 1
+        res = 0
+        while left <= right:
+            if left == right:
+                num = nums[left]
+            else:
+                num = int(str(nums[left]) + str(nums[right]))
+            res += num
+            left += 1
+            right -= 1
+        return res
+            
+```
+
+## 2563. Count the Number of Fair Pairs
+
+### Solution 1:  sorted list + binary searching 
+
+```py
+from sortedcontainers import SortedList
+class Solution:
+    def countFairPairs(self, nums: List[int], lower: int, upper: int) -> int:
+        arr = SortedList()
+        res = 0
+        for num in nums:
+            lower_bound = lower - num
+            upper_bound = upper - num
+            left, right = arr.bisect_left(lower_bound), arr.bisect_right(upper_bound)
+            res += right - left
+            arr.add(num)
+        return res
+```
+
+## 2564. Substring XOR Queries
+
+### Solution 1:  bit manipulation + bit math + dictionary + creating all substrings up to length of mx which largest mx can be is 30
+
+```py
+class Solution:
+    def substringXorQueries(self, s: str, queries: List[List[int]]) -> List[List[int]]:
+        n, q = len(s), len(queries)
+        ans = [[-1]*2 for _ in range(q)]
+        query_index = defaultdict(list)
+        mx = 0
+        for i, (first, second) in enumerate(queries):
+            num = first ^ second
+            query_index[num].append(i)
+            mx = max(mx, len(bin(num)[2:]))
+        for i in range(n + 1):
+            left = max(0, i - mx)
+            for j in reversed(range(left, i)):
+                val = int(s[j:i], 2)
+                if val not in query_index: continue
+                for k in query_index[val]:
+                    ans[k] = [j, i - 1]
+                query_index.pop(val)
+        return ans
+```
+
+## 2565. Subsequence With the Minimum Score
+
+### Solution 1:  prefix + suffix + two pointers
+
+```py
+class Solution:
+    def minimumScore(self, s: str, t: str) -> int:
+        n1, n2 = len(s), len(t)
+        prefix, suffix = [0]*n1, [0]*n1
+        left, right = 0 , n2 - 1
+        for i, ch in enumerate(s):
+            if left < n2 and ch == t[left]:
+                left += 1
+            prefix[i] = left
+        for i in reversed(range(n1)):
+            ch = s[i]
+            if right >= 0 and ch == t[right]:
+                right -= 1
+            suffix[i] = right
+        res = math.inf
+        for i, (ri, le) in enumerate(zip(suffix, prefix)):
+            if i > 0 and i < n1 - 1 and prefix[i - 1] < prefix[i] and suffix[i] < suffix[i + 1]:
+                res = min(res, ri - le + 2)
+            else:
+                res = min(res, ri - le + 1)
+        return max(0, res)
+```
+
 ##
+
+### Solution 1: 
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+####
 
 ### Solution 1:
 
@@ -19989,6 +20132,27 @@ class Solution:
 
 ##
 
+### Solution 1: 
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
 ### Solution 1: 
 
 ```py
