@@ -1,5 +1,7 @@
 import os,sys
 from io import BytesIO, IOBase
+from typing import *
+# sys.setrecursionlimit(1_000_000)
 
 # Fast IO Region
 BUFSIZE = 8192
@@ -42,30 +44,14 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-from functools import reduce
-
 def main():
-    n = int(input())
-    if n%2 == 0:
-        print('No')
-        return
-    print('Yes')
-    second_elem = [0]*n
-    cur, left, right = 2*n, 0, n//2
-    for left in range(n//2):
-        second_elem[right] = cur
-        cur -= 1
-        right += 1
-        second_elem[left] = cur
-        cur -= 1
-    second_elem[right] = cur
-    pairs = [None]*n
-    for i in range(1, n + 1):
-        pairs[i-1] = (i, second_elem[i-1])
-    for x, y in pairs:
-        print(f'{x} {y}')
+    a, b = map(int, input().split())
+    n, m = map(int, input().split())
+    num_times_m = n // (m + 1)
+    remain = n - num_times_m*(m + 1) 
+    return min(num_times_m*m*a + min(remain*a, remain*b), n*b)
 
 if __name__ == '__main__':
     t = int(input())
     for _ in range(t):
-        main()
+        print(main())

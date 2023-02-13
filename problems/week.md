@@ -20050,12 +20050,14 @@ class Solution:
         return max(0, res)
 ```
 
-##
+## 1523. Count Odd Numbers in an Interval Range
 
-### Solution 1: 
+### Solution 1:  math + add one for it if odd number
 
 ```py
-
+class Solution:
+    def countOdds(self, low: int, high: int) -> int:
+        return (high - low + (low&1) + (high&1))//2
 ```
 
 ##
