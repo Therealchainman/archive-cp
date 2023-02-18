@@ -16374,6 +16374,16 @@ class Solution:
         return root
 ```
 
+### Solution 2: recursive + swap children nodes for node + return node
+
+```py
+class Solution:
+    def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        if not root: return root
+        root.left, root.right = self.invertTree(root.right), self.invertTree(root.left)
+        return root
+```
+
 ## 1657. Determine if Two Strings Are Close
 
 ### Solution 1:  counter + set to check for character occurrences + sort the values of counter to check equal frequencies of characters
@@ -20060,7 +20070,67 @@ class Solution:
         return (high - low + (low&1) + (high&1))//2
 ```
 
-##
+## 989. Add to Array-Form of Integer
+
+### Solution 1:  zip_longest + math add integers + carry
+
+```py
+class Solution:
+    def addToArrayForm(self, num: List[int], k: int) -> List[int]:
+        carry = 0
+        res = []
+        for x, y in zip_longest(map(int, reversed(num)), map(int, reversed(str(k))), fillvalue = 0):
+            carry, cur = divmod(x + y + carry, 10)
+            res.append(cur)
+        if carry:
+            res.append(carry)
+        return reversed(res)
+```
+
+## 67. Add Binary
+
+### Solution 1:
+
+```py
+class Solution:
+    def addBinary(self, a: str, b: str) -> str:
+        res, carry = int(a, 2), int(b, 2)
+        while carry:
+            res, carry = res ^ carry, (res & carry) << 1
+        return bin(res)[2:]
+```
+
+```py
+class Solution:
+    def addBinary(self, a: str, b: str) -> str:
+        res = []
+        carry = 0
+        for x, y in zip_longest(map(int, reversed(a)), map(int, reversed(b)), fillvalue = 0):
+            carry, cur = divmod(x + y + carry, 2)
+            res.append(cur)
+        if carry:
+            res.append(carry)
+        return ''.join(map(str, reversed(res)))
+```
+
+## 2566. Maximum Difference by Remapping a Digit
+
+### Solution 1:  brute force + try every possible replacement
+
+```py
+class Solution:
+    def minMaxDifference(self, num: int) -> int:
+        max_val = min_val = num
+        for d1 in string.digits:
+            for d2 in string.digits:
+                # replace d1 with d2
+                nnum = int(str(num).replace(d1, d2))
+                max_val = max(max_val, nnum)
+                min_val = min(min_val, nnum)
+        return max_val - min_val
+```
+
+## 2568. Minimum Impossible OR
 
 ### Solution 1:
 
@@ -20068,44 +20138,148 @@ class Solution:
 
 ```
 
-##
+## 2567. Minimum Score by Changing Two Elements
 
-### Solution 1:
+### Solution 1:  dumb way
 
 ```py
-
+class Solution:
+    def minimizeSum(self, nums: List[int]) -> int:
+        n = len(nums)
+        nums.sort()
+        res = math.inf
+        low_val, high_val = nums[0], nums[-1]
+        for i in range(2):
+            low_val = nums[i + 1]
+            res = min(res, high_val - low_val)
+        low_val = nums[0]
+        for i in range(1, 3):
+            high_val = nums[~i]
+            res = min(res, high_val - low_val)
+        low_val, high_val = nums[1], nums[-2]
+        res = min(res, high_val - low_val)
+        return res
 ```
 
-##
+## 2569. Handling Sum Queries After Update
 
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
+### Solution 1:  lazy segment tree + range queries + range updates + keeps track of count of ones on a segment and stores the number of flips on a segment + O(nlogn) time 
 
 ```py
+class LazySegmentTree:
+    def __init__(self, n: int, neutral: int, noop: int, arr: List[int]):
+        self.neutral = neutral
+        self.size = 1
+        self.noop = noop
+        self.n = n 
+        self.arr = arr
+        while self.size<n:
+            self.size*=2
+        self.num_flips = [noop for _ in range(self.size*2)] # number of flips in a segment
+        self.counts = [neutral for _ in range(self.size*2)] # count of ones in a segment
+        self.build()
+        
+    def build(self):
+        for segment_idx in range(self.n):
+            v = self.arr[segment_idx]
+            segment_idx += self.size - 1
+            self.counts[segment_idx] = v
+            self.ascend(segment_idx)
 
-```
+    def is_leaf_node(self, segment_right_bound, segment_left_bound) -> bool:
+        return segment_right_bound - segment_left_bound == 1
+    
+    def calc_op(self, x: int, y: int) -> int:
+        return x + y
 
-##
+    def modify_op(self, x: int, y: int) -> int:
+        return x ^ y
+    
+    """
+    Gives the count of a bit in a segment, which is a range. and the length of that range is represented by the segment_len.
+    And it flips all the bits such as 0000110 -> 1111001, the number of 1s are now segment_len - cnt, where cnt is the current number of 1s
+    So it goes from 2 -> 7 - 2 = 5
+    """
+    def flip_op(self, segment_len: int, cnt: int) -> int:
+        return segment_len - cnt
 
-### Solution 1:
+    def propagate(self, segment_idx: int, segment_left_bound: int, segment_right_bound: int) -> None:
+        # do not want to propagate if it is a leaf node or if it is no operation (means there are no updates stored there).
+        if self.is_leaf_node(segment_right_bound, segment_left_bound) or self.num_flips[segment_idx] == self.noop: return
+        left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+        children_segment_len = (segment_right_bound - segment_left_bound) >> 1
+        self.num_flips[left_segment_idx] = self.modify_op(self.num_flips[left_segment_idx], self.num_flips[segment_idx])
+        self.num_flips[right_segment_idx] = self.modify_op(self.num_flips[right_segment_idx], self.num_flips[segment_idx])
+        self.counts[left_segment_idx] = self.flip_op(children_segment_len, self.counts[left_segment_idx])
+        self.counts[right_segment_idx] = self.flip_op(children_segment_len, self.counts[right_segment_idx])
+        self.num_flips[segment_idx] = self.noop
+    
+    def ascend(self, segment_idx: int) -> None:
+        while segment_idx > 0:
+            segment_idx -= 1
+            segment_idx >>= 1
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            self.counts[segment_idx] = self.calc_op(self.counts[left_segment_idx], self.counts[right_segment_idx])
+    
+    def update(self, left: int, right: int, val: int) -> None:
+        stack = [(0, self.size, 0)]
+        segments = []
+        while stack:
+            segment_left_bound, segment_right_bound, segment_idx = stack.pop()
+            # NO OVERLAP
+            if segment_left_bound >= right or segment_right_bound <= left: continue
+            # COMPLETE OVERLAP
+            if segment_left_bound >= left and segment_right_bound <= right:
+                self.num_flips[segment_idx] = self.modify_op(self.num_flips[segment_idx], val)
+                segment_len = segment_right_bound - segment_left_bound
+                self.counts[segment_idx] = self.flip_op(segment_len, self.counts[segment_idx])
+                segments.append(segment_idx)
+                continue
+            # PARTIAL OVERLAP
+            mid_point = (segment_left_bound + segment_right_bound) >> 1
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            self.propagate(segment_idx, segment_left_bound, segment_right_bound)
+            stack.extend([(mid_point, segment_right_bound, right_segment_idx), (segment_left_bound, mid_point, left_segment_idx)])
+        for segment_idx in segments:
+            self.ascend(segment_idx)
 
-```py
-
-```
-
-####
-
-### Solution 1:
-
-```py
-
+    def query(self, left: int, right: int) -> int:
+        stack = [(0, self.size, 0)]
+        result = self.neutral
+        while stack:
+            segment_left_bound, segment_right_bound, segment_idx = stack.pop()
+            # NO OVERLAP
+            if segment_left_bound >= right or segment_right_bound <= left: continue
+            # LEAF NODE
+            if segment_left_bound >= left and segment_right_bound <= right:
+                result = self.calc_op(result, self.counts[segment_idx])
+                continue
+            mid_point = (segment_left_bound + segment_right_bound) >> 1
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2    
+            self.propagate(segment_idx, segment_left_bound, segment_right_bound)      
+            stack.extend([(mid_point, segment_right_bound, right_segment_idx), (segment_left_bound, mid_point, left_segment_idx)])
+        return result
+    
+    def __repr__(self) -> str:
+        return f"counts: {self.counts}, num_flips: {self.num_flips}"
+    
+class Solution:
+    def handleQuery(self, nums1: List[int], nums2: List[int], queries: List[List[int]]) -> List[int]:
+        n = len(nums1)
+        lazy_seg_tree = LazySegmentTree(n, 0, 0, nums1)
+        base, addl = sum(nums2), 0
+        ans = []
+        for query in queries:
+            if query[0] == 1:
+                left, right = query[1:]
+                lazy_seg_tree.update(left, right + 1, 1)
+            elif query[0] == 2:
+                p = query[1]
+                count_ones = lazy_seg_tree.query(0, n)
+                addl += p*count_ones
+            else:
+                ans.append(base + addl)
+        return ans
 ```
 
 ##

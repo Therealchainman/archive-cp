@@ -45,12 +45,29 @@ sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
 def main():
-    a, b = map(int, input().split())
-    n, m = map(int, input().split())
-    num_times_m = n // (m + 1)
-    remain = n - num_times_m*(m + 1) 
-    return min(num_times_m*m*a + min(remain*a, remain*b), n*b)
-
+    n, k = map(int, input().split())
+    cand_segments = [None]*n
+    for i in range(n):
+        cand_segments[i] = tuple(map(int, input().split()))
+    segments = []
+    for left, right in cand_segments:
+        if left <= k <= right: 
+            segments.append((left, right))
+    events = []
+    for left, right in segments:
+        events.append((left, 1))
+        events.append((right + 1, -1))
+    events.sort()
+    counts = [0]*52
+    for ev, incr in events:
+        counts[ev] += incr
+    delta = max_count_other = 0
+    for i in range(1, 51):
+        delta += counts[i]
+        if i != k:
+            max_count_other = max(max_count_other, delta)
+        counts[i] = delta
+    return 'YES' if counts[k] > max_count_other else 'NO'
 if __name__ == '__main__':
     t = int(input())
     for _ in range(t):
