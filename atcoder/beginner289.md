@@ -190,16 +190,39 @@ if __name__ == '__main__':
 
 ## F - Teleporter Takahashi
 
-### Solution 1: 
+### Solution 1:  a trivial way to change the current x, y based on two moves in the rectangle leads to solution + the cases that will guarantee that it cannot reach the answer + x, y needs to always have the same parity as tx, ty + you need x_min != x_max if you are going to be able to change that x to a target value.  + all moves will always be less than 1 million, think about it worst case is probably 400,000 moves to get to a target point.
 
 ```py
+def main():
+    sx, sy = map(int, input().split())
+    tx, ty = map(int, input().split())
+    x_min, x_max, y_min, y_max = map(int, input().split())
+    # (rx, ry) is point in the the rectangle
+    def move(rx: int, ry: int) -> Tuple[int, int]:
+        path.append(f'{rx} {ry}')
+        return 2*rx - x, 2*ry - y
+    for i in range(2):
+        x, y = sx, sy
+        path = ['Yes']
+        if i:
+            x, y = move(x_min, y_min)
+        if x%2 != tx%2 or y%2 != ty%2 or (x_min == x_max and x != tx) or (y_min == y_max and y != ty):
+            continue
+        while (x < tx): 
+            x, y = move(x_min, y_min)
+            x, y = move(x_min + 1, y_min)
+        while (x > tx):
+            x, y = move(x_min + 1, y_min)
+            x, y = move(x_min, y_min)
+        while (y < ty):
+            x, y = move(x_min, y_min)
+            x, y = move(x_min, y_min + 1)
+        while (y > ty):
+            x, y = move(x_min, y_min + 1)
+            x, y = move(x_min, y_min)
+        return '\n'.join(path)
+    return 'No'
 
-```
-
-## G - Shopping in AtCoder store
-
-### Solution 1: 
-
-```py
-
+if __name__ == '__main__':
+    print(main())
 ```

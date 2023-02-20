@@ -81,3 +81,11 @@ class TrieNode(defaultdict):
     def __init__(self):
         super().__init__(TrieNode)
         self.word = '$'
+
+class TrieNode(defaultdict):
+    def __init__(self):
+        super().__init__(TrieNode)
+        self.prefix_count = 0 # how many words have this prefix
+
+    def __repr__(self) -> str:
+        return f'is_word: {self.is_word} prefix_count: {self.prefix_count}, children: {self.keys()}'

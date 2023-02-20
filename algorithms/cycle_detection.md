@@ -19,3 +19,20 @@ def detect_cycle(node: str) -> bool:
     in_path.remove(node)
     return False
 ```
+
+## cycle detection in undirected graph
+
+### cycle detection with recursive dfs
+
+```py
+visited = [False]*n
+def is_cycle(node, parent_node):
+    visited[node] = True
+    for nei in adj_list[node]:
+        if not visited[nei]:
+            if is_cycle(nei, node):
+                return True
+        elif nei != parent_node:
+            return True
+    return False
+```

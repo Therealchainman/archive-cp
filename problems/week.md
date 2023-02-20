@@ -20115,50 +20115,39 @@ class Solution:
 
 ## 2566. Maximum Difference by Remapping a Digit
 
-### Solution 1:  brute force + try every possible replacement
+### Solution 1:  try mapping every digit to 0 and 9 to get the max difference + O(1) time since there are only 10 digits possible always
 
 ```py
 class Solution:
     def minMaxDifference(self, num: int) -> int:
-        max_val = min_val = num
-        for d1 in string.digits:
-            for d2 in string.digits:
-                # replace d1 with d2
-                nnum = int(str(num).replace(d1, d2))
-                max_val = max(max_val, nnum)
-                min_val = min(min_val, nnum)
+        lo, hi = '0', '9'
+        min_val, max_val = math.inf, -math.inf
+        for d in string.digits:
+            min_val = min(min_val, int(str(num).replace(d, lo)))
+            max_val = max(max_val, int(str(num).replace(d, hi)))
         return max_val - min_val
 ```
 
 ## 2568. Minimum Impossible OR
 
-### Solution 1:
+### Solution 1:  smallest power of two that doesn't exist in nums
 
 ```py
-
+class Solution:
+    def minImpossibleOR(self, nums: List[int]) -> int:
+        nums = set(nums)
+        return next(1 << i for i in range(32) if (1<<i) not in nums)
 ```
 
 ## 2567. Minimum Score by Changing Two Elements
 
-### Solution 1:  dumb way
+### Solution 1:  3 cases, always lowest score will be 0 from duplicates + case 1 difference between second largest and second smallest + case 2 difference between third largest and smallest + case 3 difference between largest and third smallest + O(nlogn)
 
 ```py
 class Solution:
     def minimizeSum(self, nums: List[int]) -> int:
-        n = len(nums)
         nums.sort()
-        res = math.inf
-        low_val, high_val = nums[0], nums[-1]
-        for i in range(2):
-            low_val = nums[i + 1]
-            res = min(res, high_val - low_val)
-        low_val = nums[0]
-        for i in range(1, 3):
-            high_val = nums[~i]
-            res = min(res, high_val - low_val)
-        low_val, high_val = nums[1], nums[-2]
-        res = min(res, high_val - low_val)
-        return res
+        return min(nums[-2] - nums[1], nums[-3] - nums[0], nums[-1] - nums[2])
 ```
 
 ## 2569. Handling Sum Queries After Update
@@ -20282,12 +20271,120 @@ class Solution:
         return ans
 ```
 
-##
-
-### Solution 1:
+### Solution 2:  range query is not needed, just store the total_sum for the segment tree at all times 
 
 ```py
+class LazySegmentTree:
+    def __init__(self, n: int, neutral: int, noop: int, arr: List[int]):
+        self.neutral = neutral
+        self.size = 1
+        self.noop = noop
+        self.n = n 
+        self.arr = arr
+        while self.size<n:
+            self.size*=2
+        self.num_flips = [noop for _ in range(self.size*2)] # number of flips in a segment
+        self.counts = [neutral for _ in range(self.size*2)] # count of ones in a segment
+        self.total_sum = sum(arr)
+        self.build()
+        
+    def build(self):
+        for segment_idx in range(self.n):
+            v = self.arr[segment_idx]
+            segment_idx += self.size - 1
+            self.counts[segment_idx] = v
+            self.ascend(segment_idx)
 
+    def is_leaf_node(self, segment_right_bound, segment_left_bound) -> bool:
+        return segment_right_bound - segment_left_bound == 1
+    
+    def calc_op(self, x: int, y: int) -> int:
+        return x + y
+
+    def modify_op(self, x: int, y: int) -> int:
+        return x ^ y
+    
+    """
+    Gives the count of a bit in a segment, which is a range. and the length of that range is represented by the segment_len.
+    And it flips all the bits such as 0000110 -> 1111001, the number of 1s are now segment_len - cnt, where cnt is the current number of 1s
+    So it goes from 2 -> 7 - 2 = 5
+    """
+    def flip_op(self, segment_len: int, cnt: int) -> int:
+        return segment_len - cnt
+
+    def propagate(self, segment_idx: int, segment_left_bound: int, segment_right_bound: int) -> None:
+        # do not want to propagate if it is a leaf node or if it is no operation (means there are no updates stored there).
+        if self.is_leaf_node(segment_right_bound, segment_left_bound) or self.num_flips[segment_idx] == self.noop: return
+        left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+        children_segment_len = (segment_right_bound - segment_left_bound) >> 1
+        self.num_flips[left_segment_idx] = self.modify_op(self.num_flips[left_segment_idx], self.num_flips[segment_idx])
+        self.num_flips[right_segment_idx] =### Solution 1:  3 cases, always lowest score will be 0 from duplicates + case 1 difference between second largest and second smallest + case 2 difference between third largest and smallest + case 3 difference between largest and third smallest + O(nlogn)
+ self.modify_op(self.num_flips[right_segment_idx], self.num_flips[segment_idx])
+        self.counts[left_segment_idx] = self.flip_op(children_segment_len, self.counts[left_segment_idx])
+        self.counts[right_segment_idx] = self.flip_op(children_segment_len, self.counts[right_segment_idx])
+        self.num_flips[segment_idx] = self.noop
+    
+    def ascend(self, segment_idx: int) -> None:
+        while segment_idx > 0:
+            segment_idx -= 1
+            segment_idx >>= 1
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            self.counts[segment_idx] = self.calc_op(self.counts[left_segment_idx], self.counts[right_segment_idx])
+    
+    def update(self, left: int, right: int, val: int) -> None:
+        stack = [(0, self.size, 0)]
+        segments = []
+        while stack:
+            segment_left_bound, segment_right_bound, segment_idx = stack.pop()
+            # NO OVERLAP
+            if segment_left_bound >= right or segment_right_bound <= left: continue
+            # COMPLETE OVERLAP
+            if segment_left_bound >= left and segment_right_bound <= right:
+                self.num_flips[segment_idx] = self.modify_op(self.num_flips[segment_idx], val)
+                segment_len = segment_right_bound - segment_left_bound
+                self.total_sum -= self.counts[segment_idx]
+                self.counts[segment_idx] = self.flip_op(segment_len, self.counts[segment_idx])
+                self.total_sum += self.counts[segment_idx]
+                segments.append(segment_idx)
+                continue
+            # PARTIAL OVERLAP
+            mid_point = (segment_left_bound + segment_right_bound) >> 1
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            self.propagate(segment_idx, segment_left_bound, segment_right_bound)
+            stack.extend([(mid_point, segment_right_bound, right_segment_idx), (segment_left_bound, mid_point, left_segment_idx)])
+        for segment_idx in segments:
+            self.ascend(segment_idx)
+    
+    def __repr__(self) -> str:
+        return f"counts: {self.counts}, num_flips: {self.num_flips}"
+    
+class Solution:
+    def handleQuery(self, nums1: List[int], nums2: List[int], queries: List[List[int]]) -> List[int]:
+        n = len(nums1)
+        lazy_seg_tree = LazySegmentTree(n, 0, 0, nums1)
+        base, addl = sum(nums2), 0
+        ans = []
+        for query in queries:
+            if query[0] == 1:
+                left, right = query[1:]
+                lazy_seg_tree.update(left, right + 1, 1)
+            elif query[0] == 2:
+                p = query[1]
+                count_ones = lazy_seg_tree.total_sum
+                addl += p*count_ones
+            else:
+                ans.append(base + addl)
+        return ans
+```
+
+## 35. Search Insert Position
+
+### Solution 1:  binary search with bisect_left + log(n)
+
+```py
+class Solution:
+    def searchInsert(self, nums: List[int], target: int) -> int:
+        return bisect.bisect_left(nums, target)
 ```
 
 ##
