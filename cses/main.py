@@ -43,16 +43,46 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-# sys.setrecursionlimit(1_000_000)
-from functools import reduce
-import operator
+sys.setrecursionlimit(1_000_000)
 
 def main():
     n = int(input())
-    heaps = list(map(int, input().split()))
-    return 'first' if reduce(operator.xor, heaps) > 0 else 'second'
+    adj_list = [[] for _ in range(n)]
+    for _ in range(n - 1):
+        u, v = map(int, input().split())
+        u -= 1
+        v -= 1
+        adj_list[u].append(v)
+        adj_list[v].append(u)
+    leaf_lens1, leaf_lens2 = [0] * n, [0] * n
+    path_node1, path_node2 = [-1] * n, [-1] * n
+    def dfs1(node: int, parent: int) -> int:
+        for child in adj_list[node]:
+            if child == parent: continue
+            leaf_len = dfs1(child, node)
+            if leaf_len > leaf_lens1[node]:
+                leaf_lens2[node] = leaf_lens1[node]
+                path_node2[node] = path_node1[node]
+                leaf_lens1[node] = leaf_len
+                path_node1[node] = child
+            elif leaf_len > leaf_lens2[node]:
+                leaf_lens2[node] = leaf_len
+                path_node2[node] = child
+        return leaf_lens1[node] + 1
+    dfs1(0, -1)
+    parent_lens = [0] * n
+    def dfs2(node: int, parent: int) -> None:
+        parent_lens[node] = parent_lens[parent] + 1 if parent != -1 else 0
+        if parent != -1 and node != path_node1[parent]:
+            parent_lens[node] = max(parent_lens[node], leaf_lens1[parent] + 1)
+        if parent != -1 and node != path_node2[parent]:
+            parent_lens[node] = max(parent_lens[node], leaf_lens2[parent] + 1)
+        for child in adj_list[node]:
+            if child == parent: continue
+            dfs2(child, node)
+    dfs2(0, -1)
+    res = [max(leaf, pleaf) for leaf, pleaf in zip(leaf_lens1, parent_lens)]
+    print(*res)
 
 if __name__ == '__main__':
-    T = int(input())
-    for _ in range(T):
-        print(main())
+    main()

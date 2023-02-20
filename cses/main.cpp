@@ -1,38 +1,52 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-int memo[1301];
-int thres = 10000;
-
-int grundy(int coins) {
-	if (memo[coins] != -1) return memo[coins];
-	if (coins <= 2) return 0;
-	vector<int> grundy_numbers(thres, 0);
-	for (int i = 1; i <= coins/2; i++) {
-		if (i == coins - i) continue;
-		grundy_numbers[grundy(i) ^ grundy(coins - i)] = 1;
-	}
-	for (int grundy_number = 0; grundy_number < thres; grundy_number++) {
-		if (grundy_numbers[grundy_number] == 0) {
-			return memo[coins] = grundy_number;
+int dfs1(int node, int parent, vector<vector<int>>& graph, vector<int>& leaf_lens1, vector<int>& path_node1, vector<int>& leaf_lens2, vector<int>& path_node2) {
+	for (int& nei : graph[node]) {
+		if (nei == parent) continue;
+		int leaf_len = dfs1(nei, node, graph, leaf_lens1, path_node1, leaf_lens2, path_node2);
+		if (leaf_len > leaf_lens1[node]) {
+			leaf_lens2[node] = leaf_lens1[node];
+			path_node2[node] = path_node1[node];
+			leaf_lens1[node] = leaf_len;
+			path_node1[node] = nei;
+		} else if (leaf_len > leaf_lens2[node]) {
+			leaf_lens2[node] = leaf_len;
+			path_node2[node] = nei;
 		}
-	}
-	return -1;
+    }
+	return leaf_lens1[node] + 1;
 }
-
-int main() {
-	cin.tie(0)->sync_with_stdio(0);
-	int n, t;
-	cin >> t;
-	memset(memo, -1, sizeof(memo));
-	grundy(1300);
-	while (t--) {
-		cin >> n;
-		if (n <= 1300) {
-			cout << (memo[n] > 0 ? "first" : "second") << endl;
-		} else {
-			cout << "first" << endl;
-		}
+void dfs2(int node, int parent, vector<vector<int>>& graph, vector<int>& leaf_lens1, vector<int>& path_node1, vector<int>& leaf_lens2, vector<int>& path_node2, vector<int>& parent_lens) {
+	parent_lens[node] = parent > 0 ? parent_lens[parent] + 1 : 0;
+	if (parent > 0 && node != path_node1[parent]) {
+		parent_lens[node] = max(parent_lens[node], leaf_lens1[parent] + 1);
 	}
-	return 0;
+	if (parent > 0 && node != path_node2[parent]) {
+		parent_lens[node] = max(parent_lens[node], leaf_lens2[parent] + 1);
+	}
+	for (int& nei : graph[node]) {
+		if (nei == parent) continue;
+		dfs2(nei, node, graph, leaf_lens1, path_node1, leaf_lens2, path_node2, parent_lens);
+    }
+}
+int main() {
+    int n, a,b;
+    // freopen("input.txt", "r", stdin);
+    // freopen("output.txt", "w", stdout);
+    cin>>n;
+    vector<vector<int>> graph(n+1);
+    for(int i=0;i<n-1;i++){
+        cin>>a>>b;
+        graph[a].push_back(b);
+        graph[b].push_back(a);
+    }
+	vector<int> leaf_lens1(n+1, 0), leaf_lens2(n + 1, 0), parent_lens(n + 1, 0);
+	vector<int> path_node1(n + 1, 0), path_node2(n + 1, 0);
+	dfs1(1, 0, graph, leaf_lens1, path_node1, leaf_lens2, path_node2);
+	dfs2(1, 0, graph, leaf_lens1, path_node1, leaf_lens2, path_node2, parent_lens);
+	for (int i = 1; i <= n; i++) {
+		cout << max(leaf_lens1[i], parent_lens[i]) << " ";
+	}
+	cout << endl;
 }
