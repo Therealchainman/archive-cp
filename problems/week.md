@@ -20387,20 +20387,54 @@ class Solution:
         return bisect.bisect_left(nums, target)
 ```
 
-##
+## 1110. Delete Nodes And Return Forest
 
-### Solution 1:
+### Solution 1:  postorder traversal on binary tree + sentinel node to get the root of the tree as forest + if node is in delete list + it's left and righ children will be added to forest + this needs to return None, because  parent node above it will have it's left or right set to None, if this was left or right node for it. 
 
 ```py
-
+class Solution:
+    def delNodes(self, root: Optional[TreeNode], to_delete: List[int]) -> List[TreeNode]:
+        sentinel_node = TreeNode(0, root)
+        self.forest = []
+        to_delete = set([0] + to_delete)
+        def postorder(node: Optional[TreeNode]) -> Optional[TreeNode]:
+            if not node: return node
+            left, right = postorder(node.left), postorder(node.right)
+            if node.val in to_delete:
+                if left:
+                    self.forest.append(left)
+                if right:
+                    self.forest.append(right)
+                return None
+            node.left, node.right = left, right
+            return node
+        postorder(sentinel_node)
+        return self.forest
 ```
 
-##
+## 540. Single Element in a Sorted Array
 
-### Solution 1:
+### Solution 1:  binary search + xor + move to right segment if nums[mid] == nums[mid^1] because then you know it is not on left segment + log(n)
 
 ```py
+class Solution:
+    def singleNonDuplicate(self, nums: List[int]) -> int:
+        left, right = 0, len(nums) - 1
+        while left < right:
+            mid = (left + right) >> 1
+            if nums[mid] == nums[mid ^ 1]:
+                left = mid + 1
+            else:
+                right = mid
+        return nums[left]
+```
 
+### Solution 2: bisect_left + this creates an array that will be something like [F, F, T, T, T], and so you want the first T in here + use bisect_left
+
+```py
+class Solution:
+    def singleNonDuplicate(self, nums: List[int]) -> int:
+        return nums[bisect.bisect_left(range(len(nums) - 1), True, key = lambda i: nums[i] != nums[i ^ 1])]
 ```
 
 ##
