@@ -1,3 +1,8 @@
+# CODEFORCES
+
+## AT THE TOP
+
+```py
 import os,sys
 from io import BytesIO, IOBase
 from typing import *
@@ -44,6 +49,25 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
+def main():
+    n, h = map(int, input().split())
+    dp = [[0]*(n + 1) for _ in range(n + 1)]
+    for i in range(n + 1):
+        dp[0][i] = 1
+    for height in range(1, n + 1):
+        for i in range(1, n + 1):
+            for j in range(i):
+                dp[i][height] += dp[j][height - 1] * dp[i - j - 1][height - 1]
+    return dp[n][n] - dp[n][h - 1]
+if __name__ == '__main__':
+    print(main())
+```
+
+## D. How many trees?
+
+### Solution 1:  catalan number's + iterative dp + catalan number's with height of tree
+
+```py
 from itertools import product
 
 def main():
@@ -55,5 +79,7 @@ def main():
         for j in range(i):
             dp[i][height] += dp[j][height - 1] * dp[i - j - 1][height - 1]
     return dp[n][n] - dp[n][h - 1]
+    
 if __name__ == '__main__':
     print(main())
+```

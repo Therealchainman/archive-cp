@@ -15128,6 +15128,17 @@ class Solution:
         return dp[-1]
 ```
 
+### Solution 2:  catalan's numbers + analytical formula + O(n) time
+
+```py
+class Solution:
+    def numTrees(self, n: int) -> int:
+        cn = 1
+        for i in range(1, n + 1):
+            cn = (2*(2*i - 1)*cn)//(i + 1)
+        return cn
+```
+
 ## 1143. Longest Common Subsequence
 
 ### Solution 1:  iterative dp + space optimized O(C) space
@@ -20439,7 +20450,204 @@ class Solution:
 
 ##
 
+### Solution 1:  binary search with bisect_left + custom key + FFFTTT, return first True + O(nlogn)
+
+```py
+class Solution:
+    def shipWithinDays(self, weights: List[int], days: int) -> int:
+        n = len(weights)
+        def possible(capacity: int) -> bool:
+            i = 0
+            for _ in range(days):
+                cur_cap = 0
+                while i < n and cur_cap + weights[i] <= capacity:
+                    cur_cap += weights[i]
+                    i += 1
+                if i == n: return True
+            return False
+        return bisect.bisect_left(range(500_000), True, key = lambda capacity: possible(capacity))
+```
+
+```py
+class Solution:
+    def shipWithinDays(self, weights: List[int], days: int) -> int:
+        n = len(weights)
+        left, right = max(weights), sum(weights)
+        def possible(capacity: int) -> bool:
+            i = 0
+            for _ in range(days):
+                cur_cap = 0
+                while i < n and cur_cap + weights[i] <= capacity:
+                    cur_cap += weights[i]
+                    i += 1
+                if i == n: return True
+            return False
+        return bisect.bisect_left(range(left, right + 1), True, key = lambda capacity: possible(capacity)) + left
+```
+
+## 1259. Handshakes That Don't Cross
+
+### Solution 1: analytical formula + constant space iterative dp + O(n) time
+
+```py
+class Solution:
+    def numberOfWays(self, numPeople: int) -> int:
+        cn, mod = 1, int(1e9) + 7
+        for i in range(1, numPeople//2 + 1):
+            cn = (2*(2*i - 1)*cn)//(i + 1)
+        return cn%mod
+```
+
+### Solution 2: dynamic programming with count for N people
+
+![visualization](images/handshakes_n_people.png)
+
+We only need to consider the number of ways for even number of people.
+
+TC: O(N^2)
+
+```c++
+const int MOD = 1e9+7;
+class Solution {
+public:
+    int numberOfWays(int numPeople) {
+        vector<long long> dp(numPeople+1,-1);
+        function<long long(int)> dfs = [&](int n) {
+            if (n<=2) return 1LL;
+            if (dp[n]!=-1) return dp[n];
+            long long cnt = 0;
+            for (int i = 0;i<=n-2;i+=2) {
+                cnt = (cnt+dfs(i)*dfs(n-i-2))%MOD;
+            }
+            return dp[n]=cnt;
+        };
+        return dfs(numPeople);
+    }
+};
+```
+
+### Solution 3: dynamic programming with count for N/2 pairs of people 
+
+![visualization](images/handshakes_pairs.png)
+
+```c++
+const int MOD = 1e9+7;
+class Solution {
+public:
+    int numberOfWays(int numPeople) {
+        vector<long long> dp(numPeople/2+1,-1);
+        function<long long(int)> dfs = [&](int n) {
+            if (n<2) return 1LL;
+            if (dp[n]!=-1) return dp[n];
+            long long cnt = 0;
+            for (int i = 0;i<n;i++) {
+                cnt = (cnt+dfs(i)*dfs(n-i-1))%MOD;
+            }
+            return dp[n]=cnt;
+        };
+        return dfs(numPeople/2);
+    }
+};
+```
+
+### Solution 4: iterative DP with count for N/2 pairs of people
+
+```c++
+const int MOD = 1e9+7;
+class Solution {
+public:
+    int numberOfWays(int numPeople) {
+        int n = numPeople/2;
+        vector<long long> dp(n+1,0);
+        dp[0]=1;
+        for (int i = 0;i<=n;i++) {
+            for (int j = 0;j<i;j++) {
+                dp[i] = (dp[i] + dp[j]*dp[i-j-1])%MOD;
+            }
+        }
+        return dp[n];
+    }
+};
+```
+
+### Solution 5:  math.comb + binomial coefficient + number of combinations of (2n, n)
+
+```py
+class Solution:
+    def numberOfWays(self, numPeople: int) -> int:
+        n, mod = numPeople//2, int(1e9) + 7
+        return (math.comb(2*n, n)//(n + 1))%mod
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
 ### Solution 1: 
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+### Solution 1: 
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
 
 ```py
 
