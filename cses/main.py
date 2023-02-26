@@ -43,46 +43,59 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-sys.setrecursionlimit(1_000_000)
+# sys.setrecursionlimit(1_000_000)
+
+"""
+Euler Tour Technique to a random tree
+
+relabel or index of the tree nodes
+
+
+Necessary and sufficient conditions
+
+An undirected graph has a closed Euler tour if and only if it is connected and each vertex has an even degree.
+
+An undirected graph has an open Euler tour (Euler path) if it is connected, and each vertex, except for exactly two vertices, has an even degree. The two vertices of odd degree have to be 
+the endpoints of the tour.
+
+A directed graph has a closed Euler tour if and only if it is strongly connected and the in-degree of each vertex is equal to its out-degree.
+
+Similarly, a directed graph has an open Euler tour (Euler path) if and only if for each vertex the difference between its in-degree and out-degree is 0, except for two vertices, 
+where one has difference +1 (the start of the tour) and the other has difference -1 (the end of the tour) and, if you add an edge from the end to the start, the graph is strongly connected.
+
+Definition 13.1.1.  A walk is closed if it begins and ends with the same vertex.
+A trail is a walk in which no two vertices appear consecutively (in either order) more than once. (That is, no edge is used more than once.)
+
+A tour is a closed trail.
+
+An Euler trail is a trail in which every pair of adjacent vertices appear consecutively. (That is, every edge is used exactly once.)
+
+An Euler tour is a closed Euler trail.
+"""
+
+class FenwickTree:
+    def __init__(self, N):
+        self.sums = [0 for _ in range(N+1)]
+
+    def update(self, i, delta):
+        while i < len(self.sums):
+            self.sums[i] += delta
+            i += i & (-i)
+
+    def query(self, i):
+        res = 0
+        while i > 0:
+            res += self.sums[i]
+            i -= i & (-i)
+        return res
+
+    def __repr__(self):
+        return f"array: {self.sums}"
 
 def main():
-    n = int(input())
-    adj_list = [[] for _ in range(n)]
-    for _ in range(n - 1):
-        u, v = map(int, input().split())
-        u -= 1
-        v -= 1
-        adj_list[u].append(v)
-        adj_list[v].append(u)
-    leaf_lens1, leaf_lens2 = [0] * n, [0] * n
-    path_node1, path_node2 = [-1] * n, [-1] * n
-    def dfs1(node: int, parent: int) -> int:
-        for child in adj_list[node]:
-            if child == parent: continue
-            leaf_len = dfs1(child, node)
-            if leaf_len > leaf_lens1[node]:
-                leaf_lens2[node] = leaf_lens1[node]
-                path_node2[node] = path_node1[node]
-                leaf_lens1[node] = leaf_len
-                path_node1[node] = child
-            elif leaf_len > leaf_lens2[node]:
-                leaf_lens2[node] = leaf_len
-                path_node2[node] = child
-        return leaf_lens1[node] + 1
-    dfs1(0, -1)
-    parent_lens = [0] * n
-    def dfs2(node: int, parent: int) -> None:
-        parent_lens[node] = parent_lens[parent] + 1 if parent != -1 else 0
-        if parent != -1 and node != path_node1[parent]:
-            parent_lens[node] = max(parent_lens[node], leaf_lens1[parent] + 1)
-        if parent != -1 and node != path_node2[parent]:
-            parent_lens[node] = max(parent_lens[node], leaf_lens2[parent] + 1)
-        for child in adj_list[node]:
-            if child == parent: continue
-            dfs2(child, node)
-    dfs2(0, -1)
-    res = [max(leaf, pleaf) for leaf, pleaf in zip(leaf_lens1, parent_lens)]
-    print(*res)
+    n, q = map(int, input().split())
+    arr = list(map(int, input().split()))
+
 
 if __name__ == '__main__':
     main()

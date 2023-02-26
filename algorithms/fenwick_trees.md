@@ -67,7 +67,6 @@ class FenwickTree:
         self.sums = [0 for _ in range(N+1)]
 
     def update(self, i, delta):
-
         while i < len(self.sums):
             self.sums[i] += delta
             i += i & (-i)

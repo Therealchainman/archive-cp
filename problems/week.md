@@ -20579,49 +20579,177 @@ class Solution:
         return (math.comb(2*n, n)//(n + 1))%mod
 ```
 
-##
+## 502. IPO
 
-### Solution 1:
+### Solution 1:  max heap + sort with zip and custom key + pairs
 
 ```py
-
+class Solution:
+    def findMaximizedCapital(self, k: int, w: int, profits: List[int], capital: List[int]) -> int:
+        projects = sorted(zip(profits, capital), key = lambda p: p[1])
+        n, i = len(projects), 0
+        maxheap = []
+        for _ in range(k):
+            while i < n and projects[i][1] <= w:
+                heappush(maxheap, -projects[i][0])
+                i += 1
+            if not maxheap: break
+            w -= heappop(maxheap)
+        return w
 ```
 
-##
+## 1675. Minimize Deviation in Array
 
-### Solution 1:
+
+### Solution 1: Greedy with min and max heap datastructure
 
 ```py
+from heapq import heappush, heappop, heapify
+class Solution:
+    def minimumDeviation(self, nums: List[int]) -> int:
+        
+        # BUILD MIN AND MAX HEAP DATASTRUCTURES
+        min_heap, max_heap = nums, [-num for num in nums]
+        heapify(min_heap)
+        heapify(max_heap)
+        best = math.inf
 
+        # INITIAL DEVIATION
+        minv, maxv= min_heap[0], abs(max_heap[0])
+        best = min(best, maxv-minv)
+        
+        # DOUBLE ODD ELEMENTS FROM MIN HEAP AS LONG IT MINIMIZE DEVIATION
+        while min_heap[0]%2!=0 and abs(2*min_heap[0]-abs(max_heap[0])) <= abs(max_heap[0])-min_heap[0]:
+            minv = min_heap[0]
+            heappush(min_heap, minv*2)
+            heappush(max_heap, -minv*2)
+            # print(f"maximize the odd value in the array : minv={minv}, maxv={abs(max_heap[0])}")
+            heappop(min_heap)
+            best = min(best, abs(max_heap[0]) - min_heap[0])
+
+        # HALF EVEN ELEMENTS FROM MAX HEAP AS LONG IT MINIMIZE DEVIATION
+        while abs(max_heap[0])%2==0 and abs(min_heap[0]-(abs(max_heap[0])//2)) <= abs(max_heap[0])-min_heap[0]:
+            maxv= abs(max_heap[0])
+            heappush(min_heap, maxv//2)
+            heappush(max_heap, -maxv//2)
+            heappop(max_heap)
+            # print(f"minimize the even value in the array : maxv={maxv}, minv={min_heap[0]}")
+            best = min(best, abs(max_heap[0]) - min_heap[0])
+            
+        return best
 ```
-### Solution 1: 
+
+### Solution 2: min heap + divide all the 2 factors from each integer
 
 ```py
-
+class Solution:
+    def minimumDeviation(self, nums: List[int]) -> int:
+        def shrink(start):
+            while start%2 == 0:
+                start >>= 1
+            return start
+        heapify(minheap := [(shrink(num), -num) for num in nums])
+        max_val, res = max(shrink(num) for num in nums), math.inf
+        while len(minheap) > 1:
+            v, num = heappop(minheap)
+            res = min(res, max(max_val - v, 0))
+            if v%2 == 0 and v >= abs(num): break
+            v <<= 1
+            max_val = max(max_val, v)
+            heappush(minheap, (v, num))
+        return res
 ```
 
-##
+## 652. Find Duplicate Subtrees
 
-### Solution 1:
+### Solution 1:  preorder traversal encoding of tree with string and null for empty nodes + hashmap for subtrees to find if seen more than once + recursion + O(n^2) time
 
 ```py
-
+class Solution:
+    def findDuplicateSubtrees(self, root: Optional[TreeNode]) -> List[Optional[TreeNode]]:  
+        subtrees = defaultdict(list)
+        def encoding_tree(node) -> str:
+            if not node: return 'null'
+            tree_struct = f'{node.val}, {encoding_tree(node.left)}, {encoding_tree(node.right)}'
+            subtrees[tree_struct].append(node)
+            return tree_struct
+        encoding_tree(root)
+        return [nodes[0] for nodes in subtrees.values() if len(nodes) > 1]
 ```
 
-##
+## 2574. Left and Right Sum Differences
 
-### Solution 1:
+### Solution 1:  prefix + suffix sum 
 
 ```py
-
+class Solution:
+    def leftRigthDifference(self, nums: List[int]) -> List[int]:
+        n = len(nums)
+        left_sum, right_sum = 0, sum(nums)
+        ans = [0]*n
+        for i, num in enumerate(nums):
+            right_sum -= num
+            ans[i] = abs(right_sum - left_sum)
+            left_sum += num
+        return ans
 ```
 
-##
+## 2575. Find the Divisibility Array of a String
 
-### Solution 1:
+### Solution 1:  math + modular arithmetic + remainder theorem + n = q*m + r
 
 ```py
+class Solution:
+    def divisibilityArray(self, word: str, m: int) -> List[int]:
+        n = len(word)
+        rem = 0
+        ans = [0]*n
+        for i, dig in enumerate(map(int, word)):
+            rem = (10*rem + dig)%m
+            if rem == 0: ans[i] = 1
+        return ans
+```
 
+## 2576. Find the Maximum Number of Marked Indices
+
+### Solution 1:  greedy + sort + always best to take the smallest half numbers and mark them together with largest number at jth index.  Best it will do is mark all the numbers
+
+```py
+class Solution:
+    def maxNumOfMarkedIndices(self, nums: List[int]) -> int:
+        n, res = len(nums), 0
+        j = n - 1
+        nums.sort()
+        for i in reversed(range(n//2)):
+            if 2*nums[i] <= nums[j]:
+                res += 2
+                j -= 1
+        return res
+```
+
+## 2577. Minimum Time to Visit a Cell In a Grid
+
+### Solution 1:  ping pong dijkstra algorithm + minheap + single source shortest path
+
+```py
+class Solution:
+    def minimumTime(self, grid: List[List[int]]) -> int:
+        if grid[1][0] > 1 and grid[0][1] > 1: return -1
+        R, C = len(grid), len(grid[0])
+        vis = set([(0, 0)])
+        minheap = [(0, 0, 0)]
+        in_bounds = lambda r, c: 0 <= r < R and 0 <= c < C
+        neighborhood = lambda r, c: ((r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1))
+        while minheap:
+            time, r, c = heappop(minheap)
+            if (r, c) == (R - 1, C - 1): return time
+            for nr, nc in neighborhood(r, c):
+                if not in_bounds(nr, nc) or (nr, nc) in vis: continue
+                delta = max(0, grid[nr][nc] - time)
+                vis.add((nr, nc))
+                ntime = max(time + 1, grid[nr][nc] + (delta%2 == 0))
+                heappush(minheap, (ntime, nr, nc))
+        return -1
 ```
 
 ##

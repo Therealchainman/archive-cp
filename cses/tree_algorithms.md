@@ -330,7 +330,7 @@ int main() {
 
 ```
 
-## 
+## Subtree Queries
 
 ### Solution 1:
 
