@@ -20752,17 +20752,93 @@ class Solution:
         return -1
 ```
 
-##
+## 427. Construct Quad Tree
 
-### Solution 1:
+### Solution 1:  brute force + recursion + O(n^4) time
 
 ```py
+"""
+# Definition for a QuadTree node.
+class Node:
+    def __init__(self, val, isLeaf, topLeft, topRight, bottomLeft, bottomRight):
+        self.val = val
+        self.isLeaf = isLeaf
+        self.topLeft = topLeft
+        self.topRight = topRight
+        self.bottomLeft = bottomLeft
+        self.bottomRight = bottomRight
+"""
 
+"""
+quad tree from a grid
+
+isLeaf = True when all the values in the grid are the same else it is false
+val = 1 if all values are 1
+val = 0 if all values are 0
+
+it will be O(n^4) time if you just brute force, that is dividing into each quad recursively can be O(n^2) operations and then checking the value of each quad can take O(n^2) time again.
+
+Can we make the checking if the grid contains all 0s or 1s faster?  Probably if we precompute the sum over that sub grid, think 2d prefix sum for example, than can compute it in O(1) time the sum and if we know the size of the sub grid, we know if the sum == size then it is all 1s
+if it is 0 then it is all 0s.  That one is easy.  But yeah
+
+This will allow a O(n^2) solve
+"""
+
+class Solution:
+    def construct(self, grid: List[List[int]]) -> 'Node':
+        n = len(grid)
+        grid_sum = sum(map(sum, grid))
+        if grid_sum == 0 or grid_sum == n*n:
+            val = 0 if grid_sum == 0 else 1
+            return Node(val, True)
+        quad_n = n//2
+        top, bottom = grid[:quad_n], grid[quad_n:]
+        topLeft, topRight, bottomLeft, bottomRight = map(lambda x: [[] for _ in range(quad_n)], range(4))
+        for r, c in product(range(quad_n), range(n)):
+            if c < quad_n: # LEFT SIDE
+                topLeft[r].append(top[r][c])
+                bottomLeft[r].append(bottom[r][c])
+            else: # RIGHT SIDE
+                topRight[r].append(top[r][c])
+                bottomRight[r].append(bottom[r][c])
+        return Node(0, False, self.construct(topLeft), self.construct(topRight), self.construct(bottomLeft), self.construct(bottomRight))
 ```
-### Solution 1: 
+
+### Solution 2: precompute the grid sums in a 2d prefix sum + math to split each grid into quads using just bounding box 4 integer variables to define the top left row, col and the bottom right row, col + O(n^2) time
+
+![quad tree](images/quad_tree.png)
 
 ```py
+"""
+# Definition for a QuadTree node.
+class Node:
+    def __init__(self, val, isLeaf, topLeft, topRight, bottomLeft, bottomRight):
+        self.val = val
+        self.isLeaf = isLeaf
+        self.topLeft = topLeft
+        self.topRight = topRight
+        self.bottomLeft = bottomLeft
+        self.bottomRight = bottomRight
+"""
 
+class Solution:
+    def recurse(self, min_row: int, min_col: int, max_row: int, max_col: int) -> 'Node':
+        delta = max_row - min_row
+        grid_sum = self.ps[max_row][max_col] - self.ps[max_row][min_col] - self.ps[min_row][max_col] + self.ps[min_row][min_col]
+        if grid_sum == 0 or grid_sum == delta*delta:
+            val = 0 if grid_sum == 0 else 1
+            return Node(val, True)
+        mid_row, mid_col = min_row + delta//2, min_col + delta//2
+        topLeft, topRight, bottomLeft, bottomRight = (min_row, min_col, mid_row, mid_col), (min_row, mid_col, mid_row, max_col), (mid_row, min_col, max_row, mid_col), (mid_row, mid_col, max_row, max_col)
+        return Node(0, False, self.recurse(*topLeft), self.recurse(*topRight), self.recurse(*bottomLeft), self.recurse(*bottomRight))
+
+    def construct(self, grid: List[List[int]]) -> 'Node':
+        n = len(grid)
+        self.ps = [[0]*(n+1) for _ in range(n+1)]
+        # BUILD 2D PREFIX SUM
+        for r, c in product(range(1,n+1),range(1,n+1)):
+            self.ps[r][c] = self.ps[r-1][c] + self.ps[r][c-1] + grid[r-1][c-1] - self.ps[r-1][c-1]
+        return self.recurse(0, 0, n, n)
 ```
 
 ##
