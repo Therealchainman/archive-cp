@@ -45,110 +45,28 @@ sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
 import math
-from collections import deque
-from itertools import zip_longest, product
-
-mod = 998_244_353
-
-def convolution(arr1: List[int], arr2: List[int]) -> List[int]:
-    """
-    Convolution of two sequences of numbers modulo mod
-    """
-    n = len(arr1)
-    m = len(arr2)
-    res = [0] * (n + m - 1)
-    for i, j in product(range(n), range(m)):
-        res[i + j] += arr1[i] * arr2[j]
-        res[i + j] %= mod
-    return res
-
-def add_sequence(arr1: List[int], arr2: List[int]) -> List[int]:
-    """
-    Adds two sequences of numbers modulo mod
-    """
-    return [(a + b) % mod for a, b in zip_longest(arr1, arr2, fillvalue = 0)]
-
-def merge(arrs: List[List[int]]) -> List[int]:
-    """
-    Merges a list of sequences of numbers modulo mod
-    """
-    res = [1]
-    if len(arrs) == 0: return res # base case
-    queue = deque(arrs)
-    while len(queue) > 1:
-        arr1 = queue.popleft()
-        arr2 = queue.popleft()
-        queue.append(convolution(arr1, arr2))
-    return queue[0]
 
 def main():
-    n = int(input())
-    adj_list = [[] for _ in range(n)]
-    for _ in range(n - 1):
-        u, v = map(int, input().split())
-        u -= 1
-        v -= 1
-        adj_list[u].append(v)
-        adj_list[v].append(u)
-    children = [[] for _ in range(n)]
-    dist = [math.inf]*n
-    dist[0] = 0 # root tree at node 0
-    queue = deque([0])
-    while queue:
-        node = queue.popleft()
-        for child in adj_list[node]:
-            if dist[child] == math.inf:
-                dist[child] = dist[node] + 1
-                children[node].append(child)
-                queue.append(child)
-    # sorted in decreasing distance from root node 0, descending order based on distance
-    vertex = sorted(range(n), key=lambda x: dist[x], reverse=True)
-    # memo[i][0][j] corresponds to the number of ways to form j connected components with the subtree rooted at i when skipping node i
-    # memo[i][1][j] corresponds to the number of ways to form j connected components with the subtree rooted at i when not skipping node i
-    memo = [[[], []] for _ in range(n)] 
-    for v in vertex:
-        # merge all the children's values for number of ways to form up j connected components
-        # shen skipping node v you can just add the number of ways 
-        memo[v][0] = merge([add_sequence(memo[child][0], memo[child][1]) for child in children[v]])
-        """
-        example to understand this logic, given simple example
-
-        n1
-        |
-        n2
-
-        n1 has child node n2
-
-        suppose
-        component_ways_for_keeping_node_n2 =  [0, 10, 5, 5]
-        component_ways_for_skipping_node_n2 = [1, 10, 5, 1]
-                                   components  0, 1,  2, 3
-
-        then what should be the transition state to find these for node n1, given we know for node n2?
-        component_ways_for_keeping_node_n1 
-        =
-        [0, 10, 5, 5]
-        [0, 1, 10, 5, 1]
-        = [0, 11, 15, 10, 1]
-        basically, if you skipped n2, and you are keeping n1, then you are incrementing number of components by 1, so you shift the entire array to the right by 1.
-        So now what was for 1 component, is now for 2 components and added for when you keep n2
-
-        component_ways_for_skipping_node_n1
-        =
-        [0, 10, 5, 5]
-        [1, 10, 5, 1]
-        = [1, 11, 10, 6]
-        """ 
-        memo[v][1] = [0] + merge([add_sequence(memo[child][0], memo[child][1][1:]) for child in children[v]])
-    ans = [0]*(n + 1)
-    # add number of ways for when including node and not including node 0
-    for take in [0, 1]:
-        # j corresponds to number of components
-        # ways corresponds to number of ways to form j components
-        for j, ways in enumerate(memo[0][take]):
-            ans[j] += ways
-            ans[j] %= mod
-    print(*ans[1:], sep = '\n')
+    n, m = map(int, input().split())
+    teleporters = [''] + [input() for _ in range(n)]
+    min_teleports = [math.inf]*n
+    dist_from_start, dist_from_end = [math.inf]*(n + 1), [math.inf]*(n + 1)
+    dist_from_start[1] = dist_from_end[n] = 0
+    for i in range(2, n + 1):
+        for j in range(max(1, i - m), i):
+            if teleporters[j][i - j - 1] == '1':
+                dist_from_start[i] = min(dist_from_start[i], dist_from_start[j] + 1)
+    for i in range(n - 1, 0, -1):
+        for j in range(i + 1, min(n + 1, i + m + 1)):
+            if teleporters[i][j - i - 1] == '1':
+                dist_from_end[i] = min(dist_from_end[i], dist_from_end[j] + 1)
+    for k in range(2, n):
+        for i in range(max(1, k - m), k):
+            for j in range(k + 1, min(n + 1, i + m + 1)):
+                if teleporters[i][j - i - 1] == '1':
+                    min_teleports[k] = min(min_teleports[k], dist_from_start[i] + dist_from_end[j] + 1)
+    min_teleports = [t if t < math.inf else -1 for t in min_teleports]
+    return ' '.join(map(str, min_teleports[2:]))
 
 if __name__ == '__main__':
-    main()
+    print(main())
