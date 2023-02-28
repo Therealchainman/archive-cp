@@ -17,15 +17,15 @@ and when object is removed do ft.update(i + 1, -1)
 range queries this will work ft.query(left - 1, right)
 
 ```cpp
-int neutral = 0;
+long long neutral = 0;
 struct FenwickTree {
-    vector<int> nodes;
+    vector<long long> nodes;
     
     void init(int n) {
         nodes.assign(n + 1, neutral);
     }
 
-    void update(int idx, int val) {
+    void update(int idx, long long val) {
         while (idx < (int)nodes.size()) {
             nodes[idx] += val;
             idx += (idx & -idx);
@@ -36,8 +36,8 @@ struct FenwickTree {
         return query(right) - query(left);
     }
 
-    int query(int idx) {
-        int result = neutral;
+    long long query(int idx) {
+        long long result = neutral;
         while (idx > 0) {
             result += nodes[idx];
             idx -= (idx & -idx);

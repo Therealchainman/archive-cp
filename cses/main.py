@@ -43,35 +43,7 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-# sys.setrecursionlimit(1_000_000)
-
-"""
-Euler Tour Technique to a random tree
-
-relabel or index of the tree nodes
-
-
-Necessary and sufficient conditions
-
-An undirected graph has a closed Euler tour if and only if it is connected and each vertex has an even degree.
-
-An undirected graph has an open Euler tour (Euler path) if it is connected, and each vertex, except for exactly two vertices, has an even degree. The two vertices of odd degree have to be 
-the endpoints of the tour.
-
-A directed graph has a closed Euler tour if and only if it is strongly connected and the in-degree of each vertex is equal to its out-degree.
-
-Similarly, a directed graph has an open Euler tour (Euler path) if and only if for each vertex the difference between its in-degree and out-degree is 0, except for two vertices, 
-where one has difference +1 (the start of the tour) and the other has difference -1 (the end of the tour) and, if you add an edge from the end to the start, the graph is strongly connected.
-
-Definition 13.1.1.  A walk is closed if it begins and ends with the same vertex.
-A trail is a walk in which no two vertices appear consecutively (in either order) more than once. (That is, no edge is used more than once.)
-
-A tour is a closed trail.
-
-An Euler trail is a trail in which every pair of adjacent vertices appear consecutively. (That is, every edge is used exactly once.)
-
-An Euler tour is a closed Euler trail.
-"""
+sys.setrecursionlimit(1_000_000)
 
 class FenwickTree:
     def __init__(self, N):
@@ -91,11 +63,56 @@ class FenwickTree:
 
     def __repr__(self):
         return f"array: {self.sums}"
+    
+class EulerTour:
+    def __init__(self, num_nodes: int, edges: List[List[int]]):
+        self.num_nodes = num_nodes
+        self.edges = edges
+        self.adj_list = [[] for _ in range(num_nodes + 1)]
+        self.root_node = 1 # root of the tree
+        self.enter_counter, self.exit_counter = [0]*(num_nodes + 1), [0]*(num_nodes + 1)
+        self.counter = 1
+        self.build_adj_list() # adjacency list representation of the tree
+        self.euler_tour(self.root_node, -1)
+    
+    def build_adj_list(self) -> None:
+        for u, v in self.edges:
+            self.adj_list[u].append(v)
+            self.adj_list[v].append(u)
+
+    def euler_tour(self, node: int, parent_node: int):
+        self.enter_counter[node] = self.counter
+        self.counter += 1
+        for child_node in self.adj_list[node]:
+            if child_node != parent_node:
+                self.euler_tour(child_node, node)
+        self.exit_counter[node] = self.counter - 1
 
 def main():
     n, q = map(int, input().split())
-    arr = list(map(int, input().split()))
-
+    arr = [0] + list(map(int, input().split()))
+    edges = []
+    for _ in range(n - 1):
+        u, v = map(int, input().split())
+        edges.append((u, v))
+    euler_tour = EulerTour(n, edges)
+    fenwick_tree = FenwickTree(n + 1)
+    for node, enter_counter in enumerate(euler_tour.enter_counter[1:], start = 1):
+        fenwick_tree.update(enter_counter, arr[node])
+    result = []
+    for _ in range(q):
+        query = list(map(int, input().split()))
+        if query[0] == 1:
+            u, x = query[1:]
+            node_index_in_flatten_tree = euler_tour.enter_counter[u]
+            delta = x - arr[u]
+            arr[u] = x
+            fenwick_tree.update(node_index_in_flatten_tree, delta) # update the fenwick tree
+        else:
+            s = query[1]
+            subtree_sum = fenwick_tree.query(euler_tour.exit_counter[s]) - fenwick_tree.query(euler_tour.enter_counter[s] - 1)
+            result.append(subtree_sum)
+    return '\n'.join(map(str, result))
 
 if __name__ == '__main__':
-    main()
+    print(main())

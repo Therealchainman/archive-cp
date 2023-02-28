@@ -332,22 +332,224 @@ int main() {
 
 ## Subtree Queries
 
+### Solution 1:  euler tour technique for subtree queries + tree + binary index tree (Fenwick tree) + flatten tree
+
+```py
+class FenwickTree:
+    def __init__(self, N):
+        self.sums = [0 for _ in range(N+1)]
+
+    def update(self, i, delta):
+        while i < len(self.sums):
+            self.sums[i] += delta
+            i += i & (-i)
+
+    def query(self, i):
+        res = 0
+        while i > 0:
+            res += self.sums[i]
+            i -= i & (-i)
+        return res
+
+    def __repr__(self):
+        return f"array: {self.sums}"
+    
+class EulerTour:
+    def __init__(self, num_nodes: int, edges: List[List[int]]):
+        self.num_nodes = num_nodes
+        self.edges = edges
+        self.adj_list = [[] for _ in range(num_nodes + 1)]
+        self.root_node = 1 # root of the tree
+        self.enter_counter, self.exit_counter = [0]*(num_nodes + 1), [0]*(num_nodes + 1)
+        self.counter = 1
+        self.build_adj_list() # adjacency list representation of the tree
+        self.euler_tour(self.root_node, -1)
+    
+    def build_adj_list(self) -> None:
+        for u, v in self.edges:
+            self.adj_list[u].append(v)
+            self.adj_list[v].append(u)
+
+    def euler_tour(self, node: int, parent_node: int):
+        self.enter_counter[node] = self.counter
+        self.counter += 1
+        for child_node in self.adj_list[node]:
+            if child_node != parent_node:
+                self.euler_tour(child_node, node)
+        self.exit_counter[node] = self.counter - 1
+
+def main():
+    n, q = map(int, input().split())
+    arr = [0] + list(map(int, input().split()))
+    edges = []
+    for _ in range(n - 1):
+        u, v = map(int, input().split())
+        edges.append((u, v))
+    euler_tour = EulerTour(n, edges)
+    fenwick_tree = FenwickTree(n + 1)
+    for node, enter_counter in enumerate(euler_tour.enter_counter[1:], start = 1):
+        fenwick_tree.update(enter_counter, arr[node])
+    result = []
+    for _ in range(q):
+        query = list(map(int, input().split()))
+        if query[0] == 1:
+            u, x = query[1:]
+            node_index_in_flatten_tree = euler_tour.enter_counter[u]
+            delta = x - arr[u]
+            arr[u] = x
+            fenwick_tree.update(node_index_in_flatten_tree, delta) # update the fenwick tree
+        else:
+            s = query[1]
+            subtree_sum = fenwick_tree.query(euler_tour.exit_counter[s]) - fenwick_tree.query(euler_tour.enter_counter[s] - 1)
+            result.append(subtree_sum)
+    return '\n'.join(map(str, result))
+
+if __name__ == '__main__':
+    print(main())
+```
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+inline int read()
+{
+	int x = 0, y = 1; char c = getchar();
+	while (c < '0' || c > '9') {
+		if (c == '-') y = -1;
+		c = getchar();
+	}
+	while (c >= '0' && c <= '9') x = x * 10 + c - '0', c = getchar();
+	return x * y;
+}
+
+inline long long readll() {
+	long long x = 0, y = 1; char c = getchar();
+	while (c < '0' || c > '9') {
+		if (c == '-') y = -1;
+		c = getchar();
+	}
+	while (c >= '0' && c <= '9') x = x * 10 + c - '0', c = getchar();
+	return x * y;
+}
+
+long long neutral = 0;
+struct FenwickTree {
+    vector<long long> nodes;
+    
+    void init(int n) {
+        nodes.assign(n + 1, neutral);
+    }
+
+    void update(int idx, long long val) {
+        while (idx < (int)nodes.size()) {
+            nodes[idx] += val;
+            idx += (idx & -idx);
+        }
+    }
+
+    int query(int left, int right) {
+        return query(right) - query(left);
+    }
+
+    long long query(int idx) {
+        long long result = neutral;
+        while (idx > 0) {
+            result += nodes[idx];
+            idx -= (idx & -idx);
+        }
+        return result;
+    }
+};
+
+class EulerTour {
+public:
+    int num_nodes;
+    vector<vector<int>> edges;
+    vector<vector<int>> adj_list;
+    int root_node;
+    vector<int> enter_counter, exit_counter;
+    int counter;
+
+    EulerTour(int n, vector<vector<int>>& e) {
+        num_nodes = n;
+        edges = e;
+        adj_list.resize(num_nodes + 1);
+        root_node = 1;
+        enter_counter.resize(num_nodes + 1);
+        exit_counter.resize(num_nodes + 1);
+        counter = 1;
+        build_adj_list();
+        euler_tour(root_node, -1);
+    }
+
+    void build_adj_list() {
+        for (auto edge : edges) {
+            int u = edge[0], v = edge[1];
+            adj_list[u].push_back(v);
+            adj_list[v].push_back(u);
+        }
+    }
+
+    void euler_tour(int node, int parent_node) {
+        enter_counter[node] = counter;
+        counter++;
+        for (auto child_node : adj_list[node]) {
+            if (child_node != parent_node) {
+                euler_tour(child_node, node);
+            }
+        }
+        exit_counter[node] = counter - 1;
+    }
+};
+
+int main() {
+    // freopen("input.txt", "r", stdin);
+    // freopen("output.txt", "w", stdout);
+    int n = read(), q = read();
+    vector<int> arr(n + 1, 0);
+    for (int i = 1; i <= n; i++) {
+        arr[i] = readll();
+    }
+    vector<vector<int>> edges;
+    for (int i = 0; i < n - 1; i++) {
+        int u = read(), v = read();
+        edges.push_back({u, v});
+    }
+    EulerTour euler_tour(n, edges);
+    FenwickTree fenwick_tree;
+    fenwick_tree.init(n + 1);
+    for (int node = 1; node <= n; node++) {
+        int enter_counter = euler_tour.enter_counter[node];
+        fenwick_tree.update(enter_counter, arr[node]);
+    }
+    for (int i = 0; i < q; i++) {
+        int t = read();
+        if (t == 1) {
+            int u = read(); long long x = readll();
+            int node_index_in_flatten_tree = euler_tour.enter_counter[u];
+            int delta = x - arr[u];
+            arr[u] = x;
+            fenwick_tree.update(node_index_in_flatten_tree, delta);
+        }
+        else {
+            int s = read();
+            long long subtree_sum = fenwick_tree.query(euler_tour.exit_counter[s]) - fenwick_tree.query(euler_tour.enter_counter[s] - 1);
+            cout << subtree_sum << endl;
+        }
+    }
+}
+```
+
+## Path Queries
+
 ### Solution 1:
 
 ```py
 
 ```
 
-
-## 
-
-### Solution 1:
-
-```py
-
-```
-
-## 
+## Path Queries II
 
 ### Solution 1:
 
