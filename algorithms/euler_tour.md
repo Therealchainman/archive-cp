@@ -103,3 +103,45 @@ public:
     }
 };
 ```
+
+## EULER TOUR FOR PATH QUERIES 
+
+This one always increments the counter so that enter and exit counter will be differeent for each node. 
+
+Allows to undo operation and get the sum along a path from root to a node in O(logn) time
+
+Uses a fenwick tree to compute the sum along a path, from root you just do fenwick_tree.query(enter_counter[node]) get's sum from root to node.
+
+This is 1-indexed, that is the nodes are numbered from 1 to n
+
+Example of how need to update fenwick tree for each enter/exit counter for a node that is being updated, wich a delta value (change in value from current value in array)
+fenwick_tree.update(enter_counter, delta) # update the fenwick tree
+fenwick_tree.update(exit_counter, -delta)
+
+
+```py
+class EulerTourPathQueries:
+    def __init__(self, num_nodes: int, edges: List[List[int]]):
+        self.num_nodes = num_nodes
+        self.edges = edges
+        self.adj_list = [[] for _ in range(num_nodes + 1)]
+        self.root_node = 1 # root of the tree
+        self.enter_counter, self.exit_counter = [0]*(num_nodes + 1), [0]*(num_nodes + 1)
+        self.counter = 1
+        self.build_adj_list() # adjacency list representation of the tree
+        self.euler_tour(self.root_node, -1)
+    
+    def build_adj_list(self) -> None:
+        for u, v in self.edges:
+            self.adj_list[u].append(v)
+            self.adj_list[v].append(u)
+
+    def euler_tour(self, node: int, parent_node: int):
+        self.enter_counter[node] = self.counter
+        self.counter += 1
+        for child_node in self.adj_list[node]:
+            if child_node != parent_node:
+                self.euler_tour(child_node, node)
+        self.counter += 1
+        self.exit_counter[node] = self.counter
+```

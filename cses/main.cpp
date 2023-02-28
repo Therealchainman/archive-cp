@@ -22,109 +22,36 @@ inline long long readll() {
 	return x * y;
 }
 
-long long neutral = 0;
-struct FenwickTree {
-    vector<long long> nodes;
-    
-    void init(int n) {
-        nodes.assign(n + 1, neutral);
+int main() {
+    int n = read(), q = read();
+    vector<int> arr(n);
+    for (int i = 0; i < n; i++) {
+        arr[i] = read();
     }
-
-    void update(int idx, long long val) {
-        while (idx < (int)nodes.size()) {
-            nodes[idx] += val;
-            idx += (idx & -idx);
-        }
+    int max_power_two = 18;
+    vector<int> lg(n + 1, 0);
+    for (int i = 2; i <= n; i++) {
+        lg[i] = lg[i / 2] + 1;
     }
-
-    int query(int left, int right) {
-        return query(right) - query(left);
-    }
-
-    long long query(int idx) {
-        long long result = neutral;
-        while (idx > 0) {
-            result += nodes[idx];
-            idx -= (idx & -idx);
-        }
-        return result;
-    }
-};
-
-class EulerTour {
-public:
-    int num_nodes;
-    vector<vector<int>> edges;
-    vector<vector<int>> adj_list;
-    int root_node;
-    vector<int> enter_counter, exit_counter;
-    int counter;
-
-    EulerTour(int n, vector<vector<int>>& e) {
-        num_nodes = n;
-        edges = e;
-        adj_list.resize(num_nodes + 1);
-        root_node = 1;
-        enter_counter.resize(num_nodes + 1);
-        exit_counter.resize(num_nodes + 1);
-        counter = 1;
-        build_adj_list();
-        euler_tour(root_node, -1);
-    }
-
-    void build_adj_list() {
-        for (auto edge : edges) {
-            int u = edge[0], v = edge[1];
-            adj_list[u].push_back(v);
-            adj_list[v].push_back(u);
-        }
-    }
-
-    void euler_tour(int node, int parent_node) {
-        enter_counter[node] = counter;
-        counter++;
-        for (auto child_node : adj_list[node]) {
-            if (child_node != parent_node) {
-                euler_tour(child_node, node);
+    vector<vector<int>> sparse_table(n, vector<int>(n + 1, INT_MAX));
+    for (int j = 0; j <= max_power_two; j++) {
+        for (int i = 0; i + (1 << j) <= n; i++) {
+            if (j == 0) {
+                sparse_table[i][j] = arr[i];
+            }
+            else {
+                sparse_table[i][j] = min(sparse_table[i][j - 1], sparse_table[i + (1 << (j - 1))][j - 1]);
             }
         }
-        exit_counter[node] = counter - 1;
     }
-};
-
-int main() {
-    // freopen("input.txt", "r", stdin);
-    // freopen("output.txt", "w", stdout);
-    int n = read(), q = read();
-    vector<int> arr(n + 1, 0);
-    for (int i = 1; i <= n; i++) {
-        arr[i] = readll();
-    }
-    vector<vector<int>> edges;
-    for (int i = 0; i < n - 1; i++) {
-        int u = read(), v = read();
-        edges.push_back({u, v});
-    }
-    EulerTour euler_tour(n, edges);
-    FenwickTree fenwick_tree;
-    fenwick_tree.init(n + 1);
-    for (int node = 1; node <= n; node++) {
-        int enter_counter = euler_tour.enter_counter[node];
-        fenwick_tree.update(enter_counter, arr[node]);
-    }
+    auto query = [&](int left, int right) -> int {
+        int length = right - left + 1;
+        int power_two = lg[length];
+        return min(sparse_table[left][power_two], sparse_table[right - (1 << power_two) + 1][power_two]);
+    };
     for (int i = 0; i < q; i++) {
-        int t = read();
-        if (t == 1) {
-            int u = read(); long long x = readll();
-            int node_index_in_flatten_tree = euler_tour.enter_counter[u];
-            int delta = x - arr[u];
-            arr[u] = x;
-            fenwick_tree.update(node_index_in_flatten_tree, delta);
-        }
-        else {
-            int s = read();
-            long long subtree_sum = fenwick_tree.query(euler_tour.exit_counter[s]) - fenwick_tree.query(euler_tour.enter_counter[s] - 1);
-            cout << subtree_sum << endl;
-        }
+        int a = read(), b = read();
+        cout << query(a - 1, b - 1) << endl;
     }
+    return 0;
 }

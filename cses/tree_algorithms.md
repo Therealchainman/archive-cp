@@ -314,7 +314,7 @@ int main() {
 
 ```
 
-## 
+## Company Queries I
 
 ### Solution 1:
 
@@ -322,12 +322,624 @@ int main() {
 
 ```
 
-## 
+## Company Queries II
 
-### Solution 1:
+### Solution 1:  the lowest common boss is the lowest common ancestor in a tree + represent the relationship between bosses as a rooted tree at node 1, since 1 is the boss of everyone
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+inline int read()
+{
+	int x = 0, y = 1; char c = getchar();
+	while (c < '0' || c > '9') {
+		if (c == '-') y = -1;
+		c = getchar();
+	}
+	while (c >= '0' && c <= '9') x = x * 10 + c - '0', c = getchar();
+	return x * y;
+}
+
+inline long long readll() {
+	long long x = 0, y = 1; char c = getchar();
+	while (c < '0' || c > '9') {
+		if (c == '-') y = -1;
+		c = getchar();
+	}
+	while (c >= '0' && c <= '9') x = x * 10 + c - '0', c = getchar();
+	return x * y;
+}
+
+class BinaryLift {
+private:
+    int size;
+    vector<vector<int>> graph;
+    vector<int> depth;
+    vector<int> parents;
+    vector<bool> visited;
+    int maxAncestor;
+    vector<vector<int>> jump;
+
+    void get_parent_depth(int node, int parent_node = -1, int depth = 0) {
+        parents[node] = parent_node;
+        this->depth[node] = depth;
+        for (int nei_node : graph[node]) {
+            if (visited[nei_node]) continue;
+            visited[nei_node] = true;
+            get_parent_depth(nei_node, node, depth+1);
+        }
+    }
+
+    void build_sparse_table() {
+        for (int j = 0; j < maxAncestor; j++) {
+            for (int i = 0; i < size; i++) {
+                if (j == 0) {
+                    jump[i][j] = parents[i];
+                } else if (jump[i][j-1] != -1) {
+                    int prev_ancestor = jump[i][j-1];
+                    jump[i][j] = jump[prev_ancestor][j-1];
+                }
+            }
+        }
+    }
+
+public:
+    BinaryLift(int node_count, vector<vector<int>>& graph) {
+        size = node_count;
+        this->graph = graph;
+        depth.resize(node_count);
+        parents.resize(node_count);
+        visited.resize(node_count, false);
+        for (int node = 0; node < node_count; node++) {
+            if (visited[node]) continue;
+            visited[node] = true;
+            get_parent_depth(node);
+        }
+        maxAncestor = 18;
+        jump.resize(size, vector<int>(maxAncestor, -1));
+        build_sparse_table();
+    }
+
+    int distance(int p, int q) {
+        int lca = find_lca(p, q);
+        return depth[p] + depth[q] - 2 * depth[lca];
+    }
+
+    int find_lca(int p, int q) {
+        if (depth[p] < depth[q]) {
+            swap(p, q);
+        }
+        int k = depth[p] - depth[q];
+        p = kthAncestor(p, k);
+        if (p == q) return p;
+        for (int j = maxAncestor-1; j >= 0; j--) {
+            if (jump[p][j] != jump[q][j]) {
+                p = jump[p][j];
+                q = jump[q][j];
+            }
+        }
+        return jump[p][0];
+    }
+
+    int kthAncestor(int node, int k) {
+        while (node != -1 && k > 0) {
+            int i = log2(k);
+            node = jump[node][i];
+            k -= (1<<i);
+        }
+        return node;
+    }
+};
+
+int main() {
+    int n = read(), q = read();
+    vector<vector<int>> adj_list(n);
+    for (int i = 1; i < n; i++) {
+        int u = read();
+        u--;
+        adj_list[u].push_back(i);
+        adj_list[i].push_back(u);
+    }
+    BinaryLift binary_lift(n, adj_list);
+    for (int i = 0; i < q; i++) {
+        int u = read(), v = read();
+        u--;
+        v--;
+        int lca = binary_lift.find_lca(u, v);
+        cout << lca + 1 << endl;
+    }
+    return 0;
+}
+```
+
+## Distance Queries
+
+### Solution 1:  find lca with binary lifting to find the distance between nodes
 
 ```py
+sys.setrecursionlimit(1_000_000)
+import math
 
+"""
+The root node is assumed be 0
+"""
+
+class BinaryLift:
+    """
+    This binary lift function works on any undirected graph that is composed of
+    an adjacency list defined by graph
+    """
+    def __init__(self, node_count: int, graph: List[List[int]]):
+        self.size = node_count
+        self.graph = graph # pass in an adjacency list to represent the graph
+        self.depth = [0]*node_count
+        self.parents = [-1]*node_count
+        self.visited = [False]*node_count
+        # ITERATE THROUGH EACH POSSIBLE TREE
+        for node in range(node_count):
+            if self.visited[node]: continue
+            self.visited[node] = True
+            self.get_parent_depth(node)
+        self.maxAncestor = 18 # set it so that only up to 2^18th ancestor can exist for this example
+        self.jump = [[-1]*self.maxAncestor for _ in range(self.size)]
+        self.build_sparse_table()
+        
+    def build_sparse_table(self) -> None:
+        """
+        builds the jump sparse arrays for computing the 2^jth ancestor of ith node in any given query
+        """
+        for j in range(self.maxAncestor):
+            for i in range(self.size):
+                if j == 0:
+                    self.jump[i][j] = self.parents[i]
+                elif self.jump[i][j-1] != -1:
+                    prev_ancestor = self.jump[i][j-1]
+                    self.jump[i][j] = self.jump[prev_ancestor][j-1]
+                    
+    def get_parent_depth(self, node: int, parent_node: int = -1, depth: int = 0) -> None:
+        """
+        Fills out the depth array for each node and the parent array for each node
+        """
+        self.parents[node] = parent_node
+        self.depth[node] = depth
+        for nei_node in self.graph[node]:
+            if self.visited[nei_node]: continue
+            self.visited[nei_node] = True
+            self.get_parent_depth(nei_node, node, depth+1)
+
+    def distance(self, p: int, q: int) -> int:
+        """
+        Computes the distance between two nodes
+        """
+        lca = self.find_lca(p, q)
+        return self.depth[p] + self.depth[q] - 2*self.depth[lca]
+    
+    def find_lca(self, p: int, q: int) -> int:
+        # ASSUME NODE P IS DEEPER THAN NODE Q   
+        if self.depth[p] < self.depth[q]:
+            p, q = q, p
+        # PUT ON SAME DEPTH BY FINDING THE KTH ANCESTOR
+        k = self.depth[p] - self.depth[q]
+        p = self.kthAncestor(p, k)
+        if p == q: return p
+        for j in range(self.maxAncestor)[::-1]:
+            if self.jump[p][j] != self.jump[q][j]:
+                p, q = self.jump[p][j], self.jump[q][j] # jump to 2^jth ancestor nodes
+        return self.jump[p][0]
+    
+    def kthAncestor(self, node: int, k: int) -> int:
+        while node != -1 and k>0:
+            i = int(math.log2(k))
+            node = self.jump[node][i]
+            k-=(1<<i)
+        return node
+
+def main():
+    n, q = map(int, input().split())
+    adj_list = [[] for _ in range(n)]
+    for _ in range(n - 1):
+        u, v = map(int, input().split())
+        u -= 1
+        v -= 1
+        adj_list[u].append(v)
+        adj_list[v].append(u)
+    binary_lift = BinaryLift(n, adj_list)
+    result = []
+    for _ in range(q):
+        u, v = map(int, input().split())
+        u -= 1
+        v -= 1
+        distance = binary_lift.distance(u, v)
+        result.append(distance)
+    return '\n'.join(map(str, result))
+
+if __name__ == '__main__':
+    print(main())
+```
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+inline int read()
+{
+	int x = 0, y = 1; char c = getchar();
+	while (c < '0' || c > '9') {
+		if (c == '-') y = -1;
+		c = getchar();
+	}
+	while (c >= '0' && c <= '9') x = x * 10 + c - '0', c = getchar();
+	return x * y;
+}
+
+inline long long readll() {
+	long long x = 0, y = 1; char c = getchar();
+	while (c < '0' || c > '9') {
+		if (c == '-') y = -1;
+		c = getchar();
+	}
+	while (c >= '0' && c <= '9') x = x * 10 + c - '0', c = getchar();
+	return x * y;
+}
+
+class BinaryLift {
+private:
+    int size;
+    vector<vector<int>> graph;
+    vector<int> depth;
+    vector<int> parents;
+    vector<bool> visited;
+    int maxAncestor;
+    vector<vector<int>> jump;
+
+    void get_parent_depth(int node, int parent_node = -1, int depth = 0) {
+        parents[node] = parent_node;
+        this->depth[node] = depth;
+        for (int nei_node : graph[node]) {
+            if (visited[nei_node]) continue;
+            visited[nei_node] = true;
+            get_parent_depth(nei_node, node, depth+1);
+        }
+    }
+
+    void build_sparse_table() {
+        for (int j = 0; j < maxAncestor; j++) {
+            for (int i = 0; i < size; i++) {
+                if (j == 0) {
+                    jump[i][j] = parents[i];
+                } else if (jump[i][j-1] != -1) {
+                    int prev_ancestor = jump[i][j-1];
+                    jump[i][j] = jump[prev_ancestor][j-1];
+                }
+            }
+        }
+    }
+
+public:
+    BinaryLift(int node_count, vector<vector<int>>& graph) {
+        size = node_count;
+        this->graph = graph;
+        depth.resize(node_count);
+        parents.resize(node_count);
+        visited.resize(node_count, false);
+        for (int node = 0; node < node_count; node++) {
+            if (visited[node]) continue;
+            visited[node] = true;
+            get_parent_depth(node);
+        }
+        maxAncestor = 18;
+        jump.resize(size, vector<int>(maxAncestor, -1));
+        build_sparse_table();
+    }
+
+    int distance(int p, int q) {
+        int lca = find_lca(p, q);
+        return depth[p] + depth[q] - 2 * depth[lca];
+    }
+
+    int find_lca(int p, int q) {
+        if (depth[p] < depth[q]) {
+            swap(p, q);
+        }
+        int k = depth[p] - depth[q];
+        p = kthAncestor(p, k);
+        if (p == q) return p;
+        for (int j = maxAncestor-1; j >= 0; j--) {
+            if (jump[p][j] != jump[q][j]) {
+                p = jump[p][j];
+                q = jump[q][j];
+            }
+        }
+        return jump[p][0];
+    }
+
+    int kthAncestor(int node, int k) {
+        while (node != -1 && k > 0) {
+            int i = log2(k);
+            node = jump[node][i];
+            k -= (1<<i);
+        }
+        return node;
+    }
+};
+
+int main() {
+    int n = read(), q = read();
+    vector<vector<int>> adj_list(n);
+    for (int i = 0; i < n-1; i++) {
+        int u = read(), v = read();
+        u--;
+        v--;
+        adj_list[u].push_back(v);
+        adj_list[v].push_back(u);
+    }
+    BinaryLift binary_lift(n, adj_list);
+
+    for (int i = 0; i < q; i++) {
+        int u = read(), v = read();
+        u--;
+        v--;
+        int distance = binary_lift.distance(u, v);
+        cout << distance << endl;
+    }
+    return 0;
+}
+```
+
+## Counting Paths
+
+### Solution 1:  lowest common ancestor with binary lifting + sparse table + difference array + subtree sum with recursive dfs
+
+```py
+sys.setrecursionlimit(1_000_000)
+import math
+
+"""
+The root node is assumed be 0
+"""
+
+class BinaryLift:
+    """
+    This binary lift function works on any undirected graph that is composed of
+    an adjacency list defined by graph
+    """
+    def __init__(self, node_count: int, graph: List[List[int]]):
+        self.size = node_count
+        self.graph = graph # pass in an adjacency list to represent the graph
+        self.depth = [0]*node_count
+        self.parents = [-1]*node_count
+        self.visited = [False]*node_count
+        # ITERATE THROUGH EACH POSSIBLE TREE
+        for node in range(node_count):
+            if self.visited[node]: continue
+            self.visited[node] = True
+            self.get_parent_depth(node)
+        self.maxAncestor = 18 # set it so that only up to 2^18th ancestor can exist for this example
+        self.jump = [[-1]*self.maxAncestor for _ in range(self.size)]
+        self.build_sparse_table()
+        
+    def build_sparse_table(self) -> None:
+        """
+        builds the jump sparse arrays for computing the 2^jth ancestor of ith node in any given query
+        """
+        for j in range(self.maxAncestor):
+            for i in range(self.size):
+                if j == 0:
+                    self.jump[i][j] = self.parents[i]
+                elif self.jump[i][j-1] != -1:
+                    prev_ancestor = self.jump[i][j-1]
+                    self.jump[i][j] = self.jump[prev_ancestor][j-1]
+                    
+    def get_parent_depth(self, node: int, parent_node: int = -1, depth: int = 0) -> None:
+        """
+        Fills out the depth array for each node and the parent array for each node
+        """
+        self.parents[node] = parent_node
+        self.depth[node] = depth
+        for nei_node in self.graph[node]:
+            if self.visited[nei_node]: continue
+            self.visited[nei_node] = True
+            self.get_parent_depth(nei_node, node, depth+1)
+    
+    def find_lca(self, p: int, q: int) -> int:
+        # ASSUME NODE P IS DEEPER THAN NODE Q   
+        if self.depth[p] < self.depth[q]:
+            p, q = q, p
+        # PUT ON SAME DEPTH BY FINDING THE KTH ANCESTOR
+        k = self.depth[p] - self.depth[q]
+        p = self.kthAncestor(p, k)
+        if p == q: return p
+        for j in range(self.maxAncestor)[::-1]:
+            if self.jump[p][j] != self.jump[q][j]:
+                p, q = self.jump[p][j], self.jump[q][j] # jump to 2^jth ancestor nodes
+        return self.jump[p][0]
+    
+    def kthAncestor(self, node: int, k: int) -> int:
+        while node != -1 and k>0:
+            i = int(math.log2(k))
+            node = self.jump[node][i]
+            k-=(1<<i)
+        return node
+        
+
+def main():
+    n, m = map(int, input().split())
+    adj_list = [[] for _ in range(n)]
+    for _ in range(n - 1):
+        u, v = map(int, input().split())
+        u -= 1
+        v -= 1
+        adj_list[u].append(v)
+        adj_list[v].append(u)
+    binary_lift = BinaryLift(n, adj_list)
+    diff_arr = [0]*n
+    lca_count = [0]*n
+    for _ in range(m):
+        u, v = map(int, input().split())
+        u -= 1
+        v -= 1
+        lca = binary_lift.find_lca(u, v)
+        diff_arr[u] += 1
+        diff_arr[v] += 1
+        diff_arr[lca] -= 2
+        lca_count[lca] += 1
+    subtree_sum = [0]*n
+    def dfs(node: int, parent_node: int) -> int:
+        subtree_sum[node] = diff_arr[node]
+        for nei_node in adj_list[node]:
+            if nei_node != parent_node:
+                subtree_sum[node] += dfs(nei_node, node)
+        return subtree_sum[node]
+    dfs(0, -1)
+    return ' '.join(map(str, (x + y for x, y in zip(subtree_sum, lca_count))))
+
+if __name__ == '__main__':
+    print(main())
+```
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+inline int read()
+{
+	int x = 0, y = 1; char c = getchar();
+	while (c < '0' || c > '9') {
+		if (c == '-') y = -1;
+		c = getchar();
+	}
+	while (c >= '0' && c <= '9') x = x * 10 + c - '0', c = getchar();
+	return x * y;
+}
+
+inline long long readll() {
+	long long x = 0, y = 1; char c = getchar();
+	while (c < '0' || c > '9') {
+		if (c == '-') y = -1;
+		c = getchar();
+	}
+	while (c >= '0' && c <= '9') x = x * 10 + c - '0', c = getchar();
+	return x * y;
+}
+
+class BinaryLift {
+private:
+    int size;
+    vector<vector<int>> graph;
+    vector<int> depth;
+    vector<int> parents;
+    vector<bool> visited;
+    int maxAncestor;
+    vector<vector<int>> jump;
+
+    void get_parent_depth(int node, int parent_node = -1, int depth = 0) {
+        parents[node] = parent_node;
+        this->depth[node] = depth;
+        for (int nei_node : graph[node]) {
+            if (visited[nei_node]) continue;
+            visited[nei_node] = true;
+            get_parent_depth(nei_node, node, depth+1);
+        }
+    }
+
+    void build_sparse_table() {
+        for (int j = 0; j < maxAncestor; j++) {
+            for (int i = 0; i < size; i++) {
+                if (j == 0) {
+                    jump[i][j] = parents[i];
+                } else if (jump[i][j-1] != -1) {
+                    int prev_ancestor = jump[i][j-1];
+                    jump[i][j] = jump[prev_ancestor][j-1];
+                }
+            }
+        }
+    }
+
+public:
+    BinaryLift(int node_count, vector<vector<int>>& graph) {
+        size = node_count;
+        this->graph = graph;
+        depth.resize(node_count);
+        parents.resize(node_count);
+        visited.resize(node_count, false);
+        for (int node = 0; node < node_count; node++) {
+            if (visited[node]) continue;
+            visited[node] = true;
+            get_parent_depth(node);
+        }
+        maxAncestor = 18;
+        jump.resize(size, vector<int>(maxAncestor, -1));
+        build_sparse_table();
+    }
+
+    int find_lca(int p, int q) {
+        if (depth[p] < depth[q]) {
+            swap(p, q);
+        }
+        int k = depth[p] - depth[q];
+        p = kthAncestor(p, k);
+        if (p == q) return p;
+        for (int j = maxAncestor-1; j >= 0; j--) {
+            if (jump[p][j] != jump[q][j]) {
+                p = jump[p][j];
+                q = jump[q][j];
+            }
+        }
+        return jump[p][0];
+    }
+
+    int kthAncestor(int node, int k) {
+        while (node != -1 && k > 0) {
+            int i = log2(k);
+            node = jump[node][i];
+            k -= (1<<i);
+        }
+        return node;
+    }
+};
+
+vector<int> subtree_sum;
+
+int dfs(int node, int parent_node, vector<int>& diff_arr, vector<vector<int>>& adj_list) {
+    subtree_sum[node] = diff_arr[node];
+    for (int nei_node : adj_list[node]) {
+        if (nei_node != parent_node) {
+            subtree_sum[node] += dfs(nei_node, node, diff_arr, adj_list);
+        }
+    }
+    return subtree_sum[node];
+}
+
+int main() {
+    int n = read(), m = read();
+    vector<vector<int>> adj_list(n);
+    for (int i = 0; i < n-1; i++) {
+        int u = read(), v = read();
+        u--;
+        v--;
+        adj_list[u].push_back(v);
+        adj_list[v].push_back(u);
+    }
+    BinaryLift binary_lift(n, adj_list);
+    vector<int> diff_arr(n, 0);
+    vector<int> lca_count(n, 0);
+    for (int i = 0; i < m; i++) {
+        int u = read(), v = read();
+        u--;
+        v--;
+        int lca = binary_lift.find_lca(u, v);
+        diff_arr[u]++;
+        diff_arr[v]++;
+        diff_arr[lca] -= 2;
+        lca_count[lca]++;
+    }
+    subtree_sum.resize(n, 0);
+    dfs(0, -1, diff_arr, adj_list);
+    for (int i = 0;i < n; i++) {
+        cout << subtree_sum[i] + lca_count[i] << " ";
+    }
+}
 ```
 
 ## Subtree Queries
@@ -543,10 +1155,85 @@ int main() {
 
 ## Path Queries
 
-### Solution 1:
+### Solution 1:  euler tour for path queries + always increase counter + undo operation for the exit counter + fenwick tree
 
 ```py
+sys.setrecursionlimit(1_000_000)
 
+class FenwickTree:
+    def __init__(self, N):
+        self.sums = [0 for _ in range(N+1)]
+
+    def update(self, i, delta):
+        while i < len(self.sums):
+            self.sums[i] += delta
+            i += i & (-i)
+
+    def query(self, i):
+        res = 0
+        while i > 0:
+            res += self.sums[i]
+            i -= i & (-i)
+        return res
+
+    def __repr__(self):
+        return f"array: {self.sums}"
+    
+class EulerTourPathQueries:
+    def __init__(self, num_nodes: int, edges: List[List[int]]):
+        self.num_nodes = num_nodes
+        self.edges = edges
+        self.adj_list = [[] for _ in range(num_nodes + 1)]
+        self.root_node = 1 # root of the tree
+        self.enter_counter, self.exit_counter = [0]*(num_nodes + 1), [0]*(num_nodes + 1)
+        self.counter = 1
+        self.build_adj_list() # adjacency list representation of the tree
+        self.euler_tour(self.root_node, -1)
+    
+    def build_adj_list(self) -> None:
+        for u, v in self.edges:
+            self.adj_list[u].append(v)
+            self.adj_list[v].append(u)
+
+    def euler_tour(self, node: int, parent_node: int):
+        self.enter_counter[node] = self.counter
+        self.counter += 1
+        for child_node in self.adj_list[node]:
+            if child_node != parent_node:
+                self.euler_tour(child_node, node)
+        self.counter += 1
+        self.exit_counter[node] = self.counter
+
+def main():
+    n, q = map(int, input().split())
+    arr = [0] + list(map(int, input().split()))
+    edges = []
+    for _ in range(n - 1):
+        u, v = map(int, input().split())
+        edges.append((u, v))
+    euler_tour = EulerTourPathQueries(n, edges)
+    fenwick_tree = FenwickTree(2*n + 2)
+    for node, (enter_counter, exit_counter) in enumerate(zip(euler_tour.enter_counter[1:], euler_tour.exit_counter[1:]), start = 1):
+        fenwick_tree.update(enter_counter, arr[node])
+        fenwick_tree.update(exit_counter, -arr[node])
+    result = []
+    for _ in range(q):
+        query = list(map(int, input().split()))
+        if query[0] == 1:
+            u, x = query[1:]
+            enter_counter, exit_counter = euler_tour.enter_counter[u], euler_tour.exit_counter[u]
+            delta = x - arr[u]
+            arr[u] = x
+            fenwick_tree.update(enter_counter, delta) # update the fenwick tree
+            fenwick_tree.update(exit_counter, -delta)
+        else:
+            s = query[1]
+            path_sum = fenwick_tree.query(euler_tour.enter_counter[s])
+            result.append(path_sum)
+    return '\n'.join(map(str, result))
+
+if __name__ == '__main__':
+    print(main())
 ```
 
 ## Path Queries II

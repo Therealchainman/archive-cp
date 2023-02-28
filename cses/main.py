@@ -44,75 +44,35 @@ sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
 sys.setrecursionlimit(1_000_000)
+import math
 
-class FenwickTree:
-    def __init__(self, N):
-        self.sums = [0 for _ in range(N+1)]
-
-    def update(self, i, delta):
-        while i < len(self.sums):
-            self.sums[i] += delta
-            i += i & (-i)
-
-    def query(self, i):
-        res = 0
-        while i > 0:
-            res += self.sums[i]
-            i -= i & (-i)
-        return res
-
-    def __repr__(self):
-        return f"array: {self.sums}"
-    
-class EulerTour:
-    def __init__(self, num_nodes: int, edges: List[List[int]]):
-        self.num_nodes = num_nodes
-        self.edges = edges
-        self.adj_list = [[] for _ in range(num_nodes + 1)]
-        self.root_node = 1 # root of the tree
-        self.enter_counter, self.exit_counter = [0]*(num_nodes + 1), [0]*(num_nodes + 1)
-        self.counter = 1
-        self.build_adj_list() # adjacency list representation of the tree
-        self.euler_tour(self.root_node, -1)
-    
-    def build_adj_list(self) -> None:
-        for u, v in self.edges:
-            self.adj_list[u].append(v)
-            self.adj_list[v].append(u)
-
-    def euler_tour(self, node: int, parent_node: int):
-        self.enter_counter[node] = self.counter
-        self.counter += 1
-        for child_node in self.adj_list[node]:
-            if child_node != parent_node:
-                self.euler_tour(child_node, node)
-        self.exit_counter[node] = self.counter - 1
 
 def main():
-    n, q = map(int, input().split())
-    arr = [0] + list(map(int, input().split()))
-    edges = []
-    for _ in range(n - 1):
-        u, v = map(int, input().split())
-        edges.append((u, v))
-    euler_tour = EulerTour(n, edges)
-    fenwick_tree = FenwickTree(n + 1)
-    for node, enter_counter in enumerate(euler_tour.enter_counter[1:], start = 1):
-        fenwick_tree.update(enter_counter, arr[node])
-    result = []
+    n, q = map(int, input().split())    
+    arr = list(map(int, input().split()))
+    lg = [0] * (n + 1)
+    lg[1] = 0
+    for i in range(2, n + 1):
+        lg[i] = lg[i//2] + 1
+    max_power_two = 18
+    sparse_table = [[math.inf]*n for _ in range(max_power_two + 1)]
+    for i in range(max_power_two + 1):
+        j = 0
+        while j + (1 << i) <= n:
+            if i == 0:
+                sparse_table[i][j] = arr[j]
+            else:
+                sparse_table[i][j] = min(sparse_table[i - 1][j], sparse_table[i - 1][j + (1 << (i - 1))])
+            j += 1
+    def query(left: int, right: int) -> int:
+        length = right - left + 1
+        power_two = lg[length]
+        return min(sparse_table[power_two][left], sparse_table[power_two][right - (1 << power_two) + 1])
+    res = []
     for _ in range(q):
-        query = list(map(int, input().split()))
-        if query[0] == 1:
-            u, x = query[1:]
-            node_index_in_flatten_tree = euler_tour.enter_counter[u]
-            delta = x - arr[u]
-            arr[u] = x
-            fenwick_tree.update(node_index_in_flatten_tree, delta) # update the fenwick tree
-        else:
-            s = query[1]
-            subtree_sum = fenwick_tree.query(euler_tour.exit_counter[s]) - fenwick_tree.query(euler_tour.enter_counter[s] - 1)
-            result.append(subtree_sum)
-    return '\n'.join(map(str, result))
+        a, b = map(int, input().split())
+        res.append(query(a - 1, b - 1))
+    return '\n'.join(map(str, res))
 
 if __name__ == '__main__':
     print(main())
