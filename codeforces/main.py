@@ -44,16 +44,26 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-from itertools import product
+import math
 
 def main():
-    n, h = map(int, input().split())
-    dp = [[0]*(n + 1) for _ in range(n + 1)]
-    for i in range(n + 1):
-        dp[0][i] = 1
-    for height, i in product(range(1, n + 1), repeat = 2):
-        for j in range(i):
-            dp[i][height] += dp[j][height - 1] * dp[i - j - 1][height - 1]
-    return dp[n][n] - dp[n][h - 1]
+    n = int(input())
+    arr = list(map(int, input().split()))
+    q = int(input())
+    gcd_count = Counter()
+    tmp_gcd_count = Counter()
+    for val in arr:
+        cur_gcd_count = Counter({val: 1})
+        gcd_count[val] += 1
+        for gcd, cnt in tmp_gcd_count.items():
+            cur_gcd_count[math.gcd(val, gcd)] += cnt
+            gcd_count[math.gcd(val, gcd)] += cnt
+        tmp_gcd_count = cur_gcd_count
+    res = [0]*q
+    for i in range(q):
+        x = int(input())
+        res[i] = gcd_count[x]
+    return '\n'.join(map(str, res))
+
 if __name__ == '__main__':
     print(main())

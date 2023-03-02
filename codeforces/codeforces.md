@@ -83,3 +83,41 @@ def main():
 if __name__ == '__main__':
     print(main())
 ```
+
+## D. CGCDSSQ
+
+### Solution 1:  gcd count + works because there is very few distinct gcd so it turns out to be more like nlogm time complexity.  Since can imagine about log(m) distinct gcd, where m is max value
+
+```py
+import math
+
+def main():
+    n = int(input())
+    arr = list(map(int, input().split()))
+    q = int(input())
+    gcd_count = Counter()
+    tmp_gcd_count = Counter()
+    for val in arr:
+        cur_gcd_count = Counter({val: 1})
+        gcd_count[val] += 1
+        for gcd, cnt in tmp_gcd_count.items():
+            cur_gcd_count[math.gcd(val, gcd)] += cnt
+            gcd_count[math.gcd(val, gcd)] += cnt
+        tmp_gcd_count = cur_gcd_count
+    res = [0]*q
+    for i in range(q):
+        x = int(input())
+        res[i] = gcd_count[x]
+    return '\n'.join(map(str, res))
+
+if __name__ == '__main__':
+    print(main())
+```
+
+### Solution 2:  Uses the fact that there are very few distinct gcd + create a sparse table to be able to query gcd in O(1) time + use observation that for any starting index, as you increase size of subarray as you move the pointer to the right the gcd will be monotonically non-increasing + thus can binary search to find the count for this specific gcd 
+
+This is similar to range minimum query, you can do O(1) time because overlap doesn't matter.  The gcd of range [1, 6] can be computed by taking gcd(gcd([1, 4], gcd([3, 6]))).  
+
+```py
+
+```

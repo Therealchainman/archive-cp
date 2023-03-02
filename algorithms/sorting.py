@@ -12,6 +12,11 @@ the space complexity is O(1)
 """
 merge sort algorithm for an array (list)
 divide and conquer algorithm for stable sort of elements 
+
+stable sort algorithm
+
+to run it use
+sorted_arr = MergeSort(arr).run(0, len(arr))
 """
 class MergeSort:
     def __init__(self, arr):
@@ -67,3 +72,44 @@ def radix_sort(p: List[int], c: List[int]) -> List[int]:
         next_p[pos[cls_i]] = pi
         pos[cls_i] += 1
     return next_p
+
+"""
+another radix sort that perform a sort based on the least significant digit and then moves to the next signifiant digit
+So it scans from the left to the right places in the number.  While doing this it perform a stable sort
+
+This one also works with negative integers and positive integers.  It just sorts the negatives in reverse order and then the positives in the normal order.  So need to 
+extract the negatives and positives separately and combine into final sorted output
+
+RadixSort(nums).arr
+"""
+
+class RadixSort:
+    def __init__(self, arr: List[int]):
+        self.arr = arr
+        self.radix_sort()
+    
+    def radix_sort(self) -> None:
+        max_element = max(map(abs, self.arr))
+        max_digit = 0
+        while max_element > 0:
+            max_digit += 1
+            max_element //= 10
+        place_value = 1
+        def bucket_sort():
+            bucket = [[] for _ in range(10)]
+            for val in self.arr:
+                digit = (abs(val) // place_value) % 10
+                bucket[digit].append(val)
+            index = 0
+            for dig in range(10):
+                for val in bucket[dig]:
+                    self.arr[index] = val
+                    index += 1
+        for _ in range(max_digit):
+            bucket_sort()
+            place_value *= 10
+        
+        positives = [val for val in self.arr if val >= 0]
+        negatives = [val for val in self.arr if val < 0]
+        negatives.reverse()
+        self.arr = negatives + positives

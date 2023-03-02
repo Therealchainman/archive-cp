@@ -20841,9 +20841,102 @@ class Solution:
         return self.recurse(0, 0, n, n)
 ```
 
+## 443. String Compression
+
+### Solution 1:  two pointers + O(n) time
+
+```py
+class Solution:
+    def compress(self, chars: List[str]) -> int:
+        self.idx, prev_char, cnt = 0, chars[0], 0
+        def compress_char():
+            chars[self.idx] = prev_char
+            self.idx += 1
+            if cnt > 1:
+                for dig in str(cnt):
+                    chars[self.idx] = dig
+                    self.idx += 1
+        for ch in chars:
+            if ch != prev_char:
+                compress_char()
+                cnt, prev_char = 0, ch
+            cnt += 1
+        compress_char()
+        return self.idx
+```
+
+## 422. Valid Word Square
+
+### Solution 1:  iterating over a matrix + checking edge cases + O(nm)
+
+```py
+class Solution:
+    def validWordSquare(self, words: List[str]) -> bool:
+        n = len(words)
+        for i in range(n):
+            for j in range(len(words[i])):
+                if j >= n or i >= len(words[j]): return False
+                if words[i][j] != words[j][i]: return False
+        return True
+```
+
+## 912. Sort an Array
+
+### Solution 1:  counting sort
+
+```py
+class Solution:
+    def sortArray(self, nums: List[int]) -> List[int]:
+        min_val, max_val = min(nums), max(nums)
+        counts_arr = [0]*(max_val - min_val + 1)
+        for num in nums:
+            counts_arr[num - min_val] += 1
+        idx = 0
+        for v, cnt in enumerate(counts_arr):
+            v += min_val
+            for _ in range(cnt):
+                nums[idx] = v 
+                idx += 1
+        return nums
+```
+
 ##
 
 ### Solution 1:
+
+```py
+
+```
+### Solution 1: 
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+### Solution 1: 
 
 ```py
 
