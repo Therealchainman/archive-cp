@@ -1,5 +1,12 @@
 """
 prime sieve to generate prime numbers
+
+primes holds the prime integers for the lim integer
+
+sieve holds the prime factors for each integer from 0, 1, 2, ..., lim
+So it gives you the prime factorization of all numbers in the range. 
+
+the time complexity is O(n log log n) most likely
 """
 def prime_sieve(lim):
     sieve,primes = [[] for _ in range(lim)], []

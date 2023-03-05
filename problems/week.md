@@ -12643,26 +12643,71 @@ class Solution:
     def minJumps(self, arr: List[int]) -> int:
         n = len(arr)
         jump_locations = defaultdict(list)
-        for i, num in enumerate(arr):
-            jump_locations[num].append(i)
-        queue = deque([(0,0)])
-        visited = [0]*n
-        visited[0] = 1
+        for i in range(n):
+            jump_locations[arr[i]].append(i)
+        queue = deque([(0, 0)])
+        vis = [0]*n
+        vis[0] = 1
         while queue:
-            index, jump = queue.popleft()
-            if index == n-1: return jump
-            if index > 0 and not visited[index-1]:
-                visited[index-1] = 1
-                queue.append((index-1,jump+1))
-            if index < n-1 and not visited[index+1]:
-                visited[index+1]=1
-                queue.append((index+1,jump+1))
-            for nei_index in jump_locations[arr[index]]:
-                if visited[nei_index]: continue
-                visited[nei_index] = 1
-                queue.append((nei_index,jump+1))
-            jump_locations.pop(arr[index])
+            idx, jumps = queue.popleft()
+            if idx == n - 1: return jumps
+            if idx > 0 and not vis[idx - 1]:
+                vis[idx - 1] = 1
+                queue.append((idx - 1, jumps + 1))
+            if idx < n - 1 and not vis[idx + 1]:
+                vis[idx + 1] = 1
+                queue.append((idx + 1, jumps + 1))
+            for jump_idx in jump_locations[arr[idx]]:
+                if vis[jump_idx]: continue
+                vis[jump_idx] = 1
+                queue.append((jump_idx, jumps + 1))
+            jump_locations.pop(arr[idx])
         return -1
+```
+
+```cpp
+int minJumps(vector<int>& arr) {
+    int n = arr.size();
+    vector<bool> vis(n,false);
+    unordered_map<int,vector<int>> values;
+    for (int i = 0;i<n;i++) {
+        values[arr[i]].push_back(i);
+    }
+    queue<int> q;
+    q.push(0);
+    vis[0] = true;
+    int steps = 0;
+    auto check = [&](const int i) {
+        return i>=0 && i<n && !vis[i];
+    };
+    while (!q.empty()) {
+        queue<int> nq;
+        int sz = q.size();
+        while (sz--) {
+            int i = q.front();
+            q.pop();
+            if (i==n-1) {
+                return steps;
+            }
+            for (int nei : values[arr[i]]) {
+                if (!vis[nei]) {
+                    vis[nei]=true;
+                    nq.push(nei);
+                }
+            }
+            values[arr[i]].clear();
+            for (int j : {i-1,i+1}) {
+                if (check(j)) {
+                    vis[j]=true;
+                    nq.push(j);
+                }
+            }
+        }
+        steps++;
+        swap(q,nq);
+    }
+    return -1;
+}
 ```
 
 ## 2423. Remove Letter To Equalize Frequency
@@ -13217,20 +13262,18 @@ class Solution:
 ```py
 class Solution:
     def countSubarrays(self, nums: List[int], minK: int, maxK: int) -> int:
-        neutral = -1
-        minRight = maxRight = neutral
-        result = left = 0
+        left, res, minRight, maxRight = 0, 0, -1, -1
         for i, num in enumerate(nums):
             if num < minK or num > maxK:
-                left = i+1 # update the leftmost pointer
-                minRight = maxRight = neutral # reset the 2 right pointers for min and max
+                left = i + 1
+                minRight = maxRight = -1
             if num == minK:
-                minRight = max(minRight, i)
+                minRight = i
             if num == maxK:
-                maxRight = max(maxRight, i)
+                maxRight = i
             delta = max(0, min(minRight, maxRight) - left + 1)
-            result += delta
-        return result
+            res += delta
+        return res
 ```
 
 ## 1335. Minimum Difficulty of a Job Schedule
@@ -20900,20 +20943,211 @@ class Solution:
         return nums
 ```
 
-##
+## 2582. Pass the Pillow
+
+### Solution 1:  modular arithmetic + math + O(1) time
+
+Write out an example and it is easy to see that it follows a pattern
+for n = 4, as time increases from 0 to some number, you would get these locations
+1, 2, 3, 4, 3, 2, 1, 2, 3, 4, 3, 2, ....
+----------
+
+This sequence of consecutive natural numbers from 1, n  repeats every so often, but if you compare some examples
+You can see that it repeats after ever gap where the gap is the number of decreases it will need to get back to person 1
+But it is evident that there will be n - 2 for the size of the gap, cause they will need to give it to n - 2 people to get it
+back to person 1
+so if you take the result mod this n + gap, you can see that if it is smaller than n it is basically going to be part of that
+increasing segment.  While if it is greater it will be decreasing, which can be model by a formula
+
+Another way to state it is
+Going forward and back to the original position,
+take n * 2 - 2 steps.
+
+```py
+class Solution:
+    def passThePillow(self, n: int, time: int) -> int:
+        gap = n - 2
+        mod = n + gap
+        return time%mod + 1 if time%mod < n else 2*n - time%mod - 1
+```
+
+## 2583. Kth Largest Sum in a Binary Tree
+
+### Solution 1:  min heap + bfs + level order traversal + deque + O(nlogk) time
+
+```py
+class Solution:
+    def kthLargestLevelSum(self, root: Optional[TreeNode], k: int) -> int:
+        minheap = []
+        queue = deque([root])
+        while queue:
+            level_sum = 0
+            for _ in range(len(queue)):
+                node = queue.popleft()
+                level_sum += node.val
+                queue.extend(filter(None, (node.left, node.right)))
+            heappush(minheap, level_sum)
+            if len(minheap) > k:
+                heappop(minheap)
+        return minheap[0] if len(minheap) == k else -1
+```
+
+## 2584. Split the Array to Make Coprime Products
+
+### Solution 1:  prime factorization + use memory to save the prime factorization of a number + O(nsqrt(m)) time
+
+Using the idea of tracking the prime factors in the prefix product and suffix product. 
+So as you encounter a number you take the prime factors of it and remove it from the count of 
+those prime factors in suffix.  That is there is a suffix counter that is tracking the count
+of all the prime factors of every integer in the suffix.  Basically once you encounter the prime factor
+it is now both in the prefix and suffix, until you have reached an integer where all of the
+instances of that prime factor are now in the prefix and no longer in the suffix indicated
+by he count being 0 in suffix counter. 
+
+If there are no prime factors that are both in prefix and still in suffix then you will have a gcd of 1
+and they are coprime, so can return that index. 
+
+Idea simplified, you are finding when no prime factors are both in prefix product and suffix product when splitting
+the array into two parts. 
+
+Here, we cannot actually compute the products as they can become astronomically large.
+Products of prefix and suffix elements are co-prime if prefix elements do not share any prime factors with suffix elements.
+
+```py
+class Solution:
+    def findValidSplit(self, nums: List[int]) -> int:
+        n = len(nums)
+        suffix_prime_counter = Counter()
+        def prime_factors(num: int) -> List[int]:
+                factors = []
+                while num % 2 == 0:
+                    factors.append(2)
+                    num //= 2
+                for i in range(3, int(math.sqrt(num)) + 1, 2):
+                    while num % i == 0:
+                        factors.append(i)
+                        num //= i
+                if num > 2:
+                    factors.append(num)
+                return factors
+        factors = {}
+        for num in nums:
+            factors[num] = factors.get(num, prime_factors(num))
+            for prime_factor in factors[num]:
+                suffix_prime_counter[prime_factor] += 1
+        shared_primes = set()
+        for i in range(n - 1):
+            for prime_factor in factors[nums[i]]:
+                suffix_prime_counter[prime_factor] -= 1
+                if suffix_prime_counter[prime_factor] > 0:
+                    shared_primes.add(prime_factor)
+                else:
+                    shared_primes.discard(prime_factor)
+            if len(shared_primes) == 0: return i
+        return -1
+```
+
+### Solution 2: prime sieve + O(n + mloglogm) time
+
+There are 78,498 prime factors in the range of 1 to 1,000,000. 
+
+This solution TLE, I guess the prime sieve is too slow being that it is going to be mloglogm
+
+```py
+class Solution:
+    def findValidSplit(self, nums: List[int]) -> int:
+        n = len(nums)
+        max_val = max(nums)
+        suffix_prime_counter = Counter()
+        def prime_sieve(lim):
+            sieve,primes = [[] for _ in range(lim)], []
+            for integer in range(2,lim):
+                if not len(sieve[integer]):
+                    primes.append(integer)
+                    for possibly_divisible_integer in range(integer,lim,integer):
+                        current_integer = possibly_divisible_integer
+                        while not current_integer%integer:
+                            sieve[possibly_divisible_integer].append(integer)
+                            current_integer //= integer
+            return sieve
+        sieve_prime_factors = prime_sieve(max_val + 1)
+        for num in nums:
+            for prime_factor in sieve_prime_factors[num]:
+                suffix_prime_counter[prime_factor] += 1
+        shared_primes = set()
+        for i in range(n - 1):
+            for prime_factor in sieve_prime_factors[nums[i]]:
+                suffix_prime_counter[prime_factor] -= 1
+                if suffix_prime_counter[prime_factor] > 0:
+                    shared_primes.add(prime_factor)
+                else:
+                    shared_primes.discard(prime_factor)
+            if len(shared_primes) == 0: return i
+        return -1
+```
+
+## 2585. Number of Ways to Earn Points
+
+### Solution 1: recursive dp + knapsack dp + O(target*n^2) time, where n = 50, target = 1000
+
+classic dp problem
+
+look at [cses](https://cses.fi/problemset/task/1636)
+
+```py
+class Solution:
+    def waysToReachTarget(self, target: int, types: List[List[int]]) -> int:
+        n, mod = len(types), int(1e9) + 7
+        @cache
+        def dp(sum_marks: int, idx: int) -> int:
+            if sum_marks == target: return 1
+            if sum_marks > target or idx == n: return 0
+            counts, mark = types[idx]
+            ways = 0
+            for take in range(counts + 1):
+                ways = (ways + dp(sum_marks + take*mark, idx + 1))%mod
+            return ways
+        return dp(0, 0)
+```
+
+### Solution 2:  iterative dp + knapsack dp
+
+build dp[i] to store the number of distinct ways to achieve i marks. 
+for each item you need to iterate from dp[big] to dp[small] so that
+it doesn't update based on previous value. 
+Then just run through the number of this item can take
+
+```py
+class Solution:
+    def waysToReachTarget(self, target: int, types: List[List[int]]) -> int:
+        n, mod = len(types), int(1e9) + 7
+        dp = [0]*(target + 1)
+        dp[0] = 1
+        for count, mark in types:
+            for sum_ in range(target, 0, -1):
+                for take in range(1, count + 1):
+                    if take*mark > sum_: break
+                    dp[sum_] = (dp[sum_] + dp[sum_ - take*mark])%mod
+        return dp[target]
+```
+
+## 2578. Split With Minimum Sum
 
 ### Solution 1:
 
 ```py
 
 ```
+
+## 2579. Count Total Number of Colored Cells
+
 ### Solution 1: 
 
 ```py
 
 ```
 
-##
+## 2580. Count Ways to Group Overlapping Ranges
 
 ### Solution 1:
 
@@ -20921,36 +21155,7 @@ class Solution:
 
 ```
 
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
-```
-### Solution 1: 
-
-```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
+## 2581. Count Number of Possible Root Nodes
 
 ### Solution 1:
 

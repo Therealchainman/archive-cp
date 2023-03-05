@@ -1,8 +1,13 @@
+# Atcoder Beginner Contest 292
+
+## What is used at the top of each submission
+
+```py
 import os,sys
 from io import BytesIO, IOBase
 sys.setrecursionlimit(10**6)
 from typing import *
-
+ 
 # Fast IO Region
 BUFSIZE = 8192
 class FastIO(IOBase):
@@ -43,43 +48,59 @@ class IOWrapper(IOBase):
         self.readline = lambda: self.buffer.readline().decode("ascii")
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
+```
 
-from collections import deque
+## 
 
-def main():
-    n, m = map(int, input().split())
-    queue = deque(range(n))
-    adj_list = [[] for _ in range(n)]
-    adj_matrix = [[0] * n for _ in range(n)]
-    for i in range(n):
-        adj_matrix[i][i] = 1
-    for _ in range(m):
-        u, v = map(int, input().split())
-        u -= 1
-        v -= 1
-        adj_list[u].append(v)
-        adj_matrix[u][v] = 1
-    res = 0
-    while queue:
-        node = queue.popleft()
-        new_neighbors = []
-        for nei in adj_list[node]:
-            for nei_nei in adj_list[nei]:
-                if not adj_matrix[node][nei_nei]:
-                    adj_matrix[node][nei_nei] = 1
-                    new_neighbors.append(nei_nei)
-        while len(new_neighbors) > 0:
-            res += len(new_neighbors)
-            new_new_neighbors = []
-            for nei in new_neighbors:
-                for nei_nei in adj_list[nei]:
-                    if not adj_matrix[node][nei_nei]:
-                        adj_matrix[node][nei_nei] = 1
-                        new_new_neighbors.append(nei_nei)
-            new_neighbors = new_new_neighbors
-    return res
-    
+### Solution 1:  
 
-if __name__ == '__main__':
-    # main()
-    print(main())
+```py
+
+```
+
+## 
+
+### Solution 1:  
+
+```py
+
+```
+
+## 
+
+### Solution 1: 
+
+```py
+
+```
+
+## 
+
+### Solution 1:  
+
+```py
+
+```
+
+## 
+
+### Solution 1:  
+
+```py
+
+```
+
+## 
+
+```py
+
+```
+
+## 
+
+### Solution 1:
+
+```py
+
+```
+

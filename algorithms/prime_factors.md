@@ -1,6 +1,6 @@
 # PRIME FACTORS
 
-Get all the prime factors of a number n in sqrt(n) time
+Get all the prime factors of a number n in sqrt(num) time
 
 ```py
 def prime_factors(num: int) -> List[int]:
@@ -8,7 +8,7 @@ def prime_factors(num: int) -> List[int]:
     while num % 2 == 0:
         factors.append(2)
         num //= 2
-    for i in range(3, int(math.sqrt(num)) + 1, 2):
+    for i in range(3, math.isqrt(num) + 1, 2):
         while num % i == 0:
             factors.append(i)
             num //= i
