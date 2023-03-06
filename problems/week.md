@@ -21133,13 +21133,127 @@ class Solution:
 
 ## 2578. Split With Minimum Sum
 
+### Solution 1:  sort + greedy + O(nlogn) time, where n = number of digits which is n = 10
+
+sort the digits so like 1234567 and then altneratively assign them to the two numbers to be added.
+1357 + 246, this is better than 
+This creates the smallest sum of digits possible for each place, so for the 4th place smallest is 1
+for the 3rd place smallest is the next two smaller digits, 2, 3
+and for the 2nd place it is 4, 5 and so on. 
+
+```py
+class Solution:
+    def splitNum(self, num: int) -> int:
+        s = ''.join(sorted(str(num)))
+        return int(s[::2]) + int(s[1::2])
+```
+
+## 2579. Count Total Number of Colored Cells
+
+### Solution 1:  math
+
+Always adding 4 more to each increment, so it is 4*(1+2+3+4+...+n-1)
+
+```py
+class Solution:
+    def coloredCells(self, n: int) -> int:
+        return 1 + 4*((n - 1)*n//2)
+```
+
+## 2580. Count Ways to Group Overlapping Ranges
+
+### Solution 1:  sort + store max reachable end to find when new groups start + O(nlogn)
+
+power of 2 with a mod, is a fast way to compute the x**y%m with a mod. 
+
+Also storing the max reachable for the current group, start a new group when you exceed max reachable for current group.
+
+```py
+class Solution:
+    def countWays(self, ranges: List[List[int]]) -> int:
+        num_groups, reachable, mod= 0, -1, int(1e9) + 7
+        for s, e in sorted(ranges):
+            num_groups += (s > reachable)
+            reachable = max(reachable, e)
+        return pow(2, num_groups, mod)
+```
+
+## 2581. Count Number of Possible Root Nodes
+
+### Solution 1:  two dfs + reroot tree + O(n) time
+
+This is an example of a rerooting algorithm.  The first dfs will set an arbitrary root for the tree, such as 0.
+And construct the number of correct guesses when that is the root of the tree.  
+
+A correct guess is when the tree with that root will have that edge in that order from parent node to node.
+
+The second dfs will reroot the tree at each node, and count the number of correct guesses when that is the root of the tree. The transitions are easy because it is just
+if you have are going to reroot tree to the nei_node, what you need to do is remove the guess that was saying that node -> nei_node, where this is 
+parent_node -> node.  The reason for subtracting is when rerooting to nei_node, that will no longer be a true guess, but now you have a new guess that nei_node -> node. 
+
+When it finishes a depth first search it will come back to the current node, and extend down another neighbor node.  In this case it will be like, it needs to undo it's decision to swap the nodes, because now again node -> nei_node will work, if you reroot to another nei_node. This is easy to visualize in your mind. 
+
+```py
+class Solution:
+    def rootCount(self, edges: List[List[int]], guesses: List[List[int]], k: int) -> int:
+        n = len(edges) + 1
+        guess_counts = Counter()
+        for parent, node in guesses:
+            guess_counts[(parent, node)] += 1
+        adj_list = [[] for _ in range(n)]
+        for u, v in edges:
+            adj_list[u].append(v)
+            adj_list[v].append(u)
+        def dfs(node: int, parent_node: int) -> int:
+            correct_guesses = 0
+            for nei_node in adj_list[node]:
+                if nei_node == parent_node: continue
+                correct_guesses += guess_counts[(node, nei_node)]
+                correct_guesses += dfs(nei_node, node)
+            return correct_guesses
+        def reroot_tree_dfs(node: int, parent_node: int) -> int:
+            root_count = int(self.correct_guesses >= k)
+            for nei_node in adj_list[node]:
+                if nei_node == parent_node: continue
+                self.correct_guesses -= guess_counts[(node, nei_node)]
+                self.correct_guesses += guess_counts[(nei_node, node)]
+                root_count += reroot_tree_dfs(nei_node, node)
+                self.correct_guesses += guess_counts[(node, nei_node)]
+                self.correct_guesses -= guess_counts[(nei_node, node)]
+            return root_count
+        self.correct_guesses = dfs(0, -1) # choosing arbitrary root node 0
+        return reroot_tree_dfs(0, -1) 
+```
+
+## 1539. Kth Missing Positive Number
+
 ### Solution 1:
+
+```py
+class Solution:
+    def findKthPositive(self, arr: List[int], k: int) -> int:
+        n = len(arr)
+        left, right = 0, 2_001
+        def possible(target: int) -> bool:
+            nonmissing_ints = bisect.bisect_left(arr, target)
+            missing_ints = target - nonmissing_ints
+            return missing_ints <= k
+        while left < right:
+            mid = (left + right + 1) >> 1
+            if possible(mid):
+                left = mid
+            else:
+                right = mid - 1
+        return left
+```
+
+### Solution 2:  
 
 ```py
 
 ```
 
-## 2579. Count Total Number of Colored Cells
+##
 
 ### Solution 1: 
 
@@ -21147,15 +21261,7 @@ class Solution:
 
 ```
 
-## 2580. Count Ways to Group Overlapping Ranges
-
-### Solution 1:
-
-```py
-
-```
-
-## 2581. Count Number of Possible Root Nodes
+##
 
 ### Solution 1:
 
@@ -21170,6 +21276,33 @@ class Solution:
 ```py
 
 ```
+
+##
+
+### Solution 1: 
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
 ### Solution 1: 
 
 ```py

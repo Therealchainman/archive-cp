@@ -23,35 +23,21 @@ inline long long readll() {
 }
 
 int main() {
-    int n = read(), q = read();
-    vector<int> arr(n);
+    int n = read(), x = read();
+    int mod = 1e9 + 7;
+    vector<int> dp(x + 1, 0);
+    dp[0] = 1;
+    vector<int> coins;
     for (int i = 0; i < n; i++) {
-        arr[i] = read();
+        int c = read();
+        coins.push_back(c);
     }
-    int max_power_two = 18;
-    vector<int> lg(n + 1, 0);
-    for (int i = 2; i <= n; i++) {
-        lg[i] = lg[i / 2] + 1;
-    }
-    vector<vector<int>> sparse_table(n, vector<int>(n + 1, INT_MAX));
-    for (int j = 0; j <= max_power_two; j++) {
-        for (int i = 0; i + (1 << j) <= n; i++) {
-            if (j == 0) {
-                sparse_table[i][j] = arr[i];
-            }
-            else {
-                sparse_table[i][j] = min(sparse_table[i][j - 1], sparse_table[i + (1 << (j - 1))][j - 1]);
-            }
+    for (int i = 0; i < n; i++) {
+        for (int coin_sum = coins[i]; coin_sum <= x; coin_sum++) {
+            if (coins[i] > coin_sum) continue;
+            dp[coin_sum] = (dp[coin_sum] + dp[coin_sum - coins[i]]) % mod;
         }
     }
-    auto query = [&](int left, int right) -> int {
-        int length = right - left + 1;
-        int power_two = lg[length];
-        return min(sparse_table[left][power_two], sparse_table[right - (1 << power_two) + 1][power_two]);
-    };
-    for (int i = 0; i < q; i++) {
-        int a = read(), b = read();
-        cout << query(a - 1, b - 1) << endl;
-    }
+    cout << dp[x] << endl;
     return 0;
 }
