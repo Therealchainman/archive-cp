@@ -21253,12 +21253,49 @@ class Solution:
 
 ```
 
-##
+## 109. Convert Sorted List to Binary Search Tree
 
-### Solution 1: 
+### Solution 1:  fast and slower pointer + recursion + divide and conquer + O(nlogn) time 
 
 ```py
+class Solution:
+    def sortedListToBST(self, head: Optional[ListNode]) -> Optional[TreeNode]:
+        if not head: return
+        if not head.next: return TreeNode(head.val)
+        # SLOW AND FAST POINTER, MID WILL BE AT SLOW POINTER AFTER ITERESTING TO END OF FAST POINTER
+        slow, fast = head, head.next.next
+        while fast and fast.next:
+            slow, fast = slow.next, fast.next.next
+        middle = slow.next
+        slow.next = None
+        root = TreeNode(middle.val)
+        root.left, root.right = self.sortedListToBST(head), self.sortedListToBST(middle.next)
+        return root
+```
 
+```py
+class Solution:
+    def getsize(self, head: Optional[ListNode]) -> int:
+        cnt = 0
+        while head:
+            head = head.next
+            cnt += 1
+        return cnt
+    def sortedListToBST(self, head: Optional[ListNode]) -> Optional[TreeNode]:
+
+        size = self.getsize(head)
+
+        def convert(left: int, right: int) -> Optional[TreeNode]:
+            nonlocal head
+            if left > right: return
+            mid = (left + right) >> 1
+            left = convert(left, mid - 1)
+            root = TreeNode(head.val)
+            head = head.next
+            root.left, root.right = left, convert(mid + 1, right)
+            return root
+        
+        return convert(0, size - 1)
 ```
 
 ##

@@ -1,8 +1,13 @@
+# Atcoder Beginner Contest 293
+
+## What is used at the top of each submission
+
+```py
 import os,sys
 from io import BytesIO, IOBase
 sys.setrecursionlimit(10**6)
 from typing import *
-
+ 
 # Fast IO Region
 BUFSIZE = 8192
 class FastIO(IOBase):
@@ -43,45 +48,85 @@ class IOWrapper(IOBase):
         self.readline = lambda: self.buffer.readline().decode("ascii")
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
+```
 
-"""
-matrix multiplication with modulus
-"""
-def mat_mul(mat1: List[List[int]], mat2: List[List[int]], mod: int) -> List[List[int]]:
-    result_matrix = []
-    for i in range(len(mat1)):
-        result_matrix.append([0]*len(mat2[0]))
-        for j in range(len(mat2[0])):
-            for k in range(len(mat1[0])):
-                result_matrix[i][j] += (mat1[i][k]*mat2[k][j])%mod
-    return result_matrix
+## 
 
-"""
-matrix exponentiation with modulus
-matrix is represented as list of lists in python
-"""
-def mat_pow(matrix: List[List[int]], power: int, mod: int) -> List[List[int]]:
-    if power<=0:
-        print('n must be non-negative integer')
-        return None
-    if power==1:
-        return matrix
-    if power==2:
-        return mat_mul(matrix, matrix, mod)
-    t1 = mat_pow(matrix, power//2, mod)
-    if power%2 == 0:
-        return mat_mul(t1, t1, mod)
-    return mat_mul(t1, mat_mul(matrix, t1, mod), mod)
+### Solution 1:  
 
-def main():
-    base, num_terms, mod = map(int, input().split())
-    # exponentiated_matrix*base_matrix = solution_matrix
-    # exponentiated_matrix = transition_matrix^num_terms
-    transition_matrix = [[base, 1], [0, 1]]
-    base_matrix = [[0], [1]]
-    exponentiated_matrix = mat_pow(transition_matrix, num_terms, mod)
-    solution_matrix = mat_mul(exponentiated_matrix, base_matrix, mod)
-    return solution_matrix[0][0]
+```py
 
-if __name__ == '__main__':
-    print(main())
+```
+
+## 
+
+### Solution 1:  
+
+```py
+
+```
+
+## 
+
+### Solution 1: 
+
+```py
+    H, W = map(int, input().split())
+    A = [list(map(int, input().split())) for _ in range(H)]
+
+    dp = [[0] * (W + 1) for _ in range(H + 1)]
+    dp[1][1] = 1
+
+    for j in range(2, W + 1):
+        if A[1][j-1] in A[0][:j-1]:
+            dp[1][j] = 0
+        else:
+            dp[1][j] = 1
+    print(dp)
+    for i in range(2, H + 1):
+        if A[i-1][0] in [A[k][0] for k in range(i-1)]:
+            dp[i][1] = 0
+        else:
+            dp[i][1] = 1
+    print(dp)
+    for i in range(2, H + 1):
+        for j in range(2, W + 1):
+            if A[i-1][j-1] in set(A[k][j-1] for k in range(i-1)) or \
+            A[i-1][j-1] in set(A[i-1][:j-1]):
+                dp[i][j] = 0
+            else:
+                dp[i][j] = dp[i-1][j] + dp[i][j-1]
+
+    return dp[-1][-1]
+```
+
+## 
+
+### Solution 1:  
+
+```py
+
+```
+
+## 
+
+### Solution 1:  
+
+```py
+
+```
+
+## 
+
+```py
+
+```
+
+## 
+
+### Solution 1:
+
+```py
+
+```
+
