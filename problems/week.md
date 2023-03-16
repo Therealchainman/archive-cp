@@ -21247,15 +21247,31 @@ class Solution:
         return left
 ```
 
-### Solution 2:  
+### Solution 2:  binary search + greedy
 
 ```py
-
+class Solution:
+    def findKthPositive(self, arr: List[int], k: int) -> int:
+        n = len(arr)
+        left, right = 0, n - 1
+        def possible(idx: int) -> bool:
+            return arr[idx] - idx - 1 < k
+        while left < right:
+            mid = (left + right) >> 1
+            if possible(mid):
+                left = mid + 1
+            else:
+                right = mid
+        return k + left
 ```
 
 ## 109. Convert Sorted List to Binary Search Tree
 
 ### Solution 1:  fast and slower pointer + recursion + divide and conquer + O(nlogn) time 
+
+This is a cool divide and conquer problem where you can find the mid pointer and then divide it into to.  Choosing the mid point to be the root of a binary search tree makes sense because it is the middle value in sorted list.  so you will place smaller elements to the left and larger elements to the right.  And this will result distributing the same number to the left and right with at most a difference of 1 node. 
+
+It is important to be careful to set fast = head.next.next cause it needs to be advanced a little cause you want to set middle to slow.next so that you can set slow.next = None, so that the first part of th elinked list is modified, needs to be divided after all.  
 
 ```py
 class Solution:
@@ -21272,6 +21288,15 @@ class Solution:
         root.left, root.right = self.sortedListToBST(head), self.sortedListToBST(middle.next)
         return root
 ```
+
+### Solution 2:  Inorder traversal to create binary search tree
+
+It is known that an inorder traversal of a binary search tree will give a sorted list.  Thus in this case we have a sorted list, if we consider that it was created by an inorder traversal of a binary search tree.  It is possible to solve it in that manner? Basically you get the size of the linked list, and you then can consider breaking it into halves again.  Dividing it with two pointers left and right.  And find a mid pointer.  Then you can create a root node but it is inorder traversal of the sorted list we are using.  So you compute the left, then you set the value of the root node, and then you set the value of traverse right
+
+inorder pattern
+left subtree
+root
+right subtree
 
 ```py
 class Solution:
@@ -21298,25 +21323,445 @@ class Solution:
         return convert(0, size - 1)
 ```
 
-##
+### Solution 3:  DSW algorithm + tree rotations
 
-### Solution 1:
+The idea is to convert the tree into a vine (like linked list) using left rotations, and then balance it using right rotations. You can look online for the full description of the DSW algorithm.
+
+right rotation in tree is the following
+
+right rotation about node A, where B is left child means you do this Set A.left = B.right, so the left child of A will be what was the right child of B now.  And set B as parent of A in form of B.right = A, so A is right child of B.  And everything else stays the same. That is a right rotation, and maintains the binary search tree invariant.  
+
+left rotation 
 
 ```py
 
 ```
 
-##
+## 2589. Minimum Time to Complete All Tasks
 
-### Solution 1:
+### Solution 1:  greedy + O(n^2) time
+
+sort by end time and run that cpu task with the latest available times that the cpu is not already running until you have no more duration.  by running
+the cpu at the latest time for a task, it increases the odd that it will contribute to other task that has a later end time but earlier start time. 
 
 ```py
+class Solution:
+    def findMinimumTime(self, tasks: List[List[int]]) -> int:
+        tasks.sort(key = lambda task: task[1])
+        running_time = [0]*2001 # each index correspond to time, and if it is running at that time it is set to 1
+        total_time = 0
+        for start, end, duration in tasks:
+            # determine how much duration remains for this task
+            for i in range(start, end + 1):
+                duration -= (running_time[i])
+            # complete this tasking using the latest available times, so that it increases chance of assisting with another task    
+            for i in reversed(range(start, end + 1)):
+                if duration <= 0: break
+                if running_time[i]: continue
+                duration -= 1
+                running_time[i] = 1
+        return sum(running_time)
+```
 
+## 2587. Rearrange Array to Maximize Prefix Score
+
+### Solution 1:  sort array and go until prefix sum is less than or equal to 0 + O(n) time
+
+```py
+class Solution:
+    def maxScore(self, nums: List[int]) -> int:
+        prefix_sum = 0
+        for i, num in enumerate(sorted(nums, reverse = True)):
+            prefix_sum += num
+            if prefix_sum <= 0: return i
+        return len(nums)
+```
+
+## 2588. Count the Number of Beautiful Subarrays
+
+### Solution 1:  prefix + bit manipulation + bitmask + O(n) time
+
+The idea is that the prefix bit mask represents if that prefix has an odd or even number for that specific 2^i, where i is the index in the bit string representation. 
+so like 0101, has odd number of bits in 0 and 2 location and even number in 1 and 3 location.  Whenever you encounter a number you just need to take the xor to update what is even and odd. Because they just flip everything.  All the current bits will flip bits in the prefix mask.  
+
+so it is the case that a subarray is beautiful if it can be represented by 0000, that is all are even.  Now you just need to find the previous prefix mask that xor with current prefix max will give you the 0000, and with a counter table can track the number of times those prefixes occurred, each of those represent the left end points of a range. and you can compute the total count of subarrays. 
+
+```py
+class Solution:
+    def beautifulSubarrays(self, nums: List[int]) -> int:
+        prefix_mask = res = 0
+        prefix_counts = Counter({0: 1})
+        for num in nums:
+            prefix_mask ^= num
+            res += prefix_counts[prefix_mask]
+            prefix_counts[prefix_mask] += 1
+        return res
+```
+
+## 2586. Count the Number of Vowel Strings in Range
+
+### Solution 1:  string slice + string
+
+```py
+class Solution:
+    def vowelStrings(self, words: List[str], left: int, right: int) -> int:
+        vowels = 'aeiou'
+        res = 0
+        for word in words[left:right + 1]:
+            res += (word[0] in vowels and word[-1] in vowels)
+        return res
+```
+
+## 23. Merge k Sorted Lists
+
+### Solution 1:  merge with divide and conquer + O(nlogk) time
+
+suppose you have an array of lists = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+merge the adjacent lists initially to get 
+merged pairs (0, 1), (2, 3), (4, 5), (6, 7), (8, 9), (10, 11), (12)
+and stored in [0, 2, 4, 6, 8, 10, 12]
+now let's merge these pairs
+(0, 2), (4, 6), (8, 10), (12)
+stored in [0, 4, 8, 12]
+now let's merge these pairs (0, 4), (8, 12)
+stored in [0, 8]
+merge these pairs (0, 8)
+stored in [0]
+
+this will be logk of merges.
+
+notice that at each step you are incrementing by 
+2, 4, 8, 16, 32
+and merging pairs that this distance away at each of these increment levels
+1, 2, 4, 8, 16
+
+
+```py
+class Solution:
+    def merge_two_lists(self, list1: List[Optional[ListNode]], list2: List[Optional[ListNode]]) -> List[Optional[ListNode]]:
+        sentinel_node = ListNode(0)
+        cur = sentinel_node
+        while list1 and list2:
+            val = min(list1.val, list2.val)
+            cur.next = ListNode(val)
+            cur = cur.next
+            if list1.val == val:
+                list1 = list1.next
+            else:
+                list2 = list2.next
+        cur.next = list1 or list2
+        return sentinel_node.next
+        
+    def mergeKLists(self, lists: List[Optional[ListNode]]) -> Optional[ListNode]:
+        k = len(lists)
+        interval = 1
+        while interval < k:
+            for i in range(0, k - interval, 2*interval):
+                lists[i] = self.merge_two_lists(lists[i], lists[i + interval])
+            interval *= 2
+        return lists[0] if k > 0 else None
+```
+
+## Solution 2: minheap with custom comparator
+
+TC: O(Nlog(k)) where k is number of lists, and N is total number nodes in all lists
+
+SC: O(K) 
+
+```py
+class Solution:
+    ListNode.__lt__ = lambda self, other: self.val < other.val
+    def mergeKLists(self, lists: List[Optional[ListNode]]) -> Optional[ListNode]:
+        minheap = [node for i, node in enumerate(lists) if node]
+        heapify(minheap)
+        sentinel_node = ListNode()
+        head = sentinel_node
+        while minheap:
+            node = heappop(minheap)
+            head.next = node
+            head = head.next
+            node = node.next
+            if node:
+                heappush(minheap, node)
+        return sentinel_node.next
+```
+
+
+```py
+class Solution:
+    def mergeKLists(self, lists: List[Optional[ListNode]]) -> Optional[ListNode]:
+        if not lists:
+            return None
+        if len(lists)==1:
+            return lists[0]
+        mid = len(lists)//2
+        leftList, rightList = self.mergeKLists(lists[:mid]), self.mergeKLists(lists[mid:])
+        return self.merge(leftList,rightList)
+            
+    def merge(self, left, right):
+        head = ListNode()
+        cur = head
+        while left and right:
+            if left.val<right.val:
+                cur.next=left
+                left=left.next
+            else:
+                cur.next=right
+                right=right.next
+            cur=cur.next
+        cur.next=left or right
+        return head.next
+```
+
+## 382. Linked List Random Node
+
+### Solution 1:  reservoir sampling with k = 1 + O(n) time for each getRandom
+
+proof of reservoir sampling:
+
+suppose you have looked at n nodes and you are considering the n + 1 node.  What is the probability of remaining on node 1
+so the transition from node 1 -> node 1, what is the probability.  1/n * n/(n+1) = 1/(n+1), what does this mean
+the 1/n means the probability of picking node 1 out of n nodes is 1/n if you have uniform distribution and so on.  This seems to make sense, but what is n/(n+1), will there are n/(n+1) chance you remain on node 1 and don't pick another node.  Will let's prove this statement first
+
+proof that n/(n+1) is chance to remain for array size n
+if there are n+1 elements to pick from, what are the chance you pick the current element, well let's get to an example of reservoir sampling
+
+if you have [1,2,3,4,5,6], and I ask what is the probability that I end up with element 1 at the end of the sampling.  
+first step 
+1/1 chance of pick element 1
+second step
+there is 1/2 chance of not picking element 1
+third step
+there is a 2/3 chance of not picking element 1
+fourth step
+there is a 3/4 chance of not picking element 1, and staying in reservoir
+
+so the n/(n+1) represents the chance of not picking node 1 and it remains in reservoir.  So it remains in reservoir in this problem. so that means for the n+1 it has 1/(n+1) chance of staying in node 1
+
+For node 2 you have two possiblities there is a chance node 1 -> node 2 or node 2 -> node 2
+node 1 -> node 2 is 1/n*(1/n + 1) = 1/(n*(n+1))
+node 2 -> node 2 is 1/n*(n-1)/(n+1) = (n-1)/(n*(n+1))
+summed together gives (n-1+1)/(n*(n+1)) = 1/(n*(n+1)) = 1/(n+1), so it has the same probability and that is correct it should be that prob to be at node 2
+
+for node k+1
+node k -> node k + 1 is 1/n*(k/(n+1)) = k/(n*(n+1))
+node k+1 -> node k+1 is 1/n*(n-k)*(n+1) = (n-k)/(n*(n+1))
+summed together is again 1/(n+1).  So that shows that all nodes have same chance of being picked in reservoir sampling algorithm.  Which is what you want complete randomness.
+
+```py
+class Solution:
+
+    def __init__(self, head: Optional[ListNode]):
+        self.head = head
+
+    def getRandom(self) -> int:
+        head, res = self.head, self.head
+        n = k = 1
+        while head.next:
+            n += 1
+            head = head.next
+            if random.random() < k/n:
+                res = res.next
+                k += 1
+        return res.val
+```
+
+### Solution 2: vector store values and rand()
+
+```c++
+int n;
+vector<int> vals;
+Solution(ListNode* head) {
+    n=0;
+    ListNode *cur = head;
+    for (ListNode *cur = head;cur;cur=cur->next,n++) {
+        vals.push_back(cur->val);
+    }
+}
+
+int getRandom() {
+    return vals[rand()%n];
+}
+```
+
+### Solution 3: reservoir sampling with k=1
+This algorithm can efficiently solve the problem to find a random element when dealing with unkown size of the data.  Or basically a stream
+of data.  
+
+Known limitation of rand() is that it will only work for a size of 32k integer because of RAND_MAX
+
+Proposed solution uniform_int_distribution<int> dist(0,n-1);
+
+```c++
+ListNode *front;
+Solution(ListNode* head) {
+    front = head;
+}
+
+int getRandom() {
+    ListNode *cur = front;
+    int value = 0;
+    for (int i = 1;cur;cur=cur->next,i++) {
+        if (rand()%i==0) {
+            value = cur->val;
+        }
+    }
+    return value;
+}
+```
+
+## 875. Koko Eating Bananas
+
+### Solution 1:  bisect + greedy + binary search
+
+```py
+class Solution:
+    def minEatingSpeed(self, piles: List[int], h: int) -> int:
+        return bisect.bisect_left(range(1, max(piles) + 1), True, key = lambda spd: sum((bananas+spd-1)//spd for bananas in piles) <= h) + 1
+```
+
+### Solution 2: binary search
+
+```c++
+int minEatingSpeed(vector<int>& piles, int h) {
+    int lo = 1, hi = 1e9;
+    while (lo<hi) {
+        int mid = (lo+hi)>>1;
+        int time = 0;
+        for (int& bananas : piles) {
+            time += ((bananas+mid-1)/mid);
+        }
+        if (time<=h) {
+            hi = mid;
+        } else {
+            lo = mid+1;
+        }
+    }
+    return lo;
+}
+```
+
+```py
+def minEatingSpeed(self, piles: List[int], h: int) -> int:
+    lo, hi = 1, int(1e9)
+    while lo<hi:
+        mid = (lo+hi)//2
+        if sum((bananas+mid-1)//mid for bananas in piles)<=h:
+            hi = mid
+        else:
+            lo = mid+1
+    return lo
+```
+
+## Solution 3:  binary search + greedy
+
+```py
+class Solution:
+    def minEatingSpeed(self, piles: List[int], h: int) -> int:
+        left, right = 1, max(piles)
+        possible = lambda spd: sum((bananas+spd-1)//spd for bananas in piles) <= h
+        while left < right:
+            mid = (left+right)>>1
+            if possible(mid):
+                right = mid
+            else:
+                left = mid+1
+        return left
+```
+
+## 142. Linked List Cycle II
+
+### Solution 1:  floyd's tortoise and hare + slow and fast pointer + math 
+
+proof:
+
+break the problem down into a tail and a cycle, tail leads up to the cycle and there is an entrance node that starts the cycle.  Suppose the length of the tail is F and the length of the cycle is C.  Number the nodes in the cycle starting from 0 to C - 1, 0 node is the entrance node and so on. So you will have nodes 0, 1, 2, 3, ..., C - 1 in a cycle
+
+When the slow pointer reaches the entrance node of the cycle it wll have traveled a distance of F and the fast pointer will have travelled 2*F. In addition, it travels F distance in the cycle. Using division algorithm you can get this equation F = nC + r, where 0 <= r < C.  So n is just the number of complete laps the fast pointer makes in the cycle.  And the remainder is the current node that it will be sitting at from node 0.  So call this node r, This is current location of the fast pointer in the cycle.  Also you know that F = r (modC), where = is modular congruence operator.  
+
+Now you know the distance of separation between slow and fast pointer at this moment.  It is C - r, because slow pointer is at node 0 and fast pointer at node r and cycle length is C.  Since fast pointer travels twice as fast, you also know it will catch up in C - r movements and intersect.  So can we prove that they intersect with mathematics. 
+
+fast pointer distance = r + 2*(C - r) = 2*C - r which is modular congruence to (C - r)(mod C), thus they intersect in this math proof as well.  The reason why is because a congruent b (modm) => a + a congruent b (modm) Here just adding a C, C + C - r congruent to C - r (mod C).  Thus they are intersecting at same point on the cycle. 
+
+Now we know the intersection location of slow and fast pointer to be at C - r, set the slow pointer back to the start of the linked list on the tail. and now the fast pointer will move same speed as slow pointer.  
+
+This last phase will proof that they will intersect at the entrance node to the cycle or node 0. 
+slow pointer will travel F distance to get to node 0
+while fast pointer will travel F distance as well, but F = nC + r, so take current position on cycle
+node that it lands on after moving F = C - r + F = C - r + nC + r = (n + 1)C.  But this is modular congruence to 0 (mod C), so it will land on node 0.  In addition you are going to complete one more lap then the laps completed in distance F. 
+
+```py
+class Solution:
+    def detectCycle(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        slow, fast = head, head
+        # PHASE 1: FIND INTERSECTION AND CYCLE EXISTS
+        while fast and fast.next:
+            slow, fast = slow.next, fast.next.next
+            if slow == fast: break
+        if not fast or not fast.next: # NO CYCLE
+            return None
+        # PHASE 2: RESET SLOW TO START AND MOVE BOTH POINTERS AT SAME SPEED UNTIL THEY ARE PONITING TO SAME NODE
+        slow = head
+        while slow != fast:
+            slow, fast = slow.next, fast.next
+        return slow
+```
+
+### Solution 2: floyd's tortoise and hare or fast and slow pointer
+
+```c++
+ListNode *detectCycle(ListNode *head) {
+    ListNode *fast = head, *slow = head;
+    auto isCycle = [&]() {
+        while (fast && fast->next) {
+            slow=slow->next;
+            fast=fast->next->next;
+            if (slow==fast) {return true;}
+        }
+        return false;
+    };
+    if (!isCycle()) {
+        return nullptr;
+    }
+    while (head!=slow) {
+        slow=slow->next;
+        head=head->next;
+    }
+    return head;
+}
+```
+
+## 958. Check Completeness of a Binary Tree
+
+### Solution 1:  recursion + count number of nodes in binary tree + use the max label + O(n)
+
+```py
+class Solution:
+    def isCompleteTree(self, root: Optional[TreeNode]) -> bool:
+        max_label = cnt = 0
+        def dfs(node, label):
+            nonlocal max_label, cnt
+            max_label = max(max_label, label)
+            cnt += 1
+            if node.left:
+                dfs(node.left, 2*label)
+            if node.right:
+                dfs(node.right, 2*label + 1)
+        dfs(root, 1)
+        return max_label == cnt
 ```
 
 ##
 
 ### Solution 1: 
+
+```py
+
+```
+
+##
+
+### Solution 1:
 
 ```py
 

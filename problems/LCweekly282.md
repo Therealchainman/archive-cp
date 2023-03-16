@@ -27,7 +27,7 @@ class Solution:
 
 ## 2187. Minimum Time to Complete Trips
 
-### Solution: binary search 
+### Solution 1: binary search 
 
 ```py
 class Solution:
@@ -44,6 +44,14 @@ class Solution:
                 lo = mid + 1
             
         return lo
+```
+
+### Solution 2: binary search + bisect + greedy
+
+```py
+class Solution:
+    def minimumTime(self, time: List[int], totalTrips: int) -> int:
+        return bisect.bisect_left(range(min(time)*totalTrips), totalTrips, key = lambda ctime: sum((ctime//t for t in time)))
 ```
 
 ## 2188. Minimum Time to Finish the Race
