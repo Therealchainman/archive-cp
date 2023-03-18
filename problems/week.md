@@ -21825,12 +21825,39 @@ class BrowserHistory:
         return self.history[self.index]
 ```
 
-##
+## 2590. Design a Todo List
 
-### Solution 1:
+### Solution 1: 3 hash tables + sorting
 
 ```py
+class TodoList:
 
+    def __init__(self):
+        self.task_id = 0
+        self.user_tasks = defaultdict(set) # user_id -> task_id
+        self.tasks = defaultdict(list) # task_id -> (task_descript, due_date)
+        self.tags_tasks = defaultdict(set) # tag -> task_id
+
+    def addTask(self, userId: int, taskDescription: str, dueDate: int, tags: List[str]) -> int:
+        self.task_id += 1
+        self.user_tasks[userId].add(self.task_id)
+        self.tasks[self.task_id] = (dueDate, taskDescription)
+        for tag in tags:
+            self.tags_tasks[tag].add(self.task_id)
+        return self.task_id
+
+    def getAllTasks(self, userId: int) -> List[str]:
+        # if task id is in self the user tasks than it exists, so can add it to tasks for this user
+        all_tasks = sorted([task for task in map(lambda task_id: self.tasks[task_id], self.user_tasks[userId])])
+        return [task_descript for _, task_descript in all_tasks]
+
+
+    def getTasksForTag(self, userId: int, tag: str) -> List[str]:
+        all_tasks = sorted([self.tasks[task_id] for task_id in self.tags_tasks[tag] if task_id in self.user_tasks[userId]])
+        return [task_descript for _, task_descript in all_tasks]
+
+    def completeTask(self, userId: int, taskId: int) -> None:
+        self.user_tasks[userId].discard(taskId)
 ```
 
 ##
