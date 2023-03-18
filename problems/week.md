@@ -21751,9 +21751,155 @@ class Solution:
         return max_label == cnt
 ```
 
+## 1472. Design Browser History
+
+### Solution 1:  stacks
+
+```py
+class BrowserHistory:
+
+    def __init__(self, homepage: str):
+        self.bstk, self.fstk = [homepage], []
+
+    def visit(self, url: str) -> None:
+        self.bstk.append(url)
+        self.fstk = []
+
+    def back(self, steps: int) -> str:
+        for _ in range(steps):
+            if len(self.bstk) == 1: break
+            self.fstk.append(self.bstk.pop())
+        return self.bstk[-1]
+
+    def forward(self, steps: int) -> str:
+        for _ in range(steps):
+            if not self.fstk: break
+            self.bstk.append(self.fstk.pop())
+        return self.bstk[-1]
+```
+
+```py
+class BrowserHistory:
+
+    def __init__(self, homepage: str):
+        self.index = 0
+        self.history = [homepage]
+
+    def visit(self, url: str) -> None:
+        self.history = self.history[:self.index + 1]
+        self.history.append(url)
+        self.index += 1
+
+    def back(self, steps: int) -> str:
+        self.index = max(0, self.index - steps)
+        return self.history[self.index]
+
+    def forward(self, steps: int) -> str:
+        self.index = min(len(self.history) - 1, self.index + steps)
+        return self.history[self.index]
+```
+
+### Solution 2:  dynamic array + replace values in array + store right boundary + O(1) for visit, back, forward, and initialize of object
+
+```py
+class BrowserHistory:
+
+    def __init__(self, homepage: str):
+        self.index = self.right = 0
+        self.history = [homepage]
+
+    def visit(self, url: str) -> None:
+        self.index += 1
+        if len(self.history) > self.index:
+            self.history[self.index] = url
+        else:
+            self.history.append(url)
+        self.right = self.index
+
+    def back(self, steps: int) -> str:
+        self.index = max(0, self.index - steps)
+        return self.history[self.index]
+
+    def forward(self, steps: int) -> str:
+        self.index = min(self.right, self.index + steps)
+        return self.history[self.index]
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1: 
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1: 
+
+```py
+
+```
+
+##
+
+### Solution 1:
 
 ```py
 
