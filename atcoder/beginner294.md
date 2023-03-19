@@ -1,8 +1,13 @@
+# Atcoder Beginner Contest 294
+
+## What is used at the top of each submission
+
+```py
 import os,sys
 from io import BytesIO, IOBase
 sys.setrecursionlimit(10**6)
 from typing import *
-
+ 
 # Fast IO Region
 BUFSIZE = 8192
 class FastIO(IOBase):
@@ -43,32 +48,50 @@ class IOWrapper(IOBase):
         self.readline = lambda: self.buffer.readline().decode("ascii")
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
+```
 
-from itertools import product
-from collections import Counter
+## A - Swap Odd and Even 
 
-def main():
-    n, m, k = map(int, input().split())
-    arr1, arr2 = [], []
-    for _ in range(n):
-        arr1.append(tuple(map(int, input().split())))
-    for _ in range(m):
-        arr2.append(tuple(map(int, input().split())))
-    concentrations = []
-    concentration = lambda s, w: s/(s + w)*100
-    for i, j in product(range(n), range(m)):
-        s1, s2 = arr1[i][0], arr2[j][0]
-        w1, w2 = arr1[i][1], arr2[j][1]
-        s = s1 + s2
-        w = w1 + w2
-        conc = s/(s + w)*100
-        sum_conc = concentration(s1, w1) + concentration(s2, w2)
-        conc = concentration(s, w)
-        concentrations.append((conc, sum_conc))
-    concentrations.sort(reverse=True)
-    print(concentrations)
-    return concentrations[k - 1]
-                    
+### Solution 1: 
 
-if __name__ == '__main__':
-    print(main())
+```py
+
+```
+
+## B - Call the ID Number
+
+### Solution 1:  
+
+```py
+
+```
+
+## C - Make Takahashi Happy 
+
+### Solution 1:  
+
+```py
+
+```
+
+## D - Tying Rope 
+
+### Solution 1:  
+
+```py
+
+```
+
+## E - Geometric Progression 
+
+### Solution 1: 
+
+```py
+
+```
+
+## F - Zero or One 
+
+```py
+
+```
