@@ -1,8 +1,14 @@
+# Codeforces Round 858 Div 2
+
+## Notes
+
+if the implementation is in python it will have this at the top of the python script for fast IO operations
+
+```py
 import os,sys
 from io import BytesIO, IOBase
 from typing import *
-# sys.setrecursionlimit(1_000_000)
-
+ 
 # Fast IO Region
 BUFSIZE = 8192
 class FastIO(IOBase):
@@ -43,12 +49,58 @@ class IOWrapper(IOBase):
         self.readline = lambda: self.buffer.readline().decode("ascii")
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
+```
 
+## A. Walking Master
+
+### Solution 1:
+
+```py
+def main():
+    a, b, c, d = map(int, input().split())
+    delta_y = d - b
+    delta_x = a + delta_y - c
+    return delta_x + delta_y if delta_x >= 0 and delta_y >= 0 else -1
+
+
+if __name__ == '__main__':
+    T = int(input())
+    for _ in range(T):
+        print(main())
+```
+
+## B. Mex Master
+
+### Solution 1:
+
+```py
+def main():
+    n = int(input())
+    arr = list(map(int, input().split()))
+    count_zeros = sum([1 for i in arr if i == 0])
+    if count_zeros <= (n + 1) // 2:
+        return 0
+    count_ones = sum([1 for i in arr if i == 1])
+    if count_ones + count_zeros == n and count_ones > 0:
+        return 2
+    return 1
+
+if __name__ == '__main__':
+    T = int(input())
+    for _ in range(T):
+        print(main())
+```
+
+## C. Sequence Master
+
+### Solution 1:
+
+```py
 def main():
     n = int(input())
     arr = list(map(int, input().split()))
     if n == 1:
-        return sum(abs(num - arr[0]) for num in arr)
+        return sum(num - arr[0] for num in arr)
     min_dist = sum(abs(num) for num in arr)
     if n == 2:
         min_dist = min(min_dist, sum(abs(num - 2) for num in arr))
@@ -64,3 +116,20 @@ if __name__ == '__main__':
     T = int(input())
     for _ in range(T):
         print(main())
+```
+
+## D. DSU Master
+
+### Solution 1:
+
+```py
+
+```
+
+## E. Tree Master
+
+### Solution 1:
+
+```py
+
+```
