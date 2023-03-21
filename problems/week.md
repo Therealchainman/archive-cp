@@ -21860,6 +21860,44 @@ class TodoList:
         self.user_tasks[userId].discard(taskId)
 ```
 
+## 605. Can Place Flowers
+
+### Solution 1:  array + greedy
+
+```c++
+bool canPlaceFlowers(vector<int>& flowerbed, int n) {
+    flowerbed.insert(flowerbed.begin(),0);
+    flowerbed.push_back(0);
+    for (int i = 1;i<flowerbed.size()-1 && n>0;i++) {
+        if (flowerbed[i-1]+flowerbed[i]+flowerbed[i+1]==0) {
+            n--;
+            flowerbed[i]=1;
+        }
+    }
+    return n==0;
+}
+```
+
+```py
+class Solution:
+    def canPlaceFlowers(self, flowerbed: List[int], n: int) -> bool:
+        num_flowers = len(flowerbed)
+        is_empty = lambda i: not in_bounds(i) or flowerbed[i] == 0
+        in_bounds = lambda i: 0 <= i < num_flowers
+        def mark(i):
+            if in_bounds(i):
+                flowerbed[i] = 1
+        i = 0
+        while i < num_flowers:
+            if is_empty(i - 1) and is_empty(i) and is_empty(i + 1):
+                flowerbed[i] = 1
+                n -= 1
+                i += 2
+            else:
+                i += 1
+        return n <= 0
+```
+
 ##
 
 ### Solution 1:
