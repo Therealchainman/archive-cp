@@ -1,8 +1,15 @@
+# Atcoder Beginner Contest 295
+
+## What is used at the top of each submission
+
+```py
 import os,sys
 from io import BytesIO, IOBase
 sys.setrecursionlimit(10**6)
 from typing import *
-
+import pypyjit
+pypyjit.set_param('max_unroll_recursion=-1')
+ 
 # Fast IO Region
 BUFSIZE = 8192
 class FastIO(IOBase):
@@ -43,7 +50,104 @@ class IOWrapper(IOBase):
         self.readline = lambda: self.buffer.readline().decode("ascii")
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
+```
 
+## A - Probably English 
+
+### Solution 1: set
+
+```py
+def main():
+    n = int(input())
+    words = map(str, input().split())
+    lookup = set(['and', 'not', 'that', 'the', 'you'])
+    if any(word in lookup for word in words):
+        print('Yes')
+    else:
+        print('No')
+
+if __name__ == '__main__':
+    main()
+```
+
+## B - Bombs 
+
+### Solution 1:  brute force bfs from each bomb
+
+```py
+from itertools import product
+ 
+def main():
+    R, C = map(int, input().split())
+    grid = [list(input()) for _ in range(R)]
+    empty, wall = '.', '#'
+    manhattan_distance = lambda a, b: abs(a[0] - b[0]) + abs(a[1] - b[1])
+    for r, c in product(range(R), range(C)):
+        if grid[r][c] in '.#': continue
+        area = int(grid[r][c])
+        grid[r][c] = empty
+        vis = set()
+        vis.add((r, c))
+        stack = [(r, c)]
+        while stack:
+            cr, cc = stack.pop()
+            for nr, nc in [(cr + 1, cc), (cr - 1, cc), (cr, cc + 1), (cr, cc - 1)]:
+                if 0 <= nr < R and 0 <= nc < C and (nr, nc) not in vis and manhattan_distance((r, c), (nr, nc)) <= area:
+                    if grid[nr][nc] == wall: grid[nr][nc] = empty
+                    vis.add((nr, nc))
+                    stack.append((nr, nc))
+    result = '\n'.join(''.join(row) for row in grid)
+    print(result)
+ 
+if __name__ == '__main__':
+    main()
+```
+
+## C - Socks
+
+### Solution 1:  sum
+
+```py
+def main():
+    n = int(input())
+    arr = list(map(int, input().split()))
+    counts = Counter(arr)
+    print(sum([val//2 for val in counts.values()]))
+
+if __name__ == '__main__':
+    main()
+```
+
+## D - Three Days Ago 
+
+### Solution 1: prefix + bitmask
+
+Just keep track of a bitmask for the digits for when it has even and odds and sum them up. 
+
+```py
+from collections import Counter
+
+def main():
+    arr = map(int, list(input()))
+    mask_counts = Counter({0: 1})
+    prefix_mask = res = 0
+    for num in arr:
+        prefix_mask ^= (1 << num)
+        res += mask_counts[prefix_mask]
+        mask_counts[prefix_mask] += 1
+    print(res)
+
+if __name__ == '__main__':
+    main()
+```
+
+## E - Kth Number
+
+### Solution 1:  statistics + binomial distribution + probability 
+
+I wrote down my interpretation of the solution in notes app.
+
+```py
 from collections import Counter
 
 def mod_inverse(num, mod):
@@ -84,3 +188,12 @@ def main():
 
 if __name__ == '__main__':
     main()
+```
+
+## F - substr = S
+
+### Solution 1:   
+
+```py
+
+```
