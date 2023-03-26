@@ -147,6 +147,10 @@ if __name__ == '__main__':
 
 I wrote down my interpretation of the solution in notes app.
 
+![part 1](images/kth_number/kth_number-1.png)
+![part 2](images/kth_number/kth_number-2.png)
+![part 3](images/kth_number/kth_number-3.png)
+
 ```py
 from collections import Counter
 
