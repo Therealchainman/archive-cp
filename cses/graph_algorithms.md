@@ -6,9 +6,11 @@
 import os,sys
 from io import BytesIO, IOBase
 from typing import *
-import math
- 
- 
+sys.setrecursionlimit(1_000_000)
+# only use pypyjit when needed, it usese more memory, but speeds up recursion in pypy
+import pypyjit
+pypyjit.set_param('max_unroll_recursion=-1')
+
 # Fast IO Region
 BUFSIZE = 8192
 class FastIO(IOBase):
@@ -95,6 +97,80 @@ def main():
 
 if __name__ == '__main__':
     main()
+```
+
+## Coin Collector
+
+### Solution 1:  Create component/condensation graph from strongly connected components + dynamic programming on the dag/trees
+
+You can collect all the coins in any strongly connected component because every node is reachable from every other node.  Then you can create a component graph where each component is a node and there is an edge between two components if there is an edge between two nodes in the original graph.  Then you can do a topological sort on the component graph and do dynamic programming on the component graph to find the maximum number of coins you can collect.
+
+condensation graph is a contraction of each scc into a single vertex, and creates a dag.
+
+```py
+def main():
+    n, m = map(int, input().split())
+    coins = [0] + list(map(int, input().split()))
+    # PHASE 0: CONSTRUCT ADJACENCY LIST REPRESENTATION OF GRAPH
+    adj_list = [[] for _ in range(n + 1)]
+    for _ in range(m):
+        a, b = map(int, input().split())
+        adj_list[a].append(b)
+    # PHASE 1: FIND STRONGLY CONNECTED COMPONENTS
+    time = num_scc = 0
+    scc_ids = [0]*(n + 1)
+    disc, low, on_stack = [0]*(n + 1), [0]*(n + 1), [0]*(n + 1)
+    stack = []
+    def dfs(node):
+        nonlocal time, num_scc
+        time += 1
+        disc[node] = time
+        low[node] = disc[node]
+        on_stack[node] = 1
+        stack.append(node)
+        for nei in adj_list[node]:
+            if not disc[nei]: dfs(nei)
+            if on_stack[nei]: low[node] = min(low[node], low[nei])
+        # found scc
+        if disc[node] == low[node]:
+            num_scc += 1
+            while stack:
+                snode = stack.pop()
+                on_stack[snode] = 0
+                low[snode] = low[node]
+                scc_ids[snode] = num_scc
+                if snode == node: break
+    for i in range(1, n + 1):
+        if disc[i]: continue
+        dfs(i)
+    # PHASE 2: CONSTRUCT CONDENSATION GRAPH
+    scc_adj_list = [[] for _ in range(num_scc + 1)]
+    indegrees = [0]*(num_scc + 1)
+    # condensing the values of the coins into it's scc
+    val_scc = [0]*(num_scc + 1)
+    for i in range(1, n + 1):
+        val_scc[scc_ids[i]] += coins[i]
+        for nei in adj_list[i]:
+            if scc_ids[i] != scc_ids[nei]:
+                indegrees[scc_ids[nei]] += 1
+                scc_adj_list[scc_ids[i]].append(scc_ids[nei])
+    # PHASE 3: DO TOPOLOGICAL SORT ON CONDENSATION GRAPH WITH MEMOIZATION FOR MOST COINS COLLECTED IN EACH NODE IN CONDENSATION GRAPH
+    stack = []
+    memo = [0]*(num_scc + 1)
+    for i in range(1, num_scc + 1):
+        if indegrees[i] == 0:
+            stack.append(i)
+            memo[i] = val_scc[i]
+    while stack:
+        node = stack.pop()
+        for nei in scc_adj_list[node]:
+            indegrees[nei] -= 1
+            memo[nei] = max(memo[nei], memo[node] + val_scc[nei])
+            if indegrees[nei] == 0: stack.append(nei)
+    print(max(memo))
+        
+if __name__ == '__main__':
+    main() 
 ```
 
 ## Download Speed

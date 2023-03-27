@@ -44,9 +44,12 @@ sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
 sys.setrecursionlimit(1_000_000)
+import pypyjit
+pypyjit.set_param('max_unroll_recursion=-1')
 
 def main():
     n, m = map(int, input().split())
+    coins = [0] + list(map(int, input().split()))
     adj_list = [[] for _ in range(n + 1)]
     for _ in range(m):
         a, b = map(int, input().split())
@@ -77,8 +80,29 @@ def main():
     for i in range(1, n + 1):
         if disc[i]: continue
         dfs(i)
-    print(num_scc)
-    print(*scc_ids[1:])
+    scc_adj_list = [[] for _ in range(num_scc + 1)]
+    indegrees = [0]*(num_scc + 1)
+    val_scc = [0]*(num_scc + 1)
+    for i in range(1, n + 1):
+        val_scc[scc_ids[i]] += coins[i]
+        for nei in adj_list[i]:
+            if scc_ids[i] != scc_ids[nei]:
+                indegrees[scc_ids[nei]] += 1
+                scc_adj_list[scc_ids[i]].append(scc_ids[nei])
+    stack = []
+    memo = [0]*(num_scc + 1)
+    for i in range(1, num_scc + 1):
+        if indegrees[i] == 0:
+            stack.append(i)
+            memo[i] = val_scc[i]
 
+    while stack:
+        node = stack.pop()
+        for nei in scc_adj_list[node]:
+            indegrees[nei] -= 1
+            memo[nei] = max(memo[nei], memo[node] + val_scc[nei])
+            if indegrees[nei] == 0: stack.append(nei)
+    print(max(memo))
+        
 if __name__ == '__main__':
     main()
