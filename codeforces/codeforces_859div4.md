@@ -94,7 +94,11 @@ if __name__ == '__main__':
 
 ## C. Find and Replace
 
-### Solution 1: set + set intersection + bipartite
+### Solution 1: set + set intersection
+
+ Keep track of each change, and see if there is some letter that needs to be turned into both 0
+ and 1
+. If there is some letter, it is impossible, since each operation requires changing all occurrences of a letter into the same bit. Otherwise, it is possible, and we can directly change each letter into the bit it needs to be. (See the implementation for a better understanding.)
 
 ```py
 def main():
