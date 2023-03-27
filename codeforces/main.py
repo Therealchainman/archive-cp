@@ -1,8 +1,10 @@
 import os,sys
 from io import BytesIO, IOBase
 from typing import *
-# sys.setrecursionlimit(1_000_000)
-
+# only use pypyjit when needed, it usese more memory, but speeds up recursion in pypy
+# import pypyjit
+# pypyjit.set_param('max_unroll_recursion=-1')
+ 
 # Fast IO Region
 BUFSIZE = 8192
 class FastIO(IOBase):
@@ -47,20 +49,22 @@ input = lambda: sys.stdin.readline().rstrip("\r\n")
 def main():
     n = int(input())
     arr = list(map(int, input().split()))
-    if n == 1:
-        return sum(abs(num - arr[0]) for num in arr)
-    min_dist = sum(abs(num) for num in arr)
-    if n == 2:
-        min_dist = min(min_dist, sum(abs(num - 2) for num in arr))
-    if n%2 == 0:
-        dist = sum(abs(num + 1) for num in arr)
-        for num in arr:
-            delta = abs(num - n)
-            removal = abs(num + 1)
-            min_dist = min(min_dist, dist + delta - removal)
-    return min_dist
+    psum = [0]*(n + 1)
+    for i in range(n):
+        psum[i+1] = psum[i] + arr[i]
+    left, right = 0, n - 1
+    while left < right:
+        mid = (left + right) >> 1
+        size = mid - left + 1
+        print('?', size, *range(left + 1, mid + 2), flush = True)
+        x = int(input())
+        if x > psum[mid + 1] - psum[left]:
+            right = mid
+        else:
+            left = mid + 1
+    print('!', left + 1, flush = True)
 
 if __name__ == '__main__':
     T = int(input())
     for _ in range(T):
-        print(main())
+        main()
