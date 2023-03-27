@@ -21898,20 +21898,158 @@ class Solution:
         return n <= 0
 ```
 
-##
+## 2360. Longest Cycle in a Graph
 
-### Solution 1:
+### Solution 1:  iterative search + track current visited index in current search + track globally visited vertex 
 
 ```py
-
+class Solution:
+    def longestCycle(self, edges: List[int]) -> int:
+        n = len(edges)
+        vis = [0]*n
+        longest_cycle = -1
+        def search(node):
+            vis[node] = 1
+            while edges[node] != -1:
+                nei = edges[node]
+                # visited in current search
+                if vis_index[nei]: return vis_index[node] - vis_index[nei] + 1
+                if vis[nei]: break # visited in a previous search
+                vis[nei] = 1
+                vis_index[nei] = vis_index[node] + 1
+                node = nei
+                if not vis[nei]:
+                    vis_index[nei] = vis_index[node] + 1
+                    vis[nei] = 1
+                    nod = nei
+            return -1
+        for node in range(n):
+            if vis[node]: continue
+            vis_index = Counter({node: 1})
+            longest_cycle = max(longest_cycle, search(node))
+        return longest_cycle
 ```
 
-##
+### Solution 2:  Kahn's algorithm + Topological sort to remove the vertex not part of cycle + all that remains is cycles + find largest cycle
 
-### Solution 1:
+topological sort kind of removes these leaf nodes but they are leaf in terms of indegree is 0, and just keep pruning them
 
 ```py
+class Solution:
+    def longestCycle(self, edges: List[int]) -> int:
+        n = len(edges)
+        indegrees = [0]*n
+        vis = [0]*n
+        res = -1
+        for nei_node in edges:
+            if nei_node == -1: continue
+            indegrees[nei_node] += 1
+        frontier_stack = []
+        for node in range(n):
+            if indegrees[node] == 0: frontier_stack.append(node)
+        while frontier_stack:
+            node = frontier_stack.pop()
+            vis[node] = 1
+            nei = edges[node]
+            if nei != -1:
+                indegrees[nei] -= 1
+                if indegrees[nei] == 0:
+                    frontier_stack.append(nei)
+        for node in range(n):
+            if vis[node]: continue
+            cnt = 0
+            while not vis[node]:
+                vis[node] = 1
+                node = edges[node]
+                cnt += 1
+            res = max(res, cnt)
+        return res
+```
 
+### Solution 3:  Tarjan's algorithm + find strongly connected components + size of strongly connected component is same as length of cycle in this instance
+
+```py
+class Solution:
+    def longestCycle(self, edges: List[int]) -> int:
+        n = len(edges)
+        adj_list = [[] for _ in range(n)]
+        for u in range(n):
+            v = edges[u]
+            if v != -1:
+                adj_list[u].append(v)
+        res = time = 0
+        disc, low, on_stack = [0]*n, [0]*n, [0]*n
+        stack = []
+        def dfs(node):
+            nonlocal res, time
+            time += 1
+            disc[node] = time
+            low[node] = disc[node]
+            on_stack[node] = 1
+            stack.append(node)
+            for nei in adj_list[node]:
+                if not disc[nei]: dfs(nei)
+                if on_stack[nei]: low[node] = min(low[node], low[nei])
+            # found scc
+            if disc[node] == low[node]:
+                size = 0
+                while stack:
+                    snode = stack.pop()
+                    size += 1
+                    on_stack[snode] = 0
+                    low[snode] = low[node]
+                    if snode == node: break
+                res = max(res, size)
+        for i in range(n):
+            if disc[i]: continue
+            dfs(i)
+        return res if res > 1 else -1
+```
+
+## 2316. Count Unreachable Pairs of Nodes in an Undirected Graph
+
+### Solution 1:  union find + iterate through the size of each disjoint set + multiple it with all nodes in other disjoint sets
+
+```py
+class UnionFind:
+    def __init__(self,n):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    
+    def find(self,i):
+        if i==self.parent[i]:
+            return i
+        self.parent[i] = self.find(self.parent[i])
+        return self.parent[i]
+
+    def union(self,i,j):
+        i, j = self.find(i), self.find(j)
+        if i!=j:
+            if self.size[i] < self.size[j]:
+                i,j=j,i
+            self.parent[j] = i
+            self.size[i] += self.size[j]
+            return True
+        return False
+    
+class Solution:
+    def countPairs(self, n: int, edges: List[List[int]]) -> int:
+        dsu = UnionFind(n)
+        for u, v in edges:
+            dsu.union(u,v)
+        seen = set()
+        sizes = []
+        for i in range(n):
+            root = dsu.find(i)
+            if root in seen: continue
+            sizes.append(dsu.size[root])
+            seen.add(root)
+        sizes.sort()
+        result = 0
+        for sz in sizes:
+            n -= sz
+            result += sz*n
+        return result
 ```
 
 ##

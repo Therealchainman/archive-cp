@@ -44,35 +44,41 @@ sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
 sys.setrecursionlimit(1_000_000)
-import math
-
 
 def main():
-    n, q = map(int, input().split())    
-    arr = list(map(int, input().split()))
-    lg = [0] * (n + 1)
-    lg[1] = 0
-    for i in range(2, n + 1):
-        lg[i] = lg[i//2] + 1
-    max_power_two = 18
-    sparse_table = [[math.inf]*n for _ in range(max_power_two + 1)]
-    for i in range(max_power_two + 1):
-        j = 0
-        while j + (1 << i) <= n:
-            if i == 0:
-                sparse_table[i][j] = arr[j]
-            else:
-                sparse_table[i][j] = min(sparse_table[i - 1][j], sparse_table[i - 1][j + (1 << (i - 1))])
-            j += 1
-    def query(left: int, right: int) -> int:
-        length = right - left + 1
-        power_two = lg[length]
-        return min(sparse_table[power_two][left], sparse_table[power_two][right - (1 << power_two) + 1])
-    res = []
-    for _ in range(q):
+    n, m = map(int, input().split())
+    adj_list = [[] for _ in range(n + 1)]
+    for _ in range(m):
         a, b = map(int, input().split())
-        res.append(query(a - 1, b - 1))
-    return '\n'.join(map(str, res))
+        adj_list[a].append(b)
+    time = num_scc = 0
+    scc_ids = [0]*(n + 1)
+    disc, low, on_stack = [0]*(n + 1), [0]*(n + 1), [0]*(n + 1)
+    stack = []
+    def dfs(node):
+        nonlocal time, num_scc
+        time += 1
+        disc[node] = time
+        low[node] = disc[node]
+        on_stack[node] = 1
+        stack.append(node)
+        for nei in adj_list[node]:
+            if not disc[nei]: dfs(nei)
+            if on_stack[nei]: low[node] = min(low[node], low[nei])
+        # found scc
+        if disc[node] == low[node]:
+            num_scc += 1
+            while stack:
+                snode = stack.pop()
+                on_stack[snode] = 0
+                low[snode] = low[node]
+                scc_ids[snode] = num_scc
+                if snode == node: break
+    for i in range(1, n + 1):
+        if disc[i]: continue
+        dfs(i)
+    print(num_scc)
+    print(*scc_ids[1:])
 
 if __name__ == '__main__':
-    print(main())
+    main()
