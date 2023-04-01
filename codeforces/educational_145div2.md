@@ -1,9 +1,16 @@
+# Codeforces Educational Round 145 Div 2
+
+## Notes
+
+if the implementation is in python it will have this at the top of the python script for fast IO operations
+
+```py
 import os,sys
 from io import BytesIO, IOBase
 from typing import *
 # only use pypyjit when needed, it usese more memory, but speeds up recursion in pypy
-# import pypyjit
-# pypyjit.set_param('max_unroll_recursion=-1')
+import pypyjit
+pypyjit.set_param('max_unroll_recursion=-1')
  
 # Fast IO Region
 BUFSIZE = 8192
@@ -45,30 +52,84 @@ class IOWrapper(IOBase):
         self.readline = lambda: self.buffer.readline().decode("ascii")
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
+```
 
-def main():
-    s = input()
-    n = len(s)
-    suffix = s.count('0')
-    prefix = 0
-    m = 10**12
-    res = suffix*m + suffix
-    for i in range(n):
-        if s[i] == '0':
-            suffix -= 1
-        else:
-            prefix += 1
-        if i + 1 < n and s[i] == '1' and s[i + 1] == '0':
-            # can perform a swap
-            num_deletes = prefix + suffix - 2
-            res = min(res, (num_deletes + 1)*m + num_deletes)
-        else:
-            # can't perform a swap
-            res = min(res, (prefix + suffix)*m + prefix + suffix)
-    print(res)
+##
 
+### Solution 1:
 
-if __name__ == '__main__':
-    T = int(input())
-    for _ in range(T):
-        main()
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```

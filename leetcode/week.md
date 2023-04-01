@@ -22052,20 +22052,35 @@ class Solution:
         return result
 ```
 
-##
+## 704. Binary Search
 
-### Solution 1: 
+### Solution 1:  binary search
 
 ```py
-
+class Solution:
+    def search(self, nums: List[int], target: int) -> int:
+        i = bisect_left(nums, target)
+        return i if i < len(nums) and nums[i] == target else -1
 ```
 
-##
+## 245. Shortest Word Distance III
 
-### Solution 1:
+### Solution 1:  two pointers
 
 ```py
-
+class Solution:
+    def shortestWordDistance(self, wordsDict: List[str], word1: str, word2: str) -> int:
+        res = math.inf
+        last_index1 = last_index2 = -math.inf
+        for i, word in enumerate(wordsDict):
+            if word == word1:
+                last_index1 = i
+                res = min(res, last_index1 - last_index2)
+            if word == word2:
+                last_index2 = i
+                if last_index2 != last_index1:
+                    res = min(res, last_index2 - last_index1)
+        return res
 ```
 
 ##
