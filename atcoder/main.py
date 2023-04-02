@@ -44,43 +44,23 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-from collections import Counter
-
-def mod_inverse(num, mod):
-    return pow(num, mod - 2, mod)
+import math
+import bisect
 
 def main():
-    # integers between 1 and m
-    n, m, k = map(int, input().split())
-    freq = Counter(map(int, input().split()))
-    mod = 998244353
-    fact = [1]*(n + 1)
-    for i in range(1, n + 1):
-        fact[i] = (fact[i - 1] * i) % mod
-    inv_fact = [1]*(n + 1)
-    inv_fact[-1] = mod_inverse(fact[-1], mod)
-    for i in range(n - 1, -1, -1):
-        inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % mod
-    def nCr(n, r):
-        if n < r: return 0
-        return (fact[n] * inv_fact[r] * inv_fact[n - r]) % mod
-    def pmf_binomial_distribution(n, m, p):
-        return (nCr(n, m) * pow(p, m, mod) * pow(1 - p, n - m, mod))%mod
-    cnt_zeros = freq[0]
-    # total prob = sum from i = 1 to m of prob(A_k >= i)
-    count_less_than_i = total_prob = 0
-    for i in range(1, m + 1):
-        needed_zeros_to_replace = max(0, k - count_less_than_i)
-        if needed_zeros_to_replace == 0: continue
-        # p is the probability of success for replacing a 0 with integer less than i
-        p = ((i - 1) * mod_inverse(m, mod)) % mod
-        prob_less_than_i = 0
-        for j in range(needed_zeros_to_replace, cnt_zeros + 1):
-            prob_less_than_i = (prob_less_than_i + pmf_binomial_distribution(cnt_zeros, j, p)%mod)%mod
-        prob_greater_than_equal_to_i = 1 - prob_less_than_i
-        total_prob = (total_prob + prob_greater_than_equal_to_i)%mod
-        count_less_than_i += freq[i]
-    print(total_prob)
+    n, m = map(int, input().split())
+    if m <= n: return m
+    res = math.inf
+    f1 = min(n, math.ceil(m/n))
+    f2 = bisect.bisect_left(range(n), m//f1)
+    res = math.inf
+    for i in range(f1 - 1, min(n + 1, f1+20)):
+        for j in range(f2 - 1, min(n + 1, f2+20)):
+            # print('i', i, 'j', j)
+            if i*j >= m:
+                res = min(res, i*j)
+    if res >= m and res != math.inf: return res
+    return -1
 
 if __name__ == '__main__':
-    main()
+    print(main())

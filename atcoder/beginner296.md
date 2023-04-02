@@ -82,7 +82,26 @@ input = lambda: sys.stdin.readline().rstrip("\r\n")
 ### Solution 1:
 
 ```py
+import math
+import bisect
 
+def main():
+    n, m = map(int, input().split())
+    if m <= n: return m
+    res = math.inf
+    f1 = min(n, math.ceil(m/n))
+    f2 = bisect.bisect_left(range(n), math.ceil(m/f1))
+    if f1*f2 >= m: 
+        res = min(res, f1*f2)
+    f1 = min(n, m//n)
+    f2 = bisect.bisect_left(range(n), math.ceil(m/f1))
+    if f1*f2 >= m:
+        res = min(res, f1*f2)
+    if res >= m and res != math.inf: return res
+    return -1
+
+if __name__ == '__main__':
+    print(main())
 ```
 
 ## 
@@ -90,7 +109,43 @@ input = lambda: sys.stdin.readline().rstrip("\r\n")
 ### Solution 1:
 
 ```py
+def main():
+    n = int(input())
+    arr = list(map(int, input().split()))
+    adj_list = [-1]*(n + 1)
+    for i in range(n):
+        u, v = i + 1, arr[i]
+        adj_list[u] = v
+    on_stack = [0]*(n + 1)
+    disc = [0]*(n + 1)
+    time = 0
+    res = 0
+    def dfs(node):
+        nonlocal res, time
+        stack = []
+        while not disc[node]:
+            time += 1
+            disc[node] = time
+            on_stack[node] = 1
+            stack.append(node)
+            node = adj_list[node]
+        if on_stack[node]:
+            while stack:
+                res += 1
+                x = stack.pop()
+                on_stack[x] = 0
+                if x == node: break
+        while stack:
+            x = stack.pop()
+            on_stack[x] = 0
 
+    for i in range(1, n + 1):
+        if disc[i]: continue
+        dfs(i)
+    return res
+
+if __name__ == '__main__':
+    print(main())
 ```
 
 ## 
