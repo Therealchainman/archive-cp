@@ -4398,6 +4398,18 @@ class Solution:
         return result
 ```
 
+```py
+class Solution:
+    def successfulPairs(self, spells: List[int], potions: List[int], success: int) -> List[int]:
+        potions.sort()
+        n = len(potions)
+        ans = [0]*len(spells)
+        for i, spell in enumerate(spells):
+            j = bisect_left(potions, success, key = lambda p: p*spell)
+            ans[i] = n - j
+        return ans
+```
+
 ## 2301. Match Substring After Replacement
 
 ### Solution 1: hashmap + substrings slicing + all
@@ -22081,6 +22093,24 @@ class Solution:
                 if last_index2 != last_index1:
                     res = min(res, last_index2 - last_index1)
         return res
+```
+
+## 881. Boats to Save People
+
+### Solution:  sort + two pointers
+
+```py
+class Solution:
+    def numRescueBoats(self, people: List[int], limit: int) -> int:
+        n = len(people)
+        people.sort()
+        left, right, boats = 0, n - 1, 0
+        while left <= right:
+            if people[left] + people[right] <= limit:
+                left += 1
+            right -= 1
+            boats += 1
+        return boats
 ```
 
 ##
