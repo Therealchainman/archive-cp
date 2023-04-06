@@ -11813,6 +11813,20 @@ class Solution:
         return result
 ```
 
+```py
+class Solution:
+    def partitionString(self, s: str) -> int:
+        last_seen = [-1]*26
+        res, start = 1, 0
+        unicode = lambda ch: ord(ch) - ord('a')
+        for i, v in enumerate(map(unicode, s)):
+            if last_seen[v] >= start:
+                res += 1
+                start = i
+            last_seen[v] = i
+        return res
+```
+
 ## 2406. Divide Intervals Into Minimum Number of Groups
 
 ### Solution 1: line sweep + sort
@@ -22113,6 +22127,111 @@ class Solution:
         return boats
 ```
 
+## 651. 4 Keys Keyboard
+
+### Solution 1:  recursive dp + copy or past if buffer > 1 no reason to perform the print
+
+```py
+class Solution:
+    def maxA(self, n: int) -> int:
+        # 3 A is same as A, C, V
+        # so for 6 it becomes better to add the A, C, V
+        # can also keep using V 
+        @cache
+        def dp(i, buffer, size):
+            if i == n: return 0
+            copy = dp(i + 2, size, size) if i < n - 2 else 0
+            paste = dp(i + 1, buffer, size + buffer) + buffer
+            if buffer > 1:
+                return max(copy, paste)
+            prnt = dp(i + 1, buffer, size + 1) + 1
+            return max(copy, paste, prnt)
+        return dp(0, 0, 0)
+```
+
+## 87. Scramble String
+
+### Solution 1:  iterative dp 
+
+solve for subproblem for when length is 1, which is going to be based on if s1(i) is equal to s2(j).  This is a hard problem to understand actually. 
+
+```py
+class Solution:
+    def isScramble(self, s1: str, s2: str) -> bool:
+        n = len(s1)
+        # (p1, p2, length)
+        dp = [[[False]*(n + 1) for _ in range(n)] for _ in range(n)]
+        for i, j in product(range(n), repeat = 2):
+            dp[i][j][1] = s1[i] == s2[j]
+        for length in range(2, n + 1):
+            for k, i, j in product(range(1, length), range(n - length + 1), range(n - length + 1)):
+                # current split is both scrambled of each other
+                left_len, right_len = k, length - k
+                prefix_scrambled = dp[i][j][left_len]
+                suffix_scrambled = dp[i + left_len][j + left_len][right_len]
+                dp[i][j][length] |= (prefix_scrambled & suffix_scrambled)
+                # or scramble current segments
+                prefix_scrambled = dp[i][j + length - left_len][left_len]
+                suffix_scrambled = dp[i + left_len][j][right_len]
+                dp[i][j][length] |= (prefix_scrambled & suffix_scrambled)
+        return dp[0][0][n]
+```
+
+## 1402. Reducing Dishes
+
+### Solution 1:  iterative dp
+
+```py
+class Solution:
+    def maxSatisfaction(self, satisfaction: List[int]) -> int:
+        n = len(satisfaction)
+        satisfaction.sort()
+        dp = [-math.inf]*(n + 1)
+        dp[0] = 0
+        for i, val in enumerate(satisfaction):
+            for t in range(i + 1, 0, -1):
+                dp[t] = max(dp[t], dp[t - 1] + t*val)
+        return max(dp)
+```
+
+## 1444. Number of Ways of Cutting a Pizza
+
+### Solution 1: 
+
+```py
+
+```
+
+## 1254. Number of Closed Islands
+
+### Solution 1:  dfs
+
+```py
+class Solution:
+    def closedIsland(self, grid: List[List[int]]) -> int:
+        R, C = len(grid), len(grid[0])
+        in_bounds = lambda r, c: 0 <= r < R and 0 <= c < C
+        res = 0
+        def dfs(row, col):
+            stack = [(row, col)]
+            grid[row][col] = 2
+            is_closed = True
+            while stack:
+                r, c = stack.pop()
+                for nr, nc in [(r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)]:
+                    if not in_bounds(nr, nc): 
+                        is_closed = False
+                        continue
+                    if grid[nr][nc] != 0: continue
+                    grid[nr][nc] = 2
+                    stack.append((nr, nc))
+            return is_closed
+        for r, c in product(range(R), range(C)):
+            if grid[r][c] != 0: continue
+            res += dfs(r, c)
+        return res
+```
+
 ##
 
 ### Solution 1:
@@ -22140,6 +22259,14 @@ class Solution:
 ##
 
 ### Solution 1: 
+
+```py
+
+```
+
+##
+
+### Solution 1:
 
 ```py
 

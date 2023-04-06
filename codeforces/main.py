@@ -2,7 +2,7 @@ import os,sys
 from io import BytesIO, IOBase
 from typing import *
 # only use pypyjit when needed, it usese more memory, but speeds up recursion in pypy
-sys.setrecursionlimit(1_000_000)
+# sys.setrecursionlimit(1_000_000)
 # import pypyjit
 # pypyjit.set_param('max_unroll_recursion=-1')
  
@@ -47,53 +47,65 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
+from collections import deque
+
 def main():
-    n = int(input())
+    input()
+    n, m = map(int, input().split())
     adj_list = [[] for _ in range(n + 1)]
-    for _ in range(n - 1):
+    degrees = [0] * (n + 1)
+    for _ in range(m):
         u, v = map(int, input().split())
         adj_list[u].append(v)
+        degrees[v] += 1
         adj_list[v].append(u)
-    ans = [n] * (n + 1)
-    freq = [0] * (n + 1)
-    max_dist_subtree1 = [0] * (n + 1)
-    max_dist_subtree2 = [0] * (n + 1)
-    child1 = [0] * (n + 1)
-    child2 = [0] * (n + 1)
-    # PHASE 1: DFS to find the max distance from each node to the leaf in it's subtree but find first and second max distance
-    def dfs1(node, parent):
-        for child in adj_list[node]:
-            if child == parent: continue
-            max_dist_subtree = dfs1(child, node)
-            if max_dist_subtree > max_dist_subtree1[node]:
-                max_dist_subtree2[node] = max_dist_subtree1[node]
-                child2[node] = child1[node]
-                max_dist_subtree1[node] = max_dist_subtree
-                child1[node] = child
-            elif max_dist_subtree > max_dist_subtree2[node]:
-                max_dist_subtree2[node] = max_dist_subtree
-                child2[node] = child
-        return max_dist_subtree1[node] + 1
-    dfs1(1, 0)
-    parent_max_dist = [-1] * (n + 1)
-    # PHASE 2: 
-    def dfs2(node, parent):
-        parent_max_dist[node] = parent_max_dist[parent] + 1
-        if parent != 0:
-            parent_max_dist[node] = max(parent_max_dist[node], max_dist_subtree1[parent] + 1) if node != child1[parent] else max(parent_max_dist[node], max_dist_subtree2[parent] + 1)
-        for child in adj_list[node]:
-            if child == parent: continue
-            dfs2(child, node)
-    dfs2(1, 0)
-    # PHASE 3: compute the frequency for each max distance for each node
+        degrees[u] += 1
+    k = m - n
+    # count check
+    if k*k + k != m or k*k != n:
+        return "No"
+    # degree check
+    if any(deg not in (2, 4) for deg in degrees[1:]):
+        return "No"
+    # check all are part of a single connected component
+    def bfs1(node):
+        cnt = 0
+        queue = deque([node])
+        vis = [0]*(n + 1)
+        vis[node] = 1
+        while queue:
+            node = queue.popleft()
+            cnt += 1
+            for nei in adj_list[node]:
+                if vis[nei]: continue
+                vis[nei] = 1
+                queue.append(nei)
+        return cnt == n
+    if not bfs1(1):
+        return "No"
+    # connectivity check
+    visited = [0]*(n + 1)
+    def bfs2(node):
+        size = 0
+        queue = deque([node])
+        visited[node] = 1
+        while queue:
+            node = queue.popleft()
+            size += 1
+            for nei in adj_list[node]:
+                if visited[nei] or degrees[node] == degrees[nei] == 4: continue
+                visited[nei] = 1
+                queue.append(nei)
+        return size == k
+    num_components = 0
     for i in range(1, n + 1):
-        freq[max(max_dist_subtree1[i], parent_max_dist[i])] += 1
-    suffix_freq = 0
-    for i in range(n, 0, -1):
-        suffix_freq += freq[i]
-        if suffix_freq > 0:
-            ans[i] = n - suffix_freq + 1
-    print(*ans[1:])
-
+        if visited[i]: continue
+        num_components += 1
+        if not bfs2(i):
+            return "No"
+    return "Yes" if num_components == k else "No"
+ 
 if __name__ == '__main__':
-    main()
+    T = int(input())
+    for _ in range(T):
+        print(main())
