@@ -21357,10 +21357,60 @@ right rotation in tree is the following
 
 right rotation about node A, where B is left child means you do this Set A.left = B.right, so the left child of A will be what was the right child of B now.  And set B as parent of A in form of B.right = A, so A is right child of B.  And everything else stays the same. That is a right rotation, and maintains the binary search tree invariant.  
 
-left rotation 
+left rotation is inverse to the right rotation.  
 
 ```py
-
+class Solution:
+    def balanceBST(self, root: TreeNode) -> TreeNode:
+        # PHASE 1: CREATE THE RIGHT LEANING VINE/BACKBONE 
+        def right_rotation(node):
+            prev_node = node
+            node = node.left
+            node_left_right = node.right
+            node.right = prev_node
+            prev_node.left = node_left_right
+            return node
+        def create_vine(grand):
+            tmp = grand.right
+            cnt = 0
+            while tmp:
+                if tmp.left:
+                    tmp = right_rotation(tmp)
+                    grand.right = tmp
+                else:
+                    cnt += 1
+                    grand = grand.right
+                    tmp = tmp.right
+            return cnt
+        grand_parent = TreeNode()
+        grand_parent.right = root
+        # count number of nodes
+        n = create_vine(grand_parent)
+        # PHASE 2: LEFT ROTATIONS TO GET BALANCED BINARY SEARCH TREE
+        # height_perfect_balanced_tree
+        h = int(math.log2(n + 1))
+        # needed_nodes_perfect_balanced_tree
+        m = pow(2, h) - 1
+        excess = n - m 
+        def left_rotation(node):
+            prev_node = node
+            node = node.right
+            prev_node.right = node.left
+            node.left = prev_node
+            return node
+        def compress(grand_parent, cnt):
+            node = grand_parent.right
+            while cnt > 0:
+                cnt -= 1
+                node = left_rotation(node)
+                grand_parent.right = node
+                grand_parent = node
+                node = node.right
+        compress(grand_parent, excess)
+        while m > 0:
+            m >>= 1
+            compress(grand_parent, m)
+        return grand_parent.right
 ```
 
 ## 2589. Minimum Time to Complete All Tasks
