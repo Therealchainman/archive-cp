@@ -22282,12 +22282,22 @@ class Solution:
         return res
 ```
 
-##
+## 760. Find Anagram Mappings
 
-### Solution 1:
+### Solution 1:  deque + defaultdict + hash table
 
 ```py
-
+class Solution:
+    def anagramMappings(self, nums1: List[int], nums2: List[int]) -> List[int]:
+        anagram_index = defaultdict(deque)
+        n = len(nums1)
+        mapping = [0]*n
+        for i, num in enumerate(nums2):
+            anagram_index[num].append(i)
+        for i, num in enumerate(nums1):
+            index = anagram_index[num].popleft()
+            mapping[i] = index
+        return mapping
 ```
 
 ##

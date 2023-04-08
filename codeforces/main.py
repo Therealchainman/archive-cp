@@ -47,65 +47,15 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-from collections import deque
-
 def main():
-    input()
-    n, m = map(int, input().split())
-    adj_list = [[] for _ in range(n + 1)]
-    degrees = [0] * (n + 1)
-    for _ in range(m):
-        u, v = map(int, input().split())
-        adj_list[u].append(v)
-        degrees[v] += 1
-        adj_list[v].append(u)
-        degrees[u] += 1
-    k = m - n
-    # count check
-    if k*k + k != m or k*k != n:
-        return "No"
-    # degree check
-    if any(deg not in (2, 4) for deg in degrees[1:]):
-        return "No"
-    # check all are part of a single connected component
-    def bfs1(node):
-        cnt = 0
-        queue = deque([node])
-        vis = [0]*(n + 1)
-        vis[node] = 1
-        while queue:
-            node = queue.popleft()
-            cnt += 1
-            for nei in adj_list[node]:
-                if vis[nei]: continue
-                vis[nei] = 1
-                queue.append(nei)
-        return cnt == n
-    if not bfs1(1):
-        return "No"
-    # connectivity check
-    visited = [0]*(n + 1)
-    def bfs2(node):
-        size = 0
-        queue = deque([node])
-        visited[node] = 1
-        while queue:
-            node = queue.popleft()
-            size += 1
-            for nei in adj_list[node]:
-                if visited[nei] or degrees[node] == degrees[nei] == 4: continue
-                visited[nei] = 1
-                queue.append(nei)
-        return size == k
-    num_components = 0
-    for i in range(1, n + 1):
-        if visited[i]: continue
-        num_components += 1
-        if not bfs2(i):
-            return "No"
-    return "Yes" if num_components == k else "No"
- 
+    n, k = map(int, input().split())
+    for y in range(2):
+        if (n - k*y)%2 == 0 and (n - k*y) >= 0:
+            print("Yes")
+            return
+    print("No")
+
 if __name__ == '__main__':
     T = int(input())
     for _ in range(T):
-        print(main())
+        main()
