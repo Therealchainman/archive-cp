@@ -45,22 +45,20 @@ sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
 import math
-import bisect
 
 def main():
-    n, m = map(int, input().split())
-    if m <= n: return m
-    res = math.inf
-    f1 = min(n, math.ceil(m/n))
-    f2 = bisect.bisect_left(range(n), m//f1)
-    res = math.inf
-    for i in range(f1 - 1, min(n + 1, f1+20)):
-        for j in range(f2 - 1, min(n + 1, f2+20)):
-            # print('i', i, 'j', j)
-            if i*j >= m:
-                res = min(res, i*j)
-    if res >= m and res != math.inf: return res
-    return -1
+    a, b = map(int, input().split())
+    cnt = 0
+    while a > 0 and b > 0:
+        g = math.gcd(a, b)
+        m = 1
+        if cnt > 1_000_000 and g > 1:
+            ma, mb = a//g, b//g
+            m = min(ma, mb)
+        a -= m*g
+        b -= m*g
+        cnt += m
+    return cnt
 
 if __name__ == '__main__':
     print(main())
