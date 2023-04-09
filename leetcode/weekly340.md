@@ -90,14 +90,57 @@ class Solution:
 
 ## 2617. Minimum Number of Visited Cells in a Grid
 
-### Solution 1:  bfs with boundary
+### Solution 1:  bfs with boundary or frontier optimization
 
 ```py
-
+class Solution:
+    def minimumVisitedCells(self, grid: List[List[int]]) -> int:
+        R, C = len(grid), len(grid[0])
+        # FRONTIERS
+        max_row, max_col = [0]*C, [0]*R
+        queue = deque([(0, 0)])
+        dist = 1
+        while queue:
+            for _ in range(len(queue)):
+                r, c = queue.popleft()
+                if (r, c) == (R - 1, C - 1): return dist
+                # RIGHTWARD MOVEMENT    
+                for k in range(max(c, max_col[r]) + 1, min(grid[r][c] + c, C - 1) + 1):
+                    queue.append((r, k))
+                # DOWNWARD MOVEMENT
+                for k in range(max(r, max_row[c]) + 1, min(grid[r][c] + r, R - 1) + 1):
+                    queue.append((k, c))
+                # UPDATE FRONTIERS
+                max_col[r] = max(max_col[r], grid[r][c] + c)
+                max_row[c] = max(max_row[c], grid[r][c] + r)
+            dist += 1
+        return -1
 ```
 
-### Solution 2:  sortedlist
+### Solution 2:  sortedlist to track non visited nodes + irange to quickly find next nodes
 
 ```py
-
+from sortedcontainers import SortedList
+class Solution:
+    def minimumVisitedCells(self, grid: List[List[int]]) -> int:
+        R, C = len(grid), len(grid[0])
+        rows, cols = [SortedList(range(R)) for _ in range(C)], [SortedList(range(C)) for _ in range(R)]
+        queue = deque([(0, 0)])
+        dist = 1
+        while queue:
+            for _ in range(len(queue)):
+                r, c = queue.popleft()
+                if (r, c) == (R - 1, C - 1): return dist
+                # RIGHTWARD MOVEMENT
+                for k in list(cols[r].irange(c + 1, grid[r][c] + c)):
+                    queue.append((r, k))
+                    cols[r].remove(k)
+                    rows[k].remove(r)
+                # DOWNWARD MOVEMENT
+                for k in list(rows[c].irange(r + 1, grid[r][c] + r)):
+                    queue.append((k, c))
+                    rows[c].remove(k)
+                    cols[k].remove(c)
+            dist += 1
+        return -1
 ```
