@@ -22300,6 +22300,23 @@ class Solution:
         return mapping
 ```
 
+# 20. Valid Parentheses
+
+## Solution: recursive pattern with stack
+
+```py
+class Solution:
+    def isValid(self, s: str) -> bool:
+        stack = []
+        opened = {')': '(', ']': '[', '}': '{'}
+        for ch in s:
+            if ch in opened:
+                if not stack or stack[-1] != opened[ch]: return False
+                stack.pop()
+            else: stack.append(ch)
+        return len(stack)==0
+```
+
 ##
 
 ### Solution 1:
