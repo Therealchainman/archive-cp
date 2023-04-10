@@ -45,8 +45,16 @@ sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
     
 def main():
-    n = int(input())
-    
+    a, b = map(int, input().split())
+    res = 0
+    while a != b:
+        if a < b:
+            a, b = b, a
+        m = a // b
+        if m > 1: m -= 1
+        a -= m*b
+        res += m
+    print(res)
 
 if __name__ == '__main__':
-    print(main())
+    main()
