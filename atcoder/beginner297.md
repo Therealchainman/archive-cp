@@ -174,8 +174,56 @@ if __name__ == '__main__':
 
 ## G - Constrained Nim 2 
 
-### Solution 1:
+### Solution 1:  sprague grund theorem + nim game + impartial games
+
+Just look at sprague grundy numbers and find a pattern that reduces the required operations/iterations
+
+What you find is that you can represent the nim value for each pile as the p%(L+R)//L and this kind of looks like this for 3, 14
+nim values will be 
+0: 0,1,2
+1: 3,4,5
+2: 6,7,8
+3: 9,10,11
+4: 12,13,14
+5: 15, 16
+
+Which kind of makes sense if you think about the 1 nim value, if you have 3, 4, 5 only 1 possible move can happen, you take 3 stones and no more moves are possible after that so in a sense the 3,4,5 represent a single stone in the classical nim game.  And 0 makes sense as well it represents 0 stones, nobody can take stones.
+But for 2, why should this represent 2 stones, it's optional you could take all 8 stones but if you take minimum you can take from it at most 2 times.  It is a bit difficult to prove this but if you take an exmaple of piles = [4, 7], so they are 1 and 2, you get 1^2 = 3, and you can check that the first player can win no matter what happens. And you can check with 1^1 or 2^2 that first player can't win. 
 
 ```py
+import operator
+from functools import reduce
 
+def main():
+    N, L, R = map(int, input().split())
+    piles = list(map(int, input().split()))
+    xor_sum = reduce(operator.xor, [p%(L + R)//L for p in piles])
+    return "First" if xor_sum > 0 else "Second"
+
+if __name__ == '__main__':
+    print(main())
+```
+
+This one belows help find the pattern, cause it is finding winning and losing states with brute force algorithm.  So it is deadly slow but that is how you can start finding the solution. 
+
+```py
+def main(N, L, R, piles):
+    total = sum(piles)
+    def grundy(idx, remaining, num_piles):
+        # winning state for player
+        if num_piles == 1 and L <= remaining <= R: return 1 
+        # losing state for player
+        if num_piles == 1 and remaining < L: return 0
+        grundy_numbers = set()
+        for i in range(N):
+            for take in range(L, min(R, piles[i]) + 1):
+                piles[i] -= take
+                new_num_piles = num_piles - (1 if piles[i] < L else 0)
+                grundy_numbers.add(grundy(idx + 1, remaining - take, new_num_piles))
+                piles[i] += take
+        res = next(dropwhile(lambda i: i in grundy_numbers, range(100_000)))
+        return res
+    num_piles = sum((1 for p in piles if p >= L))
+    grundy_number = grundy(0, total, num_piles)
+    return "First" if grundy_number > 0 else "Second"
 ```

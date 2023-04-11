@@ -44,17 +44,18 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
     
+
+"""
+how do I deal with fact multiple piles? 
+"""
+import operator
+from functools import reduce
+
 def main():
-    a, b = map(int, input().split())
-    res = 0
-    while a != b:
-        if a < b:
-            a, b = b, a
-        m = a // b
-        if m > 1: m -= 1
-        a -= m*b
-        res += m
-    print(res)
+    N, L, R = map(int, input().split())
+    piles = list(map(int, input().split()))
+    xor_sum = reduce(operator.xor, [p%(L + R)//L for p in piles])
+    return "First" if xor_sum > 0 else "Second"
 
 if __name__ == '__main__':
-    main()
+    print(main())
