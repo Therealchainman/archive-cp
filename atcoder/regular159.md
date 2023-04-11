@@ -161,6 +161,9 @@ if __name__ == '__main__':
 
 ### Solution 1:  min and max segment tree + interval problem + segment trees
 
+![lis2-1](images/Lis2/Lis2-1.png)
+![list2-2](images/Lis2/Lis2-2.png)
+
 ```py
 import math
 
