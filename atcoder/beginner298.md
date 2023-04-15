@@ -1,8 +1,16 @@
+# Atcoder Beginner Contest 298
+
+## What is used at the top of each submission
+
+```py
 import os,sys
 from io import BytesIO, IOBase
 sys.setrecursionlimit(10**6)
 from typing import *
-
+# only use pypyjit when needed, it usese more memory, but speeds up recursion in pypy
+import pypyjit
+pypyjit.set_param('max_unroll_recursion=-1')
+ 
 # Fast IO Region
 BUFSIZE = 8192
 class FastIO(IOBase):
@@ -43,45 +51,60 @@ class IOWrapper(IOBase):
         self.readline = lambda: self.buffer.readline().decode("ascii")
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
+```
 
-from collections import deque, Counter
+##
 
-def main():
-    n, a, b, p, q = map(int, input().split())
-    in_queue = set([(a, b, 0)])
-    queue = deque([(a, b, 0)])
-    memo = Counter()
-    while queue:
-        pos1, pos2, turn = queue.popleft()
-        print('pos1, pos2, turn', pos1, pos2, turn)
-        print('memo', memo)
-        in_queue.remove((pos1, pos2, turn))
-        if turn == 0:
-            for i in range(1, p + 1):
-                new_pos = min(pos1 + i, n)
-                state = (new_pos, pos2, turn ^ 1)
-                memo[state] += 1
-                if state in in_queue or new_pos == n: continue
-                in_queue.add(state)
-                queue.append(state)
-        else:
-            for i in range(1, q + 1):
-                new_pos = min(pos2 + i, n)
-                state = (pos1, new_pos, turn ^ 1)
-                memo[state] += 1
-                if new_pos == n: break
-                if state in in_queue: continue
-                in_queue.add(state)
-                queue.append(state)
-    print(memo)
-    a_win = b_win = 0
-    for p1, p2, t in memo:
-        if p1 == n:
-            a_win += memo[(p1, p2, t)]
-        elif p2 == n:
-            b_win += memo[(p1, p2, t)]
-    print(a_win, b_win)
-            
+### Solution 1:
 
-if __name__ == '__main__':
-    main()
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+## E - Unfair Sugoroku
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
