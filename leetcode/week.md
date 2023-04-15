@@ -22317,12 +22317,28 @@ class Solution:
         return len(stack)==0
 ```
 
-##
+## 2218. Maximum Value of K Coins From Piles
 
-### Solution 1:
+### Solution 1:  recursive dynammic programming
+
+states are (index, remain), you want to maximize the value for at a specific index with some remain coins you can take. 
+Thinking about it you can realize that you want the maximum profit for each index and remain, Then The best if if you start from index = 0 and remain = k.  That will give optimal answer for that state. 
 
 ```py
-
+class Solution:
+    def maxValueOfCoins(self, piles: List[List[int]], k: int) -> int:
+        n = len(piles)
+        @cache
+        def dp(index, remain):
+            if remain == 0 or index == n: return 0
+            psum = 0
+            best = dp(index + 1, remain)
+            for i in range(len(piles[index])):
+                if i == remain: break
+                psum += piles[index][i]
+                best = max(best, dp(index + 1, remain - i - 1) + psum)
+            return best
+        return dp(0, k)
 ```
 
 ##
