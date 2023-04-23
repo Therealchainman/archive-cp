@@ -22341,12 +22341,48 @@ class Solution:
         return dp(0, k)
 ```
 
-##
+## 1416. Restore The Array
 
-### Solution 1:
+### Solution 1:  space optimized + deque + O(n) time + iterative dp
+
+so all you need is to write out an example and the pattern becomes obvious, take this as example
+s = 19930613 and k = 1000
+first start the empty array to be equal to 1
+then you have this window = [1]
+at the first 3 you have solution of 1 and store in array window = [1,1]
+at 13, window = [2, 1, 1]
+at 613 window = [4, 2, 1, 1]
+at 0613 window = [0, 4, 2, 1, 1]
+at 30613 window = [6, 0, 4, 2], pop two times from end because only 306 <= k
+at 9306 window = [10, 6, 0, 4]
+at 9930 window = [16, 10, 6, 0]
+at 1993 window = [32, 16, 10, 6]
+
+think of it like this if you are given 930613, you know at the current step you can take the 9, 30613 : 93, 0613 : 930, 613 those are only you can take currently because must be under k.  Now you already have computed the number of ways to form the 30613, 0613, and 613.  Those are subproblems that are already solved and you know the number of ways for the current will just be the summation of the number of ways for those 3 subproblems. 
 
 ```py
-
+class Solution:
+    def numberOfArrays(self, s: str, k: int) -> int:
+        n = len(s)
+        window = deque([1])
+        window_sum = sum(window)
+        m = 1
+        cur_val = res = 0
+        mod = int(1e9) + 7
+        for left in reversed(range(n)):
+            cur_val = (int(s[left])*m + cur_val)
+            m *= 10
+            while cur_val > k:
+                cur_val //= 10
+                m //= 10
+                window_sum = (window_sum - window.pop() + mod)%mod
+            if s[left] != '0':
+                window.appendleft(windsow_sum)
+                res = window_sum
+                window_sum = (2*window_sum)%mod
+            else:
+                window.appendleft(0)
+        return res
 ```
 
 ##
