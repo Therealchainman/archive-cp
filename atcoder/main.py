@@ -44,44 +44,61 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-from collections import deque, Counter
+from collections import deque
+import heapq
+import math
 
 def main():
-    n, a, b, p, q = map(int, input().split())
-    in_queue = set([(a, b, 0)])
-    queue = deque([(a, b, 0)])
-    memo = Counter()
-    while queue:
-        pos1, pos2, turn = queue.popleft()
-        print('pos1, pos2, turn', pos1, pos2, turn)
-        print('memo', memo)
-        in_queue.remove((pos1, pos2, turn))
-        if turn == 0:
-            for i in range(1, p + 1):
-                new_pos = min(pos1 + i, n)
-                state = (new_pos, pos2, turn ^ 1)
-                memo[state] += 1
-                if state in in_queue or new_pos == n: continue
-                in_queue.add(state)
-                queue.append(state)
-        else:
-            for i in range(1, q + 1):
-                new_pos = min(pos2 + i, n)
-                state = (pos1, new_pos, turn ^ 1)
-                memo[state] += 1
-                if new_pos == n: break
-                if state in in_queue: continue
-                in_queue.add(state)
-                queue.append(state)
-    print(memo)
-    a_win = b_win = 0
-    for p1, p2, t in memo:
-        if p1 == n:
-            a_win += memo[(p1, p2, t)]
-        elif p2 == n:
-            b_win += memo[(p1, p2, t)]
-    print(a_win, b_win)
-            
+    n, m = map(int, input().split())
+    adj_list = [[] for _ in range(n)]
+    for _ in range(m):
+        u, v = map(int, input().split())
+        adj_list[u-1].append(v-1)
+        adj_list[v-1].append(u-1)
+    k = int(input())
+    max_heap = []
+    max_dist = [0]*n
+    min_dist = [math.inf]*n
+    for _ in range(k):
+        p, d = map(int, input().split())
+        p -= 1
+        min_dist[p] = d
+        if d > 0:
+            heapq.heappush(max_heap, (-d, p))
+            max_dist[p] = d
+    result = [1]*n
+    while max_heap:
+        dist, node = heapq.heappop(max_heap)
+        result[node] = 0
+        dist = -dist
+        if dist < max_dist[node]: continue
+        for nei in adj_list[node]:
+            if dist - 1 <= max_dist[nei]: continue
+            max_dist[nei] = dist - 1
+            heapq.heappush(max_heap, (-(dist-1), nei))
+    def bfs():
+        vis = [0]*n
+        queue = deque()
+        for i in range(n):
+            if result[i] == 1:
+                queue.append(i)
+                vis[i] = 1
+        dist = 0
+        while queue:
+            for _ in range(len(queue)):
+                node = queue.popleft()
+                if dist > min_dist[node]: return False
+                for nei in adj_list[node]:
+                    if vis[nei]: continue
+                    vis[nei] = 1
+                    queue.append(nei)
+            dist += 1
+        return True
+    if sum(result) == 0 or not bfs():
+        print('No')
+        return
+    print('Yes')
+    print(''.join(map(str, result)))
 
 if __name__ == '__main__':
     main()

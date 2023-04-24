@@ -22385,6 +22385,73 @@ class Solution:
         return res
 ```
 
+## 1046. Last Stone Weight
+
+### Solution 1: max heap datastructure
+
+NlogN
+
+```c++
+int lastStoneWeight(vector<int>& stones) {
+    priority_queue<int> maxHeap(stones.begin(),stones.end());
+    while (maxHeap.size()>1) {
+        int a = maxHeap.top();
+        maxHeap.pop();
+        int b = maxHeap.top();
+        maxHeap.pop();
+        if (a==b) continue;
+        maxHeap.push(abs(a-b));
+    }
+    return !maxHeap.empty() ? maxHeap.top() : 0;
+}
+```
+
+```py
+class Solution:
+    def lastStoneWeight(self, stones: List[int]) -> int:
+        for i in range(len(stones)):
+            stones[i]*=-1
+        heapify(stones)
+        while len(stones)>1:
+            x, y = abs(heappop(stones)), abs(heappop(stones))
+            z = x-y
+            if z>0:
+                heappush(stones, -z)
+        return abs(heappop(stones)) if stones else 0
+```
+
+### solution 2: bucket sort
+
+Works if the maximum weight value is smaller than the number of elements in the array
+
+O(N+W)
+
+```py
+class Solution:
+    def lastStoneWeight(self, stones: List[int]) -> int:
+        W = max(stones)
+        buckets = [0]*(W+1)
+        for s in stones:
+            buckets[s]+=1
+        i = lastj = W
+        while i > 0:
+            if buckets[i]>1:
+                buckets[i] -= 2*(buckets[i]//2)
+            elif buckets[i]==1:
+                j = min(i-1,lastj)
+                while not buckets[j]:
+                    j-=1
+                if j<0: return i
+                lastj = j
+                buckets[i-j] += 1
+                buckets[i] -= 1
+                buckets[j] -= 1
+                i = max(i-j,j)
+            else:
+                i-=1
+        return 0
+```
+
 ##
 
 ### Solution 1: 
