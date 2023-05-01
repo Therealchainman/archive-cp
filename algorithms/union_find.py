@@ -1,17 +1,22 @@
 """
 Union Find algorithm with path compression and size for optimization
+array based union find, the size and parent can be represented with an array. 
+This means the nodes/elements used in this algorithm can be indexed by 0,1,...,n - 1
 """
 class UnionFind:
-    def __init__(self,n: int):
+    def __init__(self, n: int):
         self.size = [1]*n
         self.parent = list(range(n))
     
     def find(self,i: int) -> int:
-        if i==self.parent[i]:
-            return i
-        self.parent[i] = self.find(self.parent[i])
-        return self.parent[i]
+        while i != self.parent[i]:
+            self.parent[i] = self.parent[self.parent[i]]
+            i = self.parent[i]
+        return i
 
+    """
+    returns true if the nodes were not union prior. 
+    """
     def union(self,i: int,j: int) -> bool:
         i, j = self.find(i), self.find(j)
         if i!=j:
@@ -21,6 +26,10 @@ class UnionFind:
             self.size[i] += self.size[j]
             return True
         return False
+    
+    @property
+    def root_count(self):
+        return sum(node == self.find(node) for node in range(len(self.parent)))
     def single_connected_component(self) -> bool:
         return self.size[self.find(0)] == len(self.parent)
     def is_same_connected_components(self, i: int, j: int) -> bool:

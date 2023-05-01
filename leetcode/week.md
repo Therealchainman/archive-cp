@@ -22452,20 +22452,59 @@ class Solution:
         return 0
 ```
 
-##
+## 1491. Average Salary Excluding the Minimum and Maximum Salary
 
-### Solution 1: 
+### Solution 1:  min + max + sum
 
 ```py
-
+class Solution:
+    def average(self, salary: List[int]) -> float:
+        return (sum(salary) - min(salary) - max(salary)) / (len(salary) - 2)
 ```
 
-##
+## 1065. Index Pairs of a String
 
-### Solution 1:
+### Solution 1:  z-algorithm + z_array + pattern searching in string + O(nm) n is the length of the string and m is the length of the dictionary
+
+Using z-array to find all the occurences of the words in the dictionary in the given string.  z-array allows to find the index of each substring in the text that matches the pattern in O(n) time. 
 
 ```py
-
+def z_algorithm(s: str) -> list[int]:
+    n = len(s)
+    z = [0]*n
+    left = right = 0
+    for i in range(1,n):
+        # BEYOND CURRENT MATCHED SEGMENT, TRY TO MATCH WITH PREFIX
+        if i > right:
+            left = right = i
+            while right < n and s[right-left] == s[right]:
+                right += 1
+            z[i] = right - left
+            right -= 1
+        else:
+            k = i - left
+            # IF PREVIOUS MATCHED SEGMENT IS NOT TOUCHING BOUNDARIES OF CURRENT MATCHED SEGMENT
+            if z[k] < right - i + 1:
+                z[i] = z[k]
+            # IF PREVIOUS MATCHED SEGMENT TOUCHES OR PASSES THE RIGHT BOUNDARY OF CURRENT MATCHED SEGMENT
+            else:
+                left = i
+                while right < n and s[right-left] == s[right]:
+                    right += 1
+                z[i] = right - left
+                right -= 1
+    return z
+class Solution:
+    def indexPairs(self, text: str, words: List[str]) -> List[List[int]]:
+        res = []
+        for pattern in words:
+            composite = f"{pattern}${text}"
+            z_array = z_algorithm(composite)
+            n = len(pattern)
+            for i, z_val in enumerate(z_array[n + 1:]):
+                if z_val == n:
+                    res.append([i, i + n - 1])
+        return sorted(res)
 ```
 
 ##
