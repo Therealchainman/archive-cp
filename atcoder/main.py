@@ -2,6 +2,9 @@ import os,sys
 from io import BytesIO, IOBase
 sys.setrecursionlimit(10**6)
 from typing import *
+# only use pypyjit when needed, it usese more memory, but speeds up recursion in pypy
+# import pypyjit
+# pypyjit.set_param('max_unroll_recursion=-1')
 
 # Fast IO Region
 BUFSIZE = 8192
@@ -44,61 +47,16 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-from collections import deque
-import heapq
+from itertools import product
 import math
 
 def main():
-    n, m = map(int, input().split())
-    adj_list = [[] for _ in range(n)]
-    for _ in range(m):
-        u, v = map(int, input().split())
-        adj_list[u-1].append(v-1)
-        adj_list[v-1].append(u-1)
-    k = int(input())
-    max_heap = []
-    max_dist = [0]*n
-    min_dist = [math.inf]*n
-    for _ in range(k):
-        p, d = map(int, input().split())
-        p -= 1
-        min_dist[p] = d
-        if d > 0:
-            heapq.heappush(max_heap, (-d, p))
-            max_dist[p] = d
-    result = [1]*n
-    while max_heap:
-        dist, node = heapq.heappop(max_heap)
-        result[node] = 0
-        dist = -dist
-        if dist < max_dist[node]: continue
-        for nei in adj_list[node]:
-            if dist - 1 <= max_dist[nei]: continue
-            max_dist[nei] = dist - 1
-            heapq.heappush(max_heap, (-(dist-1), nei))
-    def bfs():
-        vis = [0]*n
-        queue = deque()
-        for i in range(n):
-            if result[i] == 1:
-                queue.append(i)
-                vis[i] = 1
-        dist = 0
-        while queue:
-            for _ in range(len(queue)):
-                node = queue.popleft()
-                if dist > min_dist[node]: return False
-                for nei in adj_list[node]:
-                    if vis[nei]: continue
-                    vis[nei] = 1
-                    queue.append(nei)
-            dist += 1
-        return True
-    if sum(result) == 0 or not bfs():
-        print('No')
-        return
-    print('Yes')
-    print(''.join(map(str, result)))
+    n = int(input())
+    if n%2 and n%3 and n%5: return 0
+    minheap = []
+    ways = []
 
+                    
 if __name__ == '__main__':
-    main()
+    print(main())
+    # main()

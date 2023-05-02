@@ -22507,12 +22507,16 @@ class Solution:
         return sorted(res)
 ```
 
-##
+## 1822. Sign of the Product of an Array
 
-### Solution 1:
+### Solution 1: any
 
 ```py
-
+class Solution:
+    def arraySign(self, nums: List[int]) -> int:
+        if any(num == 0 for num in nums): return 0
+        neg_count = sum(1 for num in nums if num < 0)
+        return 1 if neg_count%2 == 0 else -1
 ```
 
 ##
