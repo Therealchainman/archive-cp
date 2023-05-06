@@ -11101,17 +11101,20 @@ class Solution:
 
 ```py
 class UnionFind:
-    def __init__(self,n):
+    def __init__(self, n: int):
         self.size = [1]*n
         self.parent = list(range(n))
     
-    def find(self,i):
-        if i==self.parent[i]:
-            return i
-        self.parent[i] = self.find(self.parent[i])
-        return self.parent[i]
+    def find(self,i: int) -> int:
+        while i != self.parent[i]:
+            self.parent[i] = self.parent[self.parent[i]]
+            i = self.parent[i]
+        return i
 
-    def union(self,i,j):
+    """
+    returns true if the nodes were not union prior. 
+    """
+    def union(self,i: int,j: int) -> bool:
         i, j = self.find(i), self.find(j)
         if i!=j:
             if self.size[i] < self.size[j]:
@@ -11121,21 +11124,32 @@ class UnionFind:
             return True
         return False
     
+    @property
+    def root_count(self):
+        return sum(node == self.find(node) for node in range(len(self.parent)))
+    def single_connected_component(self) -> bool:
+        return self.size[self.find(0)] == len(self.parent)
+    def is_same_connected_components(self, i: int, j: int) -> bool:
+        return self.find(i) == self.find(j)
+    def num_connected_components(self) -> int:
+        return len(set(map(self.find, self.parent)))
+    def __repr__(self) -> str:
+        return f'parents: {[(i, parent) for i, parent in enumerate(self.parent)]}, sizes: {self.size}'
+
 class Solution:
     def distanceLimitedPathsExist(self, n: int, edgeList: List[List[int]], queries: List[List[int]]) -> List[bool]:
         dsu = UnionFind(n)
         edgeList.sort(key = lambda edge: edge[2])
-        queries = [(*query,i) for i, query in enumerate(queries)]
+        m = len(queries)
+        queries = [(u, v, lim, i) for i, (u, v, lim) in enumerate(queries)]
+        res = [False]*m
         i = 0
-        edge_len = len(edgeList)
-        query_len = len(queries)
-        answer = [False]*query_len
-        for p, q, lim, index in sorted(queries, key = lambda query: query[2]):
-            while i < edge_len and edgeList[i][2] < lim:
+        for u, v, lim, idx in sorted(queries, key = lambda q: q[2]):
+            while i < len(edgeList) and edgeList[i][2] < lim:
                 dsu.union(edgeList[i][0], edgeList[i][1])
                 i += 1
-            answer[index] = dsu.find(p) == dsu.find(q)
-        return answer
+            res[idx] = dsu.is_same_connected_components(u, v)
+        return res
 ```
 
 ## 1724. Checking Existence of Edge Length Limited Paths II
@@ -12229,22 +12243,16 @@ class UnionFind:
     def __repr__(self) -> str:
         return f'parents: {[(i, parent) for i, parent in enumerate(self.parent)]}, sizes: {self.size}'
 class Solution:
-    def is_similar(self, word1: str, word2: str) -> bool:
-        num_swaps = 0
-        for x,y in zip(word1,word2):
-            if x!=y:
-                num_swaps += 1
-            if num_swaps > 2: return False
-        return True
     def numSimilarGroups(self, strs: List[str]) -> int:
+        strs = list(set(strs))
         n = len(strs)
         dsu = UnionFind(n)
-        for i, j in product(range(n),repeat=2):
-            if i == j or dsu.find(i) == dsu.find(j): continue
-            if self.is_similar(strs[i], strs[j]):
-                dsu.union(i,j)
+        edit_distance = lambda s1, s2: sum([1 for x, y in zip(s1, s2) if x != y])
+        for i in range(n):
+            for j in range(i):
+                if edit_distance(strs[i], strs[j]) in (0, 2):
+                    dsu.union(i, j)
         return dsu.num_connected_components()
-
 ```
 
 ## 269. Alien Dictionary
@@ -22517,6 +22525,110 @@ class Solution:
         if any(num == 0 for num in nums): return 0
         neg_count = sum(1 for num in nums if num < 0)
         return 1 if neg_count%2 == 0 else -1
+```
+
+## 1498. Number of Subsequences That Satisfy the Given Sum Condition
+
+### Solution 1:  sort + two pointers
+
+array = [3, 3, 6, 8], target = 9
+you take two pointers, and start like this
+3 3 6 8
+^     ^
+decrement the right  pointer while the summation of the two integers is greater than target
+3 3 6 8
+^   ^
+then you have these possible configurations that satisfy the target, representing as bits, to signify if it is in the set or not.  So for example
+3 _ 6 = 101
+so possible configurations is
+100
+110
+101
+111
+basically there are 4 configurations, because the first bit is always active, so it is just right - left pointer
+3 3 6 8
+  ^ ^ 
+This also satisfies the constraint so take 
+10
+11, two possible configurations
+can see from this that it is 2^(right_index - left_index)
+
+```py
+class Solution:
+    def numSubseq(self, nums: List[int], target: int) -> int:
+        n = len(nums)
+        mod = int(1e9) + 7
+        right = n - 1
+        res = 0
+        nums.sort()
+        for left in range(n):
+            while left <= right and nums[left] + nums[right] > target:
+                right -= 1
+            if right < left: break
+            res += pow(2, right - left, mod)
+            res %= mod
+        return res
+```
+
+## 1456. Maximum Number of Vowels in a Substring of Given Length
+
+### Solution 1:  constant size sliding window
+
+```py
+class Solution:
+    def maxVowels(self, s: str, k: int) -> int:
+        n = len(s)
+        left = res = cur = 0
+        vowels = 'aeiou'
+        for right in range(n):
+            cur += (s[right] in vowels)
+            if right >= k - 1:
+                res = max(res, cur)
+                cur -= (s[left] in vowels)
+                left += 1
+        return res
+```
+
+## 649. Dota2 Senate
+
+### Solution 1: queue + banned counter + O(n) votes maximum so time complexity is O(n)
+
+```py
+class Solution:
+    def predictPartyVictory(self, senate: str) -> str:
+        banned = [0]*2
+        parties = [0]*2
+        queue = deque()
+        for party in senate:
+            x = party == 'D'
+            queue.append(x)
+            parties[x] += 1
+        while all(parties):
+            x = queue.popleft()
+            if banned[x] > 0:
+                banned[x] -= 1
+                parties[x] -= 1
+            else:
+                queue.append(x)
+                banned[x^1] += 1
+        return "Radiant" if parties[0] else "Dire"
+
+```
+
+## 1538. Guess the Majority in a Hidden Array
+
+### Solution 1: 
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
 ```
 
 ##
