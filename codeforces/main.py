@@ -47,15 +47,25 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
+from itertools import product
+import math
+
 def main():
     n, k = map(int, input().split())
-    for y in range(2):
-        if (n - k*y)%2 == 0 and (n - k*y) >= 0:
-            print("Yes")
-            return
-    print("No")
+    arr = list(map(int, input().split()))
+    dp = [0]*(64)
+    mod = int(1e9) + 7
+    for i in range(n):
+        counts = [0]*64
+        counts[arr[i]] = 1
+        for j in range(64):
+            counts[arr[i] & j] += dp[j]
+        for j in range(64):
+            dp[j] += counts[j]
+            dp[j] %= mod
+    return sum(dp[i] for i in range(64) if bin(i)[2:].count('1') == k) % mod
 
 if __name__ == '__main__':
     T = int(input())
     for _ in range(T):
-        main()
+        print(main())

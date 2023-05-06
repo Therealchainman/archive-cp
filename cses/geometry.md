@@ -83,6 +83,12 @@ inline long long readll() {
 
 ### Solution 1:  outer product test
 
+1. if outer product > 0 => the point is to the left of the line
+1. outer product < 0 => the point is to the right of the line
+1. outer product = 0 => the point and line segment points are collinear, that is lying on the same line.
+
+![point location test](images/point_line.png)
+
 ```py
 def main():
     x1, y1, x2, y2, x3, y3 = map(int, input().split())
@@ -109,7 +115,7 @@ if __name__ == '__main__':
 
 The easiest thing is to check if it doesn't intersect, so for instance if the both points of a line segment are on the same side of the other line segment, then they don't intersect.  You can do this for both so you swap the points and do from other perspective. 
 
-Then you need to check when the outer product is 0 for both which indicates colinear lines.  You need to just check if the lines overlap with each other by taking the max of one and min of other, It is guaranteed to not overlap if the max is less than the min of a single coordinate, either x or y coordinate.  Check each dimension independently. Imagine if the max x element is less than the min x element from another line segment then they do not intersect.
+Then you need to check when the outer product is 0 for both which indicates collinear lines.  You need to just check if the lines overlap with each other by taking the max of one and min of other, It is guaranteed to not overlap if the max is less than the min of a single coordinate, either x or y coordinate.  Check each dimension independently. Imagine if the max x element is less than the min x element from another line segment then they do not intersect.
 
 ```py
 def main():
