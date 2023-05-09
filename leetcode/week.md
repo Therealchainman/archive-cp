@@ -22623,9 +22623,192 @@ class Solution:
 
 ```
 
+## 1964. Find the Longest Valid Obstacle Course at Each Position
+
+### Solution 1:  longest non-decreasing subsequence + dynamic programming + binary search + O(nlogn) time
+
+main observation is that at each index you are just trying to find the longest non-decreasing subsequence that uses the current element at index i. 
+
+Using a single array lengths works, because if you find a integer that is smaller than current integer that is at some length of longest non-decreasing subsequence, you can just replace it with the current integer, because it is smaller and you can use it to build a longer non-decreasing subsequence., right cause if you have 
+[1, 1, 3], if you get a 2, it's better to replace it with that. [1, 1, 2], because now another 2 can increase this subsequence, but it wouldn't if it was still a 3.
+
+```py
+class Solution:
+    def longestObstacleCourseAtEachPosition(self, obstacles: List[int]) -> List[int]:
+        n = len(obstacles)
+        ans = [0]*n
+        lengths = [0]
+        for i, v in enumerate(obstacles):
+            j = bisect.bisect_right(lengths, v)
+            if j == len(lengths):
+                lengths.append(v)
+            else:
+                lengths[j] = v
+            ans[i] = j
+        return ans
+```
+
+## 1572. Matrix Diagonal Sum
+
+### Solution 1:  loops + index math
+
+need to skip the element on secondary diagonal sum if i == n - i - 1, 
+-i - 1 = ~i
+
+```py
+class Solution:
+    def diagonalSum(self, mat: List[List[int]]) -> int:
+        n = len(mat)
+        primary_diag_sum = sum(mat[i][i] for i in range(n))
+        secondary_diag_sum = sum(mat[i][~i] for i in range(n) if i != n + ~i)
+        return primary_diag_sum + secondary_diag_sum
+```
+
+## 311. Sparse Matrix Multiplication
+
+### Solution 1:  brute force algorithm multiply two matrices
+
+the time complexity of this algorithm is O(NMK), but if we have square matrices of N x N, 
+then we can see it is O(N^3), so it is going to be tricky to do this in an efficient manner.
+
+
+```py
+class Solution:
+    def multiply(self, mat1: List[List[int]], mat2: List[List[int]]) -> List[List[int]]:
+        m, n, k = len(mat1), len(mat2[0]), len(mat2)
+        M = [[0]*n for _ in range(m)]
+        for i in range(m):
+            for j in range(n):
+                M[i][j] = sum(mat1[i][ii]*mat2[ii][j] for ii in range(k))
+        return M
+```
+
+## Solution 2: Optimize the matrix multiplication by skipping if the current element is 0 in the row, no reason to iterate over the column of matrix 2 and multiply
+
+```py
+class Solution:
+    def multiply(self, mat1: List[List[int]], mat2: List[List[int]]) -> List[List[int]]:
+        m, n, k = len(mat1), len(mat2[0]), len(mat2)
+        M = [[0]*n for _ in range(m)]
+        for i in range(m):
+            for ii in range(k):
+                if mat1[i][ii] == 0: continue
+                for j in range(n):
+                    M[i][j] += mat1[i][ii]*mat2[ii][j]
+        return M
+```
+
+### Solution 3:  Sparse matrices + yale format + compressed sparse row (CSR) + compressed sparse column (CSC)
+
+You can represent a sparse matrix with three 1-dimensional arrays, for values, row_indices, col_indices.  With these representation you can save on memory and number of operations on average for sparse matrices. Consider matrices where the number of nonzero elements is about the same as the count of rows or columns in the matrix. 
+
+There are more names such as CRS (compressed row storage)
+
+```py
+class CompressedSparseRowMatrix:
+    def __init__(self, matrix):
+        R, C = len(matrix), len(matrix[0])
+        self.values, self.col_indices, self.row_indices = [], [], [0]
+        for r in range(R):
+            for c in range(C):
+                if matrix[r][c] == 0: continue
+                self.values.append(matrix[r][c])
+                self.col_indices.append(c)
+            self.row_indices.append(len(self.values))
+
+class CompressedSparseColumnMatrix:
+    def __init__(self, matrix):
+        R, C = len(matrix), len(matrix[0])
+        self.values, self.col_indices, self.row_indices = [], [0], []
+        for c in range(C):
+            for r in range(R):
+                if matrix[r][c] == 0: continue
+                self.values.append(matrix[r][c])
+                self.row_indices.append(r)
+            self.col_indices.append(len(self.values))
+
+class Solution:
+    def multiply(self, mat1: List[List[int]], mat2: List[List[int]]) -> List[List[int]]:
+        R, M, C = len(mat1), len(mat1[0]), len(mat2[0])
+        left_matrix, right_matrix = CompressedSparseRowMatrix(mat1), CompressedSparseColumnMatrix(mat2)
+        res = [[0]*C for _ in range(R)]
+        for r, c in product(range(R), range(C)):
+            left_col_ptr = left_matrix.row_indices[r]
+            left_col_end = left_matrix.row_indices[r + 1]
+            right_row_ptr = right_matrix.col_indices[c]
+            right_row_end = right_matrix.col_indices[c + 1]
+            while left_col_ptr < left_col_end and right_row_ptr < right_row_end:
+                left_col_index = left_matrix.col_indices[left_col_ptr]
+                right_row_index = right_matrix.row_indices[right_row_ptr]
+                if left_col_index < right_row_index:
+                    left_col_ptr += 1
+                elif left_col_index > right_row_index:
+                    right_row_ptr += 1
+                else:
+                    res[r][c] += left_matrix.values[left_col_ptr]*right_matrix.values[right_row_ptr]
+                    left_col_ptr += 1
+                    right_row_ptr += 1
+        return res
+```
+
+## 54. Spiral Matrix
+
+### Solution 1:  many loops
+
+```cpp
+class Solution {
+public:
+    vector<int> spiralOrder(vector<vector<int>>& matrix) {
+        int R = matrix.size(), C = matrix[0].size();
+        vector<int> spiral;
+        int top = 0, left = 0, bot = R-1, right = C-1;
+        while (right>=left) {
+            // go to the right on the topmost row
+            for (int i = left;i<=right;i++) {
+                spiral.push_back(matrix[top][i]);
+            }
+            top++;
+            if (top>bot) {
+                break;
+            }
+            // go to the bottom on the righmost column
+            for (int i = top;i<=bot;i++) {
+                spiral.push_back(matrix[i][right]);
+            }
+            right--;
+            if (right<left) {
+                break;
+            }
+            // go to the left on the bottomost row
+            for (int i = right;i>=left;i--) {
+                spiral.push_back(matrix[bot][i]);
+            }
+            bot--;
+            if (bot<top) {
+                break;
+            }
+            // go to the top on the leftmost column
+            for (int i = bot;i>=top;i--) {
+                spiral.push_back(matrix[i][left]);
+            }
+            left++;
+        }
+        return spiral;
+    }
+};
+```
+
 ##
 
 ### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1: 
 
 ```py
 
