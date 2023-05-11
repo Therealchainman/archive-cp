@@ -63,3 +63,14 @@ conda env export > environment.yaml
 1. df: This command displays information about the amount of free space on your system's disks. To run it, type df in the terminal.
 1. lscpu: This command displays information about the CPU in your system, including the number of cores, the architecture, and the clock speed. To run it, type lscpu in the terminal.
 1. lshw: This command displays detailed information about all of the hardware in your system. To run it, type sudo lshw in the terminal. You may need to install the lshw package first by running sudo apt-get install lshw.
+
+## Usage of jit compiler with pypy
+
+Supposed to prevent the memory error, prevents recursion function requiring lots of memory, but can slow down recursive function slightly. 
+
+```py
+import pypyjit
+pypyjit.set_param('max_unroll_recursion=-1')
+```
+
+Setting max_unroll_recursion to -1 essentially disables recursion unrolling, meaning that the JIT compiler will not attempt to unroll recursive function calls at all. This can be useful in cases where unrolling causes performance degradation due to increased memory usage or when recursion depth is unknown or unpredictable. However, disabling unrolling may also result in slower execution for recursive code.

@@ -22,67 +22,56 @@ inline long long readll() {
 	return x * y;
 }
 
-const int MAXN = 200'005;
+const int N = 1e5 + 5;
 
-int n, ans[MAXN], freq[MAXN], max_dist_subtree1[MAXN], max_dist_subtree2[MAXN], child1[MAXN], child2[MAXN], parent_max_dist[MAXN];
-vector<int> adj_list[MAXN];
+vector<long long> values;
+vector<vector<int>> adj_list;
+unordered_map<long long, int> min_ops[N];
 
-int dfs1(int node, int parent) {
-    for (int child : adj_list[node]) {
-        if (child == parent) continue;
-        int max_dist_subtree = dfs1(child, node);
-        if (max_dist_subtree > max_dist_subtree1[node]) {
-            max_dist_subtree2[node] = max_dist_subtree1[node];
-            child2[node] = child1[node];
-            max_dist_subtree1[node] = max_dist_subtree;
-            child1[node] = child;
-        } else if (max_dist_subtree > max_dist_subtree2[node]) {
-            max_dist_subtree2[node] = max_dist_subtree;
-            child2[node] = child;
-        }
-    }
-    return max_dist_subtree1[node] + 1;
+int is_leaf(int node, int parent) {
+    return adj_list[node].size() == 1 && parent != -1;
 }
 
-void dfs2(int node, int parent) {
-    parent_max_dist[node] = parent_max_dist[parent] + 1;
-    if (parent != 0) {
-        if (node != child1[parent]) {
-            parent_max_dist[node] = max(parent_max_dist[node], max_dist_subtree1[parent] + 1);
-        } else {
-            parent_max_dist[node] = max(parent_max_dist[node], max_dist_subtree2[parent] + 1);
-        }
+int dfs(int node, int parent) {
+    if (is_leaf(node, parent)) {
+        min_ops[node][values[node]] = 0;
+        return values[node];
     }
+    unordered_map<long long, int> freq;
+    int operation_count = 0;
     for (int child : adj_list[node]) {
         if (child == parent) continue;
-        dfs2(child, node);
+        long long val = dfs(child, node);
+        int ops = min_ops[child][val];
+        freq[val]++;
+        operation_count += ops;
     }
+    // int maxer = max_element(freq.begin(), freq.end(), [](const pair<int, int>& x, const pair<int, int>& y){ return x.second < y.second; })->second;
+    // int sum = accumulate(freq.begin(), freq.end(), 0, [](const int& a, const auto& b) { return a + b.second; });
+    // printf("max_count: %d, sum: %d\n", maxer, sum);
+    int total_cost = operation_count + accumulate(freq.begin(), freq.end(), 0, [](const int& a, const auto& b) { return a + b.second; }) - max_element(freq.begin(), freq.end(), [](const pair<int, int>& x, const pair<int, int>& y){ return x.second < y.second; })->second;
+    long long max_value = max_element(freq.begin(), freq.end(), [](const pair<int, int>& x, const pair<int, int>& y){ return x.second < y.second; })->first;
+    long long new_val = max_value ^ values[node];
+    min_ops[node][new_val] = total_cost;
+    // printf("node: %d, new_val: %lld, max_val: %lld, total_cost: %d\n", node, new_val, max_value, total_cost);
+    min_ops[node][0] = total_cost + (new_val != 0);
+    return new_val;
 }
 
 int main() {
-	n = read();
+    int n = read();
+    values.resize(n + 1);
+    adj_list.resize(n + 1);
+    for (int i = 1; i <= n; i++) {
+        // long long val = readll();
+        values[i] = readll();
+    }
     for (int i = 1; i < n; i++) {
         int u = read(), v = read();
         adj_list[u].push_back(v);
         adj_list[v].push_back(u);
     }
-    dfs1(1, 0);
-    memset(parent_max_dist, -1, sizeof(parent_max_dist));
-    dfs2(1, 0);
-    for (int i = 1; i <= n; i++) {
-        freq[max(max_dist_subtree1[i], parent_max_dist[i])] += 1;
-    }
-	fill(ans, ans + n + 1, n);
-    int suffix_freq = 0;
-    for (int i = n; i >= 1; i--) {
-        suffix_freq += freq[i];
-        if (suffix_freq > 0) {
-            ans[i] = n - suffix_freq + 1;
-        }
-    }
-    for (int i = 1; i <= n; i++) {
-        cout << ans[i] << " ";
-    }
-    cout << endl;
+    dfs(1, -1);
+    cout << min_ops[1][0] << endl;
     return 0;
 }

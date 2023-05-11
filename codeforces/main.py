@@ -2,7 +2,7 @@ import os,sys
 from io import BytesIO, IOBase
 from typing import *
 # only use pypyjit when needed, it usese more memory, but speeds up recursion in pypy
-# sys.setrecursionlimit(1_000_000)
+sys.setrecursionlimit(1_000_000)
 # import pypyjit
 # pypyjit.set_param('max_unroll_recursion=-1')
  
@@ -47,25 +47,46 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-from itertools import product
+from collections import defaultdict, Counter
 import math
 
 def main():
-    n, k = map(int, input().split())
-    arr = list(map(int, input().split()))
-    dp = [0]*(64)
-    mod = int(1e9) + 7
-    for i in range(n):
-        counts = [0]*64
-        counts[arr[i]] = 1
-        for j in range(64):
-            counts[arr[i] & j] += dp[j]
-        for j in range(64):
-            dp[j] += counts[j]
-            dp[j] %= mod
-    return sum(dp[i] for i in range(64) if bin(i)[2:].count('1') == k) % mod
+    n = int(input())
+    values = [0] + list(map(int, input().split()))
+    adj_list = [[] for _ in range(n + 1)]
+    for _ in range(n - 1):
+        u, v = map(int, input().split())
+        adj_list[u].append(v)
+        adj_list[v].append(u)
+    # store minimum operations (node, xor_sum): min operations for this state
+    min_ops = defaultdict(lambda: math.inf)
+    # a leaf node cannot be the root node, and guarantee tree will have two nodes
+    is_leaf = lambda node, parent: len(adj_list[node]) == 1 and parent != -1
+    def dfs(node, parent):
+        # base case
+        if is_leaf(node, parent):
+            min_ops[(node, values[node])] = 0
+            return values[node]
+        freq = Counter()
+        operation_count = 0
+        for child in adj_list[node]:
+            if child == parent: continue
+            val = dfs(child, node)
+            ops = min_ops[(child, val)]
+            freq[val] += 1
+            operation_count += ops
+        # update the values
+        total_cost = operation_count + sum(freq.values()) - max(freq.values())
+        max_value = max(freq.keys(), key = lambda x: freq[x])
+        new_val = max_value ^ values[node]
+        min_ops[(node, new_val)] = total_cost
+        min_ops[(node, 0)] = total_cost + (1 if values[node] != new_val else 0)
+        return new_val
+    dfs(1, -1)
+    return min_ops[(1, 0)]
 
 if __name__ == '__main__':
-    T = int(input())
-    for _ in range(T):
-        print(main())
+    # T = int(input())
+    # for _ in range(T):
+        # print(main())
+    print(main())

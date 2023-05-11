@@ -22798,12 +22798,32 @@ public:
 };
 ```
 
-##
+## 1035. Uncrossed Lines
 
-### Solution 1:
+### Solution 1:  iterative dynamic programming + O(n) memory optimized + O(n^2) time
+
+two loops, but at each index i and index j, consider the possiblity of connecting those two index if they match.   For that you want to take the value from the previous i - 1 iteration and look back one and see how much uncrossed connections were possible up to that j - 1 point, then update j with the addition of the crossing.  And if they are not equal then just want to update based on i - 1 or just look at j - 1 on current i.  
+
+That way dp(i) is the maximum number of uncrossed connections betweent he two integer arrays up to the ith index. dp(2) = 1, means can have 1 uncrossed connection at index 2 in the nums2 integer array, doesn't matter, can be either integer array.  
+
+so dp(0) is always equal to 0, because can always connect line with the 0th element and it should always set it to 1 but for the dp(1) state. 
+
+![uncrossed lines](images/uncrossing_lines.png)
 
 ```py
-
+class Solution:
+    def maxUncrossedLines(self, nums1: List[int], nums2: List[int]) -> int:
+        n1, n2 = len(nums1), len(nums2)
+        dp = [0]*(n2 + 1)
+        for i in range(n1):
+            ndp = [0]*(n2 + 1)
+            for j in range(n2):
+                if nums1[i] == nums2[j]:
+                    ndp[j + 1] = max(dp[j + 1], dp[j] + 1)
+                else:
+                    ndp[j + 1] = max(dp[j + 1], ndp[j])
+            dp = ndp
+        return dp[-1]
 ```
 
 ##
