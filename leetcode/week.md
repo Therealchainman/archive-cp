@@ -22826,12 +22826,61 @@ class Solution:
         return dp[-1]
 ```
 
-##
+## 1799. Maximize Score After N Operations
 
-### Solution 1: 
+### Solution 1:  dp bitmask + backtrack + memoization + O(2^(2n)*n^2*log(A)) where A is largest integer in nums array
+
+This dp bitmask starts from the end_mask which will have a 1 set for every single bit to say that all integers have been picked.
+so 0 => not picked, 1 => picked
+Then you set the dp[end_Mask] = 0, cause 0 is the score for having all picked (counter intuitive but we are going backwards). 
+Then it decreases the bitmask, and if the used is odd, then that means you have something like 1110, which is not feasible because picking in pairs. So skip these states, since they are impossible. 
+Then it will reach a state where 1100, two bits are 0, Now we are going to use this to find all the pairs of integers that we can pick, which will just be the last two integers, and then it will add from that previous state 1111, to get the value for the state 1100, supposing that already formed 1 pair, so it will use 2*gcd(x, y), So now we are supposing if we moved from 1111 -> 1100 state this is the maximum amount of score that could be achieved, and we are really saying the maximum.  This is kinda weird to be honest, going backwards, but think when you get to 0000, it will get the max based on all the previous states with two bits set to 1. Just think in order it is supposing if you pick those two first you know.  So eally it is saying if you picked the two bits, last this is the best you could get for current state. 
 
 ```py
+class Solution:
+    def maxScore(self, nums: List[int]) -> int:
+        n = len(nums)
+        end_mask = (1 << n) - 1
+        dp = [-math.inf]*(1 << n)
+        for bitmask in range(end_mask, -1, -1):
+            if bitmask == end_mask: # base case
+                dp[bitmask] = 0
+                continue
+            used = bitmask.bit_count()
+            if used&1: continue # impossible state, must be even
+            pairs_formed = used // 2
+            for i in range(n):
+                if (bitmask >> i) & 1: continue # skip if it is set to a 1, only want 0s
+                for j in range(i + 1, n):
+                    if (bitmask >> j) & 1: continue
+                    nmask = bitmask | (1 << i) | (1 << j)
+                    dp[bitmask] = max(dp[bitmask], dp[nmask] + (pairs_formed + 1)*math.gcd(nums[i], nums[j]))
+        return dp[0]
+```
 
+### Solution 2:  dp bitmask + forward
+
+This one is more straightforward since it moves forward, and considers the first, second, and so on pairs formed. 
+but because it is increasing bitmask, you need to look at a smaller bitmask so you need to set 1s to 0s to get a smaller bitmask. 
+
+```py
+class Solution:
+    def maxScore(self, nums: List[int]) -> int:
+        n = len(nums)
+        end_mask = (1 << n) - 1
+        dp = [-math.inf]*(1 << n)
+        dp[0] = 0
+        for bitmask in range(1, 1 << n):
+            used = bitmask.bit_count()
+            if used & 1: continue
+            pairs_formed = used // 2
+            for i in range(n):
+                if not ((bitmask >> i) & 1): continue # skip if set to a 0
+                for j in range(i + 1, n):
+                    if not ((bitmask >> j) & 1): continue
+                    nmask = bitmask ^ (1 << i) ^ (1 << j)
+                    dp[bitmask] = max(dp[bitmask], dp[nmask] + pairs_formed*math.gcd(nums[i], nums[j]))
+        return dp[end_mask]
 ```
 
 ##
