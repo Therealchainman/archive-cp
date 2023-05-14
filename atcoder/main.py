@@ -49,13 +49,31 @@ input = lambda: sys.stdin.readline().rstrip("\r\n")
 
 from itertools import product
 import math
+import heapq
+from collections import Counter
+import string
 
 def main():
+    s = input()
     n = int(input())
-    if n%2 and n%3 and n%5: return 0
-    minheap = []
-    ways = []
-
+    t = bin(n)[2:]
+    if len(s) > len(t):
+        t = t.zfill(len(s))
+    if len(s) < len(t):
+        s = s.zfill(len(t))
+    s = list(s)
+    is_equal = True
+    for i in range(len(s)):
+        if s[i] == '?':
+            if is_equal:
+                s[i] = t[i]
+            else:
+                s[i] = '1'
+        elif t[i] == '1' and s[i] == '0':
+            is_equal = False
+        elif t[i] == '0' and s[i] == '1' and is_equal: 
+            return -1
+    return int(''.join(s), 2)
                     
 if __name__ == '__main__':
     print(main())

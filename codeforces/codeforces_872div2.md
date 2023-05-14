@@ -147,6 +147,8 @@ if __name__ == '__main__':
 
 ### Solution 1:  tree dp
 
+at most you can have 100,000 unique xor values for each root to leaf path. 
+
 ```py
 def main():
     n = int(input())

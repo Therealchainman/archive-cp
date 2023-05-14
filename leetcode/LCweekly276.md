@@ -55,6 +55,19 @@ long long mostPoints(vector<vector<int>>& questions) {
 }
 ```
 
+```py
+class Solution:
+    def mostPoints(self, questions: List[List[int]]) -> int:
+        n = len(questions)
+        dp = [0]*(n + 1)
+        for i in range(n - 1, -1, -1):
+            pts, bp = questions[i]
+            skip = dp[i + 1]
+            take = dp[min(n, i + bp + 1)] + pts
+            dp[i] = max(take, skip)
+        return dp[0]
+```
+
 ## 2141. Maximum Running Time of N Computers
 
 ### Solution: binary search
