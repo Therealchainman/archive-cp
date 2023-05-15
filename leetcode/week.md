@@ -14825,6 +14825,10 @@ class Solution:
 
 ### Solution 1:  iterative dp + python list
 
+dp[i] is the number of ways to construct strings of length i. 
+
+![example](images/good_strings.png)
+
 ```py
 class Solution:
     def countGoodStrings(self, low: int, high: int, zero: int, one: int) -> int:
@@ -16025,6 +16029,8 @@ class Solution:
 ## 265. Paint House II
 
 ### Solution 1:  iterative dp + space optimized O(1) and O(nk) time
+
+Iterate over all the houses, and for each one track the minimum cost so far up to that house, and track the color of previous house that result in that minimum cost.  But you can't have two adjacent houses with same color.  So when looking at colors for next house, you can't always use minimum so far up to the i - 1 house.  So you need to track a second minimum cost as well that will be used when the current house is considering the same color as that which contributed to the minimum cost. 
 
 ```py
 class Solution:
@@ -22883,12 +22889,29 @@ class Solution:
         return dp[end_mask]
 ```
 
-##
+## 1721. Swapping Nodes in a Linked List
 
-### Solution 1:
+### Solution 1:  single pass + two pointers
+
+one pointer is current node as traverse to the last node The other pointer is one that is k nodes behind the current node, that way it will give the kth node from the last node in the linked list.  
+
+![example](images/swapping_nodes.png)
 
 ```py
-
+class Solution:
+    def swapNodes(self, head: Optional[ListNode], k: int) -> Optional[ListNode]:
+        cur_node = head
+        list_len = 0
+        while cur_node:
+            list_len += 1
+            if list_len == k:
+                front_node = cur_node
+                end_node = head
+            if list_len > k:
+                end_node = end_node.next
+            cur_node = cur_node.next
+        front_node.val, end_node.val = end_node.val, front_node.val
+        return head
 ```
 
 ##
