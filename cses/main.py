@@ -48,21 +48,23 @@ sys.setrecursionlimit(1_000_000)
 # pypyjit.set_param('max_unroll_recursion=-1')
 
 def main():
-    x1, y1, x2, y2, x3, y3, x4, y4 = map(int, input().split())
-    p1, p2, p3, p4 = (x1, y1), (x2, y2), (x3, y3), (x4, y4)
-    outer_product = lambda v1, v2: v1[0]*v2[1] - v1[1]*v2[0]
-    def intersects(p1, p2, p3, p4):
-        for _ in range(2):
-            v1, v2, v3 = (p2[0]-p1[0], p2[1]-p1[1]), (p3[0]-p1[0], p3[1]-p1[1]), (p4[0]-p1[0], p4[1]-p1[1])
-            outer_prod1 = outer_product(v1, v2)
-            outer_prod2 = outer_product(v1, v3)
-            if (outer_prod1 < 0 and outer_prod2 < 0) or (outer_prod1 > 0 and outer_prod2 > 0): return False
-            if outer_prod1 == outer_prod2 == 0 and (max(p1[0], p2[0]) < min(p3[0], p4[0])) or (max(p1[1], p2[1]) < min(p3[1], p4[1])): return False
-            p1, p2, p3, p4 = p3, p4, p1, p2
-        return True
-    return "YES" if intersects(p1, p2, p3, p4) else "NO"
+    n = int(input())
+    vertices = []
+    for _ in range(n):
+        x, y = map(int, input().split())
+        vertices.append((x, y))
+    double_area = 0
+    for i in range(n):
+        x1, y1 = vertices[i]
+        x2, y2 = vertices[(i + 1) % n]
+        double_area += x1 * y2 - x2 * y1
+    double_area = abs(double_area)
+    print(double_area)
+    
         
 if __name__ == '__main__':
-    T = int(input())
-    for _ in range(T):
-        print(main())
+    main()
+    # print(main())
+    # T = int(input())
+    # for _ in range(T):
+    #     print(main())
