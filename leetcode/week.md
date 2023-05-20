@@ -1101,12 +1101,6 @@ class Solution:
         return [graph[i][j] if j in graph[i] else -1.0 for i,j in queries]
 ```
 
-### Solution 4: Union Find with Weighted Edges
-
-```py
-
-```
-
 ## 431. Encode N-ary Tree to Binary Tree
 
 ### Solution 1: BFS type algorithm 
