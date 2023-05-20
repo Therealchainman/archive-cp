@@ -53,7 +53,7 @@ suffix array is these suffix index sorted in order of suffix order from ascendin
 
 sorting is O(n+k) where k is the range of values in the string.
 
-"""
+```py
 from typing import List
 def radix_sort(leaderboard: List[int], equivalence_class: List[int]) -> List[int]:
     n = len(leaderboard)
@@ -102,10 +102,9 @@ def suffix_array(s: str) -> List[int]:
         k <<= 1
         equivalence_class = updated_equivalence_class
     return leaderboard
+```
 
-"""
-Find the longest common prefix between consecutive suffixes from the suffix array
-"""
+## suffix array and longest common prefix (lcp) array
 
 ```py
 from typing import List
@@ -170,9 +169,48 @@ def lcp(leaderboard: List[int], equivalence_class: List[int], s: str) -> List[in
     return lcp
 ```
 
-# Longest repeated and non-overlapping substring
+## suffix array notes
+
+![image](images/suffix_array_and_lcp/suffix_array_1.png)
+![image](images/suffix_array_and_lcp/suffix_array_2.png)
+![image](images/suffix_array_and_lcp/suffix_array_3.png)
+![image](images/suffix_array_and_lcp/lcp_array_1.png)
+![image](images/suffix_array_and_lcp/lcp_array_2.png)
+
+## Longest repeated substring
+
+This one can be solved with suffix array and LCP array. The time complexity is O(nlogn) and space complexity is O(n). 
+
+Uses the code above for suffix and lcp array
+
+```py
+def longestDupSubstring(self, s: str) -> str:
+    s += '$'
+    n = len(s)
+    p, c = suffix_array(s)
+    lcp_arr = lcp(p, c, s)
+    idx = max(range(n - 1), key = lambda i: lcp_arr[i])
+    len_ = lcp_arr[idx]
+    suffix_index = p[idx]
+    return s[suffix_index: suffix_index + len_]
+```
+
+## notes for longest repeated and non overlapping substring
+
+At first I tried to get suffix array and lcp array to work to solve this problem.  But I found contradictions that lead me to believe it doens't work.  And the best solution is dynamic programming that is relatively easy to learn.
+
+![image](images/repeating_nonoverlapping_substrings/repeating_nonoverlapping_substrings_1.png)
+![image](images/repeating_nonoverlapping_substrings/repeating_nonoverlapping_substrings_2.png)
+![image](images/repeating_nonoverlapping_substrings/repeating_nonoverlapping_substrings_3.png)
+![image](images/repeating_nonoverlapping_substrings/repeating_nonoverlapping_substrings_4.png)
+![image](images/repeating_nonoverlapping_substrings/repeating_nonoverlapping_substrings_5.png)
+
+## Longest repeated and non-overlapping substring
 
 Dynamic programming with time complexity of O(n^2) can solve this one. 
+
+dp[i][j] is the longest common substring with both substrings ending at ith and jth character. The transition is from the i-1 j-1 end character.  So if the current characters are equal and the length doesn't cause overlap of the substrings then it's good. 
+
 
 ```py
 def longestSubstring(self, S , N):
