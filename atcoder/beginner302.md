@@ -1,6 +1,16 @@
+# Atcoder Beginner Contest 302
+
+## What is used at the top of each submission
+
+```py
 import os,sys
 from io import BytesIO, IOBase
+sys.setrecursionlimit(10**6)
 from typing import *
+# only use pypyjit when needed, it usese more memory, but speeds up recursion in pypy
+# import pypyjit
+# pypyjit.set_param('max_unroll_recursion=-1')
+# sys.stdout = open('output.txt', 'w')
 
 # Fast IO Region
 BUFSIZE = 8192
@@ -42,53 +52,110 @@ class IOWrapper(IOBase):
         self.readline = lambda: self.buffer.readline().decode("ascii")
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
-
-sys.setrecursionlimit(1_000_000)
-# import pypyjit
-# pypyjit.set_param('max_unroll_recursion=-1')
-
-import math
-
-def main():
-    n = int(input())
-    points = []
-    for _ in range(n):
-        x, y = map(int, input().split())
-        points.append((x, y))
-    points.sort()
-    points_y = sorted(points, key=lambda x: x[1])
-    euclidean_dist = lambda p1, p2: (p1[0] - p2[0])**2+(p1[1] - p2[1])**2
-    def divide(points, points_y):
-        n = len(points)
-        if n <= 1: return math.inf
-        left_points = points[:n//2]
-        right_points = points[n//2:]
-        left_points_y, right_points_y = [], []
-        mid_x = left_points[-1][0]
-        mid_y = left_points[-1][1]
-        for x, y in points:
-            if (x, y) <= (mid_x, mid_y):
-                left_points_y.append((x, y))
-            else:
-                right_points_y.append((x, y))
-        # divide
-        d = min(divide(left_points, left_points_y), divide(right_points, right_points_y))
-        # left [left, mid)
-        # right [mid, right)
-        # merge
-        strip = []
-        for x, y in points_y:
-            if abs(x - mid_x) <= d:
-                strip.append((x, y))
-        for i in range(len(strip)):
-            for j in range(i+1, len(strip)):
-                if strip[j][1] - strip[i][1] >= d: break
-                d = min(d, euclidean_dist(strip[i], strip[j]))
-        return d
-    return divide(points, points_y)
-        
+                    
 if __name__ == '__main__':
     print(main())
-    # T = int(input())
-    # for _ in range(T):
-    #     print(main())
+    # main()
+    # sys.stdout.close()
+```
+
+##
+
+### Solution 1
+
+```py
+
+```
+
+##
+
+### Solution 1
+
+```py
+
+```
+
+##
+
+### Solution 1
+
+```py
+
+```
+
+##
+
+### Solution 1
+
+```py
+
+```
+
+##
+
+### Solution 1
+
+```py
+
+```
+
+##
+
+### Solution 1
+
+```py
+
+```
+
+##
+
+### Solution 1
+
+```py
+
+```
+
+##
+
+### Solution 1
+
+```py
+def main():
+    n = int(input())
+    arr = list(map(int, input().split()))
+    res = 0
+    def inversion_count(left, right):
+        if right-left <= 1: return 0
+        mid = (left+right)>>1
+        res = inversion_count(left, mid) + inversion_count(mid, right) + merge(left, right, mid)
+        return res
+
+    def merge(left, right, mid):
+        i, j = left, mid
+        temp = []
+        inv_count = 0
+        while i < mid and j < right:
+            if arr[i] <= arr[j]:
+                temp.append(arr[i])
+                i += 1
+            else:
+                temp.append(arr[j])
+                print('mid', mid, 'i', i, 'j', j)
+                inv_count += (mid - i)
+                j += 1
+        while i < mid:
+            temp.append(arr[i])
+            i += 1
+        while j < right:
+            temp.append(arr[j])
+            j += 1
+        for i in range(left, right):
+            arr[i] = temp[i-left]
+        return inv_count
+
+    res = inversion_count(0, n)
+    return res
+
+if __name__ == '__main__':
+    print(main())
+```
