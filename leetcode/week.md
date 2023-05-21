@@ -1060,7 +1060,8 @@ class Solution:
 works because we have small number of vertices, the algorithm takes O(V^3) time complexity, 
 very good for dense graphs that have many edges.  
 
-think k internal nodes, 
+![image](images/Evaluate%20division-1.png)
+![image](images/Evaluate%20division-2.png)
 
 ```py
 class Solution:

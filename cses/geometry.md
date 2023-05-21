@@ -210,10 +210,121 @@ if __name__ == '__main__':
 
 ## Minimum Euclidean Distance
 
-### Solution 1:
+### Solution 1:  divide and conquor + O(nlogn) time
+
+It is too slow in python. 
+This works because we keep points on the left and right side regions based on x values, and then we maintain sorted points by y as well, so that can iterate through in the strip quickly.  it is guaranteed to be just 16 points in the strip.  So we can just brute force it.
+
+![image](images/Closest%20Pair%20of%20points-1.png)
+![image](images/Closest%20Pair%20of%20points-2.png)
 
 ```py
+import math
 
+def main():
+    n = int(input())
+    points = []
+    for _ in range(n):
+        x, y = map(int, input().split())
+        points.append((x, y))
+    points.sort()
+    points_y = sorted(points, key=lambda x: x[1])
+    euclidean_dist = lambda p1, p2: (p1[0] - p2[0])**2+(p1[1] - p2[1])**2
+    def divide(points, points_y):
+        n = len(points)
+        if n <= 1: return math.inf
+        left_points = points[:n//2]
+        right_points = points[n//2:]
+        left_points_y, right_points_y = [], []
+        mid_x = left_points[-1][0]
+        mid_y = left_points[-1][1]
+        for x, y in points:
+            if (x, y) <= (mid_x, mid_y):
+                left_points_y.append((x, y))
+            else:
+                right_points_y.append((x, y))
+        # divide
+        d = min(divide(left_points, left_points_y), divide(right_points, right_points_y))
+        # left [left, mid)
+        # right [mid, right)
+        # merge
+        strip = []
+        for x, y in points_y:
+            if abs(x - mid_x) <= d:
+                strip.append((x, y))
+        for i in range(len(strip)):
+            # this loop is O(1), at most 16 points, but actually even less. 
+            for j in range(i+1, len(strip)):
+                if strip[j][1] - strip[i][1] >= d: break
+                d = min(d, euclidean_dist(strip[i], strip[j]))
+        return d
+    return divide(points, points_y)
+        
+if __name__ == '__main__':
+    print(main())
+```
+
+Same algorithm written in cpp it also tle on one test case.
+
+```cpp
+#define Point pair<int, int>
+#define x first
+#define y second
+
+long long square(long long x) {
+    return x * x;
+}
+
+long long euclidean_dist(Point &p1, Point &p2) {
+    return square(p1.x - p2.x) + square(p1.y - p2.y);
+}
+
+long long divide(vector<Point> &points, vector<Point> &points_y) {
+    int n = points.size();
+    if (n <= 1) {
+        return LLONG_MAX;
+    }
+    vector<Point> left_points(points.begin(), points.begin() + n / 2);
+    vector<Point> right_points(points.begin() + n / 2, points.end());
+    vector<Point> left_points_y;
+    vector<Point> right_points_y;
+    int mid_x = left_points.back().x;
+    int mid_y = left_points.back().y;
+    for (auto &p : points) {
+        if (make_pair(p.x, p.y) <= make_pair(mid_x, mid_y)) {
+            left_points_y.push_back(p);
+        } else {
+            right_points_y.push_back(p);
+        }
+    }
+    long long d = min(divide(left_points, left_points_y), divide(right_points, right_points_y));
+    vector<Point> strip;
+    for (auto &p : points_y) {
+        if (abs(p.x - mid_x) < d) {
+            strip.push_back(p);
+        }
+    }
+    for (int i = 0; i < strip.size(); ++i) {
+        for (int j = i + 1; j < strip.size() && strip[j].y - strip[i].y < d; ++j) {
+            d = min(d, euclidean_dist(strip[i], strip[j]));
+        }
+    }
+    return d;
+}
+
+int main() {
+    int n = read();
+    vector<Point> points(n);
+    for (int i = 0; i < n; i++) {
+        int x = read(), y = read();
+        points[i] = {x, y};
+    }
+    sort(points.begin(), points.end(), [](auto &a, auto &b) {return make_pair(a.x, a.y) < make_pair(b.x, b.y);});
+    vector<Point> points_y = points;
+    sort(points_y.begin(), points_y.end(), [](auto &a, auto &b) {return a.y < b.y;});
+    cout << divide(points, points_y) << endl;
+    return 0;
+}
 ```
 
 ## Convex Hull
