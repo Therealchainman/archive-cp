@@ -141,10 +141,27 @@ if __name__ == '__main__':
 
 ## Polygon Area
 
-### Solution 1:
+### Solution 1:  shoelace theorem + O(n) time
+
+shoelace theorem is like taking the determinant of each pair of connected coordinates moving in a clockwise direction.  Then you take the absolute value of the sum of the determinants and divide by 2.  This is the area of the polygon.  The determinant is the area of the parallelogram formed by the two vectors.  The area of the triangle is half of the parallelogram.  So the area of the polygon is the sum of the areas of the triangles formed by the vertices of the polygon.
 
 ```py
-
+def main():
+    n = int(input())
+    vertices = []
+    for _ in range(n):
+        x, y = map(int, input().split())
+        vertices.append((x, y))
+    double_area = 0
+    for i in range(n):
+        x1, y1 = vertices[i]
+        x2, y2 = vertices[(i + 1) % n]
+        double_area += x1 * y2 - x2 * y1
+    double_area = abs(double_area)
+    print(double_area)
+        
+if __name__ == '__main__':
+    main()
 ```
 
 ## Point in Polygon
@@ -155,7 +172,43 @@ if __name__ == '__main__':
 
 ```
 
-##
+## Polygon Lattice Points
+
+### Solution 1:  pick's theorem + shoelace theorem + O(n) time
+
+Uses the shoelace theorem to calculate the 2*area of the simple polygon.  Which uses a determinant of each pair of connected coordinates moving in a clockwise or counterclockwise direction.
+
+Calculate the number of boundary points by taking the difference between each pair of coordinates and then compute the gcd, that is how many integer points it will cross along the line segment connecting the pair of coordinates.  Given assumption that the coordinates of the polygon are integers.
+
+Pick's theorem can be used to solve for interior points with area and boundary points known.  Just solve the equation A = I + B/2 - 1 for I.
+
+![image](images/polygon_lattice_points.png)
+
+```py
+import math
+
+def main():
+    n = int(input())
+    vertices = []
+    for _ in range(n):
+        x, y = map(int, input().split())
+        vertices.append((x, y))
+    # count boundary points
+    boundary = double_area = 0
+    for i in range(n):
+        x1, y1 = vertices[i]
+        x2, y2 = vertices[(i + 1) % n]
+        double_area += x1 * y2 - x2 * y1
+        boundary += math.gcd(abs(x1 - x2), abs(y1 - y2))
+    double_area = abs(double_area)
+    interior = (double_area - boundary + 2) // 2
+    print(interior, boundary)
+    
+if __name__ == '__main__':
+    main()
+```
+
+## Minimum Euclidean Distance
 
 ### Solution 1:
 
@@ -163,15 +216,7 @@ if __name__ == '__main__':
 
 ```
 
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
+## Convex Hull
 
 ### Solution 1:
 
