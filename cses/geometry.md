@@ -166,10 +166,71 @@ if __name__ == '__main__':
 
 ## Point in Polygon
 
-### Solution 1:
+### Solution 1:  ray casting algorithm + O(nm) time
+
+This ray casting algorithm should work for lattice polygons.  That means that the vertices of the polygon are integer coordinates.  By adding a little bit of  (inf, y + 1) this guarantees that a ray will never intersect a vertex of the polygon.  So that simple check of line segment intersection should work.  That is given two Lines L1 and L2, you just check that L2 points are on opposite sides of L1 and vice versa.  That is you take the casted ray as a line segment and check if it intersects with the line segment in polygon.  Tracking the count of these line segments it intersects will determine if it is inside or outside the polygon.  If it is an even number of intersections then it is outside the polygon, if it is an odd number of intersections then it is inside the polygon.
+
+Boundary works similarly, Once you find that a point is colinear with some line segment and is between the two points of the line segment that means it is on the boundary.  So if that happens set to true for boundary.  And the inside/outside won't matter. 
+
+This algorithm works for any polygon for most part, concave or convex.  Not certain works if polygon overlaps or intersects itself or has hole.  But any simple polygon
+
+Example of how a small ofset prevents it from intersecting a vertex of the polygon
+![image](images/horizontal_ray.PNG)
+![image](images/horizontal_ray_small_offset.PNG)
 
 ```py
+def main():
+    n, m = map(int, input().split())
+    inside, outside, boundary = "INSIDE", "OUTSIDE", "BOUNDARY"
+    outer_product = lambda v1, v2: v1[0]*v2[1] - v1[1]*v2[0]
+    def is_boundary(p, p1, p2):
+        # is p on the boundary of p1p2
+        x, y = p
+        x1, y1 = p1
+        x2, y2 = p2
+        v1 = (x2 - x1, y2 - y1)
+        v2 = (x - x1, y - y1)
+        return outer_product(v1, v2) == 0 and min(x1, x2) <= x <= max(x1, x2) and min(y1, y2) <= y <= max(y1, y2)
+    def intersects(p1, p2, p3, p4):
+        for _ in range(2):
+            v1, v2, v3 = (p2[0]-p1[0], p2[1]-p1[1]), (p3[0]-p1[0], p3[1]-p1[1]), (p4[0]-p1[0], p4[1]-p1[1])
+            outer_prod1 = outer_product(v1, v2)
+            outer_prod2 = outer_product(v1, v3)
+            if (outer_prod1 < 0 and outer_prod2 < 0) or (outer_prod1 > 0 and outer_prod2 > 0): return False
+            p1, p2, p3, p4 = p3, p4, p1, p2
+        return True
+    polygon = []
+    for _ in range(n):
+        polygon.append(tuple(map(int, input().split())))
+    points = []
+    for _ in range(m):
+        points.append(tuple(map(int, input().split())))
+    res = []
+    for p1 in points:
+        x1, y1 = p1
+        # L1 (x1, y1) -> (x2, y2)
+        p2 = (10**9 + 7, y1 + 1)
+        intersections = 0
+        on_boundary = False
+        for i in range(n):
+            p3 = polygon[i]
+            p4 = polygon[(i + 1)%n]
+            # L2 (x3, y3) -> (x4, y4)
+            if is_boundary(p1, p3, p4):
+                on_boundary = True
+                break
+            if intersects(p1, p2, p3, p4):
+                intersections += 1
+        if on_boundary:
+            res.append(boundary)
+        elif intersections % 2 == 0:
+            res.append(outside)
+        else:
+            res.append(inside)
+    return "\n".join(res)
 
+if __name__ == '__main__':
+    print(main())
 ```
 
 ## Polygon Lattice Points
