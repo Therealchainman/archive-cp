@@ -22987,20 +22987,67 @@ class Solution:
         return s[suffix_index: suffix_index + len_]
 ```
 
-##
+## 253. Meeting Rooms II
 
-### Solution 1:
+### Solution 1:  line sweep + sort
 
 ```py
-
+class Solution:
+    def minMeetingRooms(self, intervals: List[List[int]]) -> int:
+        events = []
+        for s, e in intervals:
+            events.append((s, 1))
+            events.append((e, -1))
+        events.sort()
+        num_rooms = res = 0
+        for ev, delta in events:
+            num_rooms += delta
+            res = max(res, num_rooms)
+        return res
 ```
 
-##
+## 347. Top K Frequent Elements
 
-### Solution 1: 
+### Solution 1:  sort + group + O(nlogn) time
 
 ```py
+class Solution:
+    def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+        nums.sort()
+        freq = [(len(list(grp)), elem) for elem, grp in groupby(nums)]
+        freq.sort(reverse=True)
+        return [elem for _, elem in freq[:k]]
+```
 
+### Solution 2:  counter sort for frequency array + hash table to store elements with specific frequency + O(n) time
+
+This solution will scale poorly if the integer range increases vastly such as it allows 10**9, A better solution for that if you still have a reasonable amount of elements is to use dictionary at that point, instead of lists.
+
+```py
+class Solution:
+    def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+        n = len(nums)
+        delta = 10**4
+        sz = 2 * delta + 1
+        freq, freq_freq = [0]*sz, [0]*sz
+        freq_map = defaultdict(list)
+        for num in nums:
+            freq[num + delta] += 1
+        # counting sort for frequency
+        # map to get elements that had that frequency for recovery
+        for i in range(sz):
+            if freq[i] == 0: continue
+            freq_freq[freq[i]] += 1
+            freq_map[freq[i]].append(i - delta)
+        res = []
+        for i in reversed(range(sz)):
+            if freq_freq[i] == 0: continue
+            for _ in range(freq_freq[i]):
+                if k == 0: break
+                res.append(freq_map[i].pop())
+                k -= 1
+            if k == 0: break
+        return res
 ```
 
 ##
