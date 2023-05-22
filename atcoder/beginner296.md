@@ -77,7 +77,7 @@ input = lambda: sys.stdin.readline().rstrip("\r\n")
 
 ```
 
-## 
+## D - M<=ab
 
 ### Solution 1:
 
@@ -104,7 +104,7 @@ if __name__ == '__main__':
     print(main())
 ```
 
-## 
+## E - Transition Game
 
 ### Solution 1:
 
@@ -148,102 +148,118 @@ if __name__ == '__main__':
     print(main())
 ```
 
-## 
+## G - Polygon and Points
 
-### Solution 1:
+### Solution 1:  binary search + online query + outer product + sort by angle from polygon vertex + fan triangulation of convex polygon
+
+This is a description of the algorithm, while the images below will give a better idea of what is going on.
+We can use this lemma below and is why this works.
+lemma 1: fan triangulation works for any convex polygon
+1. Use fan triangulation to triangulate the polygon.  Use the first vertex as the initial vertex.
+1. binary search for which triangle the point belongs to based on fact that each triangle is sorted by angle with respect to initial vertex in polygon.
+1. Check if it is in a triangle and on boundary of the polygon edge
+1. check if it is on boundary of polygon edge that is adjacent to the non-triangular region outside of the polygon.
+1. Check if it is inside one of the triangles of the polygon from the fan triangulation method.
+1. all other cases it would be outside of the polygon
+
+![image](images/points_in_convex_polygon_1.PNG)
+![image](images/points_in_convex_polygon_2.PNG)
+![image](images/points_in_convex_polygon_3.PNG)
+![image](images/points_in_convex_polygon_4.PNG)
 
 ```py
+outer_product = lambda v1, v2: v1[0]*v2[1] - v1[1]*v2[0]
+
+def binary_search(point, polygon):
+    n = len(polygon)
+    left, right = 0, n
+    v = (point[0] - polygon[0][0], point[1] - polygon[0][1])
+    while left < right:
+        mid = (left + right) >> 1
+        v1 = (polygon[mid][0] - polygon[0][0], polygon[mid][1] - polygon[0][1])
+        outer_prod = outer_product(v1, v)
+        if outer_prod >= 0:
+            left = mid + 1
+        else:
+            right = mid
+    return left
+
 def main():
     n = int(input())
-    points = [tuple(map(int, input().split())) for _ in range(n)]
-    line_segments = []
-    vertical_line_segments = {}
-    for i in range(1, n + 1):
-        (x1, y1), (x2, y2) = points[i-1], points[i%n]
-        if x2 < x1:
-            x1, y1, x2, y2 = x2, y2, x1, y1
-        if x1 != x2:
-            line_segments.append((x1, x2, y1, y2))
-        else:
-            if y2 < y1: y1, y2 = y2, y1
-            vertical_line_segments[x1] = (y1, y2)
-    line_segments.sort()
+    polygon = []
+    for _ in range(n):
+        polygon.append(tuple(map(int, input().split())))
     q = int(input())
-    queries = []
-    for i in range(q):
-        a, b = map(int, input().split())
-        queries.append((a, b, i))
-    queries.sort()
-    ans = ["OUT"]*q
-    ptr = 1
-    inner_product = lambda v1, v2: sum(x1*x2 for x1, x2 in zip(v1, v2))
-    outer_product = lambda v1, v2: v1[0]*v2[1] - v1[1]*v2[0]
-    def on_line_segment(outer_product, line_vector, point_vector):
-        if outer_product != 0: return False
-        line_inner_product = inner_product(line_vector, line_vector)
-        point_inner_product = inner_product(line_vector, point_vector)
-        return 0 <= point_inner_product <= line_inner_product
-    for a, b, i in queries:
-        # ADVANCE LINE SEGMENT POINTER
-        while ptr + 1 < len(line_segments) and line_segments[ptr][0] < a:
-            ptr += 1
-        # CHECK IF POINT IS IN POLYGON
-        line_seg1, line_seg2 = line_segments[ptr-1], line_segments[ptr]
-        # print('line_seg1', line_seg1, 'line_seg2', line_seg2)
-        # print('a', a, 'b', b)
-        if not (line_seg1[0] <= a <= line_seg1[1] and line_seg2[0] <= a <= line_seg2[1]):
-            continue
-        # print('a', a, 'b', b)
-        line_vector1 = (line_seg1[1]-line_seg1[0], line_seg1[3]-line_seg1[2])
-        line_vector2 = (line_seg2[1]-line_seg2[0], line_seg2[3]-line_seg2[2])
-        point_vector1 = (a-line_seg1[0], b-line_seg1[2])
-        point_vector2 = (a-line_seg2[0], b-line_seg2[2])
-        # p1, p2, p3, p4 = (line_seg1[0], line_seg1[2]), (line_seg1[1], line_seg1[3]), (line_seg2[0], line_seg2[2]), (line_seg2[1], line_seg2[3])
-        outer_product1 = outer_product(line_vector1, point_vector1)
-        outer_product2 = outer_product(line_vector2, point_vector2)
-        # COLINEAR WITH A LINE SEGMENT
-        if on_line_segment(outer_product1, line_vector1, point_vector1) or on_line_segment(outer_product2, line_vector2, point_vector2):
-            ans[i] = "ON"
-            continue
-        # SAME SIDE OF LINE SEGMENT
-        orientation1, orientation2 = outer_product1 > 0, outer_product2 > 0
-        # BETWEEN LINE SEGMENTS MEANS INSIDE POLYGON
-        if orientation1^orientation2:
-            ans[i] = "IN"
-            # CHECK COLINEAR WITH VERTICAL LINE SEGMENT
-            if a in vertical_line_segments:
-                y1, y2 = vertical_line_segments[a]
-                # print('y1', y1, 'y2', y2)
-                if y1 <= b <= y2:
-                    ans[i] = "ON"
-    return '\n'.join(ans)
+    points = []
+    for _ in range(q):
+        points.append(tuple(map(int, input().split())))
+    res = []
+    for p in points:
+        v = (p[0] - polygon[0][0], p[1] - polygon[0][1])
+        i = binary_search(p, polygon) - 1
+        p0, p1, p2 = polygon[0], polygon[i], polygon[(i + 1)%n]
+        v1, v2 = (p2[0] - p1[0], p2[1] - p1[1]), (p[0] - p1[0], p[1] - p1[1])
+        v3 = (p1[0] - p0[0], p1[1] - p0[1])
+        edge_outer_prod = outer_product(v1, v2)
+        boundary_outer_prod = outer_product(v3, v)
+        # boundary cases
+        if 0 < i < n - 1:
+            if edge_outer_prod == 0:
+                res.append('ON')
+                continue
+        if i == 1 or i == n - 1:
+            if boundary_outer_prod == 0 and min(p0[0], p1[0]) <= p[0] <= max(p0[0], p1[0]) and min(p0[1], p1[1]) <= p[1] <= max(p0[1], p1[1]):
+                res.append('ON')
+                continue
+        # check if inside triangle and therefore polygon
+        if 0 < i < n - 1 and edge_outer_prod > 0:
+            res.append('IN')
+        else:
+            res.append('OUT')
+    return '\n'.join(res)
 
 if __name__ == '__main__':
     print(main())
 
 """
+example that is same as image above
 5
-0 4
--2 2
--2 0
--1 0
-3 1
-7
--1 3
-0 2
-2 0
--2 1
--3 1
-4 1
-3 1
+3 4
+6 2
+8 4
+6 7
+4 7
+15
+2 6
+2 2
+6 3
+4 5
+8 2
+8 7
+6 8
+1 4
+5 7
+6 7
+4 7
+6 2
+9 0
+5 10
+3 4
 
-on
-in
-out
-on
-out
-out
-on
-
+OUT
+OUT
+IN
+IN
+OUT
+OUT
+OUT
+OUT
+ON
+ON
+ON
+ON
+OUT
+OUT
+ON
 """
 ```

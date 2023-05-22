@@ -48,33 +48,55 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-def main():
-    n, q = map(int, input().split())
-    degrees = [0] * (n + 1)
-    adj_list = [set() for _ in range(n + 1)]
-    cnt = n
-    res = [None] * q
-    for i in range(q):
-        query = list(map(int, input().split()))
-        if query[0] == 1:
-            u, v = query[1:]
-            cnt -= degrees[u] == 0
-            cnt -= degrees[v] == 0
-            degrees[u] += 1
-            degrees[v] += 1
-            adj_list[u].add(v)
-            adj_list[v].add(u)
+outer_product = lambda v1, v2: v1[0]*v2[1] - v1[1]*v2[0]
+
+def binary_search(point, polygon):
+    n = len(polygon)
+    left, right = 0, n
+    v = (point[0] - polygon[0][0], point[1] - polygon[0][1])
+    while left < right:
+        mid = (left + right) >> 1
+        v1 = (polygon[mid][0] - polygon[0][0], polygon[mid][1] - polygon[0][1])
+        outer_prod = outer_product(v1, v)
+        if outer_prod >= 0:
+            left = mid + 1
         else:
-            u = query[1]
-            cnt += degrees[u] > 0
-            degrees[u] = 0
-            for v in adj_list[u]:
-                degrees[v] -= 1
-                cnt += degrees[v] == 0
-                adj_list[v].discard(u)
-            adj_list[u].clear()
-        res[i] = cnt
-    return '\n'.join(map(str, res))
+            right = mid
+    return left
+
+def main():
+    n = int(input())
+    polygon = []
+    for _ in range(n):
+        polygon.append(tuple(map(int, input().split())))
+    q = int(input())
+    points = []
+    for _ in range(q):
+        points.append(tuple(map(int, input().split())))
+    res = []
+    for p in points:
+        v = (p[0] - polygon[0][0], p[1] - polygon[0][1])
+        i = binary_search(p, polygon) - 1
+        p0, p1, p2 = polygon[0], polygon[i], polygon[(i + 1)%n]
+        v1, v2 = (p2[0] - p1[0], p2[1] - p1[1]), (p[0] - p1[0], p[1] - p1[1])
+        v3 = (p1[0] - p0[0], p1[1] - p0[1])
+        edge_outer_prod = outer_product(v1, v2)
+        boundary_outer_prod = outer_product(v3, v)
+        # boundary cases
+        if 0 < i < n - 1:
+            if edge_outer_prod == 0:
+                res.append('ON')
+                continue
+        if i == 1 or i == n - 1:
+            if boundary_outer_prod == 0 and min(p0[0], p1[0]) <= p[0] <= max(p0[0], p1[0]) and min(p0[1], p1[1]) <= p[1] <= max(p0[1], p1[1]):
+                res.append('ON')
+                continue
+        # check if inside triangle and therefore polygon
+        if 0 < i < n - 1 and edge_outer_prod > 0:
+            res.append('IN')
+        else:
+            res.append('OUT')
+    return '\n'.join(res)
 
 if __name__ == '__main__':
     print(main())

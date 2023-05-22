@@ -1,4 +1,0 @@
-"""
-Convex Hull Algorithm
-"""
-
