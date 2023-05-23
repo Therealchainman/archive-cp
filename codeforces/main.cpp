@@ -22,35 +22,67 @@ inline long long readll() {
 	return x * y;
 }
 
-const int N=100002;
-int x,y,a[N],n,i,ans;
-vector<int>e[N];
-unordered_map<int,int>mp[N];
-void dfs(int u,int fa){
-	int mx=1;
-	a[u]^=a[fa];
-	for (auto v:e[u])
-		if (v!=fa){
-			dfs(v,u);
-			if (mp[v].size()>mp[u].size()) swap(mp[u],mp[v]);
-			for (auto [x,y]:mp[v]) mx=max(mx,mp[u][x]+=y);
-		}
-	if (u!=1 && e[u].size()==1) mp[u][a[u]]=1,ans++;
-	else if (mx>1){
-		ans-=mx-1;
-		for (auto it=mp[u].begin();it!=mp[u].end();)
-			if (it->second!=mx) it=mp[u].erase(it);
-			else it->second=1,it++;
-	}
-}
+const long long is_query = -(1LL<<62);
+struct line {
+    long long m, b;
+    mutable function<const line*()> succ;
+    bool operator<(const line& rhs) const {
+        if (rhs.b != is_query) return m < rhs.m;
+        const line* s = succ();
+        if (!s) return 0;
+        long long x = rhs.m;
+        return b - s->b < (s->m - m) * x;
+    }
+};
+
+struct dynamic_hull : public multiset<line> { // will maintain upper hull for maximum
+    const long long inf = LLONG_MAX;
+    bool bad(iterator y) {
+        auto z = next(y);
+        if (y == begin()) {
+            if (z == end()) return 0;
+            return y->m == z->m && y->b <= z->b;
+        }
+        auto x = prev(y);
+        if (z == end()) return y->m == x->m && y->b <= x->b;
+
+		/* compare two lines by slope, make sure denominator is not 0 */
+        long long v1 = (x->b - y->b);
+        if (y->m == x->m) v1 = x->b > y->b ? inf : -inf;
+        else v1 /= (y->m - x->m);
+        long long v2 = (y->b - z->b);
+        if (z->m == y->m) v2 = y->b > z->b ? inf : -inf;
+        else v2 /= (z->m - y->m);
+        return v1 >= v2;
+    }
+    void insert_line(long long m, long long b) {
+        auto y = insert({ m, b });
+        y->succ = [=] { return next(y) == end() ? 0 : &*next(y); };
+        if (bad(y)) { erase(y); return; }
+        while (next(y) != end() && bad(next(y))) erase(next(y));
+        while (y != begin() && bad(prev(y))) erase(prev(y));
+    }
+    long long eval(long long x) {
+        auto l = *lower_bound((line) { x, is_query });
+        return l.m * x + l.b;
+    }
+};
+
 int main(){
-	ios::sync_with_stdio(false),cin.tie(0);
-	n = read();
-	for (i=1;i<=n;i++) a[i] = read();
-	for (i=1;i<n;i++){
-	    x = read(), y = read();
-		e[x].push_back(y),e[y].push_back(x);
+	int n = read();
+	vector<long long> a(n), b(n), dp(n);
+	for (int i = 0; i < n; ++i) {
+		a[i] = read();
 	}
-	dfs(1,0);
-	cout<<ans-mp[1].count(0)<<endl;
+	for (int i = 0; i < n; ++i) b[i] = read();
+	dynamic_hull cht;
+	cht.insert_line(-b[0], 0);
+	for (int i = 1; i < n; i++) {
+		// eval for x value
+		dp[i] = -cht.eval(a[i]);
+		// insert (m, b) line
+		// for minimize take - (m, b), negative of slope and y-intercept
+		cht.insert_line(-b[i], -dp[i]);
+	}
+	cout << dp.end()[-1] << endl;
 }
