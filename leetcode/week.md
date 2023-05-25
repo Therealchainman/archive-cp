@@ -23050,12 +23050,50 @@ class Solution:
         return res
 ```
 
-##
+## 703. Kth Largest Element in a Stream
 
-### Solution 1:
+### Solution 1: min heap datastructure of size k
+
+This can store the kth largest element, it will be the smallest element in the min heap of size k
+
+nlogn + mlogk, m=calls to add, n=len(nums)
 
 ```py
+class KthLargest:
 
+    def __init__(self, k: int, nums: List[int]):
+        self.heap = nums
+        heapify(self.heap)
+        while len(self.heap)>k:
+            heappop(self.heap)
+        self.k = k
+
+    def add(self, val: int) -> int:
+        heappush(self.heap,val)
+        if len(self.heap)>self.k:
+            heappop(self.heap)
+        return self.heap[0]
+```
+
+## 837. New 21 Game
+
+### Solution 1:  dp + sliding window + probability
+
+![image](images/new_21_game.PNG)
+
+```py
+class Solution:
+    def new21Game(self, n: int, k: int, m: int) -> float:
+        if k == 0 or n >= k + m - 1: return 1.0
+        window_sum = 1.0
+        dp = [1.0] + [0.0]*n
+        for i in range(1, n + 1):
+            dp[i] = window_sum/m
+            if i < k:
+                window_sum += dp[i]
+            if i - m  >= 0:
+                window_sum -= dp[i - m]
+        return sum(dp[k:])
 ```
 
 ##
