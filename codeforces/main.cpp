@@ -68,21 +68,29 @@ struct dynamic_hull : public multiset<line> { // will maintain upper hull for ma
     }
 };
 
+struct Point {
+    long long x, y, a;
+};
+
 int main(){
 	int n = read();
-	vector<long long> a(n), b(n), dp(n);
+	vector<long long> dp(n + 1);
+    vector<Point> points(n);
 	for (int i = 0; i < n; ++i) {
-		a[i] = read();
+        long long x = readll(), y = readll(), a = readll();
+        points[i] = {x, y, a};
 	}
-	for (int i = 0; i < n; ++i) b[i] = read();
+    sort(points.begin(), points.end(), [](auto &a, auto &b) {return a.y > b.y;});
 	dynamic_hull cht;
-	cht.insert_line(-b[0], 0);
-	for (int i = 1; i < n; i++) {
+	cht.insert_line(0, 0);
+	for (int i = 1; i < n + 1; i++) {
+        long long x = points[i - 1].x, y = points[i - 1].y, a = points[i - 1].a;
 		// eval for x value
-		dp[i] = -cht.eval(a[i]);
+		dp[i] = x*y - a + cht.eval(y);
 		// insert (m, b) line
 		// for minimize take - (m, b), negative of slope and y-intercept
-		cht.insert_line(-b[i], -dp[i]);
+		cht.insert_line(-x, dp[i]);
 	}
-	cout << dp.end()[-1] << endl;
+	auto mx = max_element(dp.begin(), dp.end());
+	cout << *mx << endl;
 }
