@@ -202,6 +202,8 @@ cost = b1*a2 + b2*a3 = 5*2 + 4*3 = 22
 but if I cut tree a1 = 1, then tree a3 = 3, then tree a2 = 2
 cost = b1*a3 + b3*a2 = 5*3 + 3*2 = 21 (but this doesn't help cause still going to cost 3 multiplier for next one, so yeah doesn't make sense to go backwards until you get bn = 0) (yeah so going backwards is waste of cost, cause you will have to still use that 3 to get closer to the bn = 0. )
 
+![image](images/kalila_and_donna_in_logging_industry.PNG)
+
 ```cpp
 const long long is_query = -(1LL<<62);
 struct line {
@@ -281,6 +283,8 @@ int main(){
 
 ### Solution 1:  min segment tree + dp with segment tree optimization
 
+![image](images/train_and_statistic.PNG)
+
 ```py
 import math
 
@@ -345,6 +349,9 @@ if __name__ == '__main__':
 ## H. The Fair Nut and Rectangles
 
 ### Solution 1:  convex hull trick for dp + dp recurrence + ad hoc
+
+![image](images/fair_nut_and_rectangles.PNG)
+![image](images/fair_nut_and_rectangles_2.PNG)
 
 ```cpp
 const long long is_query = -(1LL<<62);
