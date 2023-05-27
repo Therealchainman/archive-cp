@@ -23096,6 +23096,83 @@ class Solution:
         return sum(dp[k:])
 ```
 
+## 1406. Stone Game III
+
+### Solution 1:  dynamic programming + recurrence relation
+
+dp[i] = max score that current player can attain with taking of the ith to i+3th stone. 
+
+score of current player is there score minus score of other player
+
+```py
+class Solution:
+    def stoneGameIII(self, stoneValue: List[int]) -> str:
+        n = len(stoneValue)
+        dp = [-math.inf]*n + [0]
+        for i in range(n - 1, -1, -1):
+            score = 0
+            for j in range(i, min(i + 3, n)):
+                score += stoneValue[j]
+                dp[i] = max(dp[i], score - dp[j + 1])
+        return 'Alice' if dp[0] > 0 else 'Bob' if dp[0] < 0 else 'Tie'
+```
+
+## 1140. Stone Game II
+
+### Solution 1: dynamic programming + suffix sum + maximize stones for each player
+
+dp[0][1] is the player that takes first and must take when M = 1 initially
+
+```py
+class Solution:
+    def stoneGameII(self, piles: List[int]) -> int:
+        n = len(piles)
+        dp = [[0]*(n + 1) for _ in range(n + 1)]
+        suffix_sum = [0]*(n + 1)
+        for i in range(n - 1, -1, -1):
+            suffix_sum[i] = piles[i] + suffix_sum[i + 1]
+        for i in range(n + 1):
+            dp[i][-1] = suffix_sum[i]
+        for i, j in product(reversed(range(n)), repeat = 2):
+            # j is M
+                for x in range(1, 2*j + 1): # integers can take
+                    if i + x > n: break
+                    dp[i][j] = max(dp[i][j], suffix_sum[i] - dp[i + x][max(j, x)])
+        return dp[0][1] # 0th index, M = 1
+```
+
+##
+
+### Solution 1: 
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1: 
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
