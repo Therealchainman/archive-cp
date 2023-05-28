@@ -23141,12 +23141,33 @@ class Solution:
         return dp[0][1] # 0th index, M = 1
 ```
 
-##
+## 1547. Minimum Cost to Cut a Stick
 
-### Solution 1: 
+### Solution 1:  dynamic programming + O(n^3)
+
+the length is more of the number of cut points, so for instance
+length = 2 means a stick with two endpoints that are cut points
+length = 3 means a stick with two endpoints and middle cut point
+length = 4, now you have two cut options between it, and so on want the minimum value, solve the recurrence relation
 
 ```py
-
+class Solution:
+    def minCost(self, n: int, cuts: List[int]) -> int:
+        cuts.extend([0, n])
+        cuts.sort()
+        m = len(cuts)
+        dp = [[math.inf] * m for _ in range(m)]
+        for i in range(m - 1):
+            dp[i][i + 1] = 0 # length = 2 stick does not need be cut
+        for i in range(m - 2):
+            dp[i][i + 2] = cuts[i + 2] - cuts[i] # only cut in middle
+        for len_ in range(4, m + 1):
+            for i in range(m):
+                j = i + len_ - 1
+                if j >= m: break
+                for k in range(i + 1, j):
+                    dp[i][j] = min(dp[i][j], dp[i][k] + dp[k][j] + cuts[j] - cuts[i])
+        return dp[0][m - 1] # cost of cutting the entire stick
 ```
 
 ##
