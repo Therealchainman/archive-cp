@@ -111,3 +111,156 @@ int main() {
     return 0;
 }
 ```
+
+##
+
+### Solution 1: 
+
+```py
+
+```
+
+## Counting Towers
+
+### Solution 1: 
+
+```py
+def main():
+    n = int(input())
+    mod = int(1e9) + 7
+    psum = 1
+    dp = 1
+    for i in range(1, n + 1):
+        psum += pow(2, 2 * i - 2, mod)
+        psum %= mod
+        print('psum', psum)
+        dp = psum
+        psum += dp
+        psum %= mod
+        # print(i, dp)
+    return dp
+
+
+if __name__ == '__main__':
+    # print(main())
+    T = int(input())
+    for _ in range(T):
+        print(main())
+```
+
+## Projects
+
+### Solution 1:  sort + iterative dynammic programming + coordinates compression
+
+```py
+def main():
+    n = int(input())
+    events = []
+    days = set()
+    for i in range(n):
+        a, b, p = map(int, input().split())
+        events.append((a, -p, 0))
+        events.append((b, p, a))
+        days.update([a, b])
+    compressed = {x: i + 1 for i, x in enumerate(sorted(days))}
+    events.sort()
+    dp = [0] * (len(compressed) + 1)
+    for day, p, start in events:
+        i = compressed[day]
+        if p < 0:
+            dp[i] = max(dp[i], dp[i - 1])
+        else:
+            dp[i] = max(dp[i], dp[i - 1], dp[compressed[start] - 1] + p)
+    return dp[-1]
+
+if __name__ == '__main__':
+    print(main())
+```
+
+```cpp
+int main() {
+    int n = read();
+    vector<tuple<int, int, int>> events;
+    set<int> days;
+    for (int i = 0; i < n; i++) {
+        int a = read(), b = read(), p = read();
+        events.push_back({a, -p, 0});
+        events.push_back({b, p, a});
+        days.insert(a);
+        days.insert(b);
+    }
+    map<int, int> compressed;
+    int i = 1;
+    for (auto day : days) {
+        compressed[day] = i++;
+    }
+    sort(events.begin(), events.end());
+    vector<long long> dp(i + 1);
+    for (auto [day, p, start] : events) {
+        i = compressed[day];
+        if (p < 0) {
+            dp[i] = max(dp[i], dp[i - 1]);
+        } else {
+            dp[i] = max(dp[i], dp[i - 1]);
+            dp[i] = max(dp[i], dp[compressed[start] - 1] + p);
+        }
+    }
+    cout << dp[i] << endl;
+}
+```
+
+##
+
+### Solution 1: 
+
+```py
+
+```
+
+##
+
+### Solution 1: 
+
+```py
+
+```
+
+##
+
+### Solution 1: 
+
+```py
+
+```
+
+##
+
+### Solution 1: 
+
+```py
+
+```
+
+##
+
+### Solution 1: 
+
+```py
+
+```
+
+##
+
+### Solution 1: 
+
+```py
+
+```
+
+##
+
+### Solution 1: 
+
+```py
+
+```
