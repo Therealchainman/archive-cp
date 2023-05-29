@@ -26,30 +26,21 @@ inline long long readll() {
 
 int main() {
     int n = read();
-    vector<tuple<int, int, int>> events;
-    set<int> days;
+    vector<long long> numbers(n);
     for (int i = 0; i < n; i++) {
-        int a = read(), b = read(), p = read();
-        events.push_back({a, -p, 0});
-        events.push_back({b, p, a});
-        days.insert(a);
-        days.insert(b);
+        numbers[i] = readll();
     }
-    map<int, int> compressed;
-    int i = 1;
-    for (auto day : days) {
-        compressed[day] = i++;
+    vector<vector<long long>> dp(n + 1, vector<long long>(n + 1, LONG_LONG_MIN));
+    for (int i = 0; i <= n; i++) {
+        dp[i][i] = 0;
     }
-    sort(events.begin(), events.end());
-    vector<long long> dp(i + 1);
-    for (auto [day, p, start] : events) {
-        i = compressed[day];
-        if (p < 0) {
-            dp[i] = max(dp[i], dp[i - 1]);
-        } else {
-            dp[i] = max(dp[i], dp[i - 1]);
-            dp[i] = max(dp[i], dp[compressed[start] - 1] + p);
+    for (int len = 1; len <= n; len++) {
+        for (int i = 0; i + len <= n; i++) {
+            int j = i + len;
+            dp[i][j] = max(dp[i][j], numbers[i] - dp[i + 1][j]);
+            dp[i][j] = max(dp[i][j], numbers[j - 1] - dp[i][j - 1]);
         }
     }
-    cout << dp[i] << endl;
+    long long res = (dp[0][n] + accumulate(numbers.begin(), numbers.end(), 0LL)) / 2;
+    cout << res << endl;
 }

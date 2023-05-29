@@ -209,12 +209,33 @@ int main() {
 }
 ```
 
-##
+## Removal Game
 
-### Solution 1: 
+### Solution 1:  dynammic programming + interval
 
-```py
+dp(i, j) = maximum score player can score compared to score of other player for the interval [i, j)
 
+```cpp
+int main() {
+    int n = read();
+    vector<long long> numbers(n);
+    for (int i = 0; i < n; i++) {
+        numbers[i] = readll();
+    }
+    vector<vector<long long>> dp(n + 1, vector<long long>(n + 1, LONG_LONG_MIN));
+    for (int i = 0; i <= n; i++) {
+        dp[i][i] = 0;
+    }
+    for (int len = 1; len <= n; len++) {
+        for (int i = 0; i + len <= n; i++) {
+            int j = i + len;
+            dp[i][j] = max(dp[i][j], numbers[i] - dp[i + 1][j]);
+            dp[i][j] = max(dp[i][j], numbers[j - 1] - dp[i][j - 1]);
+        }
+    }
+    long long res = (dp[0][n] + accumulate(numbers.begin(), numbers.end(), 0LL)) / 2;
+    cout << res << endl;
+}
 ```
 
 ##
