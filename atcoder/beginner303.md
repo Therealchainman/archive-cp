@@ -1,3 +1,8 @@
+# Atcoder Beginner Contest 303
+
+## What is used at the top of each submission
+
+```py
 import os,sys
 from io import BytesIO, IOBase
 sys.setrecursionlimit(10**6)
@@ -47,52 +52,69 @@ class IOWrapper(IOBase):
         self.readline = lambda: self.buffer.readline().decode("ascii")
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
+                    
+if __name__ == '__main__':
+    print(main())
+    # main()
+    # sys.stdout.close()
+```
 
-class SegmentTree:
-    def __init__(self, n: int, neutral: int, func):
-        self.func = func
-        self.neutral = neutral
-        self.size = 1
-        self.n = n
-        while self.size<n:
-            self.size*=2
-        self.nodes = [neutral for _ in range(self.size*2)]
+## 
 
-    def ascend(self, segment_idx: int) -> None:
-        while segment_idx > 0:
-            segment_idx -= 1
-            segment_idx >>= 1
-            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
-            self.nodes[segment_idx] = self.func(self.nodes[left_segment_idx], self.nodes[right_segment_idx])
-        
-    def update(self, segment_idx: int, val: int) -> None:
-        segment_idx += self.size - 1
-        self.nodes[segment_idx] = val
-        self.ascend(segment_idx)
-            
-    def query(self, left: int, right: int) -> int:
-        stack = [(0, self.size, 0)]
-        result = self.neutral
-        while stack:
-            # BOUNDS FOR CURRENT INTERVAL and idx for tree
-            segment_left_bound, segment_right_bound, segment_idx = stack.pop()
-            # NO OVERLAP
-            if segment_left_bound >= right or segment_right_bound <= left: continue
-            # COMPLETE OVERLAP
-            if segment_left_bound >= left and segment_right_bound <= right:
-                result = self.func(result, self.nodes[segment_idx])
-                continue
-            # PARTIAL OVERLAP
-            mid_point = (segment_left_bound + segment_right_bound) >> 1
-            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
-            stack.extend([(mid_point, segment_right_bound, right_segment_idx), (segment_left_bound, mid_point, left_segment_idx)])
-        return result
-    
-    def __repr__(self) -> str:
-        return f"nodes array: {self.nodes}, next array: {self.nodes}"
-    
+### Solution 1: 
+
+```py
+
+```
+
+## 
+
+### Solution 1: 
+
+```py
+
+```
+
+## 
+
+### Solution 1: 
+
+```py
+
+```
+
+## 
+
+### Solution 1: 
+
+```py
+
+```
+
+## 
+
+### Solution 1: 
+
+```py
+
+```
+
+## 
+
+### Solution 1: 
+
+```py
+
+```
+
+## G - Bags Game 
+
+### Solution 1:  dynammic programming + prefix sum + O(n^3) time
+
+This will time out obviously, need a solution that can solve in O(n^2) 
+
+```py
 from itertools import accumulate
-import math
 
 def main():
     N, A, B, C, D = map(int, input().split())
@@ -101,7 +123,6 @@ def main():
     def psum_query(left, right):
         return psum[right + 1] - psum[left]
     dp = [[0]*(N+1) for _ in range(N + 1)]
-    st = SegmentTree(N + 1, math.inf, min)
     for i in range(N): # base cases
         dp[i][0] = 0
         dp[i][1] = arr[i]
@@ -117,14 +138,19 @@ def main():
             take = min(B, j)
             # take k elements from left side and take - k elements from right side
             for k in range(take + 1):
-                dp[i][j] = max(dp[i][j], psum_query(i, r) - bit.query_range(i, i + take)psum_query(i + k, r - (take - k)) - dp[i + k][j - take] - A)
+                dp[i][j] = max(dp[i][j], psum_query(i, r) - psum_query(i + k, r - (take - k)) - dp[i + k][j - take] - A)
             # TAKING D ELEMENTS AT COST C
             take = min(D, j)
             for k in range(take + 1):
-                dp[i][j] = max(dp[i][j], psum_query(i, r) - bit.query_range(i, i + take)psum_query(i + k, r - (take - k)) - dp[i + k][j - take] - C)
+                dp[i][j] = max(dp[i][j], psum_query(i, r) - psum_query(i + k, r - (take - k)) - dp[i + k][j - take] - C)
     return dp[0][N]
 
 if __name__ == '__main__':
     print(main())
-    # main()
-    # sys.stdout.close()
+```
+
+### Solution 2:  dynamic programming + 
+
+```py
+
+```

@@ -23170,6 +23170,57 @@ class Solution:
         return dp[0][m - 1] # cost of cutting the entire stick
 ```
 
+## 1603. Design Parking System
+
+### Solution 1:  array + counter
+
+```py
+class ParkingSystem:
+
+    def __init__(self, big: int, medium: int, small: int):
+        self.free = [big, medium, small]
+
+    def addCar(self, carType: int) -> bool:
+        if self.free[carType - 1] == 0: return False
+        self.free[carType - 1] -= 1
+        return True
+```
+
+## 348. Design Tic-Tac-Toe
+
+### Solution 1:  counter + hash table + O(1) for each move
+
+```py
+class TicTacToe:
+
+    def __init__(self, n: int):
+        self.n = n
+        self.row_count, self.col_count = [0] * n, [0] * n
+        self.diags = [0] * 2
+        
+    def winner(self, row: int, col: int, player: int) -> bool:
+        size = self.n if player == 1 else -self.n
+        return self.row_count[row] == size or self.col_count[col] == size or size in self.diags
+
+    def move(self, row: int, col: int, player: int) -> int:
+        delta = 1 if player == 1 else -1
+        self.row_count[row] += delta
+        self.col_count[col] += delta
+        if row - col == 0:
+            self.diags[0] += delta
+        if row + col == self.n - 1:
+            self.diags[1] += delta
+        return player if self.winner(row, col, player) else 0
+```
+
+##
+
+### Solution 1: 
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
