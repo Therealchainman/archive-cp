@@ -47,25 +47,54 @@ input = lambda: sys.stdin.readline().rstrip("\r\n")
 # import pypyjit
 # pypyjit.set_param('max_unroll_recursion=-1')
 
-def main():
-    n = int(input())
-    events = []
-    days = set()
-    for i in range(n):
-        a, b, p = map(int, input().split())
-        events.append((a, -p, 0))
-        events.append((b, p, a))
-        days.update([a, b])
-    compressed = {x: i + 1 for i, x in enumerate(sorted(days))}
-    events.sort()
-    dp = [0] * (len(compressed) + 1)
-    for day, p, start in events:
-        i = compressed[day]
-        if p < 0:
-            dp[i] = max(dp[i], dp[i - 1])
+def is_eulerian_path(n, adj_list, indegrees, outdegrees):
+    # start node is 1 in this instance
+    start_node = 1
+    end_node = n
+    stack = [start_node]
+    vis = [0] * (n + 1)
+    vis[start_node] = 1
+    while stack:
+        node = stack.pop()
+        for nei in adj_list[node]:
+            if vis[nei]: continue
+            vis[nei] = 1
+            stack.append(nei)
+    if outdegrees[start_node] - indegrees[start_node] != 1 or indegrees[end_node] - outdegrees[end_node] != 1: return False
+    for i in range(1, n + 1):
+        if ((outdegrees[i] > 0 or indegrees[i] > 0) and not vis[i]): return False
+        if (indegrees[i] != outdegrees[i] and i not in (start_node, end_node)): return False
+    return True
+
+def hierholzers_directed(n, adj_list):
+    start_node = 1
+    end_node = n
+    stack = [start_node]
+    euler_path = []
+    while stack:
+        node = stack[-1]
+        if len(adj_list[node]) == 0:
+            euler_path.append(stack.pop())
         else:
-            dp[i] = max(dp[i], dp[i - 1], dp[compressed[start] - 1] + p)
-    return dp[-1]
+            nei = adj_list[node].pop()
+            stack.append(nei)
+    return euler_path[::-1]
+
+def main():
+    n, m = map(int, input().split())
+    adj_list = [set() for _ in range(n + 1)]
+    indegrees, outdegrees = [0] * (n + 1), [0] * (n + 1)
+    for _ in range(m):
+        u, v = map(int, input().split())
+        adj_list[u].add(v)
+        indegrees[v] += 1
+        outdegrees[u] += 1
+    # all degrees are even and one connected component with edge (nonzero degrees)
+    if not is_eulerian_path(n, adj_list, indegrees, outdegrees):
+        return "IMPOSSIBLE"
+    # hierholzer's algorithm to reconstruct the eulerian circuit
+    eulerian_path = hierholzers_directed(n, adj_list)
+    return ' '.join(map(str, eulerian_path))
 
 if __name__ == '__main__':
     print(main())

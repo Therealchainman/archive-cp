@@ -41,3 +41,81 @@ a Hamiltonian path that visits the nodes of S and ends at node x. It is possible
 implement this solution in O(2nn
 2
 ) time
+
+# EULERIAN CIRCUITS
+
+## EULERIAN CIRCUITS IN UNDIRECTED GRAPH USING HIERHOLZER'S ALGORITHM
+
+adj list is a python list with set of neighbor nodes.  That way can remove them from adjency list to to not reprocess edges.
+
+```py
+def eulerian_circuit(adj_list, degrees):
+    # start node is 1 in this instance
+    n = len(degrees)
+    start_node = 1
+    stack = [start_node]
+    vis = [0] * (n + 1)
+    vis[start_node] = 1
+    while stack:
+        node = stack.pop()
+        for nei in adj_list[node]:
+            if vis[nei]: continue
+            vis[nei] = 1
+            stack.append(nei)
+    for i in range(n):
+        if (degrees[i] & 1) or (degrees[i] > 0 and not vis[i]): return False
+    return True
+
+def hierholzers_undirected(adj_list):
+    start_node = 1
+    stack = [start_node]
+    circuit = []
+    while stack:
+        node = stack[-1]
+        if len(adj_list[node]) == 0:
+            circuit.append(stack.pop())
+        else:
+            nei = adj_list[node].pop()
+            adj_list[nei].remove(node)
+            stack.append(nei)
+    return circuit
+```
+
+# EULERIAN PATH
+
+## EULERIAN PATH IN DIRECTED GRAPH USING HIERHOLZER'S ALGORITHM
+
+```py
+def is_eulerian_path(n, adj_list, indegrees, outdegrees):
+    # start node is 1 in this instance
+    start_node = 1
+    end_node = n
+    stack = [start_node]
+    vis = [0] * (n + 1)
+    vis[start_node] = 1
+    while stack:
+        node = stack.pop()
+        for nei in adj_list[node]:
+            if vis[nei]: continue
+            vis[nei] = 1
+            stack.append(nei)
+    if outdegrees[start_node] - indegrees[start_node] != 1 or indegrees[end_node] - outdegrees[end_node] != 1: return False
+    for i in range(1, n + 1):
+        if ((outdegrees[i] > 0 or indegrees[i] > 0) and not vis[i]): return False
+        if (indegrees[i] != outdegrees[i] and i not in (start_node, end_node)): return False
+    return True
+
+def hierholzers_directed(n, adj_list):
+    start_node = 1
+    end_node = n
+    stack = [start_node]
+    euler_path = []
+    while stack:
+        node = stack[-1]
+        if len(adj_list[node]) == 0:
+            euler_path.append(stack.pop())
+        else:
+            nei = adj_list[node].pop()
+            stack.append(nei)
+    return euler_path[::-1]
+```

@@ -19,3 +19,9 @@ def mod_inverse(num, mod):
 ```
 
 Binary Exponentiation is another algorithm to find it in log(m) time. 
+
+```cpp
+long long inv(long long i) {
+  return i <= 1 ? i : mod - (long long)(mod/i) * inv(mod % i) % mod;
+}
+```

@@ -1,6 +1,4 @@
 #include <bits/stdc++.h>
-
-
 using namespace std;
 
 inline int read()
@@ -24,23 +22,25 @@ inline long long readll() {
 	return x * y;
 }
 
+long long mod = int(1e9) + 7;
+
 int main() {
     int n = read();
-    vector<long long> numbers(n);
-    for (int i = 0; i < n; i++) {
-        numbers[i] = readll();
+    int target = n * (n + 1) / 2;
+    if (target & 1) {
+        cout << 0 << endl;
+        return 0;
     }
-    vector<vector<long long>> dp(n + 1, vector<long long>(n + 1, LONG_LONG_MIN));
-    for (int i = 0; i <= n; i++) {
-        dp[i][i] = 0;
-    }
-    for (int len = 1; len <= n; len++) {
-        for (int i = 0; i + len <= n; i++) {
-            int j = i + len;
-            dp[i][j] = max(dp[i][j], numbers[i] - dp[i + 1][j]);
-            dp[i][j] = max(dp[i][j], numbers[j - 1] - dp[i][j - 1]);
+    target /= 2;
+    vector<vector<long long>> dp(n + 1, vector<long long>(target + 1, 0));
+    dp[0][0] = 1;
+    for (int i = 1; i < n; i++) {
+        for (int j = 0; j <= target; j++) {
+            dp[i][j] = dp[i - 1][j];
+            if (j - i >= 0) dp[i][j] = (dp[i][j] + dp[i - 1][j - i]) % mod;
         }
     }
-    long long res = (dp[0][n] + accumulate(numbers.begin(), numbers.end(), 0LL)) / 2;
-    cout << res << endl;
+    cout << dp[n - 1][target] << endl;
 }
+
+

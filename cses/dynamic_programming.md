@@ -238,12 +238,39 @@ int main() {
 }
 ```
 
-##
+## Two Sets II
 
-### Solution 1: 
+### Solution 1:  0/1 knapsack dp problem
 
-```py
+dp[i][x] = count of ways for the subset of elements in 0...i with sum of x
+dp[i][x] = dp[i-1][x] + dp[i-1][x-i]
+Convert to 0/1 knapsack where you can either take the element or not take it.  It can be converted to this by realize that you just need to find the number of ways that the sum is equal to n*(n+1)/4, 
 
+cause the summation of the natural number is n*(n+1)/2, but you just need a set to reach half the sum, then the other elements must be in other set and the sum of each set is equal.  So just need to look for half, can quickly check if it is odd, then there is 0 solutions. 
+
+Then just iterate through all the possibilities with dynammic programming
+
+```cpp
+long long mod = int(1e9) + 7;
+
+int main() {
+    int n = read();
+    int target = n * (n + 1) / 2;
+    if (target & 1) {
+        cout << 0 << endl;
+        return 0;
+    }
+    target /= 2;
+    vector<vector<long long>> dp(n + 1, vector<long long>(target + 1, 0));
+    dp[0][0] = 1;
+    for (int i = 1; i < n; i++) {
+        for (int j = 0; j <= target; j++) {
+            dp[i][j] = dp[i - 1][j];
+            if (j - i >= 0) dp[i][j] = (dp[i][j] + dp[i - 1][j - i]) % mod;
+        }
+    }
+    cout << dp[n - 1][target] << endl;
+}
 ```
 
 ##

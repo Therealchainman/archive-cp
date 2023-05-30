@@ -418,6 +418,44 @@ class BSTree:
         return root
 ```
 
+### Solution 3:  buckets + separate chaining + deque 
+
+```py
+class Bucket:
+    def __init__(self):
+        self.dq = deque()
+    
+    def add(self, key):
+        if not self.contains(key):
+            self.dq.appendleft(key)
+
+    def remove(self, key):
+        if self.contains(key):
+            self.dq.remove(key)
+
+    def contains(self, key):
+        return key in self.dq
+
+class MyHashSet:
+
+    def __init__(self):
+        self.prime = 769
+        self.buckets = [Bucket() for _ in range(769)]
+
+    # underscore prefix means it is private funciton, and should only be used internally
+    def _hash(self, key):
+        return key % self.prime
+
+    def add(self, key: int) -> None:
+        self.buckets[self._hash(key)].add(key)
+
+    def remove(self, key: int) -> None:
+        self.buckets[self._hash(key)].remove(key)
+
+    def contains(self, key: int) -> bool:
+        return self.buckets[self._hash(key)].contains(key)
+```
+
 ## 706. Design HashMap
 
 ### Solution 1: 
