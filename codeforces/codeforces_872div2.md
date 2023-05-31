@@ -1,4 +1,4 @@
-# Codeforces Round 872 Div 23
+# Codeforces Round 872 Div 2
 
 ## Notes
 

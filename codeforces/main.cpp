@@ -94,3 +94,94 @@ int main(){
 	auto mx = max_element(dp.begin(), dp.end());
 	cout << *mx << endl;
 }
+
+#include <bits/stdc++.h>
+using namespace std;
+ 
+typedef long long i64;
+ 
+#ifdef Local
+#include "debug.h"
+#else
+#define debug(...) 0
+#endif
+ 
+constexpr int K = 500;
+ 
+void upd(i64 &x, i64 y) {
+    x = max(x, y);
+}
+ 
+void solve() {
+    int n;
+    cin >> n;
+    vector<vector<int>> g(n + 1);
+    for (int i = 0, u, v; i < n - 1; i++) {
+        cin >> u >> v;
+        g[u].push_back(v);
+        g[v].push_back(u);
+    }
+    vector<int> sz(n + 1, 1);
+    auto dfs1 = [&](auto self, int u, int f) -> void {
+        for (int i = 0; i < g[u].size(); i++) {
+            int v = g[u][i];
+            if (v == f) continue;
+            self(self, v, u);
+            sz[u] += sz[v];
+        }
+    };
+    dfs1(dfs1, 1, 0);
+ 
+    using vii = vector<vector<i64>>;
+ 
+    auto dfs2 = [&](auto self, int u, int f) -> vii {
+ 
+        vii a(2, vector<i64>(2));
+        a[0][1] = 1, a[1][1] = 0;
+ 
+        i64 sum = 1;
+        for (int v : g[u]) {
+            if (v == f) continue;
+ 
+            auto b = self(self, v, u);
+            int n = a[0].size() - 1;
+            int m = b[0].size() - 1;
+ 
+            vii c(2, vector<i64>(min(n + m + 1, K + 1)));
+            for (int i = 1; i <= n; i++) {
+                for (int j = 1; j <= m; j++) {
+                    upd(c[0][i], a[0][i] + b[1][j] + 2 * sz[v] * sum);
+                    upd(c[1][i], a[1][i] + b[0][j] + 2 * sz[v] * sum);
+                    if (i + j <= K) {
+                        upd(c[0][i + j], a[0][i] + b[0][j] + 2 * sz[v] * sum - i * j);
+                        upd(c[1][i + j], a[1][i] + b[1][j] + 2 * sz[v] * sum - 2 * i * j);
+                    }
+                }
+            }
+            sum += sz[v];
+ 
+            a = c;
+        }
+        return a;
+    };
+    auto dp = dfs2(dfs2, 1, 0);
+ 
+    i64 ans = 0;
+    for (int z = 0; z < 2; z++) {
+        for (i64 i : dp[z]) {
+            upd(ans, i);
+        }
+    }
+    cout << ans << '\n';
+}
+ 
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int t;
+    cin >> t;
+    while (t--) {
+        solve();
+    }
+    return 0;
+}
