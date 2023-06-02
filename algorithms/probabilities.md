@@ -1,0 +1,5 @@
+# probabilities
+
+## Addition and Multiplication rule or probability
+
+The addition rule of probability is used when you are trying to find the probability of one event or the other happening. It is also known as the "or" rule. For example, if you wanted to know the probability of rolling a 1 or a 2 on a fair die, you would use the addition rule.The multiplication rule of probability is used when you are trying to find the probability of one event happening and another event happening. It is also known as the "and" rule. For example, if you wanted to know the probability of rolling a 1 on the first roll and a 2 on the second roll of a fair die, you would use the multiplication rule.In general, you use the addition rule when the events are mutually exclusive, which means that they cannot happen at the same time, and you use the multiplication rule when the events are dependent, which means that one event affects the probability of the other event happening.

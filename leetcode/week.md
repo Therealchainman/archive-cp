@@ -23251,20 +23251,100 @@ class TicTacToe:
         return player if self.winner(row, col, player) else 0
 ```
 
-##
+## 1230. Toss Strange Coins
 
-### Solution 1: 
+### Solution 1:  dynamic programming + mathematics + probabilities + addition and multiplication rule of probabilities
+
+The addition rule of probability is used when you are trying to find the probability of one event or the other happening. It is also known as the "or" rule. For example, if you wanted to know the probability of rolling a 1 or a 2 on a fair die, you would use the addition rule.The multiplication rule of probability is used when you are trying to find the probability of one event happening and another event happening. It is also known as the "and" rule. For example, if you wanted to know the probability of rolling a 1 on the first roll and a 2 on the second roll of a fair die, you would use the multiplication rule.In general, you use the addition rule when the events are mutually exclusive, which means that they cannot happen at the same time, and you use the multiplication rule when the events are dependent, which means that one event affects the probability of the other event happening.
 
 ```py
+class Solution:
+    def probabilityOfHeads(self, prob: List[float], target: int) -> float:
+        n = len(prob)
 
+        @cache
+        def dp(index, heads):
+            if index == n: return heads == target
+            skip = dp(index + 1, heads) * (1 - prob[index])
+            take = dp(index + 1, heads + 1) * prob[index]
+            return skip + take
+            
+        return dp(0, 0)
 ```
 
-##
-
-### Solution 1:
+### Solution 2:  iterative dynamic programming
 
 ```py
+class Solution:
+    def probabilityOfHeads(self, prob: List[float], target: int) -> float:
+        n = len(prob)
+        dp = [[0.0] * (target + 1) for _ in range(n + 1)]
+        dp[0][0] = 1.0
+        for i, j in product(range(1, n + 1), range(target + 1)):
+            tails = dp[i - 1][j] * (1 - prob[i - 1])
+            heads = dp[i - 1][j - 1] * prob[i - 1] if j > 0 else 0.0
+            dp[i][j] = heads + tails
+        return dp[n][target]
+```
 
+### Solution 3:  space optimized + O(target) space
+
+```py
+class Solution:
+    def probabilityOfHeads(self, prob: List[float], target: int) -> float:
+        n = len(prob)
+        dp = [1.0] + [0.0] * target
+        for i in range(n):
+            ndp = [0.0] * (target + 1)
+            for j in range(target + 1):
+                if j > i + 1: break
+                tails = dp[j] * (1 - prob[i])
+                heads = dp[j - 1] * prob[i] if j > 0 else 0.0
+                ndp[j] = heads + tails
+            dp = ndp
+        return dp[-1]
+```
+
+## 2101. Detonate the Maximum Bombs
+
+### Solution 1:  multisource bfs from each bomb + directed graph 
+
+Therefore, the original problem can be transformed into a graph traversal problem where we calculate the total number of reachable nodes from each node i
+
+Find all the nodes that can be reached from each node. 
+
+find maximum number of nodes reachable from any node.
+
+directed edge means from 1 -> 2 means bomb 1 can detonate bomb 2
+
+so if node is within radius of bomb 1 then add directed edge
+
+```py
+class Solution:
+    def maximumDetonation(self, bombs: List[List[int]]) -> int:
+        euclidean_dist = lambda p1, p2: (p2[0] - p1[0])**2 + (p2[1] - p1[1])**2
+        n = len(bombs)
+        adj_list = [[] for _ in range(n)]
+        for i in range(n):
+            x1, y1, r1 = bombs[i]
+            for j in range(n):
+                if i == j: continue
+                x2, y2, r2 = bombs[j]
+                if euclidean_dist((x1, y1), (x2, y2)) <= r1 * r1:
+                    adj_list[i].append(j)
+        res = 0
+        for start_bomb in range(n):
+            visited = [0] * n
+            visited[start_bomb] = 1
+            queue = deque([start_bomb])
+            while queue:
+                bomb = queue.popleft()
+                for nei in adj_list[bomb]:
+                    if visited[nei]: continue
+                    visited[nei] = 1
+                    queue.append(nei)
+            res = max(res, sum(visited))
+        return res
 ```
 
 ##
