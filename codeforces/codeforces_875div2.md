@@ -53,6 +53,22 @@ sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 ```
 
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+#define int long long
+
+inline int read() {
+	int x = 0, y = 1; char c = getchar();
+	while (c < '0' || c > '9') {
+		if (c == '-') y = -1;
+		c = getchar();
+	}
+	while (c >= '0' && c <= '9') x = x * 10 + c - '0', c = getchar();
+	return x * y;
+}
+```
+
 ## A. Twin Permutations
 
 ### Solution 1:  can make all elements equal
@@ -149,10 +165,48 @@ if __name__ == '__main__':
 
 ## D. The BOSS Can Count Pairs
 
-### Solution 1:
+### Solution 1:  math + two sum problem
+
+can use the fact that ai*aj <= 2*n to solve the problem optimally given it constraints the values of b, and so n + n = 2*n
+
+![image](images/boss_can_count_pairs_1.PNG)
+![image](images/boss_can_count_pairs_2.PNG)
 
 ```py
+from collections import defaultdict
+import math
+ 
+def main():
+    n = int(input())
+    a = list(map(int, input().split()))
+    b = list(map(int, input().split()))
+    res = 0
+    map_b = defaultdict(list)
+    for i in range(n):
+        map_b[a[i]].append(b[i])
+    for aj in range(1, int(math.sqrt(2*n)) + 1):
+        counts = [0] * (n + 1)
+        for i in range(n):
+            if a[i] == aj:
+                counts[b[i]] += 1
+        for i in range(n):
+            if aj < a[i]:
+                bj = aj * a[i] - b[i]
+                if 0 <= bj <= n:
+                    res += counts[bj]
+    for x, b_arr in map_b.items():
+        # two sum problem
+        # find all pairs of b_arr that sum to x^2
+        seen = Counter()
+        for y in b_arr:
+            res += seen[x * x - y]
+            seen[y] += 1
+    return res
 
+if __name__ == '__main__':
+    T = int(input())
+    for _ in range(T):
+        print(main())
 ```
 
 ## E. Hyperregular Bracket Strings

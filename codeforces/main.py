@@ -47,61 +47,35 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-from collections import Counter
- 
-MOD = 998244353
- 
-def singleton(__init__):
-    def __new__(cls, *args, **kwargs):
-        if hasattr(cls, 'instance'):
-            return getattr(cls, 'instance')
-        instance = super(cls, cls).__new__(cls)
-        __init__(instance, *args, **kwargs)
-        setattr(cls, 'instance', instance)
-        return instance
-    return __new__
- 
- 
-class Inverse:
-    @singleton
-    def __new__(cls):
-        cls.inverse = {1: 1}
- 
-    def __getitem__(self, item):
-        for i in range(len(self.inverse) + 1, item + 1):
-            self.inverse[i] = self.inverse[MOD % i] * (MOD - MOD // i) % MOD
-        return self.inverse[item]
- 
- 
-class Catalan:
-    @singleton
-    def __new__(cls):
-        cls.catalan = [1]
- 
-    def __getitem__(self, item):
-        for i in range(len(self.catalan), item + 1):
-            self.catalan.append(self.catalan[-1] * (4 * i - 2) * Inverse()[i + 1] % MOD)
-        return self.catalan[item]
- 
+from collections import defaultdict
+import math
  
 def main():
-    n, k = map(int, input().split())
-    diff, bit = [0] * (n + 1), 1
-    mod1 = 1_000_000_007
-    for _ in range(k):
-        left, right = map(int, input().split())
-        diff[left - 1] = diff[left - 1] + bit
-        diff[right] = diff[right] - bit
-        bit = bit * mod1 % MOD
-    diff.pop()
-    for i in range(1, n):
-        diff[i] += diff[i - 1]
-    result = 1
-    for count in Counter(diff).values():
-        if count & 1:
-            return 0
-        result = result * Catalan()[count >> 1] % MOD
-    return result
+    n = int(input())
+    a = list(map(int, input().split()))
+    b = list(map(int, input().split()))
+    res = 0
+    map_b = defaultdict(list)
+    for i in range(n):
+        map_b[a[i]].append(b[i])
+    for aj in range(1, int(math.sqrt(2*n)) + 1):
+        counts = [0] * (n + 1)
+        for i in range(n):
+            if a[i] == aj:
+                counts[b[i]] += 1
+        for i in range(n):
+            if aj < a[i]:
+                bj = aj * a[i] - b[i]
+                if 0 <= bj <= n:
+                    res += counts[bj]
+    for x, b_arr in map_b.items():
+        # two sum problem
+        # find all pairs of b_arr that sum to x^2
+        seen = Counter()
+        for y in b_arr:
+            res += seen[x * x - y]
+            seen[y] += 1
+    return res
 
 if __name__ == '__main__':
     T = int(input())
