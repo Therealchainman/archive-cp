@@ -48,83 +48,64 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-class SegmentTree:
-    def __init__(self, n: int, neutral: int, func):
-        self.func = func
-        self.neutral = neutral
-        self.size = 1
-        self.n = n
-        while self.size<n:
-            self.size*=2
-        self.nodes = [neutral for _ in range(self.size*2)]
-
-    def ascend(self, segment_idx: int) -> None:
-        while segment_idx > 0:
-            segment_idx -= 1
-            segment_idx >>= 1
-            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
-            self.nodes[segment_idx] = self.func(self.nodes[left_segment_idx], self.nodes[right_segment_idx])
-        
-    def update(self, segment_idx: int, val: int) -> None:
-        segment_idx += self.size - 1
-        self.nodes[segment_idx] = val
-        self.ascend(segment_idx)
-            
-    def query(self, left: int, right: int) -> int:
-        stack = [(0, self.size, 0)]
-        result = self.neutral
-        while stack:
-            # BOUNDS FOR CURRENT INTERVAL and idx for tree
-            segment_left_bound, segment_right_bound, segment_idx = stack.pop()
-            # NO OVERLAP
-            if segment_left_bound >= right or segment_right_bound <= left: continue
-            # COMPLETE OVERLAP
-            if segment_left_bound >= left and segment_right_bound <= right:
-                result = self.func(result, self.nodes[segment_idx])
-                continue
-            # PARTIAL OVERLAP
-            mid_point = (segment_left_bound + segment_right_bound) >> 1
-            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
-            stack.extend([(mid_point, segment_right_bound, right_segment_idx), (segment_left_bound, mid_point, left_segment_idx)])
-        return result
-    
-    def __repr__(self) -> str:
-        return f"nodes array: {self.nodes}, next array: {self.nodes}"
-    
-from itertools import accumulate
-import math
+from collections import deque
+from heapq import heappush, heappop
 
 def main():
-    N, A, B, C, D = map(int, input().split())
-    arr = list(map(int, input().split()))
-    psum = [0] + list(accumulate(arr))
-    def psum_query(left, right):
-        return psum[right + 1] - psum[left]
-    dp = [[0]*(N+1) for _ in range(N + 1)]
-    st = SegmentTree(N + 1, math.inf, min)
-    for i in range(N): # base cases
-        dp[i][0] = 0
-        dp[i][1] = arr[i]
-    for j in range(2, N + 1):
-        for i in range(N):
-            r = i + j - 1
-            if r >= N: break # out of bounds, right boundary is i + j - 1
-            # TAKE LEFTMOST ELEMENT
-            dp[i][j] = arr[i] - dp[i + 1][j - 1]
-            # TAKE RIGHTMOST ELEMENT
-            dp[i][j] = max(dp[i][j], arr[r] - dp[i][j - 1])
-            # TAKING B ELEMENTS AT COST A
-            take = min(B, j)
-            # take k elements from left side and take - k elements from right side
-            for k in range(take + 1):
-                dp[i][j] = max(dp[i][j], psum_query(i, r) - bit.query_range(i, i + take)psum_query(i + k, r - (take - k)) - dp[i + k][j - take] - A)
-            # TAKING D ELEMENTS AT COST C
-            take = min(D, j)
-            for k in range(take + 1):
-                dp[i][j] = max(dp[i][j], psum_query(i, r) - bit.query_range(i, i + take)psum_query(i + k, r - (take - k)) - dp[i + k][j - take] - C)
-    return dp[0][N]
+    n, m = map(int, input().split())
+    indegrees = [0] * (n + 1)
+    outdegrees = [0] * (n + 1)
+    adj_list = [[] for _ in range(n + 1)]
+    rev_adj_list = [[] for _ in range(n + 1)]
+    for _ in range(m):
+        u, v = map(int, input().split())
+        adj_list[u].append(v)
+        rev_adj_list[v].append(u)
+        indegrees[v] += 1
+        outdegrees[u] += 1
+    lranges, rranges = [0] * (n + 1), [0] * (n + 1)
+    for i in range(1, n + 1):
+        left, right = map(int, input().split())
+        lranges[i], rranges[i] = left, right
+    # reverse topological sort
+    queue = deque()
+    for i in range(1, n + 1):
+        if outdegrees[i] == 0:
+            queue.append(i)
+    while queue:
+        node = queue.popleft()
+        for nei in rev_adj_list[node]:
+            outdegrees[nei] -= 1
+            rranges[nei] = min(rranges[nei], rranges[node] - 1)
+            if outdegrees[nei] == 0:
+                queue.append(nei)
+    # topological sort
+    res = [0] * (n + 1)
+    p = 1
+    ready, not_ready = [], []
+    for i in range(1, n + 1):
+        if indegrees[i] == 0:
+            if lranges[i] > p: heappush(not_ready, (lranges[i], i))
+            else: heappush(ready, (rranges[i], i))
+    while ready:
+        right, node = heappop(ready)
+        if p > right: 
+            print("No")
+            return
+        res[node] = p
+        p += 1
+        while not_ready and not_ready[0][0] <= p:
+            _, node = heappop(not_ready)
+            heappush(ready, (rranges[node], node))
+        for nei in adj_list[node]:
+            indegrees[nei] -= 1
+            if indegrees[nei] == 0:
+                if lranges[nei] > p: heappush(not_ready, (lranges[nei], nei))
+                else: heappush(ready, (rranges[nei], nei))
+    print(res)
+    return 
 
 if __name__ == '__main__':
-    print(main())
-    # main()
+    # print(main())
+    main()
     # sys.stdout.close()

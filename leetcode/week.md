@@ -23368,12 +23368,29 @@ class Solution:
         return res
 ```
 
-##
+## 547. Number of Provinces
 
-### Solution 1: 
+### Solution 1:  dfs + connected components + visited array + adjacency matrix representation + undirected graph + O(n^2) time
 
 ```py
-
+class Solution:
+    def findCircleNum(self, isConnected: List[List[int]]) -> int:
+        # find number of connected components
+        n = len(isConnected)
+        vis = [0] * n
+        res = 0
+        for i in range(n):
+            if vis[i]: continue
+            res += 1
+            vis[i] = 1
+            stack = [i]
+            while stack:
+                node = stack.pop()
+                for nei, connected in enumerate(isConnected[node]):
+                    if not connected or vis[nei]: continue
+                    vis[nei] = 1
+                    stack.append(nei)
+        return res
 ```
 
 ##
