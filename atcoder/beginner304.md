@@ -64,7 +64,21 @@ if __name__ == '__main__':
 ### Solution 1: 
 
 ```py
-
+def main():
+    n = int(input())
+    names = [None] * n
+    ages = [None] * n
+    for i in range(n):
+        name, age = input().split()
+        names[i] = name
+        ages[i] = int(age)
+    index = min(range(n), key=lambda i: ages[i])
+    for i in range(n):
+        name = names[(index + i) % n]
+        print(name)
+ 
+if __name__ == '__main__':
+    main()
 ```
 
 ## B - Subscribers 
@@ -72,31 +86,132 @@ if __name__ == '__main__':
 ### Solution 1: 
 
 ```py
-
+def main():
+    n = list(input())
+    for i in range(3, len(n)):
+        n[i] = '0'
+    return ''.join(n)
+ 
+if __name__ == '__main__':
+    print(main())
 ```
 
 ## C - Virus 
 
-### Solution 1: 
+### Solution 1:  directed graph + dfs
 
 ```py
-
+def main():
+    n, d = map(int, input().split())
+    people = [tuple(map(int, input().split())) for _ in range(n)]
+    euclidean_dist = lambda p1, p2: (p1[0] - p2[0])**2 + (p1[1] - p2[1])**2
+    adj_list = [[] for _ in range(n)]
+    for i in range(n):
+        for j in range(i):
+            if euclidean_dist(people[i], people[j]) <= d**2:
+                adj_list[i].append(j)
+                adj_list[j].append(i) 
+    stack = [0]
+    vis = [0] * n
+    vis[0] = 1
+    while stack:
+        node = stack.pop()
+        for nei in adj_list[node]:
+            if vis[nei]: continue
+            vis[nei] = 1
+            stack.append(nei)
+    for i in range(n):
+        if vis[i]:
+            print("Yes")
+        else:
+            print("No")
+ 
+if __name__ == '__main__':
+    main()
 ```
 
 ## D - A Piece of Cake 
 
-### Solution 1: 
+### Solution 1:  binary search + grid + counter
 
 ```py
-
+import bisect
+from collections import Counter
+ 
+def main():
+    R, C = map(int, input().split())
+    n = int(input())
+    strawberries = [tuple(map(int, input().split())) for _ in range(n)]
+    A = int(input())
+    arr = list(map(int, input().split()))
+    B = int(input())
+    brr = list(map(int, input().split()))
+    counts = Counter()
+    for x, y in strawberries:
+        vertical = bisect.bisect_left(arr, x)
+        horizontal = bisect.bisect_left(brr, y)
+        counts[(vertical, horizontal)] += 1
+    m = min(counts.values()) if len(counts) == (A + 1) * (B + 1) else 0
+    M = max(counts.values())
+    print(m, M)
+ 
+if __name__ == '__main__':
+    main()
 ```
 
 ## E - Good Graph 
 
-### Solution 1: 
+### Solution 1:  condense graph to connected components + union find
 
 ```py
-
+class UnionFind:
+    def __init__(self, n: int):
+        self.size = [1]*n
+        self.parent = list(range(n))
+    
+    def find(self,i: int) -> int:
+        while i != self.parent[i]:
+            self.parent[i] = self.parent[self.parent[i]]
+            i = self.parent[i]
+        return i
+ 
+    """
+    returns true if the nodes were not union prior. 
+    """
+    def union(self,i: int,j: int) -> bool:
+        i, j = self.find(i), self.find(j)
+        if i!=j:
+            if self.size[i] < self.size[j]:
+                i,j=j,i
+            self.parent[j] = i
+            self.size[i] += self.size[j]
+            return True
+        return False
+    
+    def __repr__(self) -> str:
+        return f'parents: {[(i, parent) for i, parent in enumerate(self.parent)]}, sizes: {self.size}'
+ 
+def main():
+    n, m = map(int, input().split())
+    dsu = UnionFind(n + 1)
+    for _ in range(m):
+        u, v = map(int, input().split())
+        dsu.union(u, v)
+    k = int(input())
+    seen = set()
+    for _ in range(k):
+        u, v = map(lambda x: dsu.find(x), map(int, input().split()))
+        seen.add((min(u, v), max(u, v)))
+    q = int(input())
+    for _ in range(q):
+        c1, c2 = map(lambda x: dsu.find(x), map(int, input().split()))
+        if (min(c1, c2), max(c1, c2)) in seen:
+            print("No")
+        else:
+            print("Yes")
+ 
+if __name__ == '__main__':
+    main()
 ```
 
 ## F - Shift Table 

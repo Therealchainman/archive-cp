@@ -23393,12 +23393,26 @@ class Solution:
         return res
 ```
 
-##
+## 1232. Check If It Is a Straight Line
 
-### Solution 1:
+### Solution 1: math + equation of a line + slope of a line
+
+To deal with when vertical or hotizontal line where dx or dy is euqal to 0, then you can use the formula
+dy1/dx1 = dy2/dx2
+dy1*dx2 = dx1*dy2
 
 ```py
-
+class Solution:
+    def checkStraightLine(self, coordinates: List[List[int]]) -> bool:
+        coordinates.sort()
+        n = len(coordinates)
+        delta_x = lambda p1, p2: p1[0] - p2[0]
+        delta_y = lambda p1, p2: p1[1] - p2[1]
+        dx, dy = delta_x(coordinates[0], coordinates[1]), delta_y(coordinates[0], coordinates[1])
+        for i in range(2, n):
+            dxx, dyy = delta_x(coordinates[0], coordinates[i]), delta_y(coordinates[0], coordinates[i])
+            if dx * dyy != dy * dxx: return False
+        return True
 ```
 
 ##

@@ -54,6 +54,9 @@ class Solution:
 
 ### Solution 1:  digit dp
 
+dp(n, l, r)
+
+
 ```py
 
 ```

@@ -102,8 +102,11 @@ def main():
             if indegrees[nei] == 0:
                 if lranges[nei] > p: heappush(not_ready, (lranges[nei], nei))
                 else: heappush(ready, (rranges[nei], nei))
-    print(res)
-    return 
+    if p <= n: 
+        print("No")
+        return
+    print("Yes")
+    print(*res[1:])
 
 if __name__ == '__main__':
     # print(main())
