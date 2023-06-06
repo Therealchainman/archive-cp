@@ -23415,6 +23415,59 @@ class Solution:
         return True
 ```
 
+## 1502. Can Make Arithmetic Progression From Sequence
+
+### Solution 1:  difference array + sort + all to determine if all elements are equal in array
+
+```py
+class Solution:
+    def canMakeArithmeticProgression(self, arr: List[int]) -> bool:
+        arr.sort()
+        n = len(arr)
+        diff = [arr[i] - arr[i - 1] for i in range(1, n)]
+        return all(diff[0] == diff[i] for i in range(1, n - 1))
+```
+
+##
+
+### Solution 1: 
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1: 
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
