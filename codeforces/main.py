@@ -1,8 +1,6 @@
 import os,sys
 from io import BytesIO, IOBase
 from typing import *
-# only use pypyjit when needed, it usese more memory, but speeds up recursion in pypy
-# sys.setrecursionlimit(1_000_000)
 # import pypyjit
 # pypyjit.set_param('max_unroll_recursion=-1')
  
@@ -46,23 +44,12 @@ class IOWrapper(IOBase):
         self.readline = lambda: self.buffer.readline().decode("ascii")
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
- 
-import math
- 
+
 def main():
-    n = int(input())
-    arr = list(map(int, input().split()))
-    p = n - 1
-    toggle = 0
-    res = [None] * n
-    for i in reversed(range(n)):
-        while p >= 0 and arr[p] ^ toggle == 0:
-            p -= 1
-        if p + 1 > i: return print("NO")
-        res[i] = p + 1
-        toggle ^= 1
-    print("YES")
-    print(*res)
+    n, k = map(int, input().split())
+    k = min(k, 30)
+    res = min(n + 1, (1 << k) - 1)
+    print(res)
 
 if __name__ == '__main__':
     T = int(input())

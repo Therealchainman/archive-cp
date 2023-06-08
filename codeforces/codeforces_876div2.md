@@ -166,40 +166,82 @@ if __name__ == '__main__':
         main()
 ```
 
-##
+## D. Ball Sorting
 
-### Solution 1: 
+### Solution 1:  dynammic programming
+
+dp(i, j) = the minimum cost for the arr[0:i] and with j intervals
+The intervals are those bits that are not parted of increasing contiguous subsequences and must have operation two to put them into sorted order.  
+
+dp(i, j) = dp(i - 1, j) if arr(i) > arr(i - 1), if can be part of previous increasing contiguous subsequence. 
+but also look through for each subsequence arr[k:i] and consider if arr[k] and arr[i] form increasing subsequence, so then just need to move all the elements between them, and add one more interval, so the transition state would be 
+dp(i, j) = min(dp(i, j), dp(k, j - 1) + i - k - 1)
 
 ```py
 def main():
     n = int(input())
-    colors = list(map(int, input().split()))
-    lis = []
-    sz = 1
-    for i in range(1, n):
-        if colors[i] < colors[i - 1]:
-            lis.append(sz)
-            sz = 1
-        else:
-            sz += 1
+    arr = [0] + list(map(int, input().split())) + [n + 1]
+    dp = [[n + 1] * (n + 1) for _ in range(n + 2)] 
+    for i in range(n + 1):
+        dp[0][i] = 0 # base case, for i inserted 0s, looking at just from 0th sequence 0 flips
+    # substring i...k, can use flip? 
+    for i in range(1, n + 2):
+        for j in range(n + 1):
+            if arr[i] > arr[i - 1]: # increeasing sequence don't need to swap
+                dp[i][j] = dp[i - 1][j]
+            if j == 0: continue
+            for k in range(i):
+                if arr[k] < arr[i]:
+                    dp[i][j] = min(dp[i][j], dp[k][j - 1] + i - k - 1)
     res = [None] * n
-    res[0] = min(n - lis[0], n - lis[-1])
-    for k in range(n):
-
-
-    return ' '.join(map(str, res))
-    
+    for i in range(1, n + 1):
+        res[i - 1] = dp[n + 1][i]
+    print(*res)
 
 if __name__ == '__main__':
     T = int(input())
     for _ in range(T):
-        print(main())
+        main()
 ```
 
-##
+## E. Decreasing Game
 
 ### Solution 1: 
 
 ```py
+from itertools import dropwhile
 
+def main():
+    n = int(input())
+    arr = [0] + list(map(int, input().split()))
+    sum_ = sum(arr)
+    if sum_ & 1: # if odd sum pick first player
+        print("First", flush = True)
+        first_player = True
+    else:
+        print("Second", flush = True)
+        first_player = False
+    while True:
+        if first_player:
+            i = next(dropwhile(lambda idx: arr[idx] == 0, range(n + 1)))
+            print(i, flush = True)
+            j = int(input())
+            if j == 0 or j == -1: return
+            d = min(arr[i], arr[j])
+            arr[i] -= d
+            arr[j] -= d
+        else:
+            print(arr, flush = True)
+            i = int(input())
+            if i == 0 or i == -1: return
+            j = next(dropwhile(lambda idx: arr[idx] == 0 or idx == i, range(n + 1)))
+            print(arr[i], arr[j], flush = True)
+            d = min(arr[i], arr[j])
+            arr[i] -= d
+            arr[j] -= d
+            print(j, flush = True)
+
+
+if __name__ == '__main__':
+    main()
 ```

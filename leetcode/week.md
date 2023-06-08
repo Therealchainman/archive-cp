@@ -23428,20 +23428,37 @@ class Solution:
         return all(diff[0] == diff[i] for i in range(1, n - 1))
 ```
 
-##
+## 1318. Minimum Flips to Make a OR b Equal to c
 
-### Solution 1: 
+### Solution 1:  bit manipulation + check number flips bit by bit.
 
 ```py
-
+class Solution:
+    def minFlips(self, a: int, b: int, c: int) -> int:
+        res = 0
+        for i in range(32):
+            if (c >> i) & 1:
+                if (((a >> i) & 1) | ((b >> i) & 1)) == 0:
+                    res += 1
+            else:
+                res += ((a >> i) & 1)
+                res += ((b >> i) & 1)
+        return res
 ```
 
-##
+## 1351. Count Negative Numbers in a Sorted Matrix
 
-### Solution 1:
+### Solution 1:  binary search + bisect_left + matrix
 
 ```py
-
+class Solution:
+    def countNegatives(self, grid: List[List[int]]) -> int:
+        R, C = len(grid), len(grid[0])
+        res = 0
+        for row in grid:
+            c = bisect.bisect_left(row, True, key = lambda x: x < 0)
+            res += C - c
+        return res
 ```
 
 ##
