@@ -23461,12 +23461,15 @@ class Solution:
         return res
 ```
 
-##
+## 744. Find Smallest Letter Greater Than Target
 
-### Solution 1:
+### Solution 1:  binary search + bisect_right
 
 ```py
-
+class Solution:
+    def nextGreatestLetter(self, letters: List[str], target: str) -> str:
+        i = bisect.bisect_right(letters, target)
+        return letters[i if i < len(letters) else 0]
 ```
 
 ##

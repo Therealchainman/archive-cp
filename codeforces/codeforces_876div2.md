@@ -177,6 +177,9 @@ dp(i, j) = dp(i - 1, j) if arr(i) > arr(i - 1), if can be part of previous incre
 but also look through for each subsequence arr[k:i] and consider if arr[k] and arr[i] form increasing subsequence, so then just need to move all the elements between them, and add one more interval, so the transition state would be 
 dp(i, j) = min(dp(i, j), dp(k, j - 1) + i - k - 1)
 
+![image](images/ball_sorting_1.PNG)
+![image](images/ball_sorting_2.PNG)
+
 ```py
 def main():
     n = int(input())

@@ -1,34 +1,19 @@
+from itertools import product
 class Solution:
-		def count(self, num1: str, num2: str, min_sum: int, max_sum: int) -> int:
-			s = ""
-			mod = 10**9 + 7
-
-			@lru_cache(None)
-			def dfs(idx, tight, sm):  
-				nonlocal s,min_sum,max_sum,mod
-
-				if idx == len(s):
-					if sm >= min_sum and sm <= max_sum:
-						return 1
-					return 0
-
-				up = int(s[idx]) if tight else 9  
-				res = 0
-				for digit in range(up + 1):
-					newSum = sm + digit
-					if newSum > max_sum: # next digits are more greater than curr so newSum always greater
-						break
-					res += dfs(idx + 1, tight and digit == up, newSum)
-					res %= mod
-				return res
-
-
-			s = num2
-			res = dfs(0,1,0)
-
-			dfs.cache_clear()  # clear the dp states for new dfs
-
-			s = str(int(num1)-1)
-			res -= dfs(0,1,0)
-
-			return res % mod
+    def count(self, num1: str, num2: str, min_sum: int, max_sum: int) -> int:
+        mod = 10**9 + 7
+        def f(num):
+            digits = str(num)
+            n = len(digits)
+            # dp(i, j, t) ith index in digits, j sum of digits, t represents tight bound
+            dp = [[[0] * 2 for _ in range(max_sum + 1)] for _ in range(n + 1)]
+            for i in range(min(int(digits[0]), max_sum) + 1):
+                dp[1][i][1 if i == int(digits[0]) else 0] += 1
+            for i, t, j in product(range(1, n), range(2), range(max_sum + 1)):
+                for k in range(10):
+                    if t and k > int(digits[i]): break
+                    if j + k > max_sum: break
+                    dp[i + 1][j + k][t and k == int(digits[i])] += dp[i][j][t]
+            return sum(dp[n][j][t] for j, t in product(range(min_sum, max_sum + 1), range(2)) % mod
+        num1, num2 = int(num1), int(num2)
+        return (f(num2) - f(num1 - 1) + mod) % mod
