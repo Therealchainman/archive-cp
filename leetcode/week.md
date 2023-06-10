@@ -23472,12 +23472,21 @@ class Solution:
         return letters[i if i < len(letters) else 0]
 ```
 
-##
+## 1802. Maximum Value at a Given Index in a Bounded Array
 
-### Solution 1: 
+### Solution 1:  binary search + bisect_right + math + sum of 1,2,3,..,n
 
 ```py
-
+class Solution:
+    def maxValue(self, n: int, index: int, maxSum: int) -> int:
+        natural_sum = lambda x: x * (x + 1) // 2
+        def possible(target):
+            left_segment_len, right_segment_len = index, n - index - 1
+            x1, x2, x3, x4 = map(lambda x: natural_sum(x - 1), [target, target, max(1, target - left_segment_len), max(1, target - right_segment_len)])
+            sum_ones = max(0, left_segment_len - target + 1) + max(0, right_segment_len - target + 1) 
+            sum_ = x1 + x2 - x3 - x4 + sum_ones + target
+            return sum_
+        return bisect.bisect_right(range(maxSum + 1), maxSum, key = lambda x: possible(x)) - 1
 ```
 
 ##

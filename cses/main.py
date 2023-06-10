@@ -47,54 +47,57 @@ input = lambda: sys.stdin.readline().rstrip("\r\n")
 # import pypyjit
 # pypyjit.set_param('max_unroll_recursion=-1')
 
-def is_eulerian_path(n, adj_list, indegrees, outdegrees):
-    # start node is 1 in this instance
-    start_node = 1
-    end_node = n
-    stack = [start_node]
-    vis = [0] * (n + 1)
-    vis[start_node] = 1
-    while stack:
-        node = stack.pop()
-        for nei in adj_list[node]:
-            if vis[nei]: continue
-            vis[nei] = 1
-            stack.append(nei)
-    if outdegrees[start_node] - indegrees[start_node] != 1 or indegrees[end_node] - outdegrees[end_node] != 1: return False
-    for i in range(1, n + 1):
-        if ((outdegrees[i] > 0 or indegrees[i] > 0) and not vis[i]): return False
-        if (indegrees[i] != outdegrees[i] and i not in (start_node, end_node)): return False
-    return True
+"""
+matrix multiplication with modulus
+"""
+def mat_mul(mat1: List[List[int]], mat2: List[List[int]], mod: int) -> List[List[int]]:
+    result_matrix = []
+    for i in range(len(mat1)):
+        result_matrix.append([0]*len(mat2[0]))
+        for j in range(len(mat2[0])):
+            for k in range(len(mat1[0])):
+                result_matrix[i][j] += (mat1[i][k]*mat2[k][j])%mod
+    return result_matrix
 
-def hierholzers_directed(n, adj_list):
-    start_node = 1
-    end_node = n
-    stack = [start_node]
-    euler_path = []
-    while stack:
-        node = stack[-1]
-        if len(adj_list[node]) == 0:
-            euler_path.append(stack.pop())
-        else:
-            nei = adj_list[node].pop()
-            stack.append(nei)
-    return euler_path[::-1]
+"""
+matrix exponentiation with modulus
+matrix is represented as list of lists in python
+"""
+def mat_pow(matrix: List[List[int]], power: int, mod: int) -> List[List[int]]:
+    if power<=0:
+        print('n must be non-negative integer')
+        return None
+    if power==1:
+        return matrix
+    if power==2:
+        return mat_mul(matrix, matrix, mod)
+    t1 = mat_pow(matrix, power//2, mod)
+    if power%2 == 0:
+        return mat_mul(t1, t1, mod)
+    return mat_mul(t1, mat_mul(matrix, t1, mod), mod)
 
 def main():
-    n, m = map(int, input().split())
-    adj_list = [set() for _ in range(n + 1)]
-    indegrees, outdegrees = [0] * (n + 1), [0] * (n + 1)
-    for _ in range(m):
-        u, v = map(int, input().split())
-        adj_list[u].add(v)
-        indegrees[v] += 1
-        outdegrees[u] += 1
-    # all degrees are even and one connected component with edge (nonzero degrees)
-    if not is_eulerian_path(n, adj_list, indegrees, outdegrees):
-        return "IMPOSSIBLE"
-    # hierholzer's algorithm to reconstruct the eulerian circuit
-    eulerian_path = hierholzers_directed(n, adj_list)
-    return ' '.join(map(str, eulerian_path))
+    n = int(input())
+    mod = 10**9+7
+    matrix = [
+        [1, 1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 1, 0]
+    ]
+    base_matrix = [
+        [1],
+        [0],
+        [0],
+        [0],
+        [0],
+        [0]
+    ]
+    exponentiated_matrix = mat_pow(matrix, n, mod)
+    result_matrix = mat_mul(exponentiated_matrix, base_matrix, mod)
+    return result_matrix[0][0]
 
 if __name__ == '__main__':
     print(main())
