@@ -33,10 +33,26 @@ class Solution:
 
 ## 2731. Movement of Robots
 
-### Solution 1:
+### Solution 1:  math + prefix sum + ignore collisions
+
+This is like ants on stick problem. 
+
+![image](images/movement_of_robots.PNG)
 
 ```py
-
+class Solution:
+    def sumDistance(self, nums: List[int], s: str, d: int) -> int:
+        n = len(nums)
+        mod = int(1e9) + 7
+        nums = sorted([nums[i] + (d if s[i] == 'R' else -d) for i in range(n)])
+        psum = add_sum = sub_sum = 0
+        for i in range(n):
+            print(i, ~i)
+            add_sum += nums[~i] % mod
+            sub_sum += nums[i] % mod
+            psum += add_sum % mod
+            psum = (psum - sub_sum + mod) % mod
+        return psum
 ```
 
 ## 2732. Find a Good Subset of the Matrix
