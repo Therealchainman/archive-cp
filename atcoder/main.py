@@ -48,67 +48,31 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-from collections import deque
-from heapq import heappush, heappop
-
 def main():
     n, m = map(int, input().split())
-    indegrees = [0] * (n + 1)
-    outdegrees = [0] * (n + 1)
-    adj_list = [[] for _ in range(n + 1)]
-    rev_adj_list = [[] for _ in range(n + 1)]
-    for _ in range(m):
-        u, v = map(int, input().split())
-        adj_list[u].append(v)
-        rev_adj_list[v].append(u)
-        indegrees[v] += 1
-        outdegrees[u] += 1
-    lranges, rranges = [0] * (n + 1), [0] * (n + 1)
-    for i in range(1, n + 1):
-        left, right = map(int, input().split())
-        lranges[i], rranges[i] = left, right
-    # reverse topological sort
-    queue = deque()
-    for i in range(1, n + 1):
-        if outdegrees[i] == 0:
-            queue.append(i)
-    while queue:
-        node = queue.popleft()
-        for nei in rev_adj_list[node]:
-            outdegrees[nei] -= 1
-            rranges[nei] = min(rranges[nei], rranges[node] - 1)
-            if outdegrees[nei] == 0:
-                queue.append(nei)
-    # topological sort
-    res = [0] * (n + 1)
-    p = 1
-    ready, not_ready = [], []
-    for i in range(1, n + 1):
-        if indegrees[i] == 0:
-            if lranges[i] > p: heappush(not_ready, (lranges[i], i))
-            else: heappush(ready, (rranges[i], i))
-    while ready:
-        right, node = heappop(ready)
-        if p > right: 
-            print("No")
-            return
-        res[node] = p
-        p += 1
-        while not_ready and not_ready[0][0] <= p:
-            _, node = heappop(not_ready)
-            heappush(ready, (rranges[node], node))
-        for nei in adj_list[node]:
-            indegrees[nei] -= 1
-            if indegrees[nei] == 0:
-                if lranges[nei] > p: heappush(not_ready, (lranges[nei], nei))
-                else: heappush(ready, (rranges[nei], nei))
-    if p <= n: 
-        print("No")
-        return
-    print("Yes")
-    print(*res[1:])
+    vis = [0] * (n + 1)
+    v = 1
+    vis[1] = 1
+    stack = [1]
+    while True:
+        inp = input()
+        if inp == 'OK' or inp == '-1': break
+        vertices = list(map(int, inp.split()))
+        next_ = 0
+        for u in reversed(vertices[1:]):
+            if vis[u] == 0:
+                next_ = u
+                break
+        if next_:
+            v = next_
+            stack.append(v)
+            print(v, flush = True)
+        else:
+            stack.pop()
+            v = stack[-1]
+            print(v, flush = True)
+        vis[v] = 1
 
 if __name__ == '__main__':
-    # print(main())
     main()
     # sys.stdout.close()
