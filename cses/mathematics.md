@@ -118,7 +118,7 @@ if __name__ == '__main__':
     print(main())
 ```
 
-## 
+## Dice Probability
 
 ### Solution 1:
 

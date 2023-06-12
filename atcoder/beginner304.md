@@ -269,8 +269,71 @@ if __name__ == '__main__':
 
 ## Ex - Constrained Topological Sort 
 
-### Solution 1: 
+### Solution 1:  directed graph + backwart and forward topological sort + indegrees for forward top sort and outdegrees for backward top sort + min heaps
+
+Use the available from topological sort with the smallest right values first.  But you need to find the minimum allows right values with the backwards topological sort, because the min right for an element depends on the elements reached from it, because you need to have p be that so you can reach the other ones within the right constraint.  But also you store ones that are not ready because the left constraint has not been met yet. 
 
 ```py
+from collections import deque
+from heapq import heappush, heappop
 
+def main():
+    n, m = map(int, input().split())
+    indegrees = [0] * (n + 1)
+    outdegrees = [0] * (n + 1)
+    adj_list = [[] for _ in range(n + 1)]
+    rev_adj_list = [[] for _ in range(n + 1)]
+    for _ in range(m):
+        u, v = map(int, input().split())
+        adj_list[u].append(v)
+        rev_adj_list[v].append(u)
+        indegrees[v] += 1
+        outdegrees[u] += 1
+    lranges, rranges = [0] * (n + 1), [0] * (n + 1)
+    for i in range(1, n + 1):
+        left, right = map(int, input().split())
+        lranges[i], rranges[i] = left, right
+    # reverse topological sort
+    queue = deque()
+    for i in range(1, n + 1):
+        if outdegrees[i] == 0:
+            queue.append(i)
+    while queue:
+        node = queue.popleft()
+        for nei in rev_adj_list[node]:
+            outdegrees[nei] -= 1
+            rranges[nei] = min(rranges[nei], rranges[node] - 1)
+            if outdegrees[nei] == 0:
+                queue.append(nei)
+    # topological sort
+    res = [0] * (n + 1)
+    p = 1
+    ready, not_ready = [], []
+    for i in range(1, n + 1):
+        if indegrees[i] == 0:
+            if lranges[i] > p: heappush(not_ready, (lranges[i], i))
+            else: heappush(ready, (rranges[i], i))
+    while ready:
+        right, node = heappop(ready)
+        if p > right: 
+            print("No")
+            return
+        res[node] = p
+        p += 1
+        while not_ready and not_ready[0][0] <= p:
+            _, n1 = heappop(not_ready)
+            heappush(ready, (rranges[n1], n1))
+        for nei in adj_list[node]:
+            indegrees[nei] -= 1
+            if indegrees[nei] == 0:
+                if lranges[nei] > p: heappush(not_ready, (lranges[nei], nei))
+                else: heappush(ready, (rranges[nei], nei))
+    if p <= n: 
+        print("No")
+        return
+    print("Yes")
+    print(*res[1:])
+
+if __name__ == '__main__':
+    main()
 ```

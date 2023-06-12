@@ -121,38 +121,18 @@ if __name__ == '__main__':
 
 ## D - Sleep Log 
 
-### Solution 1:  binary search for prefix and suffix endpoints + count middle with fenwick tree queries
+### Solution 1:  binary search for prefix and suffix endpoints + count middle with prefix sum
 
 ```py
-class FenwickTree:
-    def __init__(self, N):
-        self.sums = [0 for _ in range(N+1)]
-
-    def update(self, i, delta):
-        while i < len(self.sums):
-            self.sums[i] += delta
-            i += i & (-i)
-
-    def query(self, i):
-        res = 0
-        while i > 0:
-            res += self.sums[i]
-            i -= i & (-i)
-        return res
-
-    def __repr__(self):
-        return f"array: {self.sums}"
-    
 import bisect
 
 def main():
     n = int(input())
     arr = list(map(int, input().split()))
     q = int(input())
-    fenwick_tree = FenwickTree(n + 1)
+    psum = [0] * (n + 1)
     for i in range(2, n, 2):
-        sleep = arr[i] - arr[i - 1]
-        fenwick_tree.update(i, sleep)
+        psum[i] = psum[i - 1] + (arr[i] - arr[i - 1] if i % 2 == 0 else 0)
     for _ in range(q):
         left, right = map(int, input().split())
         i, j = bisect.bisect_left(arr, left), bisect.bisect_left(arr, right)
@@ -161,8 +141,8 @@ def main():
             cur += arr[i] - left
         if j % 2 == 0:
             cur += right - arr[j - 1]
-        middle = fenwick_tree.query(j - 1) - fenwick_tree.query(i)
-        cur += middle
+        mid = psum[j - 1] - psum[i]
+        cur += mid
         print(cur)
 
 if __name__ == '__main__':
