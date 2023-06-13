@@ -45,28 +45,21 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-from itertools import product
-
-def count(n):
-    digits = str(n)
-    num_digits = len(digits)
-    # dp(i, j, t), ith index in digits, j nonzero digits, t represents tight bound
-    dp = [[[0]* 2 for _ in range(num_digits + 1)] for _ in range(num_digits + 1)]
-    for i in range(int(digits[0]) + 1):
-        dp[1][1 if i > 0 else 0][1 if i == int(digits[0]) else 0] += 1
-    for i, t in product(range(1, num_digits), range(2)):
-        for j in range(i + 1):
-            for k in range(10): # digits
-                if t and k > int(digits[i]): break
-                dp[i + 1][j + (1 if k > 0 else 0)][t and k == int(digits[i])] += dp[i][j][t]
-    return sum(dp[num_digits][j][t] for j, t in product(range(min(num_digits, 3) + 1), range(2)))
+from collections import defaultdict
+import bisect
+from itertools import accumulate
 
 def main():
-    left, right = map(int, input().split())
-    res = count(right) - count(left - 1)
-    print(res)
+    s = input()
+    n = len(s)
+    values = {'A': 1, 'B': 10, 'C': 100, 'D': 1000, 'E': 10000}
 
 if __name__ == '__main__':
     T = int(input())
     for _ in range(T):
         main()
+
+"""
+1
+ABCDEEDCBA
+"""

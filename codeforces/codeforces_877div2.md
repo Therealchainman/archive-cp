@@ -1,7 +1,16 @@
+# Codeforces Round 877 Div 2
+
+## Notes
+
+if the implementation is in python it will have this at the top of the python script for fast IO operations
+
+```py
 import os,sys
 from io import BytesIO, IOBase
 from typing import *
-
+import pypyjit
+pypyjit.set_param('max_unroll_recursion=-1')
+ 
 # Fast IO Region
 BUFSIZE = 8192
 class FastIO(IOBase):
@@ -42,28 +51,100 @@ class IOWrapper(IOBase):
         self.readline = lambda: self.buffer.readline().decode("ascii")
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
+```
 
-# sys.setrecursionlimit(1_000_000)
-# import pypyjit
-# pypyjit.set_param('max_unroll_recursion=-1')
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+#define int long long
 
+inline int read() {
+	int x = 0, y = 1; char c = getchar();
+	while (c < '0' || c > '9') {
+		if (c == '-') y = -1;
+		c = getchar();
+	}
+	while (c >= '0' && c <= '9') x = x * 10 + c - '0', c = getchar();
+	return x * y;
+}
+```
+
+## A - Game with Board
+
+### Solution 1: 
+
+```py
 def main():
-    n, a, b = map(int, input().split())
-    dp = [0] * (b + 1)
-    for i in range(1, min(7, b + 1)):
-        dp[i] = 1 / 6
-    for _ in range(n - 1):
-        ndp = [0] * (b + 1)
-        for i in range(b):
-            for j in range(1, 7):
-                if i + j > b: continue
-                ndp[i + j] += dp[i] / 6
-        dp = ndp
-    res = f"{sum(dp[a : b + 1]):0.6f}"
-    print(res)
+    n = int(input())
+    if n < 5:
+        print('Bob')
+    else:
+        print('Alice')
+ 
+if __name__ == '__main__':
+    T = int(input())
+    for _ in range(T):
+        main()
+```
+
+## B - Keep it Beautiful
+
+### Solution 1: 
+
+```py
+def main():
+    q = int(input())
+    arr = list(map(int, input().split()))
+    res = [0] * q
+    ascending = False
+    prev = -1
+    for i in range(q):
+        if not ascending and arr[i] >= prev:
+            res[i] = 1
+            prev = arr[i]
+        elif not ascending and arr[0] >= arr[i]:
+            ascending = True
+            res[i] = 1
+            prev = arr[i]
+        elif arr[i] >= prev and arr[0] >= arr[i]:
+            res[i] = 1
+            prev = arr[i]
+    print(''.join(map(str, res)))
 
 if __name__ == '__main__':
-    main()
-    # T = int(input())
-    # for _ in range(T):
-    #     print(main())
+    T = int(input())
+    for _ in range(T):
+        main()
+```
+
+## C - Ranom Numbers
+
+### Solution 1: 
+
+```py
+
+```
+
+## 
+
+### Solution 1: 
+
+```py
+
+```
+
+## 
+
+### Solution 1: 
+
+```py
+
+```
+
+## 
+
+### Solution 1: 
+
+```py
+
+```

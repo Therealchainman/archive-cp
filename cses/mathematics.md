@@ -120,10 +120,26 @@ if __name__ == '__main__':
 
 ## Dice Probability
 
-### Solution 1:
+### Solution 1:  math + probability + and or logic of probability
 
 ```py
+def main():
+    n, a, b = map(int, input().split())
+    dp = [0] * (b + 1)
+    for i in range(1, min(7, b + 1)):
+        dp[i] = 1 / 6
+    for _ in range(n - 1):
+        ndp = [0] * (b + 1)
+        for i in range(b):
+            for j in range(1, 7):
+                if i + j > b: continue
+                ndp[i + j] += dp[i] / 6
+        dp = ndp
+    res = f"{sum(dp[a : b + 1]):0.6f}"
+    print(res)
 
+if __name__ == '__main__':
+    main()
 ```
 
 ## 
