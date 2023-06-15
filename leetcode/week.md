@@ -23542,6 +23542,90 @@ class Solution:
         return ["->".join(map(str,(x,y))) if x != y else str(x) for x,y in ranges]
 ```
 
+## 530. Minimum Absolute Difference in BST
+
+### Solution 1:  recursive inorder traversal + binary search tree
+
+```py
+class Solution:
+    def getMinimumDifference(self, root: Optional[TreeNode]) -> int:
+        res, prev = math.inf, -math.inf
+        def inorder(node):
+            nonlocal res, prev
+            if not node: return
+            inorder(node.left)
+            res = min(res, node.val - prev)
+            prev = node.val
+            inorder(node.right)
+        inorder(root)
+        return res
+```
+
+## 1161. Maximum Level Sum of a Binary Tree
+
+### Solution 1:  bfs + binary tree + filter
+
+```py
+class Solution:
+    def maxLevelSum(self, root: Optional[TreeNode]) -> int:
+        res, level = -math.inf, 1
+        queue = deque([root])
+        lv = 0
+        while queue:
+            level_sum = 0
+            lv += 1
+            for _ in range(len(queue)):
+                node = queue.popleft()
+                level_sum += node.val
+                queue.extend(filter(None, (node.left, node.right)))
+            if level_sum > res:
+                res = level_sum
+                level = lv
+        return level
+```
+
+## 163. Missing Ranges
+
+### Solution 1:  loop + decision
+
+```py
+class Solution:
+    def findMissingRanges(self, nums: List[int], lower: int, upper: int) -> List[List[int]]:
+        prev = lower - 1
+        res = []
+        for num in nums:
+            if num - prev > 1:
+                res.append([prev + 1, num - 1])
+            prev = num
+        if upper > prev:
+            res.append([prev + 1, upper])
+        return res
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1: 
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
