@@ -47,63 +47,22 @@ input = lambda: sys.stdin.readline().rstrip("\r\n")
 
 import math
 
-"""
-n is size of array input
-range query is [left, right]
-"""
-class RMQ:
-    def __init__(self, n, arr):
-        self.lg = [0] * (n + 1)
-        self.lg[1] = 0
-        for i in range(2, n + 1):
-            self.lg[i] = self.lg[i//2] + 1
-        max_power_two = 18
-        self.sparse_table = [[math.inf]*n for _ in range(max_power_two + 1)]
-        for i in range(max_power_two + 1):
-            j = 0
-            while j + (1 << i) <= n:
-                if i == 0:
-                    self.sparse_table[i][j] = arr[j]
-                else:
-                    self.sparse_table[i][j] = min(self.sparse_table[i - 1][j], self.sparse_table[i - 1][j + (1 << (i - 1))])
-                j += 1
-                
-    def query(self, left: int, right: int) -> int:
-        length = right - left + 1
-        power_two = self.lg[length]
-        return min(self.sparse_table[power_two][left], self.sparse_table[power_two][right - (1 << power_two) + 1])
-
-import bisect
-
 def main():
-    n = int(input())
-    arr = list(map(int, input().split()))
-    rmq = RMQ(n, arr)
-    smax = [0] * (n + 1)
-    for i in reversed(range(n)):
-        smax[i] = max(smax[i + 1], arr[i])  
-    print('smax', smax)
-    def binary_search(start, target):
-        left, right = start, n - 1
-        while left < right:
-            mid = (left + right) >> 1
-            if smax[mid] <= target:
-                right = mid
-            else:
-                left = mid + 1
-        return left
-    pmax = 0
-    for i in range(n - 2):
-        pmax = max(pmax, arr[i])
-        j = binary_search(i + 2, pmax)
-        mmin = rmq.query(i + 1, j - 1)
-        if pmax == smax[j] == mmin:
-            print("YES")
-            x, y, z = i + 1, j - i - 1, n - j
-            print(x, y, z)
-            return
-    print("NO")
-    
+    n, m = map(int, input().split())
+    lefts, rights = [None] * n, [None] * n
+    smallest_segment = math.inf
+    for i in range(n):
+        left, right = map(int, input().split())
+        lefts[i] = left
+        rights[i] = right
+        smallest_segment = min(smallest_segment, right - left + 1)
+    min_right = min(rights)
+    max_left = max(lefts)
+    res = 0
+    for i in range(n):
+        res = max(res, rights[i] - max(min_right, lefts[i] - 1), min(max_left, rights[i] + 1) - lefts[i], rights[i] - lefts[i] - smallest_segment + 1)
+    print(2 * res)
+
 if __name__ == '__main__':
     T = int(input())
     for _ in range(T):

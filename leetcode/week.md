@@ -13775,6 +13775,27 @@ class Solution:
         return getCost(left)
 ```
 
+```py
+class Solution:
+    def minCost(self, nums: List[int], cost: List[int]) -> int:
+        cost_counter = Counter()
+        for x, y in zip(nums, cost):
+            cost_counter[x] += y
+        prev = min(nums)
+        prefix, suffix = 0, sum((x - prev) * y for x, y in cost_counter.items())
+        prefix_delta, suffix_delta = 0, sum(cost)
+        res = prefix + suffix
+        for num in sorted(cost_counter.keys()):
+            delta = num - prev
+            prefix += delta * prefix_delta
+            suffix -= delta * suffix_delta
+            prefix_delta += cost_counter[num]
+            suffix_delta -= cost_counter[num]
+            prev = num
+            res = min(res, prefix + suffix)
+        return res
+```
+
 ## 2449. Minimum Number of Operations to Make Arrays Similar
 
 ### Solution 1:  greedy + split into odds and evens, since you are increment/decrement by 2 + sort
@@ -23602,36 +23623,81 @@ class Solution:
         return res
 ```
 
-##
+## 1187. Make Array Strictly Increasing
 
-### Solution 1:
+### Solution 1:  sort + dynamic programming + memoization + memory optimized + dictionary + binary search
+
+dp[i] = minimum number of operations to have strictly increasing array ending with ith value
+Do this for each strictly increasing array, keep adding one element to it and answer the problem above. 
+
+binary search because you want to find the smallest number that is greater than previous value. 
 
 ```py
-
+class Solution:
+    def makeArrayIncreasing(self, arr1: List[int], arr2: List[int]) -> int:
+        arr2 = sorted(set(arr2))
+        n2 = len(arr2)
+        dp = {-1: 0}
+        for num in arr1:
+            ndp = defaultdict(lambda: math.inf)
+            for v in dp.keys():
+                if num > v:
+                    ndp[num] = min(ndp[num], dp[v])
+                i = bisect.bisect_right(arr2, v)
+                if i < n2:
+                    ndp[arr2[i]] = min(ndp[arr2[i]], dp[v] + 1)
+            dp = ndp
+        return min(dp.values()) if dp else -1
 ```
 
-##
+## 1569. Number of Ways to Reorder Array to Get Same BST
 
-### Solution 1: 
+### Solution 1:  combinatorics + math + left and right subtree
+
+The part that I really couldn't figure out is that the number orderings will be that of the elements that would be in left or right array.  But additionally it is the number of interleavings which can be found by considering the positions, and there are certain many number of ways to choose some left elements to fit in the available positions. 
 
 ```py
-
+class Solution:
+    def numOfWays(self, nums: List[int]) -> int:
+        mod = int(1e9) + 7
+        def dfs(arr):
+            n = len(arr)
+            if n <= 1: return 1
+            left_arr = [x for x in arr if x < arr[0]]
+            right_arr = [x for x in arr if x > arr[0]]
+            left_size, right_size = len(left_arr), len(right_arr)
+            left_orderings, right_orderings = dfs(left_arr), dfs(right_arr)
+            interleaving_ways = math.comb(left_size + right_size, left_size)
+            return left_orderings * right_orderings * interleaving_ways % mod
+        return dfs(nums) - 1
 ```
 
-##
+## 1732. Find the Highest Altitude
 
-### Solution 1:
+### Solution 1:  accumulate for prefix sum + initial value is 0 + max
 
 ```py
-
+class Solution:
+    def largestAltitude(self, gain: List[int]) -> int:
+        return max(accumulate(gain, initial = 0))
 ```
 
-##
+## 2090. K Radius Subarray Averages
 
-### Solution 1:
+### Solution 1:  sliding window
 
 ```py
-
+class Solution:
+    def getAverages(self, nums: List[int], k: int) -> List[int]:
+        n = len(nums)
+        res = [-1] * n
+        window_sum = 0
+        for i in range(n):
+            window_sum += nums[i]
+            if i >= 2*k:
+                res[i - k] = window_sum // (2 * k + 1)
+                window_sum -= nums[i - 2 * k]
+        return res
 ```
 
 ##

@@ -12,88 +12,77 @@ inline int read() {
 	return x * y;
 }
 
-const int threshold = 300;
-const int inf = 1e16;
+const int inf = 1e15;
 
-struct dp_state
-{
-    vector<int> zero_trees, one_trees;
-    void init()
-    {
-        zero_trees.resize(threshold + 1, inf);
-        one_trees.resize(threshold + 1, inf);
-        zero_trees[1] = 1;
-        one_trees[1] = 2;
-    }
-};
-
-int32_t  main(){
-	int T = read();
+int32_t main() {
+    int T = read();
     while (T--) {
-        int n = read();
-        vector<vector<int>> adj_list(n + 1);
-        vector<int> sz(n + 1);
-        for (int i = 0; i < n - 1; i++) {
-            int u = read(), v = read();
-            adj_list[u].push_back(v);
-            adj_list[v].push_back(u);
-        }
-        function<int(int, int)> heavy_edge_first = [&](int node, int parent) {
-            int sz = 1;
-            pair<int, int> res;
-            for (int i = 0; i < adj_list[node].size(); i++) {
-                if (adj_list[node][i] == parent) continue;
-                int child_sz = heavy_edge_first(adj_list[node][i], node);
-                res = max(res, {child_sz, i});
-                sz += child_sz;
-            }
-            if (!adj_list[node].empty()) {
-                swap(adj_list[node][0], adj_list[node][res.second]);
-            }
-            return sz;
-        };
-        heavy_edge_first(1, 0);
-        vector<vector<int>> merged(2 * threshold + 1, vector<int>(2, inf));
-        function<dp_state(int, int)> dfs = [&](int node, int parent) {
-            dp_state dp;
-            sz[node] = 1;
-            bool hasinit = false;
-            for (auto nei : adj_list[node]) {
-                if (nei == parent) continue;
-                dp_state nei_dp = dfs(nei, node);
-                if (!hasinit) {
-                    dp.init();
-                    hasinit = true;
-                }
-                for (int i = 0; i <= min(sz[node], threshold) + min(sz[nei], threshold); i++ ) {
-                    merged[i][0] = merged[i][1] = inf;
-                }
-                for (int j = 1; j <= min(sz[node], threshold); j++) {
-                    for (int k = 1; k <= min(sz[nei], threshold); k++) {
-                        merged[j][0] = min(merged[j][0], dp.zero_trees[j] + nei_dp.one_trees[k]);
-                        merged[j][1] = min(merged[j][1], dp.one_trees[j] + nei_dp.zero_trees[k]);
-                        merged[j + k][0] = min(merged[j + k][0], dp.zero_trees[j] + nei_dp.zero_trees[k] + j * k);
-                        merged[j + k][1] = min(merged[j + k][1], dp.one_trees[j] + nei_dp.one_trees[k] + j * k * 2);
+        string left, right;
+        cin >> left >> right;
+
+        int n = right.length();
+        left = string(n - left.length(), '0') + left;
+
+        vector<vector<vector<vector<vector<int>>>>> dp(n + 1,
+            vector<vector<vector<vector<int>>>>(2,
+                vector<vector<vector<int>>>(2,
+                    vector<vector<int>>(2,
+                        vector<int>(2, -inf)
+                    )
+                )
+            )
+        );
+
+        // (i, left_lower, left_upper, right_lower, right_upper)
+        dp[0][1][1][1][1] = 0;
+
+        for (int i = 0; i < n; i++) {
+            int L = left[i] - '0';
+            int R = right[i] - '0';
+
+            for (int left_lower = 0; left_lower < 2; left_lower++) {
+                for (int left_upper = 0; left_upper < 2; left_upper++) {
+                    for (int d1 = 0; d1 < 10; d1++) {
+                        if (left_lower && d1 < L) continue;
+                        if (left_upper && d1 > R) break;
+
+                        for (int right_lower = 0; right_lower < 2; right_lower++) {
+                            for (int right_upper = 0; right_upper < 2; right_upper++) {
+                                for (int d2 = 0; d2 < 10; d2++) {
+                                    if (right_lower && d2 < L) continue;
+                                    if (right_upper && d2 > R) break;
+
+                                    int nleft_lower = left_lower && d1 == L;
+                                    int nleft_upper = left_upper && d1 == R;
+                                    int nright_lower = right_lower && d2 == L;
+                                    int nright_upper = right_upper && d2 == R;
+
+                                    dp[i + 1][nleft_lower][nleft_upper][nright_lower][nright_upper] =
+                                        max(dp[i + 1][nleft_lower][nleft_upper][nright_lower][nright_upper],
+                                            dp[i][left_lower][left_upper][right_lower][right_upper] + abs(d1 - d2)
+                                        );
+                                }
+                            }
+                        }
                     }
                 }
-                sz[node] += sz[nei];
-                for (int i = 1; i <= min(sz[node], threshold); i++) {
-                    dp.zero_trees[i] = merged[i][0];
-                    dp.one_trees[i] = merged[i][1];
+            }
+        }
+
+        int res = 0;
+
+        for (int left_lower = 0; left_lower < 2; left_lower++) {
+            for (int left_upper = 0; left_upper < 2; left_upper++) {
+                for (int right_lower = 0; right_lower < 2; right_lower++) {
+                    for (int right_upper = 0; right_upper < 2; right_upper++) {
+                        res = max(res, dp[n][left_lower][left_upper][right_lower][right_upper]);
+                    }
                 }
             }
-            if (!hasinit) {
-                dp.init();
-                hasinit = true;
-            }
-            return dp;
-        };
-        dp_state dp = dfs(1, 0);
-        int res = inf;
-        for (int i = 1; i <= threshold; i++) {
-            res = min(res, dp.zero_trees[i]);
-            res = min(res, dp.one_trees[i]);
         }
-        cout << n * (n + 1) - res << endl;
+
+        cout << res << endl;
     }
+
+    return 0L;
 }
