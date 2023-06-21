@@ -5,6 +5,9 @@ computing factorials and their inverses using memory to reduce time.
 Store all factorials up to some n, use mod_inverse to compute the inverse factorials
 
 ```py
+def mod_inverse(num, mod):
+    return pow(num, mod - 2, mod)
+
 n = 10**6
 mod = 998244353
 fact = [1]*(n + 1)

@@ -273,9 +273,9 @@ int main() {
 }
 ```
 
-##
+## Elevator Rides
 
-### Solution 1: 
+### Solution 1:  bitmask dp
 
 ```py
 

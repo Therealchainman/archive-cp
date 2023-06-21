@@ -142,12 +142,51 @@ if __name__ == '__main__':
     main()
 ```
 
-## 
+## Binomial Coefficients
 
-### Solution 1:
+### Solution 1: python math module + math.comb
+
+TLE here, but sometimes it can work. 
 
 ```py
+import math
 
+def main():
+    n = int(input())
+    mod = int(1e9) + 7
+    for _ in range(n):
+        a, b = map(int, input().split())
+        res = math.comb(a, b) % mod
+        print(res)
+
+if __name__ == '__main__':
+    main()
+```
+
+### Solution 2:  precompute factorial and inverse factorial + O(1) to compute binomial coefficient + O(m) time, where m is the max(n, k)
+
+```py
+def mod_inverse(num, mod):
+    return pow(num, mod - 2, mod)
+
+def main():
+    n = int(input())
+    m = int(1e6) + 1
+    mod = int(1e9) + 7
+    fact = [1]*(m + 1)
+    for i in range(1, m + 1):
+        fact[i] = (fact[i - 1] * i) % mod
+    inv_fact = [1]*(m + 1)
+    inv_fact[-1] = mod_inverse(fact[-1], mod)
+    for i in range(m - 1, -1, -1):
+        inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % mod
+    for _ in range(n):
+        a, b = map(int, input().split())
+        res = fact[a] * inv_fact[b] * inv_fact[a - b] % mod
+        print(res)
+
+if __name__ == '__main__':
+    main()
 ```
 
 ## 
