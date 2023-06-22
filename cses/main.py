@@ -47,24 +47,11 @@ input = lambda: sys.stdin.readline().rstrip("\r\n")
 # import pypyjit
 # pypyjit.set_param('max_unroll_recursion=-1')
 
-def mod_inverse(num, mod):
-    return pow(num, mod - 2, mod)
-
 def main():
-    n = int(input())
-    m = int(1e6) + 1
-    mod = int(1e9) + 7
-    fact = [1]*(m + 1)
-    for i in range(1, m + 1):
-        fact[i] = (fact[i - 1] * i) % mod
-    inv_fact = [1]*(m + 1)
-    inv_fact[-1] = mod_inverse(fact[-1], mod)
-    for i in range(m - 1, -1, -1):
-        inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % mod
-    for _ in range(n):
-        a, b = map(int, input().split())
-        res = fact[a] * inv_fact[b] * inv_fact[a - b] % mod
-        print(res)
+    n, k = map(int, input().split())
+    prob = lambda x: pow((x / k), n)
+    res = sum(i * (prob(i) - prob(i - 1)) for i in range(1, k + 1))
+    print(f"{res:0.6f}")
 
 if __name__ == '__main__':
     main()

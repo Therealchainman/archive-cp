@@ -189,12 +189,30 @@ if __name__ == '__main__':
     main()
 ```
 
-## 
+## Candy Lottery
 
-### Solution 1:
+### Solution 1: Expected maximum
+
+given n items, and k possible values it computes the expected maximum it represents a square, for the proof
+
+1 2 3
+2 2 3
+3 3 3
+
+as you can see 1 is in a 1 sided square, 1^2
+2 is in a 2 sidied square, 2^2 = 4
+3 is in 3 sided square 3^2,
+but that is at least those values, so need to take f(x) - f(x - 1) to calculate the number of 3. But this is for 2 items, so extrapolate it to n items. 
 
 ```py
+def main():
+    n, k = map(int, input().split())
+    prob = lambda x: pow((x / k), n)
+    res = sum(i * (prob(i) - prob(i - 1)) for i in range(1, k + 1))
+    print(f"{res:0.6f}")
 
+if __name__ == '__main__':
+    main()
 ```
 
 ## 

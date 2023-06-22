@@ -14641,6 +14641,21 @@ class Solution:
         return stock(0, buy)
 ```
 
+```py
+class Solution:
+    def maxProfit(self, prices: List[int], fee: int) -> int:
+        # s1 own stock, s2 do not own stock
+        s1, s2 = -math.inf, 0
+        for price in prices:
+            ns1, ns2 = s1, s2
+            # sell a stock
+            ns2 = max(ns2, ns1 + price)
+            # hold or buy a stock
+            ns1 = max(ns1, ns2 - fee - price)
+            s1, s2 = ns1, ns2
+        return max(s1, s2)
+```
+
 ## 26. Remove Duplicates from Sorted Array
 
 ### Solution 1:  two pointers + inplace
@@ -23700,9 +23715,69 @@ class Solution:
         return res
 ```
 
+## 1214. Two Sum BSTs
+
+### Solution 1:  dfs stack through one bst + binary search through other bst + O(n^2) worst case, but O(nlogn) average
+
+```py
+class Solution:
+    def twoSumBSTs(self, root1: Optional[TreeNode], root2: Optional[TreeNode], target: int) -> bool:
+        def search(value, root):
+            if not root: return False
+            if value + root.val > target: return search(value, root.left)
+            if value + root.val < target: return search(value, root.right)
+            return True
+        stack = [root1]
+        while stack:
+            node1 = stack.pop() 
+            if search(node1.val, root2): return True
+            stack.extend(filter(None, (node1.left, node1.right)))
+        return False
+```
+
 ##
 
-### Solution 1: 
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
 
 ```py
 

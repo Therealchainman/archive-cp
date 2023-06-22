@@ -277,8 +277,29 @@ int main() {
 
 ### Solution 1:  bitmask dp
 
-```py
+dp[mask] = minimum pair of number of rides and then weight on last ride.  
+So the best combination of these two values for taking a subset of weights is the best solution to subproblem, where subproblem is that of taking this subset of weights. 
 
+```py
+import math
+
+def main():
+    n, x = map(int, input().split())
+    weights = list(map(int, input().split()))
+    dp = [(math.inf, math.inf)] * (1 << n)
+    dp[0] = (1, 0) # number rides, weight on last ride
+    for mask in range(1, 1 << n):
+        for i in range(n):
+            if (mask >> i) & 1:
+                prev_mask = mask ^ (1 << i)
+                if dp[prev_mask][1] + weights[i] <= x:
+                    dp[mask] = min(dp[mask], (dp[prev_mask][0], dp[prev_mask][1] + weights[i]))
+                else:
+                    dp[mask] = min(dp[mask], (dp[prev_mask][0] + 1, weights[i]))
+    print(dp[-1][0])
+
+if __name__ == '__main__':
+    main()
 ```
 
 ##

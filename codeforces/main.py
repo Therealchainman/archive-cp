@@ -45,23 +45,11 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-import math
-
 def main():
-    n, m = map(int, input().split())
-    lefts, rights = [None] * n, [None] * n
-    smallest_segment = math.inf
-    for i in range(n):
-        left, right = map(int, input().split())
-        lefts[i] = left
-        rights[i] = right
-        smallest_segment = min(smallest_segment, right - left + 1)
-    min_right = min(rights)
-    max_left = max(lefts)
-    res = 0
-    for i in range(n):
-        res = max(res, rights[i] - max(min_right, lefts[i] - 1), min(max_left, rights[i] + 1) - lefts[i], rights[i] - lefts[i] - smallest_segment + 1)
-    print(2 * res)
+    m, n = map(int, input().split())
+    prob = lambda x: pow((x / m), 2)
+    res = sum(i * (prob(i) - prob(i - 1)) for i in range(1, n + 1))
+    print(res)  
 
 if __name__ == '__main__':
     T = int(input())

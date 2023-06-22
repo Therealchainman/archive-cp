@@ -12,77 +12,60 @@ inline int read() {
 	return x * y;
 }
 
-const int inf = 1e15;
+vector<vector<int>> adj_list;
+vector<int> num_leaves;
+
+int dfs(int node, int parent) {
+    bool is_leaf = true;
+    int cnt = 0;
+    for (int child : adj_list[node]) {
+        if (child == parent)
+            continue;
+        is_leaf = false;
+        cnt += dfs(child, node);
+    }
+    if (is_leaf)
+        cnt = 1;
+    num_leaves[node] = cnt;
+    return cnt;
+}
 
 int32_t main() {
     int T = read();
+    
     while (T--) {
-        string left, right;
-        cin >> left >> right;
-
-        int n = right.length();
-        left = string(n - left.length(), '0') + left;
-
-        vector<vector<vector<vector<vector<int>>>>> dp(n + 1,
-            vector<vector<vector<vector<int>>>>(2,
-                vector<vector<vector<int>>>(2,
-                    vector<vector<int>>(2,
-                        vector<int>(2, -inf)
-                    )
-                )
-            )
-        );
-
-        // (i, left_lower, left_upper, right_lower, right_upper)
-        dp[0][1][1][1][1] = 0;
-
-        for (int i = 0; i < n; i++) {
-            int L = left[i] - '0';
-            int R = right[i] - '0';
-
-            for (int left_lower = 0; left_lower < 2; left_lower++) {
-                for (int left_upper = 0; left_upper < 2; left_upper++) {
-                    for (int d1 = 0; d1 < 10; d1++) {
-                        if (left_lower && d1 < L) continue;
-                        if (left_upper && d1 > R) break;
-
-                        for (int right_lower = 0; right_lower < 2; right_lower++) {
-                            for (int right_upper = 0; right_upper < 2; right_upper++) {
-                                for (int d2 = 0; d2 < 10; d2++) {
-                                    if (right_lower && d2 < L) continue;
-                                    if (right_upper && d2 > R) break;
-
-                                    int nleft_lower = left_lower && d1 == L;
-                                    int nleft_upper = left_upper && d1 == R;
-                                    int nright_lower = right_lower && d2 == L;
-                                    int nright_upper = right_upper && d2 == R;
-
-                                    dp[i + 1][nleft_lower][nleft_upper][nright_lower][nright_upper] =
-                                        max(dp[i + 1][nleft_lower][nleft_upper][nright_lower][nright_upper],
-                                            dp[i][left_lower][left_upper][right_lower][right_upper] + abs(d1 - d2)
-                                        );
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        int n = read();
+        
+        adj_list.clear();
+        adj_list.resize(n + 1);
+        
+        for (int i = 0; i < n - 1; i++) {
+            int u = read(), v = read();
+            adj_list[u].push_back(v);
+            adj_list[v].push_back(u);
         }
-
-        int res = 0;
-
-        for (int left_lower = 0; left_lower < 2; left_lower++) {
-            for (int left_upper = 0; left_upper < 2; left_upper++) {
-                for (int right_lower = 0; right_lower < 2; right_lower++) {
-                    for (int right_upper = 0; right_upper < 2; right_upper++) {
-                        res = max(res, dp[n][left_lower][left_upper][right_lower][right_upper]);
-                    }
-                }
-            }
+        
+        int q = read();
+        
+        vector<pair<int, int>> queries(q);
+        for (int i = 0; i < q; i++) {
+            int x = read(), y = read();    
+            queries[i] = make_pair(x, y);
         }
-
-        cout << res << endl;
+        
+        num_leaves.clear();
+        num_leaves.resize(n + 1);
+        
+        dfs(1, 0);
+        
+        for (const auto& query : queries) {
+            int x = query.first;
+            int y = query.second;
+            
+            int res = num_leaves[x] * num_leaves[y];
+            cout << res << endl;
+        }
     }
-
-    return 0L;
+    
+    return 0;
 }
