@@ -1,16 +1,13 @@
 class Solution:
-    def specialPerm(self, nums: List[int]) -> int:
-        n = len(nums)
-        mod = int(1e9) + 7
-        dp = {(1 << i, i): 1 for i in range(n)}
-        print(dp)
-        for _ in range(n):
-            ndp = Counter()
-            for (mask, j), v in dp.items():
-                for i in range(n):
-                    if (k >> i) & 1: continue
-                    if nums[i] % nums[j] != 0 and nums[j] % nums[i] != 0: continue
-                    nstate = (mask | (1 << i), i)
-                    ndp[nstate] = (ndp[nstate] + v) % mod
-            dp = ndp
-        return sum(dp.values()) % mod
+    def maximumNumberOfStringPairs(self, words: List[str]) -> int:
+        n = len(words)
+        res = 0
+        vis = [0] * n
+        for i in range(n):
+            for j in range(i + 1, n):
+                if vis[j]: continue
+                if words[i] == words[j][::-1]:
+                    vis[j] = 1
+                    res += 1
+                    break
+        return res
