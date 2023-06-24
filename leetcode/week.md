@@ -23735,20 +23735,174 @@ class Solution:
         return False
 ```
 
-##
+## 1027. Longest Arithmetic Subsequence
 
-### Solution 1:
+### Solution 1:  iterative dynamic programming + maximum value of dp
+
+dp[i][j] = maximum length of arithmetic subsequence, with nums[i], and diff = j
+
+So recurrence relation is 
+dp[i][nums[i] - nums[j]] = max(dp[i][nums[i]-nums[j]], dp[j][nums[i] - nums[j]] + 1)
 
 ```py
-
+class Solution:
+    def longestArithSeqLength(self, nums: List[int]) -> int:
+        n = len(nums)
+        m = 2 * (max(nums) - min(nums))
+        dp = [[1] * (m + 1) for _ in range(n)]
+        res = 0
+        for i in range(1, n):
+            for j in range(i):
+                delta = nums[i] - nums[j] + m // 2
+                dp[i][delta] = max(dp[i][delta], dp[j][delta] + 1)
+                res = max(res, dp[i][delta])
+        return res
 ```
 
-##
-
-### Solution 1:
+also can use dictionary
 
 ```py
+class Solution:
+    def longestArithSeqLength(self, nums: List[int]) -> int:
+        n = len(nums)
+        dp = defaultdict(lambda: 1)
+        for i in range(n):
+            for j in range(i):
+                delta = nums[i] - nums[j]
+                dp[(i, delta)] = max(dp[(j, delta)], dp[(j, delta)] + 1)
+        return max(dp.values())
+```
 
+## 956. Tallest Billboard
+
+### Solution 1:  meet in the middle + hash table
+
+3^n possibility, 012, use base 3 to represent the states
+
+Only need to represent the left and right sum for each possibility.  The initial sums is that they are both (0, 0).  Then of course there can be the possiblity that current rod is added to left sum, to right sum or neither, so 3 possiblities which gives the 3^n time. 
+
+But it can be done in 3^(n/2) by using meet in the middle, so compute the left and right half of the rods separately with brute force. 
+
+Then you are interested in storing the difference between the left and right sum and storing the maximum value for the left sum.  
+
+Because if you have a diff, then you know the -diff in the other half will make them work together. 
+cause 5 - 3 = 2, and 4 - 6 = -2, so together theses work, cause both each to 9.  think about it like if you know the left side is this relative to the right side, then you know for the other half you are looking for the opposite relationship so that it cancels out.  and the total difference is 0.  2 - 2 = 0
+
+proof for why looking for -diff in the second half. 
+
+left1 - right1 = diff
+left2 - right2 = -diff
+(left1 + left2) - (right1 + right2) = diff - diff = 0
+implies that left1 + left2 = right1 + right2 
+
+```py
+class Solution:
+    def tallestBillboard(self, rods: List[int]) -> int:
+        n = len(rods)
+        def solve(start, end):
+            sums = set([(0, 0)]) # sum for s1, s2
+            for i in range(start, end):
+                nsums = set()
+                for left, right in sums:
+                    # add to left sum
+                    nsums.add((left + rods[i], right))
+                    # add to right sum
+                    nsums.add((left, right + rods[i]))
+                sums.update(nsums)
+            states = defaultdict(lambda: -math.inf)
+            for left, right in sums:
+                delta = left - right
+                states[delta] = max(states[delta], left)
+            return states
+        left_diffs = solve(0, n//2)
+        right_diffs = solve(n//2, n)
+        res = 0
+        for diff in left_diffs:
+            res = max(res, left_diffs[diff] + right_diffs[-diff])
+        return res
+```
+
+### Solution 2:  dynamic programming 
+
+this is the recurrence relation
+dp[diff] = max(dp[diff], taller)
+return dp[0]
+for each rod, need to consider 3 options for each of the previous dp states. 
+1. add rod to taller support
+1. add rod to shorter support
+1. add rod to neither support
+
+```py
+class Solution:
+    def tallestBillboard(self, rods: List[int]) -> int:
+        n = len(rods)
+        # diff: taller
+        # diff = taller - shorter
+        # shorter = taller - diff
+        dp = defaultdict(lambda: -math.inf)
+        dp[0] = 0
+        for rod in rods:
+            # skipping adding the rod
+            ndp = dp.copy()
+            for diff, taller in dp.items():
+                shorter = taller - diff
+                # add the rod to the taller support
+                ndp[diff + rod] = max(ndp[diff + rod], taller + rod)
+                # add the rod to the shorter support
+                ndiff = abs(taller - shorter - rod)
+                ntaller = max(taller, shorter + rod)
+                ndp[ndiff] = max(ndp[ndiff], ntaller)
+            dp = ndp
+        return dp[0]
+```
+
+## 2106. Maximum Fruits Harvested After at Most K Steps
+
+### Solution 1: Sliding window algorithm with prefix and suffix sums
+
+move k steps to the left and then k steps to the right.
+
+For each instance, as you reduce number of steps moved in direction by 1, that allows you to move 2 more steps in the opposite direction. 
+
+This will cover all the possible ranges.
+
+```py
+class Solution:
+    def maxTotalFruits(self, fruits: List[List[int]], startPos: int, k: int) -> int:
+        n = len(fruits)
+        mx = max(fruits[-1][0], startPos)
+        quantity = [0] * (mx + 1)
+        for pos, amt in fruits:
+            quantity[pos] = amt
+        res = quantity[startPos]
+        # move k steps to the left
+        left_sum = right_sum = 0
+        for pos in range(max(0, startPos - k), startPos):
+            left_sum += quantity[pos]
+        # moving less steps to left and some to the right with remaining steps
+        right_pos = startPos - k
+        for left_pos in range(startPos - k, startPos):
+            res = max(res, left_sum + right_sum + quantity[startPos])
+            if left_pos >= 0:
+                left_sum -= quantity[left_pos]
+            for _ in range(2):
+                right_pos += 1
+                if startPos < right_pos <= mx:
+                    right_sum += quantity[right_pos]
+        # move k steps to the right
+        left_sum = right_sum = 0
+        for pos in range(startPos + 1, min(startPos + k, mx) + 1):
+            right_sum += quantity[pos]
+        left_pos = startPos + k
+        for right_pos in range(startPos + k, startPos, -1):
+            res = max(res, left_sum + right_sum + quantity[startPos])
+            if right_pos <= mx:
+                right_sum -= quantity[right_pos]
+            for _ in range(2):
+                left_pos -= 1
+                if 0 <= left_pos < startPos:
+                    left_sum += quantity[left_pos]
+        return res
 ```
 
 ##

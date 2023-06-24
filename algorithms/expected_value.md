@@ -16,3 +16,65 @@ prob = lambda x: pow((x / m), n)
 res = sum(i * (prob(i) - prob(i - 1)) for i in range(1, m + 1))
 print(res)  
 ```
+
+## Expected value for indicator random variables
+
+Indicator random variables describe experiments to detect whether or not something happened.
+
+The expected value of an indicator random variable for an event is just the probability of that
+event. (Remember that a random variable IA is the indicator random variable for event A, if
+IA = 1 when A occurs and IA = 0 otherwise.)
+
+$E[IA] = Pr{A}$
+
+moving robots example problem
+
+```py
+"""
+probability cell is empty is 1 - probability of robot existing on cell
+"""
+from itertools import product
+
+def main():
+    k = int(input())
+    n = 8
+    board = [[[0] * n for _ in range(n)] for _ in range(n * n)]
+    neighborhood = lambda r, c: [(r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)]
+    in_bounds = lambda r, c: 0 <= r < n and 0 <= c < n
+    for i in range(n * n):
+        r, c = i // n, i % n
+        board[i][r][c] = 1
+    on_corner = lambda r, c: (r == 0 and c == 0) or (r == 0 and c == n - 1) or (r == n - 1 and c == 0) or (r == n - 1 and c == n - 1)
+    on_boundary = lambda r, c: r == 0 or r == n - 1 or c == 0 or c == n - 1
+    for _ in range(k):
+        nboard = [[[0] * n for _ in range(n)] for _ in range(n * n)]
+        for i, r, c in product(range(n * n), range(n), range(n)):
+            p = 3 if on_boundary(r, c) else 4
+            p = 2 if on_corner(r, c) else p
+            for nr, nc in neighborhood(r, c):
+                if in_bounds(nr, nc):
+                    nboard[i][nr][nc] += board[i][r][c] / p
+        board = nboard
+    """
+    probability that first robot is not in that cell at kth step, 1 - probability robot exists in that cell at kth step
+    so it should be multiplied, because you want the probability of the sequence that robot1, robot2, robot3 are all not at that cell
+    so how to do this for all.
+    low*high = low 
+    low*low = low
+    high*high = high
+    """
+    res = [[1] * n for _ in range(n)]
+    for i, r, c in product(range(n * n), range(n), range(n)):
+        res[r][c] *= (1 - board[i][r][c])
+    """
+    expectation value is sum of all probabilities of each cell
+    using linearity of expectation
+    E[x+y] = E[x] + E[y
+    that is expecation value of all cells is equal to expectation value of each cell that it is empty
+    """
+    sum_ = sum(sum(row) for row in res)
+    print(f"{sum_:0.6f}")
+
+if __name__ == '__main__':
+    main()
+```
