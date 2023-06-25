@@ -4734,6 +4734,44 @@ class Solution:
         return dfs(start, fuel)
 ```
 
+```py
+class Solution:
+    def countRoutes(self, locations: List[int], start: int, finish: int, fuel: int) -> int:
+        n = len(locations)
+        dp = [[0] * (fuel + 1) for _ in range(n)] # dp[i][j] = number of ways to reach city i with j fuel
+        dp[start][fuel] = 1
+        mod = 10 ** 9 + 7
+        for f in range(fuel, -1, -1):
+            for i, j in product(range(n), repeat = 2):
+                # travel from city j to city i
+                if i == j: continue 
+                cst = abs(locations[i] - locations[j])
+                if f + cst > fuel: continue
+                dp[i][f] += dp[j][f + cst]
+                dp[i][f] %= mod
+        return sum(dp[finish]) % mod
+```
+
+```py
+class Solution:
+    def countRoutes(self, locations: List[int], start: int, finish: int, fuel: int) -> int:
+        n = len(locations)
+        dp = [[0] * (fuel + 1) for _ in range(n)] # dp[i][j] = number of ways to reach city i with j fuel
+        for i in range(fuel + 1):
+            dp[finish][i] = 1
+        mod = 1_000_000_007
+        for f in range(1, fuel + 1):
+            for i in range(n):
+                for j in range(n):
+                    # travel from city j to city i
+                    if i == j: continue 
+                    cst = abs(locations[i] - locations[j])
+                    if f - cst < 0: continue
+                    dp[i][f] += dp[j][f - cst]
+                    dp[i][f] %= mod
+        return dp[start][fuel]
+```
+
 ## 1268. Search Suggestions System
 
 ### Solution 1:  Trie data structure + minheap 

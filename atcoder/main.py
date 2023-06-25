@@ -48,9 +48,48 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
+from heapq import heappush, heappop
+
 def main():
-    n, k, q = map(int, input().split())
-    queries = [None] * q
+    n, m = map(int, input().split())
+    adj_list = [[] for _ in range(n + 1)]
+    for _ in range(m):
+        u, v, w = map(int, input().split())
+        adj_list[u].append((v, w))
+        adj_list[v].append((u, w))
+    K = int(input())
+    start_nodes = map(int, input().split())
+    D = int(input())
+    dist = [0] + list(map(int, input().split()))
+    res = [-1] * (n + 1)
+    min_heap = []
+    for node in start_nodes:
+        res[node] = 0
+        for nei, wei in adj_list[node]:
+            heappush(min_heap, (wei, nei))
+    def dfs(node, rem_dist):
+        neighbors = []
+        rem_heap = [(rem_dist, node)]
+        while rem_heap:
+            rem_dist, node = heappop(rem_heap)
+            for nei, wei in adj_list[node]:
+                if res[nei] != -1: continue
+                if wei <= rem_dist:
+                    res[nei] = day
+                    heappush(rem_heap, (rem_dist - wei, nei))
+                else:
+                    neighbors.append((wei, nei))
+        return neighbors
+    for day in range(1, D + 1):
+        tomorrow = []
+        while min_heap and min_heap[0][0] <= dist[day]:
+            wei, node = heappop(min_heap)
+            if res[node] != -1: continue
+            res[node] = day
+            tomorrow.extend(dfs(node, dist[day] - wei))
+        for wei, node in tomorrow:
+            heappush(min_heap, (wei, node))
+    print('\n'.join(map(str, res[1:])))
 
 if __name__ == '__main__':
     main()
