@@ -48,48 +48,36 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-from heapq import heappush, heappop
+from itertools import product
+
+# i corresponds to the row, and also the position on the y axis
+# j corresponds to the column, and also the position on the x axis
+def convert(H, W, grid):
+    s = set()
+    for i, j in product(range(H), range(W)):
+        if grid[i][j] == '#':
+            s.add((i, j))
+    return s
+
+"""
+convert everything to the first quadrant, and with minimim black squares on x = 0 and y = 0
+"""
+def normalize(s):
+    min_x, min_y = min(x for y, x in s), min(y for y, x in s)
+    return set((y - min_y, x - min_x) for y, x in s)
 
 def main():
-    n, m = map(int, input().split())
-    adj_list = [[] for _ in range(n + 1)]
-    for _ in range(m):
-        u, v, w = map(int, input().split())
-        adj_list[u].append((v, w))
-        adj_list[v].append((u, w))
-    K = int(input())
-    start_nodes = map(int, input().split())
-    D = int(input())
-    dist = [0] + list(map(int, input().split()))
-    res = [-1] * (n + 1)
-    min_heap = []
-    for node in start_nodes:
-        res[node] = 0
-        for nei, wei in adj_list[node]:
-            heappush(min_heap, (wei, nei))
-    def dfs(node, rem_dist):
-        neighbors = []
-        rem_heap = [(rem_dist, node)]
-        while rem_heap:
-            rem_dist, node = heappop(rem_heap)
-            for nei, wei in adj_list[node]:
-                if res[nei] != -1: continue
-                if wei <= rem_dist:
-                    res[nei] = day
-                    heappush(rem_heap, (rem_dist - wei, nei))
-                else:
-                    neighbors.append((wei, nei))
-        return neighbors
-    for day in range(1, D + 1):
-        tomorrow = []
-        while min_heap and min_heap[0][0] <= dist[day]:
-            wei, node = heappop(min_heap)
-            if res[node] != -1: continue
-            res[node] = day
-            tomorrow.extend(dfs(node, dist[day] - wei))
-        for wei, node in tomorrow:
-            heappush(min_heap, (wei, node))
-    print('\n'.join(map(str, res[1:])))
+    n = int(input())
+    HA, WA = map(int, input().split())
+    A = normalize(convert(HA, WA, [input() for _ in range(HA)]))
+    HB, WB = map(int, input().split())
+    B = normalize(convert(HB, WB, [input() for _ in range(HB)]))
+    HX, WX = map(int, input().split())
+    X = normalize(convert(HX, WX, [input() for _ in range(HX)]))
+    res = False
+    for dx, dy in product(range(-HX, HX + 1), range(-WX, WX + 1)):
+        res |= normalize(A.union(set((y + dy, x + dx) for y, x in B))) == X
+    print('Yes' if res else 'No')
 
 if __name__ == '__main__':
     main()

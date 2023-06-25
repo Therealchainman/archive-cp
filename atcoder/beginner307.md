@@ -96,10 +96,44 @@ if __name__ == '__main__':
 
 ## C - Ideal Sheet 
 
-### Solution 1: 
+### Solution 1:  set + matrix + union of sets + normalize everything to first quadrant and cutout at that spot
+
+The main reason I struggled with this problem is that I didn't realize that X must contain all the black squares from A and B. 
 
 ```py
+from itertools import product
 
+# i corresponds to the row, and also the position on the y axis
+# j corresponds to the column, and also the position on the x axis
+def convert(H, W, grid):
+    s = set()
+    for i, j in product(range(H), range(W)):
+        if grid[i][j] == '#':
+            s.add((i, j))
+    return s
+
+"""
+convert everything to the first quadrant, and with minimim black squares on x = 0 and y = 0
+"""
+def normalize(s):
+    min_x, min_y = min(x for y, x in s), min(y for y, x in s)
+    return set((y - min_y, x - min_x) for y, x in s)
+
+def main():
+    n = int(input())
+    HA, WA = map(int, input().split())
+    A = normalize(convert(HA, WA, [input() for _ in range(HA)]))
+    HB, WB = map(int, input().split())
+    B = normalize(convert(HB, WB, [input() for _ in range(HB)]))
+    HX, WX = map(int, input().split())
+    X = normalize(convert(HX, WX, [input() for _ in range(HX)]))
+    res = False
+    for dx, dy in product(range(-HX, HX + 1), range(-WX, WX + 1)):
+        res |= normalize(A.union(set((y + dy, x + dx) for y, x in B))) == X
+    print('Yes' if res else 'No')
+
+if __name__ == '__main__':
+    main()
 ```
 
 ## D - Mismatched Parentheses 
@@ -222,8 +256,39 @@ if __name__ == '__main__':
 
 ## G - Approximate Equalization 
 
-### Solution 1: 
+### Solution 1:  dynamic programming + prefix sum + O(n^2) time
+
+dp(i, j) = minimum number of operations to make the first j of the first i elements equal to v0 and the rest equal to v1. 
+
+prefix sum can be used to calculate what the last value of the array must have been set to from previous elements. 
+
+then can transition that last_val to v0 or v1, and update the number of operations required for that. 
 
 ```py
+import math
+from itertools import accumulate
 
+def main():
+    n = int(input())
+    arr = list(map(int, input().split()))
+    psum = [0] + list(accumulate(arr))
+    sum_ = sum(arr)
+    v0 = sum_ // n
+    v1 = v0 + 1
+    v0_terms = n - sum_ % n
+    dp = [[math.inf] * (n + 1) for _ in range(n + 1)]
+    dp[0][0] = 0
+    # j v0 terms
+    for i in range(n):
+        for j in range(i + 1):
+            prev_psum = j * v0 + (i - j) * v1
+            last_val = psum[i + 1] - prev_psum
+            # add v0 term
+            dp[i + 1][j + 1] = min(dp[i + 1][j + 1], dp[i][j] + abs(v0 - last_val))
+            # add v1 term
+            dp[i + 1][j] = min(dp[i + 1][j], dp[i][j] + abs(v1 - last_val))
+    print(dp[-1][v0_terms])
+
+if __name__ == '__main__':
+    main()
 ```
