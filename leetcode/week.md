@@ -9506,6 +9506,48 @@ class Solution:
         return -1
 ```
 
+### Solution 2:  bfs + bitmask + visited
+
+the visited states are (row, col, key_mask)
+
+```py
+class Solution:
+    def shortestPathAllKeys(self, grid: List[str]) -> int:
+        R, C = len(grid), len(grid[0])
+        empty, wall, start = '.', '#', '@'
+        # (row, col, key_mask)
+        queue = deque([(r, c, 0) for r, c in product(range(R), range(C)) if grid[r][c] == start])
+        steps = 0
+        n = sum(1 for r, c in product(range(R), range(C)) if grid[r][c] in string.ascii_lowercase)
+        end_mask = (1 << n) - 1
+        in_bounds = lambda r, c: 0 <= r < R and 0 <= c < C
+        neighborhood = lambda r, c: [(r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)]
+        vis = set(list(queue))
+        while queue:
+            for _ in range(len(queue)):
+                r, c, mask = queue.popleft()
+                if mask == end_mask: return steps
+                for nr, nc in neighborhood(r, c):
+                    if not in_bounds(nr, nc) or grid[nr][nc] == wall: continue
+                    val = grid[nr][nc]
+                    nmask = mask
+                    # key condition
+                    if val in string.ascii_lowercase:
+                        key = string.ascii_lowercase.index(val)
+                        nmask |= (1 << key)
+                    # lock condition
+                    if val in string.ascii_uppercase:
+                        lock = string.ascii_uppercase.index(val)
+                        have_key = (nmask >> lock) & 1
+                        if not have_key: continue
+                    nstate = (nr, nc, nmask)
+                    if nstate in vis: continue
+                    vis.add(nstate)
+                    queue.append(nstate)
+            steps += 1
+        return -1
+```
+
 ## 2367. Number of Arithmetic Triplets
 
 ### Solution 1:
@@ -23941,6 +23983,100 @@ class Solution:
                 if 0 <= left_pos < startPos:
                     left_sum += quantity[left_pos]
         return res
+```
+
+## 373. Find K Pairs with Smallest Sums
+
+### Solution 1:  hash set + min heap
+
+```py
+class Solution:
+    def kSmallestPairs(self, nums1: List[int], nums2: List[int], k: int) -> List[List[int]]:
+        n1, n2 = len(nums1), len(nums2)
+        pointers = [0] * n1 # pointer to index in nums2
+        heapify(min_heap := [(nums1[i] + nums2[0], i) for i in range(n1)])
+        res = []
+        for _ in range(k):
+            if not min_heap: break
+            _, p1 = heappop(min_heap)
+            pointers[p1] += 1
+            p2 = pointers[p1]
+            res.append([nums1[p1], nums2[p2 - 1]])
+            if p2 < n2:
+                heappush(min_heap, (nums1[p1] + nums2[p2], p1))
+        return res
+```
+
+## 1514. Path with Maximum Probability
+
+### Solution 1:  math + logarithms + dijkstra + min heap + log sum
+
+Use the property of logarithms
+0 <= p <= 1
+
+the best path will be multiplication of probabilities so such as p1*p2*p3*...*pn
+log(p1*p2*...*pn) = log(p1) + log(p2) + ... + log(pn),  but you want to maximize probability so you want to maxmize the sum of logarithms of probabilities. 
+
+![image](images/positive_log_probability.png)
+
+As p increases, so does log(p) for given range of p values.  So you can use a max heap and get the one with the largest probability.
+
+![images](images/negative_log_probability.png)
+
+as p increases, -log(p) decreases for given range of p values.  So you can use a min heap cause the minimal sum of negative log of the probabilities corresponds to the maximum sum of positive log of the probabilities and the maximum of the product of probabilities
+
+```py
+class Solution:
+    def maxProbability(self, n: int, edges: List[List[int]], succProb: List[float], start: int, end: int) -> float:
+        adj_list = [[] for _ in range(n)]
+        logarize = lambda x: -math.log(x)
+        unlogarize = lambda x: math.exp(-x)
+        for (u, v), p in zip(edges, succProb):
+            adj_list[u].append((v, logarize(p)))
+            adj_list[v].append((u, logarize(p)))
+        min_heap = [(0, start)]
+        dist = [math.inf] * n
+        dist[start] = 0
+        while min_heap:
+            cost, node = heappop(min_heap)
+            if dist[node] < cost: continue
+            for nei, wei in adj_list[node]:
+                ncost = cost + wei
+                if ncost < dist[nei]:
+                    dist[nei] = ncost
+                    heappush(min_heap, (ncost, nei))
+        return unlogarize(dist[end]) if dist[end] != math.inf else 0
+```
+
+## 250. Count Univalue Subtrees
+
+### Solution 1:  dfs + postorder + binary tree
+
+```py
+class Solution:
+    def countUnivalSubtrees(self, root: Optional[TreeNode]) -> int:
+        res = 0
+        def dfs(node):
+            nonlocal res
+            if not node: return True
+            if node.left:
+                is_univalued &= (node.val == node.left.val)
+                is_univalued &= dfs(node.left)
+            if node.right:
+                is_univalued &= (node.val == node.right.val)
+                is_univalued &= dfs(node.right)
+            res += is_univalued
+            return is_univalued
+        dfs(root)
+        return res
+```
+
+##
+
+### Solution 1:
+
+```py
+
 ```
 
 ##
