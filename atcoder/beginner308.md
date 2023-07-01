@@ -97,6 +97,9 @@ if __name__ == '__main__':
 
 ### Solution 1: sorting fractions + custom comparator + fraction class + math
 
+Let us first design a function that compares the success rates of two people. Here, it is discouraged to compare h / (h + t)
+using a floating-point number type, due to potential computational errors. In fact, some test cases are prepared to hack the solutions that compares values using std::double.
+
 ```py
 # comparator for fractions
 class Fraction:
