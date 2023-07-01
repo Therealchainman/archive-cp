@@ -24071,9 +24071,86 @@ class Solution:
         return res
 ```
 
-##
+## 1970. Last Day Where You Can Still Cross
 
-### Solution 1:
+### Solution 1:  binary search for day + bfs over remaining land cells at that day
+
+[t,t,t,t,f,f,f]
+at one day you will no longer be able to reach bottom row from top row, and it will be false forever, so can binary search for the last day can reach bottom row.
+
+```py
+class Solution:
+    def latestDayToCross(self, row: int, col: int, cells: List[List[int]]) -> int:
+        cells = [(r - 1, c - 1) for r, c in cells]
+        neighborhood = lambda r, c: [(r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)]
+        in_bounds = lambda r, c: 0 <= r < row and 0 <= c < col
+        land, water = 0, 1
+        def bfs(target):
+            grid = [[0] * col for _ in range(row)]
+            for r, c in map(lambda i: cells[i], range(target)):
+                grid[r][c] = water # which ones will be covered with water by target
+            queue = deque()
+            for c in range(col):
+                if grid[0][c] == land:
+                    queue.append((0, c))
+                    grid[0][c] = water
+            while queue:
+                r, c = queue.popleft()
+                if r == row - 1: return True # reached bottom row
+                for nr, nc in neighborhood(r, c):
+                    if not in_bounds(nr, nc) or grid[nr][nc] != land: continue
+                    grid[nr][nc] = water
+                    queue.append((nr, nc))
+            return False
+        left, right = 0, row * col
+        while left < right:
+            mid = (left + right + 1) >> 1
+            if bfs(mid):
+                left = mid
+            else:
+                right = mid - 1
+        return left
+```
+
+### Solution 2:  min heap + dijkstra + undirected graph + time nodes
+
+The update function is interesting, it is not you are adding the sume of the distances, but rather taking the min distance so far.  
+
+negating everything allows to take min heap
+
+so what minimizes the negatives should maximize if they were positives
+
+```py
+class Solution:
+    def latestDayToCross(self, row: int, col: int, cells: List[List[int]]) -> int:
+        cells = [(r - 1, c - 1) for r, c in cells]
+        neighborhood = lambda r, c: [(r - 1, c), (r + 1, c), (r, c - 1), (r, c + 1)]
+        in_bounds = lambda r, c: 0 <= r < row and 0 <= c < col
+        land, water = 0, 1
+        grid = [[0] * col for _ in range(row)]
+        for i, (r, c) in enumerate(cells, start = 1):
+            # negate so that we can take the min heap and apply dijkstra
+            grid[r][c] = -i
+        min_heap = []
+        dist = [[math.inf] * col for _ in range(row)]
+        for c in range(col):
+            heappush(min_heap, (grid[0][c], 0, c))
+            dist[0][c] = grid[0][c]
+        while min_heap:
+            cost, r, c = heappop(min_heap)
+            if r == row - 1: return abs(cost + 1)
+            for nr, nc in neighborhood(r, c):
+                if not in_bounds(nr, nc): continue
+                ncost = max(cost, grid[nr][nc])
+                if ncost < dist[nr][nc]:
+                    dist[nr][nc] = ncost
+                    heappush(min_heap, (ncost, nr, nc))
+        return 0
+```
+
+## Solution 3:  union find on water
+
+find connected component from left side to right side with water because that will block the path 
 
 ```py
 

@@ -46,10 +46,17 @@ sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
 def main():
-    m, n = map(int, input().split())
-    prob = lambda x: pow((x / m), 2)
-    res = sum(i * (prob(i) - prob(i - 1)) for i in range(1, n + 1))
-    print(res)  
+    n = int(input())
+    arr = list(map(int, input().split()))
+    best_psum = psum = best_sum = 0
+    for num in arr:
+        psum += num
+        best_psum = max(best_psum, psum)
+        if best_sum + num < best_psum:
+            best_sum = best_psum
+        else:
+            best_sum += num
+    print(best_psum)
 
 if __name__ == '__main__':
     T = int(input())
