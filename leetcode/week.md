@@ -4308,6 +4308,24 @@ class Solution:
         return -1
 ```
 
+### Solution 2: iterative dynamic programming 
+
+```py
+class Solution:
+    def minPathCost(self, grid: List[List[int]], moveCost: List[List[int]]) -> int:
+        R, C = len(grid), len(grid[0])
+        min_cost_memo = [[inf]*C for _ in range(R)]
+        for c in range(C):
+            min_cost_memo[0][c] = grid[0][c]
+        prev_cells = [0]*C
+        for r in range(1,R):
+            for c in range(C):
+                for prev_c in range(C):
+                    prev_cells[prev_c] = moveCost[grid[r-1][prev_c]][c] + min_cost_memo[r-1][prev_c] + grid[r][c]
+                min_cost_memo[r][c] = min(prev_cells)
+        return min(min_cost_memo[R-1])
+```
+
 ## 2305. Fair Distribution of Cookies
 
 ### Solution 1: backtracking + early pruning optimization
@@ -4333,22 +4351,25 @@ class Solution:
         return self.fairest
 ```
 
-### Solution 2: iterative dynamic programming 
-
 ```py
 class Solution:
-    def minPathCost(self, grid: List[List[int]], moveCost: List[List[int]]) -> int:
-        R, C = len(grid), len(grid[0])
-        min_cost_memo = [[inf]*C for _ in range(R)]
-        for c in range(C):
-            min_cost_memo[0][c] = grid[0][c]
-        prev_cells = [0]*C
-        for r in range(1,R):
-            for c in range(C):
-                for prev_c in range(C):
-                    prev_cells[prev_c] = moveCost[grid[r-1][prev_c]][c] + min_cost_memo[r-1][prev_c] + grid[r][c]
-                min_cost_memo[r][c] = min(prev_cells)
-        return min(min_cost_memo[R-1])
+    def distributeCookies(self, cookies: List[int], k: int) -> int:
+        counts = [0] * k
+        n = len(cookies)
+        def backtrack(i, rem):
+            if i == n: return max(counts)
+            if rem > n - i: return math.inf 
+            res = math.inf
+            for j in range(k):
+                if counts[j] == 0:
+                    rem -= 1
+                counts[j] += cookies[i]
+                res = min(res, backtrack(i + 1, rem))
+                counts[j] -= cookies[i]
+                if counts[j] == 0:
+                    rem += 1
+            return res
+        return backtrack(0, k)
 ```
 
 ## 2306. Naming a Company
@@ -24156,12 +24177,30 @@ find connected component from left side to right side with water because that wi
 
 ```
 
-##
+## 465. Optimal Account Balancing
 
-### Solution 1:
+### Solution 1:  backtrack + recursion + dfs + pruning of dfs tree
 
 ```py
-
+class Solution:
+    def minTransfers(self, transactions: List[List[int]]) -> int:
+        balance = Counter()
+        for u, v, amt in transactions:
+            balance[u] -= amt
+            balance[v] += amt
+        balance = list(balance.values())
+        n = len(balance)
+        def backtrack(i):
+            while i < n and balance[i] == 0: i += 1
+            res = math.inf
+            if i == n: return 0
+            for j in range(i + 1, n):
+                if balance[i] * balance[j] < 0:
+                    balance[j] += balance[i]
+                    res = min(res, 1 + backtrack(i + 1))
+                    balance[j] -= balance[i]
+            return res
+        return backtrack(0)
 ```
 
 ##

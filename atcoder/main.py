@@ -48,36 +48,24 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-from itertools import product
-
-# i corresponds to the row, and also the position on the y axis
-# j corresponds to the column, and also the position on the x axis
-def convert(H, W, grid):
-    s = set()
-    for i, j in product(range(H), range(W)):
-        if grid[i][j] == '#':
-            s.add((i, j))
-    return s
-
-"""
-convert everything to the first quadrant, and with minimim black squares on x = 0 and y = 0
-"""
-def normalize(s):
-    min_x, min_y = min(x for y, x in s), min(y for y, x in s)
-    return set((y - min_y, x - min_x) for y, x in s)
+# comparator for fractions
+class Fraction:
+    def __init__(self, num, denom):
+        self.num, self.denom = num, denom
+    
+    def __lt__(self, other):
+        return self.num * other.denom < other.num * self.denom
 
 def main():
     n = int(input())
-    HA, WA = map(int, input().split())
-    A = normalize(convert(HA, WA, [input() for _ in range(HA)]))
-    HB, WB = map(int, input().split())
-    B = normalize(convert(HB, WB, [input() for _ in range(HB)]))
-    HX, WX = map(int, input().split())
-    X = normalize(convert(HX, WX, [input() for _ in range(HX)]))
-    res = False
-    for dx, dy in product(range(-HX, HX + 1), range(-WX, WX + 1)):
-        res |= normalize(A.union(set((y + dy, x + dx) for y, x in B))) == X
-    print('Yes' if res else 'No')
+    heads, tails = [None] * n, [None] * n
+    succ = [0] * n
+    for i in range(n):
+        h, t = map(int, input().split())
+        heads[i], tails[i] = h, t
+        succ[i] = Fraction(h, h + t)
+    res = sorted(range(1, n + 1), key = lambda i: (succ[i - 1], -i), reverse = True)
+    print(*res)
 
 if __name__ == '__main__':
     main()
