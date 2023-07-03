@@ -269,12 +269,32 @@ if __name__ == '__main__':
     main()
 ```
 
-## 
+## Christmas Party
 
-### Solution 1:
+### Solution 1:  inclusion-exclusion principle + math + combinatorics + derangements
 
 ```py
+def mod_inverse(num, mod):
+    return pow(num, mod - 2, mod)
 
+def main():
+    n = int(input())
+    mod = int(1e9) + 7
+    fact = [1]*(n + 1)
+    for i in range(1, n + 1):
+        fact[i] = (fact[i - 1] * i) % mod
+    inv_fact = [1]*(n + 1)
+    inv_fact[-1] = mod_inverse(fact[-1], mod)
+    for i in range(n - 1, -1, -1):
+        inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % mod
+    res = 0
+    for i in range(n + 1):
+        res = (res + (inv_fact[i] if i % 2 == 0 else -inv_fact[i])) % mod
+    res = (res * fact[n]) % mod
+    print(res)
+
+if __name__ == '__main__':
+    main()
 ```
 
 ## 
