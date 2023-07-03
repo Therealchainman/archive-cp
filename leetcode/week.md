@@ -24203,6 +24203,63 @@ class Solution:
         return backtrack(0)
 ```
 
+## 1601. Maximum Number of Achievable Transfer Requests
+
+### Solution 1:  backtrack + recursion + pruning
+
+```py
+class Solution:
+    def maximumRequests(self, n: int, requests: List[List[int]]) -> int:
+        m = len(requests)
+        res = 0
+        for mask in range(1, 1 << m):
+            degrees = [0] * n
+            request_count = mask.bit_count()
+            if request_count <= res: continue
+            for i in range(m):
+                if (mask >> i) & 1:
+                    u, v = requests[i]
+                    degrees[u] -= 1
+                    degrees[v] += 1
+            if not any(x != 0 for x in degrees): res = max(res, request_count)
+        return res
+```
+
+### Solution 2: network flow 
+
+```py
+
+```
+
+## 859. Buddy Strings
+
+### Solution 1:  set + sum + counter
+
+```py
+class Solution:
+    def buddyStrings(self, s: str, goal: str) -> bool:
+        if len(s) != len(goal): return False
+        if s == goal and len(set(s)) < len(s): return True
+        diff = sum(1 for i in range(len(s)) if s[i] != goal[i])
+        return diff == 2 and Counter(s) == Counter(goal)
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
