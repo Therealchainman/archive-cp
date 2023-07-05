@@ -302,12 +302,30 @@ if __name__ == '__main__':
     main()
 ```
 
-##
+## Grid Paths
 
-### Solution 1: 
+### Solution 1:  dynamic programming + grid + counting number of paths + O(n^2)
 
 ```py
+from itertools import product
 
+def main():
+    n = int(input())
+    mod = int(1e9) + 7
+    grid = [input() for _ in range(n)]
+    wall = '*'
+    dp = [[0] * n for _ in range(n)]
+    dp[0][0] = 0 if grid[0][0] == wall else 1
+    for r, c in product(range(n), repeat = 2):
+        if grid[r][c] == wall: continue
+        if r > 0:
+            dp[r][c] = (dp[r][c] + dp[r - 1][c]) % mod
+        if c > 0:
+            dp[r][c] = (dp[r][c] + dp[r][c - 1]) % mod
+    print(dp[-1][-1])
+
+if __name__ == '__main__':
+    main()
 ```
 
 ##

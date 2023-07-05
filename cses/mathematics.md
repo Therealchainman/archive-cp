@@ -269,6 +269,68 @@ if __name__ == '__main__':
     main()
 ```
 
+## Creating Strings II
+
+### Solution 1:  combinatorics + factorials = modular inverse + multinomial coefficient + reduce + string module and count of each lowercase character
+
+```py
+from functools import reduce
+import string
+
+def mod_inverse(num, mod):
+    return pow(num, mod - 2, mod)
+
+def factorials(n, mod):
+    fact = [1]*(n + 1)
+    for i in range(1, n + 1):
+        fact[i] = (fact[i - 1] * i) % mod
+    inv_fact = [1]*(n + 1)
+    inv_fact[-1] = mod_inverse(fact[-1], mod)
+    for i in range(n - 1, -1, -1):
+        inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % mod
+    return fact, inv_fact
+
+def main():
+    s = input()
+    n = len(s)
+    mod = int(1e9) + 7
+    fact, inv_fact = factorials(n, mod)
+    res = (fact[n] * reduce(lambda cur, val: inv_fact[s.count(val)] * cur, string.ascii_lowercase, 1)) % mod
+    print(res)
+
+if __name__ == '__main__':
+    main()
+```
+
+## Distributing Apples
+
+### Solution 1:  factorials + modular inverse + inverse factorials + combinations + binomial coefficient + combinatorics
+
+```py
+def mod_inverse(num, mod):
+    return pow(num, mod - 2, mod)
+
+def factorials(n, mod):
+    fact = [1]*(n + 1)
+    for i in range(1, n + 1):
+        fact[i] = (fact[i - 1] * i) % mod
+    inv_fact = [1]*(n + 1)
+    inv_fact[-1] = mod_inverse(fact[-1], mod)
+    for i in range(n - 1, -1, -1):
+        inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % mod
+    return fact, inv_fact
+
+def main():
+    n, m = map(int, input().split())
+    mod = int(1e9) + 7
+    fact, inv_fact = factorials(n + m, mod)
+    res = (fact[n + m - 1] * inv_fact[n - 1] * inv_fact[m]) % mod
+    print(res)
+
+if __name__ == '__main__':
+    main()
+```
+
 ## Christmas Party
 
 ### Solution 1:  inclusion-exclusion principle + math + combinatorics + derangements
@@ -296,23 +358,6 @@ def main():
 if __name__ == '__main__':
     main()
 ```
-
-## 
-
-### Solution 1:
-
-```py
-
-```
-
-## 
-
-### Solution 1:
-
-```py
-
-```
-
 
 ## 
 

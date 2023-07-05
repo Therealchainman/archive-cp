@@ -47,27 +47,22 @@ input = lambda: sys.stdin.readline().rstrip("\r\n")
 # import pypyjit
 # pypyjit.set_param('max_unroll_recursion=-1')
 
-def mod_inverse(num, mod):
-    return pow(num, mod - 2, mod)
+from itertools import product
 
 def main():
     n = int(input())
     mod = int(1e9) + 7
-    fact = [1]*(n + 1)
-    for i in range(1, n + 1):
-        fact[i] = (fact[i - 1] * i) % mod
-    inv_fact = [1]*(n + 1)
-    inv_fact[-1] = mod_inverse(fact[-1], mod)
-    for i in range(n - 1, -1, -1):
-        inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % mod
-    res = 0
-    for i in range(n + 1):
-        res = (res + (inv_fact[i] if i % 2 == 0 else -inv_fact[i])) % mod
-    res = (res * fact[n]) % mod
-    print(res)
+    grid = [input() for _ in range(n)]
+    wall = '*'
+    dp = [[0] * n for _ in range(n)]
+    dp[0][0] = 0 if grid[0][0] == wall else 1
+    for r, c in product(range(n), repeat = 2):
+        if grid[r][c] == wall: continue
+        if r > 0:
+            dp[r][c] = (dp[r][c] + dp[r - 1][c]) % mod
+        if c > 0:
+            dp[r][c] = (dp[r][c] + dp[r][c - 1]) % mod
+    print(dp[-1][-1])
 
 if __name__ == '__main__':
     main()
-    # T = int(input())
-    # for _ in range(T):
-    #     print(main())

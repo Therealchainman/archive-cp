@@ -24244,20 +24244,57 @@ class Solution:
         return diff == 2 and Counter(s) == Counter(goal)
 ```
 
-##
+## 1493. Longest Subarray of 1's After Deleting One Element
 
-### Solution 1:
+### Solution 1:  prefix and suffix count of continuous ones
 
 ```py
-
+class Solution:
+    def longestSubarray(self, nums: List[int]) -> int:
+        n = len(nums)
+        scount = [0] * (n + 1)
+        for i in reversed(range(n)):
+            scount[i] = scount[i + 1] + 1 if nums[i] else 0
+        pcount = res = 0
+        for i in range(n):
+            res = max(res, pcount + scount[i + 1])
+            pcount = pcount + 1 if nums[i] else 0
+        return res
 ```
 
-##
-
-### Solution 1:
+### Solution 2: sliding window + maintain one zero + one element deleted in sliding window
 
 ```py
+class Solution:
+    def longestSubarray(self, nums: List[int]) -> int:
+        n = len(nums)
+        res = zeros = left = 0
+        for right in range(n):
+            zeros += not nums[right]
+            while zeros > 1:
+                zeros -= not nums[left]
+                left += 1
+            res = max(res, right - left)
+        return res
+```
 
+## 137. Single Number II
+
+### Solution 1:  addition under modulo 3 + bitwise operators + bit manipulation
+
+Can induce addition under modulo 3 (a + b) % 3 by using addition under modulo 2 and some logic on each bit. 
+Then need three variables to represent the bits that are currently set to 0, 1, 2.  
+
+Logic is that if the bit is not set in twice then it must be set in the zero, so when it encounters it it will be now set to 1. 
+
+```py
+class Solution:
+    def singleNumber(self, nums: List[int]) -> int:
+        once = twice = 0
+        for num in nums:
+            once = (once ^ num & ~twice)
+            twice = (twice ^ num & ~once)
+        return once
 ```
 
 ##
