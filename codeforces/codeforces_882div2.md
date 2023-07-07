@@ -1,8 +1,15 @@
+# Codeforces Round 882 Div 2
+
+## Notes
+
+if the implementation is in python it will have this at the top of the python script for fast IO operations
+
+```py
 import os,sys
 from io import BytesIO, IOBase
 from typing import *
-# import pypyjit
-# pypyjit.set_param('max_unroll_recursion=-1')
+import pypyjit
+pypyjit.set_param('max_unroll_recursion=-1')
  
 # Fast IO Region
 BUFSIZE = 8192
@@ -44,24 +51,68 @@ class IOWrapper(IOBase):
         self.readline = lambda: self.buffer.readline().decode("ascii")
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
+```
 
-def main():
-    n = int(input())
-    N = 10**18
-    for d in range(3, 64):
-        left, right = 2, int(pow(N, 1 / (d - 1))) + 10
-        while left <= right:
-            mid = (left + right) >> 1
-            value = (mid**d - 1) // (mid - 1)
-            if value < n:
-                left = mid + 1
-            else:
-                right = mid - 1
-            if (mid**d - 1) % (mid - 1) == 0 and (mid**d - 1) // (mid - 1) == n:
-                return print("YES")
-    print("NO")
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+#define int long long
 
-if __name__ == '__main__':
-    T = int(input())
-    for _ in range(T):
-        main()
+inline int read() {
+	int x = 0, y = 1; char c = getchar();
+	while (c < '0' || c > '9') {
+		if (c == '-') y = -1;
+		c = getchar();
+	}
+	while (c >= '0' && c <= '9') x = x * 10 + c - '0', c = getchar();
+	return x * y;
+}
+```
+
+## 
+
+### Solution 1: 
+
+```py
+
+```
+
+## 
+
+### Solution 1: 
+
+```py
+
+```
+
+## 
+
+### Solution 1: 
+
+```py
+
+```
+
+## 
+
+### Solution 1: 
+
+```py
+
+```
+
+## 
+
+### Solution 1: 
+
+```py
+
+```
+
+## 
+
+### Solution 1: 
+
+```py
+
+```

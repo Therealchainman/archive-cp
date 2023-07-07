@@ -24297,6 +24297,51 @@ class Solution:
         return once
 ```
 
+## 2024. Maximize the Confusion of an Exam
+
+### Solution 1:  sliding window
+
+Move the left pointer whenever the current window is invalid because both T and F are greater than k so no way to replace k of them.  If one of them is less than or equal to k, then you are capable of flipping that answer key.
+
+```py
+class Solution:
+    def maxConsecutiveAnswers(self, answerKey: str, k: int) -> int:
+        n = len(answerKey)
+        left = res = 0
+        counts = Counter({'T': 0, 'F': 0})
+        for right in range(n):
+            counts[answerKey[right]] += 1
+            while min(counts.values()) > k:
+                counts[answerKey[left]] -= 1
+                left += 1
+            res = max(res, right - left + 1)
+        return res
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
