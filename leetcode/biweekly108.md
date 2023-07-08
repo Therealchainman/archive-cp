@@ -7,20 +7,18 @@
 ```py
 class Solution:
     def alternatingSubarray(self, nums: List[int]) -> int:
-        n = len(nums)
         res = -1
-        for i in range(1, n):
-            cur = nums[i] - nums[i - 1]
-            if cur != 1: continue
-            res = max(res, 2)
-            for j in range(i + 1, n):
-                if cur > 0 and nums[j] - nums[j - 1] == -1:
-                    cur = nums[j] - nums[j - 1]
-                    res = max(res, j - i + 2)
-                elif cur < 0 and nums[j] - nums[j - 1] == 1:
-                    cur = nums[j] - nums[j - 1]
-                    res = max(res, j - i + 2)
-                else: break
+        left = 0
+        n = len(nums)
+        diff = [nums[i] - nums[i - 1] for i in range(1, n)]
+        for right in range(1, n - 1):
+            while left < right and diff[left] != 1:
+                left += 1
+            delta = right - left
+            if ((delta & 1) and diff[right] == -1) or (delta % 2 == 0 and diff[right] == 1):
+                res = max(res, delta + 2)
+            else:
+                left = right
         return res
 ```
 
@@ -89,5 +87,26 @@ class Solution:
                 cnt = black_rocks(nr, nc)
                 counts[cnt] += 1
         counts[0] = total - sum(counts)
+        return counts
+```
+
+```py
+class Solution:
+    def countBlackBlocks(self, R: int, C: int, coordinates: List[List[int]]) -> List[int]:
+        coordinates = set([(r, c) for r, c in coordinates])
+        neighborhood = lambda r, c: [(r - 1, c), (r - 1, c - 1), (r, c - 1), (r, c)]
+        in_bounds = lambda r, c: 0 <= r < R and 0 <= c < C
+        base_in_bounds = lambda r, c: 0 <= r < R - 1 and 0 <= c < C - 1
+        base_neighborhood = lambda r, c: [(r + 1, c), (r + 1, c + 1), (r, c + 1), (r, c)] 
+        submatrix_search = lambda r, c: sum(1 for r, c in base_neighborhood(r, c) if in_bounds(r, c) and (r, c) in coordinates)
+        vis = set()
+        counts = [0] * 5
+        for r, c in coordinates:
+            for nr, nc in neighborhood(r, c):
+                if not base_in_bounds(nr, nc) or (nr, nc) in vis: continue
+                vis.add((nr, nc))
+                cnt = submatrix_search(nr, nc)
+                counts[cnt] += 1
+        counts[0] = (R - 1) * (C - 1) - sum(counts)
         return counts
 ```
