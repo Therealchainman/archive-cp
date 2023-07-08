@@ -224,6 +224,8 @@ if __name__ == '__main__':
 
 ## G - Minimum Xor Pair Query 
 
+![images](images/minimum_xor_pair.png)
+
 ### Solution 1: 
 
 ```py

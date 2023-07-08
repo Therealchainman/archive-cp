@@ -219,6 +219,8 @@ if __name__ == '__main__':
 
 ### Solution 1: dynamic programming + probability + expectation of indicator random variable
 
+![images](images/moving_robots_indicator_variable.png)
+
 ```py
 """
 probability cell is empty is 1 - probability of robot existing on cell
@@ -273,6 +275,8 @@ if __name__ == '__main__':
 
 ### Solution 1:  combinatorics + factorials = modular inverse + multinomial coefficient + reduce + string module and count of each lowercase character
 
+![images](images/creating_strings_2.png)
+
 ```py
 from functools import reduce
 import string
@@ -306,6 +310,8 @@ if __name__ == '__main__':
 
 ### Solution 1:  factorials + modular inverse + inverse factorials + combinations + binomial coefficient + combinatorics
 
+![image](images/distributing_apples.png)
+
 ```py
 def mod_inverse(num, mod):
     return pow(num, mod - 2, mod)
@@ -335,6 +341,8 @@ if __name__ == '__main__':
 
 ### Solution 1:  inclusion-exclusion principle + math + combinatorics + derangements
 
+![images](images/inclusion_exclusion_principle_derangements.png)
+
 ```py
 def mod_inverse(num, mod):
     return pow(num, mod - 2, mod)
@@ -359,31 +367,37 @@ if __name__ == '__main__':
     main()
 ```
 
-## 
+## Counting Divisors
 
 ### Solution 1:
+
+![images](images/counting_factors.png)
 
 ```py
 
 ```
 
-## 
+## Common Divisors
 
 ### Solution 1:
+
+![images](images/common_divisors.png)
 
 ```py
 
 ```
 
-## 
+## Graph Paths I
 
 ### Solution 1:
+
+![images](images/graph_paths.png)
 
 ```py
 
 ```
 
-## 
+## Graph Paths II
 
 ### Solution 1:
 

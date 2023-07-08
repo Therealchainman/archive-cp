@@ -23298,6 +23298,9 @@ class Solution:
 
 dp[0][1] is the player that takes first and must take when M = 1 initially
 
+![images](images/stone_game_2_1.png)
+![images](images/stone_game_2_2.png)
+
 ```py
 class Solution:
     def stoneGameII(self, piles: List[int]) -> int:
@@ -23324,6 +23327,9 @@ the length is more of the number of cut points, so for instance
 length = 2 means a stick with two endpoints that are cut points
 length = 3 means a stick with two endpoints and middle cut point
 length = 4, now you have two cut options between it, and so on want the minimum value, solve the recurrence relation
+
+![images](images/minimum_stick_cuts_1.png)
+![images](images/minimum_stick_cuts_2.png)
 
 ```py
 class Solution:
@@ -24282,6 +24288,8 @@ class Solution:
 
 ### Solution 1:  addition under modulo 3 + bitwise operators + bit manipulation
 
+![images](images/single_number_2.png)
+
 Can induce addition under modulo 3 (a + b) % 3 by using addition under modulo 2 and some logic on each bit. 
 Then need three variables to represent the bits that are currently set to 0, 1, 2.  
 
@@ -24318,12 +24326,27 @@ class Solution:
         return res
 ```
 
-##
+## 340. Longest Substring with At Most K Distinct Characters
 
-### Solution 1:
+### Solution 1:  sliding window + counter
 
 ```py
-
+class Solution:
+    def lengthOfLongestSubstringKDistinct(self, s: str, k: int) -> int:
+        n = len(s)
+        counts = Counter()
+        left = res = count_distinct = 0
+        for right in range(n):
+            counts[s[right]] += 1
+            if counts[s[right]] == 1:
+                count_distinct += 1
+            while count_distinct > k:
+                counts[s[left]] -= 1
+                if counts[s[left]] == 0: 
+                    count_distinct -= 1
+                left += 1
+            res = max(res, right - left + 1)
+        return res
 ```
 
 ##
