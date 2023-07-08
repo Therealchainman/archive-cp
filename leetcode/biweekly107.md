@@ -102,9 +102,3 @@ class Solution:
             ans[i] = n - cnt
         return ans
 ```
-
-### Solution 2: online queries?
-
-```py
-
-```
