@@ -11,7 +11,7 @@ class Solution:
         left = 0
         n = len(nums)
         diff = [nums[i] - nums[i - 1] for i in range(1, n)]
-        for right in range(1, n - 1):
+        for right in range(n - 1):
             while left < right and diff[left] != 1:
                 left += 1
             delta = right - left
@@ -62,51 +62,46 @@ class Solution:
         return res if res < math.inf else -1
 ```
 
-## 2768. Number of Black Blocks
+### Solution 2:  dynamic programming + O(n^2)
 
-### Solution 1:  set + brute force submatrices
+dp[i] = minimum number of valid partitions ending at character s[i - 1]
+base case is dp[0] for empty string and set to 0 partitions
 
 ```py
 class Solution:
-    def countBlackBlocks(self, m: int, n: int, coordinates: List[List[int]]) -> List[int]:
-        R, C = m, n
-        n = len(coordinates)
-        coordinates = set([(r, c) for r, c in coordinates])
-        neighborhood = lambda r, c: [(r - 1, c), (r - 1, c - 1), (r, c - 1), (r, c)]
-        neighborhood2 = lambda r, c: [(r + 1, c), (r + 1, c + 1), (r, c + 1), (r, c)]
-        in_bounds = lambda r, c: 0 <= r < R and 0 <= c < C
-        in_bounds2 = lambda r, c: 0 <= r < R - 1 and 0 <= c < C - 1
-        total = (R - 1) * (C - 1)
-        vis = set()
-        counts = [0] * 5
-        black_rocks = lambda r, c: sum(1 for r, c in neighborhood2(r, c) if in_bounds(r, c) and (r, c) in coordinates)
-        for r, c in coordinates:
-            for nr, nc in neighborhood(r, c):
-                if not in_bounds2(nr, nc) or (nr, nc) in vis: continue
-                vis.add((nr, nc))
-                cnt = black_rocks(nr, nc)
-                counts[cnt] += 1
-        counts[0] = total - sum(counts)
-        return counts
+    def minimumBeautifulSubstrings(self, s: str) -> int:
+        n = len(s)
+        fives = {1, 5, 25, 125, 625, 3125, 15625}
+        dp = [0] + [math.inf] * n
+        for i in range(1, n + 1):
+            for j in range(i):
+                if s[j] == '0': continue
+                cand = int(s[j:i], 2)
+                if cand not in fives: continue
+                dp[i] = min(dp[i], dp[j] + 1)
+        return dp[-1] if dp[-1] != math.inf else -1
 ```
+
+## 2768. Number of Black Blocks
+
+### Solution 1:  hash table + counters
+
+For each black rock, add it to all the possibly 4 submatrices it can belong within.  
 
 ```py
 class Solution:
     def countBlackBlocks(self, R: int, C: int, coordinates: List[List[int]]) -> List[int]:
-        coordinates = set([(r, c) for r, c in coordinates])
+        in_bounds = lambda r, c: 0 <= r < R - 1 and 0 <= c < C - 1
         neighborhood = lambda r, c: [(r - 1, c), (r - 1, c - 1), (r, c - 1), (r, c)]
-        in_bounds = lambda r, c: 0 <= r < R and 0 <= c < C
-        base_in_bounds = lambda r, c: 0 <= r < R - 1 and 0 <= c < C - 1
-        base_neighborhood = lambda r, c: [(r + 1, c), (r + 1, c + 1), (r, c + 1), (r, c)] 
-        submatrix_search = lambda r, c: sum(1 for r, c in base_neighborhood(r, c) if in_bounds(r, c) and (r, c) in coordinates)
-        vis = set()
-        counts = [0] * 5
+        black_counter = Counter()
         for r, c in coordinates:
             for nr, nc in neighborhood(r, c):
-                if not base_in_bounds(nr, nc) or (nr, nc) in vis: continue
-                vis.add((nr, nc))
-                cnt = submatrix_search(nr, nc)
-                counts[cnt] += 1
+                if not in_bounds(nr, nc): continue
+                cell = nc + nr * C
+                black_counter[cell] += 1
+        counts = [0] * 5
+        for cnt in black_counter.values():
+            counts[cnt] += 1
         counts[0] = (R - 1) * (C - 1) - sum(counts)
         return counts
 ```
