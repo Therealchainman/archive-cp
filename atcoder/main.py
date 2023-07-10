@@ -48,24 +48,10 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-# comparator for fractions
-class Fraction:
-    def __init__(self, num, denom):
-        self.num, self.denom = num, denom
-    
-    def __lt__(self, other):
-        return self.num * other.denom < other.num * self.denom
-
 def main():
-    n = int(input())
-    heads, tails = [None] * n, [None] * n
-    succ = [0] * n
-    for i in range(n):
-        h, t = map(int, input().split())
-        heads[i], tails[i] = h, t
-        succ[i] = Fraction(h, h + t)
-    res = sorted(range(1, n + 1), key = lambda i: (succ[i - 1], -i), reverse = True)
-    print(*res)
+    a, b = map(int, input().split())
+    res = "Yes" if a % 3 and b == a + 1 else "No"
+    print(res)
 
 if __name__ == '__main__':
     main()

@@ -2265,6 +2265,28 @@ class Solution:
         return var
 ```
 
+```py
+class Solution:
+    def largestVariance(self, s: str) -> int:
+        pairs = [(ch1, ch2) for ch1 in set(s) for ch2 in set(s) if ch1 != ch2]
+        def kadane(st):
+            res = 0
+            for ch1, ch2 in pairs:
+                low_count = high_count = 0
+                for ch in st:
+                    if ch not in (ch1, ch2): continue
+                    if ch == ch1:
+                        low_count += 1
+                    elif ch == ch2:
+                        high_count += 1
+                    if high_count < low_count:
+                        low_count = high_count = 0
+                    elif low_count > 0 and high_count > 0:
+                        res = max(res, high_count - low_count)
+            return res
+        return max(kadane(s), kadane(s[::-1]))
+```
+
 ## 1302. Deepest Leaves Sum
 
 ### Solution 1: Tree traversal + sum array
@@ -24349,12 +24371,23 @@ class Solution:
         return res
 ```
 
-##
+## 111. Minimum Depth of Binary Tree
 
-### Solution 1:
+### Solution 1:  bfs + queue
 
 ```py
-
+class Solution:
+    def minDepth(self, root: Optional[TreeNode]) -> int:
+        if not root: return 0
+        queue = deque([root])
+        depth = 1
+        while queue:
+            for _ in range(len(queue)):
+                node = queue.popleft()
+                if not node.left and not node.right: return depth
+                queue.extend(filter(None, (node.left, node.right)))
+            depth += 1
+        return -1
 ```
 
 ##
