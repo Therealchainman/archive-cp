@@ -6,6 +6,8 @@ This is example of how was able to binary search for the k values in a quadratic
 
 Finding if there is a solution to this equation 1 + x + x^2 = n, where x is the unknown variable.  So just need to find at what x it is equal to n.  But x > 0,  so you are only searching one side of quadratic equation that is why binary search works.  
 
+The area that is actually be searched is monotonic and that is why binary search will work. 
+
 ![images](images/quadratic.png)
 
 ```py
