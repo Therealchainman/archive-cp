@@ -186,24 +186,67 @@ if __name__ == '__main__':
 
 ### Solution 1:  math + binary search
 
+This code shows how it exceeds 10^18 limit on the k = 1,000,000 for 1 + k + k^2 + k^3.
+so it only goes up to 1,000,000 and that is all needs to be precomputed
+
+So the all that is not precomputed is all the possible values for 1 + k + k^2, or when p = 2 if you write the snowflake as 1 + k + k^2 + ... + k^p
+
 ```py
+for k in range(2, 1_000_001):
+    v = 1 + k + k**2 + k**3
+    if v >= 10**18:
+        print(f'{v:,}')
+```
+
+This proves that with the smallest k = 2, that you will exceed max once p = 59, so really just need p < 60
+
+```py
+v = 0
+for i in range(60):
+    v += 2**i
+    if v > 10**18:
+        print(i)
+print(f"{v:,}")
+```
+
+The only snowflakes not solved by precomputing the first 1 million terms or 1,000,000 terms, is the case of 1 + k + k^2,  Cause in this instance k can be really large, it can go all the way up to 1,000,000,000 as can be proved with this code. 
+
+This is too large to precompute, so the only way is to binary search this specific case. 
+
+```py
+for k in range(999_999_980, 1_000_500_000):
+    v = 1 + k + k**2
+    if v > 10**18:
+        print(f"{k:,}", f"{v:,}")
+        break
+```
+
+```py
+vis = set()
+INF = int(1e18)
+
 def main():
     n = int(input())
-    N = 10**18
-    for d in range(3, 64):
-        left, right = 2, int(pow(N, 1 / (d - 1))) + 10
-        while left <= right:
-            mid = (left + right) >> 1
-            value = (mid**d - 1) // (mid - 1)
-            if value < n:
-                left = mid + 1
-            else:
-                right = mid - 1
-            if (mid**d - 1) % (mid - 1) == 0 and (mid**d - 1) // (mid - 1) == n:
-                return print("YES")
-    print("NO")
+    if n in vis: return print("Yes")
+    # solve equation 1 + k + k^2 == n with binary search
+    quadratic = lambda k: 1 + k + k**2
+    left, right = 2, 1_000_000_000
+    while left < right:
+        mid = (left + right) >> 1
+        if quadratic(mid) == n: return print("Yes")
+        if quadratic(mid) <= n: left = mid + 1
+        else: right = mid
+    print("No")
 
 if __name__ == '__main__':
+    for k in range(2, 1_000_001):
+        term = k
+        num_vertices = 1 + k
+        for p in range(59):
+            term *= k
+            num_vertices += term
+            if num_vertices > INF: break
+            vis.add(num_vertices)
     T = int(input())
     for _ in range(T):
         main()

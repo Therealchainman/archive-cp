@@ -45,23 +45,31 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
+vis = set()
+INF = int(1e18)
+
 def main():
     n = int(input())
-    N = 10**18
-    for d in range(3, 64):
-        left, right = 2, int(pow(N, 1 / (d - 1))) + 10
-        while left <= right:
-            mid = (left + right) >> 1
-            value = (mid**d - 1) // (mid - 1)
-            if value < n:
-                left = mid + 1
-            else:
-                right = mid - 1
-            if (mid**d - 1) % (mid - 1) == 0 and (mid**d - 1) // (mid - 1) == n:
-                return print("YES")
-    print("NO")
+    if n in vis: return print("Yes")
+    # solve equation 1 + k + k^2 == n with binary search
+    possible = lambda k: 1 + k + k**2 <= n
+    left, right = 2, 1_000_000_000
+    while left < right:
+        mid = (left + right) >> 1
+        if 1 + mid + mid**2 == n: return print("Yes")
+        if possible(mid): left = mid + 1
+        else: right = mid
+    print("No")
 
 if __name__ == '__main__':
+    for k in range(2, 1_000_001):
+        term = k
+        num_vertices = 1 + k
+        for p in range(62):
+            term *= k
+            num_vertices += term
+            if num_vertices > INF: break
+            vis.add(num_vertices)
     T = int(input())
     for _ in range(T):
         main()
