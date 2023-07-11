@@ -174,6 +174,8 @@ if __name__ == '__main__':
 
 ### Solution 1:  directed graph + tree + bfs
 
+The trick is just keep the track of the remaining descendants that can be covered by the current insurance
+
 ```py
 from collections import deque, Counter
 
@@ -207,6 +209,8 @@ if __name__ == '__main__':
 ## F - Box in Box
 
 ### Solution 1:  sort + offline queries + minimum segment tree + coordinate compression
+
+This is good segment tree problem you can sort It turns out that you can use any permutation of h, w, d with some rotation of a rectangular prism.  So then what you can do is consider the problem of sorting by h in ascending order, so that for j > i it is true that hj >= hi.  So smaller ones processed first, But since they can be equal you will want to sort wi in descending order.  Then what can be done is created a segment tree that will hold the minimum di for each wi.  Need to use coordinate compression on wi and segment tree.  Then can query a range from [0, wi - 1] with segment tree to get minimum di and if di < dj, it is already guaranteed wi < wj and that hi < hj.  so that is the solution.
 
 ```py
 import math
@@ -282,8 +286,59 @@ if __name__ == '__main__':
 
 ## G - Ban Permutation
 
-### Solution 1: 
+### Solution 1:  bitmask window + dynamic programming + inclusion exclusion principle + factorial
+
+Instead of solving the problem for |Pi - i| >= X , try solving the problem with dynamic programming for |Pi - i| < X 
+And then use inclusion exclusion principle to get the answer for |Pi - i| >= X.  
+
+Inclusion Exclusion principle is needed for this because thereare overlapping, and you want to take the union of all the sets.  It is similar to derangement problem and I used that one to help understand why this works. 
+
+![images](images/ban_permutation_1.png)
+![images](images/ban_permutation_2.png)
+![images](images/ban_permutation_3.png)
+![images](images/ban_permutation_4.png)
 
 ```py
+def factorials(n, mod):
+    fact = [1]*(n + 1)
+    for i in range(1, n + 1):
+        fact[i] = (fact[i - 1] * i) % mod
+    return fact
 
+def main():
+    N, X = map(int, input().split())
+    mod = 998244353
+    fact = factorials(N, mod)
+    window_size = 2 * X - 1
+    dp = [[0] * (1 << window_size)]
+    dp[0][0] = 1
+    for i in range(N):
+        ndp = [[0] * (1 << window_size) for _ in range(i + 2)]
+        for taken in range(i + 1):
+            for mask in range(1 << window_size):
+                if dp[taken][mask] == 0: continue
+                for disp in range(-X + 1, X):
+                    if i + disp < 0 or i + disp >= N: continue
+                    window_index = disp + X - 1
+                    if mask & (1 << window_index): continue
+                    new_mask = (mask | (1 << window_index)) >> 1
+                    # taking valid i where |P_i - i| < X
+                    ndp[taken + 1][new_mask] += dp[taken][mask]
+                # not taking an integer, but upgrading the mask for the window
+                new_mask = mask >> 1
+                ndp[taken][new_mask] += dp[taken][mask]
+        dp = ndp
+    res = 0
+    for taken in range(N + 1):
+        cur = 0
+        for mask in range(1 << window_size):
+            cur = (cur + dp[taken][mask]) % mod
+        if taken & 1:
+            res = (res - cur * fact[N - taken]) % mod
+        else:
+            res = (res + cur * fact[N - taken]) % mod
+    print(res)
+    
+if __name__ == '__main__':
+    main()
 ```
