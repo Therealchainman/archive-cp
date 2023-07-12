@@ -24390,12 +24390,32 @@ class Solution:
         return -1
 ```
 
-##
+## 802. Find Eventual Safe States
 
-### Solution 1:
+### Solution 1: directed graph + topological sort + reverse adjacency list + outdegrees
+
+If it has outdegree of a node is equal to 0 that means that it is a safe node because it is either a terminal node or it was only connected to other safe nodes.
 
 ```py
-
+class Solution:
+    def eventualSafeNodes(self, adj_list: List[List[int]]) -> List[int]:
+        n = len(adj_list)
+        rev_adj_list = [[] for _ in range(n)]
+        outdegrees = [0] * n
+        queue = deque()
+        for i in range(n):
+            outdegrees[i] = len(adj_list[i])
+            if outdegrees[i] == 0: queue.append(i)
+            for j in adj_list[i]:
+                rev_adj_list[j].append(i)
+        res = []
+        while queue:
+            node = queue.popleft()
+            res.append(node)
+            for nei in rev_adj_list[node]:
+                outdegrees[nei] -= 1
+                if outdegrees[nei] == 0: queue.append(nei)
+        return sorted(res)
 ```
 
 ##
