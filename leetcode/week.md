@@ -24418,6 +24418,265 @@ class Solution:
         return sorted(res)
 ```
 
+## 1218. Longest Arithmetic Subsequence of Given Difference
+
+### Solution 1:  dynamic programming + counter
+
+dp[i] = max(dp[i], dp[i - k] + 1), where k is the difference.  So it is either part of previous 
+
+```py
+class Solution:
+    def longestSubsequence(self, arr: List[int], difference: int) -> int:
+        dp = Counter()
+        for num in arr:
+            dp[num] = max(dp[num], dp[num - difference] + 1)
+        return max(dp.values())
+```
+
+## 1751. Maximum Number of Events That Can Be Attended II
+
+### Solution 1:  recursive dynamic programming + sort + bisect + binary search
+
+```py
+class Solution:
+    def maxValue(self, events: List[List[int]], k: int) -> int:
+        events = list(map(tuple, events))
+        n = len(events)
+        events.sort()
+        @cache
+        def dp(i, j):
+            if j == k or i == n: return 0
+            # skip event
+            res = dp(i + 1, j)
+            # take the event
+            _, e, v = events[i]
+            idx = bisect.bisect_right(events, (e, math.inf, math.inf))
+            res = max(res, dp(idx, j + 1) + v)
+            return res
+        return dp(0, 0)
+```
+
+## 1644. Lowest Common Ancestor of a Binary Tree II
+
+### Solution 1:  binary lifting + lowest common ancestor + binary tree
+
+Convert binary tree into into adjacency list representation and as an undirected graph to run in binary lift algorithm
+
+```py
+class BinaryLift:
+    """
+    This binary lift function works on any undirected graph that is composed of
+    an adjacency list defined by graph
+    """
+    def __init__(self, node_count: int, graph: List[List[int]]):
+        self.size = node_count
+        self.graph = graph # pass in an adjacency list to represent the graph
+        self.depth = [0]*node_count
+        self.parents = [-1]*node_count
+        self.visited = [False]*node_count
+        # ITERATE THROUGH EACH POSSIBLE TREE
+        for node in range(node_count):
+            if self.visited[node]: continue
+            self.visited[node] = True
+            self.get_parent_depth(node)
+        self.maxAncestor = 18 # set it so that only up to 2^18th ancestor can exist for this example
+        self.jump = [[-1]*self.maxAncestor for _ in range(self.size)]
+        self.build_sparse_table()
+        
+    def build_sparse_table(self) -> None:
+        """
+        builds the jump sparse arrays for computing the 2^jth ancestor of ith node in any given query
+        """
+        for j in range(self.maxAncestor):
+            for i in range(self.size):
+                if j == 0:
+                    self.jump[i][j] = self.parents[i]
+                elif self.jump[i][j-1] != -1:
+                    prev_ancestor = self.jump[i][j-1]
+                    self.jump[i][j] = self.jump[prev_ancestor][j-1]
+                    
+    def get_parent_depth(self, node: int, parent_node: int = -1, depth: int = 0) -> None:
+        """
+        Fills out the depth array for each node and the parent array for each node
+        """
+        self.parents[node] = parent_node
+        self.depth[node] = depth
+        for nei_node in self.graph[node]:
+            if self.visited[nei_node]: continue
+            self.visited[nei_node] = True
+            self.get_parent_depth(nei_node, node, depth+1)
+
+    def distance(self, p: int, q: int) -> int:
+        """
+        Computes the distance between two nodes
+        """
+        lca = self.find_lca(p, q)
+        return self.depth[p] + self.depth[q] - 2*self.depth[lca]
+
+    def find_lca(self, p: int, q: int) -> int:
+        # ASSUME NODE P IS DEEPER THAN NODE Q   
+        if self.depth[p] < self.depth[q]:
+            p, q = q, p
+        # PUT ON SAME DEPTH BY FINDING THE KTH ANCESTOR
+        k = self.depth[p] - self.depth[q]
+        p = self.kthAncestor(p, k)
+        if p == q: return p
+        for j in range(self.maxAncestor)[::-1]:
+            if self.jump[p][j] != self.jump[q][j]:
+                p, q = self.jump[p][j], self.jump[q][j] # jump to 2^jth ancestor nodes
+        return self.jump[p][0]
+    
+    def kthAncestor(self, node: int, k: int) -> int:
+        while node != -1 and k>0:
+            i = int(math.log2(k))
+            node = self.jump[node][i]
+            k-=(1<<i)
+        return node
+
+class Solution:
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        node_index = {root: 0}
+        index_node = {0: root}
+        adj_list = defaultdict(list)
+        queue = deque([0])
+        while queue:
+            index = queue.popleft()
+            node = index_node[index]
+            if node.left:
+                u, v = index, len(node_index)
+                node_index[node.left] = v
+                index_node[v] = node.left
+                adj_list[u].append(v)
+                adj_list[v].append(u)
+                queue.append(v)
+            if node.right:
+                u, v = index, len(node_index)
+                node_index[node.right] = v
+                index_node[v] = node.right
+                adj_list[u].append(v)
+                adj_list[v].append(u)
+                queue.append(v)
+        if p not in node_index or q not in node_index: return None
+        p_index, q_index = node_index[p], node_index[q]
+        lca_algorithm = BinaryLift(len(node_index), adj_list)
+        lca_node = index_node[lca_algorithm.find_lca(p_index, q_index)]
+        return lca_node
+```
+
+## 1125. Smallest Sufficient Team
+
+### Solution 1:  dynamic programming + bitmask + bfs + queue + shortest path in unweighted undirected graph
+
+```py
+class Solution:
+    def smallestSufficientTeam(self, req_skills: List[str], people: List[List[str]]) -> List[int]:
+        n, m = len(req_skills), len(people)
+        end_mask = (1 << n) - 1
+        dp = [0] * (1 << n)
+        dp[0] = 0
+        skill_value = {skill: 1 << i for i, skill in enumerate(req_skills)}
+        pmasks = [reduce(operator.xor, map(lambda s: skill_value[s], skills), 0) for skills in people]
+        queue = deque([0])
+        while queue:
+            mask = queue.popleft()
+            if mask == end_mask: break
+            for i, pmask in enumerate(pmasks):
+                if pmask == 0: continue
+                nmask = mask | pmask
+                if dp[nmask]: continue
+                dp[nmask] = dp[mask] | (1 << i)
+                queue.append(nmask)
+        res = [i for i in range(m) if (dp[mask] >> i) & 1]
+        return res
+```
+
+### Solution 2:  bitmask + memoization + bfs + queue + backtrack to reconstruct shortest path
+
+```py
+class Solution:
+    def smallestSufficientTeam(self, req_skills: List[str], people: List[List[str]]) -> List[int]:
+        n = len(req_skills)
+        end_mask = (1 << n) - 1
+        vis = [0] * (1 << n)
+        vis[0] = 1
+        parent_arr = {(-1, 0): None}
+        skill_value = {skill: 1 << i for i, skill in enumerate(req_skills)}
+        pmasks = [reduce(operator.xor, map(lambda s: skill_value[s], skills), 0) for skills in people]
+        queue = deque([(-1, 0)])
+        while queue:
+            person, mask = queue.popleft()
+            if mask == end_mask: break
+            for i, pmask in enumerate(pmasks):
+                nmask = mask | pmask
+                if vis[nmask]: continue
+                vis[nmask] = 1
+                parent_arr[i, nmask] = (person, mask)
+                queue.append((i, nmask))
+        res = []
+        while mask != 0:
+            res.append(person)
+            person, mask = parent_arr[(person, mask)]
+        return res
+```
+
+## Solution 3: BFS to find the shortest path or smallest team with bitmask for skills and bitset for people in team bitset for people in team
+
+```cpp
+using People = bitset<60>;
+vector<int> smallestSufficientTeam(vector<string>& req_skills, vector<vector<string>>& people) {
+    int n = req_skills.size(), m = people.size(), endMask = (1<<n)-1;
+    unordered_map<string, int> skillMap;
+    for (int i = 0;i<n;i++) {
+        skillMap[req_skills[i]]=i;
+    }
+    int NEUTRAL  = m+1;
+    vector<int> dp(1<<n,NEUTRAL);
+    dp[0]=0;
+    for (int mask = 0;mask<endMask;mask++) {
+        if (dp[mask]==NEUTRAL) continue;
+        for (int i = 0;i<m;i++) {  
+            int nmask = mask;
+            for (string& skill : people[i]) {
+                int j = skillMap[skill];
+                nmask|=(1<<j);
+            }
+            dp[nmask] = min(dp[nmask],dp[mask]+1);
+        }
+    }
+    vector<int> result, vis(1<<n,0);
+    queue<pair<int,People>> q;
+    q.emplace(0,0);
+    int mask;
+    People p;
+    while (!q.empty()) {
+        tie(mask,p) = q.front();
+        q.pop();
+        if (mask==endMask) {
+            break;
+        }
+        for (int i = 0;i<m;i++) {  
+            int nmask = mask;
+            for (string& skill : people[i]) {
+                int j = skillMap[skill];
+                nmask|=(1<<j);
+            }
+            if (nmask>mask && !vis[nmask]) {
+                People np = p;
+                np.set(i);
+                q.emplace(nmask,np);
+                vis[nmask]=1;
+            }
+        }
+    }
+    for (int i = 0;i<m;i++) {
+        if (p.test(i)) {
+            result.push_back(i);
+        }
+    }
+    return result;
+}
+```
+
 ##
 
 ### Solution 1:
