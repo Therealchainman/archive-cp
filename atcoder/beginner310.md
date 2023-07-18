@@ -1,3 +1,8 @@
+# Atcoder Beginner Contest 310
+
+## What is used at the top of each submission
+
+```py
 import os,sys
 from io import BytesIO, IOBase
 sys.setrecursionlimit(10**6)
@@ -47,7 +52,33 @@ class IOWrapper(IOBase):
         self.readline = lambda: self.buffer.readline().decode("ascii")
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
+                    
+if __name__ == '__main__':
+    print(main())
+    # main()
+    # sys.stdout.close()
+```
 
+## 
+
+### Solution 1: 
+
+```py
+def main():
+    n, p, q = map(int, input().split())
+    d = list(map(int, input().split()))
+    res = min(p, q + min(d))
+    print(res)
+
+if __name__ == '__main__':
+    main()
+```
+
+## 
+
+### Solution 1: 
+
+```py
 def main():
     n, m = map(int, input().split())
     prices = [None] * n
@@ -69,3 +100,91 @@ def main():
 
 if __name__ == '__main__':
     main()
+```
+
+## 
+
+### Solution 1: 
+
+```py
+def main():
+    n = int(input())
+    vis = set()
+    res = 0
+    for _ in range(n):
+        s = input()
+        res += s not in vis
+        vis.add(s)
+        vis.add(s[::-1])
+    print(res)
+
+if __name__ == '__main__':
+    main()
+```
+
+## 
+
+### Solution 1: 
+
+```py
+from functools import lru_cache
+
+def main():
+    N, T, M = map(int, input().split())
+    incompatible_masks = set()
+    end_mask = (1 << N) - 1
+    for _ in range(M):
+        a, b = map(int, input().split())
+        mask = (1 << a) | (1 << b)
+        incompatible_masks.add(mask)    
+    @lru_cache(None)
+    def dfs(i, mask):
+        if i == T: return mask == end_mask
+        if mask == end_mask: return 0
+        cnt = 0
+        for team_mask in range(1, 1 << N):
+            if team_mask & mask: continue
+            cnt += dfs(i + 1, mask | team_mask)
+        if mask == 7:
+            print('i', i, 'mask', mask, 'cnt', cnt)
+        return cnt
+    res = dfs(0, 0)
+    print(res)
+
+if __name__ == '__main__':
+    main()
+```
+
+## 
+
+### Solution 1: 
+
+```py
+def main():
+    n = int(input())
+    arr = list(map(int, list(input())))
+    ones = zeros = res = 0
+    for num in arr:
+        ones, zeros = zeros + (1 if num else ones), ones if num else 1
+        res += ones
+    return res
+
+if __name__ == '__main__':
+    main()
+```
+
+## 
+
+### Solution 1: 
+
+```py
+
+```
+
+## 
+
+### Solution 1: 
+
+```py
+
+```
