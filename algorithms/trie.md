@@ -16,5 +16,26 @@ class TrieNode(defaultdict):
         self.prefix_count = 0 # how many words have this prefix
 
     def __repr__(self) -> str:
-        return f'is_word: {self.is_word} prefix_count: {self.prefix_count}, children: {self.keys()}'s
+        return f'is_word: {self.is_word} prefix_count: {self.prefix_count}, children: {self.keys()}'
+```
+
+## reduce trie
+
+This is a trie with the use of reduce to add words to the trie, and you can search through the trie like normal. 
+
+```py
+TrieNode = lambda: defaultdict(TrieNode)
+root = TrieNode()
+# adding words into the trie data structure
+for word in dictionary:
+    reduce(dict.__getitem__, word, root)['word'] = True
+
+
+    
+for word in sentence.split():
+    cur = root
+    n = len(word)
+    for i in range(n):
+        cur = cur[word[i]]
+        if cur['word']:
 ```

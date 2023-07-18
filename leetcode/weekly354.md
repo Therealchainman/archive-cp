@@ -32,6 +32,27 @@ class Solution:
         return res
 ```
 
+### Solution 2:  sliding window + math + optimized sliding window
+
+This is optimized sliding window that is not each window is valid, but it can consider nonvalid windows that are same length as the largest window found so far, and it will find longer windows it increases that size.  
+
+This uses the fact that if nums is sorted and 
+nums[l] + k < nums[r] + k
+Then for it to be valid it is required that they overlap in this method, nums[r] - k <= nums[l] + k
+which gives nums[r] - nums[l] <= 2*k
+
+```py
+class Solution:
+    def maximumBeauty(self, nums: List[int], k: int) -> int:
+        nums.sort()
+        left = 0
+        n = len(nums)
+        for right in range(n):
+            if nums[right] - nums[left] > 2 * k:
+                left += 1
+        return right - left + 1
+```
+
 ## 2780. Minimum Index of a Valid Split
 
 ### Solution 1:  prefix and suffix count
@@ -81,5 +102,44 @@ class Solution:
             while window and window[0][0] < left:
                 window.popleft()
             res = max(res, right - left + 1)
+        return res
+```
+
+```py
+class Solution:
+    def longestValidSubstring(self, word: str, forbidden: List[str]) -> int:
+        n = len(word)
+        forbidden = set(forbidden)
+        left = res = 0
+        last = n
+        for left in reversed(range(n)):
+            for right in range(left, min(n, left + 10, last)):
+                if word[left : right + 1] in forbidden: 
+                    last = right
+                    break
+            res = max(res, last - left)
+        return res
+```
+
+### Solution 2: trie
+
+```py
+class Solution:
+    def longestValidSubstring(self, word: str, forbidden: List[str]) -> int:
+        n = len(word)
+        TrieNode = lambda: defaultdict(TrieNode)
+        root = TrieNode()
+        for w in forbidden:
+            reduce(dict.__getitem__, w, root)['word'] = True
+        left = res = 0
+        last = n
+        for left in reversed(range(n)):
+            cur = root
+            for right in range(left, min(n, left + 10, last)):
+                cur = cur[word[right]]
+                if cur['word']:
+                    last = right
+                    break
+            res = max(res, last - left)
         return res
 ```

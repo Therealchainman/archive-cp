@@ -24677,6 +24677,152 @@ vector<int> smallestSufficientTeam(vector<string>& req_skills, vector<vector<str
 }
 ```
 
+## 445. Add Two Numbers II
+
+### Solution 1:  reverse linked lists + addition + linked lists + prev
+
+```py
+class Solution:
+    def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:
+        def reverse(lst):
+            tail = lst
+            prev = None 
+            while tail:
+                nxt = tail.next
+                tail.next = prev
+                prev = tail
+                tail = nxt
+            return prev
+        l1, l2 = map(reverse, (l1, l2))
+        dummy = ListNode()
+        cur = dummy
+        carry = 0
+        while l1 or l2 or carry:
+            if l1:
+                carry += l1.val
+                l1 = l1.next
+            if l2:
+                carry += l2.val
+                l2 = l2.next
+            value = carry % 10
+            cur.next = ListNode(value)
+            cur = cur.next
+            carry //= 10
+        res = reverse(dummy.next)
+        return res
+```
+
+### Solution 2:  reverse linked lists + addition + linked lists + prev + reverse result during addition
+
+```py
+class Solution:
+    def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:
+        def reverse(lst):
+            tail = lst
+            prev = None 
+            while tail:
+                nxt = tail.next
+                tail.next = prev
+                prev = tail
+                tail = nxt
+            return prev
+        l1, l2 = map(reverse, (l1, l2))
+        dummy = ListNode()
+        cur = dummy
+        tail = prev = None
+        carry = 0
+        while l1 or l2 or carry:
+            if l1:
+                carry += l1.val
+                l1 = l1.next
+            if l2:
+                carry += l2.val
+                l2 = l2.next
+            value = carry % 10
+            nxt = ListNode(value)
+            if tail:
+                tail.next = prev
+            prev = tail
+            tail = nxt
+            carry //= 10
+        tail.next = prev
+        return tail
+```
+
+## 648. Replace Words
+
+### Solution 1:  trie 
+
+```py
+class Solution:
+    def replaceWords(self, dictionary: List[str], sentence: str) -> str:
+        TrieNode = lambda: defaultdict(TrieNode)
+        root = TrieNode()
+        # adding words into the trie data structure
+        for word in dictionary:
+            reduce(dict.__getitem__, word, root)['word'] = True
+        result = []
+        for word in sentence.split():
+            cur = root
+            n = len(word)
+            for i in range(n):
+                cur = cur[word[i]]
+                if cur['word']:
+                    result.append(word[:i + 1])
+                    break
+            if not cur['word']:
+                result.append(word)
+        return ' '.join(result)
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
