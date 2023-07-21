@@ -1,8 +1,15 @@
+# Codeforces Round 885 Div 2
+
+## Notes
+
+if the implementation is in python it will have this at the top of the python script for fast IO operations
+
+```py
 import os,sys
 from io import BytesIO, IOBase
 from typing import *
-# import pypyjit
-# pypyjit.set_param('max_unroll_recursion=-1')
+import pypyjit
+pypyjit.set_param('max_unroll_recursion=-1')
  
 # Fast IO Region
 BUFSIZE = 8192
@@ -44,7 +51,94 @@ class IOWrapper(IOBase):
         self.readline = lambda: self.buffer.readline().decode("ascii")
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
+```
 
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+#define int long long
+
+inline int read() {
+	int x = 0, y = 1; char c = getchar();
+	while (c < '0' || c > '9') {
+		if (c == '-') y = -1;
+		c = getchar();
+	}
+	while (c >= '0' && c <= '9') x = x * 10 + c - '0', c = getchar();
+	return x * y;
+}
+```
+
+## 
+
+### Solution 1:
+
+```py
+def main():
+    n, m, k = map(int, input().split())
+    x, y = map(int, input().split())
+    manhattan_distance = lambda x1, y1, x2, y2: abs(x1 - x2) + abs(y1 - y2)
+    res = True
+    for _ in range(k):
+        x1, y1 = map(int, input().split())
+        if manhattan_distance(x, y, x1, y1) % 2 == 0: res = False
+    print('YES' if res else 'NO')
+
+if __name__ == '__main__':
+    T = int(input())
+    for _ in range(T):
+        main()
+```
+
+## 
+
+### Solution 1:
+
+```py
+def main():
+    n, k = map(int, input().split())
+    paint = list(map(int, input().split()))
+    dp1, dp2 = [0] * (1 + k), [0] * (1 + k)
+    stack = [-1] * (k + 1)
+    for i in range(n):
+        color = paint[i]
+        step = i - stack[color] - 1
+        stack[color] = i
+        if step > dp1[color]:
+            dp2[color] = dp1[color]
+            dp1[color] = step
+        elif step > dp2[color]:
+            dp2[color] = step
+    for i in range(1, k + 1):
+        step = n - stack[i] - 1
+        if step > dp1[i]:
+            dp2[i] = dp1[i]
+            dp1[i] = step
+        elif step > dp2[i]:
+            dp2[i] = step
+    res = min(max(dp1[i] // 2, dp2[i]) for i in range(1, k + 1))
+    print(res)
+
+if __name__ == '__main__':
+    T = int(input())
+    for _ in range(T):
+        main()
+```
+
+## C. Vika and Price Tags
+
+### Solution 1:  extended euclidean algorithm + math
+
+if a > b
+then this pattern happens
+a,b,a-b,a-2b,b,a-3b,a-4b,b,...
+Can derive formula a = kb + r,
+so solve this equation and each time a < b swap the locations
+return the number of steps, for if k is odd it will always be k + k // 2 + 1, which can do by swapping (b, r)
+
+else you do (r, b)
+
+```py
 def extended_euclid(a, b):
     if a == 0: return 0
     if b == 0: return 1
@@ -71,3 +165,20 @@ if __name__ == '__main__':
     T = int(input())
     for _ in range(T):
         main()
+```
+
+## D. Vika and Bonuses
+
+### Solution 1:
+
+```py
+
+```
+
+## 
+
+### Solution 1:
+
+```py
+
+```

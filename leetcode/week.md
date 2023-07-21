@@ -24775,28 +24775,103 @@ class Solution:
         return ' '.join(result)
 ```
 
-##
+## 435. Non-overlapping Intervals
 
-### Solution 1:
+### Solution 1:  greedy
+
+You want to always greedily take the result that minimizes the end point, because that prevents the number of overlaps. 
+
+So there are two cases as well for a pair of s, e
+1. where s >= max_end and e > max_end.  In that case you want to update the max_end, because you will want to take that one. 
+2. where s < max_end and e >= max_end.  In this case it is overlapping and you can add it to the result of overlapping intervals to remove. 
+
 
 ```py
-
+class Solution:
+    def eraseOverlapIntervals(self, intervals: List[List[int]]) -> int:
+        res, max_end = 0, -math.inf
+        for s, e in sorted(intervals, key = lambda pair: pair[1]):
+            if s >= max_end:
+                max_end = e
+            else:
+                res += 1
+        return res
 ```
 
-##
+### Solution 2: dynamic programming + coordinate compression
 
-### Solution 1:
+dp[i] = maximum length of non overlapping interval that ends before the ith endpoint. 
 
 ```py
-
+class Solution:
+    def eraseOverlapIntervals(self, intervals: List[List[int]]) -> int:
+        n = len(intervals)
+        ends = defaultdict(list)
+        end_points = set()
+        index = {}
+        index_point, point_index = {}, {}
+        for s, e in intervals:
+            end_points.update((s, e))
+        for ep in sorted(end_points):
+            index[ep] = len(index) + 1
+        for s, e in intervals:
+            ends[index[e]].append(index[s])
+        m = len(index)
+        dp = [0] * (m + 1)
+        for i in range(1, m + 1):
+            dp[i] = dp[i - 1]
+            for j in sorted(ends[i]):
+                dp[i] = max(dp[i], dp[j] + 1)
+        return n - dp[-1]
 ```
 
-##
+## 735. Asteroid Collision
 
-### Solution 1:
+### Solution 1:  stack 
 
 ```py
+class Solution:
+    def asteroidCollision(self, asteroids: List[int]) -> List[int]:
+        n = len(asteroids)
+        stack = []
+        for num in asteroids:
+            alive = True
+            while stack and stack[-1] > 0 and num < 0:
+                prv = stack.pop()
+                if prv >= abs(num):
+                    alive = False
+                    if prv > abs(num):
+                        stack.append(prv)
+                    break
+            if alive:
+                stack.append(num)
+        return stack
+```
 
+## 673. Number of Longest Increasing Subsequence
+
+### Solution 1:  dynamic programming + counter
+
+dp[i][j] = count of number of ways to get to increasing subsequence with length i, and the last element is equal to value j. 
+
+So basically for some i, you want to look at all current processed subsequences of length i - 1, and then add them to the number of ways to attain dp[i][j] if the previous subsequence last element is less than j. 
+
+```py
+class Solution:
+    def findNumberOfLIS(self, nums: List[int]) -> int:
+        arr = []
+        dp = [Counter({-math.inf: 1})]
+        for num in nums:
+            len_subsequence = bisect.bisect_left(arr, num)
+            if len_subsequence == len(arr):
+                arr.append(num)
+                dp.append(Counter())
+            else:
+                arr[len_subsequence] = num
+            for last_element, cnt in dp[len_subsequence].items():
+                if last_element < num:
+                    dp[len_subsequence + 1][num] += cnt
+        return sum(dp[-1].values())
 ```
 
 ##
