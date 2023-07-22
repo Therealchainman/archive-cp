@@ -20,6 +20,38 @@ def detect_cycle(node: str) -> bool:
     return False
 ```
 
+### cycle detection with arrays and save the path for recreate the cycle path
+
+Just need to make sure when recreate cycle path to reverse it cause it is in reverse order
+
+```py
+visited = [0] * (n + 1)
+in_path = [0] * (n + 1)
+path = []
+def detect_cycle(node) -> bool:
+    path.append(node)
+    visited[node] = 1
+    in_path[node] = 1
+    for nei in adj_list[node]:
+        if in_path[nei]: return nei
+        if visited[nei]: continue
+        res = detect_cycle(nei)
+        if res: return res
+    in_path[node] = 0
+    path.pop()
+    return 0
+
+node = detect_cycle(i)
+cur = node
+cycle = [node]
+if cur:
+    while path[-1] != node:
+        cur = path.pop()
+        cycle.append(cur)
+    print(len(cycle))
+    print(*cycle[::-1])
+```
+
 ## cycle detection in undirected graph
 
 ### cycle detection with recursive dfs

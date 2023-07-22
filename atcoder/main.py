@@ -49,23 +49,7 @@ sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
 def main():
-    n, m = map(int, input().split())
-    prices = [None] * n
-    functions = [set() for _ in range(n)]
-    for i in range(n):
-        arr = list(map(int, input().split()))
-        prices[i] = arr[0]
-        for j in range(2, len(arr)):
-            functions[i].add(arr[j])
-    indices = sorted(range(n), key = lambda i: prices[i])
-    for idx in range(n):
-        for jdx in range(idx + 1, n):
-            i, j = indices[jdx], indices[idx]
-            common = functions[i] & functions[j]
-            if len(common) < len(functions[i]): continue
-            if prices[i] == prices[j] and len(functions[j]) == len(common): continue
-            return print('Yes')
-    print('No')
+    pass
 
 if __name__ == '__main__':
     main()

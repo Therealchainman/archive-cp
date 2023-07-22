@@ -24874,12 +24874,29 @@ class Solution:
         return sum(dp[-1].values())
 ```
 
-##
+## 688. Knight Probability in Chessboard
 
-### Solution 1:
+### Solution 1:  dynamic programming + probability + O(kn^2)
+
+The probability will be added because it is or logic, that is take this sequence or this sequence to end up at a specific cell in chess board.
 
 ```py
-
+class Solution:
+    def knightProbability(self, n: int, k: int, row: int, column: int) -> float:
+        board = [[0.0] * n for _ in range(n)]
+        board[row][column] = 1.0
+        in_bounds = lambda r, c: 0 <= r < n and 0 <= c < n
+        manhattan = lambda r, c: abs(r) + abs(c)
+        neighborhood = lambda r, c: [(r + dr, c + dc) for dr, dc in product(range(-2, 3), repeat = 2) if manhattan(dr, dc) == 3]
+        for _ in range(k):
+            nboard = [[0.0] * n for _ in range(n)]
+            for r, c in product(range(n), repeat = 2):
+                if board[r][c] == 0.0: continue
+                for nr, nc in neighborhood(r, c):
+                    if not in_bounds(nr, nc): continue
+                    nboard[nr][nc] += board[r][c] / 8
+            board = nboard
+        return sum(map(sum, board))
 ```
 
 ##
