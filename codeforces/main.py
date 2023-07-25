@@ -45,27 +45,8 @@ class IOWrapper(IOBase):
 sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
 input = lambda: sys.stdin.readline().rstrip("\r\n")
 
-def extended_euclid(a, b):
-    if a == 0: return 0
-    if b == 0: return 1
-    if a > b:
-        k = a // b
-        r = a % b
-        return (extended_euclid(b, r) if k & 1 else extended_euclid(r, b)) + k + k // 2
-    return 1 + extended_euclid(b, b - a)
-
 def main():
-    n = int(input())
-    A = list(map(int, input().split()))
-    B = list(map(int, input().split()))
-    seen = set()
-    for a, b in zip(A, B):
-        if a == 0 and b == 0: continue
-        seen.add(extended_euclid(a, b) % 3)
-    if len(seen) <= 1:
-        print('Yes')
-    else:
-        print('No')
+    pass
 
 if __name__ == '__main__':
     T = int(input())

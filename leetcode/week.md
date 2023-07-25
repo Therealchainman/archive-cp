@@ -24899,20 +24899,37 @@ class Solution:
         return sum(map(sum, board))
 ```
 
-##
+## 852. Peak Index in a Mountain Array
 
-### Solution 1:
+### Solution 1:  bisect_right + binary search
+
+FFFTTTT, same as 000111, so find the first 1 is the solution
+
+Cause you have it being false when it is increasing and when decreasing it becomes true. 
+
 
 ```py
-
+class Solution:
+    def peakIndexInMountainArray(self, arr: List[int]) -> int:
+        return bisect.bisect_right(range(1, len(arr)), False, key = lambda i: arr[i] < arr[i - 1])
 ```
 
-##
+## 50. Pow(x, n)
 
-### Solution 1:
+### Solution 1:  binary exponentation + O(logn) + bit manipulation
 
 ```py
-
+class Solution:
+    def myPow(self, x: float, n: int) -> float:
+        def exponentiation(b, p):
+            res = 1
+            while p > 0:
+                if p & 1:
+                    res *= b
+                b *= b
+                p >>= 1
+            return res
+        return exponentiation(x, n) if n >= 0 else 1 / exponentiation(x, abs(n))
 ```
 
 ##

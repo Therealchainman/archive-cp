@@ -49,12 +49,12 @@ This solves a sum of geometrix progression type problem where you want
 sum = base^0 + base^1 + base^2 + ... + base^(num_terms-1)
 
 ```py
-    base, num_terms, mod = 3, 4, 7
-    # exponentiated_matrix*base_matrix = solution_matrix
-    # exponentiated_matrix = transition_matrix^num_terms
-    transition_matrix = [[base, 1], [0, 1]]
-    base_matrix = [[0], [1]]
-    exponentiated_matrix = mat_pow(transition_matrix, num_terms, mod)
-    solution_matrix = mat_mul(exponentiated_matrix, base_matrix, mod)
-    return solution_matrix[0][0]
+base, num_terms, mod = 3, 4, 7
+# exponentiated_matrix*base_matrix = solution_matrix
+# exponentiated_matrix = transition_matrix^num_terms
+transition_matrix = [[base, 1], [0, 1]]
+base_matrix = [[0], [1]]
+exponentiated_matrix = mat_pow(transition_matrix, num_terms, mod)
+solution_matrix = mat_mul(exponentiated_matrix, base_matrix, mod)
+return solution_matrix[0][0]
 ```
