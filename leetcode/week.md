@@ -24932,6 +24932,157 @@ class Solution:
         return exponentiation(x, n) if n >= 0 else 1 / exponentiation(x, abs(n))
 ```
 
+## 1870. Minimum Speed to Arrive on Time
+
+### Solution 1:  binary search + bisect_right
+
+```py
+class Solution:
+    def minSpeedOnTime(self, dist: List[int], hour: float) -> int:
+        def possible(spd):
+            cur = 0
+            for t in map(lambda dis: dis / spd, dist):
+                cur = math.ceil(cur)
+                cur += t
+                if cur > hour: return False
+            return True
+        INF = int(1e7) + 5
+        i = bisect.bisect_right(range(1, INF), False, key = lambda x: possible(x)) + 1
+        return i if i < INF else -1
+```
+
+## 439. Ternary Expression Parser
+
+### Solution 1:  reverse polish notation + stack + backwards iteration
+
+postfix notation means 1 2 +, 
+you see the operands first and then operator
+
+```py
+class Solution:
+    def parseTernary(self, expression: str) -> str:
+        # reverse polish notation if you iterate from right to left that is a b + , that is you see the operands first and then the operator, in this case the operands are b:c and the operator is ?
+        stack = []
+        i = len(expression) - 1
+        while i >= 0:
+            if expression[i] in 'TF0123456789':
+                stack.append(expression[i])
+            elif expression[i] == '?':
+                on_true, on_false = stack.pop(), stack.pop()
+                if expression[i - 1] == 'T':
+                    stack.append(on_true)
+                else:
+                    stack.append(on_false)
+                i -= 1
+            i -= 1
+        return stack[0]
+```
+
+## 2141. Maximum Running Time of N Computers
+
+### Solution 1:  greedy + binary search + bisect_right
+
+FFFFFTTTT
+return first T but actually want last F
+
+```py
+class Solution:
+    def maxRunTime(self, n: int, batteries: List[int]) -> int:
+        batteries.sort(reverse = True)
+        hours = sum(batteries) - sum(batteries[:n])
+        def possible(target):
+            rem = hours
+            for i in range(n):
+                rem -= max(0, target - batteries[i])
+                if rem < 0: return True
+            return False
+        right = int(1e14) + 1
+        i = bisect.bisect_right(range(right), False, key = lambda x: possible(x)) - 1
+        return i
+```
+
+### Solution 2:  binary search
+
+TTTTTFFFF
+return last T
+
+```py
+class Solution:
+    def maxRunTime(self, n: int, batteries: List[int]) -> int:
+        batteries.sort(reverse = True)
+        hours = sum(batteries) - sum(batteries[:n])
+        def possible(target):
+            rem = hours
+            for i in range(n):
+                rem -= max(0, target - batteries[i])
+                if rem < 0: return False
+            return True
+        left, right = 0, int(1e14) + 1
+        while left < right:
+            mid = (left + right + 1) >> 1
+            if possible(mid):
+                left = mid
+            else:
+                right = mid - 1
+        return left
+```
+
+### Solution 3:  sort + greedy
+
+```py
+class Solution:
+    def maxRunTime(self, n: int, batteries: List[int]) -> int:
+        batteries.sort(reverse = True)
+        hours = sum(batteries) - sum(batteries[:n])
+        for i in range(n - 2, -1, -1):
+            delta = batteries[i] - batteries[i + 1]
+            left_comps = n - i - 1
+            if delta * left_comps <= hours:
+                hours -= delta * left_comps
+            else:
+                return batteries[i + 1] + hours // left_comps
+        return batteries[0] + hours // n
+```
+
+```py
+class Solution:
+    def maxRunTime(self, n: int, batteries: List[int]) -> int:
+        batteries.sort(reverse = True)
+        hours = sum(batteries) - sum(batteries[:n])
+        i = n - 2
+        while i >= 0:
+            delta = batteries[i] - batteries[i + 1]
+            comps = n - i - 1
+            if delta * comps > hours: break
+            hours -= delta * comps
+            i -= 1
+        return batteries[i + 1] + hours // (n - i - 1)
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
