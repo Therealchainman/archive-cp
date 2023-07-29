@@ -25059,12 +25059,73 @@ class Solution:
         return batteries[i + 1] + hours // (n - i - 1)
 ```
 
-##
+## 486. Predict the Winner
 
-### Solution 1:
+### Solution 1:  recursive dynamic programming + O(2^n)
+
+Since n <= 20 this works, 2^20 is around 10^6
 
 ```py
+class Solution:
+    def PredictTheWinner(self, nums: List[int]) -> bool:
+        n = len(nums)
+        @cache
+        def dfs(left, right, score1, score2, player):
+            if left == right: return score1 >= score2 if player else score1 < score2
+            delta_left1, delta_left2 = nums[left] if player else 0, 0 if player else nums[left]
+            delta_right1, delta_right2 = nums[right - 1] if player else 0, 0 if player else nums[right - 1]
+            return (
+                not dfs(left + 1, right, score1 + delta_left1, score2 + delta_left2, player ^ 1)
+                or
+                not dfs(left, right - 1, score1 + delta_right1, score2 + delta_right2, player ^ 1)
+            )
+        return dfs(0, n, 0, 0, 1)
+```
 
+### Solution 2:  reduce the size of each state
+
+```py
+class Solution:
+    def PredictTheWinner(self, nums: List[int]) -> bool:
+        n = len(nums)
+        @cache
+        def dfs(left, right, score):
+            player = 0 if (right - left) % 2 == n % 2 else 1
+            if left == right: return score >= 0 if not player else score < 0
+            return (
+                not dfs(left + 1, right, score + (-1)**player * nums[left])
+                or
+                not dfs(left, right - 1, score + (-1)**player * nums[right - 1])
+            )
+        return dfs(0, n, 0)
+```
+
+O(n^2)
+
+```py
+class Solution:
+    def PredictTheWinner(self, nums: List[int]) -> bool:
+        n = len(nums)
+        @cache
+        def dfs(left, right):
+            if left == right: return nums[left]
+            score_left, score_right = nums[left] - dfs(left + 1, right), nums[right] - dfs(left, right - 1)
+            return max(score_left, score_right)
+        return dfs(0, n - 1) >= 0
+```
+
+```py
+class Solution:
+    def PredictTheWinner(self, nums: List[int]) -> bool:
+        n = len(nums)
+        dp = [[0] * n for _ in range(n)]
+        for i in range(n):
+            dp[i][i] = nums[i]
+        for delta in range(1, n):
+            for left in range(n - delta):
+                right = left + delta
+                dp[left][right] = max(nums[left] - dp[left + 1][right], nums[right] - dp[left][right - 1])
+        return dp[0][-1] >= 0
 ```
 
 ##
