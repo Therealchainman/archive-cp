@@ -9763,12 +9763,12 @@ class Solution:
 ```py
 class Solution:
     def minimumCosts(self, regular: List[int], express: List[int], expressCost: int) -> List[int]:
-        min_regular, min_express = 0, inf
+        reg, exp = 0, math.inf
         n = len(regular)
-        result = [0]*n
-        for i, reg, exp in zip(range(n),regular, express):
-            min_regular, min_express = min(min_regular,min_express)+reg, min(min_express,min_regular+expressCost)+exp
-            result[i] = min(min_regular, min_express)
+        result = [0] * n
+        for i, (x, y) in enumerate(zip(regular, express)):
+            reg, exp = min(reg, exp) + x, min(reg + expressCost, exp) + y
+            result[i] = min(reg, exp)
         return result
 ```
 
@@ -25128,58 +25128,358 @@ class Solution:
         return dp[0][-1] >= 0
 ```
 
-##
+## 1060. Missing Element in Sorted Array
 
-### Solution 1:
+### Solution 1:  greedy + binary search + nlogn
+
+FFFTTTT return first T with using bisect_right
+
+```py
+class Solution:
+    def missingElement(self, nums: List[int], k: int) -> int:
+        nums.append(math.inf)
+        n = len(nums)
+        right = int(1e12)
+        def possible(target):
+            res = 0
+            for i in range(1, n):
+                if nums[i] >= target:
+                    res += target - nums[i - 1] - (1 if nums[i] == target else 0)
+                    break
+                res += nums[i] - nums[i - 1] - 1
+                if res >= k: return True
+            return res >= k
+        i = bisect.bisect_right(range(nums[0], right), 0, key = lambda x: possible(x)) + nums[0]
+        return i
+```
+
+TTTFFF return first F
+
+```py
+class Solution:
+    def missingElement(self, nums: List[int], k: int) -> int:
+        nums.append(math.inf)
+        n = len(nums)
+        left, right = nums[0], int(1e12)
+        def possible(target):
+            res = 0
+            for i in range(1, n):
+                if nums[i] >= target:
+                    res += target - nums[i - 1] - (1 if nums[i] == target else 0)
+                    break
+                res += nums[i] - nums[i - 1] - 1
+            return res < k
+        while left < right:
+            mid = (left + right) >> 1
+            if possible(mid):
+                left = mid + 1
+            else:
+                right = mid
+        return left
+```
+
+## 808. Soup Servings
+
+### Solution 1:  memoization + dynamic programming
+
+```py
+class Solution:
+    def soupServings(self, n: int) -> float:
+        if n >= 5_000: return 1.0
+        states = Counter({(n, n): 1.0})
+        res = 0
+        cnt = 0
+        while states:
+            nstates = Counter()
+            for (a, b), pr in states.items():
+                cnt += 1
+                for da, db in [(100, 0), (75, 25), (50, 50), (25, 75)]:
+                    na, nb = a - da, b - db
+                    npr = pr * 0.250
+                    if na <= 0 or nb <= 0:
+                        if na <= 0 and nb > 0:
+                            res += npr
+                        if na <= 0 and nb <= 0:
+                            res += npr/2
+                    else:
+                        nstates[(na, nb)] += npr
+            states = nstates
+        return res
+```
+
+### Solution 2:  dynamic programming + probability + law of large numbers + expectation value
+
+you can divide everything by ceil(n / 25) the reason is because each serving is in group of 25, and if it is greater than 0 it needs to be 1, cause you still need one serving
+
+then the problem is about these operations
+1. 4 serving a, 0 serving b
+1. 3 serving a, 1 serving b
+1. 2 serving a, 2 serving b
+1. 1 serving a, 3 serving b
+
+without doing the math you can assume that at some large number of servings need for a and b. that it will reach 100% probability that a will finish first because it should have a large expected value, and by law of large numbers it will close in on the expected value.  
+
+So if you just add a factor to check when it becomes within the tolerance 10^-5 you can terminate it earlier,  it turns out it will be around 200 servings.  40,000 operations is fine. 
+
+So what are the base cases and recurrence relation? 
+
+The base case is that when there are 0 servings for a it should have probability = 1.0 and if it is 0 for a and b it is 0.5 and if it is 0 for b it is 0.0.  
+
+So dp[i][j], where i is remaining servings for a, and j is remaining serving for b
+dp[0][j] = 1, dp[0][0] = 1/2, dp[i][0] = 0
+The recurrence for the rest is 
+dp[i][j] = 1 / 4 * (dp[i - 4][j] + dp[i - 3][j - 1] + dp[i - 2][j - 2] + dp[i - 1][j - 3])
+it is 1/4th the probability for each possible path which is using or logic, because it use operation 1 or operation 2 etc.
 
 ```py
 
 ```
 
-##
+## 664. Strange Printer
 
-### Solution 1:
+### Solution 1:  dynamic programming + interval + greedy
+
+increase the length of the ranges that you compute the number of paint turns needed, this means you know previous subproblem is solved since a larger length range is just composed of smaller ranges. 
+
+For each length you take all the left starting points, and you know the range from left to right, so it is a substring of the string.  So for this interval, you want to find the first index at which the characters don't match the rightmost character.  
+
+case 1: all characters match
+-------, this is a base case, we return 0 for this
+case 2: prefix and suffix match
+---xxxxx--
+   ^
+In this case you want to set the mid pointer to the location where they first beging to not match with the last character.  Then you will consider every possible combination of subinterval 
+---xxxxx--
+   ^^    ^
+   ^ ^   ^
+   ^  ^  ^
+   ^   ^ ^
+   ^    ^^
+You already have solved these subproblems, so it will work.  
+
+return the result for the range extending the entire string, and add 1, because you need to set base case to 0, but it really is 1 to paint the base color.  If you made the base case equal to 1 though it would not work. 
+
+I label this as greedy because you greedily take the same character from prefix that match with last character until they are different. 
 
 ```py
-
+class Solution:
+    def strangePrinter(self, s: str) -> int:
+        n = len(s)
+        dp = [[n] * n for _ in range(n)] # (left, right)
+        for len_ in range(1, n + 1): 
+            for left in range(n - len_ + 1):
+                right = left + len_ - 1
+                mid = None
+                for i in range(left, right):
+                    if s[i] != s[right] and mid is None:
+                        mid = i
+                    if mid is not None:
+                        # stuck this doesn't work at all actually
+                        dp[left][right] = min(dp[left][right], 1 + dp[mid][i] + dp[i + 1][right])
+                if mid is None:
+                    dp[left][right] = 0 # base case
+        return dp[0][-1] + 1
 ```
 
-##
+## 712. Minimum ASCII Delete Sum for Two Strings
 
-### Solution 1:
+### Solution 1:  dynamic programming + O(n^2)
+
+dp[i][j] = the minimum ascii deletion to get to the s1[...i] and s2[...j] substrings
+The result is the full s1 and s2 string. 
+
+The base cases are that you need to know if you delete
 
 ```py
-
+class Solution:
+    def minimumDeleteSum(self, s1: str, s2: str) -> int:
+        n1, n2 = len(s1), len(s2)
+        dp = [[0] * (n2 + 1) for _ in range(n1 + 1)]
+        for i in range(n1):
+            dp[i + 1][0] = dp[i][0] + ord(s1[i])
+        for j in range(n2):
+            dp[0][j + 1] = dp[0][j] + ord(s2[j])
+        for i in range(n1):
+            for j in range(n2):
+                if s1[i] == s2[j]:
+                    dp[i + 1][j + 1] = dp[i][j]
+                else:
+                    dp[i + 1][j + 1] = min(dp[i][j + 1] + ord(s1[i]), dp[i + 1][j] + ord (s2[j]))
+        return dp[-1][-1]
 ```
 
-##
+## 77. Combinations
 
-### Solution 1:
+### Solution 1:  combinations
 
 ```py
-
+class Solution:
+    def combine(self, n: int, k: int) -> List[List[int]]:
+        return combinations(range(1, n + 1), k)
 ```
 
-##
-
-### Solution 1:
-
 ```py
-
+class Solution:
+    def combine(self, n: int, k: int) -> List[List[int]]:
+        res = []
+        for mask in range(1, 1 << n):
+            if mask.bit_count() != k: continue
+            cur = [i + 1 for i in range(n) if (mask >> i) & 1]
+            res.append(cur)
+        return res
 ```
 
-##
+## 1683. Invalid Tweets
 
-### Solution 1:
+### Solution 1:  string + subset
 
 ```py
+import pandas as pd
 
+def invalid_tweets(tweets: pd.DataFrame) -> pd.DataFrame:
+    tweets = tweets[tweets.content.str.len() > 15]
+    return tweets[['tweet_id']]
 ```
 
-##
+## 1517. Find Users With Valid E-Mails
+
+### Solution 1:  regex + str contains
+
+```py
+import pandas as pd
+
+def valid_emails(users: pd.DataFrame) -> pd.DataFrame:
+    return users[users.mail.str.contains('^[A-Za-z][A-Za-z0-9_.-]*@leetcode\.com$', regex = True)]
+```
+
+## 46. Permutations
 
 ### Solution 1:
 
 ```py
+class Solution:
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        return permutations(nums)
+```
 
+```py
+class Solution:
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        n = len(nums)
+        res, cur = [], []
+        def backtrack(i, mask):
+            if i == n:
+                res.append(cur[:])
+            for j in range(n):
+                if (mask >> j) & 1: continue
+                cur.append(nums[j])
+                backtrack(i + 1, mask | (1 << j))
+                cur.pop()
+        backtrack(0, 0)
+        return res
+```
+
+## 2082. The Number of Rich Customers
+
+### Solution 1:  nunique + initialize dataframe
+
+```py
+import pandas as pd
+
+def count_rich_customers(store: pd.DataFrame) -> pd.DataFrame:
+    cnt = store[store.amount > 500].customer_id.nunique()
+    return pd.DataFrame({'rich_count': [cnt]})
+```
+
+## 596. Classes More Than 5 Students
+
+### Solution 1:  value_counts + reset_index + filter query + column subset dataframe
+
+pandas.series.reset_index() creates a dataframe where the index becomes a column
+
+This is useful when the index needs to be treated as a column, or when the index is meaningless and needs to be reset to the default before another operation.
+
+When drop is False (the default), a DataFrame is returned. The newly created columns will come first in the DataFrame, followed by the original Series values. When drop is True, a Series is returned. In either case, if inplace=True, no value is returned.
+
+
+```py
+import pandas as pd
+
+def find_classes(courses: pd.DataFrame) -> pd.DataFrame:
+    # number of unique combinations with column class
+    # so like students a, b, c are class = math, then it will be 3 for math
+    courses = (
+        courses
+        .value_counts(subset = 'class')
+        .resetindex()
+    )
+    return courses[courses['count'] >= 5][['class']]
+```
+
+## 1907. Count Salary Categories
+
+### Solution 1:  value_countrs + reindexing and reset index with name + apply
+
+```py
+import pandas as pd
+
+def count_salary_categories(accounts: pd.DataFrame) -> pd.DataFrame:
+    accounts['category'] = accounts['income'].apply(lambda row: "Low Salary" if row < 20_000 else "Average Salary" if row <= 50_000 else "High Salary")
+    accounts = (
+        accounts
+        .value_counts('category')
+        .reindex(["Low Salary", "Average Salary", "High Salary"], fill_value = 0)
+        .reset_index(name = 'accounts_count')
+    )
+    return accounts
+```
+
+### Solution 2:  Get sum of the boolean series + initialize pandas dataframe from dictionary
+
+```py
+import pandas as pd
+
+def count_salary_categories(accounts: pd.DataFrame) -> pd.DataFrame:
+    low_count = (accounts.income < 20_000).sum()
+    avg_count = ((accounts.income >= 20_000) & (accounts.income <= 50_000)).sum()
+    high_count = (accounts.income > 50_000).sum()
+    return pd.DataFrame(
+        {"category": ["Low Salary", "Average Salary", "High Salary"],
+        "accounts_count": [low_count, avg_count, high_count]}
+    )
+```
+
+## 33. Search in Rotated Sorted Array
+
+### Solution 1:  binary search + if statements to separate the different cases
+
+Break the problem down into three possible scenarios
+
+1. $R <= L <= M$ such as 4, 7, 3 (L, M, R) 
+1. $M <= R <= L$ such as 4, 0, 3
+1. $L <= M <= R$ such as 0, 3, 5
+
+```py
+class Solution:
+    def search(self, nums: List[int], target: int) -> int:
+        n = len(nums)
+        left, right = 0, n - 1
+        while left < right:
+            mid = (left + right + 1) >> 1
+            if nums[right] <= nums[left] <= nums[mid]:
+                if target >= nums[mid] or target <= nums[right]:
+                    left = mid
+                else:
+                    right = mid - 1
+            elif nums[mid] <= nums[right] <= nums[left]:
+                if nums[mid] <= target <= nums[right]:
+                    left = mid
+                else:
+                    right = mid - 1
+            else:
+                if target >= nums[mid]:
+                    left = mid
+                else:
+                    right = mid - 1
+        return left if nums[left] == target else -1
 ```
