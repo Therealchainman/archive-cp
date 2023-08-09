@@ -17,6 +17,22 @@ class Solution:
         return ''.join(res)
 ```
 
+### Solution 2:  flipping + deque + O(n) + forward facing and reverse facing
+
+```py
+class Solution:
+    def finalString(self, s: str) -> str:
+        queue = deque()
+        forward = False
+        for chars in s.split('i'):
+            forward = not forward
+            if forward:
+                queue.extend(chars)
+            else:
+                queue.extendleft(chars)
+        return ''.join(queue) if forward else ''.join(reversed(queue))
+```
+
 ## 2811. Check if it is Possible to Split Array
 
 ### Solution 1:  any + greedy
@@ -112,8 +128,6 @@ class Solution:
 ## 2813. Maximum Elegance of a K-Length Subsequence
 
 ### Solution 1:  greedy + sort + monotonic stack
-
-
 
 ```py
 class Solution:
