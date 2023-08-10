@@ -99,6 +99,92 @@ def replace_employee_id(employees: pd.DataFrame, employee_uni: pd.DataFrame) -> 
     return df
 ```
 
+## 81. Search in Rotated Sorted Array II
+
+### Solution 1:  binary search + linear search when stuck
+
+```py
+class Solution:
+    def search(self, nums: List[int], target: int) -> int:
+        n = len(nums)
+        left, right = 0, n - 1
+        while left < right:
+            mid = (left + right + 1) >> 1
+            if nums[right] == nums[left] == nums[mid]:
+                while left < right and nums[left] == nums[mid]:
+                    left += 1
+                left -= 1
+                while left < right and nums[right] == nums[mid]:
+                    right -= 1
+            elif nums[right] <= nums[left] <= nums[mid]:
+                if target >= nums[mid] or target <= nums[right]:
+                    left = mid
+                else:
+                    right = mid - 1
+            elif nums[mid] <= nums[right] <= nums[left]:
+                if nums[mid] <= target <= nums[right]:
+                    left = mid
+                else:
+                    right = mid - 1
+            else:
+                if target >= nums[mid]:
+                    left = mid
+                else:
+                    right = mid - 1
+        return nums[left] == target
+```
+
+### Solution 2: Binary search
+
+Binary search but with two arrays you have array S and array F, both are 
+non-decreasing arrays.  But normall the arrays are array S + array F, but with the 
+pivot point it get's rotated and you have array F + array S
+
+The following you just need to consider 4 cases to solve the problem
+
+special case: This is for it you can't determine which array mid belongs in, which is the case 
+when nums[mid]==nums[lo], because you don't know which array it belongs to.
+case 1: if mid in F and target in F, then you just need to look at comparison of target to nums[mid]
+case 2: if mid in S and target in S, then you just need to look at comparison of target to nums[mid]
+case 3: if mid in F and target in S, then you need to look to right of mid
+case 3: if mid in S and target in F, then you need to look to left of mid
+
+
+
+```py
+class Solution:
+    def search(self, nums: List[int], target: int) -> bool:
+        """
+        Break it down to two arrays
+        [F][S]
+        """
+        def can_binary_search(start_val, cur_val):
+            return cur_val != start_val
+        # in the F array if this is true
+        def find_arr(start_val, cur_val):
+            return cur_val>=start_val
+        lo, hi = 0, len(nums)-1
+        while lo < hi:
+            mid = (lo+hi)>>1
+            if nums[mid]==target: return True
+            if not can_binary_search(nums[lo],nums[mid]):
+                lo += 1
+                continue
+            target_arr = find_arr(nums[lo], target)
+            mid_arr = find_arr(nums[lo], nums[mid])
+            if target_arr ^ mid_arr:
+                if mid_arr:
+                    lo = mid+1
+                else:
+                    hi = mid
+            else:
+                if nums[mid]<target:
+                    lo=mid+1
+                else:
+                    hi=mid
+        return nums[lo] == target
+```
+
 ##
 
 ### Solution 1:
