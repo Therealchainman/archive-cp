@@ -16,3 +16,18 @@ def prime_factors(num: int) -> List[int]:
         factors.append(num)
     return factors
 ```
+
+Count all the prime factors of a number in sqrt(num) time
+
+```py
+def prime_count(num):
+    cnt = 0
+    i = 2
+    while i * i <= num:
+        cnt += num % i == 0
+        while num % i == 0:
+            num //= i
+        i += 1
+    cnt += num > 1
+    return cnt
+```
