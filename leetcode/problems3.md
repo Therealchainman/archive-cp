@@ -224,12 +224,14 @@ class Solution:
         return -1
 ```
 
-##
+## 215. Kth Largest Element in an Array
 
-### Solution 1:
+### Solution 1:  nlargest + heapq
 
 ```py
-
+class Solution:
+    def findKthLargest(self, nums: List[int], k: int) -> int:
+        return nlargest(k, nums)[-1]
 ```
 
 ##

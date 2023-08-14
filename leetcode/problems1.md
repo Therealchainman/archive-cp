@@ -3769,12 +3769,31 @@ GROUP BY user_id
 
 ## 1741. Find Total Time Spent by Each Employee
 
-### Solution 1:
+### Solution 1:  groupby + sum
 
 ```sql
 SELECT event_day AS day, emp_id, SUM(out_time-in_time) AS total_time
 FROM Employees
 GROUP BY emp_id, event_day
+```
+
+### Solution 2:  apply across axis = 1 + groupby + sum + reset_index
+
+```py
+import pandas as pd
+
+def total_time(employees: pd.DataFrame) -> pd.DataFrame:
+  employees['total_time'] = (
+    employees.apply(lambda row: row.out_time - row.in_time, axis = 1)
+  )
+  df = (
+    employees[['event_day', 'emp_id', 'total_time']]
+    .groupby(['event_day', 'emp_id'])
+    .sum()
+    .reset_index()
+    .rename(columns = {'event_day': 'day'})
+  )
+  return df
 ```
 
 ## 1729. Find Followers Count

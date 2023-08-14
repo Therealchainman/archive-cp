@@ -8,7 +8,19 @@ problem_counts = {"atcoder": 7, "codeforces": 6, "leetcode": 4}
 
 def create(contest, name, number):
     if contest == "atcoder":
-        pass
+        path = f"{contest}/{name}{number}.md"
+        sys.stdout = open(path, 'w')
+        print(f"# Atcoder Beginner Contest {number}")
+        print()
+        for _ in range(problem_counts[contest]):
+            print("## ")
+            print()
+            print("### Solution 1: ")
+            print()
+            print("```py")
+            print()
+            print("```")
+            print()
     elif contest == "codeforces":
         pass
     elif contest == "leetcode":
@@ -28,5 +40,5 @@ def create(contest, name, number):
     sys.stdout.close()
 
 if __name__ == '__main__':
-    contest, name, number = "leetcode", "weekly", 358
+    contest, name, number = "atcoder", "beginner", 314
     create(contest, name, number)
