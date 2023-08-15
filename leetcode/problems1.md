@@ -3756,6 +3756,22 @@ FROM Activity
 GROUP BY player_id
 ```
 
+### Solution 2:  groupby + sort_values + first
+
+```py
+import pandas as pd
+
+def game_analysis(activity: pd.DataFrame) -> pd.DataFrame:
+  df = (
+    activity.sort_values('event_date')
+    .groupby('player_id')
+    .agg({'event_date': 'first'})
+    .reset_index()
+    .rename(columns = {'event_date': 'first_login'})
+  )
+  return df
+```
+
 ## 1890. The Latest Login in 2020
 
 ### Solution 1: YEAR function with GROUP BY 
@@ -3787,9 +3803,9 @@ def total_time(employees: pd.DataFrame) -> pd.DataFrame:
     employees.apply(lambda row: row.out_time - row.in_time, axis = 1)
   )
   df = (
-    employees[['event_day', 'emp_id', 'total_time']]
+    employees
     .groupby(['event_day', 'emp_id'])
-    .sum()
+    .agg({'total_time': 'sum'})
     .reset_index()
     .rename(columns = {'event_day': 'day'})
   )
@@ -9753,6 +9769,22 @@ SELECT
     COUNT(DISTINCT(subject_id)) AS cnt
 FROM Teacher
 GROUP BY teacher_id
+```
+
+### Solution 2: groupby + nunique aggregate
+
+```py
+import pandas as pd
+
+def count_unique_subjects(teacher: pd.DataFrame) -> pd.DataFrame:
+    df = (
+        teacher
+        .groupby('teacher_id')
+        .agg({'subject_id': 'nunique'})
+        .reset_index()
+        .rename(columns = {'subject_id': 'cnt'})
+    )
+    return df
 ```
 
 ## 314. Binary Tree Vertical Order Traversal
