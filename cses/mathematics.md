@@ -387,6 +387,143 @@ if __name__ == '__main__':
 
 ```
 
+## Prime Multiples
+
+### Solution 1:  inclusion exclusion principle + bitmasks + bit manipulation + subsets
+
+![image](images/prime_multiples.png)
+
+```py
+def main():
+    n, k = map(int, input().split())
+    primes = list(map(int, input().split()))
+    res = 0
+    for bitmask in range(1, 1 << k):
+        num_divisible = n
+        num_primes = 0
+        for i in range(k):
+            if (bitmask >> i) & 1:
+                num_divisible //= primes[i]
+                num_primes += 1
+        res = (res + (num_divisible if num_primes & 1 else -num_divisible))
+    print(res)
+
+if __name__ == '__main__':
+    main()
+```
+
+## Counting Coprime Pairs
+
+### Solution 1:  combinatorics + combinations + inclusion exclusion principle + bitmasks + bit manipulation + prime sieve + gcd + math + factorials
+
+Only the cpp code pass all test cases without TLE
+
+![image](images/counting_coprime_pairs_1.png)
+![image](images/counting_coprime_pairs_2.png)
+![image](images/counting_coprime_pairs_3.png)
+
+```py
+"""
+precomputes the prime factorization for each integer from 0 to upper_bound (inclusive)
+"""
+def prime_sieve(upper_bound):
+    prime_factorizations = [[] for _ in range(upper_bound + 1)]
+    for i in range(2, upper_bound + 1):
+        if len(prime_factorizations[i]) > 0: continue # not a prime
+        for j in range(i, upper_bound + 1, i):
+            prime_factorizations[j].append(i)
+    return prime_factorizations
+
+"""
+given upper_bound <= 10^6, the highest count of prime factors for any integer 
+in that range is going to be 7
+"""
+def main():
+    n = int(input())
+    arr = list(map(int, input().split()))
+    upper_bound = max(arr)
+    prime_factorizations = prime_sieve(upper_bound)
+    # count and size of each pair of primes for each integer
+    count = [0] * (upper_bound + 1)
+    size = [0] * (upper_bound + 1)
+    for num in arr:
+        k = len(prime_factorizations[num])
+        for bitmask in range(1, 1 << k):
+            prod = 1
+            num_primes = 0
+            for i in range(k):
+                if (bitmask >> i) & 1:
+                    prod *= prime_factorizations[num][i]
+                    num_primes += 1
+            count[prod] += 1
+            size[prod] = num_primes
+    res = 0
+    # combinbation formula is n! / (n - k)! * k!
+    # but for pairs it is always n * (n - 1) / 2
+    for i in range(1, upper_bound + 1):
+        if count[i] < 2: continue
+        pair_combinations = count[i] * (count[i] - 1) // 2
+        res = (res + (pair_combinations if size[i] & 1 else -pair_combinations))
+    # solving the complement, the upper bound on the number of combinations of pairs is n choose 2
+    upper_value = n * (n - 1) // 2
+    print(upper_value - res)
+
+if __name__ == '__main__':
+    main()
+```
+
+```cpp
+vector<vector<int>> prime_sieve(int upper_bound) {
+    vector<vector<int>> prime_factorizations(upper_bound + 1);
+    vector<bool> vis(upper_bound + 1);
+    for (int i = 2; i <= upper_bound; i++) {
+        if (vis[i]) continue;
+        for (int j = i; j <= upper_bound; j += i) {
+            vis[j] = true;
+            prime_factorizations[j].push_back(i);
+        }
+    }
+    return prime_factorizations;
+}
+
+int32_t main() {
+    int n = read();
+    vector<int> arr(n);
+    for (int i = 0; i < n; i++) {
+        arr[i] = read();
+    }
+    int upper_bound = *max_element(arr.begin(), arr.end());
+    vector<vector<int>> prime_factorizations = prime_sieve(upper_bound);
+    vector<int> prod_counts(upper_bound + 1);
+    vector<int> prod_size(upper_bound + 1);
+    for (int num : arr) {
+        int k = prime_factorizations[num].size();
+        for (int bitmask = 1; bitmask < (1 << k); bitmask++) {
+            int prod = 1;
+            int num_primes = 0;
+            for (int i = 0; i < k; i++) {
+                if ((bitmask >> i) & 1) {
+                    prod *= prime_factorizations[num][i];
+                    num_primes++;
+                }
+            }
+            prod_counts[prod]++;
+            prod_size[prod] = num_primes;
+        }
+    }
+    int res = 0;
+    for (int i = 0; i <= upper_bound; i++) {
+        if (prod_counts[i] < 2) continue;
+        int pair_combinations = prod_counts[i] * (prod_counts[i] - 1) / 2;
+        res = (res + ((prod_size[i] & 1) ? pair_combinations : -pair_combinations));
+    }
+    int upper_value = n * (n - 1) / 2;
+    int ans = upper_value - res;
+    cout << ans << endl;
+    return 0;
+}
+```
+
 ## Graph Paths I
 
 ### Solution 1:

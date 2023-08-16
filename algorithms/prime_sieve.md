@@ -43,3 +43,17 @@ def prime_sieve(lim):
         p += 1
     return primes
 ```
+
+## fast prime sieve for prime factorizations of each integer
+
+precomputes the prime factorization for each integer from 0 to upper_bound (inclusive)
+
+```py
+def prime_sieve(upper_bound):
+    prime_factorizations = [[] for _ in range(upper_bound + 1)]
+    for i in range(2, upper_bound + 1):
+        if len(prime_factorizations[i]) > 0: continue # not a prime
+        for j in range(i, upper_bound + 1, i):
+            prime_factorizations[j].append(i)
+    return prime_factorizations
+```
