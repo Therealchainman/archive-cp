@@ -79,6 +79,8 @@ class Solution:
 
 ### Solution 2:  math + combinatorics + inclusion exclusion principle + modular inverse + fermat's little theorem + precompute factorial and inverse factorials
 
+![image](images/number_of_music_playlists.png)
+
 ```py
 mod = int(1e9) + 7
 
