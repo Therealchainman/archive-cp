@@ -77,10 +77,31 @@ class Solution:
         return dp[goal][n]
 ```
 
-### Solution 2:  math + combinatorics + inclusion exclusion principle
+### Solution 2:  math + combinatorics + inclusion exclusion principle + modular inverse + fermat's little theorem + precompute factorial and inverse factorials
 
 ```py
+mod = int(1e9) + 7
 
+def mod_inverse(v):
+    return pow(v, mod - 2, mod)
+
+def factorials(n):
+    fact, inv_fact = [1] * (n + 1), [0] * (n + 1)
+    for i in range(2, n + 1):
+        fact[i] = (fact[i - 1] * i) % mod
+    inv_fact[-1] = mod_inverse(fact[-1])
+    for i in reversed(range(n)):
+        inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % mod
+    return fact, inv_fact
+
+class Solution:
+    def numMusicPlaylists(self, n: int, goal: int, k: int) -> int:
+        fact, inv_fact = factorials(n)
+        f = lambda x: pow(x - k, goal - k, mod) * inv_fact[n - x] * inv_fact[x - k]
+        res = 0
+        for i in range(k, n + 1):
+            res = (res + (1 if (n - i) % 2 == 0 else -1) * f(i)) % mod
+        return (res * fact[n]) % mod
 ```
 
 ## 1378. Replace Employee ID With The Unique Identifier

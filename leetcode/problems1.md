@@ -3252,6 +3252,25 @@ GROUP BY sell_date
 ORDER BY sell_date 
 ```
 
+### Solution 2:  groupby + sort_values + aggregate + lambda
+
+```py
+import pandas as pd
+
+def categorize_products(activities: pd.DataFrame) -> pd.DataFrame:
+  df = (
+    activities
+    .sort_values("sell_date")
+    .groupby("sell_date", sort = False)
+    .agg(
+      num_sold = ("product", "nunique"),
+      products = ("product", lambda x: ",".join(sorted(set(x))))
+    )
+    .reset_index()
+  )
+  return df
+```
+
 ## 1527. Patients With a Condition
 
 ### Solution 1: WHERE WITH LIKE for prefix search + search for prefix in string
@@ -3522,6 +3541,23 @@ HAVING COUNT(order_number) = (SELECT COUNT(order_number) AS cnt
                              FROM Orders
                              GROUP BY customer_number
                              ORDER BY cnt DESC LIMIT 1)
+```
+
+### Solution 2:  groupby + size + sort_values + dataframe slicing
+
+```py
+import pandas as pd
+
+def largest_orders(orders: pd.DataFrame) -> pd.DataFrame:
+  df = (
+    orders
+    .groupby('customer_number')
+    .agg({'order_number': 'size'})
+    .reset_index()
+    .rename(columns = {'order_number': 'count'})
+    .sort_values('count', ascending = False)
+  )
+  return df[['customer_number']][0:1]
 ```
 
 ## 52. N-Queens II
@@ -3799,15 +3835,15 @@ GROUP BY emp_id, event_day
 import pandas as pd
 
 def total_time(employees: pd.DataFrame) -> pd.DataFrame:
-  employees['total_time'] = (
-    employees.apply(lambda row: row.out_time - row.in_time, axis = 1)
-  )
+  employees['total_time'] = employees.out_time - employees.in_time
   df = (
     employees
     .groupby(['event_day', 'emp_id'])
-    .agg({'total_time': 'sum'})
+    .agg(
+      total_time = ("total_time", "sum")
+    )
     .reset_index()
-    .rename(columns = {'event_day': 'day'})
+    .rename(columns = {"event_day": "day"})
   )
   return df
 ```
@@ -3831,6 +3867,24 @@ ORDER BY user_id
 SELECT date_id, make_name, COUNT(DISTINCT(lead_id)) AS unique_leads, COUNT(DISTINCT(partner_id)) AS unique_partners
 FROM DailySales
 GROUP BY date_id, make_name
+```
+
+### Solution 2:  groupby on two columns + aggregate on multiple columns + nunique on multiple columns
+
+```py
+import pandas as pd
+
+def daily_leads_and_partners(daily_sales: pd.DataFrame) -> pd.DataFrame:
+  df = (
+    daily_sales
+    .groupby(["date_id", "make_name"])
+    .agg(
+      unique_leads = ("lead_id", "nunique"),
+      unique_partners = ("partner_id", "nunique")
+    )
+    .reset_index()
+  )
+  return df
 ```
 
 ## 1141. User Activity for the Past 30 Days I
