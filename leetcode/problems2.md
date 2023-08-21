@@ -241,14 +241,6 @@ class Solution:
         return -1
 ```
 
-## 1203. Sort Items by Groups Respecting Dependencies
-
-### Solution 1:
-
-```py
-
-```
-
 ## 871. Minimum Number of Refueling Stops
 
 ### Solution 1:  dynamic programming 
@@ -694,58 +686,92 @@ class Solution:
 
 ## 1203. Sort Items by Groups Respecting Dependencies
 
-### Solution 1:  topological sort + double topological sort + groups
+### Solution 1:  topological sort + topological sort of groups then topological sort of nodes within each group + preprocess data
 
 ```py
 class Solution:
-    def topSort(self, item: int, graph: defaultdict[List[int]]) -> List[int]:
-        result = []
-        queue = deque([item])
-        while queue:
-            item = queue.popleft()
-            result.append(item)
-            for nei in graph[item]:
-                self.indegrees[nei] -= 1
-                if self.indegrees[nei] == 0:
-                    queue.append(nei)
-        return result
     def sortItems(self, n: int, m: int, group: List[int], beforeItems: List[List[int]]) -> List[int]:
-        nogroup = -1
-        Group = namedtuple('Group', ['start', 'end'])
-        groups = [Group(i, i+1) for i in range(n,n+2*m,2)]
-        # for debug purpose used defaultdict
-        # graph = defaultdict(list)
-        self.indegrees = [0]*(n+2*m)
-        graph = [[] for _ in range(n+2*m)]
-        for i, gi in enumerate(group):
-            if gi == nogroup: continue
-            grp = groups[gi]
-            graph[grp.start].append(i)
-            graph[i].append(grp.end)
-            self.indegrees[i] += 1
-            self.indegrees[grp.end] += 1
-        for node_in, nodes_out in enumerate(beforeItems):
-            for node_out in nodes_out:
-                if group[node_in] != nogroup and group[node_out] != nogroup and group[node_in] != group[node_out]:
-                    grp_out, grp_in = groups[group[node_out]], groups[group[node_in]]
-                    graph[grp_out.end].append(grp_in.start)
-                    self.indegrees[grp_in.start] += 1
-                elif group[node_in] == group[node_out]:
-                    graph[node_out].append(node_in)
-                    self.indegrees[node_in] += 1
-                elif group[node_in] == nogroup:
-                    grp_out = groups[group[node_out]]
-                    graph[grp_out.end].append(node_in)
-                    self.indegrees[node_in] += 1
+        """
+        Creates a topological ordering of nodes
+        n = number of nodes
+        nodes = iterable of nodes in directed graph
+        adj_list = dictionary of lists adjacency list representation of directed graph for the nodes given
+
+        returns: topological ordering of nodes if possible
+        """
+        def topological_ordering(n, nodes, adj_list):
+            indegrees = Counter()
+            queue = deque()
+            for neis in adj_list.values():
+                for nei in neis: indegrees[nei] += 1
+            for node in nodes:
+                if indegrees[node] == 0: queue.append(node)
+            topo_order = []
+            while queue:
+                node = queue.popleft()
+                topo_order.append(node)
+                for nei in adj_list[node]:
+                    indegrees[nei] -= 1
+                    if indegrees[nei] == 0: queue.append(nei)
+            return topo_order if len(topo_order) == n else []
+        """
+        preprocess the data into directed graphs for topological_ordering function
+
+        Regrouping all nodes to belong to a group can make the topological ordering of groups easier.
+        sort by group, so same groups are together, than you can use itertools.groupby to split the groups.
+        special case is when key = -1, each item belongs to own group in that case to loop through all the nodes and assign while incrementing the m
+        Else just assign m
+        m will be equal to the number of unique groups
+        """
+        m = 0
+        for key, grp in itertools.groupby(sorted([(group[i], i) for i in range(n)]), key = lambda x: x[0]):
+            for _, i in grp:
+                group[i] = m
+                m += key == -1
+            m += key != -1
+
+        """
+        Create an adjacency lists for the group and the nodes in each group
+        This is needed to perform topo ordering
+        1. add edge to directed intergroup graph if u, v belong to different groups
+        2. add edge to corresponding directed intragroup graph if u, v belong to the same group
+        """
+        inter_grp_adj_list = defaultdict(list)
+        intra_grp_adj_lists = [defaultdict(list) for _ in range(m)]
+        for v, neis in enumerate(beforeItems):
+            # u -> v
+            for u in neis:
+                if group[u] != group[v]:
+                    inter_grp_adj_list[group[u]].append(group[v])
                 else:
-                    grp_in = groups[group[node_in]]
-                    graph[node_out].append(grp_in.start)
-                    self.indegrees[grp_in.start] += 1
-        result = []
-        start_nodes = [i for i in range(n+2*m) if self.indegrees[i] == 0]
-        for node in start_nodes:
-            result.extend(self.topSort(node,graph))
-        return [] if any(indegree > 0 for indegree in self.indegrees) else filter(lambda x: x < n, result)
+                    intra_grp_adj_lists[group[u]][u].append(v)
+
+        """
+        Find the a valid topological ordering of the intergroup directed graph
+        This is finding the valid order in which you can process the intragroup graphs for each group.
+        This guarantees that you process the dependencies between groups in proper order
+        
+        For example, if node u, and node v belong to group i and j respectively.  But v depends on u that is u -> v then you
+        will have that i -> j, that is group j depends on group i, because a node belonging to group j depends on a node belonging to group i
+        """
+        inter_group_topo_ordering = topological_ordering(m, range(m), inter_grp_adj_list)
+        if not inter_group_topo_ordering: return []
+
+        """
+        Looping through the each group in topological ordering, which guarantees that any dependencies between groups is satisfied.
+
+        1. Create a list of all nodes belonging to each group
+        2. Find valid topolocail ordering of the nodes within a group
+        """
+        res = []
+        group_nodes = [[] for _ in range(m)]
+        for i in range(n):
+            group_nodes[group[i]].append(i)
+        for group_i in inter_group_topo_ordering:
+            topo_order = topological_ordering(len(group_nodes[group_i]), group_nodes[group_i], intra_grp_adj_lists[group_i])
+            if not topo_order: return []
+            res.extend(topo_order)
+        return res
 ```
 
 ## 1591. Strange Printer II

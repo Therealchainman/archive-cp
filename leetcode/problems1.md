@@ -3166,11 +3166,32 @@ FROM Employees;
 
 ```sql
 SELECT employee_id, 
-    CASE 
+    CASE    
         WHEN employee_id%2 != 0 AND name NOT LIKE 'M%' THEN salary
         ELSE 0
     END bonus
 FROM Employees;
+```
+
+### Solution 3:  masks + loc to assign value where mask is false + rename + sort_values
+
+loc returns the columns where mask is true and assigns the value
+
+```py
+import pandas as pd
+
+def calculate_special_bonus(employees: pd.DataFrame) -> pd.DataFrame:
+  m_mask = ~employees.name.str.startswith('M')
+  odd_mask = (employees.employee_id & 1 == 1)
+  mask = m_mask & odd_mask
+  # where false it replaces with 0
+  employees.loc[~mask, "salary"] = 0
+  df = (
+    employees
+    .rename(columns = {"salary": "bonus"})
+    .sort_values("employee_id")
+  )
+  return df[["employee_id", "bonus"]]
 ```
 
 ## 2290. Minimum Obstacle Removal to Reach Corner
@@ -4154,6 +4175,23 @@ SELECT actor_id, director_id
 FROM ActorDirector
 GROUP BY actor_id, director_id
 HAVING COUNT(timestamp) >= 3;
+```
+
+### Solution 2:  groupby multiple columns + count + filter + subset dataframe columns
+
+```py
+import pandas as pd
+
+def actors_and_directors(actor_director: pd.DataFrame) -> pd.DataFrame:
+  df = (
+    actor_director
+    .groupby(["actor_id", "director_id"])
+    .agg(
+      count_ = ("timestamp", "count")
+    )
+    .reset_index()
+  )
+  return df[df.count_ >= 3][["actor_id", "director_id"]]
 ```
 
 ## 1393. Capital Gain/Loss
@@ -5687,6 +5725,38 @@ LEFT JOIN Examinations e
 ON s1.student_id = e.student_id AND s2.subject_name = e.subject_name
 GROUP BY student_id, subject_name
 ORDER BY student_id, subject_name
+```
+
+### Solution 3: cross join + groupby + left join + sort_values
+
+1. Perform a cross join to get all students associated with each subject
+2. groupby the student_id and subject_name to get the count of attended exams
+3. left join with the table created from step 1, so that if there were no exams it will place a NaN there. but you can use fillna to fix that.
+
+```py
+import pandas as pd
+
+def students_and_examinations(students: pd.DataFrame, subjects: pd.DataFrame, examinations: pd.DataFrame) -> pd.DataFrame:
+  all_students_subjects_df = (
+    students
+    .merge(subjects, how = "cross")
+  )
+  grouped = (
+    examinations
+    .groupby(["student_id", "subject_name"])
+    .agg(
+      attended_exams = ("subject_name", "count")
+    )
+    .reset_index()
+  )
+  exam_df = (
+    all_students_subjects_df
+    .merge(grouped, how = "left", on = ["student_id", "subject_name"])
+    .fillna(0)
+    .sort_values(["student_id", "subject_name"])
+  )
+  exam_df.attended_exams = exam_df.attended_exams.astype("int")
+  return exam_df[["student_id", "student_name", "subject_name", "attended_exams"]]
 ```
 
 ## 1501. Countries You Can Safely Invest In
@@ -8554,21 +8624,26 @@ class Solution:
 
 ## 1489. Find Critical and Pseudo-Critical Edges in Minimum Spanning Tree
 
-### Solution 1:  union find + minimum spanning tree + test exclude or include each node, 
+### Solution 1:  union find + minimum spanning tree + test exclude or include each node
+
+It's a bit tricky to understand what are the critical and psuedo critical edges.  The crtical edges are those which will exist in all minimum spanning trees for the graph.  That is the removal of them would result in a larger edge cost for the spanning tree.  So if you detect a change by blocking an edge you know it is critical.  psuedo critical edge means it appears in some of the MST but not all, so basically it is an edge that can be forced into the spannin tree and still give the MST.  If it doesn't then that means it is not ever a part of MST.
 
 ```py
 class UnionFind:
-    def __init__(self,n):
+    def __init__(self, n: int):
         self.size = [1]*n
         self.parent = list(range(n))
     
-    def find(self,i):
-        if i==self.parent[i]:
-            return i
-        self.parent[i] = self.find(self.parent[i])
-        return self.parent[i]
+    def find(self,i: int) -> int:
+        while i != self.parent[i]:
+            self.parent[i] = self.parent[self.parent[i]]
+            i = self.parent[i]
+        return i
 
-    def union(self,i,j):
+    """
+    returns true if the nodes were not union prior. 
+    """
+    def union(self,i: int,j: int) -> bool:
         i, j = self.find(i), self.find(j)
         if i!=j:
             if self.size[i] < self.size[j]:
@@ -8577,30 +8652,37 @@ class UnionFind:
             self.size[i] += self.size[j]
             return True
         return False
+    
+    def __repr__(self) -> str:
+        return f'parents: {[(i, parent) for i, parent in enumerate(self.parent)]}, sizes: {self.size}'
+
 class Solution:
-    def minimumSpanningTree(self, n, edges, include_edge = None):
-        minCost = 0
-        dsu = UnionFind(n)
-        if include_edge:
-            u, v, w = include_edge
-            dsu.union(u,v)
-            minCost += w
-        for u, v, w in edges:
-            if dsu.union(u,v):
-                minCost += w
-        return minCost
     def findCriticalAndPseudoCriticalEdges(self, n: int, edges: List[List[int]]) -> List[List[int]]:
-        edge_index = {tuple(edge): i for i, edge in enumerate(edges)}
-        edges.sort(key=lambda edge: edge[2])
-        mst = self.minimumSpanningTree(n, edges)
-        critical, pseudo = [], []
-        for i, edge in enumerate(edges):
-            mst_exclude = self.minimumSpanningTree(n, edges[:i] + edges[i+1:])
-            if mst_exclude != mst:
-                critical.append(edge_index[tuple(edge)])
-            elif mst_exclude == mst and self.minimumSpanningTree(n, edges, edge) == mst:
-                pseudo.append(edge_index[tuple(edge)])
-        return [critical, pseudo]
+        adj_list = [[] for _ in range(n)]
+        edges = [(u, v, w, i) for i, (u, v, w) in enumerate(edges)]
+        for u, v, w, _ in edges:
+            adj_list[u].append((v, w))
+            adj_list[v].append((u, w))
+        edges.sort(key = lambda data: data[2])
+        def mst(blocked_edge = None, forced_edge = None):
+            dsu = UnionFind(n)
+            min_cost = 0
+            if forced_edge:
+                dsu.union(*forced_edge[:2])
+                min_cost += forced_edge[2]
+            for u, v, w, _ in edges:
+                if (u, v) == blocked_edge: continue
+                if dsu.union(u, v):
+                    min_cost += w
+            return min_cost if dsu.size[dsu.find(0)] == n else math.inf
+        mst_val = mst()
+        critical_edges, psuedo_critical_edges = [], []
+        for u, v, w, i in edges:
+            if mst(blocked_edge = (u, v)) != mst_val:
+                critical_edges.append(i)
+            elif mst(forced_edge = (u, v, w)) == mst_val:
+                psuedo_critical_edges.append(i)
+        return [critical_edges, psuedo_critical_edges]
 ```
 
 ## 1168. Optimize Water Distribution in a Village

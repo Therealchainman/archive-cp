@@ -257,6 +257,120 @@ class Solution:
         return nlargest(k, nums)[-1]
 ```
 
+## 1615. Maximal Network Rank
+
+### Solution 1:  graph theory + degrees + adjacency matrix
+
+if there are multiple with maximum degree than only need to look through those.
+
+```py
+class Solution:
+    def maximalNetworkRank(self, n: int, roads: List[List[int]]) -> int:
+        degrees = [0] * n
+        adj_mat = [[0] * n for _ in range(n)]
+        for u, v in roads:
+            adj_mat[u][v], adj_mat[v][u] = 1, 1
+            degrees[u] += 1
+            degrees[v] += 1
+        max_deg = max(degrees)
+        max_ind = [i for i in range(n) if degrees[i] == max_deg]
+        if len(max_ind) == 1:
+            u = max_ind[0]
+            return max(degrees[u] + degrees[v] - adj_mat[u][v] for v in range(n) if v != u)
+        return max(degrees[u] + degrees[v] - adj_mat[u][v] for u, v in product(max_ind, repeat = 2) if u != v)
+```
+
+## 459. Repeated Substring Pattern
+
+### Solution 1:  modulus + divisors + prefix + time complexity $O(n\sqrt{n})$
+
+There may be $\sqrt{n}$ divisors for n, for each one check if the repeated substring matches the entire string s. 
+You can do this with modulus, so just mod by the current divisor m, and that way it will keep wrapping around and matching the prefix with the string.  But need to iterate through entire string which is where the O(n) operations come from. 
+
+```py
+class Solution:
+    def repeatedSubstringPattern(self, s: str) -> bool:
+        n = len(s)
+        def matches(m):
+            for i in range(n):
+                if s[i % m] != s[i]: return False
+            return True
+        for i in range(1, n // 2 + 1):
+            if n % i == 0 and matches(i): return True
+        return False
+```
+
+### Solution 2:  string is rotation of itself + concatenation of string + boyer's moore algorithm
+
+python uses boyer's moore algorithm to test if pattern is in string.  Which is average time complexity of O(n) so it isn't too bad.  
+
+This uses the fact that the string will be a roration of itself if it contains a repeated substring pattern. 
+
+You have to remove the first and last characters, cause otherwise it will match the entire string which is like a trivial case.  That is string s is trivially a substring of itself. 
+
+```py
+class Solution:
+    def repeatedSubstringPattern(self, s: str) -> bool:
+        n = len(s)
+        t = s[1:] + s[:-1]
+        return s in t
+```
+
+### Solution 3:  using Z-algorithm
+
+The pattern you are searching for is string s within the string s + s, with first and last character removed.  So just need to encode it for the z algorithm by putting pattern # string, and it will find if the pattern is a susbstring of the string.
+
+```py
+def z_algorithm(s: str) -> list[int]:
+    n = len(s)
+    z = [0]*n
+    left = right = 0
+    for i in range(1,n):
+        # BEYOND CURRENT MATCHED SEGMENT, TRY TO MATCH WITH PREFIX
+        if i > right:
+            left = right = i
+            while right < n and s[right-left] == s[right]:
+                right += 1
+            z[i] = right - left
+            right -= 1
+        else:
+            k = i - left
+            # IF PREVIOUS MATCHED SEGMENT IS NOT TOUCHING BOUNDARIES OF CURRENT MATCHED SEGMENT
+            if z[k] < right - i + 1:
+                z[i] = z[k]
+            # IF PREVIOUS MATCHED SEGMENT TOUCHES OR PASSES THE RIGHT BOUNDARY OF CURRENT MATCHED SEGMENT
+            else:
+                left = i
+                while right < n and s[right-left] == s[right]:
+                    right += 1
+                z[i] = right - left
+                right -= 1
+    return z
+
+class Solution:
+    def repeatedSubstringPattern(self, s: str) -> bool:
+        n = len(s)
+        t = s + "#" + s[1:] + s[:-1]
+        z_array = z_algorithm(t)
+        return any(z == n for z in z_array)
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
