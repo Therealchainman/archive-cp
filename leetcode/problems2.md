@@ -688,6 +688,8 @@ class Solution:
 
 ### Solution 1:  topological sort + topological sort of groups then topological sort of nodes within each group + preprocess data
 
+![images](images/sort_items_by_dependencies.png)
+
 ```py
 class Solution:
     def sortItems(self, n: int, m: int, group: List[int], beforeItems: List[List[int]]) -> List[int]:

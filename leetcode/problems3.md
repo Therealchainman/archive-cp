@@ -308,6 +308,8 @@ This uses the fact that the string will be a roration of itself if it contains a
 
 You have to remove the first and last characters, cause otherwise it will match the entire string which is like a trivial case.  That is string s is trivially a substring of itself. 
 
+![images](images/string_with_repeated_substrings.png)
+
 ```py
 class Solution:
     def repeatedSubstringPattern(self, s: str) -> bool:
