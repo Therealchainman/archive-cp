@@ -3262,6 +3262,16 @@ FROM Users
 ORDER BY user_id
 ```
 
+### Solution 2: apply + lambda + capitalize + sort_values
+
+```py
+import pandas as pd
+
+def fix_names(users: pd.DataFrame) -> pd.DataFrame:
+  users.name = users.name.apply(lambda row: row.capitalize())
+  return users.sort_values("user_id")
+```
+
 ## 1484. Group Sold Products By The Date
 
 ### Solution 1: GROUPBY + ORDERBY + GROUP_CONCAT create a list from a column
@@ -7477,6 +7487,19 @@ BEGIN
       LIMIT 1
   );
 END
+```
+
+### Solution 2:  min rank + mask + filter + drop duplicates + rank in descending order
+
+```py
+import pandas as pd
+
+def nth_highest_salary(employee: pd.DataFrame, N: int) -> pd.DataFrame:
+  employee.drop_duplicates("salary", inplace = True)
+  employee["rank_"] = employee.salary.rank(method = "min", ascending = False).astype("int")
+  mask = (employee.rank_ == N)
+  df = employee[mask]
+  return df[["salary"]]
 ```
 
 ## 1709. Biggest Window Between Visits

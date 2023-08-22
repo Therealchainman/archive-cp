@@ -357,20 +357,66 @@ class Solution:
         return any(z == n for z in z_array)
 ```
 
-##
+## 723. Candy Crush
 
-### Solution 1:
+### Solution 1:  matrix loop + inplace + lowest zero pointer + bottom to top and treat columns independent for drop phase + use absolute value to detect finding crushable sets in place
 
 ```py
-
+class Solution:
+    def candyCrush(self, board: List[List[int]]) -> List[List[int]]:
+        R, C = len(board), len(board[0])
+        def find():
+            found = False
+            for r, c in product(range(R), range(C)):
+                # mark horizontal
+                if 0 < c < C - 1 and board[r][c] != 0 and abs(board[r][c - 1]) == abs(board[r][c]) == abs(board[r][c + 1]):
+                    for i in range(c - 1, c + 2):
+                        board[r][i] = -abs(board[r][i])
+                    found = True
+                # mark vertical
+                if 0 < r < R - 1 and board[r][c] != 0 and abs(board[r - 1][c]) == abs(board[r][c]) == abs(board[r + 1][c]):
+                    for i in range(r - 1, r + 2):
+                        board[i][c] = -abs(board[i][c])
+                    found = True
+            for r, c in product(range(R), range(C)):
+                if board[r][c] < 0: board[r][c] = 0 # mark as empty
+            return found
+        def drop():
+            for c in range(C):
+                lowest_zero = -1
+                for r in reversed(range(R)):
+                    if board[r][c] == 0:
+                        lowest_zero = max(lowest_zero, r)
+                    elif lowest_zero >= 0 and board[r][c] > 0:
+                        board[lowest_zero][c], board[r][c] = board[r][c], board[lowest_zero][c]
+                        lowest_zero -= 1
+        while find():
+            drop()
+        return board
 ```
 
-##
+## 168. Excel Sheet Column Title
 
-### Solution 1:
+### Solution 1:  base 26 + subtract by one because all characters are shifted by one
+
+That is A is 1, Z is 26, but I want them to be 0 and 25, so shift to the left by 1.  To make the coefficients set so that 0 represents A and 25 represent Z you need to add one to each of the coefficients, and since we are converting to base 26, we need to subtract the 1.  Cause it had the added 1 in the base 10 representation.  
+
+$V = (c_{n} + 1) * b^{n} + ... + (c_{2} + 1) * b^{2} + (c_{1} + 1) * b^{1} + (c_{0} + 1) * b^{0}$
+Do this while V > 0
+1. $V = V - 1$
+1. $c_{i} = V \% b$
+1. $V = \lfloor \frac{V}{b} \rfloor$
 
 ```py
-
+class Solution:
+    def convertToTitle(self, n: int) -> str:
+        res = []
+        while n > 0:
+            n -= 1
+            ch = chr(n % 26 + ord("A"))
+            res.append(ch)
+            n //= 26
+        return "".join(reversed(res))
 ```
 
 ##
