@@ -419,12 +419,38 @@ class Solution:
         return "".join(reversed(res))
 ```
 
-##
+## 68. Text Justification
 
-### Solution 1:
+### Solution 1:  string + greedy + left justified
 
 ```py
-
+class Solution:
+    def fullJustify(self, words: List[str], maxWidth: int) -> List[str]:
+        res = []
+        cur = words[0]
+        num = 0
+        for word in words[1:]:
+            if len(word) + 1 <= maxWidth - len(cur):
+                cur += " "
+                cur += word
+                num += 1
+            else:
+                if not num:
+                    res.append(cur.ljust(maxWidth, " "))
+                else:
+                    num_spaces = maxWidth - len(cur) + num
+                    each = num_spaces // num
+                    extra = num_spaces % num
+                    s = ""
+                    for w in cur.split():
+                        s += w
+                        s += " " * (each + int(extra > 0))
+                        extra -= 1
+                    res.append(s.rstrip(" "))
+                cur = word
+                num = 0
+        res.append(cur.ljust(maxWidth, " "))
+        return res
 ```
 
 ##

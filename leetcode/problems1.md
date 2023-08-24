@@ -3149,6 +3149,17 @@ WHERE p1.email = p2.email
 AND p1.id > p2.id;
 ```
 
+### Solution 2: inplace sort_values + drop duplicates
+
+```py
+import pandas as pd
+
+# Modify Person in place
+def delete_duplicate_emails(person: pd.DataFrame) -> None:
+  person.sort_values("id", inplace = True)
+  person.drop_duplicates(subset = "email", keep = "first", inplace = True, ignore_index = True)
+```
+
 ## 1873. Calculate Special Bonus
 
 ### Solution 1: SELECT + CASE + SUBSTRING
@@ -3396,6 +3407,25 @@ FROM tmp_tbl
 WHERE price IS NOT NULL
 ```
 
+### Solution 3:  mask + rename to price and add the store to store column + concat dataframes
+
+```py
+import pandas as pd
+
+def rearrange_products_table(products: pd.DataFrame) -> pd.DataFrame:
+    def create(st):
+        df = (
+            products[["product_id", st]]
+            .rename(columns = {st: "price"})
+        )
+        mask = df.price.notna()
+        df = df[mask]
+        df["store"] = st
+        return df[["product_id", "store", "price"]]
+    dfs = map(lambda x: create(x), ["store1", "store2", "store3"])
+    return pd.concat(dfs)
+```
+
 ## 608. Tree Node
 
 ### Solution 1: CASE STATEMENT 
@@ -3438,6 +3468,22 @@ SELECT
     LIMIT 1 OFFSET 1
 ), NULL
 ) SecondHighestSalary;
+```
+
+### Solution 3:  drop duplicates + rank + mask + subset
+
+```py
+import pandas as pd
+
+def second_highest_salary(employee: pd.DataFrame) -> pd.DataFrame:
+  employee.drop_duplicates("salary", inplace = True)
+  employee["rank_"] = employee.salary.rank(ascending = False).astype(int)
+  mask = (employee.rank_ == 2)
+  df = (
+    employee[mask]
+    .rename(columns = {"salary": "SecondHighestSalary"})
+  )
+  return df[["SecondHighestSalary"]] if len(df) > 0 else pd.DataFrame([{"SecondHighestSalary": None}])
 ```
 
 ## 1461. Check If a String Contains All Binary Codes of Size K
@@ -5806,6 +5852,54 @@ JOIN highest_salary_tbl AS h
 ON e.salary = h.salary AND e.departmentId = h.departmentId
 JOIN Department d
 ON e.departmentId = d.id
+```
+
+### Solution 2: join + groupby with max + inner join to get rows with max salary for each department
+
+```py
+import pandas as pd
+
+def department_highest_salary(employee: pd.DataFrame, department: pd.DataFrame) -> pd.DataFrame:
+  df = (
+    employee[["name", "salary", "departmentId"]]
+    .rename(columns = {"name": "Employee", "departmentId": "id", "salary": "Salary"})
+    .merge(department.rename(columns = {"name": "Department"}), on = "id", how = "inner")
+  )
+  group = (
+    df
+    .groupby("Department")
+    .agg(
+      Salary = ("Salary", "max")
+    )
+    .reset_index()
+  )
+  df = (
+    df.merge(group, how = "inner", on = ["Department", "Salary"])
+  )
+  return df[["Department", "Employee", "Salary"]]
+```
+
+### Solution 3:  drop + inner join + groupby with series and transform + mask + subset
+
+```py
+import pandas as pd
+
+def department_highest_salary(employee: pd.DataFrame, department: pd.DataFrame) -> pd.DataFrame:
+  employee = (
+    employee[["name", "salary", "departmentId"]]
+    .rename(columns = {"name": "Employee", "departmentId": "id", "salary": "Salary"})
+  )
+  df = (
+    department.rename(columns = {"name": "Department"})
+    .merge(employee, on = "id", how = "inner")
+    .drop(labels = ["id"], axis = 1)
+  )
+  max_salaries = (
+    df
+    .groupby("Department")["Salary"].transform("max")
+  )
+  mask = df.Salary == max_salaries
+  return df[mask]
 ```
 
 ## 580. Count Student Number in Departments
