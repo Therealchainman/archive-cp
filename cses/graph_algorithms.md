@@ -593,6 +593,50 @@ if __name__ == '__main__':
     print(main())
 ```
 
+## Planets Queries I
+
+### Solution 1:  binary jumping + functional graph or successor graph + time complexity O(nlogk + qlogk)
+
+A functional graph means each node has an outdegree of 1, that is has one output. This means you will have islands but each island contains a cycle.  A cycle must always exist in a weakly connected component of a functional graph.  This is also a directed graph.  You can use binary jumping to find the power of twos successors from each node.  And you can convert any number to a summation of power of two jumps to calculate any possible jump.  Any jump can be composed of power of two jumps. 
+
+```py
+def main():
+    LOG = 31
+    n, q = map(int, input().split())
+    successor = list(map(int, input().split()))
+    queries = [tuple(map(int, input().split())) for _ in range(q)]
+    succ = [[0] * n for _ in range(LOG)]
+    succ[0] = [s - 1 for s in successor]
+    for i in range(1, LOG):
+        for j in range(n):
+            succ[i][j] = succ[i - 1][succ[i - 1][j]]
+    for x, k in queries:
+        x -= 1
+        for i in range(LOG):
+            if (k >> i) & 1:
+                x = succ[i][x]
+        print(x + 1)
+
+if __name__ == '__main__':
+    main()
+```
+
+## 
+
+### Solution 1:  
+
+```py
+
+```
+
+## 
+
+### Solution 1:  
+
+```py
+
+```
+
 ## 
 
 ### Solution 1:  
