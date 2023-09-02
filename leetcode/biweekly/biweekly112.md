@@ -130,6 +130,12 @@ cause 1 * 1 * 1 = 1^3, and if you can do it however many ways you want to multip
 
 And if it is 2 * 2 * 2 = 2^3 so you pick from those and then you multiply that by number of combinations you can pick with twos. 
 
+x1 * 1 * x2 * 1 * x3 * 3
+
+cause if you can do it 3 ways then you can basically 
+
+the thing is math.comb will be greater than 1 only if take less than ffreq[cnt].  So only for the suffix like above.  So this is equivalent to above solution it is just you can use a more general math formula.  I just didn't realize that the combinations would be 1 for each prefix.  And that you can take the frequency of the frequency and that is actually a more useful value in this problem. 
+
 ```py
 class Solution:
     def countKSubsequencesWithMaxBeauty(self, s: str, k: int) -> int:
