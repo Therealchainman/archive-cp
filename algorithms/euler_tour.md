@@ -34,29 +34,33 @@ Euler tour technique for subtree queries for a tree with root node 1
 Note this is 1-indexed, that is the nodes are numbered from 1 to n
 
 ```py
-class EulerTour:
-    def __init__(self, num_nodes: int, edges: List[List[int]]):
-        self.num_nodes = num_nodes
-        self.edges = edges
-        self.adj_list = [[] for _ in range(num_nodes + 1)]
-        self.root_node = 1 # root of the tree
-        self.enter_counter, self.exit_counter = [0]*(num_nodes + 1), [0]*(num_nodes + 1)
-        self.counter = 1
-        self.build_adj_list() # adjacency list representation of the tree
-        self.euler_tour(self.root_node, -1)
-    
-    def build_adj_list(self) -> None:
-        for u, v in self.edges:
-            self.adj_list[u].append(v)
-            self.adj_list[v].append(u)
-
-    def euler_tour(self, node: int, parent_node: int) -> None:
-        self.enter_counter[node] = self.counter
-        self.counter += 1
-        for child_node in self.adj_list[node]:
-            if child_node != parent_node:
-                self.euler_tour(child_node, node)
-        self.exit_counter[node] = self.counter - 1
+# EULER TOUR TECHNIQUE
+start, end = [0] * n, [0] * n
+timer = 0
+def dfs(node, parent):
+    nonlocal timer
+    start[node] = timer
+    timer += 1
+    for nei in adj_list[node]:
+        if nei == parent: continue
+        dfs(nei, node)
+    end[node] = timer
+dfs(0, -1)
+bit = FenwickTree(timer + 1)
+for i, val in enumerate(values):
+    bit.update(start[i] + 1, val)
+for _ in range(q):
+    queries = list(map(int, input().split()))
+    if queries[0] == 1:
+        u, s = queries[1:]
+        u -= 1
+        delta = s - values[u]
+        bit.update(start[u] + 1, delta)
+        values[u] = s
+    else:
+        u = queries[1] - 1
+        res = bit.query(end[u]) - bit.query(start[u])
+        print(res)
 ```
 
 Implemented in C++
@@ -120,28 +124,34 @@ fenwick_tree.update(exit_counter, -delta)
 
 
 ```py
-class EulerTourPathQueries:
-    def __init__(self, num_nodes: int, edges: List[List[int]]):
-        self.num_nodes = num_nodes
-        self.edges = edges
-        self.adj_list = [[] for _ in range(num_nodes + 1)]
-        self.root_node = 1 # root of the tree
-        self.enter_counter, self.exit_counter = [0]*(num_nodes + 1), [0]*(num_nodes + 1)
-        self.counter = 1
-        self.build_adj_list() # adjacency list representation of the tree
-        self.euler_tour(self.root_node, -1)
-    
-    def build_adj_list(self) -> None:
-        for u, v in self.edges:
-            self.adj_list[u].append(v)
-            self.adj_list[v].append(u)
-
-    def euler_tour(self, node: int, parent_node: int):
-        self.enter_counter[node] = self.counter
-        self.counter += 1
-        for child_node in self.adj_list[node]:
-            if child_node != parent_node:
-                self.euler_tour(child_node, node)
-        self.counter += 1
-        self.exit_counter[node] = self.counter
+# EULER TOUR TECHNIQUE FOR PATH QUERIES
+start, end = [0] * n, [0] * n
+timer = 1
+def dfs(node, parent):
+    nonlocal timer
+    start[node] = timer
+    timer += 1
+    for nei in adj_list[node]:
+        if nei == parent: continue
+        dfs(nei, node)
+    timer += 1
+    end[node] = timer
+dfs(0, -1)
+bit = FenwickTree(timer + 1)
+for i, val in enumerate(values):
+    bit.update(start[i], val)
+    bit.update(end[i], -val)
+for _ in range(q):
+    queries = list(map(int, input().split()))
+    if queries[0] == 1:
+        u, s = queries[1:]
+        u -= 1
+        delta = s - values[u]
+        bit.update(start[u], delta)
+        bit.update(end[u], -delta)
+        values[u] = s
+    else:
+        u = queries[1] - 1
+        res = bit.query(start[u])
+        print(res)
 ```

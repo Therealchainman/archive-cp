@@ -621,6 +621,94 @@ if __name__ == '__main__':
     main()
 ```
 
+## Planets Queries II
+
+### Solution 1:  binary jumping + functional graph or successor graph + cycles + two cases
+
+binary jumping is being used to check if their is a node that is k distance away. 
+
+Needs to use a dfs to store cycle information and distance from a node belonging to a cycle. for non cycle nodes.
+Use a parent array and backtracking to reconstruct cycle path and update the distances.  
+
+```py
+def main():
+    n, q = map(int, input().split())
+    successors = [x - 1 for x in map(int, input().split())]
+    LOG = 19
+    succ = [[0] * n for _ in range(LOG)]
+    succ[0] = successors[:]
+    for i in range(1, LOG):
+        for j in range(n):
+            succ[i][j] = succ[i - 1][succ[i - 1][j]]
+    cycle_count = 0
+    cycle_ids = [-1] * n # map node -> cycle_id
+    cycle_indices = [-1] * n # map node -> cycle_index
+    cycle_lens = []
+    tree_dist = [0] * n # map node -> distance from root node or cycle node
+    vis = [False] * n
+    def dfs(u):
+        nonlocal cycle_count
+        parent = {u: None}
+        is_cycle = False
+        while True:
+            v = successors[u]
+            if v in parent: 
+                is_cycle = True
+                break
+            if vis[v]: break
+            parent[v] = u
+            u = v
+        if is_cycle:
+            crit_point = parent[successors[u]]
+            cycle_path = []
+            while u != crit_point:
+                cycle_ids[u] = cycle_count
+                cycle_path.append(u)
+                u = parent[u]
+            cycle_path = cycle_path[::-1]
+            cycle_lens.append(len(cycle_path))
+            for i, node in enumerate(cycle_path):
+                cycle_indices[node] = i
+                vis[node] = True
+            cycle_count += 1
+        while u is not None:
+            vis[u] = True
+            tree_dist[u] = tree_dist[successors[u]] + 1
+            u = parent[u]
+    for u in range(n):
+        if vis[u]: continue
+        vis[u] = True
+        dfs(u)
+    def cycle_distance(u, v):
+        if cycle_ids[u] != cycle_ids[v]: return -1
+        u_i, v_i = cycle_indices[u], cycle_indices[v]
+        cid = cycle_ids[u]
+        return v_i - u_i if v_i >= u_i else cycle_lens[cid] - (u_i - v_i)
+    for _ in range(q):
+        u, v = map(int, input().split())
+        u -= 1
+        v -= 1
+        if cycle_ids[u] != -1 and cycle_ids[v] != -1: # case 1: both nodes belong to cycles
+            res = cycle_distance(u, v)
+        else: # case 2: both nodes do not belong to cycles
+            k = tree_dist[u] - tree_dist[v]
+            if k < 0: res = -1
+            else:
+                w = u # dummy node
+                for i in range(LOG):
+                    if (k >> i) & 1:
+                        w = succ[i][w]
+                if v != w and cycle_ids[v] != -1 and cycle_ids[w] != -1: # became case 1
+                    res = cycle_distance(w, v)
+                    res = res + (k if res >= 0 else 0)
+                else:
+                    res = k if w == v else -1
+        print(res)
+
+if __name__ == '__main__':
+    main()
+```
+
 ## 
 
 ### Solution 1:  

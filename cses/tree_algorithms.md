@@ -316,15 +316,108 @@ int main() {
 
 ## Company Queries I
 
-### Solution 1:
+### Solution 1:  binary jump + sparse table + tree + kth ancestor
 
 ```py
+def main():
+    LOG = 18
+    n, q = map(int, input().split())
+    parent = [-1] * n
+    arr = list(map(int, input().split()))
+    for i in range(n - 1):
+        parent[i + 1] = arr[i] - 1
+    ancestor = [[-1] * n for _ in range(LOG)]
+    ancestor[0] = parent[:]
+    for i in range(1, LOG):
+        for j in range(n):
+            if ancestor[i - 1][j] != -1:
+                ancestor[i][j] = ancestor[i - 1][ancestor[i - 1][j]]
+    def kth_ancestor(node, k):
+        for i in range(LOG):
+            if node == -1: break
+            if (k >> i) & 1:
+                node = ancestor[i][node]
+        return node
+    for _ in range(q):
+        u, k = map(int, input().split())
+        u -= 1
+        res = kth_ancestor(u, k)
+        print(res + 1 if res >= 0 else res)
 
+if __name__ == '__main__':
+    main()
 ```
 
 ## Company Queries II
 
-### Solution 1:  the lowest common boss is the lowest common ancestor in a tree + represent the relationship between bosses as a rooted tree at node 1, since 1 is the boss of everyone
+## Solution 1:  binary jump + lowest common ancestor + bfs + depth + kth ancestor + tree
+
+
+```py
+from collections import deque
+
+def main():
+    LOG = 18
+    n, q = map(int, input().split())
+    parent = [-1] * n
+    arr = list(map(int, input().split()))
+    for i in range(n - 1):
+        parent[i + 1] = arr[i] - 1
+    adj_list = [[] for _ in range(n)]
+    for u in range(1, n):
+        v = parent[u]
+        adj_list[u].append(u)
+        adj_list[v].append(u)
+    depth = [0] * n
+    def bfs(root):
+        queue = deque([root])
+        vis = [0] * n
+        vis[root] = 1
+        dep = 0
+        while queue:
+            for _ in range(len(queue)):
+                node = queue.popleft()
+                depth[node] = dep
+                for nei in adj_list[node]:
+                    if vis[nei]: continue
+                    vis[nei] = 1
+                    queue.append(nei)
+            dep += 1
+    bfs(0)
+    ancestor = [[-1] * n for _ in range(LOG)]
+    ancestor[0] = parent[:]
+    for i in range(1, LOG):
+        for j in range(n):
+            if ancestor[i - 1][j] != -1:
+                ancestor[i][j] = ancestor[i - 1][ancestor[i - 1][j]]
+    def kth_ancestor(node, k):
+        for i in range(LOG):
+            if (k >> i) & 1:
+                node = ancestor[i][node]
+        return node
+    def lca(u, v):
+        # ASSUME NODE u IS DEEPER THAN NODE v   
+        if depth[u] < depth[v]:
+            u, v = v, u
+        # PUT ON SAME DEPTH BY FINDING THE KTH ANCESTOR
+        k = depth[u] - depth[v]
+        u = kth_ancestor(u, k)
+        if u == v: return u
+        for i in reversed(range(LOG)):
+            if ancestor[i][u] != ancestor[i][v]:
+                u, v = ancestor[i][u], ancestor[i][v]
+        return ancestor[0][u]
+    for _ in range(q):
+        u, v = map(int, input().split())
+        u -= 1
+        v -= 1
+        print(lca(u, v) + 1)
+
+if __name__ == '__main__':
+    main()
+```
+
+### Solution 2:  the lowest common boss is the lowest common ancestor in a tree + represent the relationship between bosses as a rooted tree at node 1, since 1 is the boss of everyone
 
 ```cpp
 #include <bits/stdc++.h>
@@ -457,85 +550,13 @@ int main() {
 
 ### Solution 1:  find lca with binary lifting to find the distance between nodes
 
+Gives TLE
+
 ```py
-sys.setrecursionlimit(1_000_000)
-import math
-
-"""
-The root node is assumed be 0
-"""
-
-class BinaryLift:
-    """
-    This binary lift function works on any undirected graph that is composed of
-    an adjacency list defined by graph
-    """
-    def __init__(self, node_count: int, graph: List[List[int]]):
-        self.size = node_count
-        self.graph = graph # pass in an adjacency list to represent the graph
-        self.depth = [0]*node_count
-        self.parents = [-1]*node_count
-        self.visited = [False]*node_count
-        # ITERATE THROUGH EACH POSSIBLE TREE
-        for node in range(node_count):
-            if self.visited[node]: continue
-            self.visited[node] = True
-            self.get_parent_depth(node)
-        self.maxAncestor = 18 # set it so that only up to 2^18th ancestor can exist for this example
-        self.jump = [[-1]*self.maxAncestor for _ in range(self.size)]
-        self.build_sparse_table()
-        
-    def build_sparse_table(self) -> None:
-        """
-        builds the jump sparse arrays for computing the 2^jth ancestor of ith node in any given query
-        """
-        for j in range(self.maxAncestor):
-            for i in range(self.size):
-                if j == 0:
-                    self.jump[i][j] = self.parents[i]
-                elif self.jump[i][j-1] != -1:
-                    prev_ancestor = self.jump[i][j-1]
-                    self.jump[i][j] = self.jump[prev_ancestor][j-1]
-                    
-    def get_parent_depth(self, node: int, parent_node: int = -1, depth: int = 0) -> None:
-        """
-        Fills out the depth array for each node and the parent array for each node
-        """
-        self.parents[node] = parent_node
-        self.depth[node] = depth
-        for nei_node in self.graph[node]:
-            if self.visited[nei_node]: continue
-            self.visited[nei_node] = True
-            self.get_parent_depth(nei_node, node, depth+1)
-
-    def distance(self, p: int, q: int) -> int:
-        """
-        Computes the distance between two nodes
-        """
-        lca = self.find_lca(p, q)
-        return self.depth[p] + self.depth[q] - 2*self.depth[lca]
-    
-    def find_lca(self, p: int, q: int) -> int:
-        # ASSUME NODE P IS DEEPER THAN NODE Q   
-        if self.depth[p] < self.depth[q]:
-            p, q = q, p
-        # PUT ON SAME DEPTH BY FINDING THE KTH ANCESTOR
-        k = self.depth[p] - self.depth[q]
-        p = self.kthAncestor(p, k)
-        if p == q: return p
-        for j in range(self.maxAncestor)[::-1]:
-            if self.jump[p][j] != self.jump[q][j]:
-                p, q = self.jump[p][j], self.jump[q][j] # jump to 2^jth ancestor nodes
-        return self.jump[p][0]
-    
-    def kthAncestor(self, node: int, k: int) -> int:
-        while node != -1 and k>0:
-            i = int(math.log2(k))
-            node = self.jump[node][i]
-            k-=(1<<i)
-        return node
+from collections import deque
 
 def main():
+    LOG = 18
     n, q = map(int, input().split())
     adj_list = [[] for _ in range(n)]
     for _ in range(n - 1):
@@ -544,18 +565,56 @@ def main():
         v -= 1
         adj_list[u].append(v)
         adj_list[v].append(u)
-    binary_lift = BinaryLift(n, adj_list)
-    result = []
+    parent = [-1] * n
+    depth = [0] * n
+    def bfs(root):
+        queue = deque([root])
+        vis = [0] * n
+        vis[root] = 1
+        dep = 0
+        while queue:
+            for _ in range(len(queue)):
+                node = queue.popleft()
+                depth[node] = dep
+                for nei in adj_list[node]:
+                    if vis[nei]: continue
+                    vis[nei] = 1
+                    parent[nei] = node
+                    queue.append(nei)
+            dep += 1
+    bfs(0)
+    ancestor = [[-1] * n for _ in range(LOG)]
+    ancestor[0] = parent[:]
+    for i in range(1, LOG):
+        for j in range(n):
+            if ancestor[i - 1][j] != -1:
+                ancestor[i][j] = ancestor[i - 1][ancestor[i - 1][j]]
+    def kth_ancestor(node, k):
+        for i in range(LOG):
+            if (k >> i) & 1:
+                node = ancestor[i][node]
+        return node
+    def lca(u, v):
+        # ASSUME NODE u IS DEEPER THAN NODE v   
+        if depth[u] < depth[v]:
+            u, v = v, u
+        # PUT ON SAME DEPTH BY FINDING THE KTH ANCESTOR
+        k = depth[u] - depth[v]
+        u = kth_ancestor(u, k)
+        if u == v: return u
+        for i in reversed(range(LOG)):
+            if ancestor[i][u] != ancestor[i][v]:
+                u, v = ancestor[i][u], ancestor[i][v]
+        return ancestor[0][u]
     for _ in range(q):
         u, v = map(int, input().split())
         u -= 1
         v -= 1
-        distance = binary_lift.distance(u, v)
-        result.append(distance)
-    return '\n'.join(map(str, result))
+        res = depth[u] + depth[v] - 2 * depth[lca(u, v)]
+        print(res)
 
 if __name__ == '__main__':
-    print(main())
+    main()
 ```
 
 ```cpp
@@ -568,7 +627,7 @@ inline int read()
 	while (c < '0' || c > '9') {
 		if (c == '-') y = -1;
 		c = getchar();
-	}
+	} 
 	while (c >= '0' && c <= '9') x = x * 10 + c - '0', c = getchar();
 	return x * y;
 }
@@ -947,6 +1006,7 @@ int main() {
 ### Solution 1:  euler tour technique for subtree queries + tree + binary index tree (Fenwick tree) + flatten tree
 
 ```py
+sys.setrecursionlimit(1_000_000)
 class FenwickTree:
     def __init__(self, N):
         self.sums = [0 for _ in range(N+1)]
@@ -965,59 +1025,47 @@ class FenwickTree:
 
     def __repr__(self):
         return f"array: {self.sums}"
-    
-class EulerTour:
-    def __init__(self, num_nodes: int, edges: List[List[int]]):
-        self.num_nodes = num_nodes
-        self.edges = edges
-        self.adj_list = [[] for _ in range(num_nodes + 1)]
-        self.root_node = 1 # root of the tree
-        self.enter_counter, self.exit_counter = [0]*(num_nodes + 1), [0]*(num_nodes + 1)
-        self.counter = 1
-        self.build_adj_list() # adjacency list representation of the tree
-        self.euler_tour(self.root_node, -1)
-    
-    def build_adj_list(self) -> None:
-        for u, v in self.edges:
-            self.adj_list[u].append(v)
-            self.adj_list[v].append(u)
-
-    def euler_tour(self, node: int, parent_node: int):
-        self.enter_counter[node] = self.counter
-        self.counter += 1
-        for child_node in self.adj_list[node]:
-            if child_node != parent_node:
-                self.euler_tour(child_node, node)
-        self.exit_counter[node] = self.counter - 1
 
 def main():
     n, q = map(int, input().split())
-    arr = [0] + list(map(int, input().split()))
-    edges = []
-    for _ in range(n - 1):
+    values = list(map(int, input().split()))
+    adj_list = [[] for _ in range(n)]
+    for _ in range(n -1):
         u, v = map(int, input().split())
-        edges.append((u, v))
-    euler_tour = EulerTour(n, edges)
-    fenwick_tree = FenwickTree(n + 1)
-    for node, enter_counter in enumerate(euler_tour.enter_counter[1:], start = 1):
-        fenwick_tree.update(enter_counter, arr[node])
-    result = []
+        u -= 1
+        v -= 1
+        adj_list[u].append(v)
+        adj_list[v].append(u)
+    # EULER TOUR TECHNIQUE
+    start, end = [0] * n, [0] * n
+    timer = 0
+    def dfs(node, parent):
+        nonlocal timer
+        start[node] = timer
+        timer += 1
+        for nei in adj_list[node]:
+            if nei == parent: continue
+            dfs(nei, node)
+        end[node] = timer
+    dfs(0, -1)
+    bit = FenwickTree(timer + 1)
+    for i, val in enumerate(values):
+        bit.update(start[i] + 1, val)
     for _ in range(q):
-        query = list(map(int, input().split()))
-        if query[0] == 1:
-            u, x = query[1:]
-            node_index_in_flatten_tree = euler_tour.enter_counter[u]
-            delta = x - arr[u]
-            arr[u] = x
-            fenwick_tree.update(node_index_in_flatten_tree, delta) # update the fenwick tree
+        queries = list(map(int, input().split()))
+        if queries[0] == 1:
+            u, s = queries[1:]
+            u -= 1
+            delta = s - values[u]
+            bit.update(start[u] + 1, delta)
+            values[u] = s
         else:
-            s = query[1]
-            subtree_sum = fenwick_tree.query(euler_tour.exit_counter[s]) - fenwick_tree.query(euler_tour.enter_counter[s] - 1)
-            result.append(subtree_sum)
-    return '\n'.join(map(str, result))
+            u = queries[1] - 1
+            res = bit.query(end[u]) - bit.query(start[u])
+            print(res)
 
 if __name__ == '__main__':
-    print(main())
+    main()
 ```
 
 ```cpp
@@ -1159,7 +1207,6 @@ int main() {
 
 ```py
 sys.setrecursionlimit(1_000_000)
-
 class FenwickTree:
     def __init__(self, N):
         self.sums = [0 for _ in range(N+1)]
@@ -1178,65 +1225,373 @@ class FenwickTree:
 
     def __repr__(self):
         return f"array: {self.sums}"
-    
-class EulerTourPathQueries:
-    def __init__(self, num_nodes: int, edges: List[List[int]]):
-        self.num_nodes = num_nodes
-        self.edges = edges
-        self.adj_list = [[] for _ in range(num_nodes + 1)]
-        self.root_node = 1 # root of the tree
-        self.enter_counter, self.exit_counter = [0]*(num_nodes + 1), [0]*(num_nodes + 1)
-        self.counter = 1
-        self.build_adj_list() # adjacency list representation of the tree
-        self.euler_tour(self.root_node, -1)
-    
-    def build_adj_list(self) -> None:
-        for u, v in self.edges:
-            self.adj_list[u].append(v)
-            self.adj_list[v].append(u)
-
-    def euler_tour(self, node: int, parent_node: int):
-        self.enter_counter[node] = self.counter
-        self.counter += 1
-        for child_node in self.adj_list[node]:
-            if child_node != parent_node:
-                self.euler_tour(child_node, node)
-        self.counter += 1
-        self.exit_counter[node] = self.counter
 
 def main():
     n, q = map(int, input().split())
-    arr = [0] + list(map(int, input().split()))
-    edges = []
-    for _ in range(n - 1):
+    values = list(map(int, input().split()))
+    adj_list = [[] for _ in range(n)]
+    for _ in range(n -1):
         u, v = map(int, input().split())
-        edges.append((u, v))
-    euler_tour = EulerTourPathQueries(n, edges)
-    fenwick_tree = FenwickTree(2*n + 2)
-    for node, (enter_counter, exit_counter) in enumerate(zip(euler_tour.enter_counter[1:], euler_tour.exit_counter[1:]), start = 1):
-        fenwick_tree.update(enter_counter, arr[node])
-        fenwick_tree.update(exit_counter, -arr[node])
-    result = []
+        u -= 1
+        v -= 1
+        adj_list[u].append(v)
+        adj_list[v].append(u)
+    # EULER TOUR TECHNIQUE FOR PATH QUERIES
+    start, end = [0] * n, [0] * n
+    timer = 1
+    def dfs(node, parent):
+        nonlocal timer
+        start[node] = timer
+        timer += 1
+        for nei in adj_list[node]:
+            if nei == parent: continue
+            dfs(nei, node)
+        timer += 1
+        end[node] = timer
+    dfs(0, -1)
+    bit = FenwickTree(timer + 1)
+    for i, val in enumerate(values):
+        bit.update(start[i], val)
+        bit.update(end[i], -val)
     for _ in range(q):
-        query = list(map(int, input().split()))
-        if query[0] == 1:
-            u, x = query[1:]
-            enter_counter, exit_counter = euler_tour.enter_counter[u], euler_tour.exit_counter[u]
-            delta = x - arr[u]
-            arr[u] = x
-            fenwick_tree.update(enter_counter, delta) # update the fenwick tree
-            fenwick_tree.update(exit_counter, -delta)
+        queries = list(map(int, input().split()))
+        if queries[0] == 1:
+            u, s = queries[1:]
+            u -= 1
+            delta = s - values[u]
+            bit.update(start[u], delta)
+            bit.update(end[u], -delta)
+            values[u] = s
         else:
-            s = query[1]
-            path_sum = fenwick_tree.query(euler_tour.enter_counter[s])
-            result.append(path_sum)
-    return '\n'.join(map(str, result))
+            u = queries[1] - 1
+            res = bit.query(start[u])
+            print(res)
 
 if __name__ == '__main__':
-    print(main())
+    main()
 ```
 
 ## Path Queries II
+
+### Solution 1:  heavy light decomposition + segment tree + dfs + max value on path
+
+```py
+sys.setrecursionlimit(1_000_000)
+import math
+
+class SegmentTree:
+    def __init__(self, n: int, neutral: int, func, initial_arr):
+        self.func = func
+        self.neutral = neutral
+        self.size = 1
+        self.n = n
+        while self.size<n:
+            self.size*=2
+        self.nodes = [neutral for _ in range(self.size*2)] 
+        self.build(initial_arr)
+
+    def build(self, initial_arr: List[int]) -> None:
+        for i, segment_idx in enumerate(range(self.n)):
+            segment_idx += self.size - 1
+            val = initial_arr[i]
+            self.nodes[segment_idx] = val
+            self.ascend(segment_idx)
+
+    def ascend(self, segment_idx: int) -> None:
+        while segment_idx > 0:
+            segment_idx -= 1
+            segment_idx >>= 1
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            self.nodes[segment_idx] = self.func(self.nodes[left_segment_idx], self.nodes[right_segment_idx])
+        
+    def update(self, segment_idx: int, val: int) -> None:
+        segment_idx += self.size - 1
+        self.nodes[segment_idx] = val
+        self.ascend(segment_idx)
+            
+    def query(self, left: int, right: int) -> int:
+        stack = [(0, self.size, 0)]
+        result = self.neutral
+        while stack:
+            # BOUNDS FOR CURRENT INTERVAL and idx for tree
+            segment_left_bound, segment_right_bound, segment_idx = stack.pop()
+            # NO OVERLAP
+            if segment_left_bound >= right or segment_right_bound <= left: continue
+            # COMPLETE OVERLAP
+            if segment_left_bound >= left and segment_right_bound <= right:
+                result = self.func(result, self.nodes[segment_idx])
+                continue
+            # PARTIAL OVERLAP
+            mid_point = (segment_left_bound + segment_right_bound) >> 1
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            stack.extend([(mid_point, segment_right_bound, right_segment_idx), (segment_left_bound, mid_point, left_segment_idx)])
+        return result
+    
+    def __repr__(self) -> str:
+        return f"nodes array: {self.nodes}, next array: {self.nodes}"
+
+def main():
+    n, q = map(int, input().split())
+    values = list(map(int, input().split()))
+    adj_list = [[] for _ in range(n)]
+    for _ in range(n -1):
+        u, v = map(int, input().split())
+        u -= 1
+        v -= 1
+        adj_list[u].append(v)
+        adj_list[v].append(u)
+    parent, depth, head, size, index_map = [-1] * n, [0] * n, [-1] * n, [0] * n, [0] * n
+    counter = 0
+    heavy = list(range(n))
+    def dfs(u):
+        size[u] = 1
+        heavy_size = 0
+        for v in adj_list[u]:
+            if v == parent[u]: continue
+            parent[v] = u
+            depth[v] = depth[u] + 1
+            sz = dfs(v)
+            size[u] += sz
+            if sz > heavy_size:
+                heavy_size = sz
+                heavy[u] = v
+        return size[u]
+    dfs(0) # set node 0 as root
+    def decompose(u, h):
+        nonlocal counter
+        index_map[u] = counter
+        counter += 1
+        head[u] = h
+        for v in adj_list[u]:
+            if v != heavy[u]: continue
+            decompose(v, h)
+        for v in adj_list[u]:
+            if v == heavy[u] or v == parent[u]: continue
+            decompose(v, v)
+    decompose(0, 0)
+    vals = [0] * n
+    for i, v in enumerate(values):
+        vals[index_map[i]] = v
+    segment_tree = SegmentTree(n, -math.inf, max, vals) # need to compute the initial array, should contain heavy paths
+    def query(u, v):
+        res = 0
+        while True:
+            if depth[u] > depth[v]:
+                u, v = v, u
+            x, y = head[u], head[v]
+            if x == y:
+                left, right = index_map[u], index_map[v]
+                res = max(res, segment_tree.query(left, right + 1))
+                break
+            elif depth[x] > depth[y]:
+                left, right = index_map[x], index_map[u]
+                res = max(res, segment_tree.query(left, right + 1))
+                u = parent[x]
+            else:
+                left, right = index_map[y], index_map[v]
+                res = max(res, segment_tree.query(left, right + 1))
+                v = parent[y]
+        return res
+    result = []
+    for _ in range(q):
+        t, u, v = map(int, input().split())
+        u -= 1
+        if t == 1:
+            segment_tree.update(index_map[u], v)
+        else:
+            v -= 1
+            res = query(u, v)
+            result.append(res)
+    print(*result)
+            
+if __name__ == '__main__':
+    main()
+```
+
+This segment tree is inclusive that is [L, R] for queries. 
+
+```cpp
+const int N = 2e5+5;
+vector<int> adj_list[N];
+int parent[N], depth[N], head[N], sz[N], index_map[N], heavy[N], values[N];
+int counter;
+
+struct SegmentTree {
+    int size;
+    vector<int> nodes;
+
+    void init(int num_nodes) {
+        size = 1;
+        while (size < num_nodes) size *= 2;
+        nodes.resize(size * 2, 0);
+    }
+
+    int func(int x, int y) {
+        return max(x, y);
+    }
+
+    void ascend(int segment_idx) {
+        while (segment_idx > 0) {
+            int left_segment_idx = 2 * segment_idx, right_segment_idx = 2 * segment_idx + 1;
+            nodes[segment_idx] = func(nodes[left_segment_idx], nodes[right_segment_idx]);
+            segment_idx >>= 1;
+        }
+    }
+
+    void update(int segment_idx, int val) {
+        segment_idx += size;
+        nodes[segment_idx] = val;
+        segment_idx >>= 1;
+        ascend(segment_idx);
+    }
+
+    int query(int left, int right) {
+        left += size, right += size;
+        int res = 0;
+        while (left <= right) {
+            if (left & 1) {
+                res = max(res, nodes[left]);
+                left++;
+            }
+            if (~right & 1) {
+                res = max(res, nodes[right]);
+                right--;
+            }
+            left >>= 1, right >>= 1;
+        }
+        return res;
+    }
+};
+
+SegmentTree seg;
+
+int dfs(int u) {
+    sz[u] = 1;
+    int heavy_size = 0;
+    for (int v : adj_list[u]) {
+        if (v == parent[u]) continue;
+        parent[v] = u;
+        depth[v] = depth[u] + 1;
+        int s = dfs(v);
+        sz[u] += s;
+        if (s > heavy_size) {
+            heavy_size = s;
+            heavy[u] = v;
+        }
+    }
+    return sz[u];
+}
+
+void decompose(int u, int h) {
+    index_map[u] = counter++;
+    seg.update(index_map[u], values[u]);
+    head[u] = h;
+    for (int v : adj_list[u]) {
+        if (v == heavy[u]) {
+            decompose(v, h);
+        }
+    }
+    for (int v : adj_list[u]) {
+        if (v == heavy[u] || v == parent[u]) continue;
+        decompose(v, v);
+    }
+}
+
+int query(int u, int v) {
+    int res = 0;
+    while (true) {
+        if (depth[u] > depth[v]) {
+            swap(u, v);
+        }
+        int x = head[u];
+        int y = head[v];
+        if (x == y) {
+            int left = index_map[u];
+            int right = index_map[v];
+            res = max(res, seg.query(left, right));
+            break;
+        } else if (depth[x] > depth[y]) {
+            int left = index_map[x];
+            int right = index_map[u];
+            res = max(res, seg.query(left, right));
+            u = parent[x];
+        } else {
+            int left = index_map[y];
+            int right = index_map[v];
+            res = max(res, seg.query(left, right));
+            v = parent[y];
+        }
+    }
+    return res;
+}
+
+int32_t main() {
+    int n = read(), q = read();
+    for (int i = 0; i < n; i++) {
+        values[i] = read();
+    }
+    for (int i = 0; i < n - 1; ++i) {
+        int u = read(), v = read();
+        u--;
+        v--;
+        adj_list[u].push_back(v);
+        adj_list[v].push_back(u);
+    }
+    counter = 0;
+    for (int i = 0; i < n; ++i) {
+        heavy[i] = i;
+    }
+    seg.init(n);
+    dfs(0);
+    decompose(0, 0);
+    vector<int> result;
+    for (int i = 0; i < q; ++i) {
+        int t = read(), u = read(), v = read();
+        u--;
+        if (t == 1) {
+            // Update operation
+            // Call the update function for the segment tree
+            seg.update(index_map[u], v);
+        } else {
+            v -= 1;
+            // Query operation
+            int res = query(u, v);
+            result.push_back(res);
+        }
+    }
+    for (int res : result) {
+        cout << res << " ";
+    }
+    cout << endl;
+    return 0;
+}
+```
+
+## 
+
+### Solution 1:
+
+```py
+
+```
+
+## 
+
+### Solution 1:
+
+```py
+
+```
+
+## 
+
+### Solution 1:
+
+```py
+
+```
+
+## 
 
 ### Solution 1:
 

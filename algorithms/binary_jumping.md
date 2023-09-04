@@ -68,7 +68,7 @@ depth = [0] * n
 parent = [-1] * n
 freq = [[0] * 27 for _ in range(n)]
 # CONSTRUCT THE PARENT, DEPTH AND FREQUENCY ARRAY FROM ROOT
-def dfs(root):
+def bfs(root):
     queue = deque([root])
     vis = [0] * n
     vis[root] = 1
@@ -85,7 +85,7 @@ def dfs(root):
                 vis[nei] = 1
                 queue.append(nei)
         dep += 1
-dfs(0)
+bfs(0)
 # CONSTRUCT THE SPARSE TABLE FOR THE BINARY JUMPING TO ANCESTORS IN TREE
 ancestor = [[-1] * n for _ in range(LOG)]
 ancestor[0] = parent[:]

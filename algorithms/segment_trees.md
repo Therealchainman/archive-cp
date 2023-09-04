@@ -154,3 +154,58 @@ class SegmentTree:
     def __repr__(self) -> str:
         return f"nodes array: {self.nodes}, next array: {self.nodes}"
 ```
+
+## Fast Segment tree in C++ Point updates and Range Queries PURQ
+
+Implement the function in here, such as max for func, and update each index value. 
+
+Inclusive queries [left, right].  
+
+```cpp
+struct SegmentTree {
+    int size;
+    vector<int> nodes;
+
+    void init(int num_nodes) {
+        size = 1;
+        while (size < num_nodes) size *= 2;
+        nodes.resize(size * 2, 0);
+    }
+
+    int func(int x, int y) {
+        return max(x, y);
+    }
+
+    void ascend(int segment_idx) {
+        while (segment_idx > 0) {
+            int left_segment_idx = 2 * segment_idx, right_segment_idx = 2 * segment_idx + 1;
+            nodes[segment_idx] = func(nodes[left_segment_idx], nodes[right_segment_idx]);
+            segment_idx >>= 1;
+        }
+    }
+
+    void update(int segment_idx, int val) {
+        segment_idx += size;
+        nodes[segment_idx] = val;
+        segment_idx >>= 1;
+        ascend(segment_idx);
+    }
+
+    int query(int left, int right) {
+        left += size, right += size;
+        int res = 0;
+        while (left <= right) {
+            if (left & 1) {
+                res = max(res, nodes[left]);
+                left++;
+            }
+            if (~right & 1) {
+                res = max(res, nodes[right]);
+                right--;
+            }
+            left >>= 1, right >>= 1;
+        }
+        return res;
+    }
+};
+```
