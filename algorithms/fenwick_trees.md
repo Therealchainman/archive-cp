@@ -4,7 +4,7 @@
 
 Fenwick trees are a data structure that can be used to efficiently calculate prefix sums in a table of numbers.
 
-### IMPLEMENTED IN C++ 
+### IMPLEMENTED IN C++ PURQ
 
 This fenwick tree will provide super fast range sum queries
 works for point updates and range queries
@@ -15,6 +15,8 @@ if want to use it for counting, when object is added do ft.update(i + 1, 1)
 and when object is removed do ft.update(i + 1, -1)
 
 range queries this will work ft.query(left - 1, right)
+
+point update range queries
 
 ```cpp
 long long neutral = 0;
@@ -47,7 +49,7 @@ struct FenwickTree {
 };
 ```
 
-### IMPLEMENTED IN PYTHON
+### IMPLEMENTED IN PYTHON + PURQ
 
 The thing that I need to know about a fenwick tree datastructure is how to use it. It is useful for when you need to 
 modify the range sum,  So with this you can both update a range sum in the tree, and query a range sum in log(n) time complexity
@@ -60,6 +62,8 @@ self.fenwick = FenwickTree(n)
 self.fenwick.update(r+1,-k)
 
 if I query(5) it looks in the range [0,5], so it is inclusive
+
+point update range queries
 
 ```py
 class FenwickTree:
@@ -81,3 +85,4 @@ class FenwickTree:
     def __repr__(self):
         return f"array: {self.sums}"
 ```
+
