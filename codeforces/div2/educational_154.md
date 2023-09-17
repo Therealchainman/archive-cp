@@ -102,7 +102,7 @@ if __name__ == '__main__':
 
 ## E. Non-Intersecting Subpermutations
 
-### Solution 1: 
+### Solution 1:  combinatorics + dynamic programming + math
 
 ```py
 

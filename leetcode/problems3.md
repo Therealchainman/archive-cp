@@ -453,6 +453,260 @@ class Solution:
         return res
 ```
 
+## 725. Split Linked List in Parts
+
+### Solution 1:  linked list
+
+```py
+class Solution:
+    def splitListToParts(self, head: Optional[ListNode], k: int) -> List[Optional[ListNode]]:
+        def size(head):
+            n = 0
+            while head:
+                head = head.next
+                n += 1
+            return n
+        sz = size(head)
+        res = []
+        while k > 0:
+            cnt = math.ceil(sz / k)
+            sub_head = head
+            for _ in range(cnt - 1):
+                head = head.next
+            if head:
+                head.next, head = None, head.next
+            res.append(sub_head)
+            sz -= cnt
+            k -= 1
+        return res
+```
+
+## 92. Reverse Linked List II
+
+### Solution 1:  multiple pointers for linked list + reverse linked list
+
+```py
+class Solution:
+    def reverseBetween(self, head: Optional[ListNode], left: int, right: int) -> Optional[ListNode]:
+        dummy = ListNode(next = head)
+        s = dummy
+        for _ in range(left - 1):
+            s = s.next
+        left_node = s.next
+        right_node = None
+        s.next = None
+        e = left_node
+        for _ in range(right - left + 1):
+            nxt = e.next
+            e.next = right_node
+            right_node = e
+            e = nxt
+        s.next, left_node.next = right_node, e
+        return dummy.next
+```
+
+## 1282. Group the People Given the Group Size They Belong To
+
+### Solution 1:  offline query + sort
+
+```py
+class Solution:
+    def groupThePeople(self, groupSizes: List[int]) -> List[List[int]]:
+        groups = sorted([(g, i) for i, g in enumerate(groupSizes)])
+        res = [[]]
+        for g, i in groups:
+            res[-1].append(i)
+            if len(res[-1]) == g:
+                res.append([])
+        return res[:-1]
+```
+
+## 358. Rearrange String k Distance Apart
+
+### Solution 1:  max heap + queue to store up to k characters + greedy
+
+Best to use the characters with highest frequency, once used keep a queue of characters that are currently blocked. And once the length of queue is >= k that means the character can be reused, add back into max heap.  
+
+```py
+class Solution:
+    def rearrangeString(self, s: str, k: int) -> str:
+        queue = deque()
+        heapify(max_heap := [(-s.count(ch), ch) for ch in string.ascii_lowercase])
+        res = []
+        while max_heap:
+            cnt, ch = heappop(max_heap)
+            cnt = abs(cnt)
+            if cnt == 0: continue
+            cnt -= 1
+            res.append(ch)
+            queue.append((cnt, ch))
+            if len(queue) >= k:
+                cnt, ch = queue.popleft()
+                heappush(max_heap, (-cnt, ch))
+        return "".join(res) if len(res) == len(s) else ""
+```
+
+## 332. Reconstruct Itinerary
+
+### Solution 1:  dfs + stack + Hierholzer's algorithm + Eulerian path + directed graph + greedy + sort
+
+```py
+class Solution:
+    def findItinerary(self, tickets: List[List[str]]) -> List[str]:
+        tickets.sort(key = lambda x: x[-1], reverse = True)
+        adj_list = defaultdict(list)
+        for u, v in tickets:
+            adj_list[u].append(v)
+        stack = []
+        def dfs(u):
+            while adj_list[u]:
+                dfs(adj_list[u].pop())
+            stack.append(u)
+        dfs("JFK")
+        return stack[::-1]
+```
+
+## 1359. Count All Valid Pickup and Delivery Options
+
+### Solution 1:  dynamic programming + space optimized + math
+
+fixing P_i and then letting D_i have it's possible locations
+
+```py
+class Solution:
+    def countOrders(self, n: int) -> int:
+        mod = int(1e9) + 7
+        f = lambda x: x * (2 * x - 1)
+        dp = 1
+        for i in range(1, n + 1):
+            dp = (dp * f(i)) % mod
+        return dp
+```
+
+### Solution 2:  permutations + combinatorics + math
+
+```py
+class Solution:
+    def countOrders(self, n: int) -> int:
+        mod = int(1e9) + 7
+        res = fact = 1
+        for i in range(2, n + 1):
+            res = (res * (2 * i - 1)) % mod
+            fact = (fact * i)
+        return (res * fact) % mod
+```
+
+### Solution 3:  probability + math
+
+probability = favorable_outcomes / total_outcomes
+
+total_outcomes = (2n)! => total number of permutations
+probability for correct order for P_i and D_i is 1/2
+probability = (1/2)^n, probability that all are in correct order
+favorable_outcomes = probability * total_outcomes
+
+```py
+class Solution:
+    def countOrders(self, n: int) -> int:
+        mod = int(1e9) + 7
+        res = 1
+        for i in range(2, 2 * n + 1):
+            res *= i
+            if i % 2 == 0: res //= 2
+            res %= mod
+        return res
+```
+
+## 847. Shortest Path Visiting All Nodes
+
+### Solution: BFS + bitmask + dynamic programming
+
+The reason to use BFS is because we have an unweighted undirected graph, so I can imagine all weights are equal to 1.  So BFS will explore it optimally to return the shortest path.  I do need to store the (node, mask) , else it will continue visiting the same node with the same set of nodes visited in the path.  This is obviously already been computed.  So save the shortest path to reach some node aftering visitin g a set of nodes.  
+
+TC: O(N*2^N)
+
+```c++
+int shortestPathLength(vector<vector<int>>& graph) {
+    int n = graph.size();
+    queue<vector<int>> q;
+    int endMask = (1<<n)-1;
+    vector<vector<bool>> vis(n, vector<bool>(1<<n, false));
+    for (int i = 0;i<n;i++) {
+        vis[i][(1<<i)]=true;
+        q.push({i,(1<<i),0});
+    }
+    while (!q.empty()) {
+        auto v = q.front();
+        int i = v[0], mask = v[1], path = v[2];
+        q.pop();
+        if (mask==endMask) return path;
+        for (int nei : graph[i]) {
+            int nmask = mask|(1<<nei);
+            if (vis[nei][nmask]) continue;
+            vis[nei][nmask] = true;
+            q.push({nei, nmask, path+1});
+        }
+    }
+    return -1;
+}
+```
+
+```py
+class Solution:
+    def shortestPathLength(self, graph: List[List[int]]) -> int:
+        n = len(graph)
+        dq = deque()
+        end_mask = (1 << n) - 1
+        steps = 0
+        vis = [[0] * (1 << n) for _ in range(n)]
+        for i in range(n):
+            vis[i][1 << i] = 1
+            dq.append((i, 1 << i))
+        while dq:
+            for _ in range(len(dq)):
+                u, mask = dq.popleft()
+                for v in graph[u]:
+                    nmask = mask | (1 << v)
+                    if nmask == end_mask: return steps + 1
+                    if vis[v][nmask]: continue
+                    vis[v][nmask] = 1
+                    dq.append((v, nmask))
+            steps += 1
+        return 0
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:

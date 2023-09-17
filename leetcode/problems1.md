@@ -6762,13 +6762,13 @@ class Solution:
 ```py
 class Solution:
     def candy(self, ratings: List[int]) -> int:
-        cells = sorted([(rating, i) for i, rating in enumerate(ratings)])
         n = len(ratings)
-        candies = [1]*n
-        in_bounds = lambda x: 0<=x<n
-        for rating, i in cells:
-            for j in [i-1,i+1]:
-                if not in_bounds(j) or ratings[j] >= rating: continue
+        pool = sorted([(r, i) for i, r in enumerate(ratings)])
+        candies = [1] * n
+        in_bounds = lambda x: 0 <= x < n
+        for r, i in pool:
+            for j in [i - 1, i + 1]:
+                if not in_bounds(j) or r <= ratings[j]: continue
                 candies[i] = max(candies[i], candies[j] + 1)
         return sum(candies)
 ```

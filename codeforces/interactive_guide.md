@@ -4,6 +4,8 @@ Example for problem, flush may not be necessary, it worked without, any thing ab
 
 Surprisingly there is not anything extra needed for interactive problems in codeforces. 
 
+## Python Example
+
 ```py
 def main():
     n = int(input())
@@ -27,4 +29,49 @@ if __name__ == '__main__':
     T = int(input())
     for _ in range(T):
         main()
+```
+
+## C++ Example
+
+Sometimes C++ is needed to pass time limit, but it is not always necessary.
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+#define int long long
+
+inline int read() {
+	int x = 0, y = 1; char c = getchar();
+	while (c < '0' || c > '9') {
+		if (c == '-') y = -1;
+		c = getchar();
+	}
+	while (c >= '0' && c <= '9') x = x * 10 + c - '0', c = getchar();
+	return x * y;
+}
+
+int32_t main() {
+	ios_base::sync_with_stdio(0);
+    cin.tie(NULL);
+    int t = read();
+    while (t--) {
+        int n = read();
+        int mex = n;
+        for (int i = 0; i < n; i++) {
+            int x = read();
+            if (mex < i) continue;
+            if (x != i) {
+                mex = i;
+            }
+        }
+        while (true) {
+            cout << mex << endl;
+            int resp = read();
+            if (resp == -1) break;
+            if (resp == -2) break;
+            mex = resp;
+        }
+    }
+    return 0;
+}
 ```
