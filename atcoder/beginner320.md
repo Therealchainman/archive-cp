@@ -140,7 +140,48 @@ if __name__ == '__main__':
 ### Solution 1:  dynamic programming
 
 ```py
+import math
 
+def main():
+    N, H = map(int, input().split())
+    pos = list(map(int, input().split()))
+    stations = [None] * (N - 1)
+    for i in range(N - 1):
+        p, f = map(int, input().split())
+        stations[i] = (p, f)
+    dp = [[math.inf] * (H + 1) for _ in range(H + 1)] # j, k
+    if pos[0] > H: return print(-1)
+    for k in range(pos[0], H + 1):
+        dp[H - pos[0]][k] = 0
+    for i in range(N - 1):
+        ndp = [[math.inf] * (H + 1) for _ in range(H + 1)]
+        d = pos[i + 1] - pos[i]
+        for j in range(H + 1):
+            for k in range(H + 1):
+                if dp[j][k] == math.inf: continue
+                p, f = stations[i]
+                # refuel none
+                if k + d <= H and j - d >= 0:
+                    nj, nk = j - d, k + d
+                    ndp[nj][nk] = min(ndp[nj][nk], dp[j][k])
+                # refuel j
+                if k + d <= H:
+                    nj, nk = min(j + f, H) - d, k + d
+                    if nj >= 0:
+                        ndp[nj][nk] = min(ndp[nj][nk], dp[j][k] + p)
+                # refuel k
+                if j - d >= 0 and k >= f and k - f + d <= H:
+                    nj, nk = j - d, k - f + d
+                    ndp[nj][nk] = min(ndp[nj][nk], dp[j][k] + p)
+                    if k == H:
+                        for w in range(nk + 1, H + 1):
+                            ndp[nj][w] = min(ndp[nj][w], dp[j][k] + p)
+        dp = ndp
+    res = min(dp[i][i] for i in range(H + 1))
+    print(res if res != math.inf else -1)
+
+if __name__ == '__main__':
+    main()
 ```
 
 ## G - Slot Strategy 2 (Hard)
