@@ -111,3 +111,31 @@ def lca(u, v):
             u, v = ancestor[i][u], ancestor[i][v]
     return ancestor[0][u]
 ```
+
+## Range Minimum Query 
+
+RMQ + sparse tables + O(nlogn) precompute sparse tables + O(1) query since the ranges can overlap without affecting the in
+
+This approach that only work on static arrays, i.e. it is not possible to change a value in the array without recomputing the complete data structure.
+
+range minimum query can also be used with (value, index), where the index is location in an array and can be used in a divide and conquer type algorithm to split array into partition at the location of the minimum value in the current range. 
+
+
+```py
+n = len(nums)
+lg = [0] * (n + 1)
+for i in range(2, n + 1):
+    lg[i] = lg[i // 2] + 1
+LOG = lg[-1] + 1
+st = [[math.inf] * n for _ in range(LOG)]
+st[0] = nums[:]
+for i in range(1, LOG):
+    j = 0
+    while (j + (1 << (i - 1))) < n:
+        st[i][j] = min(st[i - 1][j], st[i - 1][j + (1 << (i - 1))])
+        j += 1
+def query(left, right):
+    length = right - left + 1
+    i = lg[length]
+    return min(st[i][left], st[i][right - (1 << i) + 1])
+```

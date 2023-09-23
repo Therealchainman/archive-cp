@@ -24,7 +24,7 @@ def create(contest, name, number, division = None):
     elif contest == "codeforces":
         path = f"{contest}/div{division}/{name}_{number}.md"
         sys.stdout = open(path, 'w')
-        print(f"# Codeforces {name.capitalize()} {number}")
+        print(f"# Codeforces {name.capitalize()} {number} Div {division}")
         print()
         for _ in range(problem_counts[contest]):
             print("## ")
@@ -55,6 +55,6 @@ if __name__ == '__main__':
     # contest, name, number, div = "atcoder", "beginner", 320, None
     # contest, name, number, div = "leetcode", "biweekly", 113, None
     # contest, name, number, div = "leetcode", "weekly", 363, None
-    # contest, name, number, div = "codeforces", "round", 894, 3
+    # contest, name, number, div = "codeforces", "round", 898, 4
     # contest, name, number, div = "codeforces", "educational", 154, 2
     create(contest, name, number, division = div)

@@ -675,12 +675,55 @@ class Solution:
         return 0
 ```
 
-##
+## 1063. Number of Valid Subarrays
 
-### Solution 1:
+### Solution 1:  monotonically increasing stack
 
 ```py
+class Solution:
+    def validSubarrays(self, nums: List[int]) -> int:
+        stack = []
+        res = 0
+        for num in nums:
+            while stack and stack[-1] > num:
+                stack.pop()
+            stack.append(num)
+            res += len(stack)
+        return res
+```
 
+### Solution 2:  RMQ + sparse tables + binary search
+
+```py
+class Solution:
+    def validSubarrays(self, nums: List[int]) -> int:
+        n = len(nums)
+        lg = [0] * (n + 1)
+        for i in range(2, n + 1):
+            lg[i] = lg[i // 2] + 1
+        LOG = 16
+        st = [[math.inf] * n for _ in range(LOG)]
+        st[0] = nums[:]
+        for i in range(1, LOG):
+            j = 0
+            while (j + (1 << (i - 1))) < n:
+                st[i][j] = min(st[i - 1][j], st[i - 1][j + (1 << (i - 1))])
+                j += 1
+        def query(left, right):
+            length = right - left + 1
+            i = lg[length]
+            return min(st[i][left], st[i][right - (1 << i) + 1])
+        res = 0
+        for i in range(n):
+            left, right = i, n - 1
+            while left < right:
+                mid = (left + right + 1) >> 1
+                if query(left, mid) >= nums[i]:
+                    left = mid
+                else:
+                    right = mid - 1
+            res += left - i + 1
+        return res
 ```
 
 ##
