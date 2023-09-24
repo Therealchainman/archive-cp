@@ -126,10 +126,29 @@ if __name__ == '__main__':
 
 ## F - #(subset sum = K) with Add and Erase
 
-### Solution 1: 
+### Solution 1:  knapsack + dynamic programming + remove element from knapsack + reverse knapsack
 
 ```py
+def main():
+    mod = 998244353
+    q, k = map(int, input().split())
+    dp = [0] * (k + 1)
+    dp[0] = 1
+    for _ in range(q):
+        t, x = input().split()
+        x = int(x)
+        if t == "+":
+            for i in range(k, x - 1, -1):
+                dp[i] += dp[i - x] % mod
+                dp[i] %= mod
+        else:
+            for i in range(x, k + 1):
+                dp[i] -= dp[i - x] % mod
+                dp[i] %= mod
+        print(dp[-1])
 
+if __name__ == '__main__':
+    main()
 ```
 
 ## G - Electric Circuit
