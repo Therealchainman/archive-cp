@@ -1,8 +1,11 @@
-"""
-Union Find algorithm with path compression and size for optimization
-array based union find, the size and parent can be represented with an array. 
-This means the nodes/elements used in this algorithm can be indexed by 0,1,...,n - 1
-"""
+# Union Find
+
+## Union Find Algorithm
+
+simple implementation using lists, and works if the nodes are integers labels from 0 to n or something.
+This is also an iterative implementation which makes it better on memory and time.
+
+```py
 class UnionFind:
     def __init__(self, n: int):
         self.size = [1]*n
@@ -13,7 +16,6 @@ class UnionFind:
             self.parent[i] = self.parent[self.parent[i]]
             i = self.parent[i]
         return i
-
     """
     returns true if the nodes were not union prior. 
     """
@@ -26,7 +28,6 @@ class UnionFind:
             self.size[i] += self.size[j]
             return True
         return False
-    
     @property
     def root_count(self):
         return sum(node == self.find(node) for node in range(len(self.parent)))
@@ -36,52 +37,20 @@ class UnionFind:
         return self.find(i) == self.find(j)
     def num_connected_components(self) -> int:
         return len(set(map(self.find, self.parent)))
+    def size_(self, i):
+        return self.size[self.find(i)]
     def __repr__(self) -> str:
         return f'parents: {[(i, parent) for i, parent in enumerate(self.parent)]}, sizes: {self.size}'
+```
 
-"""
-This is a space optimized union find algorithm, where don't have to initialize with the size of the elements, but 
-add elements to dictionary and set when they are processed.
-"""
-class CompactUnionFind:
-    def __init__(self):
-        self.size = dict()
-        self.parent = dict()
-        self.connected_components = set()
-        self.count_connected_components = 0
-        
-    def add(self, i: int) -> None:
-        if i not in self.connected_components:
-            self.connected_components.add(i)
-            self.parent[i] = i
-            self.size[i] = 1
-        self.count_connected_components += 1
-    
-    def find(self,i: int) -> int:
-        if i==self.parent[i]:
-            return i
-        self.parent[i] = self.find(self.parent[i])
-        return self.parent[i]
+## Union Find using dictionary
 
-    def union(self,i: int,j: int) -> bool:
-        # FIND THE REPRESENTATIVE NODE FOR THESE NODES IF THEY ARE ALREADY BELONGING TO CONNECTED COMPONENTS
-        i, j = self.find(i), self.find(j)
-        if i!=j:
-            if self.size[i] < self.size[j]:
-                i,j=j,i
-            self.parent[j] = i
-            self.size[i] += self.size[j]
-            self.count_connected_components -= 1
-            return True
-        return False
-    
-    def __repr__(self) -> str:
-        return f'parents: {self.parent}, sizes: {self.size}, connected_components: {self.connected_components}'
+This union find implementation is beneficial when you have non-integer nodes, and you want to use the nodes as keys in a dictionary.
+Also it is space optimized for these type of node labels. 
 
-"""
-This union find implementation is using iterative approach to find the representative node for a given node.
-It also uses dictionary for size and parent, so it is space optimized and compact
-"""
+Compact union find
+
+```py
 class UnionFind:
     def __init__(self):
         self.size = dict()
@@ -112,3 +81,4 @@ class UnionFind:
 
     def __repr__(self) -> str:
         return f'parents: {[(i, parent) for i, parent in enumerate(self.parent)]}, sizes: {self.size}'
+```
