@@ -1,4 +1,4 @@
-# Codeforces Educational 154
+# Codeforces Educational 154 Div 2
 
 ## A. Prime Deletion
 

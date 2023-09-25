@@ -726,6 +726,40 @@ class Solution:
         return res
 ```
 
+## 389. Find the Difference
+
+### Solution 1: hashmap with array of size 26
+
+```py
+class Solution:
+    def findTheDifference(self, s: str, t: str) -> str:
+        cnt = [0]*26
+        for ch in t:
+            cnt[ord(ch)-ord('a')]+=1
+        for ch in s:
+            cnt[ord(ch)-ord('a')]-=1
+        for i, ct in enumerate(cnt):
+            if ct:
+                return chr(i+ord('a'))
+        return ""
+```
+
+### Solution 2: Hashmap with dictionary in python, not best space optimization
+
+```py
+class Solution:
+    def findTheDifference(self, s: str, t: str) -> str:
+        return list(Counter(t) - Counter(s)).pop()
+```
+
+### Solution 3: mapreduce algorithm xor with last character
+
+```py
+class Solution:
+    def findTheDifference(self, s: str, t: str) -> str:
+        return chr(reduce(xor, map(ord, s+t)))
+```
+
 ##
 
 ### Solution 1:
