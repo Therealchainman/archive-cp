@@ -17,9 +17,18 @@ inline int read() {
 string name = "cheeseburger_corollary_2_input.txt";
 
 
-int solve(int t) {
-    int res = 0;
-    return res;
+void solve(int t) {
+    int A = read(), B = read(), C = read();
+    int res = 0LL;
+    res = max(res, C / A);
+    res = max(res, 2 * (C / B) - 1);
+    if (C >= A) {
+        res = max(res, 2 * ((C - A) / B) + 1);
+    }
+    if (C >= 2 * A) {
+        res = max(res, 2 * ((C - 2 * A) / B) + 2);
+    }
+    cout << "Case #" << t << ": " << res << endl;
 }
 
 int32_t main() {
@@ -31,7 +40,7 @@ int32_t main() {
     freopen(out.c_str(), "w", stdout);
     int T = read();
     for (int i = 1; i <= T ; i++) {
-        cout << "Case #" << i << ": " << solve() << endl;
+        solve(i);
     }
     return 0;
 }

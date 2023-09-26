@@ -7,11 +7,11 @@ name = "two_apples_a_day_input.txt"
 sys.stdout = open(f"outputs/{name}", "w")
 sys.stdin = open(f"inputs/{name}", "r")
 
-def main(t):
+def main():
     res = 0
-    print(f"Case #{t}: {res}")
+    return res
 
 if __name__ == '__main__':
     T = int(input())
     for t in range(1, T + 1):
-        main(t)
+        print(f"Case #{t}: {main()}")

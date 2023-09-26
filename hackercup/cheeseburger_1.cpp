@@ -13,13 +13,17 @@ inline int read() {
 }
 
 // string name = "cheeseburger_corollary_2_sample_input.txt";
-// string name = "cheeseburger_corollary_2_validation_input.txt";
-string name = "cheeseburger_corollary_2_input.txt";
+// string name = "cheeseburger_corollary_1_validation_input.txt";
+string name = "cheeseburger_corollary_1_input.txt";
 
 
-int solve(int t) {
-    int res = 0;
-    return res;
+void solve(int t) {
+    int S = read(), D = read(), K = read();
+    int buns = 2 * (S + D);
+    int patties = S + 2 * D;
+    int decker = min(buns - 1, patties);
+    string res = decker >= K ? "YES" : "NO";
+    cout << "Case #" << t << ": " << res << endl;
 }
 
 int32_t main() {
@@ -31,7 +35,7 @@ int32_t main() {
     freopen(out.c_str(), "w", stdout);
     int T = read();
     for (int i = 1; i <= T ; i++) {
-        cout << "Case #" << i << ": " << solve() << endl;
+        solve(i);
     }
     return 0;
 }
