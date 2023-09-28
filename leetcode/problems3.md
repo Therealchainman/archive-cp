@@ -760,12 +760,77 @@ class Solution:
         return chr(reduce(xor, map(ord, s+t)))
 ```
 
-##
+## 880. Decoded String at Index
 
 ### Solution 1:
 
 ```py
+class Solution:
+    def decodeAtIndex(self, s: str, k: int) -> str:
+        s += "1"
+        k -= 1
+        arr = re.split(r'(\d{1})', s)
+        arr.pop()
+        stack = []
+        p = 0
+        for i in range(1, len(arr), 2):
+            chars = arr[i - 1]
+            cnt = int(arr[i])
+            p = cnt * (len(chars) + p)
+            stack.append((chars, cnt))
+        while stack:
+            chars, cnt = stack.pop()
+            p = p // cnt - len(chars)
+            if p <= k:
+                k %= p + len(chars)
+                i = k - p
+                if i >= 0:
+                    return chars[i]
+        return ""
+```
 
+```py
+class Solution:
+    def decodeAtIndex(self, s: str, k: int) -> str:
+        sz = 0
+        for ch in s:
+            if ch.isdigit():
+                sz *= int(ch)
+            else:
+                sz += 1
+        for ch in reversed(s):
+            k %= sz
+            if k == 0 and ch.isalpha(): return ch
+            if ch.isdigit():
+                sz //= int(ch)
+            else:
+                sz -= 1
+```
+
+
+```cpp
+#define ll long long
+class Solution {
+public:
+    string decodeAtIndex(string s, ll k) {
+        ll sz = 0;
+        for (auto ch : s) {
+            if (isdigit(ch)) sz *= (ch - '0');
+            else sz++;
+        }
+        reverse(s.begin(), s.end());
+        for (auto ch: s) {
+            k %= sz;
+            if (k == 0 and !isdigit(ch)) {
+                string s(1, ch);
+                return s;
+            }
+            if (isdigit(ch)) sz /= (ch - '0');
+            else sz--;
+        }
+        return "";
+    }
+};
 ```
 
 ##

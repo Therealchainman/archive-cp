@@ -1,5 +1,7 @@
 # HEAVY LIGHT DECOMPOSITION
 
+This algorithm is excellent for finding min/max path queries on a tree and does it in log squared time complexity.  It also allows updates to node's values on the tree.  So this works for dynamic trees which will have queries and updates.
+
 ## implementation for max
 
 Needs a rooted tree that is undirected.  Uses heavy light decomposition to compute the max. 
@@ -137,11 +139,19 @@ def main():
 
 ## cpp implementation that is fast
 
+This segment tree is inclusive that is [L, R] for queries. 
+
+don't forget to change the function to min or max depending on problem
+
+also update the neutral value for each one
+
 ```cpp
-const int N = 2e5+5;
-vector<int> adj_list[N];
-int parent[N], depth[N], head[N], sz[N], index_map[N], heavy[N], values[N];
-int counter;
+vector<int> parent, depth, head, sz, index_map, heavy;
+int counter, neutral;
+
+int func(int x, int y) {
+    return min(x, y);
+}
 
 struct SegmentTree {
     int size;
@@ -150,11 +160,7 @@ struct SegmentTree {
     void init(int num_nodes) {
         size = 1;
         while (size < num_nodes) size *= 2;
-        nodes.resize(size * 2, 0);
-    }
-
-    int func(int x, int y) {
-        return max(x, y);
+        nodes.assign(size * 2, neutral);
     }
 
     void ascend(int segment_idx) {
@@ -174,14 +180,14 @@ struct SegmentTree {
 
     int query(int left, int right) {
         left += size, right += size;
-        int res = 0;
+        int res = neutral;
         while (left <= right) {
             if (left & 1) {
-                res = max(res, nodes[left]);
+                res = func(res, nodes[left]);
                 left++;
             }
             if (~right & 1) {
-                res = max(res, nodes[right]);
+                res = func(res, nodes[right]);
                 right--;
             }
             left >>= 1, right >>= 1;
@@ -192,14 +198,14 @@ struct SegmentTree {
 
 SegmentTree seg;
 
-int dfs(int u) {
+int heavy_dfs(int u) {
     sz[u] = 1;
     int heavy_size = 0;
     for (int v : adj_list[u]) {
         if (v == parent[u]) continue;
         parent[v] = u;
         depth[v] = depth[u] + 1;
-        int s = dfs(v);
+        int s = heavy_dfs(v);
         sz[u] += s;
         if (s > heavy_size) {
             heavy_size = s;
@@ -211,7 +217,7 @@ int dfs(int u) {
 
 void decompose(int u, int h) {
     index_map[u] = counter++;
-    seg.update(index_map[u], values[u]);
+    seg.update(index_map[u], dist[u]);
     head[u] = h;
     for (int v : adj_list[u]) {
         if (v == heavy[u]) {
@@ -225,7 +231,7 @@ void decompose(int u, int h) {
 }
 
 int query(int u, int v) {
-    int res = 0;
+    int res = neutral;
     while (true) {
         if (depth[u] > depth[v]) {
             swap(u, v);
@@ -235,17 +241,17 @@ int query(int u, int v) {
         if (x == y) {
             int left = index_map[u];
             int right = index_map[v];
-            res = max(res, seg.query(left, right));
+            res = func(res, seg.query(left, right));
             break;
         } else if (depth[x] > depth[y]) {
             int left = index_map[x];
             int right = index_map[u];
-            res = max(res, seg.query(left, right));
+            res = func(res, seg.query(left, right));
             u = parent[x];
         } else {
             int left = index_map[y];
             int right = index_map[v];
-            res = max(res, seg.query(left, right));
+            res = func(res, seg.query(left, right));
             v = parent[y];
         }
     }
@@ -265,11 +271,16 @@ int32_t main() {
         adj_list[v].push_back(u);
     }
     counter = 0;
-    for (int i = 0; i < n; ++i) {
-        heavy[i] = i;
-    }
+    neutral = LLONG_MAX; // for min queries
+    parent.assign(n, -1);
+    depth.assign(n, 0);
+    heavy.assign(n, -1);
+    head.assign(n, 0);
+    sz.assign(n, 0);
+    index_map.assign(n, 0);
+    for (int i = 0; i < n; ++i) heavy[i] = i;
     seg.init(n);
-    dfs(0);
+    heavy_dfs(0);
     decompose(0, 0);
     vector<int> result;
     for (int i = 0; i < q; ++i) {

@@ -17,7 +17,7 @@ inline int read() {
 string name = "cheeseburger_corollary_2_input.txt";
 
 
-int solve(int t) {
+int solve() {
     int res = 0;
     return res;
 }
@@ -35,3 +35,9 @@ int32_t main() {
     }
     return 0;
 }
+
+/*
+problem solve
+
+g++ "-Wl,--stack,1078749825" nutella.cpp -o main
+*/

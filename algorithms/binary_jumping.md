@@ -2,6 +2,8 @@
 
 Binary jumping is an algorithm that works for finding kth ancestor, LCA of trees and also for finding the kth successor in a functional/successor graph.
 
+# Functional Graphs
+
 ## kth successor in functional graph
 
 Example code for using it to find the kth successor in a functional graph. 
@@ -111,6 +113,101 @@ def lca(u, v):
             u, v = ancestor[i][u], ancestor[i][v]
     return ancestor[0][u]
 ```
+
+## Binary jumping to calculate minimum node value on path queries in tree with LCA
+
+So take care of the sparse table because it is looking at the nodes value it has a few edge cases.
+
+But basically the sparse table over the nodes is along these lines, that is if you have a node u and looking at 4 away, the value over that sparse table is including node u and the next 3 nodes, while the ancestor would be pointing to the 4th node.  So it is behind the ancestor in a sense, so you must return st[0][u] and st[1][u] instead of what it does for lca. 
+
+```cpp
+// binary lifting algorithm
+
+vector<int> depth, parent;
+const int LOG = 20, inf = INT_MAX;
+vector<vector<int>> ancestor, st, adj;
+vector int n;
+
+// bfs from root of tree to calculate depth of nodes in the tree
+void bfs(int root) {
+    queue<int> q;
+    depth.assign(block_id, inf);
+    parent.assign(block_id, -1);
+    q.push(root);
+    depth[root] = 0;
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop();
+        for (int v : adj[u]) {
+            if (depth[u] + 1 < depth[v]) {
+                depth[v] = depth[u] + 1;
+                parent[v] = u;
+                q.push(v);
+            }
+        }
+    }
+}
+
+// preprocess the ancestor and sparse table for minimum array
+void preprocess() {
+    ancestor.assign(LOG, vector<int>(n, -1));
+    st.assign(LOG, vector<int>(n, inf));
+    for (int i = 0; i < n; i++) {
+        ancestor[0][i] = parent[i];
+        st[0][i] = dist[i];
+    }
+    for (int i = 1; i < LOG; i++) {
+        for (int j = 0; j < n; j++) {
+            if (ancestor[i - 1][j] != -1) {
+                ancestor[i][j] = ancestor[i - 1][ancestor[i - 1][j]];
+                st[i][j] = min(st[i - 1][j], st[i - 1][ancestor[i - 1][j]]);
+            }
+        }
+    }
+}
+
+// LCA queries to calculate the minimum node value in path from u to v
+int lca(int u, int v) {
+    if (depth[u] < depth[v]) swap(u, v);
+    int ans = inf;
+    int k = depth[u] - depth[v];
+    if (k > 0) {
+        for (int i = 0; i < LOG; i++) {
+            if ((k >> i) & 1) {
+                ans = min(ans, st[i][u]);
+                u = ancestor[i][u];
+            }
+        }
+    }
+    if (u == v) {
+        ans = min(ans, st[0][u]);
+        return ans;
+    }
+    for (int i = LOG - 1; i >= 0; i--) {
+        if (ancestor[i][u] != -1 && ancestor[i][u] != ancestor[i][v]) {
+            ans = min(ans, st[i][u]);
+            ans = min(ans, st[i][v]);
+            u = ancestor[i][u]; v = ancestor[i][v];
+        }
+    }
+    ans = min(ans, st[1][u]);
+    ans = min(ans, st[1][v]);
+    return ans;
+}
+void solve() {
+    bfs(0);
+    preprocess();
+    int Q = read();
+    while (Q--) {
+        int u = read(), v = read();
+        // path min query on the bridge tree
+        res += lca(u, v);
+    }
+}
+
+```
+
+# Sparse Tables
 
 ## Range Minimum Query 
 
