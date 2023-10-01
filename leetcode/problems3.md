@@ -833,20 +833,53 @@ public:
 };
 ```
 
-##
-
-### Solution 1:
+## 557. Reverse Words in a String III
 
 ```py
-
+class Solution:
+    def reverseWords(self, s: str) -> str:
+        res = " ".join(s.split()[::-1])[::-1]
+        return res
 ```
 
-##
-
-### Solution 1:
+## 1804. Implement Trie II (Prefix Tree)
 
 ```py
+class TrieNode:
+    def __init__(self):
+        self.children = defaultdict(TrieNode)
+        self.prefix_count = self.word_count = 0
 
+class Trie:
+
+    def __init__(self):
+        self.root = TrieNode()
+
+    def insert(self, word: str) -> None:
+        node = self.root
+        for ch in word:
+            node = node.children[ch]
+            node.prefix_count += 1
+        node.word_count += 1
+
+    def countWordsEqualTo(self, word: str) -> int:
+        node = self.root
+        for ch in word:
+            node = node.children[ch]
+        return node.word_count
+
+    def countWordsStartingWith(self, prefix: str) -> int:
+        node = self.root
+        for ch in prefix:
+            node = node.children[ch]
+        return node.prefix_count
+
+    def erase(self, word: str) -> None:
+        node = self.root
+        for ch in word:
+            node = node.children[ch]
+            node.prefix_count -= 1
+        node.word_count -= 1
 ```
 
 ##

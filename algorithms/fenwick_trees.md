@@ -82,6 +82,9 @@ class FenwickTree:
             i -= i & (-i)
         return res
 
+    def query_range(self, i, j):
+        return self.query(j) - self.query(i - 1)
+
     def __repr__(self):
         return f"array: {self.sums}"
 ```

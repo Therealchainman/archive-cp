@@ -1708,6 +1708,48 @@ class Solution:
         return False
 ```
 
+```py
+class FenwickTree:
+    def __init__(self, N):
+        self.sums = [0 for _ in range(N+1)]
+
+    def update(self, i, delta):
+        while i < len(self.sums):
+            self.sums[i] += delta
+            i += i & (-i)
+
+    def query(self, i):
+        res = 0
+        while i > 0:
+            res += self.sums[i]
+            i -= i & (-i)
+        return res
+
+    def query_range(self, i, j):
+        return self.query(j) - self.query(i - 1)
+
+    def __repr__(self):
+        return f"array: {self.sums}"
+
+class Solution:
+    def find132pattern(self, nums: List[int]) -> bool:
+        index_map = {}
+        for num in sorted(set(nums)):
+            index_map[num] = len(index_map) + 1
+        print(index_map)
+        fenwick = FenwickTree(len(index_map))
+        for i in map(lambda x: index_map[x], nums):
+            fenwick.update(i, 1)
+        pmin = math.inf
+        for num in nums:
+            # remove current element
+            fenwick.update(index_map[num], -1)
+            if pmin < num and fenwick.query_range(index_map[pmin] + 1, index_map[num] - 1) > 0:
+                return True
+            pmin = min(pmin, num)
+        return False
+```
+
 ## 484. Find Permutation
 
 ### Solution 1: stack based to reverse when it is D, and then always add to I and add from stack.  

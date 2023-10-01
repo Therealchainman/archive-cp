@@ -39,3 +39,45 @@ for word in sentence.split():
         cur = cur[word[i]]
         if cur['word']:
 ```
+
+## Example of using Trie to find prefix and word count in a trie data structure
+
+This is useful if you want to find the number of words that have a certain prefix.  This is useful for autocomplete and other things.
+
+```py
+class TrieNode:
+    def __init__(self):
+        self.children = defaultdict(TrieNode)
+        self.prefix_count = self.word_count = 0
+
+class Trie:
+
+    def __init__(self):
+        self.root = TrieNode()
+
+    def insert(self, word: str) -> None:
+        node = self.root
+        for ch in word:
+            node = node.children[ch]
+            node.prefix_count += 1
+        node.word_count += 1
+
+    def countWordsEqualTo(self, word: str) -> int:
+        node = self.root
+        for ch in word:
+            node = node.children[ch]
+        return node.word_count
+
+    def countWordsStartingWith(self, prefix: str) -> int:
+        node = self.root
+        for ch in prefix:
+            node = node.children[ch]
+        return node.prefix_count
+
+    def erase(self, word: str) -> None:
+        node = self.root
+        for ch in word:
+            node = node.children[ch]
+            node.prefix_count -= 1
+        node.word_count -= 1
+```
