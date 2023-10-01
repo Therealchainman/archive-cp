@@ -20,7 +20,18 @@ class Solution:
 ### Solution 2:  prefix max + suffix max
 
 ```py
-
+class Solution:
+    def maximumTripletValue(self, nums: List[int]) -> int:
+        n = len(nums)
+        pmax = -math.inf
+        smax = [0] * (n + 1)
+        for i in reversed(range(n)):
+            smax[i] = max(smax[i + 1], nums[i])
+        res = 0
+        for i, num in enumerate(nums):
+            res = max(res, (pmax - num) * smax[i + 1])
+            pmax = max(pmax, num)
+        return res
 ```
 
 ## 2875. Minimum Size Subarray in Infinite Array
