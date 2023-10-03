@@ -11,7 +11,7 @@ AX = B for example, where AX represents matrix multiplication of A and X.
 """
 matrix multiplication with modulus
 """
-def mat_mul(mat1: List[List[int]], mat2: List[List[int]], mod: int) -> List[List[int]]:
+def mat_mul(mat1, mat2, mod):
     result_matrix = []
     for i in range(len(mat1)):
         result_matrix.append([0]*len(mat2[0]))
@@ -24,7 +24,7 @@ def mat_mul(mat1: List[List[int]], mat2: List[List[int]], mod: int) -> List[List
 matrix exponentiation with modulus
 matrix is represented as list of lists in python
 """
-def mat_pow(matrix: List[List[int]], power: int, mod: int) -> List[List[int]]:
+def mat_pow(matrix, power, mod):
     if power<=0:
         print('n must be non-negative integer')
         return None

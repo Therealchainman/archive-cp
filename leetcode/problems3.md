@@ -882,20 +882,47 @@ class Trie:
         node.word_count -= 1
 ```
 
-##
+## 2038. Remove Colored Pieces if Both Neighbors are the Same Color
 
 ### Solution 1:
 
-```py
-
+```cpp
+class Solution {
+public:
+    bool winnerOfGame(string colors) {
+        char prev = 'C';
+        int cnt = 0, mv_a = 0, mv_b = 0;
+        for (char ch : colors) {
+            if (ch != prev) {
+                cnt = 0;
+            }
+            cnt++;
+            if (ch == 'A' && cnt > 2) mv_a++;
+            if (ch == 'B' && cnt > 2) mv_b++;
+            prev = ch;
+        }
+        return mv_a > mv_b;
+    }
+};
 ```
 
-##
+## 1512. Number of Good Pairs
 
 ### Solution 1:
 
-```py
-
+```cpp
+class Solution {
+public:
+    int numIdenticalPairs(vector<int>& nums) {
+        vector<int> counts(101, 0);
+        int res = 0;
+        for (int num : nums) {
+            res += counts[num];
+            counts[num]++;
+        }   
+        return res;
+    }
+};
 ```
 
 ##
