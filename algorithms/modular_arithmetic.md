@@ -16,3 +16,19 @@ Another property is
  a*b = (a(modm) * b(modm))(modm) 
 
 That is the multiplication of two integer a and b will be in the same congruence class as the multiplication of a and b modulo m.  When they are all under the modulus m. 
+
+## Second note on modular congruence
+
+Let's derive a statement about modular congruence.
+
+given $$a \equiv b \mod c$$ let's prove that $$ c | (a - b) $$ (c divides a - b)
+
+So modular congruence can be thought of as the remainder of a and b when divided by c are the same. 
+1. a = nc + r
+2. b = mc + r
+
+Since by definition both have the same remainder, you can set a - nc = b - mc which leads to the result that c divides a - b.  $$\frac{a - b}{c} = n - m$$
+Which means that there is integer result from the division of a - b by c. So c divides a - b.
+
+
+

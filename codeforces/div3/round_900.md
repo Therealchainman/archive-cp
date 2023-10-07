@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
 ## D. Reverse Madness
 
-### Solution 1: 
+### Solution 1:  two pointers + trick
 
 ```py
 def main():
@@ -98,7 +98,7 @@ if __name__ == '__main__':
 
 ## E. Iva & Pav
 
-### Solution 1: 
+### Solution 1: binary search + prefix sum + bits
 
 ```py
 def main():
@@ -143,10 +143,55 @@ if __name__ == '__main__':
 
 ## F. Vasilije Loves Number Theory
 
-### Solution 1: 
+### Solution 1:  sieve of Erastothenes for smallest prime factor + log(x) prime factorizations of queries
+
+Calculate the product of the frequency of the power of the prime factors for each integer, and basically it needs to be divisible by that. But since the number can be really large you need to calculate it modulo the product.  But you can use O(q^2) so you can just store queries since the last reset to n.
 
 ```py
+import math
 
+def sieve(n):
+    spf = [i for i in range(n)]
+    for i in range(2, n):
+        if spf[i] != i: continue
+        for j in range(i * i, n, i):
+            spf[j] = i
+    return spf
+
+LIM = 10**6
+
+def main():
+    n, q = map(int, input().split())
+    pfreq = Counter()
+    def factorize(x):
+        while x > 1:
+            pfreq[spf[x]] += 1
+            x //= spf[x]
+    factorize(n)
+    original_pfreq = pfreq.copy()
+    integers = []
+    for _ in range(q):
+        query = list(map(int, input().split()))
+        if query[0] == 1:
+            x = query[1]
+            integers.append(x)
+            factorize(x)
+            p = math.prod(v + 1 for v in pfreq.values())
+            d = n
+            for v in integers:
+                d = (d * v) % p
+            res = "YES" if d == 0 else "NO"
+            print(res)
+        else: # reset
+            integers.clear()
+            pfreq = original_pfreq.copy()
+    print()
+
+if __name__ == '__main__':
+    T = int(input())
+    spf = sieve(LIM + 1)
+    for _ in range(T):
+        main()
 ```
 
 ## G. wxhtzdy ORO Tree

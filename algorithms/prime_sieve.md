@@ -12,6 +12,7 @@ the time complexity is O(n log log n) most likely
 ## prime sieve that gets the prime factorization
 
 This prime seive constructs the prime factorization of the composite integers 
+This algorithm is rather slow actually, because it is storing the prime factorization of each integer.  There is a heavy constant factor overhead most likely. 
 
 ```py
 def prime_sieve(lim):
@@ -46,7 +47,7 @@ def prime_sieve(lim):
 
 ## fast prime sieve for prime factorizations of each integer
 
-precomputes the prime factorization for each integer from 0 to upper_bound (inclusive)
+precomputes the prime factorization for each integer from 0 to upper_bound (inclusive).  This one is a bit worrisome, it may be too slow in actually.  A faster approach is below for how to get the prime factorization of integer queries. 
 
 ```py
 def prime_sieve(upper_bound):
@@ -56,4 +57,39 @@ def prime_sieve(upper_bound):
         for j in range(i, upper_bound + 1, i):
             prime_factorizations[j].append(i)
     return prime_factorizations
+```
+
+## prime sieve for smallest prime factor and fast prime factorization of integers
+
+If you calculate the smallest prime factor for each integer, you can use that to speed up prime factorization of each integer from O(sqrt(n)) to O(log(n)).  While the prime sieve here is really fast and just nlog(log(n))
+
+Just remember you want to call the sieve at the appropriate location, don't want to recompute it over and over it is a precomputation step that should only be done once. 
+
+```py
+def sieve(n):
+    spf = [i for i in range(n + 1)]
+    for i in range(2, n + 1):
+        if spf[i] != i: continue
+        for j in range(i * i, n + 1, i):
+            spf[j] = i
+    return spf
+
+# log(n) factorize
+def factorize(x):
+    factors = []
+    while x > 1:
+        factors.append(spf[x])
+        x //= spf[x]
+    return factors
+```
+
+You can also count the number of prime integers in the prime factorization of an integer, excluding 1, which is not prime anyways. 
+
+```py
+def factorize(n):
+    cnt = 0
+    while n > 1:
+        cnt += 1
+        n //= spf[n]
+    return cnt
 ```
