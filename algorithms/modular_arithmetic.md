@@ -1,7 +1,7 @@
 # Modular Arithmetic
 
 
-## Modular Congruence
+## congruence relation modulo n
 
 modular congruence means that two integers are in the same equivalence class under some (mod m).  Imagine = is congruence symbol.  a = b(modm) implies that with division algorithm a = mq + r, where 0 <= r < m.  And b = mq + r, and both have the same remainder.  So when divided by m they have same remainder.  
 
@@ -29,6 +29,10 @@ So modular congruence can be thought of as the remainder of a and b when divided
 
 Since by definition both have the same remainder, you can set a - nc = b - mc which leads to the result that c divides a - b.  $$\frac{a - b}{c} = n - m$$
 Which means that there is integer result from the division of a - b by c. So c divides a - b.
+
+## Cancellation rule in congruence relation modulo n
+
+
 
 
 
