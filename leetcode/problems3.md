@@ -925,6 +925,59 @@ public:
 };
 ```
 
+## 1095. Find in Mountain Array
+
+binary search, boolean array
+
+```py
+class Solution:
+    def findInMountainArray(self, target: int, mountain_arr: 'MountainArray') -> int:
+        N = mountain_arr.length()
+        left, right = 1, N - 1
+        while left < right:
+            mid = (left + right + 1) >> 1
+            if mountain_arr.get(mid) > mountain_arr.get(mid - 1):
+                left = mid
+            else:
+                right = mid - 1
+        pi = left
+        # search left side
+        left, right = 0, pi
+        while left < right:
+            mid = (left + right + 1) >> 1
+            if mountain_arr.get(mid) <= target:
+                left = mid
+            else:
+                right = mid - 1
+        if mountain_arr.get(left) == target: return left
+        # search right side (decreasing)
+        left, right = pi, N - 1
+        while left < right:
+            mid = (left + right + 1) >> 1
+            if mountain_arr.get(mid) >= target:
+                left =  mid
+            else:
+                right = mid - 1
+        if mountain_arr.get(left) == target: return left
+        return -1
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:

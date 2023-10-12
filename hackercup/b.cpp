@@ -12,44 +12,86 @@ inline int read() {
 	return x * y;
 }
 
-string name = "sum_41_chapter_1_input.txt";
+string name = "jacks_candy_shop_input.txt";
 
-const int N = 1e9;
-vector<int> spf;
-void sieve(int n) {
-    for (int i = 2; i <= n; i++) {
-        if (spf[i] != 1) continue;
-        for (int j = i; j <= n; j += i) {
-            spf[j] = i;
+vector<int> parents, indegrees, candies, sz, heavy;
+vector<vector<int>> adj;
+vector<priority_queue<int>> heaps;
+
+int dfs(int u, int p) {
+    int hc = 0;
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        int csz = dfs(v, u);
+        if (csz > hc) {
+            hc = csz;
+            heavy[u] = v;
         }
+        sz[u] += csz;
     }
-}
-
-vector<int> factorize(int x) {
-    vector<int> factors;
-    while (x > 1) {
-        factors.push_back(spf[x]);
-        x /= spf[x];
-    }
-    return factors;
+    return sz[u];
 }
 
 void solve() {
-    int P = read();
-    vector<int> factors = factorize(P);
-    int fsum = 0;
-    for (int f : factors) fsum += f;
-    if (fsum > 41) {
-        cout << -1;
-        return;
+    int N = read(), M = read(), A = read(), B = read();
+    parents.assign(N, -1);
+    indegrees.assign(N, 0);
+    indegrees[0]++;
+    adj.assign(N, vector<int>());
+    for (int i = 1; i < N; i++) {
+        parents[i] = read();
+        adj[i].push_back(parents[i]);
+        adj[parents[i]].push_back(i);
+        indegrees[i]++;
+        indegrees[parents[i]]++;
     }
-    while (fsum < 41) {
-        factors.push_back(1);
-        fsum++;
+    candies.assign(N, 0);
+    for (int i = 0; i < M; i++) {
+        int candy = (A * i + B) % N;
+        candies[candy]++;
     }
-    // then it will equal to 41 so print out all these factors
-    cout << factors.size() << " ";
-    for (int f : factors) cout << f << " ";
+    sz.assign(N, 1);
+    heavy.assign(N, -1);
+    dfs(0, -1);
+    int res = 0;
+    deque<int> dq;
+    for (int i = 0; i < N; i++) {
+        if (indegrees[i] == 1) {
+            dq.push_back(i);
+        }
+    }
+    heaps.assign(N, priority_queue<int>());
+    while (!dq.empty()) {
+        int u = dq.front();
+        dq.pop_front();
+        for (int v : adj[u]) {
+            if (v == parents[u]) {
+                indegrees[v]--;
+                if (indegrees[v] == 1) {
+                    dq.push_back(v);
+                }
+            }
+            if (v == heavy[u]) {
+                heaps[u] = heaps[v];
+            }
+        }
+        heaps[u].push(u);
+        for (int v : adj[u]) {
+            if (v == parents[u]) continue;
+            if (v == heavy[u]) continue;
+            while (!heaps[v].empty()) {
+                int c = heaps[v].top();
+                heaps[u].push(heaps[v].top());
+                heaps[v].pop();
+            }
+        }
+        while (candies[u] > 0 && !heaps[u].empty()) {
+            res += heaps[u].top();
+            heaps[u].pop();
+            candies[u]--;
+        }
+    }
+    cout << res;
 }
 
 int32_t main() {
@@ -60,8 +102,6 @@ int32_t main() {
     freopen(in.c_str(), "r", stdin);
     freopen(out.c_str(), "w", stdout);
     int T = read();
-    spf.assign(N + 1, 1);
-    sieve(N);
     for (int i = 1; i <= T ; i++) {
         cout << "Case #" << i << ": ";
         solve();
