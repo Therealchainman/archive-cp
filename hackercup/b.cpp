@@ -12,86 +12,40 @@ inline int read() {
 	return x * y;
 }
 
-string name = "jacks_candy_shop_input.txt";
+string name = "carnival_coins_input.txt";
 
-vector<int> parents, indegrees, candies, sz, heavy;
-vector<vector<int>> adj;
-vector<priority_queue<int>> heaps;
-
-int dfs(int u, int p) {
-    int hc = 0;
-    for (int v : adj[u]) {
-        if (v == p) continue;
-        int csz = dfs(v, u);
-        if (csz > hc) {
-            hc = csz;
-            heavy[u] = v;
-        }
-        sz[u] += csz;
-    }
-    return sz[u];
-}
+const double SMALL = numeric_limits<double>::min();
+vector<vector<double>> prob;
+vector<double> dp, expected;
 
 void solve() {
-    int N = read(), M = read(), A = read(), B = read();
-    parents.assign(N, -1);
-    indegrees.assign(N, 0);
-    indegrees[0]++;
-    adj.assign(N, vector<int>());
-    for (int i = 1; i < N; i++) {
-        parents[i] = read();
-        adj[i].push_back(parents[i]);
-        adj[parents[i]].push_back(i);
-        indegrees[i]++;
-        indegrees[parents[i]]++;
-    }
-    candies.assign(N, 0);
-    for (int i = 0; i < M; i++) {
-        int candy = (A * i + B) % N;
-        candies[candy]++;
-    }
-    sz.assign(N, 1);
-    heavy.assign(N, -1);
-    dfs(0, -1);
-    int res = 0;
-    deque<int> dq;
-    for (int i = 0; i < N; i++) {
-        if (indegrees[i] == 1) {
-            dq.push_back(i);
+    int N, K;
+    double p;
+    cin >> N >> K >> p;
+    prob.assign(N + 1, vector<double>(N + 1, 0.0));
+    dp.assign(N + 1, 0.0);
+    expected.assign(N + 1, SMALL);
+    prob[0][0] = 1.0;
+    for (int i = 1; i <= N; i++ ) { // flip i coins
+        for (int j = 0; j <= i; j++) { // exactly j heads
+            prob[i][j] = (1 - p) * prob[i - 1][j];
+            if (j > 0) prob[i][j] += p * prob[i - 1][j - 1];
         }
     }
-    heaps.assign(N, priority_queue<int>());
-    while (!dq.empty()) {
-        int u = dq.front();
-        dq.pop_front();
-        for (int v : adj[u]) {
-            if (v == parents[u]) {
-                indegrees[v]--;
-                if (indegrees[v] == 1) {
-                    dq.push_back(v);
-                }
-            }
-            if (v == heavy[u]) {
-                heaps[u] = heaps[v];
-            }
-        }
-        heaps[u].push(u);
-        for (int v : adj[u]) {
-            if (v == parents[u]) continue;
-            if (v == heavy[u]) continue;
-            while (!heaps[v].empty()) {
-                int c = heaps[v].top();
-                heaps[u].push(heaps[v].top());
-                heaps[v].pop();
-            }
-        }
-        while (candies[u] > 0 && !heaps[u].empty()) {
-            res += heaps[u].top();
-            heaps[u].pop();
-            candies[u]--;
+    // dp[i] calculates the probability when flipping i coins to get at least K heads
+    for (int i = 1; i <= N; i++) {
+        for (int j = K; j <= i; j++) {
+            dp[i] += prob[i][j];
         }
     }
-    cout << res;
+    expected[0] = 0.0;
+    // maximum expected value
+    for (int i = 1; i <= N; i++) { // up to i coins flippped
+        for (int j = 0; j < i; j++ ) { 
+            expected[i] = max(expected[i], expected[j] + dp[i - j]);
+        }
+    }
+    printf("%.12f\n", expected.end()[-1]);
 }
 
 int32_t main() {
@@ -101,11 +55,11 @@ int32_t main() {
     string out = "outputs/" + name;
     freopen(in.c_str(), "r", stdin);
     freopen(out.c_str(), "w", stdout);
-    int T = read();
+    int T;
+    cin >> T;
     for (int i = 1; i <= T ; i++) {
-        cout << "Case #" << i << ": ";
+        printf("Case #%d: ", i);
         solve();
-        cout << endl;
     }
     return 0;
 }

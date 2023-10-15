@@ -1,30 +1,20 @@
 import sys
 
-name = "ethan_finds_the_shortest_path_input.txt"
+name = "subtle_sabotage_input.txt"
 
 sys.stdout = open(f"outputs/{name}", "w")
 sys.stdin = open(f"inputs/{name}", "r")
 
-def main(t):
-    N, K = map(int, input().split())
-    edges = [(1, N, K)]
-    s = 0
-    u = 1
-    if N > 2 and K > 2:
-        for i in range(K - 1, 0, -1):
-            if u == N: break
-            if i == 1: edges.append((u, N, i))
-            else: edges.append((u, u + 1, i))
-            u += 1
-            s += i
-    res = max(0, s - K)
-    print(f"Case #{t}: {res}")
-    print(len(edges))
-    for edge in edges:
-        print(*edge)
+def main():
+    N, M, K = map(int, input().split())
+    if 2 * K + 3 > max(N, M): return -1
+    if K == 1 and N >= 5 and M >= 5: return 5
+    if K != 1 and N >= 3 * K + 1 and M >= 3 * K + 1: return 4
+    n = (min(N, M) + K - 1) // K # ceil division
+    if n < 2: return -1
+    return n
 
 if __name__ == '__main__':
     T = int(input())
     for t in range(1, T + 1):
-        main(t)
-        # print(f"Case #{t}: {main()}")
+        print(f"Case #{t}: {main()}")

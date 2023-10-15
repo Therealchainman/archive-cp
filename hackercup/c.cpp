@@ -2,7 +2,7 @@
 using namespace std;
 #define int long long
 #define x first
-#define y second
+#define h second
 
 inline int read() {
 	int x = 0, y = 1; char c = getchar();
@@ -14,104 +14,40 @@ inline int read() {
 	return x * y;
 }
 
-string name = "replay_value_input.txt";
+string name = "snakes_and_ladders_input.txt";
 
 const int mod = 1e9 + 7;
-vector<int> y_values;
-vector<pair<int, int>> lasers;
-int dp[2][52][52][52][52];
+vector<pair<int,int>> ladders;
+vector<int> st;
+
+bool comp(const int &a, const int &b) {
+    return ladders[a].h > ladders[b].h;
+}
 
 void solve() {
-    int N = read(), S = read(), E = read();
-    lasers.clear();
-    y_values.assign(N, 0);
+    int N = read();
+    ladders.assign(N, {0, 0});
     for (int i = 0; i < N; i++) {
-        int x = read(), y = read();
-        lasers.push_back({x, y});
-        y_values[i] = y;
+        ladders[i].x = read();
+        ladders[i].h = read();
     }
-    y_values.push_back(S);
-    y_values.push_back(E);
-    // y value coordinate compression
-    sort(y_values.begin(), y_values.end());
-    S = lower_bound(y_values.begin(), y_values.end(), S) - y_values.begin();
-    E = lower_bound(y_values.begin(), y_values.end(), E) - y_values.begin();
+    int res = 0LL;
+    sort(ladders.begin(), ladders.end());
+    st.clear();
     for (int i = 0; i < N; i++) {
-        lasers[i].y = lower_bound(y_values.begin(), y_values.end(), lasers[i].y) - y_values.begin();
-    }
-    // flip all the y coordinates if values of E > S
-    if (E > S) {
-        for (int i = 0; i < N; i++) {
-            lasers[i].y = N + 1 - lasers[i].y;
+        while (!st.empty() && ladders[st.end()[-1]].h < ladders[i].h) {
+            st.pop_back();
         }
-        S = N + 1 - S;
-        E = N + 1 - E;
-    }
-    // sort the lasers by x coordinate
-    sort(lasers.begin(), lasers.end());
-    int x = 0;
-    memset(dp[x], 0, sizeof(dp[x]));
-    dp[x][N + 1][0][N + 1][0] = 1;
-    for (int i = 0; i < N; i++) {
-        x ^= 1;
-        memset(dp[x], 0, sizeof(dp[x]));
-        // set region of current laser's y value
-        int region = 0;
-        int y = lasers[i].y;
-        if (y > S) region = 1;
-        else if (y > E) region = 2;
-        else region = 3;
-        for (int a = 0; a < N + 2; a++) {
-            for (int b = 0; b < N + 2; b++) {
-                for (int c = 0; c < N + 2; c++) {
-                    for (int d = 0; d < N + 2; d++) {
-                        int v = dp[x ^ 1][a][b][c][d];
-                        if (v == 0) continue;
-                        // right
-                        if (region == 3) {
-                            dp[x][a][b][c][max(d, y)] += v;
-                            dp[x][a][b][c][max(d, y)] %= mod;
-                        } else {
-                            dp[x][a][b][min(c, y)][d] += v;
-                            dp[x][a][b][min(c, y)][d] %= mod;
-                        }
-                        // up
-                        if (y >= d) {
-                            dp[x][min(a, y)][b][c][d] += v;
-                            dp[x][min(a, y)][b][c][d] %= mod;
-                        }
-                        // left
-                        if ((region == 1 && y >= b) || (region != 1 && y <= a)) {
-                            dp[x][a][b][c][d] += v;
-                            dp[x][a][b][c][d] %= mod;
-                        }
-                        // down
-                        if (y <= c) {
-                            dp[x][a][max(b, y)][c][d] += v;
-                            dp[x][a][max(b, y)][c][d] %= mod;
-                        }
-                    }
-                }
+        if (!st.empty()) {
+            int j = lower_bound(st.begin(), st.end(), i, comp) - st.begin();
+            for (int k = j; k < st.size(); k++) {
+                int L = ladders[i].x - ladders[st[k]].x;
+                int L_2 = (L * L) % mod;
+                res = (res + L_2) % mod;
             }
         }
+        st.push_back(i);
     }
-    int num_configs = 0;
-    for (int a = 0; a < N + 2; a++) {
-        for (int b = 0; b < N + 2; b++) {
-            for (int c = 0; c < N + 2; c++) {
-                for (int d = 0; d < N + 2; d++) {
-                    num_configs += dp[x][a][b][c][d];
-                    num_configs %= mod;
-                }
-            }
-        }
-    }
-    int res = 1;
-    for (int i = 0; i < N; i++) {
-        res *= 4;
-        res %= mod;
-    }
-    res = (res - num_configs + mod) % mod;
     cout << res;
 }
 

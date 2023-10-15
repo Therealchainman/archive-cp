@@ -12,20 +12,24 @@ def pmf_binomial_distribution(n, m, p):
 
 alternative for when math.comb is not availabe with a class
 
+
 ```py
-mod = 998244353
-fact = [1]*(n + 1)
-for i in range(1, n + 1):
-    fact[i] = (fact[i - 1] * i) % mod
-inv_fact = [1]*(n + 1)
-inv_fact[-1] = mod_inverse(fact[-1], mod)
-for i in range(n - 1, -1, -1):
-    inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % mod
+mod = int(1e9) + 7
+
+def mod_inverse(v):
+    return pow(v, mod - 2, mod)
+
+def factorials(n):
+    fact, inv_fact = [1] * (n + 1), [0] * (n + 1)
+    for i in range(2, n + 1):
+        fact[i] = (fact[i - 1] * i) % mod
+    inv_fact[-1] = mod_inverse(fact[-1])
+    for i in reversed(range(n)):
+        inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % mod
+    return fact, inv_fact
+
 def nCr(n, r):
-    if n < r: return 0
-    return (fact[n] * inv_fact[r] * inv_fact[n - r]) % mod
-def pmf_binomial_distribution(n, m, p):
-    return (nCr(n, m) * pow(p, m, mod) * pow(1 - p, n - m, mod))%mod
+    return (fact[n] * inv_fact[r] * inv_fact[n - r]) % mod if n >= r else 0
 ```
 
 alternative for when math.comb is not available with a class, although appears to be slower than implementation above
