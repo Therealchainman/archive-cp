@@ -64,12 +64,22 @@ The frequency of the digits in the squares should be the same as that in S if it
 However you can ignore 0s. 
 
 ```py
+def main():
+    N = int(input())
+    S = sorted(input())
+    M = round(10 ** (N / 2))
+    res = 0
+    for i in range(M + 1):
+        res += S == sorted(str(i * i).zfill(N))
+    print(res)
 
+if __name__ == '__main__':
+    main()
 ```
 
 ## E - Joint Two Strings 
 
-### Solution 1: 
+### Solution 1: binary search, two pointers
 
 ```py
 def main():
@@ -108,7 +118,7 @@ if __name__ == '__main__':
     main()
 ```
 
-## 
+## F - Beautiful Path 
 
 ### Solution 1: 
 
@@ -116,7 +126,7 @@ if __name__ == '__main__':
 
 ```
 
-## 
+## G - Generate Arrays 
 
 ### Solution 1: 
 

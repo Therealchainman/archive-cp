@@ -80,3 +80,32 @@ class BinomialDistribution(Combinations):
     def pmf_binomial_distribution(self, n, m, p):
         return self.nCr(n, m) * pow(p, m, self.mod) * pow(1 - p, n - m, self.mod)
 ```
+
+
+## Calculate binomial distribution with dynamic programming
+
+This is sometimes useful when the calculation is with floats, and you cannot possibly calculate the factorial because it would get too large for the combinatorics solution.  So there is another solution that is nice for this use case using recurrence relation in maths.
+
+for some p of success
+prob(i, j) = probability of j successes with i trials
+
+```py
+prob = [[0.0] * 21 for _ in range(21)]
+prob[0][0] = 1.0
+for i in range(1, 21): # number of trials
+    for j in range(i + 1): # number of successes
+        prob[i][j] = prob[i - 1][j] * (1 - p)
+        if j > 0:
+            prob[i][j] += prob[i - 1][j - 1] * p
+```
+
+```cpp
+prob.assign(N + 1, vector<double>(N + 1, 0.0));
+prob[0][0] = 1.0;
+for (int i = 1; i <= N; i++ ) { // flip i coins
+    for (int j = 0; j <= i; j++) { // exactly j heads
+        prob[i][j] = (1 - p) * prob[i - 1][j];
+        if (j > 0) prob[i][j] += p * prob[i - 1][j - 1];
+    }
+}
+```

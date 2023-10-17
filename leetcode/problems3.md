@@ -962,12 +962,29 @@ class Solution:
         return -1
 ```
 
-##
+## 2355. Maximum Number of Books You Can Take
 
-### Solution 1:
+### Solution 1: monotonic stack, arithmetic progression, dynamic programming
 
 ```py
-
+class Solution:
+    def maximumBooks(self, books: List[int]) -> int:
+        n = len(books)
+        stack = []
+        dp = [0] * n
+        def range_sum(left, right):
+            n = min(books[right], right - left + 1)
+            return n * (2 * books[right] - (n - 1)) // 2
+        for i in range(n):
+            while stack and books[stack[-1]] - stack[-1] >= books[i] - i:
+                stack.pop()
+            if not stack:
+                dp[i] = range_sum(0, i)
+            else:
+                j = stack[-1]
+                dp[i] = dp[j] + range_sum(j + 1, i)
+            stack.append(i)
+        return max(dp)
 ```
 
 ##
