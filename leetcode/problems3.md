@@ -987,6 +987,70 @@ class Solution:
         return max(dp)
 ```
 
+## 1361. Validate Binary Tree Nodes
+
+### Solution 1: binary tree, queue, bfs, one root note, visited array
+
+```py
+class Solution:
+    def validateBinaryTreeNodes(self, n: int, leftChild: List[int], rightChild: List[int]) -> bool:
+        root = None
+        vis = [0] * n
+        def visit(i):
+            if i != -1: vis[i] = 1
+        def add(i):
+            if i != -1:
+                if vis[i]: return False
+                vis[i] = 1
+                queue.append(i)
+            return True
+        for l, r in zip(leftChild, rightChild):
+            visit(l)
+            visit(r)
+        for i in range(n):
+            if not vis[i]:
+                if root is not None: return False
+                root = i
+        queue = deque()
+        vis = [0] * n
+        if root is not None: 
+            queue.append(root)
+            vis[root] = 1
+        while queue:
+            u = queue.popleft()
+            left, right = leftChild[u], rightChild[u]
+            if not add(left) or not add(right): return False
+        return all(v for v in vis)
+```
+
+## 1425. Constrained Subsequence Sum
+
+### Solution 1: deque, monotonic deque, dynamic programming
+
+```py
+class Solution:
+    def constrainedSubsetSum(self, nums: List[int], k: int) -> int:
+        nums = [0] + nums
+        queue = deque([0])
+        n = len(nums)
+        for i in range(1, n):
+            while i - queue[0] > k:
+                queue.popleft()
+            nums[i] = max(nums[i], nums[queue[0]] + nums[i])
+            while queue and nums[queue[-1]] <= nums[i]:
+                queue.pop()
+            queue.append(i)
+        return max(nums[1:])
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:

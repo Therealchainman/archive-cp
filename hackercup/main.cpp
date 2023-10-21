@@ -45,5 +45,8 @@ int32_t main() {
 /*
 problem solve
 
+This doesn't work that great if you are reading in a float type, You need to remove the read function and just read inputs using cin >> 
+and printf to output it and specify the desired number of decimal places. printf("%.12f\n", p);
+
 g++ "-Wl,--stack,1078749825" nutella.cpp -o main
 */
