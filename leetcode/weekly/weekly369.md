@@ -20,6 +20,8 @@ class Solution:
 
 ### Solution 1:  dynamic programming + sliding window 
 
+![images](images/Minimum_Increment_Operations_to_Make_Array_Beautiful.png)
+
 ```py
 class Solution:
     def minIncrementOperations(self, nums: List[int], k: int) -> int:
