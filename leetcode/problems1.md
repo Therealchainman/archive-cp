@@ -9800,21 +9800,6 @@ class Solution:
         return sentinel_node.next
 ```
 
-## 458. Poor Pigs
-
-### Solution 1:  math + quantum bits + count number of states
-
-```py
-class Solution:
-    def poorPigs(self, buckets: int, minutesToDie: int, minutesToTest: int) -> int:
-        if buckets == 1: return 0
-        states, cur_buckets, cur_pigs = minutesToTest//minutesToDie + 1, 1, 0
-        while cur_buckets < buckets:
-            cur_buckets *= states
-            cur_pigs += 1
-        return cur_pigss
-```
-
 ## 377. Combination Sum IV
 
 ### Solution 1:  dynamic programming

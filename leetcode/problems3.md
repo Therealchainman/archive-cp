@@ -1043,6 +1043,145 @@ class Solution:
         return max(nums[1:])
 ```
 
+## 1793. Maximum Score of a Good Subarray
+
+### Solution 1:  two pointer, prefix min, greedy
+
+```py
+class Solution:
+    def maximumScore(self, nums: List[int], k: int) -> int:
+        n = len(nums)
+        lmin = [math.inf] * (k + 1)
+        lmin[0] = nums[k]
+        for i in range(1, k + 1):
+            lmin[i] = min(lmin[i - 1], nums[k - i])
+        rmin = [math.inf] * (n - k)
+        rmin[0] = nums[k]
+        for i in range(1, n - k):
+            rmin[i] = min(rmin[i - 1], nums[i + k])
+        res = 0
+        # rmin is weakly decreasing and lmin is weakly decreasing
+        left, right = k, n - k - 1
+        while left >= 0 and right >= 0:
+            v = min(lmin[left], rmin[right])
+            res = max(res, (right + left + 1) * v)
+            while left >= 0 and lmin[left] == v:
+                left -= 1
+            while right >= 0 and rmin[right] == v:
+                right -= 1
+        return res
+```
+
+## 458. Poor Pigs
+
+### Solution 1: math, quantum bits, count number of states, information theory
+
+Find how many rounds you have to find everything
+there will be floor( minutesToTest / minutesToDie ) rounds to run experiments
+
+Can be anywhere between 1 to 100 rounds
+And there are 1,000 buckets
+xxxx
+  xxxx
+    xxxx
+
+
+in 1 round
+if you have 1 bucket you can use 0 pigs
+2 buckets you can use 1 pig
+3 buckets you can use 2 pigs 
+4 buckets 2 pigs
+5 to 8 buckets with 3 pigs
+9 to 16 buckets with 4 pigs
+17 to 32 with 5 pigs, 2^5
+10 pigs can do 513 to 1024 buckets
+2^4 = 16.
+
+so at most 10 pigs are needed okay, so just precompute the combinatorics for all 10 pig
+works if it divides into by less than or equal to number of rounds, and the remainder is less than or equal to 1
+
+
+2 rounds
+1 bucket with 0 pigs
+2 to 3 buckets with 1 pig
+4 to 7 buckets with 2 pigs
+8 to 15 buckets with 3 pigs
+16 to 31 buckets with 4 pigs
+
+
+3 rounds
+1 bucket with 0 pigs
+2 to 4 buckets with 1 pig
+5 to 10 buckets with 2 pigs
+
+
+with 2 pigs you can test 3 every round and 4 on the last round
+how to calculate this though? 
+
+calculate the number of rounds 
+then calculate the possible number of combinations for each pig, and find the one that you have enough buckets for.  So you know it is
+
+for x pigs
+math.comb(x, x) + math.comb(x, x - 1) + math.comb(x, x - 2) + math.comb(x, 1)
+
+2 rounds
+2 buckets you can use 1 pig
+3 buckets you can use 1 pig
+4 buckets you can use 
+
+
+2 pigs
+xx
+x x
+8
+
+base encoding problem
+that is with 1 round and 3 pigs you have
+000
+001
+010 and so on
+so there are 2^3 possible configurations that would all let you know which pig died.
+
+Suppose you have 2 rounds now you can do this
+000
+001
+002
+
+Because you are saying you test it in round 1 or round 2 now.  
+How many configurations now there will be 3^3 possible configurations, because you still have 3 pigs, and 3 possiblities for each pig. 
+
+so solution is just the lowest num of pigs that achieve (rounds + 1)^pigs
+
+look into application to information theory
+
+find x such that states^x >= buckets
+x >= log_states(buckets)
+x >= log(buckets) / log(states)
+
+```py
+class Solution:
+    def poorPigs(self, buckets: int, minutesToDie: int, minutesToTest: int) -> int:
+      rounds = minutesToTest // minutesToDie
+      for i in range(11):
+        if pow(rounds + 1, i) >= buckets: return i
+      return 10
+```
+
+```py
+class Solution:
+    def poorPigs(self, buckets: int, minutesToDie: int, minutesToTest: int) -> int:
+      states = minutesToTest // minutesToDie + 1
+      return math.ceil(round(math.log(buckets) / math.log(states), 6))
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:

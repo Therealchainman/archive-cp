@@ -1,36 +1,43 @@
 import sys
 
-name = "all_critical_input.txt"
+name = "ready_go_part_2_input.txt"
 
 sys.stdout = open(f"outputs/{name}", "w")
 sys.stdin = open(f"inputs/{name}", "r")
 
+from collections import deque, Counter
+from itertools import product
+
 def main():
-    p = float(input())
-    prob = [[0.0] * 21 for _ in range(21)]
-    prob[0][0] = 1.0
-    for i in range(1, 21): # number of trials
-        for j in range(i + 1): # number of successes
-            prob[i][j] = prob[i - 1][j] * (1 - p)
-            if j > 0:
-                prob[i][j] += prob[i - 1][j - 1] * p
-    dp = [0.0] * 21
-    dp[0] = 1.0
-    res = 0
-    play = 1
-    precision_threshold = 1e-8
-    while True:
-        ndp = [0.0] * 21
-        for i in range(21):
-            for j in range(i + 1): # going from state of j successes to i successes, number of successes will be i - j
-                ndp[i] += dp[j] * prob[20 - j][i - j] # why is this multiplication? think about that
-        delta = ndp[20] - dp[20]
-        if play * delta < precision_threshold and dp[0] < precision_threshold:
-            break
-        res += play * delta
-        dp = ndp
-        play += 1
-    return f"{round(res, 5):.5f}"
+    R, C = map(int, input().split())
+    grid = [list(input()) for _ in range(R)]
+    empty, black, white = ".", "B", "W"
+    vis = "#"
+    in_bounds = lambda r, c: 0 <= r < R and 0 <= c < C
+    neighborhood = lambda r, c: [(r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)]
+    counts = Counter()
+    def bfs(r, c):
+        vis2 = set([(r, c)])
+        queue = deque([(r, c)])
+        sr = sc = sz = cnt = 0
+        while queue:
+            r, c = queue.popleft()
+            sz += 1
+            grid[r][c] = vis
+            for nr, nc in neighborhood(r, c):
+                if not in_bounds(nr, nc): continue
+                if (nr, nc) in vis2: continue
+                vis2.add((nr, nc))
+                if grid[nr][nc] == empty: 
+                    sr, sc = nr, nc
+                    cnt += 1
+                if grid[nr][nc] == white: queue.append((nr, nc))
+        return sr, sc, sz, cnt
+    for r, c in product(range(R), range(C)):
+        if grid[r][c] == vis or grid[r][c] != white: continue
+        rr, cc, sz, cnt = bfs(r, c)
+        if cnt == 1: counts[(rr, cc)] += sz
+    return max(counts.values(), default = 0)
 
 if __name__ == '__main__':
     T = int(input())

@@ -14,127 +14,88 @@ inline int read() {
 	return x * y;
 }
 
-string name = "circular_circles_input.txt";
+string name = "meta_game_sample_input.txt";
 
-const int mod = 1e9 + 7;
-const int mod2 = 1e9;
-multiset<int> weight_pairs, inter_circle_weights;
-vector<multiset<int>> top_circle_weights, bot_circle_weights;
-vector<int> X, Y, I, W, CW;
+int N;
+vector<int> A;
 
-int maximum(multiset<int>& ms) {
-    auto max_val_iterator = ms.rbegin();
-    return max_val_iterator != ms.rend() ? *max_val_iterator : 0;
+void advance(int& p) {
+    p = (p + 1) % (2 * N);
 }
 
-void erase(multiset<int>& s, int x) {
-	s.erase(s.find(x));
+void decrement(int& p) {
+    p = (p - 1 + 2 * N) % (2 * N);
 }
 
-void solve() {
-    // N circles
-    // M nodes in each circle
-    // N extra edges to connect all the circles into a super circle
-    int N = read(), M = read(), E = read(), K = read();
-    X.assign(N, 0);
-    Y.assign(N, 0);
-    I.assign(E, 0);
-    W.assign(E, 0);
-    for (int i = 0; i < K; i++) {
-        X[i] = read();
-    }
-    int Ax = read(), Bx = read(), Cx = read();
-    for (int i = K; i < N; i++) {
-        X[i] = (Ax * X[i - 2] + Bx * X[i - 1] + Cx) % M;
-    }
-    for (int i = 0; i < K; i++) {
-        Y[i] = read();
-    }
-    int Ay = read(), By = read(), Cy = read();
-    for (int i = K; i < N; i++) {
-        Y[i] = (Ay * Y[i - 2] + By * Y[i - 1] + Cy) % M;
-    }
-    for (int i = 0; i < K; i++) {
-        I[i] = read();
-    }
-    int Ai = read(), Bi = read(), Ci = read();
-    for (int i = K; i < E; i++) {
-        I[i] = (Ai * I[i - 2] + Bi * I[i - 1] + Ci) % (N * M + N);
-    }
-    for (int i = 0; i < K; i++) {
-        W[i] = read();
-    }
-    int Aw = read(), Bw = read(), Cw = read();
-    for (int i = K; i < E; i++) {
-        W[i] = (Aw * W[i - 2] + Bw * W[i - 1] + Cw) % mod2;
-    }
-    int res = 1;
-    weight_pairs.clear();
-    inter_circle_weights.clear();
-    top_circle_weights.assign(N, multiset<int>());
-    bot_circle_weights.assign(N, multiset<int>());
-    // N * M circle edges
-    for (int i = 0; i < N * M; i++) {
-        int c = i / M;
-        int e = i % M;
-        if (e >= min(X[c], Y[c]) && e < max(X[c], Y[c])) {
-            // TOP
-            top_circle_weights[c].insert(1);
-        } else {
-            // BOT
-            bot_circle_weights[c].insert(1);
-        }
-        if (e == 0) {
-            weight_pairs.insert(X[c] == Y[c] ? 0 : 1);
-        }
-    }
-    // N inter circle edges
+bool check(int left, int right) {
     for (int i = 0; i < N; i++) {
-        inter_circle_weights.insert(1);
+        if (A[left] != A[right]) return false;
+        advance(left);
+        decrement(right);
     }
-    CW.assign(N * M + N, 1);
-    int total_weight = N * M + N;
-    int circle_weight = N;
-    for (int q = 0; q < E; q++) {
-        int weight = W[q], edge = I[q];
-        int cur_weight;
-        // belongs to inter-circle edge
-        if (edge >= N * M) {
-            cur_weight = CW[edge];
-            erase(inter_circle_weights, cur_weight);
-            inter_circle_weights.insert(weight);
-        } else {
-            int c = edge / M;
-            int e = edge % M;
-            cur_weight = CW[edge];
-            int top_max = maximum(top_circle_weights[c]), bot_max = maximum(bot_circle_weights[c]);
-            int cur_pair_max = top_max + bot_max - max(top_max, bot_max);
-            int cur_circle_max = max(top_max, bot_max);
-            erase(weight_pairs, cur_pair_max);
-            if (e >= min(X[c], Y[c]) && e < max(X[c], Y[c])) {
-                // TOP
-                erase(top_circle_weights[c], cur_weight);
-                top_circle_weights[c].insert(weight);
-            } else {
-                // BOT
-                erase(bot_circle_weights[c], cur_weight);
-                bot_circle_weights[c].insert(weight);
-            }
-            top_max = maximum(top_circle_weights[c]), bot_max = maximum(bot_circle_weights[c]);
-            int delta = max(top_max, bot_max) - cur_circle_max;
-            circle_weight += delta;
-            int pair_delta = top_max + bot_max - max(top_max, bot_max);
-            weight_pairs.insert(pair_delta);
+    return true;
+}
+
+int solve() {
+    N = read();
+    // cout << "N: " << N << endl;
+    A.assign(2 * N, 0);
+    for (int i = 0; i < N; i++) {
+        A[i] = read();
+    }
+    for (int i = N; i < 2 * N; i++) {
+        A[i] = read();
+    }
+    int window_N = N / 2;
+    // A and B first windows
+    int left_af = 0, right_af = N / 2 - 1;
+    int left_bf = N, right_bf = N + N / 2 - 1;
+    int count_f = 0;
+    for (int i = 0; i < N / 2; i++) {
+        if (A[i] < A[i + N]) count_f++;
+        // cout << A[i] << " " << A[i + N] << endl;
+    }
+    // A and B second windows
+    int left_as = N % 2 == 0 ? N / 2 : N / 2 + 1;
+    int right_as = N - 1;
+    int left_bs = N % 2 == 0 ? N + N / 2 : N + N / 2 + 1;
+    int right_bs = 2 * N - 1;
+    int count_s = 0;
+    for (int i = N / 2 + (N % 2 == 0 ? 0 : 1); i < N; i++) {
+        if (A[i] > A[i + N]) count_s++;
+    }
+    // cout << "count_f: " << count_f << endl;
+    // cout << "count_s: " << count_s << endl;
+    vector<int> index;
+    if (count_s == window_N && count_f == window_N) {
+        if (check(left_af, right_bs)) return 0;
+    }
+    for (int t = 1; t < 2 * N; t++) {
+        // updates first window
+        if (A[left_af] < A[left_bf]) count_f--;
+        advance(left_af);
+        advance(left_bf);
+        // cout << "left_af: " << left_af << endl;
+        // cout << "right_bf: " << right_bf << endl;
+        // cout << "right_af: " << right_af << endl;
+        advance(right_af);
+        advance(right_bf);
+        // cout << "right_bf: " << right_bf << endl;
+        // cout << "right_af: " << right_af << endl;
+        if (A[right_af] < A[right_bf]) count_f++;
+        // cout << "count_f: " << count_f << endl;
+        if (A[left_as] > A[left_bs]) count_s--;
+        advance(left_as);
+        advance(left_bs);
+        advance(right_as);
+        advance(right_bs);
+        if (A[right_as] > A[right_bs]) count_s++;
+        // cout << "count_s: " << count_s << endl;
+        if (count_s == window_N && count_f == window_N) {
+            if (check(left_af, right_bs)) return t;
         }
-        CW[edge] = weight;
-        int max_extra = max(maximum(weight_pairs), maximum(inter_circle_weights));
-        int max_weight_pairs = maximum(weight_pairs);
-        int max_inter_circle_weights = maximum(inter_circle_weights);
-        total_weight = total_weight + weight - cur_weight;
-        int mst_weight = (total_weight - max_extra - circle_weight) % mod;
-        res = (res * mst_weight) % mod;
     }
-    cout << res;
+    return -1;
 }
 
 int32_t main() {
@@ -146,9 +107,7 @@ int32_t main() {
     freopen(out.c_str(), "w", stdout);
     int T = read();
     for (int i = 1; i <= T ; i++) {
-        cout << "Case #" << i << ": ";
-        solve();
-        cout << endl;
+        cout << "Case #" << i << ": " << solve() << endl;
     }
     return 0;
 }
