@@ -1174,12 +1174,14 @@ class Solution:
       return math.ceil(round(math.log(buckets) / math.log(states), 6))
 ```
 
-##
+## 1356. Sort Integers by The Number of 1 Bits
 
-### Solution 1:
+### Solution 1: custom sort
 
 ```py
-
+class Solution:
+    def sortByBits(self, arr: List[int]) -> List[int]:
+        return sorted(arr, key = lambda x: (x.bit_count(), x))
 ```
 
 ##

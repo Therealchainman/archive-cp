@@ -209,6 +209,17 @@ void solve() {
 
 # Sparse Tables
 
+sparse tables are best for range queries with an immutable array or static array.  They even have O(1) query for indempotent functions and the rest O(logn)
+
+## Indempotent Functions
+
+Indempotent functions are really useful for sparse tables because they allow O(1) operations.
+Indempotent function means you can apply the function multiple times and it will not change the result.  For example, min, max, gcd, lcm, etc.  But not sum, product, etc.
+f(x,x) = x is condition for indempotent function
+sum(x,x) = 2x that is why sum function is not indempotent.
+Because you don't care about applying function multiple times you can apply it over an overlapping range in the query, and you can cover any power of two lengthed segment
+by using two power of two lengthed segments.
+
 ## Range Minimum Query 
 
 RMQ + sparse tables + O(nlogn) precompute sparse tables + O(1) query since the ranges can overlap without affecting the in
