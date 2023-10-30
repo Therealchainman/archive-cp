@@ -236,3 +236,76 @@ def query(left, right):
     i = lg[length]
     return min(st[i][left], st[i][right - (1 << i) + 1])
 ```
+
+```cpp
+const int LOG = 31;
+vector<int> nums;
+vector<vector<int>> st;
+
+int query(int L, int R) {
+	int k = log2(R - L + 1);
+	return min(st[k][L], st[k][R - (1LL << k) + 1]);
+}
+
+void solve() {
+	int N = read(), Q = read();
+	nums.assign(N, 0);
+	st.assign(LOG, vector<int>(N, INF));
+	for (int i = 0; i < N; i++) {
+		nums[i] = read();
+		st[0][i] = nums[i];
+	}
+	for (int i = 1; i < LOG; i++) {
+		for (int j = 0; j + (1LL << (i - 1)) < N; j++) {
+			st[i][j] = min(st[i - 1][j], st[i - 1][j + (1LL << (i - 1))]);
+		}
+	}
+	while (Q--) {
+		int L = read(), R = read();
+		printf("%lld\n", query(L, R - 1));
+	}
+}
+```
+
+## Range GCD Queries
+
+This works only for static arrays, because each update requires recomputing the entire sparse table, which is a lot of work for single point update.
+
+These are inclusive so query range [L, R]
+
+Watch out for when gcd(0,0) = 0, what does that mean for the specific problem
+
+Can also precompute logarithms at expense of memory
+
+                                      
+```py
+st_gcd = [[0] * n for _ in range(LOG)]
+st_gcd[0] = [x - y for x, y in zip(a, b)] # replace with whatever value
+for i in range(1, LOG):
+    j = 0
+    while (j + (1 << (i - 1))) < n:
+        st_gcd[i][j] = math.gcd(st_gcd[i - 1][j], st_gcd[i - 1][j + (1 << (i - 1))])
+        j += 1
+def query(left, right):
+    length = right - left + 1
+    k = int(math.log2(length))
+    return math.gcd(st_gcd[k][left], st_gcd[k][right - (1 << k) + 1])
+```
+
+```cpp
+const int LOG = 21;
+int st_gcd[21][LIM + 1];
+
+int query_gcd(int L, int R) {
+    int k = log2(R - L + 1);
+    return gcd(st_gcd[k][L], st_gcd[k][R - (1LL << k) + 1]);
+}
+for (int i = 0; i < N; i++) {
+    st_gcd[0][i] = A[i] - B[i] > 0 ? A[i] - B[i] : 1;
+}
+for (int i = 1; i < LOG; i++) {
+    for (int j = 0; j + (1LL << (i - 1)) < N; j++) {
+        st_gcd[i][j] = gcd(st_gcd[i - 1][j], st_gcd[i - 1][j + (1LL << (i - 1))]);
+    }
+}
+```

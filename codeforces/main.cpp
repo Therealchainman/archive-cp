@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define int long long
+#define endl '\n'
 
 inline int read() {
 	int x = 0, y = 1; char c = getchar();
@@ -13,7 +14,8 @@ inline int read() {
 }
 
 int32_t main() {
-	ios_base::sync_with_stdio(0);
-    cin.tie(NULL);
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
     return 0;
 }
