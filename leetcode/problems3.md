@@ -1184,6 +1184,63 @@ class Solution:
         return sorted(arr, key = lambda x: (x.bit_count(), x))
 ```
 
+## 501. Find Mode in Binary Search Tree
+
+### Solution 1:  binary search tree, inorder traversal, depth first search
+
+```py
+class Solution:
+    def findMode(self, root: Optional[TreeNode]) -> List[int]:
+        max_streak = cur_streak = 0
+        prev = -math.inf
+        ans = []
+        def dfs(node):
+            nonlocal ans, prev, cur_streak, max_streak
+            if not node: return
+            dfs(node.left)
+            if node.val != prev:
+                cur_streak = 0
+            prev = node.val
+            cur_streak += 1
+            if cur_streak > max_streak:
+                ans = [node.val]
+                max_streak = cur_streak
+            elif cur_streak == max_streak:
+                ans.append(node.val)
+            dfs(node.right)
+        dfs(root)
+        return ans
+```
+
+## 1503. Last Moment Before All Ants Fall Out of a Plank
+
+### Solution 1:  greedy, observation
+
+The trick is to realize that when left and right moving ants meet, you just swap them, so the worst time is whichever ant takes longest to reach end of plank.
+
+```py
+class Solution:
+    def getLastMoment(self, n: int, left: List[int], right: List[int]) -> int:
+        right = [n - r for r in right]
+        return max(left + right)
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:

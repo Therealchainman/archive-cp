@@ -3608,6 +3608,18 @@ class Solution:
         return arr
 ```
 
+```py
+class Solution:
+    def findArray(self, pref: List[int]) -> List[int]:
+        n = len(pref)
+        arr = [0] * n
+        for i in range(n):
+            if i > 0:
+                arr[i] = pref[i - 1]
+            arr[i] ^= pref[i]
+        return arr
+```
+
 ## 2434. Using a Robot to Print the Lexicographically Smallest String
 
 ### Solution 1:  suffix min array + stack + greedy

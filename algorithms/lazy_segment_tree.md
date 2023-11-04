@@ -111,3 +111,175 @@ class LazySegmentTree:
     def __repr__(self) -> str:
         return f"counts: {self.counts}, num_flips: {self.num_flips}"
 ```
+
+## Fast Lazy Segment tree for Range Additions Queries
+
+1. range additions
+1. range max queries
+
+This is a lazy segment tree implementation for range additions and any query function.
+
+This is a fast implementation, I need to rewrite it sometime, right now taken from another website. 
+
+It is 0 indexed based and range queries are of the form [L, R) I believe, not 100% sure, need to apply to more problems. 
+It allows and range query just change out segfunc, But it only allows addition range updates.  
+
+So you can update a range by adding value x to range [L, R).
+
+It uses delayed propagation of the range updates, to make it faster.
+
+init_val is actually an array of initial values, and ide_ele I believe is the identity element possibly?  It is like the neutral value or the value by default, so for a query it will start with that ide_ele value, and update it according to th segfunc.
+
+```py
+# https://qiita.com/ether2420/items/7b67b2b35ad5f441d686
+def segfunc(x,y):
+    return max(x, y)
+class LazySegTree_RAQ:
+    def __init__(self,init_val,segfunc,ide_ele):
+        n = len(init_val)
+        self.segfunc = segfunc
+        self.ide_ele = ide_ele
+        self.num = 1<<(n-1).bit_length()
+        self.tree = [ide_ele]*2*self.num
+        self.lazy = [0]*2*self.num
+        for i in range(n):
+            self.tree[self.num+i] = init_val[i]
+        for i in range(self.num-1,0,-1):
+            self.tree[i] = self.segfunc(self.tree[2*i], self.tree[2*i+1])
+    def gindex(self,l,r):
+        l += self.num
+        r += self.num
+        lm = l>>(l&-l).bit_length()
+        rm = r>>(r&-r).bit_length()
+        while r>l:
+            if l<=lm:
+                yield l
+            if r<=rm:
+                yield r
+            r >>= 1
+            l >>= 1
+        while l:
+            yield l
+            l >>= 1
+    def propagates(self,*ids):
+        for i in reversed(ids):
+            v = self.lazy[i]
+            if v==0:
+                continue
+            self.lazy[i] = 0
+            self.lazy[2*i] += v
+            self.lazy[2*i+1] += v
+            self.tree[2*i] += v
+            self.tree[2*i+1] += v
+    def add(self,l,r,x):
+        ids = self.gindex(l,r)
+        l += self.num
+        r += self.num
+        while l<r:
+            if l&1:
+                self.lazy[l] += x
+                self.tree[l] += x
+                l += 1
+            if r&1:
+                self.lazy[r-1] += x
+                self.tree[r-1] += x
+            r >>= 1
+            l >>= 1
+        for i in ids:
+            self.tree[i] = self.segfunc(self.tree[2*i], self.tree[2*i+1]) + self.lazy[i]
+    def query(self,l,r):
+        self.propagates(*self.gindex(l,r))
+        res = self.ide_ele
+        l += self.num
+        r += self.num
+        while l<r:
+            if l&1:
+                res = self.segfunc(res,self.tree[l])
+                l += 1
+            if r&1:
+                res = self.segfunc(res,self.tree[r-1])
+            l >>= 1
+            r >>= 1
+        return res
+
+# initialization
+seg = LazySegTree_RAQ([0] * M, segfunc, 0)
+```
+
+## Fast Lazy Segment tree for Range Assignment Queries
+
+This one is untested, but it is suppose to basically assign a value to a range.
+
+```py
+def segfunc(x,y):
+    return min(x,y)
+class LazySegTree_RUQ:
+    def __init__(self,init_val,segfunc,ide_ele):
+        n = len(init_val)
+        self.segfunc = segfunc
+        self.ide_ele = ide_ele
+        self.num = 1<<(n-1).bit_length()
+        self.tree = [ide_ele]*2*self.num
+        self.lazy = [None]*2*self.num
+        for i in range(n):
+            self.tree[self.num+i] = init_val[i]
+        for i in range(self.num-1,0,-1):
+            self.tree[i] = self.segfunc(self.tree[2*i],self.tree[2*i+1])
+    def gindex(self,l,r):
+        l += self.num
+        r += self.num
+        lm = l>>(l&-l).bit_length()
+        rm = r>>(r&-r).bit_length()
+        while r>l:
+            if l<=lm:
+                yield l
+            if r<=rm:
+                yield r
+            r >>= 1
+            l >>= 1
+        while l:
+            yield l
+            l >>= 1
+    def propagates(self,*ids):
+        for i in reversed(ids):
+            v = self.lazy[i]
+            if v is None:
+                continue
+            self.lazy[i] = None
+            self.lazy[2*i] = v
+            self.lazy[2*i+1] = v
+            self.tree[2*i] = v
+            self.tree[2*i+1] = v
+    def update(self,l,r,x):
+        ids = self.gindex(l,r)
+        self.propagates(*self.gindex(l,r))
+        l += self.num
+        r += self.num
+        while l<r:
+            if l&1:
+                self.lazy[l] = x
+                self.tree[l] = x
+                l += 1
+            if r&1:
+                self.lazy[r-1] = x
+                self.tree[r-1] = x
+            r >>= 1
+            l >>= 1
+        for i in ids:
+            self.tree[i] = self.segfunc(self.tree[2*i], self.tree[2*i+1])
+    def query(self,l,r):
+        ids = self.gindex(l,r)
+        self.propagates(*self.gindex(l,r))
+        res = self.ide_ele
+        l += self.num
+        r += self.num
+        while l<r:
+            if l&1:
+                res = self.segfunc(res,self.tree[l])
+                l += 1
+            if r&1:
+                res = self.segfunc(res,self.tree[r-1])
+            l >>= 1
+            r >>= 1
+        return res
+```
