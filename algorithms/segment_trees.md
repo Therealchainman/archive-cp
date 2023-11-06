@@ -157,6 +157,8 @@ class SegmentTree:
 
 ## Fast Segment tree in C++ Point updates and Range Queries PURQ
 
+point update, range query
+
 Implement the function in here, such as max for func, and update each index value. 
 
 Inclusive queries [left, right].  

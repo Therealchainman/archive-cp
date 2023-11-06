@@ -1225,6 +1225,59 @@ class Solution:
         return max(left + right)
 ```
 
+## 1535. Find the Winner of an Array Game
+
+### Solution 1: counter, iterate
+
+```py
+class Solution:
+    def getWinner(self, arr: List[int], k: int) -> int:
+        n = len(arr)
+        rounds = [0] * n
+        j = 0
+        for i in range(1, n):
+            if arr[i] > arr[j]:
+                j = i
+            rounds[j] += 1
+        for i in range(n):
+            if rounds[i] >= k: return arr[i]
+        return max(arr) 
+```
+
+## 1845. Seat Reservation Manager
+
+### Solution 1: min heap
+
+```py
+class SeatManager:
+
+    def __init__(self, n: int):
+        self.seats = list(range(1, n + 1))
+        heapify(self.seats)
+
+    def reserve(self) -> int:
+        return heappop(self.seats)
+
+    def unreserve(self, seatNumber: int) -> None:
+        heappush(self.seats, seatNumber)
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
