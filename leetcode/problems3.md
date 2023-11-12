@@ -1262,28 +1262,72 @@ class SeatManager:
         heappush(self.seats, seatNumber)
 ```
 
-##
+## 1743. Restore the Array From Adjacent Pairs
 
-### Solution 1:
+### Solution 1:  graph, eulerian path
 
 ```py
-
+class Solution:
+    def restoreArray(self, adjacentPairs: List[List[int]]) -> List[int]:
+        n = len(adjacentPairs) + 1
+        adj = defaultdict(list)
+        for u, v in adjacentPairs:
+            adj[u].append(v)
+            adj[v].append(u)
+        res = []
+        for k, v in adj.items():
+            if len(v) == 1:
+                res.append(k)
+                break
+        prev = None
+        while len(res) < n:
+            for v in adj[res[-1]]:
+                if v != prev:
+                    prev = res[-1]
+                    res.append(v)
+                    break
+        return res
 ```
 
-##
+## 1759. Count Number of Homogenous Substrings
 
-### Solution 1:
+### Solution 1: greedy, math
 
 ```py
-
+class Solution:
+    def countHomogenous(self, s: str) -> int:
+        n = len(s)
+        mod = int(1e9) + 7
+        res = delta = 0
+        cur = None
+        for i in range(n):
+            if s[i] != cur:
+                delta = 0
+                cur = s[i]
+            delta += 1
+            res = (res + delta) % mod
+        return res
 ```
 
-##
+## 573. Squirrel Simulation
 
-### Solution 1:
+### Solution 1:  manhattan distance, choosing which nut to take first, subtraction from total sum of distances
 
 ```py
-
+class Solution:
+    def minDistance(self, height: int, width: int, tree: List[int], squirrel: List[int], nuts: List[List[int]]) -> int:
+        n = len(nuts)
+        dist = [0] * n
+        tx, ty = tree
+        sx, sy = squirrel
+        manhattan_dist = lambda x1, y1, x2, y2: abs(x1 - x2) + abs(y1 - y2)
+        for i, (x, y) in enumerate(nuts):
+            dist[i] = 2 * manhattan_dist(x, y, tx, ty)
+        total = sum(dist)
+        res = math.inf
+        for i, (x, y) in enumerate(nuts):
+            res = min(res, total - dist[i] + manhattan_dist(sx, sy, x, y) + manhattan_dist(x, y, tx, ty))
+        return res
 ```
 
 ##

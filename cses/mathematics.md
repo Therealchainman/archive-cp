@@ -369,22 +369,102 @@ if __name__ == '__main__':
 
 ## Counting Divisors
 
-### Solution 1:
+### Solution 1: math, smallest prime factor, sieve, counting divisors, multiplicity of prime factors
 
 ![images](images/counting_factors.png)
 
-```py
+Use fact that the largest multiplicity is 20 and the largest number of distinct prime factors is 7. So at most there will be 20 iterations for factorization so it's going to be fast enough.
 
+```cpp
+const int N = 1e6 + 5;
+int spf[N];
+
+// nloglog(n)
+void sieve() {
+    for (int i = 2; i < N; i++) {
+        if (spf[i] != i) continue;
+        for (int j = i * i; j < N; j += i) {
+            if (spf[j] != j) continue;
+            spf[j] = i;
+        }
+    }
+}
+
+// log(x) algorithm with spf
+int count_divisors(int x) {
+    int res = 1;
+    int prev = -1;
+    int cnt = 1;
+    while (x > 1) {
+        if (spf[x] != prev) {
+            res *= cnt;
+            cnt = 1;
+        }
+        cnt++;
+        prev = spf[x];
+        x /= spf[x];
+    }
+    res *= cnt;
+    return res;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int n, x;
+    cin >> n;
+    for (int i = 0; i < N; i++) {
+        spf[i] = i;
+    }
+    sieve();
+    for (int i = 0; i < n; i++) {
+        cin >> x;
+        cout << count_divisors(x) << endl;
+    }
+    return 0;
+}
 ```
 
 ## Common Divisors
 
-### Solution 1:
+### Solution 1:  harmonic series, math, sieve, 
 
+The image seems wrong? 
 ![images](images/common_divisors.png)
 
 ```py
+const int N = 1e6 + 5;
+int freq[N];
 
+int solve() {
+    int n, x;
+    cin >> n;
+    memset(freq, 0, sizeof(freq));
+    int max_x = 0;
+    for (int i = 0; i < n; i++) {
+        cin >> x;
+        // increase the frequency and so on
+        freq[x]++;
+        max_x = max(x, max_x);
+    }
+    for (int g = max_x; g > 0; g--) {
+        int div_count = 0;
+        for (int j = g; j <= max_x; j += g) {
+            div_count += freq[j];
+        }
+        if (div_count > 1) return g;
+    }
+    return 1;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    cout << solve() << endl;
+    return 0;
+}
 ```
 
 ## Prime Multiples

@@ -71,6 +71,7 @@ def sieve(n):
     for i in range(2, n + 1):
         if spf[i] != i: continue
         for j in range(i * i, n + 1, i):
+            if spf[j] != j: continue
             spf[j] = i
     return spf
 
@@ -83,6 +84,59 @@ def factorize(x):
     return factors
 ```
 
+Full example of smallest prime factor being used to count divisors in C++. 
+
+```cpp
+const int N = 1e6 + 5;
+int spf[N];
+
+// nloglog(n)
+void sieve() {
+    for (int i = 2; i < N; i++) {
+        if (spf[i] != i) continue;
+        for (int j = i * i; j < N; j += i) {
+            if (spf[j] != j) continue;
+            spf[j] = i;
+        }
+    }
+}
+
+// log(x) algorithm with spf
+int count_divisors(int x) {
+    int res = 1;
+    int prev = -1;
+    int cnt = 1;
+    while (x > 1) {
+        if (spf[x] != prev) {
+            res *= cnt;
+            cnt = 1;
+        }
+        cnt++;
+        prev = spf[x];
+        x /= spf[x];
+    }
+    res *= cnt;
+    return res;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int n, x;
+    cin >> n;
+    for (int i = 0; i < N; i++) {
+        spf[i] = i;
+    }
+    sieve();
+    for (int i = 0; i < n; i++) {
+        cin >> x;
+        cout << count_divisors(x) << endl;
+    }
+    return 0;
+}
+```
+
 You can also count the number of prime integers in the prime factorization of an integer, excluding 1, which is not prime anyways. 
 
 ```py
@@ -92,4 +146,11 @@ def factorize(n):
         cnt += 1
         n //= spf[n]
     return cnt
+```
+
+Similar implementation in C++.
+
+```cpp
+
+
 ```
