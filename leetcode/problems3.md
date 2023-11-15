@@ -1330,6 +1330,57 @@ class Solution:
         return res
 ```
 
+## 346. Moving Average from Data Stream
+
+### Solution 1:  deque, sliding window
+
+```py
+class MovingAverage:
+
+    def __init__(self, size: int):
+        self.window = deque()
+        self.size = size
+        self.window_sum = 0
+
+    def next(self, val: int) -> float:
+        self.window.append(val)
+        self.window_sum += val
+        if len(self.window) > self.size:
+            self.window_sum -= self.window.popleft()
+        return self.window_sum / len(self.window)
+```
+
+## 1846. Maximum Element After Decreasing and Rearranging
+
+### Solution 1:  sort
+
+```py
+class Solution:
+    def maximumElementAfterDecrementingAndRearranging(self, arr: List[int]) -> int:
+        arr.sort()
+        arr[0] = 1
+        n = len(arr)
+        for i in range(1, n):
+            arr[i] = min(arr[i - 1] + 1, arr[i])
+        return arr[-1]
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
