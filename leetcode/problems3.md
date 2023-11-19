@@ -1365,28 +1365,50 @@ class Solution:
         return arr[-1]
 ```
 
-##
+## 1980. Find Unique Binary String
 
-### Solution 1:
+### Solution 1:  bit manipulation, bitmasks
 
 ```py
-
+class Solution:
+    def findDifferentBinaryString(self, nums: List[str]) -> str:
+        n = len(nums)
+        nums = set(map(lambda x: int(x, 2), nums))
+        for i in range(1 << n):
+            if i not in nums:
+                return str(bin(i)[2:]).zfill(n)
+        return ""
 ```
 
-##
+## 1838. Frequency of the Most Frequent Element
 
-### Solution 1:
+### Solution 1:  sliding window, window sum
 
 ```py
-
+class Solution:
+    def maxFrequency(self, nums: List[int], k: int) -> int:
+        n = len(nums)
+        nums.sort()
+        left = wsum = res = 0
+        for right in range(n):
+            wsum += nums[right]
+            while (right - left + 1) * nums[right] - wsum > k:
+                wsum -= nums[left]
+                left += 1
+            res = max(res, right - left + 1)
+        return res
 ```
 
-##
+## 1887. Reduction Operations to Make the Array Elements Equal
 
-### Solution 1:
+### Solution 1:  sort, greedy, sum
 
 ```py
-
+class Solution:
+    def reductionOperations(self, nums: List[int]) -> int:
+        n = len(nums)
+        nums.sort(reverse = True)
+        return sum(i for i in range(1, n) if nums[i] != nums[i - 1])
 ```
 
 ##
