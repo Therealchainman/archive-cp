@@ -177,7 +177,7 @@ struct MergeSortTree {
         for (int i = 0; i < N; i++) {
             values[i] = arr[i];
         }
-        build(1, l, r);
+        build(1, 0, N - 1);
     }
     void build(int u, int left, int right) {
         if (left == right) {
@@ -212,7 +212,7 @@ public:
     MergeSortTree mst;
     RangeFreqQuery(vector<int>& arr) {
         int n = arr.size();
-        mst.init(arr, 0, n - 1);
+        mst.init(arr);
     }
     
     int query(int left, int right, int value) {
