@@ -155,6 +155,47 @@ class SegmentTree:
         return f"nodes array: {self.nodes}, next array: {self.nodes}"
 ```
 
+## Segment tree for mex
+
+It can deal with updates to values in an array and find the mex for each query. 
+
+```py
+class SegmentTree:
+    def __init__(self, n: int, neutral: int, func):
+        self.func = func
+        self.neutral = neutral
+        self.size = 1
+        self.n = n
+        while self.size<n:
+            self.size*=2
+        self.nodes = [neutral for _ in range(self.size*2)]
+    def ascend(self, segment_idx: int) -> None:
+        while segment_idx > 0:
+            segment_idx -= 1
+            segment_idx >>= 1
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            self.nodes[segment_idx] = self.func(self.nodes[left_segment_idx], self.nodes[right_segment_idx]) 
+    def update(self, segment_idx: int, val: int) -> None:
+        segment_idx += self.size - 1
+        self.nodes[segment_idx] += val
+        self.ascend(segment_idx)
+    def query_mex(self) -> int:
+        segment_left_bound, segment_right_bound, segment_idx = 0, self.size, 0
+        while segment_left_bound + 1 < segment_right_bound:
+            mid_point = (segment_left_bound + segment_right_bound) >> 1
+            left_segment_idx, right_segment_idx = 2 * segment_idx + 1, 2 * segment_idx + 2
+            child_segment_len = (segment_right_bound - segment_left_bound) >> 1
+            if self.nodes[left_segment_idx] < child_segment_len:
+                segment_idx = left_segment_idx
+                segment_right_bound = mid_point
+            else:
+                segment_idx = right_segment_idx
+                segment_left_bound = mid_point
+        return segment_left_bound
+    def __repr__(self) -> str:
+        return f"nodes array: {self.nodes}, next array: {self.nodes}"
+```
+
 ## Fast Segment tree in C++ Point updates and Range Queries PURQ
 
 point update, range query

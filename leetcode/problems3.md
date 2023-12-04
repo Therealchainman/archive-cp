@@ -1411,6 +1411,186 @@ class Solution:
         return sum(i for i in range(1, n) if nums[i] != nums[i - 1])
 ```
 
+## 1424. Diagonal Traverse II
+
+### Solution 1:  custom sort
+
+```cpp
+#define row first
+#define col second
+bool comp(pair<int, int>& a, pair<int, int>& b) {
+    int sa = a.row + a.col, sb = b.row + b.col;
+    if (sa != sb) return sa < sb;
+    return a.row > b.row;
+}
+class Solution {
+public:
+    vector<int> findDiagonalOrder(vector<vector<int>>& nums) {
+        vector<pair<int, int>> diag;
+        for (int i = 0; i < nums.size(); i++) {
+            for (int j = 0; j < nums[i].size(); j++) {
+                diag.emplace_back(i, j);
+            }
+        }
+        sort(diag.begin(), diag.end(), comp);
+        vector<int> ans;
+        for (auto &[r, c] : diag) {
+            ans.push_back(nums[r][c]);
+        }
+        return ans;
+    }
+};
+```
+
+## 624. Maximum Distance in Arrays
+
+### Solution 1:  prefix min and max
+
+```py
+class Solution {
+public:
+    int maxDistance(vector<vector<int>>& arrays) {
+        int pmin = INT_MAX, pmax = -INT_MAX, res = 0;
+        for (int i = 0; i < arrays.size(); i++) {
+            if (i > 0) {
+                for (int j = 0; j < arrays[i].size(); j++) {
+                    res = max(res, abs(arrays[i][j] - pmin));
+                    res = max(res, abs(arrays[i][j] - pmax));
+                }
+            }
+            for (int j = 0; j < arrays[i].size(); j++) {
+                pmin = min(pmin, arrays[i][j]);
+                pmax = max(pmax, arrays[i][j]);
+            }
+        }
+        return res;
+    }
+};
+```
+
+## 1561. Maximum Number of Coins You Can Get
+
+### Solution 1:  greedy, take the second best each time, let bob take the smallest, and you can get the second to best
+
+```py
+class Solution:
+    def maxCoins(self, P):
+        P.sort()
+        dq=deque(P)
+        ans=0
+        while dq:
+            bob=dq.popleft()
+            alice=dq.pop()
+            me=dq.pop()
+            ans+=me
+        return ans
+```
+
+## 1685. Sum of Absolute Differences in a Sorted Array
+
+### Solution 1: math, prefix sum, suffix sum
+
+```cpp
+class Solution {
+public:
+    vector<int> getSumAbsoluteDifferences(vector<int>& nums) {
+        int n = nums.size();
+        vector<int> ans(n, 0);
+        int ssum = accumulate(nums.begin(), nums.end(), 0), psum = 0;
+        int lsum, rsum;
+        for (int i = 0; i < n; i++) {
+            lsum = i * nums[i] - psum, rsum = ssum - (n - i) * nums[i];
+            ans[i] = lsum + rsum;
+            ssum -= nums[i]; psum += nums[i];
+        }
+        return ans;
+    }
+};
+```
+
+## 1727. Largest Submatrix With Rearrangements
+
+### Solution 1:  greedy, sort
+
+Suppose a pillar of 1s and the height of the pillar is just the number of consecutive ones above.  Now you can suppose that for each row it is a platform of which pillars can be built upon at each column.  Now you can easily update the height of the pillar given the current platform by just taking previous height at the platform above it.  then you can sort the pillar heights and use that to form the width and height given that you are able to rearrange these pillars or columns. 
+
+```py
+class Solution:
+    def largestSubmatrix(self, matrix: List[List[int]]) -> int:
+        R, C = len(matrix), len(matrix[0])
+        for r, c in product(range(1, R), range(C)):
+            if matrix[r][c] == 0: continue
+            matrix[r][c] += matrix[r - 1][c]
+        res = 0
+        for row in matrix:
+            for c, height in enumerate(sorted(row)):
+                width = C - c
+                res = max(res, height * width)
+        return res
+```
+
+## 935. Knight Dialer
+
+### Solution 1:  dynamic programming, hash table
+
+Precompute all the possible moves for each number, then use dynamic programming to compute the number of ways to reach each number.  Then sum up all the ways to reach each number.
+It will keep increasing as there are more and more digits.  But however many ways you can reach 4, and now you can reach 0 from 4, so add all those ways to it.  Such as dp[9] = dp[2] + dp[4]
+
+```py
+class Solution:
+    def knightDialer(self, n: int) -> int:
+        moves = {0: [4, 6], 7: [2, 6], 8: [1, 3], 9: [2, 4], 4: [0, 3, 9], 5: [], 6: [0, 1, 7], 1: [6, 8], 2: [7, 9], 3: [4, 8]}
+        mod = int(1e9) + 7
+        dp = [1] * 10
+        for i in range(1, n):
+            ndp = [0] * 10
+            for v in range(10):
+                for pv in moves[v]:
+                    ndp[v] = (ndp[v] + dp[pv]) % mod
+            dp = ndp
+        return sum(dp) % mod
+```
+
+## 1160. Find Words That Can Be Formed by Characters
+
+### Solution 1:  strings, counter
+
+```cpp
+class Solution {
+public:
+    vector<int> freq;
+    bool check(string word) {
+        vector<int> wfreq(26, 0);
+        for (auto ch : word) {
+            wfreq[ch - 'a']++;
+            if (wfreq[ch - 'a'] > freq[ch - 'a']) return false;
+        }
+        return true;
+    }
+    int countCharacters(vector<string>& words, string chars) {
+        freq.assign(26, 0);
+        for (auto ch : chars) {
+            freq[ch - 'a']++;
+        }
+        int res = 0;
+        for (string word : words) {
+            if (check(word)) res += word.size();
+        }
+        return res;
+    }
+};
+```
+
+## 1266. Minimum Time Visiting All Points
+
+### Solution 1:  sum + max delta between x and y
+
+```py
+class Solution:
+    def minTimeToVisitAllPoints(self, points: List[List[int]]) -> int:
+        return sum(max(abs(points[i][0] - points[i - 1][0]), abs(points[i][1] - points[i - 1][1])) for i in range(1, len(points)))
+```
+
 ##
 
 ### Solution 1:

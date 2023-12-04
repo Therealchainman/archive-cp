@@ -89,3 +89,17 @@ class FenwickTree:
         return f"array: {self.sums}"
 ```
 
+How it works for queries and updates,  you cannot do update(0, x), because it causes it to run infinite loop, but you can query from 0, but it is not necessary since verything needs to be treated as 1-indexed
+
+```py
+fenwick = FenwickTree(MAXN)
+fenwick.update(1, 1)
+fenwick.update(2, 1)
+print(fenwick)
+assert fenwick.query_range(0, 0) == 0, "Wrong"
+assert fenwick.query_range(0, 1) == 1, "Wrong"
+assert fenwick.query_range(0, 2) == 2, "Wrong"
+assert fenwick.query_range(1, 2) == 2, "Wrong"
+assert fenwick.query_range(2, 2) == 1, "Wrong"
+```
+
