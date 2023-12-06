@@ -1591,6 +1591,73 @@ class Solution:
         return sum(max(abs(points[i][0] - points[i - 1][0]), abs(points[i][1] - points[i - 1][1])) for i in range(1, len(points)))
 ```
 
+## 1688. Count of Matches in Tournament
+
+### Solution 1:  division
+
+```cpp
+class Solution {
+public:
+    int numberOfMatches(int n) {
+        int res = 0;
+        while (n > 1) {
+            res += n >> 1;
+            if (n & 1) n++;
+            n >>= 1;
+        }
+        return res;
+    }
+};
+```
+
+## 1716. Calculate Money in Leetcode Bank
+
+### Solution 1:  loop through, arithmetic progression, sum of a natural number sequence
+
+```py
+class Solution:
+    def totalMoney(self, n: int) -> int:
+        f = lambda x: x * (x + 1) // 2
+        res = 0
+        for i in range(0, n, 7):
+            cnt = i // 7
+            len_ = min(7, n - i)
+            res += f(len_ + cnt) - f(cnt)
+        return res
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
