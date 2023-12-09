@@ -52,8 +52,8 @@ def create(contest, name, number, division = None):
     sys.stdout.close()
 
 if __name__ == '__main__':
-    contest, name, number, div = "atcoder", "beginner", 330, None
-    # contest, name, number, div = "leetcode", "biweekly", 115, None
+    # contest, name, number, div = "atcoder", "beginner", 330, None
+    contest, name, number, div = "leetcode", "biweekly", 119, None
     # contest, name, number, div = "leetcode", "weekly", 369, None
     # contest, name, number, div = "codeforces", "round", 900, 3
     # contest, name, number, div = "codeforces", "educational", 155, 2
