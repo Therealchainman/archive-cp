@@ -1626,12 +1626,21 @@ class Solution:
         return res
 ```
 
-##
+## 1287. Element Appearing More Than 25% In Sorted Array
 
-### Solution 1:
+### Solution 1:  sliding window, math
+length of window > n / 4 => multiply both sides by 4 and solve that insted
 
 ```py
-
+class Solution:
+    def findSpecialInteger(self, arr: List[int]) -> int:
+        n = len(arr)
+        left = 0
+        for right in range(n):
+            if arr[left] != arr[right]:
+                left = right
+            if 4 * (right - left + 1) > n: return arr[right]
+        return 0
 ```
 
 ##
