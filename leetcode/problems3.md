@@ -1660,12 +1660,21 @@ class Solution:
         return (m1 - 1) * (m2 - 1)
 ```
 
-##
+## 1582. Special Positions in a Binary Matrix
 
-### Solution 1:
+### Solution 1:  counter for each row and column, sum for when it is just 1
 
 ```py
-
+class Solution:
+    def numSpecial(self, mat: List[List[int]]) -> int:
+        R, C = len(mat), len(mat[0])
+        rows = [0] * R
+        cols = [0] * C
+        for r, c in product(range(R), range(C)):
+            if mat[r][c]:
+                rows[r] += 1
+                cols[c] += 1
+        return sum(1 for r, c in product(range(R), range(C)) if mat[r][c] == rows[r] == cols[c] == 1)
 ```
 
 ##

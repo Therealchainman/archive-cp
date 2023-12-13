@@ -8,14 +8,13 @@ problem_counts = {"atcoder": 7, "codeforces": 6, "leetcode": 4}
 
 def create(contest, name, number, division = None):
     if contest == "atcoder":
-        path = f"{contest}/{name}{number}.md"
-        sys.stdout = open(path, 'w')
         if name == "beginner":
             path = f"{contest}/abc/{name}{number}.md"
             print(f"# Atcoder Beginner Contest {number}")
         elif name == "regular":
             path = f"{contest}/arc/{name}{number}.md"
             print(f"# Atcoder Regular Contest {number}")
+        sys.stdout = open(path, 'w')
         print()
         for _ in range(problem_counts[contest]):
             print("## ")
@@ -57,10 +56,10 @@ def create(contest, name, number, division = None):
     sys.stdout.close()
 
 if __name__ == '__main__':
-    # contest, name, number, div = "atcoder", "beginner", 330, None
+    contest, name, number, div = "atcoder", "beginner", 332, None
     # contest, name, number, div = "atcoder", "regular", 169, None
     # contest, name, number, div = "leetcode", "biweekly", 119, None
-    contest, name, number, div = "leetcode", "weekly", 375, None
+    # contest, name, number, div = "leetcode", "weekly", 375, None
     # contest, name, number, div = "codeforces", "round", 900, 3
     # contest, name, number, div = "codeforces", "educational", 155, 2
     create(contest, name, number, division = div)

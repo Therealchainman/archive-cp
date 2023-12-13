@@ -55,19 +55,13 @@ class Solution:
 
 ## Count the Number of Good Partitions
 
-### Solution 1:  track the last time each element appears, dynamic programming, create blocks
+### Solution 1:  track the last time each element appears, create blocks, and count the number of ways to choose the blocks, 2^(num_blocks - 1)
 
 ```py
 class Solution:
     def numberOfGoodPartitions(self, nums: List[int]) -> int:
         n = len(nums)
-        psum = 0
         mod = int(1e9) + 7
-        dp = [0] * (n + 1)
-        dp[0] = 1
-        for i in range(1, n + 1):
-            dp[i] = (psum + 1) % mod
-            psum = (psum + dp[i]) % mod
         last = {}
         for i, num in enumerate(nums):
             last[num] = i
@@ -75,6 +69,6 @@ class Solution:
         for i, num in enumerate(nums):
             right = max(right, last[num])
             if i == right: num_blocks += 1
-        return dp[num_blocks]
+        return pow(2, num_blocks - 1, mod)        
 ```
 
