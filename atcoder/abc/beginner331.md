@@ -31,12 +31,32 @@ if __name__ == '__main__':
     main()
 ```
 
-## 
+## E - Set Meal 
 
-### Solution 1: 
+### Solution 1:  hash map, sort, offline query
 
 ```py
-
+def main():
+    N, M, L = map(int, input().split())
+    A = list(map(int, input().split()))
+    B = list(map(int, input().split()))
+    sides = sorted(range(M), key = lambda i: B[i], reverse = True)
+    bad_combos = [set() for _ in range(N)]
+    for _ in range(L):
+        c, d = map(int, input().split())
+        c -= 1
+        d -= 1
+        bad_combos[c].add(d)
+    ans = 0
+    for i in range(N):
+        for j in sides:
+            if j not in bad_combos[i]:
+                ans = max(ans, A[i] + B[j])
+                break
+    print(ans)
+    
+if __name__ == '__main__':
+    main()
 ```
 
 ## 
