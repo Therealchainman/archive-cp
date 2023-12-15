@@ -1677,6 +1677,47 @@ class Solution:
         return sum(1 for r, c in product(range(R), range(C)) if mat[r][c] == rows[r] == cols[c] == 1)
 ```
 
+## 1436. Destination City
+
+### Solution 1:  outdegrees, functional graph, directed graph
+
+```py
+class Solution:
+    def destCity(self, paths: List[List[str]]) -> str:
+        neighbor = {}
+        for u, v in paths:
+            neighbor[u] = v
+        for u, v in paths:
+            if u not in neighbor: return u
+            if v not in neighbor: return v
+        return ""
+```
+
+```cpp
+class Solution {
+public:
+    string destCity(vector<vector<string>>& paths) {
+        unordered_map<string, string> neighbor;
+        for (auto v : paths) {
+            neighbor[v[0]] = v[1];
+        }
+        for (auto v : paths) {
+            if (neighbor.find(v[0]) == neighbor.end()) return v[0];
+            if (neighbor.find(v[1]) == neighbor.end()) return v[1];
+        }
+        return "";
+    }
+};
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:

@@ -1,67 +1,36 @@
-# Atcoder Beginner Contest 331
+# Rolling Hash
 
-## D. Tile Pattern
 
-### Solution 1:  2D prefix sum + periodicity
+## Rolling hash to find pattern in string
 
-```py
-from itertools import product
+This works for when you have only lowercase english letters, 
+This is an implementation of a rolling hash to find pattern in 
+string
 
-def main():
-    N, Q = map(int, input().split())
-    grid = [list(input()) for _ in range(N)]
-    psum = [[0] * (N + 1) for _ in range(N + 1)]
-    for r, c in product(range(1, N + 1), repeat = 2):
-        psum[r][c] = psum[r - 1][c] + psum[r][c - 1] - psum[r - 1][c - 1] + (grid[r - 1][c - 1] == "B")
-    def g(r, c):
-        r_span, c_span = r // N, c // N
-        return (
-            psum[N][N] * r_span * c_span
-            + psum[N][c % N] * r_span
-            + psum[r % N][N] * c_span
-            + psum[r % N][c % N]
-        )
-    def f(r1, c1, r2, c2):
-        return g(r2, c2) - g(r1, c2) - g(r2, c1) + g(r1, c1)
-    for _ in range(Q):
-        r1, c1, r2, c2 = map(int, input().split())
-        print(f(r1, c1, r2 + 1, c2 + 1))
-
-if __name__ == '__main__':
-    main()
-```
-
-## E - Set Meal 
-
-### Solution 1:  hash map, sort, offline query
+This can lead to collision sometimes, so it is not 100% guaranteed to work
 
 ```py
-def main():
-    N, M, L = map(int, input().split())
-    A = list(map(int, input().split()))
-    B = list(map(int, input().split()))
-    sides = sorted(range(M), key = lambda i: B[i], reverse = True)
-    bad_combos = [set() for _ in range(N)]
-    for _ in range(L):
-        c, d = map(int, input().split())
-        c -= 1
-        d -= 1
-        bad_combos[c].add(d)
-    ans = 0
-    for i in range(N):
-        for j in sides:
-            if j not in bad_combos[i]:
-                ans = max(ans, A[i] + B[j])
-                break
-    print(ans)
-    
-if __name__ == '__main__':
-    main()
+def find_pattern_rolling_hash(string: str, pattern: str) -> int:
+    p, MOD = 31, int(1e9)+7
+    coefficient = lambda x: ord(x) - ord('a') + 1
+    pat_hash = 0
+    for ch in pattern:
+        pat_hash = ((pat_hash*p)%MOD + coefficient(ch))%MOD
+    POW = 1
+    for _ in range(len(pattern)-1):
+        POW = (POW*p)%MOD
+    cur_hash = 0
+    for i, ch in enumerate(string):
+        cur_hash = ((cur_hash*p)%MOD + coefficient(ch))%MOD
+        if i>=len(pattern)-1:
+            if cur_hash == pat_hash: return i-len(pattern)+1
+            cur_hash = (cur_hash - (POW*coefficient(string[i-len(pattern)+1]))%MOD + MOD)%MOD
+    return -1
 ```
 
-## F - Palindrome Query 
+## Rolling Hash on Segment Tree
 
-### Solution 1:  rolling hash on segment tree
+using segment tree with queries of [l, r)
 
 ```py
 class SegmentTree:
@@ -150,19 +119,8 @@ def main():
             h_rev = seg_rev.query(l_rev, r_rev + 1)
             if h == h_rev: print("Yes")
             else: print("No")
-
-if __name__ == '__main__':
-    main()
 ```
 
 ```cpp
-
-```
-
-## 
-
-### Solution 1: 
-
-```py
 
 ```

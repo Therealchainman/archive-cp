@@ -10,7 +10,7 @@ Just note for range queries it is querying the range [L, R), so that means it do
 
 ```py
 class SegmentTree:
-    def __init__(self, n: int, neutral: int, func, initial_arr):
+    def __init__(self, n, neutral, func, initial_arr):
         self.func = func
         self.neutral = neutral
         self.size = 1
@@ -20,26 +20,26 @@ class SegmentTree:
         self.nodes = [neutral for _ in range(self.size*2)] 
         self.build(initial_arr)
 
-    def build(self, initial_arr: List[int]) -> None:
+    def build(self, initial_arr):
         for i, segment_idx in enumerate(range(self.n)):
             segment_idx += self.size - 1
             val = initial_arr[i]
             self.nodes[segment_idx] = val
             self.ascend(segment_idx)
 
-    def ascend(self, segment_idx: int) -> None:
+    def ascend(self, segment_idx):
         while segment_idx > 0:
             segment_idx -= 1
             segment_idx >>= 1
             left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
             self.nodes[segment_idx] = self.func(self.nodes[left_segment_idx], self.nodes[right_segment_idx])
         
-    def update(self, segment_idx: int, val: int) -> None:
+    def update(self, segment_idx, val):
         segment_idx += self.size - 1
         self.nodes[segment_idx] = val
         self.ascend(segment_idx)
             
-    def query(self, left: int, right: int) -> int:
+    def query(self, left, right):
         stack = [(0, self.size, 0)]
         result = self.neutral
         while stack:
@@ -57,7 +57,7 @@ class SegmentTree:
             stack.extend([(mid_point, segment_right_bound, right_segment_idx), (segment_left_bound, mid_point, left_segment_idx)])
         return result
     
-    def __repr__(self) -> str:
+    def __repr__(self):
         return f"nodes array: {self.nodes}, next array: {self.nodes}"
 ```
 
