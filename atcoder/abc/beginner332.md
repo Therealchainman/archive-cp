@@ -41,10 +41,34 @@ if __name__ == '__main__':
 
 ## E - Lucky bag 
 
-### Solution 1: 
+### Solution 1:  dynamic programming with bitmasks, enumerating submasks
 
 ```py
+import math
 
+def main():
+    N, D = map(int, input().split())
+    arr = list(map(int, input().split()))
+    avg = sum(arr) / D
+    dp = [[math.inf] * (1 << N) for _ in range(D + 1)]
+    def bag(mask):
+        weight = sum(arr[i] for i in range(N) if (mask >> i) & 1)
+        return (weight - avg) ** 2
+    # base case is for every possible set of items in one bag dp[1][mask]
+    for mask in range(1 << N): 
+        dp[1][mask] = bag(mask)
+    for i in range(2, D + 1): # i bags
+        for mask in range(1, 1 << N): # set of items taken in i bags
+            submask = mask
+            dp[i][mask] = dp[i - 1][mask] + dp[1][0] # take no items into new bag
+            while submask > 0:
+                submask = (submask - 1) & mask
+                dp[i][mask] = min(dp[i][mask], dp[i - 1][submask] + dp[1][mask ^ submask])
+    ans = dp[-1][-1] / D
+    print(ans)
+
+if __name__ == '__main__':
+    main()
 ```
 
 ## F - Random Update Query 
@@ -210,35 +234,40 @@ if __name__ == '__main__':
     main()
 ```
 
-## 
+## G - Not Too Many Balls 
 
-### Solution 1: 
-
-```py
-
-```
-
-## 
-
-### Solution 1: 
+### Solution 1:  max flow min cut theorem and dynamic programming
 
 ```py
+from collections import defaultdict
 
+def main():
+    N, M = map(int, input().split())
+    A = list(map(int, input().split()))
+    B = list(map(int, input().split()))
+    max_k = N * (N + 1) // 2
+    INF = 1 << 60
+    dp = [INF] * (max_k + 1)
+    dp[0] = 0
+    for i, a in enumerate(A, start = 1):
+        available_k = i * (i - 1) // 2
+        for k in range(available_k, -1, -1):
+            dp[k + i] = min(dp[k + i], dp[k] + a)
+    over_bs = defaultdict(list)
+    for j, b in enumerate(B, start = 1):
+        max_k2 = b // j
+        over_bs[max_k2].append(j)
+    j_sum = M * (M + 1) // 2
+    b_sum = 0
+    ans = INF
+    for k2 in range(max_k + 1):
+        ans = min(ans, dp[max_k - k2] + k2 * j_sum + b_sum)
+        if k2 in over_bs:
+            for j in over_bs[k2]:
+                j_sum -= j
+                b_sum += B[j - 1]
+    print(ans)
+
+if __name__ == '__main__':
+    main()
 ```
-
-## 
-
-### Solution 1: 
-
-```py
-
-```
-
-## 
-
-### Solution 1: 
-
-```py
-
-```
-
