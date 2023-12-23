@@ -1710,6 +1710,83 @@ public:
 };
 ```
 
+## 661. Image Smoother
+
+### Solution 1:  2d prefix sum
+
+```py
+class Solution:
+    def imageSmoother(self, img: List[List[int]]) -> List[List[int]]:
+        R, C = len(img), len(img[0])
+        ps = [[0] * (C + 1) for _ in range(R + 1)]
+        for r, c in product(range(1,R+1),range(1,C+1)):
+            ps[r][c] = ps[r-1][c] + ps[r][c-1] + img[r-1][c-1] - ps[r-1][c-1]
+        for r, c in product(range(R), range(C)):
+            max_row = min(R, r + 2)
+            min_row = max(0, r - 1)
+            max_col = min(C, c + 2)
+            min_col = max(0, c - 1)
+            psum = ps[max_row][max_col] - ps[max_row][min_col] - ps[min_row][max_col] + ps[min_row][min_col]
+            dr = max_row - min_row
+            dc = max_col - min_col
+            img[r][c] = psum // (dr * dc)
+        return img
+```
+
+## 1637. Widest Vertical Area Between Two Points Containing No Points
+
+### Solution 1:  sort, max difference between nearest x coordinates
+
+```py
+class Solution:
+    def maxWidthOfVerticalArea(self, points: List[List[int]]) -> int:
+        n = len(points)
+        points.sort()
+        return max(points[i][0] - points[i - 1][0] for i in range(1, n))
+```
+
+## 1422. Maximum Score After Splitting a String
+
+### Solution 1:  prefix and suffix sum
+
+```py
+class Solution:
+    def maxScore(self, s: str) -> int:
+        psum, ssum = 0, s.count("1")
+        res = 0
+        n = len(s)
+        for ch in s[:-1]:
+            psum += ch == "0"
+            ssum -= ch == "1"
+            res = max(res, psum + ssum)
+        return res
+```
+
+## 1496. Path Crossing
+
+### Solution 1:  set and dictionary for movements
+
+```py
+class Solution:
+    def isPathCrossing(self, path: str) -> bool:
+        vis = set()
+        directions = {
+            "N": (0, 1),
+            "S": (0, -1),
+            "E": (1, 0),
+            "W": (-1, 0)
+        }
+        r = c = 0
+        vis.add((r, c))
+        for d in path:
+            dr, dc = directions[d]
+            r += dr
+            c += dc
+            if (r, c) in vis: return True
+            vis.add((r, c))
+        return False
+```
+
 ##
 
 ### Solution 1:
