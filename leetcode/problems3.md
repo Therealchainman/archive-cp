@@ -1787,6 +1787,58 @@ class Solution:
         return False
 ```
 
+## 1758. Minimum Changes To Make Alternating Binary String
+
+### Solution 1:  summation with parity
+
+```py
+class Solution:
+    def minOperations(self, s: str) -> int:
+        n = len(s)
+        place = lambda x: sum(1 for i in range(n) if (i % 2 == x and s[i] != "1") or (i % 2 != x and s[i] != "0"))
+        return min(place(0), place(1))
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
