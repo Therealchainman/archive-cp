@@ -3220,6 +3220,21 @@ class Solution:
         return result
 ```
 
+```py
+class Solution:
+    def minCost(self, colors: str, neededTime: List[int]) -> int:
+        ans, n = 0, len(colors)
+        for key, grp in groupby(range(n), key = lambda i: colors[i]):
+            grp = list(grp)
+            if len(grp) == 1: continue
+            total = largest = 0
+            for i in grp:
+                total += neededTime[i]
+                largest = max(largest, neededTime[i])
+            ans += total - largest
+        return ans
+```
+
 ## 112. Path Sum
 
 ### Solution 1:  dfs + stack implementation + iterative implementation + modify tree to keep accumulated sum along each path from root
@@ -3317,18 +3332,19 @@ class Solution:
 
 ```py
 class Solution:
-    def getLengthOfOptimalCompression(self, s: str, k: int) -> int:  
+    def getLengthOfOptimalCompression(self, s: str, k: int) -> int:
+        n = len(s)
         @cache
-        def dfs(index: int, last_char: str, last_char_cnt: int, delete: int) -> int:
-            if delete < 0: return inf
-            if index == len(s): return 0
-            delete_char = dfs(index+1,last_char,last_char_cnt,delete-1)
+        def dfs(index, last_char, last_char_cnt, deleted):
+            if deleted > k: return math.inf
+            if index == n: return 0
             if s[index] != last_char:
-                keep_char = dfs(index+1,s[index],1,delete)+1
+                take = dfs(index + 1, s[index], 1, deleted) + 1
             else:
-                keep_char = dfs(index+1,last_char,last_char_cnt+1,delete) + (1 if last_char_cnt in [1,9,99] else 0)
-            return min(keep_char, delete_char)
-        return dfs(0,'0',0,k)
+                take = dfs(index + 1, s[index], last_char_cnt + 1, deleted) + (1 if last_char_cnt in (1, 9, 99) else 0)
+            skip = dfs(index + 1, last_char, last_char_cnt, deleted + 1)
+            return min(take, skip)
+        return dfs(0, "#", 0, 0)
 ```
 
 ## 2440. Create Components With Same Value
