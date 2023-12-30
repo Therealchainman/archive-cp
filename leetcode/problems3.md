@@ -1799,12 +1799,18 @@ class Solution:
         return min(place(0), place(1))
 ```
 
-##
+## 1897. Redistribute Characters to Make All Strings Equal
 
-### Solution 1:
+### Solution 1:  counter
 
 ```py
-
+class Solution:
+    def makeEqual(self, words: List[str]) -> bool:
+        n = len(words)
+        freq = Counter()
+        for word in words:
+            freq.update(word)
+        return all(v % n == 0 for v in freq.values())
 ```
 
 ##
