@@ -1813,12 +1813,33 @@ class Solution:
         return all(v % n == 0 for v in freq.values())
 ```
 
-##
+## 1624. Largest Substring Between Two Equal Characters
 
-### Solution 1:
+### Solution 1:  dictionary
 
 ```py
+class Solution:
+    def maxLengthBetweenEqualCharacters(self, s: str) -> int:
+        first = defaultdict(lambda: math.inf)
+        ans = -1
+        for i, ch in enumerate(s):
+            ans = max(ans, i - first[ch] - 1)
+            first[ch] = min(first[ch], i)
+        return ans
+```
 
+### Solution 2:  regex, greedy search, start and end of span
+
+```py
+import re
+class Solution:
+    def maxLengthBetweenEqualCharacters(self, s: str) -> int:
+        ans = -1
+        for ch in set(s):
+            x = re.search(ch, s).start()
+            y = re.search(".*" + ch, s).end() - 1
+            ans = max(ans, y - x - 1)
+        return ans
 ```
 
 ##
