@@ -1842,12 +1842,26 @@ class Solution:
         return ans
 ```
 
-##
+## 455. Assign Cookies
 
-### Solution 1:
+### Solution 1:  greedy, sort
+
+The idea is to assign cookies to the less greedy children first.  And also assign the smallest possible cookie to the children first.  This will maximize the number of children getting cookies.  Cause for the greedier children, you could have some larger cookies remaining.  By looping through the cookies in sorted order, you can assign the smallest possible cookie to the less greedy children first.  
+
+1. sort the greedy factors
+2. Loop through the sorted cookies 
+3. if the cookie matches or exceeds the greedy factor threshold, then increment the pointer, cause that cookie will be assigned to that child. 
+4. Now you are going to keep looping until you get to a cookie that exceeds the greed factor of this child.
 
 ```py
-
+class Solution:
+    def findContentChildren(self, g: List[int], s: List[int]) -> int:
+        ptr = 0
+        n = len(g)
+        g.sort()
+        for cookie in sorted(s):
+            if ptr < n and cookie >= g[ptr]: ptr += 1
+        return ptr
 ```
 
 ##
