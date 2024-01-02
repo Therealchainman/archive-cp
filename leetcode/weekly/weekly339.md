@@ -25,13 +25,15 @@ class Solution:
 ```py
 class Solution:
     def findMatrix(self, nums: List[int]) -> List[List[int]]:
-        mx = max(Counter(nums).values())
-        res = [[] for _ in range(mx)]
-        i = 0
-        for num in sorted(nums):
-            res[i].append(num)
-            i = (i + 1)%mx
-        return res                
+        n = len(nums)
+        last = [0] * (n + 1)
+        ans = []
+        for num in nums:
+            if len(ans) == last[num]:
+                ans.append([])
+            ans[last[num]].append(num)
+            last[num] += 1
+        return ans              
 ```
 
 ## 2611. Mice and Cheese
