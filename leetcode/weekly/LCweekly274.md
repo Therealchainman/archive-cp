@@ -20,15 +20,11 @@ def checkString(self, s: str) -> bool:
 ### Solution: count 1s in each row
 
 ```py
-def numberOfBeams(self, bank: List[str]) -> int:
-    counts = [x.count('1') for x in bank]
-    prev = 0
-    numBeams = 0
-    for cnt in counts:
-        if cnt>0:
-            numBeams += (cnt*prev)
-            prev = cnt
-    return numBeams
+class Solution:
+    def numberOfBeams(self, bank: List[str]) -> int:
+        counts = map(lambda row: row.count("1"), bank)
+        counts = list(filter(lambda row: row > 0, counts))
+        return sum(counts[i] * counts[i - 1] for i in range(1, len(counts)))
 ```
 
 ## 2126. Destroying Asteroids
