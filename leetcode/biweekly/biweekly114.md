@@ -21,18 +21,17 @@ class Solution:
 
 ### Solution 1:  counter + remainder on division by 3
 
+if remainder = 2, then when you subtract 2 you get remainder = 0 next so for instance it is ceiling of v / 3 
+if remainder = 1, then you get 1 -> 2 -> 0
+
+so it will take 1 or 2 operations before the integer will be divisible by 3.  And then you will just take 3 at a time.
+
 ```py
 class Solution:
     def minOperations(self, nums: List[int]) -> int:
         counts = Counter(nums)
-        res = 0
-        for _, v in counts.items():
-            if v == 1: return -1
-            while v % 3:
-                res += 1
-                v -= 2
-            res += v // 3
-        return res
+        if any(v == 1 for v in counts.values()): return -1
+        return sum(math.ceil(v / 3) for v in counts.values())
 ```
 
 ## 2871. Split Array Into Maximum Number of Subarrays
