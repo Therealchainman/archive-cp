@@ -1,0 +1,115 @@
+
+
+
+
+Note to self, the only reason this passed was because I initialized the arrays only once and not per each test,  and it is just under the time constraints.  To be safe you should implement in C++. 
+
+```py
+from heapq import heappop, heappush
+
+MAXN = 2 * 10 ** 5 + 5
+arr, prv, nxt, used = [0] * MAXN, [0] * MAXN, [0] * MAXN, [0] * MAXN
+
+def main():
+    N = int(input())
+    def ready(i):
+        if i < 1 or i > N: return False
+        return arr[prv[i]] + 1 == arr[i] or arr[nxt[i]] + 1 == arr[i]
+    lst = map(int, input().split())
+    for i in range(1, N + 1):
+        arr[i] = next(lst)
+        prv[i] = i - 1
+        nxt[i] = i + 1
+        used[i] = 0
+    arr[0] = arr[N + 1] = -2
+    max_heap = []
+    for i in range(1, N + 1):
+        if ready(i):
+            used[i] = 1
+            heappush(max_heap, (-arr[i], i))
+    while max_heap:
+        v, i = heappop(max_heap)
+        v = -v
+        prv[nxt[i]] = prv[i]
+        nxt[prv[i]] = nxt[i]
+        if not used[prv[i]] and ready(prv[i]):
+            used[prv[i]] = 1
+            heappush(max_heap, (-arr[prv[i]], prv[i]))
+        if not used[nxt[i]] and ready(nxt[i]):
+            used[nxt[i]] = 1
+            heappush(max_heap, (-arr[nxt[i]], nxt[i]))
+    unused, val = 0, N
+    for i in range(1, N + 1):
+        if not used[i]:
+            unused += 1
+            val = arr[i]
+    return unused == 1 and val == 0
+
+if __name__ == '__main__':
+    T = int(input())
+    for _ in range(T):
+        print("YES" if main() else "NO")
+```
+
+```cpp
+const int MAXN = 200'005;
+int arr[MAXN], prv[MAXN], nxt[MAXN], used[MAXN];
+int N;
+
+bool ready(int i) {
+    if (i < 1 || i > N) return false;
+    return arr[prv[i]] + 1 == arr[i] || arr[nxt[i]] + 1== arr[i];
+}
+
+void solve() {
+    cin >> N;
+    for (int i = 1; i <= N; i++) {
+        cin >> arr[i];
+        prv[i] = i - 1;
+        nxt[i] = i + 1;
+        used[i] = 0;
+    }
+    arr[0] = arr[N + 1] = -2;
+    priority_queue<pair<int, int>> pq;
+    for (int i = 1; i <= N; i++) {
+        if (ready(i)) {
+            used[i] = 1;
+            pq.emplace(arr[i], i);
+        }
+    }
+    int val, idx;
+    while (!pq.empty()) {
+        tie(val, idx) = pq.top();
+        pq.pop();
+        prv[nxt[idx]] = prv[idx];
+        nxt[prv[idx]] = nxt[idx];
+        if (!used[prv[idx]] && ready(prv[idx])) {
+            pq.emplace(arr[prv[idx]], prv[idx]);
+            used[prv[idx]] = 1;
+        }
+        if (!used[nxt[idx]] && ready(nxt[idx])) {
+            pq.emplace(arr[nxt[idx]], nxt[idx]);
+            used[nxt[idx]] = 1;
+        }
+    }
+    int unused = 0, mn = N;
+    for (int i = 1; i <= N; i++) {
+        unused += !used[i];
+        mn = min(mn, arr[i]);
+    }
+    string ans = unused == 1 && mn == 0 ? "YES" : "NO";
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```

@@ -1864,12 +1864,22 @@ class Solution:
         return ptr
 ```
 
-##
+## 446. Arithmetic Slices II - Subsequence
 
-### Solution 1:
+### Solution 1:  iterative dp with dictionary, precompute the number of arithmetic slices ending at each index with each delta (index, delta): count
 
 ```py
-
+class Solution:
+    def numberOfArithmeticSlices(self, nums: List[int]) -> int:
+        n = len(nums)
+        dp = [Counter() for _ in range(n)]
+        ans = 0
+        for i in range(n):
+            for j in range(i):
+                delta = nums[i] - nums[j]
+                dp[i][delta] += dp[j][delta] + 1
+                ans += dp[j][delta]
+        return ans
 ```
 
 ##

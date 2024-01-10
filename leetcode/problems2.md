@@ -7154,17 +7154,15 @@ class Solution:
 
 ```py
 class Solution:
-    def leafGenerator(self, root: Optional[TreeNode]) -> Iterable[int]:
-        if not root.left and not root.right:
-            yield root.val
+    def dfs(self, root):
+        if not root.left and not root.right: yield root.val
         if root.left:
-            yield from self.leafGenerator(root.left)
+            yield from self.dfs(root.left)
         if root.right:
-            yield from self.leafGenerator(root.right)
+            yield from self.dfs(root.right)
     def leafSimilar(self, root1: Optional[TreeNode], root2: Optional[TreeNode]) -> bool:
-        leaves1, leaves2 = self.leafGenerator(root1), self.leafGenerator(root2)
-        for lf1, lf2 in zip_longest(leaves1, leaves2, fillvalue = -1):
-            if lf1 != lf2: return False
+        for x, y in zip_longest(self.dfs(root1), self.dfs(root2), fillvalue = None):
+            if x != y: return False
         return True
 ```
 
