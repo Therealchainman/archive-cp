@@ -7161,9 +7161,7 @@ class Solution:
         if root.right:
             yield from self.dfs(root.right)
     def leafSimilar(self, root1: Optional[TreeNode], root2: Optional[TreeNode]) -> bool:
-        for x, y in zip_longest(self.dfs(root1), self.dfs(root2), fillvalue = None):
-            if x != y: return False
-        return True
+        return all(itertools.starmap(operator.eq, zip_longest(self.dfs(root1), self.dfs(root2))))
 ```
 
 ## 1026. Maximum Difference Between Node and Ancestor
@@ -7198,6 +7196,14 @@ class Solution:
         minimus(root)
         
         return self.max_diff
+```
+
+```py
+class Solution:
+    def maxAncestorDiff(self, root: Optional[TreeNode], min_val = math.inf, max_val = -math.inf) -> int:
+        if not root: return abs(max_val - min_val)
+        nmin, nmax = min(min_val, root.val), max(max_val, root.val)
+        return max(self.maxAncestorDiff(root.left, nmin, nmax), self.maxAncestorDiff(root.right, nmin, nmax))
 ```
 
 ## 1339. Maximum Product of Splitted Binary Tree

@@ -1882,12 +1882,33 @@ class Solution:
         return ans
 ```
 
-##
+## 2385. Amount of Time for Binary Tree to Be Infected
 
-### Solution 1:
+### Solution 1:  dfs, recursion, binary tree, bfs, queue
 
 ```py
-
+class Solution:
+    def amountOfTime(self, root: Optional[TreeNode], start: int) -> int:
+        queue = deque()
+        parents = {}
+        vis = set([start])
+        def dfs(root, parent = None):
+            if not root: return
+            if root.val == start: queue.append(root)
+            parents[root] = parent
+            dfs(root.left, root)
+            dfs(root.right, root)
+        dfs(root)
+        steps = -1
+        while queue:
+            for _ in range(len(queue)):
+                u = queue.popleft()
+                for v in filter(None, (u.left, u.right, parents[u])):
+                    if v.val in vis: continue
+                    vis.add(v.val)
+                    queue.append(v)
+            steps += 1
+        return steps
 ```
 
 ##
