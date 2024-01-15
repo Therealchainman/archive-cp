@@ -47,23 +47,23 @@ if __name__ == '__main__':
 ### Solution 1:  digit dp, digit sums
 
 ```py
-# (digit_sum, is_zero, tight)
+# for each fixed digit sum
+# (index, digit sum, remainder modulos fixed digit sum, tight)
+
 def main():
     N = input()
     ans = 0
     for ds in range(1, 9 * 14 + 1):
-        # digit sum, remainder of integer modulo ds, tight
-        dp = Counter({(0, 0, True)})
-        for dig in map(int, N):
+        dp = Counter({(0, 0, 1): 1})
+        for d in map(int, N):
             ndp = Counter()
             for (dig_sum, rem, tight), cnt in dp.items():
-                for d in range(10 if not tight else dig + 1):
-                    if dig_sum + d > ds: break
-                    nrem = (rem * 10 + d) % ds
-                    ntight = tight and d == dig
-                    ndp[(dig_sum + d, nrem, ntight)] += cnt
+                for dig in range(10 if not tight else d + 1):
+                    ndig_sum, nrem, ntight = dig_sum + dig, (rem * 10 + dig) % ds, tight and dig == d
+                    if ndig_sum > ds: break
+                    ndp[(ndig_sum, nrem, ntight)] += cnt
             dp = ndp
-        ans += sum(cnt for (dig_sum, rem, tight), cnt in dp.items() if rem == 0 and dig_sum == ds)
+        ans += dp[(ds, 0, 0)] + dp[(ds, 0, 1)]
     print(ans)
 
 if __name__ == '__main__':

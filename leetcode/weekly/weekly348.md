@@ -77,4 +77,23 @@ class Solution:
         return (f(num2) - f(num1 - 1) + mod) % mod
 ```
 
+```py
+class Solution:
+    def count(self, num1: str, num2: str, min_sum: int, max_sum: int) -> int:
+        mod = int(1e9) + 7
+        def solve(upper):
+            dp = Counter({(0, 1): 1})
+            for d in map(int, upper):
+                ndp = Counter()
+                for (dig_sum, tight), cnt in dp.items():
+                    for dig in range(10 if not tight else d + 1):
+                        ndig_sum = dig_sum + dig
+                        if ndig_sum > max_sum: break
+                        ntight = tight and dig == d
+                        ndp[(ndig_sum, ntight)] = (ndp[(ndig_sum, ntight)] + cnt) % mod
+                dp = ndp
+            return sum(dp[(ds, t)] for ds, t in product(range(min_sum, max_sum + 1), range(2))) % mod
+        return (solve(num2) - solve(str(int(num1) - 1))) % mod
+```
+
 

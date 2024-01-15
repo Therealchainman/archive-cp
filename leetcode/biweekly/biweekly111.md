@@ -60,6 +60,20 @@ class Solution:
 ### Solution 1:  digit dp
 
 ```py
-
+class Solution:
+    def numberOfBeautifulIntegers(self, low: int, high: int, k: int) -> int:
+        # (remainder modulo k, even_count - odd_count, tight, zero)
+        def solve(upper):
+            dp = Counter({(0, 0, 1, 1): 1})
+            for d in map(int, upper):
+                ndp = Counter()
+                for (rem, parity, tight, zero), cnt in dp.items():
+                    for dig in range(10 if not tight else d + 1):
+                        nrem, ntight, nzero = (rem * 10 + dig) % k, tight and dig == d, zero and dig == 0
+                        nparity = parity + (1 if dig % 2 == 0 else -1) if not nzero else 0
+                        ndp[(nrem, nparity, ntight, nzero)] += cnt
+                dp = ndp
+            return sum(dp[(0, 0, t, 0)] for t in range(2))
+        return solve(str(high)) - solve(str(low - 1))
 ```
 

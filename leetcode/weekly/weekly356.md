@@ -55,37 +55,18 @@ if it is larger you can add it unless it is for the last digit, then you can't a
 class Solution:
     def countSteppingNumbers(self, low: str, high: str) -> int:
         mod = int(1e9) + 7
-        def f(digits):
-            # dp(digit, tight)
-            if len(digits) == 1: return int(digits[0])
-            dp = [[0] * 3 for _ in range(10)]
-            for i in range(1, 10):
-                if i == int(digits[0]): 
-                    dp[i][1] += 1
-                elif i < int(digits[0]):
-                    dp[i][0] += 1
-                else:
-                    dp[i][2] += 1
-            res = 9
-            for i in range(1, len(digits)):
-                ndp = [[0] * 3 for _ in range(10)]
-                cur_dig = int(digits[i])
-                for dig, tight in product(range(10), range(3)):
-                    for j in range(10):
-                        if tight == 1 and j != cur_dig and abs(j - dig) == 1: 
-                            if j < cur_dig:
-                                ndp[j][0] += dp[dig][tight]
-                            elif i < len(digits) - 1:
-                                ndp[j][2] += dp[dig][tight]
-                        if tight == 1 and j == cur_dig and abs(j - dig) == 1:
-                            ndp[j][1] += dp[dig][tight]
-                        if tight == 0 and abs(j - dig) == 1:
-                                ndp[j][0] += dp[dig][tight]
-                        if tight == 2 and abs(j - dig) == 1 and i < len(digits) - 1:
-                            ndp[j][2] += dp[dig][tight]
+        # (last_dig, tight, zero)
+        def solve(upper):
+            dp = Counter({(0, 1, 1): 1})
+            for d in map(int, upper):
+                ndp = Counter()
+                for (last_dig, tight, zero), cnt in dp.items():
+                    for dig in range(10 if not tight else d + 1):
+                        if not zero and abs(last_dig - dig) != 1: continue
+                        ntight, nzero = tight and dig == d, zero and dig == 0
+                        ndp[(dig, ntight, nzero)] = (ndp[(dig, ntight, nzero)] + cnt) % mod
                 dp = ndp
-                res += sum(sum(row) for row in dp)
-                res %= mod
-            return res
-        return (f(high) - f(low) + all(abs(y - x) == 1 for x, y in zip(map(int, low), map(int, low[1:]))) + mod) % mod
+            return sum(dp[(dig, t, 0)] for dig, t in product(range(10), range(2))) % mod
+        low_is_stepping_int = all(abs(x - y) == 1 for x, y in zip(map(int ,low), map(int, low[1:])))
+        return (solve(high) - solve(low) + low_is_stepping_int) % mod
 ```
