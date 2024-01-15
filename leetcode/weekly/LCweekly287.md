@@ -53,12 +53,11 @@ class Solution:
 ```py
 class Solution:
     def findWinners(self, matches: List[List[int]]) -> List[List[int]]:
-        winners, losers= set(), Counter()
-        for winner, loser in matches:
-            winners.add(winner)
-            losers[loser] += 1
-        one_losses = [player for player, losts in losers.items() if losts==1]
-        return [sorted(list(winners-set(losers.keys()))), sorted(one_losses)]
+        wins, loss = set(), Counter()
+        for u, v in matches:
+            wins.add(u)
+            loss[v] += 1
+        return [sorted(wins - set(loss)), sorted([x for x, v in loss.items() if v == 1])]
 ```
 
 ## 2226. Maximum Candies Allocated to K Children

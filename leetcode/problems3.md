@@ -1911,12 +1911,16 @@ class Solution:
         return steps
 ```
 
-##
+## 1347. Minimum Number of Steps to Make Two Strings Anagram
 
-### Solution 1:
+### Solution 1:  counter difference total
+
+similar to set difference. 
 
 ```py
-
+class Solution:
+    def minSteps(self, s: str, t: str) -> int:
+        return (Counter(s) - Counter(t)).total()
 ```
 
 ##

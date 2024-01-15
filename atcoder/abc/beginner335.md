@@ -100,12 +100,6 @@ if __name__ == '__main__':
     main()
 ```
 
-### Solution 2:  Transform to DAG with connected components becoming one node, DP on DAG
-
-```py
-
-```
-
 ## F - Hop Sugoroku
 
 ### Solution 1:  DP, square root 
@@ -131,3 +125,58 @@ if __name__ == '__main__':
     main()
 ```
 
+## G - Discrete Logarithm Problems 
+
+### Solution 1:  Number theory, modular arithmetic, fermat's little theorem, gcd, primitive roots, multiplicative order and additive order
+
+```py
+import math
+
+# collect all the prime factors
+def prime_factors(num: int) -> List[int]:
+    factors = []
+    while num % 2 == 0:
+        if not factors or (factors and factors[-1] != 2):
+            factors.append(2)
+        num //= 2
+    for i in range(3, math.isqrt(num) + 1, 2):
+        while num % i == 0:
+            if not factors or (factors and factors[-1] != i):
+                factors.append(i)
+            num //= i
+    if num > 2:
+        factors.append(num)
+    return factors
+
+def main():
+    N, P = map(int, input().split())
+    pf = prime_factors(P - 1)
+    arr = list(map(int, input().split()))
+    mult_orders = [P - 1] * N
+    for i in range(N):
+        while mult_orders[i] > 1:
+            found = False
+            for pfactor in pf:
+                if pfactor > mult_orders[i] or mult_orders[i] % pfactor: continue
+                x = mult_orders[i] // pfactor
+                if pow(arr[i], x, P) == 1:
+                    mult_orders[i] = x
+                    found = True
+                    break
+            if not found: break
+    mult_pairs = Counter()
+    for i in range(N):
+        mult_pairs[mult_orders[i]] += 1
+    mult_pairs = list(mult_pairs.items())
+    ans = 0
+    for i in range(len(mult_pairs)):
+        k1, v1 = mult_pairs[i]
+        for j in range(i, len(mult_pairs)):
+            k2, v2 = mult_pairs[j]
+            if k1 % k2 == 0 or k2 % k1 == 0:
+                ans += v1 * v2
+    print(ans)
+
+if __name__ == '__main__':
+    main()
+```

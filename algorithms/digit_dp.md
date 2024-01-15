@@ -40,3 +40,12 @@ if __name__ == '__main__':
     for _ in range(T):
         main()
 ```
+
+## Only zeros
+
+For some problems you need to track if you have seen a nonzero digit up to this point.  
+
+## Digit Sum Divisible
+
+For some problems you need to track if something is divisible by an integer value.  So instead of looping over every integer, you can us dynamic programming, where you keep track of the remainder modulo n.  So that can be anything.  For one problem it could be the digit sum. 
+
