@@ -1923,12 +1923,43 @@ class Solution:
         return (Counter(s) - Counter(t)).total()
 ```
 
-##
+## 384. Shuffle an Array
 
-### Solution 1:
+### Solution 1:  Fisher-Yates Shuffle Algorithm
 
 ```py
+class Solution:
 
+    def __init__(self, nums: List[int]):
+        self.arr = nums
+
+    def reset(self) -> List[int]:
+        return self.arr
+        
+
+    def shuffle(self) -> List[int]:
+        n = len(self.arr)
+        sarr = list(self.arr)
+        for i in reversed(range(n)):
+            idx = random.randint(0, i)
+            sarr[idx], sarr[i] = sarr[i], sarr[idx]
+        return sarr
+```
+
+```py
+class Solution:
+
+    def __init__(self, nums: List[int]):
+        self.arr = nums
+
+    def reset(self) -> List[int]:
+        return self.arr
+        
+
+    def shuffle(self) -> List[int]:
+        sarr = list(self.arr)
+        random.shuffle(sarr)
+        return sarr
 ```
 
 ##

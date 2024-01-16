@@ -8368,22 +8368,22 @@ class RandomizedSet:
     def __init__(self):
         self.index_table = {}
         self.arr = []
-
+        
     def insert(self, val: int) -> bool:
         if val in self.index_table: return False
-        self.index_table[val] = len(self.index_table)
+        self.index_table[val] = len(self.arr)
         self.arr.append(val)
         return True
-
+        
     def remove(self, val: int) -> bool:
         if val not in self.index_table: return False
-        index = self.index_table[val]
-        self.arr[index], self.arr[-1] = self.arr[-1], self.arr[index]
-        self.index_table[self.arr[index]] = index
+        idx = self.index_table[val]
+        self.arr[idx] = self.arr[-1]
+        self.index_table[self.arr[idx]] = idx
         del self.index_table[val]
         self.arr.pop()
         return True
-
+        
     def getRandom(self) -> int:
         return random.choice(self.arr)
 ```
