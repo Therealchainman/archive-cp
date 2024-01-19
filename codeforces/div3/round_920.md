@@ -109,10 +109,38 @@ if __name__ == '__main__':
 
 ## F. Sum of Progression
 
-### Solution 1:  dynamic programming, square root decomposition
+### Solution 1:  prefix sums, square root decomposition
 
 ```py
+import math
 
+def main():
+    n, q = map(int, input().split())
+    arr = list(map(int, input().split()))
+    N = int(math.sqrt(n)) + 1
+    psum = [[0] * (2 * n + 1) for _ in range(N)]
+    psumi = [[0] * (2 * n + 1) for _ in range(N)]
+    for i in range(1, N):
+        for j in range(n):
+            psum[i][j + i] = psum[i][j] + arr[j]
+            psumi[i][j + i] = psumi[i][j] + (j // i + 1) * arr[j]
+    ans = [0] * q
+    for i in range(q):
+        s, d, k = map(int, input().split())
+        s -= 1
+        if d < N:
+            e = s + k * d
+            ans[i] = psumi[d][e] - psumi[d][s] - (s // d) * (psum[d][e] - psum[d][s])
+        else: # brute force
+            for j in range(1, k + 1):
+                ans[i] += j * arr[s]
+                s += d
+    print(*ans)
+
+if __name__ == '__main__':
+    T = int(input())
+    for _ in range(T):
+        main()
 ```
 
 ## G. Mischievous Shooter
