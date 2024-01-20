@@ -111,7 +111,7 @@ if __name__ == '__main__':
 
 ## F. Replace on Segment
 
-### Solution 1: 
+### Solution 1: dss
 
 ```py
 
