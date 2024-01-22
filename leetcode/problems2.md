@@ -3764,16 +3764,23 @@ class Solution:
 
 ### Solution 1:  bit manipulation + xor + in place modification of array to find duplicate element
 
+Quick explanation on this one. 
+
+Since you are considering integers from 1 to n, to find the missing integer, you just need to xor everything with 1 to n and the elements in array, cause all will cancel because you are xoring every value that exists in array twice.  Except for the duplicated element, which would be xored 3 times, so you need to xor that one more time.  The only value that is xored once is the missing integer.  
+
+You can find the duplicate integer, by storing negative values at index that corresponds with the integer. Cause the only time you should see a negative at that index already means you already set it to negative, and thus this is the duplicate element. 
+
 ```py
 class Solution:
     def findErrorNums(self, nums: List[int]) -> List[int]:
-        dupe, missing, n = 0, 0, len(nums)
+        n = len(nums)
+        miss = dupe = 0
         for i in range(n):
             num = abs(nums[i])
-            missing ^= (i+1)^num
-            if nums[num-1] < 0: dupe = num
-            else: nums[num-1] *= -1
-        return [dupe, missing^dupe]
+            miss ^= (i + 1) ^ num
+            if nums[num - 1] < 0: dupe = num
+            nums[num - 1] *= -1
+        return [dupe, miss ^ dupe]
 ```
 
 ## 217. Contains Duplicate
