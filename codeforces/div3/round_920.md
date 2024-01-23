@@ -145,9 +145,62 @@ if __name__ == '__main__':
 
 ## G. Mischievous Shooter
 
-### Solution 1:  manhattan distance,  prefix sums
+### Solution 1:  column-wise prefix sum, diagonal prefix sum, re-orientation of matrix, right side triangle
 
 ```py
+from itertools import product
 
+TARGET = "#"  
+
+def main():
+    R, C, K = map(int, input().split())
+    K += 1
+    mat, st = [[0] * C for _ in range(R)], [[0] * C for _ in range(R)]
+    for r in range(R):
+        for c, ch in enumerate(input()):
+            mat[r][c] = (1 if ch == TARGET else 0)
+            st[r][c] = (1 if ch == TARGET else 0)
+    def solve():
+        res = 0
+        diagsum = [[0] * C for _ in range(R)]
+        colsum = [[0] * C for _ in range(R)]
+        for r, c in product(range(R), range(C)):
+            colsum[r][c] = diagsum[r][c] = mat[r][c]
+            if r > 0:
+                colsum[r][c] += colsum[r - 1][c]
+            if r > 0 and c + 1 < C:
+                diagsum[r][c] += diagsum[r - 1][c + 1]
+        for r in range(R):
+            psum = 0
+            for c in range(C):
+                psum += colsum[r][c]
+                if r - K >= 0:
+                    psum -= colsum[r - K][c]
+                if c - K >= 0:
+                    psum -= diagsum[r][c - K]
+                else:
+                    r1 = c - K + r
+                    if r1 >= 0:
+                        psum -= diagsum[r1][0]
+                if r - K >= 0:
+                    psum += diagsum[r - K][c]
+                res = max(res, psum)
+        return res 
+    ans = solve()
+    for r, c in product(range(R), range(C)):
+        mat[r][c] = st[R - r - 1][c]
+    ans = max(ans, solve())
+    for r, c in product(range(R), range(C)):
+        mat[r][c] = st[r][C - c - 1]
+    ans = max(ans, solve())
+    for r, c in product(range(R), range(C)):
+        mat[r][c] = st[R - r - 1][C - c - 1]
+    ans = max(ans, solve())
+    print(ans)
+
+if __name__ == '__main__':
+    T = int(input())
+    for _ in range(T):
+        main()
 ```
 

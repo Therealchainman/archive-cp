@@ -1962,6 +1962,36 @@ class Solution:
         return sarr
 ```
 
+## 1239. Maximum Length of a Concatenated String with Unique Characters
+
+### Solution 1:  bitmask, brute force, enumerate every combination, set
+
+```py
+class Solution:
+    def maxLength(self, arr: List[str]) -> int:
+        n = len(arr)
+        ans = 0
+        for mask in range(1, 1 << n):
+            seen = set()
+            for i in range(n):
+                if (mask >> i) & 1:
+                    plen = len(seen)
+                    seen.update(arr[i])
+                    if len(seen) < plen + len(arr[i]): 
+                        seen.clear()
+                        break
+                ans = max(ans, len(seen))
+        return ans
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
