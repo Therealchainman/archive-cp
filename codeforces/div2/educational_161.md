@@ -106,13 +106,167 @@ if __name__ == '__main__':
 ### Solution 1:  bitmasks, bit manipulation
 
 ```py
+def main():
+    X = bin(int(input()))[2:]
+    ans = []
+    for i in range(1, len(X)):
+        ans.append(i)
+        if X[i] == "1":
+            ans.append(0)
+    print(len(ans))
+    print(*ans)
 
+if __name__ == '__main__':
+    T = int(input())
+    for _ in range(T):
+        main()
 ```
 
 ## F. Replace on Segment
 
-### Solution 1: dss
+### Solution 1: interval dynamic programming, cyclic dependency handling, modified intervals
+
+```cpp
+const int N = 105;
+int n, x;
+int nxt1[N][N], nxt2[N][N], prv1[N][N], prv2[N][N], dp1[N][N][N], dp2[N][N][N];
+vector<int> arr;
+
+int remove(int left, int right, int k);
+
+int add(int left, int right, int k) {
+    left = nxt1[left][k];
+    right = prv1[right][k];
+    if (left > right) return 0;
+    if (dp1[left][right][k] != -1) return dp1[left][right][k];
+    int res = LONG_LONG_MAX;
+    for (int i = left; i < right; i++) {
+        res = min(res, add(left, i, k) + add(i + 1, right, k));
+    }
+    res = min(res, remove(left, right, k) + 1);
+    return dp1[left][right][k] = res;
+}
+
+int remove(int left, int right, int k) {
+    left = nxt2[left][k];
+    right = prv2[right][k];
+    if (left > right) return 0;
+    if (dp2[left][right][k] != -1) return dp2[left][right][k];
+    int res = LONG_LONG_MAX;
+    for (int i = left; i < right; i++) {
+        res = min(res, remove(left, i, k) + remove(i + 1, right, k));
+    }
+    for (int m = 1; m <= x; m++) {
+        if (m == k) continue;
+        res = min(res, add(left, right, m));
+    }
+    return dp2[left][right][k] = res;
+}
+
+void solve() {
+    cin >> n >> x;
+    arr.resize(n);
+    for (int i = 0; i < n; i++) {
+        cin >> arr[i];
+    }
+    memset(dp1, -1, sizeof(dp1));
+    memset(dp2, -1, sizeof(dp2));
+    for (int k = 1; k <= x; k++) {
+        int last1 = n, last2 = n;
+        for (int i = n - 1; i >= 0; i--) {
+            if (arr[i] != k) last1 = i;
+            else last2 = i;
+            nxt1[i][k] = last1;
+            nxt2[i][k] = last2;
+        }
+        int first1 = -1, first2 = -1;
+        for (int i = 0; i < n; i++) {
+            if (arr[i] != k) first1 = i;
+            else first2 = i;
+            prv1[i][k] = first1;
+            prv2[i][k] = first2;
+        }
+    }
+    int ans = LONG_LONG_MAX;
+    for (int k = 1; k <= x; k++) {
+        ans = min(ans, add(0, n - 1, k));
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
 
 ```py
+sys.setrecursionlimit(10**6)
+import math
+UNVISITED = -1
 
+def main():
+    n, x = map(int, input().split())
+    arr = list(map(int, input().split()))
+    dp1 = [[[UNVISITED] * (x + 1) for _ in range(n)] for _ in range(n)]
+    dp2 = [[[UNVISITED] * (x + 1) for _ in range(n)] for _ in range(n)]
+    nxt1, prv1 = [[0] * (x + 1) for _ in range(n)], [[0] * (x + 1) for _ in range(n)]
+    nxt2, prv2 = [[0] * (x + 1) for _ in range(n)], [[0] * (x + 1) for _ in range(n)]
+    for k in range(1, x + 1):
+        last1 = last2 = n
+        for i in reversed(range(n)):
+            if arr[i] != k: last1 = i
+            else: last2 = i
+            nxt1[i][k] = last1
+            nxt2[i][k] = last2
+        first1 = first2 = -1
+        for i in range(n):
+            if arr[i] != k: first1 = i
+            else: first2 = i
+            prv1[i][k] = first1
+            prv2[i][k] = first2
+    # add all k
+    def add(left, right, k):
+        left = nxt1[left][k]
+        right = prv1[right][k]
+        if left > right: return 0
+        if dp1[left][right][k] != UNVISITED: return dp1[left][right][k]
+        res = math.inf
+        # split
+        for i in range(left, right):
+            res = min(res, add(left, i, k) + add(i + 1, right, k))
+        # transformation
+        res = min(res, remove(left, right, k) + 1)
+        dp1[left][right][k] = res
+        return res
+    # remove all k
+    def remove(left, right, k):
+        left = nxt2[left][k]
+        right = prv2[right][k]
+        if left > right: return 0
+        if dp2[left][right][k] != UNVISITED: return dp2[left][right][k]
+        res = math.inf
+        # split
+        for i in range(left, right):
+            res = min(res, remove(left, i, k) + remove(i + 1, right, k))
+        # transformation
+        for m in range(1, x + 1):
+            if m == k: continue
+            res = min(res, add(left, right, m))
+        dp2[left][right][k] = res
+        return res
+    ans = min([add(0, n - 1, k) for k in range(1, x + 1)])
+    print(ans)
+
+if __name__ == '__main__':
+    T = int(input())
+    for _ in range(T):
+        main()
 ```
