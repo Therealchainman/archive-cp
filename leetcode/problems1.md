@@ -8897,27 +8897,25 @@ class Solution:
 
 ## 576. Out of Boundary Paths
 
-### Solution 1:  iterative DP + BFS + memoization
+### Solution 1:  iterative DP + BFS + space optimized dp
 
 ```py
 class Solution:
-    def findPaths(self, m: int, n: int, maxMove: int, startRow: int, startColumn: int) -> int:
-        # m rows, n cols
-        MOD = int(1e9)+7
-        paths = [[0]*n for _ in range(m)]
-        paths[startRow][startColumn] = 1
-        in_bounds = lambda r,c: 0<=r<m and 0<=c<n
-        ways = 0
-        for _ in range(maxMove):
-            npaths = [[0]*n for _ in range(m)]
-            for r,c in product(range(m), range(n)):
-                for nr, nc in [(r+1,c),(r-1,c),(r,c+1),(r,c-1)]:
-                    if not in_bounds(nr,nc): 
-                        ways = (ways + paths[r][c])%MOD
-                        continue
-                    npaths[r][c] = (npaths[r][c] + paths[nr][nc])%MOD
-            paths = npaths
-        return ways
+    def findPaths(self, R: int, C: int, M: int, sr: int, sc: int) -> int:
+        mod = int(1e9) + 7
+        neighborhood = lambda r, c: [(r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)]
+        in_bounds = lambda r, c: 0 <= r < R and 0 <= c < C
+        dp = [[0] * C for _ in range(R)]
+        dp[sr][sc] = 1
+        ans = 0
+        for _ in range(M):
+            ndp = [[0] * C for _ in range(R)]
+            for r, c in product(range(R), range(C)):
+                for nr, nc in neighborhood(r, c):
+                    if not in_bounds(nr, nc): ans = (ans + dp[r][c]) % mod; continue
+                    ndp[nr][nc] = (ndp[nr][nc] + dp[r][c]) % mod
+            dp = ndp
+        return ans
 ```
 
 ## 2331. Evaluate Boolean Binary Tree
@@ -8981,10 +8979,24 @@ class Solution:
 
 ## 629. K Inverse Pairs Array
 
-### Solution 1:
+### Solution 1:  iterative dynamic programming, sliding window, window sum
 
 ```py
-
+class Solution:
+    def kInversePairs(self, n: int, k: int) -> int:
+        mod = int(1e9) + 7
+        dp = [0] * (k + 1)
+        dp[0] = 1
+        for i in range(1, n + 1):
+            ndp = [0] * (k + 1)
+            s = 0
+            for j in range(k + 1):
+                if j >= i:
+                    s -= dp[j - i]
+                s = (s + dp[j]) % mod
+                ndp[j] = s
+            dp = ndp
+        return dp[-1]
 ```
 
 ## 2341. Maximum Number of Pairs in Array
