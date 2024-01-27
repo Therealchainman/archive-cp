@@ -124,7 +124,7 @@ if __name__ == '__main__':
 
 ## F. Replace on Segment
 
-### Solution 1: interval dynamic programming, cyclic dependency handling, modified intervals
+### Solution 1: interval dynamic programming, cyclic dependency handling, modified intervals, recursive
 
 ```cpp
 const int N = 105;
@@ -190,6 +190,74 @@ void solve() {
     int ans = LONG_LONG_MAX;
     for (int k = 1; k <= x; k++) {
         ans = min(ans, add(0, n - 1, k));
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+### Solution 2:  iterative dp
+
+```cpp
+const int N = 105;
+int n, x;
+int arr[N], dp1[N][N][N], dp2[N][N][N];
+/*
+dp(left, right, k)
+dp1 is add
+dp2 is remove
+*/
+
+void solve() {
+    cin >> n >> x;
+    for (int i = 0; i < n; i++) {
+        cin >> arr[i];
+    }
+    memset(dp1, N, sizeof(dp1));
+    memset(dp2, N, sizeof(dp2));
+    for (int i = 0; i < n; i++) {
+        for (int j = 1; j <= x; j++) {
+            dp1[i][i][j] = arr[i] == j ? 0 : 1;
+            dp2[i][i][j] = arr[i] == j ? 1 : 0;
+        }
+    }
+    for (int len = 2; len <= n; len++) {
+        for (int left = 0; left + len - 1 < n; left++) {
+            int right = left + len - 1;
+            vector<pair<int, int>> vec;
+            for (int k = 1; k <= x; k++) {
+                for (int i = left; i < right; i++) {
+                    dp1[left][right][k] = min(dp1[left][right][k], dp1[left][i][k] + dp1[i + 1][right][k]);
+                    dp2[left][right][k] = min(dp2[left][right][k], dp2[left][i][k] + dp2[i + 1][right][k]);
+                    /* next part is the following, need the transformations*/
+                }
+                /* transformation from all being not equal to k to being all equal to k */
+                dp1[left][right][k] = min(dp1[left][right][k], dp2[left][right][k] + 1);
+
+                vec.emplace_back(dp1[left][right][k], k);
+            }
+            for (int k = 1; k <= x; k++) {
+                for (auto &[cnt, m]: vec) {
+                    if (m == k) continue;
+                    dp2[left][right][k] = min(dp2[left][right][k], dp1[left][right][m]);
+                }
+            }
+        }
+    }
+    int ans = N;
+    for (int k = 1; k <= x; k++) {
+        ans = min(ans, dp1[0][n - 1][k]);
     }
     cout << ans << endl;
 }
