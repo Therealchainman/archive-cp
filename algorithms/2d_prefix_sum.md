@@ -3,6 +3,29 @@
 
 TODO: rewrite this with a class 2d prefix sum that includes a query function and the function that constructs the 2d array representation of a prefix sum. 
 
+## Simple Python Implementation
+
+```py
+R, C = len(matrix), len(matrix[0])
+ps = [[0]*(C+1) for _ in range(R+1)]
+# BUILD 2D PREFIX SUM
+for r, c in product(range(1,R+1),range(1,C+1)):
+    ps[r][c] = ps[r-1][c] + ps[r][c-1] + matrix[r-1][c-1] - ps[r-1][c-1]
+```
+
+## column-wise prefix sum
+
+This is useful when you are going to add a rectangle with width = 1, so just at that column, but height could be whatever, cause now you are adding r1 to r2 at c,  and you can find the sum to add with this type of 2d prefix sum.
+
+```py
+R, C = len(matrix), len(matrix[0])
+ps = [[0] * C for _ in range(R)]
+# build columnwise prefix sum
+for r, c in product(range(R), range(C)):
+    ps[r][c] = matrix[r][c]
+    if r > 0: ps[r][c] += ps[r - 1][c]
+```
+
 ```py
 class Solution:
     def recurse(self, min_row: int, min_col: int, max_row: int, max_col: int) -> 'Node':

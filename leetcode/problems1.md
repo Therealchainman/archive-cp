@@ -9128,26 +9128,28 @@ class Solution:
 
 ## 1074. Number of Submatrices That Sum to Target
 
-### Solution 1:  2D prefix sum + reduce to 1D in terms of row1, row2 for upper and lower bound + hash table
+### Solution 1:  column-wise prefix sum, hash table, prefix sum with width between r1 and r2
 
 ```py
 class Solution:
     def numSubmatrixSumTarget(self, matrix: List[List[int]], target: int) -> int:
         R, C = len(matrix), len(matrix[0])
-        ps = [[0]*(C+1) for _ in range(R+1)]
+        ps = [[0] * C for _ in range(R)]
         cnt = 0
-        # BUILD 2D PREFIX SUM
-        for r, c in product(range(1,R+1),range(1,C+1)):
-            ps[r][c] = ps[r-1][c] + ps[r][c-1] + matrix[r-1][c-1] - ps[r-1][c-1]
+        # build columnwise prefix sum
+        for r, c in product(range(R), range(C)):
+            ps[r][c] = matrix[r][c]
+            if r > 0: ps[r][c] += ps[r - 1][c]
         for r1 in range(R):
-            for r2 in range(r1+1,R+1):
-                counter = Counter()
-                counter[0] = 1
-                for c in range(1,C+1):
-                    submatrix_presum = ps[r2][c] - ps[r1][c]
-                    sum_ = submatrix_presum-target
-                    cnt += counter[sum_]
-                    counter[submatrix_presum] += 1
+            for r2 in range(r1, R):
+                vis = Counter({0: 1})
+                psum = 0
+                for c in range(C):
+                    psum += ps[r2][c]
+                    if r1 > 0:
+                        psum -= ps[r1 - 1][c]
+                    cnt += vis[psum - target]
+                    vis[psum] += 1
         return cnt
 ```
 
