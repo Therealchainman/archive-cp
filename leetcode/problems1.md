@@ -8497,27 +8497,23 @@ class Solution:
 
 ```py
 class Solution:
+    def evaluate(self, a, b, op):
+        sign = 1 if a * b >= 0 else -1
+        match op:
+            case "+": return a + b
+            case "-": return a - b
+            case "/": return sign * (abs(a) // abs(b))
+            case "*": return a * b
+        assert op in "+-/*", f"invalid op: {op}"
+        return -1
     def evalRPN(self, tokens: List[str]) -> int:
-        def evaluate(left, right, op):
-            match op:
-                case '*':
-                    return left*right
-                case '/':
-                    return math.ceil(left/right) if left*right <0 else left//right
-                case '+':
-                    return left+right
-                case '-':
-                    return left-right
-            return 0
-        operand_stk = []
+        operands = []
         for token in tokens:
-            if token in '+*-/':
-                right_operand = operand_stk.pop()
-                left_operand = operand_stk.pop()
-                operand_stk.append(evaluate(left_operand, right_operand, token))
-            else:
-                operand_stk.append(int(token))
-        return operand_stk[-1]
+            if token in "+-/*":
+                a, b = operands.pop(), operands.pop()
+                operands.append(self.evaluate(b, a, token))
+            else: operands.append(int(token))
+        return operands[0]
 ```
 
 ## 25. Reverse Nodes in k-Group

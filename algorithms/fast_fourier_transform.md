@@ -1,8 +1,12 @@
 # Fast Fourier Transform algorithm (FFT)
 
-## atcoder library implementation
+A fast Fourier transform (FFT) is an algorithm that computes the discrete Fourier transform (DFT) of a sequence, or its inverse (IDFT).
+
+## pythonic atcoder library implementation
 
 This is an implementation that allows convolution using the fast fourier tranform algorithm.  It can be used for convolutions (such as multiplication of polynomials)
+
+This one requires a modulo m to be passed through.  Now I noticed it doesn't work with a lot of m values.  It does happen to work for the m = 998244353 thought, which is a common one.
 
 ```py
 from itertools import product
@@ -181,5 +185,78 @@ class FFT:
         for i in range(n + m - 1):
             c[i] = (c[i] * iz) % self.mod
         return c[: n + m - 1]
-
 ```
+
+## Implementation in C++ 
+
+This does not contain modulo
+
+It also currently is expecting max size of the arrays to be less than 2^19 or 524,288 roughly
+
+```cpp
+typedef complex<double> cd;
+const int SIZE = 1<<19;
+const double PI = acos(-1);
+
+int n, m;
+vector<cd> A(SIZE), B(SIZE);
+
+void fft(vector<cd> &a, bool invert) {
+    int n = a.size();
+
+    for (int i = 1, j = 0; i < n; i++) {
+        int bit = n >> 1;
+        for (; j & bit; bit >>= 1)
+            j ^= bit;
+        j ^= bit;
+
+        if (i < j)
+            swap(a[i], a[j]);
+    }
+
+    for (int len = 2; len <= n; len <<= 1) {
+        double ang = 2 * PI / len * (invert ? -1 : 1);
+        cd wlen(cos(ang), sin(ang));
+        for (int i = 0; i < n; i += len) {
+            cd w(1);
+            for (int j = 0; j < len / 2; j++) {
+                cd u = a[i+j], v = a[i+j+len/2] * w;
+                a[i+j] = u + v;
+                a[i+j+len/2] = u - v;
+                w *= wlen;
+            }
+        }
+    }
+
+    if (invert) {
+        for (cd & x : a)
+            x /= n;
+    }
+}
+```
+
+```cpp
+fft(A, false);
+fft(B, false);
+for (int i = 0; i < SIZE; i++) {
+    A[i] *= B[i];
+}
+fft(A, true);
+for (int i = 0; i < n + m - 1; i++) {
+    cout << llround(A[i].real()) << " ";
+}
+```
+
+Explanation:
+
+### FFT on two sequences
+fft(A, false) and fft(B, false).  These lines compute the FFT of two sequences (or polynomials) A and B.  The false parameter means it is going to perform forward FFT.  Transforms both sequences from time domain to frequency domain. 
+
+### point-wise multiplicaton of transformed sequences
+
+The for loop iterates through the transformed sequences A and B, performing element-wise multiplication: A[i] *= B[i];. In the frequency domain, this is equivalent to the convolution of the original time-domain signals, which in turn corresponds to polynomial multiplication.
+
+### Performing Inverse FFT
+
+fft(A, true).  This line computes the inverse FFT of the sequence A. The true parameter indicates that the function is performing the inverse FFT. This step transforms the sequence back from the frequency domain to the time domain. The result is the product of the original polynomials represented by A and B.
+
