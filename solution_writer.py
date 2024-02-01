@@ -60,7 +60,7 @@ if __name__ == '__main__':
     # contest, name, number, div = "atcoder", "beginner", 338, None
     # contest, name, number, div = "atcoder", "regular", 169, None
     # contest, name, number, div = "leetcode", "biweekly", 119, None
-    contest, name, number, div = "leetcode", "weekly", 382, None
-    # contest, name, number, div = "codeforces", "round", 920, 3
+    # contest, name, number, div = "leetcode", "weekly", 382, None
+    contest, name, number, div = "codeforces", "round", 921, 2
     # contest, name, number, div = "codeforces", "educational", 161, 2
     create(contest, name, number, division = div)
