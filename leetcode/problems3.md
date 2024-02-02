@@ -1984,12 +1984,22 @@ class Solution:
         return ans
 ```
 
-##
+## 1291. Sequential Digits
 
-### Solution 1:
+### Solution 1:  iterate over all sequences 
 
 ```py
-
+class Solution:
+    def sequentialDigits(self, low, high):
+        arr = list(range(1, 9))
+        ans = []
+        for idx in range(8):
+            for i in range(8 - idx):
+                last_dig = arr[i] % 10
+                if last_dig < 9:
+                    arr[i] = arr[i] * 10 + last_dig + 1
+                    if low <= arr[i] <= high: ans.append(arr[i])
+        return ans
 ```
 
 ##
