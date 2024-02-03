@@ -82,3 +82,34 @@ class UnionFind:
     def __repr__(self) -> str:
         return f'parents: {[(i, parent) for i, parent in enumerate(self.parent)]}, sizes: {self.size}'
 ```
+
+```cpp
+struct UnionFind {
+    vector<int> parents, size;
+    void init(int n) {
+        parents.resize(n);
+        iota(parents.begin(),parents.end(),0);
+        size.assign(n,1);
+    }
+
+    int find(int i) {
+        if (i==parents[i]) {
+            return i;
+        }
+        return parents[i]=find(parents[i]);
+    }
+
+    bool union_(int i, int j) {
+        i = find(i), j = find(j);
+        if (i!=j) {
+            if (size[j]>size[i]) {
+                swap(i,j);
+            }
+            size[i]+=size[j];
+            parents[j]=i;
+            return false;
+        }
+        return true;
+    }
+};
+```

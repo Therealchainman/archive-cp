@@ -2,19 +2,21 @@
 
 ## SUMMARY
 
-Fenwick trees are a data structure that can be used to efficiently calculate prefix sums in a table of numbers.
+Fenwick trees are a data structure that can be used to efficiently calculate dynamic prefix sums in a table of numbers.
 
 ### IMPLEMENTED IN C++ PURQ
 
-This fenwick tree will provide super fast range sum queries
-works for point updates and range queries
+The thing that I need to know about a fenwick tree datastructure is how to use it. It is useful for when you need to 
+modify the range sum,  So with this you can both update a range sum in the tree, and query a range sum in log(n) time complexity
 
-when updating will probably need to do ft.update(i + 1, 1)
+This equation is 1-indexed based, so that means it starts at index=1, so if you have start at index 0 need to add 1 to all the values
 
-if want to use it for counting, when object is added do ft.update(i + 1, 1) 
-and when object is removed do ft.update(i + 1, -1)
+Initialize it with the following
+self.fenwick = FenwickTree(n)
 
-range queries this will work ft.query(left - 1, right)
+self.fenwick.update(r+1,-k)
+
+if I query(5) it looks in the range [0,5], so it is inclusive
 
 point update range queries
 
@@ -35,7 +37,7 @@ struct FenwickTree {
     }
 
     int query(int left, int right) {
-        return query(right) - query(left);
+        return query(right) - query(left - 1);
     }
 
     long long query(int idx) {
