@@ -241,6 +241,12 @@ class Solution:
         return -1
 ```
 
+```py
+class Solution:
+    def firstUniqChar(self, s: str) -> int:
+        return min((s.index(ch) for ch in string.ascii_lowercase if s.count(ch) == 1), default = -1)
+```
+
 ## 871. Minimum Number of Refueling Stops
 
 ### Solution 1:  dynamic programming 
@@ -3743,21 +3749,20 @@ class Solution:
 ```py
 class Solution:
     def minWindow(self, s: str, t: str) -> str:
-        result = ""
-        chars_t = set(t)
         freq = Counter(t)
-        score = len(t)
-        left, n = 0, len(s)
-        for right in range(n):
-            score -= (freq[s[right]]>0)
-            freq[s[right]] -= 1
-            while score == 0:
-                if len(result) == 0 or right-left+1 < len(result):
-                    result = s[left:right+1]
-                freq[s[left]] += (s[left] in chars_t)
-                score += (freq[s[left]]>0)
-                left += 1
-        return result
+        unmatched = len(t)
+        n = len(s)
+        ans = "A" * (n + 1)
+        l = 0
+        for r in range(n):
+            if freq[s[r]] > 0: unmatched -= 1
+            freq[s[r]] -= 1
+            while unmatched == 0:
+                freq[s[l]] += 1
+                if freq[s[l]] > 0: unmatched += 1
+                if unmatched == 1 and r - l + 1 < len(ans): ans = s[l : r + 1]
+                l += 1
+        return ans if len(ans) <= n else ""
 ```
 
 ## 645. Set Mismatch

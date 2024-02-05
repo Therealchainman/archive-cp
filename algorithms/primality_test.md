@@ -4,6 +4,8 @@
 
 This miller rabin primality test is deterministic for any 64 bit integer.  It has a good choice of bases for the primality test.  Really useful for determining large prime integers with up to 18 digits. 
 
+This is something log(n) time, maybe not exactly but close to that for sure. 
+
 ```py
 def check_composite(n, a, d, s):
     x = pow(a, d, n)

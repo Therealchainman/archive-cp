@@ -57,10 +57,10 @@ def create(contest, name, number, division = None):
     sys.stdout.close()
 
 if __name__ == '__main__':
-    # contest, name, number, div = "atcoder", "beginner", 338, None
-    # contest, name, number, div = "atcoder", "regular", 169, None
-    contest, name, number, div = "leetcode", "biweekly", 123, None
-    # contest, name, number, div = "leetcode", "weekly", 382, None
+    # contest, name, number, div = "atcoder", "beginner", 339, None
+    # contest, name, number, div = "atcoder", "regular", 171, None
+    # contest, name, number, div = "leetcode", "biweekly", 123, None
+    contest, name, number, div = "leetcode", "weekly", 383, None
     # contest, name, number, div = "codeforces", "round", 923, 3
     # contest, name, number, div = "codeforces", "educational", 161, 2
     create(contest, name, number, division = div)

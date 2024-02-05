@@ -2001,27 +2001,3 @@ class Solution:
                     if low <= arr[i] <= high: ans.append(arr[i])
         return ans
 ```
-
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
-```
-
-##
-
-### Solution 1:
-
-```py
-
-```

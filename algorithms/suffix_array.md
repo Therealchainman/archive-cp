@@ -106,6 +106,8 @@ def suffix_array(s: str) -> List[int]:
 
 ## suffix array and longest common prefix (lcp) array
 
+This requires that you append "$" character at the end of any string, because it includes the empty string in it with that. 
+
 ```py
 from typing import List
 def radix_sort(leaderboard: List[int], equivalence_class: List[int]) -> List[int]:
