@@ -23,7 +23,7 @@ def dijkstra(adj, src, dst):
         cost, u = heapq.heappop(min_heap)
         if u == dst: return cost
         if vis[u]: continue
-        vis[u] == 1
+        vis[u] = 1
         for v, w in adj[u]:
             if vis[v]: continue
             heapq.heappush(min_heap, (cost + w, v))
@@ -33,6 +33,8 @@ def dijkstra(adj, src, dst):
 ### Python implementation for all nodes
 
 It is the same, just doesn't early terminate
+
+Is this one still necessary? I think the one above is the better approach
 
 ```py
 import math
@@ -52,10 +54,12 @@ def dijkstra(adj, src):
 
 ### Cpp implementation for source to destination node
 
+untested, but same as python dijkstra
+
 ```cpp
 bool dijkstra(int src, int dst) {
     priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
-    vector<int> vis(N, false);
+    vector<bool> vis(N, false);
     pq.emplace(0, src);
     while (!pq.empty()) {
         auto [cost, u] = pq.top();

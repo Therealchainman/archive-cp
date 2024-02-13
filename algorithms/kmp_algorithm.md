@@ -1,8 +1,31 @@
 # KMP
 
+Just know that for any pi[i] it tells you the longest suffix that ends at i (inclusive) that matches to the longest prefix.  and pi[0] = 0 always. 
+
+## KMP Algorithm
+
+Computes prefix array
+
+```py
+def kmp(s):
+    n = len(s)
+    pi = [0] * n
+    for i in range(1, n):
+        j = pi[i - 1]
+        while j > 0 and s[i] != s[j]: 
+            j = pi[j - 1]
+        if s[j] == s[i]: j += 1
+        pi[i] = j
+    return pi
+
+parr = kmp(s)
+```
+
 ## KMP algortihm (Knuth-Morris-Pratt)
 
 This is example of using kmp algorithm to find the number of occurrences of pattern in a text.  
+
+This one is old what is this doing, how is lcp in here working? 
 
 ```py
 text = input()
@@ -37,3 +60,4 @@ lcp_arr = lcp(pat)
 res = kmp(text, pat)
 print(res)
 ```
+

@@ -914,7 +914,7 @@ def composition(f, g):
 # identity element for mapping (1, 0)
 ```
 
-## Lazy segment tree for C++
+## Lazy segment tree for C++ for range update and range queries
 
 This is a very generalize implementation, you can really put anything, you probably won't need the range though,  For this one I wanted to do arithmetic progression, so I was storing ranges to get the start and end value.
 
@@ -1046,4 +1046,67 @@ struct LazySegmentTree {
     }
 
 };
+```
+
+## Lazy Segment Tree for range updates and point queries
+
+This lazy segment tree is special in that it works for range updates and point queries.  In particular it is set up for addition, but you can use other operations as well. 
+
+```py
+class LazySegmentTree:
+    def __init__(self, n: int, neutral: int, noop: int):
+        self.neutral = neutral
+        self.size = 1
+        self.noop = noop
+        self.n = n 
+        while self.size<n:
+            self.size*=2
+        self.tree = [neutral for _ in range(self.size*2)]
+
+    def is_leaf_node(self, segment_right_bound, segment_left_bound) -> bool:
+        return segment_right_bound - segment_left_bound == 1
+
+    def operation(self, x: int, y: int) -> int:
+        return x + y
+
+    def propagate(self, segment_idx: int, segment_left_bound: int, segment_right_bound: int) -> None:
+        # do not want to propagate if it is a leaf node
+        if self.is_leaf_node(segment_right_bound, segment_left_bound): return
+        left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+        self.tree[left_segment_idx] = self.operation(self.tree[left_segment_idx], self.tree[segment_idx])
+        self.tree[right_segment_idx] = self.operation(self.tree[right_segment_idx], self.tree[segment_idx])
+        self.tree[segment_idx] = self.noop
+    
+    def update(self, left: int, right: int, val: int) -> None:
+        stack = [(0, self.size, 0)]
+        while stack:
+            segment_left_bound, segment_right_bound, segment_idx = stack.pop()
+            # NO OVERLAP
+            if segment_left_bound >= right or segment_right_bound <= left: continue
+            # COMPLETE OVERLAP
+            if segment_left_bound >= left and segment_right_bound <= right:
+                self.tree[segment_idx] = self.operation(self.tree[segment_idx], val)
+                continue
+            # PARTIAL OVERLAP
+            mid_point = (segment_left_bound + segment_right_bound) >> 1
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            self.propagate(segment_idx, segment_left_bound, segment_right_bound)
+            stack.extend([(mid_point, segment_right_bound, right_segment_idx), (segment_left_bound, mid_point, left_segment_idx)])
+
+    def query(self, i: int) -> int:
+        stack = [(0, self.size, 0)]
+        while stack:
+            segment_left_bound, segment_right_bound, segment_idx = stack.pop()
+            # NO OVERLAP
+            if i < segment_left_bound or i >= segment_right_bound: continue
+            # LEAF NODE
+            if self.is_leaf_node(segment_right_bound, segment_left_bound): 
+                return self.tree[segment_idx]
+            mid_point = (segment_left_bound + segment_right_bound) >> 1
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            self.propagate(segment_idx, segment_left_bound, segment_right_bound)            
+            stack.extend([(mid_point, segment_right_bound, right_segment_idx), (segment_left_bound, mid_point, left_segment_idx)])
+    
+    def __repr__(self) -> str:
+        return f"array: {self.tree}"
 ```

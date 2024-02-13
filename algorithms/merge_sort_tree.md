@@ -8,6 +8,8 @@ If you understand segment tree and merge sort algorithm, this algorithm just fol
 
 I don't know why this algorithm reqires the tree to consists of 4 * n, but it does some reason, verified on a problem.
 
+All of these below you have to follow, and build(1, 0, n - 1),  so it is 0-indexed, and your queries should be from 0 to n - 1.  And I need to recall why it sets u = 1,  But to query you need to include these as well
+
 ## practice problems
 
 [K-query online]<https://www.spoj.com/problems/KQUERYO/>
@@ -217,6 +219,63 @@ public:
     
     int query(int left, int right, int value) {
         return mst.query(left, right, value);
+    }
+};
+```
+
+## Solving another problem involving sum
+You can also find the cumulative sum of all elements in a range, for when all elements are less than or equal to some value X.
+
+```cpp
+const int N = 2e5 + 10;
+vector<int> tree[4 * N], psum[4 * N];
+int n, arr[N], a, b, c;
+
+struct MergeSortTree {
+    void build(int u, int left, int right) {
+        if (left == right) {
+            tree[u].push_back(arr[left]);
+            psum[u].push_back(arr[left]);
+            return;
+        }
+        int mid = (left + right) >> 1;
+        int left_segment = u << 1;
+        int right_segment = left_segment | 1;
+        build(left_segment, left, mid);
+        build(right_segment, mid + 1, right);
+        merge(tree[left_segment].begin(), tree[left_segment].end(), tree[right_segment].begin(), tree[right_segment].end(), back_inserter(tree[u]));
+        int l = 0, r = 0, nl = tree[left_segment].size(), nr = tree[right_segment].size(), cur = 0;
+        while (l < nl or r < nr) {
+            if (l < nl and r < nr) {
+                if (tree[left_segment][l] <= tree[right_segment][r]) {
+                    cur += tree[left_segment][l];
+                    l += 1;
+                } else {
+                    cur += tree[right_segment][r];
+                    r += 1;
+                }
+            } else if (l < nl) {
+                cur += tree[left_segment][l];
+                l += 1;
+            } else {
+                cur += tree[right_segment][r];
+                r += 1;
+            }
+            psum[u].push_back(cur);
+        }
+    }
+    // not greater than k, so <= k we want
+    int query(int u, int left, int right, int i, int j, int k) {
+        if (i > right || left > j) return 0; // NO OVERLAP
+        if (i <= left && right <= j) { // COMPLETE OVERLAP
+            int idx = upper_bound(tree[u].begin(), tree[u].end(), k) - tree[u].begin();
+            return idx > 0 ? psum[u][idx - 1] : 0;
+        }
+        // PARTIAL OVERLAP
+        int mid = (left + right) >> 1;
+        int left_segment = u << 1;
+        int right_segment = left_segment | 1;
+        return query(left_segment, left, mid, i, j, k) + query(right_segment, mid + 1, right, i, j, k);
     }
 };
 ```

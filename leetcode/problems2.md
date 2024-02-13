@@ -6793,6 +6793,13 @@ class Solution:
         return ''.join([key*freq for key, freq in sorted(Counter(s).items(), key = lambda pair: pair[1], reverse = True)])
 ```
 
+```py
+class Solution:
+    def frequencySort(self, s: str) -> str:
+        counts = Counter(s)
+        return "".join(sorted(s, key = lambda x: (counts[x], x), reverse = True))
+```
+
 ## 1162. As Far from Land as Possible
 
 ### Solution 1:

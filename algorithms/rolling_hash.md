@@ -28,6 +28,31 @@ def find_pattern_rolling_hash(string: str, pattern: str) -> int:
     return -1
 ```
 
+Example of very similar rolling hash implementation but for an array containing [-1, 0, 1] elements.  So you encode the coefficient by adding 2,  cause you can't have a 0 I believe. 
+
+```py
+n, m = len(nums), len(pattern)
+p, MOD = 31, int(1e9)+7
+coefficient = lambda x: x + 2
+pat_hash = 0
+for v in pattern:
+    pat_hash = (pat_hash * p + coefficient(v)) % MOD
+diff = [0] * (n - 1)
+for i in range(n - 1):
+    if nums[i + 1] > nums[i]: diff[i] = 1
+    elif nums[i + 1] < nums[i]: diff[i] = -1
+POW = 1
+for _ in range(m - 1):
+    POW = (POW * p) % MOD
+ans = cur_hash = 0
+for i, v in enumerate(diff):
+    cur_hash = (cur_hash * p + coefficient(v)) % MOD
+    if i >= m - 1:
+        if cur_hash == pat_hash: ans += 1
+        cur_hash = (cur_hash - coefficient(diff[i - m + 1]) * POW) % MOD
+return ans
+```
+
 ## Rolling Hash on Segment Tree
 
 using segment tree with queries of [l, r)

@@ -2659,18 +2659,15 @@ class Solution:
 ```py
 class Solution:
     def countSubstrings(self, s: str) -> int:
-        cnt, n = 0, len(s)
-        def expand(left, right):
+        n = len(s)
+        ans = 0
+        def expand(i, j):
             cnt = 0
-            while left >= 0 and right < n and s[left]==s[right]:
-                cnt += 1
-                left -= 1
-                right += 1
+            while i >= 0 and j < n and s[i] == s[j]: i -= 1; j += 1; cnt += 1
             return cnt
         for i in range(n):
-            cnt += expand(i, i)
-            cnt += expand(i, i+1)
-        return cnt
+            ans += expand(i, i) + expand(i, i + 1)
+        return ans
 ```
 
 ## 277. Find the Celebrity
