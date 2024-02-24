@@ -152,5 +152,4 @@ Similar implementation in C++.
 
 ```cpp
 
-
 ```

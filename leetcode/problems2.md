@@ -1595,23 +1595,23 @@ class Solution:
 ```py
 class Solution:
     def mostBooked(self, n: int, meetings: List[List[int]]) -> int:
-        num_meetings = [0]*n
-        next_rooms = []
-        avail_rooms = [i for i in range(n)]
-        heapify(avail_rooms)
-        for start, end in sorted(meetings):
-            while next_rooms and next_rooms[0][0] <= start:
-                _, room = heappop(next_rooms)
-                heappush(avail_rooms, room)
-            if avail_rooms:
-                room_index = heappop(avail_rooms)
-                heappush(next_rooms, (end, room_index))
-            else:
-                time, room_index = heappop(next_rooms)
-                duration = end-start
-                heappush(next_rooms, (time + duration, room_index))
-            num_meetings[room_index] += 1
-        return max(range(n), key = lambda i: num_meetings[i])
+        m = len(meetings)
+        rooms = list(range(n))
+        heapify(rooms)
+        waiting = []
+        counts = [0] * n
+        for s, e in sorted(meetings):
+            while waiting and waiting[0][0] <= s:
+                _, i = heappop(waiting)
+                heappush(rooms, i)
+            time = s
+            if not rooms:
+                time, i = heappop(waiting)
+                heappush(rooms, i)
+            i = heappop(rooms)
+            counts[i] += 1
+            heappush(waiting, (time - s + e, i))
+        return max(range(n), key = lambda i: counts[i])
 ```
 
 ## 987. Vertical Order Traversal of a Binary Tree

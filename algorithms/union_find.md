@@ -107,9 +107,9 @@ struct UnionFind {
             }
             size[i]+=size[j];
             parents[j]=i;
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 };
 ```

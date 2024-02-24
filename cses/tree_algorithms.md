@@ -1567,12 +1567,61 @@ int32_t main() {
 }
 ```
 
-## 
+## Distinct Colors
 
-### Solution 1:
+### Solution 1:  small-to-large merging, set, dfs
 
 ```py
+const int MAXN = 2e5 + 5;
+int N, color;
+vector<int> adj[MAXN];
+int ans[MAXN];
+set<int> s[MAXN];
 
+void dfs(int u, int p) {
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        dfs(v, u);
+        if (s[v].size() > s[u].size()) {
+            swap(s[u], s[v]);
+        }
+        for (int x : s[v]) {
+            s[u].insert(x);
+        }
+    }
+    ans[u] = s[u].size();
+}
+
+void solve() {
+    cin >> N;
+    for (int i = 0; i < N; i++) {
+        cin >> color;
+        s[i].clear();
+        s[i].insert(color);
+    }
+    for (int i = 0; i < N - 1; i++) {
+        int u, v;
+        cin >> u >> v;
+        u--, v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    dfs(0, -1);
+    for (int i = 0; i < N; i++) {
+        cout << ans[i] << " ";
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T = 1;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
 ```
 
 ## 

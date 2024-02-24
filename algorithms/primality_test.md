@@ -28,3 +28,17 @@ def miller_rabin(n):
         if check_composite(n, a, d, r): return False
     return True
 ```
+
+## Simple prime test
+
+Determines if n is a prime integer,  This is a slow one that runs in sqrt(n) time, so you can get away with integers with up to 16 digits or so.  It is slower than the method above.  So to test a lot of large integers this one quickly becomes too slow.
+
+```py
+def is_prime(n):
+    if n < 2: return False
+    if n == 2: return True
+    if n % 2 == 0: return False
+    for i in range(3, int(math.sqrt(n)) + 1, 2):
+        if n % i == 0: return False
+    return True
+```

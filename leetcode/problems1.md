@@ -8184,21 +8184,19 @@ class Solution:
 ```py
 class Solution:
     def findCheapestPrice(self, n: int, flights: List[List[int]], src: int, dst: int, k: int) -> int:
-        graph = [[] for _ in range(n)]
-        for u, v, price in flights:
-            graph[u].append((v,price))
-        minheap = [(0,0,src)]
-        dist = [[inf]*(k+1) for _ in range(n)]
-        dist[src][0] = 0
+        minheap = [(0, 0, src)]
+        adj = [[] for _ in range(n)]
+        for u, v, w in flights:
+            adj[u].append((v, w))
+        vis = set()
         while minheap:
-            cost, stops, node = heappop(minheap)
-            if node == dst: return cost
-            if stops > k: continue
-            for nei, w in graph[node]:
-                ncost = cost + w
-                if ncost < dist[nei][stops]: 
-                    dist[nei][stops] = ncost
-                    heappush(minheap, (ncost, stops+1, nei))
+            cost, steps, u = heappop(minheap)
+            if u == dst: return cost
+            if steps > k: continue
+            if (u, steps) in vis: continue
+            vis.add((u, steps))
+            for v, w in adj[u]:
+                heappush(minheap, (cost + w, steps + 1, v))
         return -1
 ```
 

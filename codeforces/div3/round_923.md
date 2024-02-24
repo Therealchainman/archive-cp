@@ -140,25 +140,23 @@ if __name__ == '__main__':
 
 ## F. Microcycle
 
-### Solution 1: 
+### Solution 1:  maximum spanning tree, union find, dfs, tree
 
 ```cpp
-const int INF = 1e9;
-int N, M, timer, src, dst;
-vector<vector<pair<int, int>>> adj;
-vector<tuple<int, int, int>> edges;
-set<int> cedges, on_stack;
-vector<bool> vis;
-vector<int> ancestor, disc, ans;
+int N, M, src, dst, minw;
+vector<int> path;
+vector<vector<int>> adj;
+
+struct Edge {
+    int u, v, w;
+};
 
 struct UnionFind {
     vector<int> parents, size;
-    vector<bool> has_cycle;
     void init(int n) {
         parents.resize(n);
         iota(parents.begin(),parents.end(),0);
         size.assign(n,1);
-        has_cycle.assign(n, false);
     }
 
     int find(int i) {
@@ -175,227 +173,53 @@ struct UnionFind {
                 swap(i,j);
             }
             size[i]+=size[j];
-            has_cycle[i] = has_cycle[i] || has_cycle[j];
             parents[j]=i;
-            return false;
-        }
-        has_cycle[i] = true;
-        return true;
-    }
-};
-
-void dfs(int u, int p) {
-    if (vis[u]) return;
-    disc[u] = timer++;
-    ancestor[u] = disc[u] + 1;
-    vis[u] = true;
-    for (auto [v, i] : adj[u]) {
-        if (v == p) continue;
-        if (vis[v]) {
-            ancestor[u] = min(ancestor[u], ancestor[v]);
-            continue;
-        } 
-        dfs(v, u);
-        if (ancestor[u] == disc[u]) {
-            // cout << "u: " << u << " " << ancestor[u] << " " << disc[u] << endl;
-            cedges.erase(i);
-        }
-    }
-}
-
-bool dfs1(int u, int p) {
-    // cout << u << " " << p << endl;
-    on_stack.insert(u);
-    if (u == dst) {
-        ans.push_back(u);
-        return true;
-    }
-    for (auto [v, i] : adj[u]) {
-        // cout << u << "neighbors: " << v << endl;
-        if (v == p) continue;
-        if (on_stack.find(v) != on_stack.end()) continue;
-        if (dfs1(v, u)) {
-            ans.push_back(u);
             return true;
         }
-    }
-    on_stack.erase(u);
-    return false;
-}
-
-void solve() {
-    cin >> N >> M;
-    adj.assign(N, vector<pair<int, int>>());
-    edges.resize(M);
-    cedges.clear();
-    vis.assign(N, false);
-    for (int i = 0; i < M; i++) {
-        int u, v, w;
-        cin >> u >> v >> w;
-        u--, v--;
-        adj[u].emplace_back(v, i);
-        adj[v].emplace_back(u, i);
-        edges[i] = {u, v, w};
-    }
-    UnionFind dsu;
-    dsu.init(N);
-    for (int i = 0; i < M; i++) {
-        int u, v, _;
-        tie(u, v, _) = edges[i];
-        dsu.union_(u, v);
-    }
-    for (int i = 0; i < M; i++) {
-        int u, v, _;
-        tie(u, v, _) = edges[i];
-        u = dsu.find(u), v = dsu.find(v);
-        if (dsu.has_cycle[u] && dsu.has_cycle[v]) {
-            cedges.insert(i);
-        }
-    }
-    disc.assign(N, -1);
-    ancestor.assign(N, -1);
-    timer = 0;
-    for (int u = 0; u < N; u++) {
-        if (vis[u]) continue;
-        dfs(u, -1);
-    }
-    ans.clear();
-    int weight = INF;
-    int start_edge = -1;
-    for (int i : cedges) {
-        int u, v, w;
-        tie(u, v, w) = edges[i];
-        if (w < weight) {
-            weight = w;
-            start_edge = i;
-        }
-    }
-    tie(src, dst, weight) = edges[start_edge];
-    dfs1(src, dst);
-    cout << weight << " " << ans.size() << endl;
-    for (int x : ans) {
-        cout << x + 1 << " ";
-    }
-    cout << endl;
-}
-
-signed main() {
-    ios::sync_with_stdio(0);
-    cin.tie(0);
-    cout.tie(0);
-    int T;
-    cin >> T;
-    while (T--) {
-        solve();
-    }
-    return 0;
-}
-```
-
-```cpp
-struct Edge {
-    int u, v, w, index;
-};
-
-const int INF = 1e9;
-int N, M, timer, src, dst;
-vector<vector<pair<int, int>>> adj;
-vector<Edge> edges;
-set<int> cedges, on_stack;
-vector<bool> vis;
-vector<int> ancestor, disc, ans;
-
-struct UnionFind {
-    vector<int> parents, size;
-    void init(int n) {
-        parents.resize(n);
-        iota(parents.begin(),parents.end(),0);
-        size.assign(n,1);
-    }
-
-    int find(int i) {
-        if (i==parents[i]) {
-            return i;
-        }
-        return parents[i]=find(parents[i]);
-    }
-
-    bool union_(int i, int j) {
-        i = find(i), j = find(j);
-        if (i!=j) {
-            if (size[j]>size[i]) {
-                swap(i,j);
-            }
-            size[i]+=size[j];
-            parents[j]=i;
-            return false;
-        }
-        return true;
+        return false;
     }
 };
-
 
 bool dfs(int u, int p) {
-    // cout << u << " " << p << endl;
-    on_stack.insert(u);
-    if (u == dst) {
-        ans.push_back(u);
-        return true;
-    }
-    for (auto [v, i] : adj[u]) {
-        // cout << u << "neighbors: " << v << endl;
+    path.push_back(u + 1);
+    if (u == dst) return true;
+    for (int v : adj[u]) {
         if (v == p) continue;
-        if (on_stack.find(v) != on_stack.end()) continue;
-        if (dfs(v, u)) {
-            ans.push_back(u);
-            return true;
-        }
+        if (dfs(v, u)) return true;
     }
-    on_stack.erase(u);
+    path.pop_back();
     return false;
 }
 
-
-struct MaxHeapComparator {
-    bool operator()(Edge lhs, Edge rhs) {
-        // For max heap, we return true if lhs is "less" than rhs.
-        return lhs.w < rhs.w;
-    }
-};
-
 void solve() {
     cin >> N >> M;
-    adj.assign(N, vector<pair<int, int>>());
-    edges.resize(M);
-    cedges.clear();
-    vis.assign(N, false);
+    vector<Edge> edges(M);
+    adj.assign(N, vector<int>());
+    int u, v, w;
     for (int i = 0; i < M; i++) {
-        int u, v, w;
         cin >> u >> v >> w;
-        u--, v--;
-        adj[u].emplace_back(v, i);
-        adj[v].emplace_back(u, i);
-        edges[i] = {u, v, w, i};
+        u--; v--;
+        edges[i] = {u, v, w};
     }
-    int weight = INF;
-    Edge start_edge;
-    priority_queue<Edge, vector<Edge>, MaxHeapComparator> max_heap(edges.begin(), edges.end());
+    sort(edges.begin(), edges.end(), [](const Edge& a, const Edge& b) {
+        return a.w > b.w; // Descending order
+    });
     UnionFind dsu;
     dsu.init(N);
-    while (!max_heap.empty()) {
-        Edge e = max_heap.top();
-        max_heap.pop();
-        if (dsu.union_(e.u, e.v)) { // cycle detected
-            start_edge = e;
-            weight = e.w;
+    minw = INT_MAX;
+    for (auto &[u, v, w] : edges) {
+        if (!dsu.union_(u, v)) {
+            minw = w; src = u; dst = v;
+        } else {
+            adj[u].push_back(v);
+            adj[v].push_back(u);
         }
     }
-    ans.clear();
-    int src = start_edge.u, dst = start_edge.v;
-    dfs(src, dst);
-    cout << weight << " " << ans.size() << endl;
-    for (int x : ans) {
-        cout << x + 1 << " ";
+    path.clear();
+    dfs(src, -1);
+    cout << minw << " " << path.size() << endl;
+    for (int u : path) {
+        cout << u << " ";
     }
     cout << endl;
 }

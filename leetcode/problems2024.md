@@ -115,28 +115,80 @@ class Solution:
         return ans
 ```
 
-##
+## 1481. Least Number of Unique Integers after K Removals
 
-### Solution 1:
+### Solution 1:  count, sort
 
 ```py
-
+class Solution:
+    def findLeastNumOfUniqueInts(self, arr: List[int], k: int) -> int:
+        freq = sorted(Counter(arr).values(), reverse = True)
+        while k > 0:
+            x = freq.pop()
+            k -= x
+            if k < 0: freq.append(x)
+        return len(freq)
 ```
 
-##
+## 201. Bitwise AND of Numbers Range
 
-### Solution 1:
+### Solution 1:  bit manipulation
+
+![image](images/bitwise_and_range.png)
+
+Observation 1:
+All the bits to the right of a flipped bit between left and right will also be flipped in the range.
 
 ```py
-
+class Solution:
+    def rangeBitwiseAnd(self, left: int, right: int) -> int:
+        ans = 0
+        try:
+            start = next(dropwhile(lambda i: not ((right >> i) & 1), reversed(range(32))))
+        except:
+            return ans
+        for i in range(start, -1, -1):
+            if (right >> i) != (left >> i): break
+            if (right >> i) & 1: ans |= (1 << i)
+        return ans
 ```
 
-##
+## 2092. Find All People With Secret
 
-### Solution 1:
+### Solution 1:  undirected graph, dfs
+
+Form an many undirected graphs at each time step.  And the person who has a secret spreads to everyone they can reach.  So use a dfs through the graph from each person that knows a secret let it flow to everyone. 
 
 ```py
-
+class Solution:
+    def findAllPeople(self, n: int, meetings: List[List[int]], firstPerson: int) -> List[int]:
+        know = [0] * n
+        know[0] = know[firstPerson] = 1
+        edge_lists = defaultdict(list)
+        for u, v, t in sorted(meetings, key = lambda pair: pair[-1]):
+            edge_lists[t].append((u, v))
+        def dfs(src):
+            stk = [src]
+            vis.add(src)
+            while stk:
+                u = stk.pop()
+                know[u] = 1
+                for v in adj[u]:
+                    if v in vis: continue
+                    vis.add(v)
+                    stk.append(v)
+        for edges in edge_lists.values():
+            adj = defaultdict(list)
+            nodes, vis = set(), set()
+            for u, v in edges:
+                adj[u].append(v)
+                adj[v].append(u)
+                nodes.update([u, v])
+            for u in nodes:
+                if u in vis: continue
+                if not know[u]: continue
+                dfs(u)
+        return [i for i in range(n) if know[i]]
 ```
 
 ##

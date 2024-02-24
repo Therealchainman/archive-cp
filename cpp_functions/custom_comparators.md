@@ -13,3 +13,13 @@ struct priorityComp {
     }
 };
 ```
+
+## Vector 
+
+sorting edges containing object Edge in descending order of w variable
+
+```cpp
+    sort(edges.begin(), edges.end(), [](const Edge& a, const Edge& b) {
+        return a.w > b.w; // Descending order
+    })
+```
