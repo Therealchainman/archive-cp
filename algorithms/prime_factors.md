@@ -31,3 +31,19 @@ def prime_count(num):
     cnt += num > 1
     return cnt
 ```
+
+## Alternative solution
+
+This is a good alternative solution, that is maybe easier to read and understand.  It gets all the factors in square root time complexity of num still.  It basically removes the primes, and there could be one prime integer that is greater than the square root value. 
+
+```py
+def prime_factors(num):
+    factors = []
+    for p in range(2, num):
+        if p * p > num: break 
+        if num % p != 0: continue 
+        factors.append(p)
+        while num % p == 0: num //= p
+    if num > 1: factors.append(num)
+    return factors
+```
