@@ -191,12 +191,22 @@ class Solution:
         return [i for i in range(n) if know[i]]
 ```
 
-##
+## 543. Diameter of Binary Tree
 
-### Solution 1:
+### Solution 1: recursion, dfs
 
 ```py
-
+class Solution:
+    def diameterOfBinaryTree(self, root: Optional[TreeNode]) -> int:
+        ans = 0
+        def dfs(u):
+            nonlocal ans
+            if not u: return 0
+            llen, rlen = dfs(u.left), dfs(u.right)
+            ans = max(ans, llen + rlen)
+            return max(llen, rlen) + 1
+        dfs(root)
+        return ans
 ```
 
 ##

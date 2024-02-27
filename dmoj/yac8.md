@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
 ## Herobrine
 
-### Solution 1:  small-to-large merging technique, dfs, tree
+### Solution 1:  small to large merging technique, dfs, tree
 
 ```cpp
 vector<vector<int>> adj;

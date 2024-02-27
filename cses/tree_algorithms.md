@@ -1569,7 +1569,7 @@ int32_t main() {
 
 ## Distinct Colors
 
-### Solution 1:  small-to-large merging, set, dfs
+### Solution 1:  small to large merging, set, dfs
 
 ```py
 const int MAXN = 2e5 + 5;

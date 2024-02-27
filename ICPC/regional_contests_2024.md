@@ -12,7 +12,63 @@
 
 ### Solution 1:  dfs, stack, tree
 
-```py
+([)]
+
+```cpp
+const int INF = 1e9;
+int N, ans;
+string sym;
+const string OPEN = "([{", CLOSE = ")]}";
+vector<vector<int>> adj;
+stack<int> stk;
+
+void dfs(int u, int p) {
+    char br = sym[u];
+    char last;
+    if (OPEN.find(br) != string::npos) stk.push(br);
+    else {
+        if (stk.empty()) return;
+        last = stk.top();
+        if (OPEN.find(last) != CLOSE.find(br)) return;
+        stk.pop();
+    }
+    if (stk.empty()) ans++;
+    for (int v : adj[u]) {
+        if (v != p) dfs(v, u);
+    }
+    if (OPEN.find(br) != string::npos) stk.pop();
+    else stk.push(last);
+}
+
+void solve() {
+    cin >> N;
+    cin >> sym;
+    adj.assign(N, vector<int>());
+    for (int i = 0; i < N - 1; i++) {
+        int u, v;
+        cin >> u >> v;
+        u--, v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    ans = 0;
+    for (int i = 0; i < N; i++) {
+        while (!stk.empty()) stk.pop();
+        dfs(i, -1);
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T = 1;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
 
 ```
 
