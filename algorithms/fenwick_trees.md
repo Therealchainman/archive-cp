@@ -21,15 +21,16 @@ if I query(5) it looks in the range [0,5], so it is inclusive
 point update range queries
 
 ```cpp
-long long neutral = 0;
+
+int neutral = 0;
 struct FenwickTree {
-    vector<long long> nodes;
+    vector<int> nodes;
     
     void init(int n) {
         nodes.assign(n + 1, neutral);
     }
 
-    void update(int idx, long long val) {
+    void update(int idx, int val) {
         while (idx < (int)nodes.size()) {
             nodes[idx] += val;
             idx += (idx & -idx);
@@ -40,8 +41,8 @@ struct FenwickTree {
         return query(right) - query(left - 1);
     }
 
-    long long query(int idx) {
-        long long result = neutral;
+    int query(int idx) {
+        int result = neutral;
         while (idx > 0) {
             result += nodes[idx];
             idx -= (idx & -idx);

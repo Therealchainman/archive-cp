@@ -320,3 +320,28 @@ for (int i = 1; i < LOG; i++) {
     }
 }
 ```
+
+## Range Bitwise Or Queries
+
+It queries inclusive ranges [l, r], that are 0-indexed.
+
+```py
+LOG = 14 # 200,000
+st = [[0] * n for _ in range(LOG)]
+for i in range(n): # this is not complete, initialize how needed
+    st[0][i] = w
+# CONSTRUCT SPARSE TABLE
+for i in range(1, LOG):
+    j = 0
+    while (j + (1 << (i - 1))) < n:
+        st[i][j] = st[i - 1][j] | st[i - 1][j + (1 << (i - 1))]
+        j += 1
+# QUERY SPARSE TABLE
+def query(l, r):
+    res = 0
+    for i in reversed(range(LOG)):
+        if (1 << i) <= r - l + 1:
+            res |= st[i][l] 
+            l += 1 << i
+    return res
+```

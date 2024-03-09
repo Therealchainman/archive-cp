@@ -76,3 +76,21 @@ bool dijkstra(int src, int dst) {
 }
 ```
 
+## dijkstra for when you need the distance to all nodes from source node
+
+```py
+import math
+import heapq
+def dijkstra(adj, src):
+    N = len(adj)
+    min_heap = [(0, src)]
+    dist = [math.inf] * N
+    while min_heap:
+        cost, u = heapq.heappop(min_heap)
+        if cost >= dist[u]: continue
+        dist[u] = cost
+        for v, w in adj[u]:
+            if cost + w < dist[v]: heapq.heappush(min_heap, (cost + w, v))
+    return dist
+```
+

@@ -429,10 +429,35 @@ if __name__ == '__main__':
 
 ## L. Roads
 
-### Solution 1: 
+### Solution 1:  tree, combinatorics, counting, dp of bags, O(n^3)
 
 ```py
+MOD = 998244353
+def pair(n):
+    return n * (n - 1) // 2
+def main():
+    n = int(input())
+    dp = Counter({(1, 0): 1})
+    for _ in range(n - 1):
+        ndp = Counter()
+        for (len_, plen), cnt in dp.items():
+            # TRANSITION 1: ADDING A NEW CITY AT SAME DISTANCE
+            if plen > 0:
+                ndp[(len_ + 1, plen)] += plen * cnt
+                ndp[(len_ + 1, plen)] %= MOD
+            # TRANSITION 2: ADDING A NEW CITY AT ONE GREATER DISTANCE
+            ndp[(1, len_)] += len_ * cnt * pow(2, pair(len_))
+            ndp[(1, len_)] %= MOD
+        dp = ndp
+    ans = 0
+    for (len_, plen), cnt in dp.items():
+        ans = (ans + cnt * pow(2, pair(len_), MOD)) % MOD
+    print(ans)
 
+if __name__ == '__main__':
+    T = 1
+    for _ in range(T):
+        main()
 ```
 
 ## Main Round

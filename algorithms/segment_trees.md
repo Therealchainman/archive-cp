@@ -194,6 +194,14 @@ class SegmentTree:
         return segment_left_bound
     def __repr__(self) -> str:
         return f"nodes array: {self.nodes}, next array: {self.nodes}"
+
+freq = Counter()
+summation = lambda x, y: x + y
+seg = SegmentTree(MAXN + 1, 0, summation)  
+for num in arr:
+    freq[num] += 1
+    if freq[num] == 1 and num <= MAXN:
+        seg.update(num, 1)
 ```
 
 ## Fast Segment tree in C++ Point updates and Range Queries PURQ

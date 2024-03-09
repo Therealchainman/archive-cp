@@ -209,6 +209,76 @@ class Solution:
         return ans
 ```
 
+## 513. Find Bottom Left Tree Value
+
+### Solution 1:  bfs
+
+```py
+class Solution:
+    def findBottomLeftValue(self, root: Optional[TreeNode]) -> int:
+        q = deque([root])
+        while q:
+            first = q[0].val
+            for _ in range(len(q)):
+                u = q.popleft() 
+                q.extend(filter(None, (u.left, u.right)))
+        return first
+```
+
+## 1609. Even Odd Tree
+
+### Solution 1:  hash map, dfs
+
+```py
+class Solution:
+    def isEvenOddTree(self, root: Optional[TreeNode]) -> bool:
+        last = {}
+        def dfs(u, depth = 0):
+            if not u: return True
+            if depth & 1:
+                if u.val & 1: return False
+                if u.val >= last.get(depth, math.inf): return False
+                last[depth] = u.val
+            else:
+                if u.val % 2 == 0: return False
+                if u.val <= last.get(depth, -math.inf): return False
+                last[depth] = u.val
+            return dfs(u.left, depth + 1) and dfs(u.right, depth + 1)
+        return dfs(root)
+```
+
+## 1750. Minimum Length of String After Deleting Similar Ends
+
+### Solution 1:  two pointers 
+
+```py
+class Solution:
+    def minimumLength(self, s: str) -> int:
+        l, r = 0, len(s) - 1
+        while l < r:
+            if s[l] != s[r]: break 
+            ch = s[l]
+            while l <= r and s[l] == ch: l += 1 
+            while l <= r and s[r] == ch: r -= 1
+        return max(0, r - l + 1)
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:

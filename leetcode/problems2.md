@@ -2118,18 +2118,17 @@ class Solution:
     def bagOfTokensScore(self, tokens: List[int], power: int) -> int:
         tokens.sort()
         n = len(tokens)
-        maxScore, left, right, score = 0, 0, n-1, 0
-        while left <= right:
-            while left <= right and power >= tokens[left]:
-                power -= tokens[left]
-                left += 1
+        ans = score = i = 0
+        for j in reversed(range(n)):
+            while i <= j and tokens[i] <= power:
+                power -= tokens[i]
+                i += 1
                 score += 1
-            maxScore = max(maxScore, score)
-            if score == 0: break
-            power += tokens[right] 
-            right -= 1
+            ans = max(ans, score)
+            power += tokens[j]
             score -= 1
-        return maxScore
+            if score < 0: break
+        return ans
 ```
 
 ## 1383. Maximum Performance of a Team

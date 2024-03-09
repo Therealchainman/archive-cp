@@ -2,6 +2,23 @@
 
 I created this because doubly linked lists are very useful data structure in some scenarios.  Especially if you need to delete an element in an array at any index.  And maintain what are the next and previous elements.
 
+## ERASE x from doubly linked list
+
+```py
+def erase(x):
+    prv[nxt[x]] = prv[x]
+    nxt[prv[x]] = nxt[x]
+```
+
+## INSERT y afterx in doubly linked list
+
+```py
+def insert(x, y): # insert y after x
+    nxt[y] = nxt[x]
+    prv[y] = x
+    prv[nxt[x]] = y
+    nxt[x] = y
+```
 
 ## Example of a Doubly Linked List 
 
