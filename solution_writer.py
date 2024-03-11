@@ -43,7 +43,10 @@ def create(contest, name, number, division = None):
     elif contest == "leetcode":
         path = f"{contest}/{name}/{name}{number}.md"
         sys.stdout = open(path, 'w')
-        print(f"# Leetcode Weekly Contest {number}")
+        if name == "weekly":
+            print(f"# Leetcode Weekly Contest {number}")
+        else:
+            print(f"# Leetcode BiWeekly Contest {number}")
         print()
         for _ in range(problem_counts[contest]):
             print("## ")
@@ -57,10 +60,10 @@ def create(contest, name, number, division = None):
     sys.stdout.close()
 
 if __name__ == '__main__':
-    contest, name, number, div = "atcoder", "beginner", 343, None
-    # contest, name, number, div = "atcoder", "regular", 171, None
-    # contest, name, number, div = "leetcode", "biweekly", 123, None
-    # contest, name, number, div = "leetcode", "weekly", 387, None
-    # contest, name, number, div = "codeforces", "round", 932, 2
+    # contest, name, number, div = "atcoder", "beginner", 343, None
+    # contest, name, number, div = "atcoder", "regular", 173, None
+    # contest, name, number, div = "leetcode", "biweekly", 125, None
+    # contest, name, number, div = "leetcode", "weekly", 388, None
+    # contest, name, number, div = "codeforces", "round", 933, 3
     # contest, name, number, div = "codeforces", "educational", 162, 2
     create(contest, name, number, division = div)

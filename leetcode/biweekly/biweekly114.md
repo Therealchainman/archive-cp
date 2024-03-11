@@ -1,4 +1,4 @@
-# Leetcode Weekly Contest 114
+# Leetcode BiWeekly  Contest 114
 
 ## 2869. Minimum Operations to Collect Elements
 

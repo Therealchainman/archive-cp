@@ -1,4 +1,4 @@
-# Leetcode Weekly Contest 124
+# Leetcode BiWeekly Contest 124
 
 ## Apply Operations to Make String Empty
 

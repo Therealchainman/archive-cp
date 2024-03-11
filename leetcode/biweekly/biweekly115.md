@@ -1,4 +1,4 @@
-# Leetcode Weekly Contest 115
+# Leetcode BiWeekly  Contest 115
 
 ## 2899. Last Visited Integers
 

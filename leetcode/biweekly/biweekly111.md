@@ -1,4 +1,4 @@
-# Leetcode Weekly Contest 111
+# Leetcode BiWeekly  Contest 111
 
 ## 2824. Count Pairs Whose Sum is Less than Target
 

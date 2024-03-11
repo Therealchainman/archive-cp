@@ -1,12 +1,4 @@
-# Atcoder Beginner Contest 343
-
-## 
-
-### Solution 1: 
-
-```py
-
-```
+# Codeforces Round 933 Div 3
 
 ## 
 

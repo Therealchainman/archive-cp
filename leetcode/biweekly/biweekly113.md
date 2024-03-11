@@ -1,4 +1,4 @@
-# Leetcode Weekly Contest 113
+# Leetcode BiWeekly  Contest 113
 
 ## 2855. Minimum Right Shifts to Sort the Array
 

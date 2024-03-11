@@ -1,4 +1,4 @@
-# Leetcode Weekly Contest 123
+# Leetcode BiWeekly  Contest 123
 
 ## Maximum Good Subarray Sum
 

@@ -1,4 +1,4 @@
-# Leetcode Weekly Contest 112
+# Leetcode BiWeekly  Contest 112
 
 ## 2839. Check if Strings Can be Made Equal With Operations I
 

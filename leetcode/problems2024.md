@@ -263,12 +263,14 @@ class Solution:
         return max(0, r - l + 1)
 ```
 
-##
+## 791. Custom Sort String
 
-### Solution 1:
+### Solution 1:  sort with key, string find
 
 ```py
-
+class Solution:
+    def customSortString(self, order: str, s: str) -> str:
+        return "".join(sorted(s, key = lambda ch: order.find(ch)))
 ```
 
 ##

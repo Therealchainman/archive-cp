@@ -1,4 +1,4 @@
-# Leetcode Weekly Contest 121
+# Leetcode BiWeekly  Contest 121
 
 ## 
 
