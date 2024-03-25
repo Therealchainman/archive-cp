@@ -15,10 +15,20 @@ int maximum(multiset<int>& ms) {
 
 ## Erase One Element
 
-Erase just one element from multiset and not all the elements with the same value
+Erase just one element from multiset and not all the elements with the same value.  Just be cautious if you call erase with an iterator it removes one instance of that value.  But if you use erase with the value it removes all instances of that value. 
 
 ```cpp
 void erase(multiset<int>& s, int x) {
 	s.erase(s.find(x));
+}
+```
+
+## LOWER BOUND 
+
+```cpp
+auto it = s.lower_bound(x);
+if (it != s.end()) {
+    // do something with it
+    s.erase(it);
 }
 ```

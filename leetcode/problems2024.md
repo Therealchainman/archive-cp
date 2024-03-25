@@ -273,6 +273,122 @@ class Solution:
         return "".join(sorted(s, key = lambda ch: order.find(ch)))
 ```
 
+## 1171. Remove Zero Sum Consecutive Nodes from Linked List
+
+### Solution 1: linked list, sentinel node, start and end node for range and prefix sum
+
+```py
+class Solution:
+    def removeZeroSumSublists(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        front = ListNode(0, head)
+        start = front
+        while start:
+            psum = 0
+            end = start.next
+            while end:
+                psum += end.val
+                if psum == 0: start.next = end.next
+                end = end.next
+            start = start.next
+        return front.next
+```
+
+## 930. Binary Subarrays With Sum
+
+### Solution 1:  sliding window, frequency array, natural sequence sum formula
+
+```py
+class Solution:
+    def numSubarraysWithSum(self, nums: List[int], goal: int) -> int:
+        f = lambda n: n * (n + 1) // 2
+        if goal == 0: return sum(f(len(list(grp))) for k, grp in groupby(nums) if k == 0)
+        n = len(nums)
+        freq = [1] * (n + 1)
+        ans = 0
+        for i in reversed(range(n)):
+            if nums[i] == 0: freq[i] = freq[i + 1] + 1
+        j = wsum = 0
+        for i in range(n):
+            wsum += nums[i]
+            while wsum > goal:
+                wsum -= nums[j]
+                j += 1
+            if wsum == goal: ans += freq[j]
+        return ans
+```
+
+## 238. Product of Array Except Self
+
+### Solution 1:  prefix and suffix multiplication
+
+```py
+class Solution:
+    def productExceptSelf(self, nums: List[int]) -> List[int]:
+        n = len(nums)
+        ans = list(accumulate(reversed(nums), func = operator.mul))
+        ans.reverse()
+        pmul = 1
+        for i in range(n):
+            ans[i] = pmul * (ans[i + 1] if i + 1 < n else 1)
+            pmul *= nums[i]
+        return ans
+```
+
+## 452. Minimum Number of Arrows to Burst Balloons
+
+### Solution 1: line sweep, greedy, stack
+
+```py
+class Solution:
+    def findMinArrowShots(self, points: List[List[int]]) -> int:
+        START = -1
+        END = 1
+        n = len(points)
+        events = []
+        for i, (s, e) in enumerate(points):
+            events.append((s, START, i))
+            events.append((e, END, i))
+        events.sort()
+        arrows = [-1] * n
+        stk = []
+        shots = 1
+        for _, d, i in events:
+            if d == END and arrows[i] == -1: # set of balloons not burst yet
+                while stk: # burst everything that has been seen
+                    j = stk.pop()
+                    arrows[j] = shots
+                shots += 1 # will need 1 more shot for any more balloons not burst by this shot
+            elif d == START:
+                stk.append(i)
+        return max(arrows)
+```
+
+## 621. Task Scheduler
+
+### Solution 1:  maxheap, array, greedy
+
+place the most frequent task first in each cycle, cycles are of length n + 1, save in array for characters so they are not used more than once in cycle, but will be added back into max heap after the cycle. 
+
+```py
+class Solution:
+    def leastInterval(self, tasks: List[str], n: int) -> int:
+        freq = Counter(tasks)
+        heapify(maxheap := [(-freq[ch], ch) for ch in string.ascii_uppercase if freq[ch] > 0])
+        ans = cur = 0
+        while maxheap:
+            stk = []
+            for i in range(n + 1):
+                cur += 1
+                if not maxheap: continue
+                _, ch = heappop(maxheap)
+                ans = cur
+                freq[ch] -= 1
+                stk.append(ch)
+            for ch in stk:
+                if freq[ch] > 0: heappush(maxheap, (-freq[ch], ch))
+        return ans
+```
+
 ##
 
 ### Solution 1:

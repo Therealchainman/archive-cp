@@ -61,9 +61,9 @@ def create(contest, name, number, division = None):
 
 if __name__ == '__main__':
     # contest, name, number, div = "atcoder", "beginner", 343, None
-    # contest, name, number, div = "atcoder", "regular", 173, None
-    # contest, name, number, div = "leetcode", "biweekly", 125, None
+    # contest, name, number, div = "atcoder", "regular", 174, None
+    # contest, name, number, div = "leetcode", "biweekly", 126, None
     # contest, name, number, div = "leetcode", "weekly", 388, None
-    # contest, name, number, div = "codeforces", "round", 933, 3
+    contest, name, number, div = "codeforces", "round", 935, 3
     # contest, name, number, div = "codeforces", "educational", 162, 2
     create(contest, name, number, division = div)

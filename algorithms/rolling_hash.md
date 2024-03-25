@@ -28,6 +28,30 @@ def find_pattern_rolling_hash(string: str, pattern: str) -> int:
     return -1
 ```
 
+## Double hash
+
+if rolling hash fails, you could get accepted with a double hash, here is an example of it used in a problem. 
+
+```py
+p, MOD1, MOD2 = 31, int(1e9) + 7, int(1e9) + 9
+coefficient = lambda x: ord(x) - ord('a') + 1
+shashes = {}
+add = lambda h, mod, ch: ((h * p) % mod + coefficient(ch)) % mod
+n = len(wordsContainer)
+for i in reversed(range(n)):
+    word = wordsContainer[i]
+    hash1 = hash2 = 0
+    if len(word) <= shashes.get((hash1, hash2), (0, math.inf))[1]:
+        shashes[(hash1, hash2)] = (i, len(word))
+    for ch in reversed(word):
+        hash1 = add(hash1, MOD1, ch)
+        hash2 = add(hash2, MOD2, ch)
+        if len(word) <= shashes.get((hash1, hash2), (0, math.inf))[1]:
+            shashes[(hash1, hash2)] = (i, len(word))
+```
+
+## Rolling Hash when you have -1 in array
+
 Example of very similar rolling hash implementation but for an array containing [-1, 0, 1] elements.  So you encode the coefficient by adding 2,  cause you can't have a 0 I believe. 
 
 ```py

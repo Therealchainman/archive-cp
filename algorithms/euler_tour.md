@@ -155,3 +155,80 @@ for _ in range(q):
         res = bit.query(start[u])
         print(res)
 ```
+
+## Euler Tour and RMQ to find LCA of nodes u and v in tree
+
+preprocess time O(nlogn) and lca query time O(1)
+
+```cpp
+const int MAXN = 2e5 + 5, LOG = 20;
+int N, Q;
+int par[MAXN];
+vector<vector<int>> adj;
+int last[MAXN];
+int depth[2 * MAXN];
+vector<int> tour;
+
+void dfs(int u, int p, int dep) {
+    depth[tour.size()] = dep;
+    tour.push_back(u);
+    for (int v : adj[u]) {
+        if (v != p) {
+            dfs(v, u, dep + 1);
+            depth[tour.size()] = dep;
+            tour.push_back(u);
+        }
+    }
+    last[u] = tour.size() - 1;
+}
+
+struct RMQ {
+    vector<vector<int>> st;
+    void init() {
+        int n = tour.size();
+        st.assign(n, vector<int>(LOG));
+        for (int i = 0; i < n; i++) {
+            st[i][0] = i;
+        }
+        for (int j = 1; j < LOG; j++) {
+            for (int i = 0; i + (1 << j) <= n; i++) {
+                int x = st[i][j - 1];
+                int y = st[i + (1 << (j - 1))][j - 1];
+                st[i][j] = (depth[x] < depth[y] ? x : y);
+            }
+        }
+    }
+
+    int query(int a, int b) {
+        int l = min(a, b), r = max(a, b);
+        int j = 31 - __builtin_clz(r - l + 1);
+        int x = st[l][j];
+        int y = st[r - (1 << j) + 1][j];
+        return (depth[x] < depth[y] ? x : y);
+    }
+};
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    cin >> N >> Q;
+    adj.assign(N + 1, vector<int>());
+    for (int i = 2; i <= N; i++) {
+        cin >> par[i];
+        adj[par[i]].push_back(i);
+        adj[i].push_back(par[i]);
+    }
+    memset(depth, 0, sizeof(depth));
+    tour.clear();
+    dfs(1, 0, 0);
+    RMQ rmq;
+    rmq.init();
+    while (Q--) {
+        int u, v;
+        cin >> u >> v;
+        int lca = tour[rmq.query(last[u], last[v])];
+        cout << lca << endl;
+    }
+    return 0;
+}
+```

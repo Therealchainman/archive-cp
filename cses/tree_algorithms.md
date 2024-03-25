@@ -352,7 +352,6 @@ if __name__ == '__main__':
 
 ## Solution 1:  binary jump + lowest common ancestor + bfs + depth + kth ancestor + tree
 
-
 ```py
 from collections import deque
 
@@ -417,133 +416,80 @@ if __name__ == '__main__':
     main()
 ```
 
-### Solution 2:  the lowest common boss is the lowest common ancestor in a tree + represent the relationship between bosses as a rooted tree at node 1, since 1 is the boss of everyone
+### Solution 2:  euler tour, rmq, lca, dfs, sparse table
 
 ```cpp
-#include <bits/stdc++.h>
-using namespace std;
+const int MAXN = 2e5 + 5, LOG = 20;
+int N, Q;
+int par[MAXN];
+vector<vector<int>> adj;
+int last[MAXN];
+int depth[2 * MAXN];
+vector<int> tour;
 
-inline int read()
-{
-	int x = 0, y = 1; char c = getchar();
-	while (c < '0' || c > '9') {
-		if (c == '-') y = -1;
-		c = getchar();
-	}
-	while (c >= '0' && c <= '9') x = x * 10 + c - '0', c = getchar();
-	return x * y;
-}
-
-inline long long readll() {
-	long long x = 0, y = 1; char c = getchar();
-	while (c < '0' || c > '9') {
-		if (c == '-') y = -1;
-		c = getchar();
-	}
-	while (c >= '0' && c <= '9') x = x * 10 + c - '0', c = getchar();
-	return x * y;
-}
-
-class BinaryLift {
-private:
-    int size;
-    vector<vector<int>> graph;
-    vector<int> depth;
-    vector<int> parents;
-    vector<bool> visited;
-    int maxAncestor;
-    vector<vector<int>> jump;
-
-    void get_parent_depth(int node, int parent_node = -1, int depth = 0) {
-        parents[node] = parent_node;
-        this->depth[node] = depth;
-        for (int nei_node : graph[node]) {
-            if (visited[nei_node]) continue;
-            visited[nei_node] = true;
-            get_parent_depth(nei_node, node, depth+1);
+void dfs(int u, int p, int dep) {
+    depth[tour.size()] = dep;
+    tour.push_back(u);
+    for (int v : adj[u]) {
+        if (v != p) {
+            dfs(v, u, dep + 1);
+            depth[tour.size()] = dep;
+            tour.push_back(u);
         }
     }
+    last[u] = tour.size() - 1;
+}
 
-    void build_sparse_table() {
-        for (int j = 0; j < maxAncestor; j++) {
-            for (int i = 0; i < size; i++) {
-                if (j == 0) {
-                    jump[i][j] = parents[i];
-                } else if (jump[i][j-1] != -1) {
-                    int prev_ancestor = jump[i][j-1];
-                    jump[i][j] = jump[prev_ancestor][j-1];
-                }
+struct RMQ {
+    vector<vector<int>> st;
+    void init() {
+        int n = tour.size();
+        st.assign(n, vector<int>(LOG));
+        for (int i = 0; i < n; i++) {
+            st[i][0] = i;
+        }
+        for (int j = 1; j < LOG; j++) {
+            for (int i = 0; i + (1 << j) <= n; i++) {
+                int x = st[i][j - 1];
+                int y = st[i + (1 << (j - 1))][j - 1];
+                st[i][j] = (depth[x] < depth[y] ? x : y);
             }
         }
     }
 
-public:
-    BinaryLift(int node_count, vector<vector<int>>& graph) {
-        size = node_count;
-        this->graph = graph;
-        depth.resize(node_count);
-        parents.resize(node_count);
-        visited.resize(node_count, false);
-        for (int node = 0; node < node_count; node++) {
-            if (visited[node]) continue;
-            visited[node] = true;
-            get_parent_depth(node);
-        }
-        maxAncestor = 18;
-        jump.resize(size, vector<int>(maxAncestor, -1));
-        build_sparse_table();
-    }
-
-    int distance(int p, int q) {
-        int lca = find_lca(p, q);
-        return depth[p] + depth[q] - 2 * depth[lca];
-    }
-
-    int find_lca(int p, int q) {
-        if (depth[p] < depth[q]) {
-            swap(p, q);
-        }
-        int k = depth[p] - depth[q];
-        p = kthAncestor(p, k);
-        if (p == q) return p;
-        for (int j = maxAncestor-1; j >= 0; j--) {
-            if (jump[p][j] != jump[q][j]) {
-                p = jump[p][j];
-                q = jump[q][j];
-            }
-        }
-        return jump[p][0];
-    }
-
-    int kthAncestor(int node, int k) {
-        while (node != -1 && k > 0) {
-            int i = log2(k);
-            node = jump[node][i];
-            k -= (1<<i);
-        }
-        return node;
+    int query(int a, int b) {
+        int l = min(a, b), r = max(a, b);
+        int j = 31 - __builtin_clz(r - l + 1);
+        int x = st[l][j];
+        int y = st[r - (1 << j) + 1][j];
+        return (depth[x] < depth[y] ? x : y);
     }
 };
-
-int main() {
-    int n = read(), q = read();
-    vector<vector<int>> adj_list(n);
-    for (int i = 1; i < n; i++) {
-        int u = read();
-        u--;
-        adj_list[u].push_back(i);
-        adj_list[i].push_back(u);
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    cin >> N >> Q;
+    adj.assign(N + 1, vector<int>());
+    for (int i = 2; i <= N; i++) {
+        cin >> par[i];
+        adj[par[i]].push_back(i);
+        adj[i].push_back(par[i]);
     }
-    BinaryLift binary_lift(n, adj_list);
-    for (int i = 0; i < q; i++) {
-        int u = read(), v = read();
-        u--;
-        v--;
-        int lca = binary_lift.find_lca(u, v);
-        cout << lca + 1 << endl;
+    memset(depth, 0, sizeof(depth));
+    tour.clear();
+    dfs(1, 0, 0);
+    RMQ rmq;
+    rmq.init();
+    while (Q--) {
+        int u, v;
+        cin >> u >> v;
+        int lca = tour[rmq.query(last[u], last[v])];
+        cout << lca << endl;
     }
     return 0;
 }
+
 ```
 
 ## Distance Queries

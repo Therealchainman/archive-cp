@@ -8988,6 +8988,26 @@ class Solution:
         return left + [[start, end]] + right
 ```
 
+### Solution 4:  line sweep algorithm, O(nlogn)
+
+```py
+class Solution:
+    def insert(self, intervals: List[List[int]], newInterval: List[int]) -> List[List[int]]:
+        intervals.append(newInterval)
+        events = []
+        for s, e in intervals:
+            events.append((s, -1))
+            events.append((e, 1))
+        events.sort()
+        ans = []
+        cnt = start = 0
+        for p, d in events:
+            cnt -= d
+            if cnt == 0: ans.append((start, p)) # p is end of current interval
+            elif cnt == 1 and d == -1: start = p # confirm p is start of interval
+        return ans
+```
+
 ## 491. Non-decreasing Subsequences
 
 ### Solution 1: n*2^n time

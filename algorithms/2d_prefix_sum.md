@@ -11,6 +11,8 @@ ps = [[0]*(C+1) for _ in range(R+1)]
 # BUILD 2D PREFIX SUM
 for r, c in product(range(1,R+1),range(1,C+1)):
     ps[r][c] = ps[r-1][c] + ps[r][c-1] + matrix[r-1][c-1] - ps[r-1][c-1]
+# query
+psum = ps[max_row][max_col] - ps[max_row][min_col] - ps[min_row][max_col] + ps[min_row][min_col]
 ```
 
 ## column-wise prefix sum
