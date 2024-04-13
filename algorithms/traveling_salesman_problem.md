@@ -42,3 +42,18 @@ def main():
     ans = min(dp[end_mask])
     print(ans if ans < math.inf else "No")
 ```
+
+## dp bitmask to find if path exists ending at node u with set of nodes seen
+
+```py
+dp = [[False] * N for _ in range(1 << N)]
+for i in range(N):
+    dp[1 << i][i] = True # start from each node
+for mask in range(1 << N):
+    # travel from u to v
+    for u in range(N):
+        if not dp[mask][u]: continue 
+        for v in adj[u]:
+            if (mask >> v) & 1: continue
+            dp[mask | (1 << v)][v] = dp[mask][u]
+```

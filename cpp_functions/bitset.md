@@ -6,3 +6,6 @@ A bitset is an array of bools but each boolean value is not stored in a separate
 
 A limitation of the bitset is that size must be known at compile time i.e. size of the bitset is fixed.
 
+reset() : This function is used to reset all bits of the bitset to 0.
+reset(i): This function is used to reset the ith bit of the bitset.
+set(i): This function is used to set the ith bit of the bitset.

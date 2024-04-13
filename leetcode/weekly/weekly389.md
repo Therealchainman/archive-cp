@@ -44,34 +44,31 @@ class Solution:
 
 ```py
 class Solution:
-    def RMD(self, nums, k): # RMD
-        n = len(nums)
-        if k == 0: return 0
-        if k > n: return math.inf
-        psum = 0
-        for i in range(k):
-            psum += abs(nums[k // 2] - nums[i])
-        ans = psum
-        med_i = k // 2
-        for i in range(k, n):
-            delta = nums[med_i + 1] - nums[med_i]
-            psum += delta
-            psum += (k // 2) * delta
-            v = k // 2 - (1 if k % 2 == 0 else 0)
-            psum -= v * delta
-            med_i += 1
-            psum += nums[i] - nums[med_i] # element added into window
-            psum -= nums[med_i] - nums[i - k] # element removed from window
-            ans = min(ans, psum) 
-        return ans
-
     def minimumMoves(self, nums: List[int], k: int, maxChanges: int) -> int:
-        n = len(nums)
         ans = math.inf
         nums = [i for i, x in enumerate(nums) if x]
+        n = len(nums)
+        psum = list(accumulate(nums))
+        def sum_(i, j):
+            return psum[j] - (psum[i - 1] if i > 0 else 0)
+        def deviation(i, j, mid):
+            lsum = (mid - i + 1) * nums[mid] - sum_(i, mid)
+            rsum = sum_(mid, j) - (j - mid + 1) * nums[mid]
+            return lsum + rsum
+        def RMD(nums, k): # rolling median deviation
+            if k == 0: return 0
+            ans = math.inf
+            l = 0
+            for r in range(k - 1, n):
+                mid = (l + r) >> 1
+                ans = min(ans, deviation(l, r, mid))
+                if k % 2 == 0:
+                    ans = min(ans, deviation(l, r, mid + 1))
+                l += 1
+            return ans
         L, R = max(0, min(k, maxChanges) - 3), min(k, maxChanges)
         for m in range(L, R + 1):
-            ans = min(ans, self.RMD(nums, k - m) + 2 * m)
+            ans = min(ans, RMD(nums, k - m) + 2 * m)
         return ans
 ```
 

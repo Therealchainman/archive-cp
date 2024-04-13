@@ -389,6 +389,406 @@ class Solution:
         return ans
 ```
 
+## 41. First Missing Positive
+
+### Solution 1: answer in range [1,n], swap elements to correct index
+
+```py
+class Solution:
+    def firstMissingPositive(self, nums: List[int]) -> int:
+        nums.append(0)
+        n = len(nums)
+        for i in range(n):
+            index = None
+            while 0 <= nums[i] < n and nums[i] != index:
+                index = nums[i]
+                nums[index], nums[i] = nums[i], nums[index]
+        for i in range(1, n):
+            if nums[i] != i: return i
+        return n
+```
+
+## 713. Subarray Product Less Than K
+
+### Solution 1:  two pointers, prefix calculation with multiplication
+
+```py
+class Solution:
+    def numSubarrayProductLessThanK(self, nums: List[int], k: int) -> int:
+        n = len(nums)
+        ans = j = 0
+        pmul = 1
+        for i in range(n):
+            pmul *= nums[i]
+            while j <= i and pmul >= k:
+                pmul //= nums[j]
+                j += 1
+            ans += i - j + 1
+        return ans
+```
+
+## 992. Subarrays with K Different Integers
+
+### Solution 1:  two sliding windows, two pointers, frequency array
+
+```py
+class Solution:
+    def subarraysWithKDistinct(self, nums: List[int], k: int) -> int:
+        p1 = p2 = ans = d1 = d2 = 0
+        n = len(nums)
+        f1, f2 = [0] * (n + 1), [0] * (n + 1)
+        for i in range(n):
+            f1[nums[i]] += 1
+            f2[nums[i]] += 1
+            if f1[nums[i]] == 1: d1 += 1
+            if f2[nums[i]] == 1: d2 += 1
+            while d1 > k:
+                f1[nums[p1]] -= 1
+                if f1[nums[p1]] == 0: d1 -= 1
+                p1 += 1
+            while d2 >= k:
+                f2[nums[p2]] -= 1
+                if f2[nums[p2]] == 0: d2 -= 1
+                p2 += 1
+            ans += p2 - p1
+        return ans
+```
+
+## 678. Valid Parenthesis String
+
+### Solution 1: two pointers, greedy
+
+```py
+class Solution:
+    def checkValidString(self, s: str) -> bool:
+        lo = hi = 0
+        for i, ch in enumerate(s):
+            if ch == "(": 
+                lo += 1
+                hi += 1
+            elif ch == ")":
+                lo -= 1
+                hi -= 1
+            else:
+                lo -= 1
+                hi += 1
+            if hi < 0: return False
+            lo = max(0, lo)
+        return lo == 0
+```
+
+## 950. Reveal Cards In Increasing Order
+
+### Solution 1: simulation deque
+
+```py
+class Solution:
+    def deckRevealedIncreasing(self, deck: List[int]) -> List[int]:
+        n = len(deck)
+        pos = [0] * n
+        dq = deque(range(n))
+        i = 0
+        while dq:
+            ndq = deque()
+            while dq:
+                v = dq.popleft()
+                if i % 2 == 0:
+                    pos[v] = i // 2
+                else:
+                    ndq.append(v)
+                i += 1
+            dq = ndq
+        deck.sort()
+        ans = [deck[pos[i]] for i in range(n)]
+        return ans
+```
+
+## 402. Remove K Digits
+
+### Solution 1:  monotonic queue, deque
+
+```py
+class Solution:
+    def removeKdigits(self, num: str, k: int) -> str:
+        num += "0"
+        q = deque()
+        for x in map(int, num):
+            while k > 0 and q and q[-1] > x:
+                q.pop()
+                k -= 1
+            q.append(x)
+        while len(q) > 1 and q[0] == 0: q.popleft() # remove leading 0s
+        if len(q) > 1: q.pop() # remove artificial tail "0"
+        return "".join(map(str, q))
+```
+
+## 2953. Count Complete Substrings
+
+### Solution 1:  fixed sized sliding window, frequency, difference array
+
+```py
+class Solution:
+    def count(self, s, e, word, sz, k):
+        len_ = e - s
+        under_count = over_count = ans = 0
+        if sz > len_: return ans
+        freq = [0] * 26
+        unicode = lambda ch: ord(ch) - ord("a")
+        for i in range(s, e):
+            v = unicode(word[i])
+            freq[v] += 1
+            if freq[v] == 1: under_count += 1
+            if freq[v] == k: under_count -= 1
+            elif freq[v] == k + 1: over_count += 1
+            if i >= s + sz - 1:
+                if over_count == under_count == 0: ans += 1
+                v = unicode(word[i - sz + 1])
+                freq[v] -= 1
+                if freq[v] == k: over_count -= 1
+                elif freq[v] == k - 1: under_count += 1
+                if freq[v] == 0: under_count -= 1
+        return ans
+    def countCompleteSubstrings(self, word: str, k: int) -> int:
+        n = len(word)
+        diff_arr = [0] * n
+        unicode = lambda ch: ord(ch) - ord("a")
+        chdiff = lambda i, j: abs(unicode(word[i]) - unicode(word[j]))
+        for i in range(n - 1):
+            diff_arr[i] = chdiff(i, i + 1)
+        diff_arr[-1] = 3
+        queries = []
+        start = 0
+        for end in range(n):
+            if diff_arr[end] > 2:
+                queries.append((start, end + 1))
+                start = end + 1
+        ans = 0
+        for nc in range(1, 27):
+            sz = nc * k
+            for s, e in queries:
+                ans += self.count(s, e, word, sz, k)
+        return ans
+```
+
+## 2954. Count the Number of Infection Sequences
+
+### Solution 1:  dp, counting, multinomial coefficient, factorials
+
+```py
+MOD = int(1e9) + 7
+def mod_inverse(num):
+    return pow(num, MOD - 2, MOD)
+def factorials(n):
+    fact = [1]*(n + 1)
+    for i in range(1, n + 1):
+        fact[i] = (fact[i - 1] * i) % MOD
+    inv_fact = [1]*(n + 1)
+    inv_fact[-1] = mod_inverse(fact[-1])
+    for i in range(n - 1, -1, -1):
+        inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % MOD
+    return fact, inv_fact
+class Solution:
+    def numberOfSequence(self, n: int, sick: List[int]) -> int:
+        blocks = []
+        sick.insert(0, -1)
+        sick.append(n)
+        for i in range(1, len(sick)):
+            blocks.append(sick[i] - sick[i - 1] - 1)
+        fact, inv_fact = factorials(n)
+        ans = fact[sum(blocks)]
+        m = len(blocks)
+        for i in range(m):
+            ans = (ans * inv_fact[blocks[i]]) % MOD
+            if 0 < i < m - 1: ans = (ans * pow(2, max(0, blocks[i] - 1), MOD)) % MOD
+        return ans
+```
+
+## 2977. Minimum Cost to Convert String II
+
+### Solution 1:  dijkstra, rolling hash, minimize dp
+
+TLE
+
+```py
+def dijkstra(adj, src, dst):
+    N = len(adj)
+    min_heap = [(0, src)]
+    vis = set()
+    while min_heap:
+        cost, u = heapq.heappop(min_heap)
+        if u == dst: return cost
+        if u in vis: continue
+        vis.add(u)
+        for v, w in adj[u]:
+            if v in vis: continue
+            heapq.heappush(min_heap, (cost + w, v))
+    return math.inf
+
+class Solution:
+    def minimumCost(self, source: str, target: str, original: List[str], changed: List[str], cost: List[int]) -> int:
+        p, MOD1, MOD2 = 31, int(1e9) + 7, int(1e9) + 9
+        coefficient = lambda x: ord(x) - ord('a') + 1
+        transformation = {}
+        add = lambda h, mod, ch: ((h * p) % mod + coefficient(ch)) % mod
+        n = len(source)
+        for l in range(n):
+            hash1 = hash2 = 0
+            for r in range(l, n):
+                hash1 = add(hash1, MOD1, source[r]) 
+                hash2 = add(hash2, MOD1, target[r])
+                transformation[hash1] = hash2
+        edges = defaultdict(lambda: math.inf)
+        for u, v, w in zip(original, changed, cost):
+            hash1 = hash2 = 0
+            for i in range(len(u)):
+                hash1 = add(hash1, MOD1, u[i]) 
+                hash2 = add(hash2, MOD1, v[i])
+            edges[(hash1, hash2)]
+            edges[(hash1, hash2)] = min(edges[(hash1, hash2)], w)
+        adj = defaultdict(list)
+        for (u, v), w in edges.items():
+            adj[u].append((v, w))
+        transitions = [[math.inf] * n for _ in range(n)]
+        for l in range(n):
+            hash1 = hash2 = 0
+            for r in range(l, n):
+                hash1 = add(hash1, MOD1, source[r]) 
+                hash2 = add(hash2, MOD1, target[r])
+                if hash1 == hash2: transitions[l][r] = 0
+                else: transitions[l][r] = dijkstra(adj, hash1, hash2)
+        dp = [math.inf] * n
+        for r in range(n):
+            for l in range(r + 1):
+                cur = transitions[l][r]
+                if l > 0: cur += dp[l - 1]
+                dp[r] = min(dp[r], cur)
+        return dp[-1] if dp[-1] < math.inf else -1
+```
+
+## 3008. Find Beautiful Indices in the Given Array II
+
+### Solution 1:  z algorithm, string matching, two pointers
+
+```py
+def z_algorithm(s: str) -> list[int]:
+    n = len(s)
+    z = [0]*n
+    left = right = 0
+    for i in range(1,n):
+        # BEYOND CURRENT MATCHED SEGMENT, TRY TO MATCH WITH PREFIX
+        if i > right:
+            left = right = i
+            while right < n and s[right-left] == s[right]:
+                right += 1
+            z[i] = right - left
+            right -= 1
+        else:
+            k = i - left
+            # IF PREVIOUS MATCHED SEGMENT IS NOT TOUCHING BOUNDARIES OF CURRENT MATCHED SEGMENT
+            if z[k] < right - i + 1:
+                z[i] = z[k]
+            # IF PREVIOUS MATCHED SEGMENT TOUCHES OR PASSES THE RIGHT BOUNDARY OF CURRENT MATCHED SEGMENT
+            else:
+                left = i
+                while right < n and s[right-left] == s[right]:
+                    right += 1
+                z[i] = right - left
+                right -= 1
+    return z
+
+class Solution:
+    def beautifulIndices(self, s: str, a: str, b: str, k: int) -> List[int]:
+        n, na, nb = len(s), len(a), len(b)
+        z_arr_a = z_algorithm(a + "$" + s)[na + 1:]
+        z_arr_b = z_algorithm(b + "$" + s)[nb + 1:]
+        arra = [i for i, x in enumerate(z_arr_a) if x == na]
+        arrb = [i for i, x in enumerate(z_arr_b) if x == nb]
+        j = 0
+        ans = []
+        for i in arra:
+            while j < len(arrb) and arrb[j] < i and i - arrb[j] > k: j += 1
+            if j == len(arrb): break
+            if abs(i - arrb[j]) <= k: ans.append(i)
+        return ans
+```
+
+## 3049. Earliest Second to Mark Indices II
+
+### Solution 1:
+
+```py
+
+```
+
+## 3017. Count the Number of Houses at a Certain Distance II
+
+### Solution 1:
+
+```py
+
+```
+
+## 2968. Apply Operations to Maximize Frequency Score
+
+### Solution 1:  binary search size of subarray, sort, rolling median deivation, prefix sum
+
+```py
+class Solution:
+    def maxFrequencyScore(self, nums: List[int], k: int) -> int:
+        n = len(nums)
+        nums.sort()
+        psum = list(accumulate(nums))
+        def sum_(i, j):
+            return psum[j] - (psum[i - 1] if i > 0 else 0)
+        def deviation(i, j, mid):
+            lsum = (mid - i + 1) * nums[mid] - sum_(i, mid)
+            rsum = sum_(mid, j) - (j - mid + 1) * nums[mid]
+            return lsum + rsum
+        def RMD(nums, k): # rolling median deviation
+            n = len(nums)
+            ans = math.inf
+            l = 0
+            for r in range(k - 1, n):
+                mid = (l + r) >> 1
+                ans = min(ans, deviation(l, r, mid))
+                if k % 2 == 0:
+                    ans = min(ans, deviation(l, r, mid - 1))
+                l += 1
+            return ans
+        l, r = 1, n
+        while l < r:
+            m = (l + r + 1) >> 1
+            if RMD(nums, m) <= k:
+                l = m
+            else:
+                r = m - 1
+        return l
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:

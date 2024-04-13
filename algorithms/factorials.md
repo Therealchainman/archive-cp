@@ -6,6 +6,8 @@ Store all factorials up to some n, use mod_inverse to compute the inverse factor
 
 Can be used to solve multinomial coefficients, combinations, permutations and so on. 
 
+multinomial coefficients is you take fact[n], and multiply by all inv_fact[b1] * inv_fact[b2] ...
+
 ## precompute factorial and inverse factorials
 
 ```py

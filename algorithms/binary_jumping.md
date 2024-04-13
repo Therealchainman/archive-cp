@@ -325,6 +325,9 @@ for (int i = 1; i < LOG; i++) {
 
 It queries inclusive ranges [l, r], that are 0-indexed.
 
+query is O(logn)
+precompute is (nlogn)
+
 ```py
 LOG = 14 # 200,000
 st = [[0] * n for _ in range(LOG)]

@@ -3502,18 +3502,18 @@ class Solution:
 ```py
 class Solution:
     def countSubarrays(self, nums: List[int], minK: int, maxK: int) -> int:
-        left, res, minRight, maxRight = 0, 0, -1, -1
-        for i, num in enumerate(nums):
-            if num < minK or num > maxK:
-                left = i + 1
-                minRight = maxRight = -1
-            if num == minK:
-                minRight = i
-            if num == maxK:
-                maxRight = i
-            delta = max(0, min(minRight, maxRight) - left + 1)
-            res += delta
-        return res
+        n = len(nums)
+        lmin = lmax = -1
+        ans = j = 0
+        for i in range(n):
+            if nums[i] > maxK or nums[i] < minK:
+                j = i + 1
+                lmin = lmax = -1
+            if nums[i] == minK: lmin = i
+            if nums[i] == maxK: lmax = i
+            delta = max(0, min(lmin, lmax) - j + 1)
+            ans += delta
+        return ans
 ```
 
 ## 1335. Minimum Difficulty of a Job Schedule
