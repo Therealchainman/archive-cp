@@ -13,3 +13,10 @@ for (int &v : values) {
     compress[v] = compress.size() + 1;
 }
 ```
+
+This is how to dedupe vector
+
+```cpp
+sort(poss.begin(), poss.end());
+poss.erase(unique(poss.begin(), poss.end()), poss.end());
+```

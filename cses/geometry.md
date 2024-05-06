@@ -390,8 +390,46 @@ int main() {
 
 ## Convex Hull
 
-### Solution 1:
+### Solution 1:  convex hull algorithm, geometry, upper and lower convex hull construction
 
-```py
+```cpp
+int N, x, y;
 
+struct P {
+    int x, y;
+    bool operator<(const P &b) const {
+        return make_pair(x, y) < make_pair(b.x, b.y);
+    }
+};
+
+signed main() {
+    cin >> N;
+    vector<P> points(N);
+    for (int i = 0; i < N; i++) {
+        cin >> x >> y;
+        points[i] = {x, y};
+    }
+    sort(points.begin(), points.end());
+    vector<P> ans;
+    for (int rep = 0; rep < 2; rep++) {
+        vector<int> hull; // hull that holds the indices of the points
+        for (int i = 0; i < points.size(); i++) {
+            auto [x3, y3] = points[i];
+            while (hull.size() >= 2) {
+                auto [x1, y1] = points[hull.end()[-2]];
+                auto [x2, y2] = points[hull.end()[-1]];
+                if ((x3 - x1) * (y2 - y1) <= (x2 - x1) * (y3 - y1)) break;
+                hull.pop_back();
+            }
+            hull.push_back(i);
+        }
+        hull.pop_back();
+        for (int i : hull) ans.push_back(points[i]);
+        reverse(points.begin(), points.end());
+    }
+    cout << ans.size() << endl;
+    for (P a : ans) {
+        cout << a.x << " " << a.y << endl;
+    }
+}
 ```

@@ -43,3 +43,36 @@ def z_algorithm(s: str) -> list[int]:
                 right -= 1
     return z
 ```
+
+This is not battle tested very much
+
+```cpp
+std::vector<int> z_algorithm(const std::string& s) {
+    int n = s.length();
+    std::vector<int> z(n, 0);
+    int left = 0, right = 0;
+    for (int i = 1; i < n; ++i) {
+        if (i > right) {
+            left = right = i;
+            while (right < n && s[right-left] == s[right]) {
+                right++;
+            }
+            z[i] = right - left;
+            right--;
+        } else {
+            int k = i - left;
+            if (z[k] < right - i + 1) {
+                z[i] = z[k];
+            } else {
+                left = i;
+                while (right < n && s[right-left] == s[right]) {
+                    right++;
+                }
+                z[i] = right - left;
+                right--;
+            }
+        }
+    }
+    return z;
+}
+```

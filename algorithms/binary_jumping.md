@@ -230,22 +230,34 @@ range minimum query can also be used with (value, index), where the index is loc
 
 
 ```py
-n = len(nums)
-lg = [0] * (n + 1)
-for i in range(2, n + 1):
-    lg[i] = lg[i // 2] + 1
-LOG = lg[-1] + 1
-st = [[math.inf] * n for _ in range(LOG)]
-st[0] = nums[:]
-for i in range(1, LOG):
-    j = 0
-    while (j + (1 << (i - 1))) < n:
-        st[i][j] = min(st[i - 1][j], st[i - 1][j + (1 << (i - 1))])
-        j += 1
-def query(left, right):
-    length = right - left + 1
-    i = lg[length]
-    return min(st[i][left], st[i][right - (1 << i) + 1])
+class ST_Min:
+    def __init__(self, nums):
+        self.nums = nums
+        self.n = len(nums)
+        self.LOG = 14 # 10,000
+        self.build()
+
+    def op(self, x, y):
+        return min(x, y)
+
+    def build(self):
+        self.lg = [0] * (self.n + 1)
+        for i in range(2, self.n + 1):
+            self.lg[i] = self.lg[i // 2] + 1
+        self.st = [[0] * self.n for _ in range(self.LOG)]
+        for i in range(self.n):
+            self.st[0][i] = self.nums[i]
+        # CONSTRUCT SPARSE TABLE
+        for i in range(1, self.LOG):
+            j = 0
+            while (j + (1 << (i - 1))) < self.n:
+                self.st[i][j] = self.op(self.st[i - 1][j], self.st[i - 1][j + (1 << (i - 1))])
+                j += 1
+
+    def query(self, l, r):
+        length = r - l + 1
+        i = self.lg[length]
+        return self.op(self.st[i][l], self.st[i][r - (1 << i) + 1])
 ```
 
 ```cpp
@@ -328,6 +340,8 @@ It queries inclusive ranges [l, r], that are 0-indexed.
 query is O(logn)
 precompute is (nlogn)
 
+think can change this to O(1), cause bitwise or is idempotent
+
 ```py
 LOG = 14 # 200,000
 st = [[0] * n for _ in range(LOG)]
@@ -347,4 +361,42 @@ def query(l, r):
             res |= st[i][l] 
             l += 1 << i
     return res
+```
+
+## Range Bitwise And Queries
+
+It queries inclusive ranges [l, r], that are 0-indexed.
+
+query is O(1) (idempotent)
+precompute is (nlogn)
+
+```py
+class ST_And:
+    def __init__(self, nums):
+        self.nums = nums
+        self.n = len(nums)
+        self.LOG = 14 # 10,000
+        self.build()
+
+    def op(self, x, y):
+        return x & y
+
+    def build(self):
+        self.lg = [0] * (self.n + 1)
+        for i in range(2, self.n + 1):
+            self.lg[i] = self.lg[i // 2] + 1
+        self.st = [[0] * self.n for _ in range(self.LOG)]
+        for i in range(self.n): 
+            self.st[0][i] = self.nums[i]
+        # CONSTRUCT SPARSE TABLE
+        for i in range(1, self.LOG):
+            j = 0
+            while (j + (1 << (i - 1))) < self.n:
+                self.st[i][j] = self.op(self.st[i - 1][j], self.st[i - 1][j + (1 << (i - 1))])
+                j += 1
+
+    def query(self, l, r):
+        length = r - l + 1
+        i = self.lg[length]
+        return self.op(self.st[i][l], self.st[i][r - (1 << i) + 1])
 ```

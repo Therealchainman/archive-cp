@@ -21,3 +21,12 @@ for i in range(N):
         bfreq[i][j] = count_bits(R[i], j) % MOD
         if L[i] > 0: bfreq[i][j] = (bfreq[i][j] - count_bits(L[i] - 1, j)) % MOD
 ```
+
+## lowbit function
+
+This function returns the lowest bit that is set in a given integer.  It does so by using the bitwise AND operator with the two's complement of the input integer.  This is a common operation in bit manipulation and is used in many algorithms that require bit manipulation.
+
+```py
+def lowbit(x):
+    return x & -x
+```

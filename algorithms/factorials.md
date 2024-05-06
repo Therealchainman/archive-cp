@@ -11,18 +11,16 @@ multinomial coefficients is you take fact[n], and multiply by all inv_fact[b1] *
 ## precompute factorial and inverse factorials
 
 ```py
-mod = int(1e9) + 7
-
-def mod_inverse(v):
-    return pow(v, mod - 2, mod)
+def mod_inverse(x):
+    return pow(x, MOD - 2, MOD)
 
 def factorials(n):
     fact, inv_fact = [1] * (n + 1), [0] * (n + 1)
     for i in range(2, n + 1):
-        fact[i] = (fact[i - 1] * i) % mod
+        fact[i] = (fact[i - 1] * i) % MOD
     inv_fact[-1] = mod_inverse(fact[-1])
     for i in reversed(range(n)):
-        inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % mod
+        inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % MOD
     return fact, inv_fact
 ```
 

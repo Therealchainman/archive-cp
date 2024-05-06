@@ -765,20 +765,75 @@ class Solution:
         return l
 ```
 
-##
+## 752. Open the Lock
 
-### Solution 1:
+### Solution 1:  bfs, deque, hash table, set
 
 ```py
-
+class Solution:
+    def openLock(self, deadends: List[str], target: str) -> int:
+        n = len(deadends)
+        q = deque([[0, 0, 0, 0]])
+        vis = set(deadends)
+        start = "0000"
+        if target == start: return 0
+        if start in vis: return -1
+        vis.add(start)
+        cnt = 0
+        def create_lock(i, delta):
+            lock[i] = (lock[i] + delta) % 10
+            new_lock = lock[::]
+            lock[i] = (lock[i] - delta) % 10
+            return new_lock
+        while q:
+            cnt += 1
+            for _ in range(len(q)):
+                lock = q.popleft()
+                for i in range(4):
+                    new_lock = create_lock(i, 1)
+                    key = "".join(map(str, new_lock))
+                    if key not in vis: 
+                        if key == target: return cnt
+                        vis.add(key)
+                        q.append(new_lock)
+                    new_lock = create_lock(i, -1)
+                    key = "".join(map(str, new_lock))
+                    if key not in vis: 
+                        if key == target: return cnt
+                        vis.add(key)
+                        q.append(new_lock)
+        return -1
 ```
 
-##
+## 1289. Minimum Falling Path Sum II
 
-### Solution 1:
+### Solution 1:  dynamic programming, space optimized, save two minimums
 
 ```py
-
+class Solution:
+    def minFallingPathSum(self, grid: List[List[int]]) -> int:
+        N = len(grid)
+        dp1 = dp2 = 0
+        i1 = i2 = -1
+        for row in grid:
+            ndp1 = ndp2 = math.inf
+            ni1 = ni2 = -1
+            for i in range(N):
+                if i != i1:
+                    cand = dp1 + row[i]
+                else:
+                    cand = dp2 + row[i]
+                if cand < ndp1:
+                    ndp2 = ndp1
+                    ni2 = ni1
+                    ndp1 = cand
+                    ni1 = i
+                elif cand < ndp2:
+                    ndp2 = cand
+                    ni2 = i
+            dp1, dp2 = ndp1, ndp2
+            i1, i2 = ni1, ni2
+        return dp1
 ```
 
 ##

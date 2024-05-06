@@ -153,3 +153,18 @@ Similar implementation in C++.
 ```cpp
 
 ```
+
+## prime sieve to compute the sum of multiplicity for each integer
+
+```py
+def prime_sieve(lim):
+    multi_sum = [0] * lim
+    for i in range(2, lim):
+        if multi_sum[i] > 0: continue 
+        for j in range(i, lim, i):
+            num = j
+            while num % i == 0:
+                multi_sum[j] += 1
+                num //= i
+    return multi_sum
+```

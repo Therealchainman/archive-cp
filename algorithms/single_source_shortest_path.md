@@ -57,7 +57,7 @@ def dijkstra(adj, src):
 untested, but same as python dijkstra
 
 ```cpp
-bool dijkstra(int src, int dst) {
+int dijkstra(int src, int dst) {
     priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
     vector<bool> vis(N, false);
     pq.emplace(0, src);

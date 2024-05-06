@@ -984,6 +984,52 @@ if __name__ == '__main__':
     print(main())
 ```
 
+## Range XOR Queries
+
+### Solution 1:  prefix xor sum
+
+```cpp
+int N, Q;
+vector<int> arr, pxor;
+
+int xor_sum(int l, int r) {
+    return pxor[r] ^ (l > 0 ? pxor[l - 1] : 0);
+}
+
+signed main() {
+    cin >> N >> Q;
+    arr.resize(N);
+    pxor.resize(N);
+    for (int i = 0; i < N; i++) {
+        cin >> arr[i];
+        pxor[i] = arr[i];
+        if (i > 0) pxor[i] ^= pxor[i - 1];
+    }
+    while (Q--) {
+        int l, r;
+        cin >> l >> r;
+        l--; r--;
+        cout << xor_sum(l, r) << endl;
+    }
+}
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:

@@ -21,7 +21,6 @@ if I query(5) it looks in the range [0,5], so it is inclusive
 point update range queries
 
 ```cpp
-
 int neutral = 0;
 struct FenwickTree {
     vector<int> nodes;
