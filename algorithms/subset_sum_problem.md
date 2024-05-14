@@ -60,3 +60,20 @@ for (int c : cycles) {
     }
 }
 ```
+
+## Subset Sum Problem O(nc) solution
+
+Iterates over n elements with sum = c.  Make sure you do it in this order, loop over the elements, then loop over in reverse order the sums. 
+
+```cpp
+  
+// ssp begins
+dp.assign(n + 1, 0);
+dp[0] = 1;
+for (int x : arr) {
+    for (int i = n; i >= 0; i--) {
+        if (i - x < 0) continue;
+        dp[i] |= dp[i - x];
+    }
+}
+```

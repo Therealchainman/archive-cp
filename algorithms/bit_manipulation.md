@@ -30,3 +30,8 @@ This function returns the lowest bit that is set in a given integer.  It does so
 def lowbit(x):
     return x & -x
 ```
+
+
+## Important fact about binary representations
+
+1000 > 0111, This is useful for solving many problems, because now you know you just need to set the highest bit to 1 and you will get the maximum number.

@@ -836,6 +836,121 @@ class Solution:
         return dp1
 ```
 
+## 506. Relative Ranks
+
+### Solution 1:  dictionary, sort
+
+```py
+class Solution:
+    def findRelativeRanks(self, score: List[int]) -> List[str]:
+        n = len(score)
+        ans = [None] * n
+        place = {}
+        place[1] = "Gold Medal"
+        place[2] = "Silver Medal"
+        place[3] = "Bronze Medal"
+        for r, i in enumerate(sorted(range(n), key = lambda x: score[x], reverse = True), start = 1):
+            ans[i] = place.get(r, str(r))
+        return ans
+```
+
+## 786. K-th Smallest Prime Fraction
+
+### Solution 1:  binary search, floats, two pointers
+
+```py
+class Solution:
+    def kthSmallestPrimeFraction(self, arr: List[int], k: int) -> List[int]:
+        n = len(arr)
+        def possible(target):
+            x, y = 1, 100_000
+            j = ans = 0
+            for i in range(n):
+                j = i + 1
+                while j < n and arr[i] / arr[j] >= target: j += 1
+                if j < n:
+                    ans += n - j
+                    if arr[i] * y > x * arr[j]: x, y = arr[i], arr[j]
+            return ans, x, y
+        lo, hi = 0, 1.0
+        while lo < hi:
+            mid = (lo + hi) / 2
+            cnt, x, y = possible(mid)
+            if cnt == k: return [x, y]
+            if cnt < k:
+                lo = mid
+            else:
+                hi = mid
+        return []
+```
+
+## 861. Score After Flipping Matrix
+
+### Solution 1:  greedy, bit manipulation, binary
+
+```py
+class Solution:
+    def matrixScore(self, grid: List[List[int]]) -> int:
+        R, C = len(grid), len(grid[0])
+        for i in range(R):
+            if grid[i][0]: continue
+            for j in range(C):
+                grid[i][j] ^= 1
+        col_count = [[0] * 2 for _ in range(C)]
+        for r, c in product(range(R), range(C)):
+            col_count[c][grid[r][c]] += 1
+        for r, c in product(range(R), range(C)):
+            if col_count[c][0] > col_count[c][1]: grid[r][c] ^= 1
+        ans = sum(int("".join(map(str, row)), 2) for row in grid)
+        return ans
+```
+
+## 1219. Path with Maximum Gold
+
+### Solution 1:  undirected graph, bitmask dynamic programming, counter, index compression
+
+```py
+class Solution:
+    def getMaximumGold(self, grid: List[List[int]]) -> int:
+        R, C = len(grid), len(grid[0])
+        nodes = {(-1, -1): 0}
+        for r, c in product(range(R), range(C)):
+            if grid[r][c] > 0:
+                nodes[(r, c)] = len(nodes)
+        n = len(nodes)
+        amt = [0] * n
+        adj = [[] for _ in range(n)]
+        neighborhood = lambda r, c: [(r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)]
+        in_bounds = lambda r, c: 0 <= r < R and 0 <= c < C
+        for r, c in product(range(R), range(C)):
+            if not grid[r][c]: continue
+            amt[nodes[(r, c)]] = grid[r][c]
+            adj[0].append(nodes[(r, c)])
+            for nr, nc in neighborhood(r, c):
+                if not in_bounds(nr, nc) or not grid[nr][nc]: continue
+                adj[nodes[(r, c)]].append(nodes[(nr, nc)])
+        ans = 0
+        dp = Counter({(1, 0) : 0})
+        while dp:
+            ndp = Counter()
+            for (mask, u), gold in dp.items():
+                ans = max(ans, gold)
+                for v in adj[u]:
+                    if (mask >> v) & 1: continue
+                    nmask = mask | (1 << v)
+                    ndp[(nmask, v)] = max(ndp[(nmask, v)], gold + amt[v])
+            dp = ndp
+        return ans
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:

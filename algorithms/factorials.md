@@ -24,6 +24,26 @@ def factorials(n):
     return fact, inv_fact
 ```
 
+```cpp
+int inv(int i) {
+  return i <= 1 ? i : MOD - (int)(MOD/i) * inv(MOD % i) % MOD;
+}
+
+vector<int> fact, inv_fact;
+
+void factorials(int n) {
+    fact.assign(n + 1, 1);
+    inv_fact.assign(n + 1, 0);
+    for (int i = 2; i <= n; i++) {
+        fact[i] = (fact[i - 1] * i) % MOD;
+    }
+    inv_fact.end()[-1] = inv(fact.end()[-1]);
+    for (int i = n - 1; i >= 0; i--) {
+        inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % MOD;
+    }
+}
+```
+
 ## binomial coefficient or combinations
 
 combinations pick r from n elements
@@ -33,6 +53,13 @@ factorials are precomputed for calculating combinations frequently
 ```py
 def nCr(n, r):
     return (fact[n] * inv_fact[r] * inv_fact[n - r]) % mod if n >= r else 0
+```
+
+```cpp
+int choose(int n, int r) {
+    if (n < r) return 0;
+    return (fact[n] * inv_fact[r] % MOD) * inv_fact[n - r] % MOD;
+}
 ```
 
 ## log base 2 factorials
