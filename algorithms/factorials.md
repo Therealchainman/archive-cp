@@ -92,3 +92,19 @@ long double choose(int n, int k) {
     return log_fac[n] - log_fac[k] - log_fac[n - k];
 }
 ```
+
+## Factorial trick with division by an integer
+
+If you have N! / i, there is a way compute these with using suffix and prefix product precomputation, and to compute these on the fly
+
+```cpp
+for (int i = 1; i <= N; i++) {
+    pprod[i] = (pprod[i - 1] * i) % M;
+}
+for (int i = N; i > 0; i--) {
+    sprod[i] = (sprod[i + 1] * i) % M;
+}
+
+```
+
+Then to compute N! / i => pprod[i - 1] * sprod[i + 1]

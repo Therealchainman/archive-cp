@@ -39,6 +39,8 @@ for i in range(n):
     dfs(i)
 ```
 
+## Computing the number of SCCs and determining which component each node is belongs
+
 This implementation is computing the number of strongly connected components. And also the id of each node in the scc.
 
 ```py
@@ -68,6 +70,37 @@ def dfs(node):
 for i in range(1, n + 1):
     if disc[i]: continue
     dfs(i)
+```
+
+## CPP variant
+
+```cpp
+int N, M, timer, scc_count;
+vector<vector<int>> adj;
+vector<int> disc, low, comp;
+stack<int> stk;
+vector<bool> on_stack;
+
+void dfs(int u) {
+    disc[u] = low[u] = ++timer;
+    stk.push(u);
+    on_stack[u] = true;
+    for (int v : adj[u]) {
+        if (not disc[v]) dfs(v);
+        if (on_stack[v]) low[u] = min(low[u], low[v]);
+    }
+    if (disc[u] == low[u]) { // found scc
+        scc_count++;
+        while (!stk.empty()) {
+            int v = stk.top();
+            stk.pop();
+            on_stack[v] = false;
+            low[v] = low[u];
+            comp[v] = scc_count;
+            if (v == u) break;
+        }
+    }
+}
 ```
 
 ## CONDENSATION GRAPH

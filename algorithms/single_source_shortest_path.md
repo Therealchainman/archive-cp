@@ -94,3 +94,35 @@ def dijkstra(adj, src):
     return dist
 ```
 
+## dijkstra for matrix or grid search, where you can only move in 4 directions
+
+For this particular implementation it is multisource, and every position that is on the boundary is a source.  Then it computes the minimum distance to get from boundary to any other position inside the grid.  In this case it finds the cheapest way to get from every position to escape the grid.
+
+```cpp
+void dijkstra() {
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+    vis.assign(N * M, false);
+    for (int i = 0; i < N; i++) {
+        pq.emplace(grid[i][0], mat_id(i, 0));
+        pq.emplace(grid[i][M - 1], mat_id(i, M - 1));
+    }
+    for (int i = 0; i < M; i++) {
+        pq.emplace(grid[0][i], mat_id(0, i));
+        pq.emplace(grid[N - 1][i], mat_id(N - 1, i));
+    }
+    while (!pq.empty()) {
+        auto [cost, u] = pq.top();
+        pq.pop();
+        if (vis[u]) continue;
+        vis[u] = true;
+        auto [i, j] = mat_ij(u);
+        dist[i][j] = cost;
+        for (auto [ni, nj] : neighborhood(i, j)) {
+            if (!in_bounds(ni, nj)) continue;
+            if (vis[mat_id(ni, nj)]) continue;
+            pq.emplace(cost + grid[ni][nj], mat_id(ni, nj));
+        }
+    }
+}
+```
+

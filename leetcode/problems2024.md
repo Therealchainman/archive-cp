@@ -943,12 +943,24 @@ class Solution:
         return ans
 ```
 
-##
+## 979. Distribute Coins in Binary Tree
 
-### Solution 1:
+### Solution 1:  dfs, tree traversal
 
 ```py
-
+class Solution:
+    def distributeCoins(self, root: Optional[TreeNode]) -> int:
+        ans = 0
+        def dfs(u):
+            nonlocal ans
+            if not u: return 0
+            if not u.left and not u.right: return -1 if u.val == 0 else u.val - 1
+            lcoins, rcoins = dfs(u.left), dfs(u.right)
+            ans = ans + abs(lcoins) + abs(rcoins)
+            u.val = u.val + lcoins + rcoins
+            return u.val - 1
+        dfs(root)
+        return ans
 ```
 
 ##

@@ -35,3 +35,8 @@ def lowbit(x):
 ## Important fact about binary representations
 
 1000 > 0111, This is useful for solving many problems, because now you know you just need to set the highest bit to 1 and you will get the maximum number.
+
+## Bit Equations
+
+Bit equation that relates addition to bitwise XOR and AND operations.  This is useful for solving problems that require bit manipulation.  This is a useful way to convert from one to another, if it makes something simpler.
+x+y=(x⊕y)+2⋅(x&y)
