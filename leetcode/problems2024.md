@@ -963,6 +963,35 @@ class Solution:
         return ans
 ```
 
+## 1863. Sum of All Subset XOR Totals
+
+### Solution 1:  dynamic programming, bitmask, subset sum
+
+```py
+class Solution:
+    def subsetXORSum(self, nums: List[int]) -> int:
+        n = len(nums)
+        ans = 0
+        m = 2 ** 5
+        dp = [0] * (m + 1)
+        dp[0] = 1
+        for num in nums:
+            ndp = dp[:]
+            for v in range(m + 1):
+                if v ^ num > m: continue
+                ndp[v ^ num] += dp[v]
+            dp = ndp
+        return sum(i * v for i, v in enumerate(dp))
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
