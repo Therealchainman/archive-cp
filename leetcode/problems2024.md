@@ -984,12 +984,28 @@ class Solution:
         return sum(i * v for i, v in enumerate(dp))
 ```
 
-##
+## 1255. Maximum Score Words Formed by Letters
 
-### Solution 1:
+### Solution 1:  enumerate bitmask, frequency array
 
 ```py
-
+class Solution:
+    def maxScoreWords(self, words: List[str], letters: List[str], score: List[int]) -> int:
+        n, m = len(words), len(letters)
+        unicode = lambda ch: ord(ch) - ord("a")
+        freq = [0] * 26
+        for ch in letters:
+            freq[unicode(ch)] += 1
+        ans = 0
+        for mask in range(1 << n):
+            mfreq = [0] * 26
+            for i in range(n):
+                if (mask >> i) & 1:
+                    for ch in words[i]:
+                        mfreq[unicode(ch)] += 1
+            if any(f1 > f2 for f1, f2 in zip(mfreq, freq)): continue
+            ans = max(ans, sum(score[i] * mfreq[i] for i in range(26)))
+        return ans
 ```
 
 ##

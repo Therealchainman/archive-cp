@@ -81,3 +81,49 @@ class Trie:
             node.prefix_count -= 1
         node.word_count -= 1
 ```
+
+```cpp
+struct Node {
+    int children[26];
+    bool isLeaf;
+    void init() {
+        memset(children,0,sizeof(children));
+        isLeaf = false;
+    }
+};
+struct Trie {
+    vector<Node> trie;
+    void init() {
+        Node root;
+        root.init();
+        trie.push_back(root);
+    }
+    void insert(string& s) {
+        int cur = 0;
+        for (char &c : s) {
+            int i = c-'a';
+            if (trie[cur].children[i]==0) {
+                Node root;
+                root.init();
+                trie[cur].children[i] = trie.size();
+                trie.push_back(root);
+            }
+            cur = trie[cur].children[i];
+        }
+        trie[cur].isLeaf= true;
+    }
+    int search(string& s) {
+        int cur = 0;
+        for (char &c : s) {
+            int i = c-'a';
+            if (!trie[cur].children[i]) { return false;
+            }
+            cur = trie[cur].children[i];
+        }
+        return trie[cur].isLeaf;
+    }
+};
+
+Trie trie;
+trie.init();
+```
