@@ -58,7 +58,7 @@ class SegmentTree:
         return result
     
     def __repr__(self):
-        return f"nodes array: {self.nodes}, next array: {self.nodes}"
+        return f"nodes array: {self.nodes}"
 ```
 
 segment tree without initial array
@@ -105,7 +105,7 @@ class SegmentTree:
         return result
     
     def __repr__(self) -> str:
-        return f"nodes array: {self.nodes}, next array: {self.nodes}"
+        return f"nodes array: {self.nodes}"
 ```
 
 This variation was needed for a problem where you want to always keep the minimum or maximum value of an integer at an index in a segment tree, so that means the update function is updating based on the self.func(cur, val)

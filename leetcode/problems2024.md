@@ -1008,12 +1008,28 @@ class Solution:
         return ans
 ```
 
-##
+## 552. Student Attendance Record II
 
-### Solution 1:
+### Solution 1:  dynamic programming, counting
 
 ```py
-
+class Solution:
+    def checkRecord(self, n: int) -> int:
+        MOD = int(1e9) + 7
+        dp = [[0] * 3 for _ in range(2)] # dp[A][L]
+        dp[0][0] = 1
+        for _ in range(n):
+            ndp = [[0] * 3 for _ in range(2)]
+            for i in range(3):
+                # add A
+                ndp[1][0] = (ndp[1][0] + dp[0][i]) % MOD
+                for j in range(2):
+                    # add P
+                    ndp[j][0] = (ndp[j][0] + dp[j][i]) % MOD
+                    # add L
+                    if i > 0: ndp[j][i] = (ndp[j][i] + dp[j][i - 1]) % MOD
+            dp = ndp
+        return sum(sum(row) % MOD for row in dp) % MOD
 ```
 
 ##

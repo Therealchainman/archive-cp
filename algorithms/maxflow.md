@@ -1,5 +1,7 @@
 # Maximum flow algorithms
 
+Max Flow
+
 # Ford Fulkerson Algorithm
 
 ## Dinics Algorithm for finding augmenting paths

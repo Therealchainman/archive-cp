@@ -83,6 +83,10 @@ class UnionFind:
         return f'parents: {[(i, parent) for i, parent in enumerate(self.parent)]}, sizes: {self.size}'
 ```
 
+## Best cpp implementation
+
+This is my favorite cpp implementation, it is rather simple.
+
 ```cpp
 struct UnionFind {
     vector<int> parents, size;
@@ -99,7 +103,7 @@ struct UnionFind {
         return parents[i]=find(parents[i]);
     }
 
-    bool union_(int i, int j) {
+    bool same(int i, int j) {
         i = find(i), j = find(j);
         if (i!=j) {
             if (size[j]>size[i]) {
@@ -107,9 +111,9 @@ struct UnionFind {
             }
             size[i]+=size[j];
             parents[j]=i;
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 };
 ```

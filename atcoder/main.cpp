@@ -3,12 +3,11 @@ using namespace std;
 #define int long long
 #define endl '\n'
 
+void solve() {
 
+}
 
 signed main() {
-    int n, q, idx, left, right, query_type;
-    string s;
-    char ch;
-    cin>>n>>s>>q;
+    solve();
     return 0;
 }
