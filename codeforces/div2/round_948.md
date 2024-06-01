@@ -18,41 +18,62 @@
 
 ## E. Tensor
 
-### Solution 1: 
+### Solution 1:  partially ordered sets, reachability in DAG, Dilworth's theorem, stacks, greedy, directed acyclic graph
 
 ```cpp
 int N;
-vector<int> ans;
 string resp;
+
+bool ask(int i, int j) {
+    cout << "? " << i << " " << j << endl;
+    cout.flush();
+    cin >> resp;
+    return resp == "YES";
+}
 
 void solve() {
     cin >> N;
-    ans.assign(N + 1, -1);
-    vector<int> U(2, -1), V(2, -1);
-    V[0] = N;
-    U[0] = V[0] - 1;
-    ans[N] = 0;
-    bool turn = true;
-    while (U[0] > 0 || U[1] > 0) {
-        int idx;
-        if (U[0] > U[1] || (U[0] == U[1] && turn)) {
-            idx = 0;
+    vector<int> ans(N + 1, 0);
+    vector<int> white, black, mixed;
+    for (int i = 1; i <= N; i++) {
+        bool white_reachable = false, black_reachable = false, mixed_reachable = false;
+        if (mixed.empty()) {
+            if (!white.empty()) {
+                if (ask(white.end()[-1], i)) white_reachable = true;
+            }
+            if (!black.empty()) {
+                if (ask(black.end()[-1], i)) black_reachable = true;
+                if (resp == "YES") black_reachable = true;
+            }
+            if (white_reachable && black_reachable) {
+                mixed.push_back(i);
+            } else if (white_reachable) {
+                white.push_back(i);
+            } else if (black_reachable) {
+                black.push_back(i);
+            } else if (white.empty()) {
+                white.push_back(i);
+            } else {
+                black.push_back(i);
+            }
         } else {
-            idx = 1;
+            if (ask(mixed.end()[-1], i)) mixed_reachable = true;
+            if (ask(white.end()[-1], i)) white_reachable = true;
+            if (mixed_reachable) {
+                mixed.push_back(i);
+            } else {  
+                if (white_reachable) white.push_back(i);
+                else black.push_back(i);
+                for (int j : mixed) {
+                    if (white_reachable) black.push_back(j);
+                    else white.push_back(j);
+                }
+                mixed.clear();
+            }
         }
-        cout << "?" << " " << U[idx] << " " << V[idx] << endl;
-        cout.flush();
-        cin >> resp;
-        if (resp == "YES" && ans[U[idx]] == -1) {
-            if (U[idx] == U[idx ^ 1]) turn = false;
-            V[idx] = U[idx];
-            ans[V[idx]] = idx;
-        } else if (V[idx ^ 1] == -1) {
-            V[idx ^ 1] = U[idx];
-            ans[V[idx ^ 1]] = idx ^ 1;
-            U[idx ^ 1] = V[idx ^ 1] - 1;
-        }
-        U[idx]--;
+    }
+    for (int v : white) {
+        ans[v] = 1;
     }
     cout << "! ";
     for (int i = 1; i <= N; i++) {

@@ -40,3 +40,7 @@ def lowbit(x):
 
 Bit equation that relates addition to bitwise XOR and AND operations.  This is useful for solving problems that require bit manipulation.  This is a useful way to convert from one to another, if it makes something simpler.
 x+y=(x⊕y)+2⋅(x&y)
+
+## Minimum xor of a pair of integers in an array
+
+This problem can be solved by sorting the array, and then the minimum xor of a pair will come from some adjacent elements in the array.

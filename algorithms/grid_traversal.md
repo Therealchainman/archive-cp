@@ -2,6 +2,8 @@
 
 ## Helpers for grids in cpp
 
+Really a matrix in linear algebra
+
 You can convert 2d point to 1d index and vice versa, check if a point is in bounds, and get the neighbors of a point in a grid.
 
 ```cpp

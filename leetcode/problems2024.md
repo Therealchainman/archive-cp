@@ -1032,6 +1032,65 @@ class Solution:
         return sum(sum(row) % MOD for row in dp) % MOD
 ```
 
+## 1404. Number of Steps to Reduce a Number in Binary Representation to One
+
+### Solution 1:  loop, addition modulo 2
+
+```py
+class Solution:
+    def numSteps(self, s: str) -> int:
+        carry = ans = 0
+        n = len(s)
+        for i in reversed(range(1, n)):
+            cur = int(s[i]) + carry
+            if cur > 0: carry = 1
+            ans = ans + 1 + cur % 2
+        return ans + carry
+```
+
+## 260. Single Number III
+
+### Solution 1:  bit manipulation, bitwise xor sum
+
+You end with xor = x ^ y, where x and y are the integers you are trying to find.  
+You know where the xor has a bit equal to 1 that indicates that the x and y disagreed at that bit.
+So x may have had that bit set to 1 and y had it set to 0.  So then split all the numbers based on if they have that bit
+This will lead to getting x and also y.
+
+```py
+import operator
+class Solution:
+    def singleNumber(self, nums: List[int]) -> List[int]:
+        xsum = reduce(operator.xor, nums, 0)
+        ans = [0] * 2
+        i = 0
+        while i < 32:
+            if (xsum >> i) & 1: break
+            i += 1
+        for num in nums:
+            if (num >> i) & 1:
+                ans[0] ^= num
+            else:
+                ans[1] ^= num
+        return ans
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
+##
+
+### Solution 1:
+
+```py
+
+```
+
 ##
 
 ### Solution 1:
