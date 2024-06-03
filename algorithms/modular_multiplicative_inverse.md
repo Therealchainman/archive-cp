@@ -24,6 +24,6 @@ Calculates 1/i, or the multiplicative inverse.
 
 ```cpp
 int inv(int i) {
-  return i <= 1 ? i : MOD - (int)(MOD/i) * inv(MOD % i) % MOD;
+  return i <= 1 ? i : MOD - (long long)(MOD/i) * inv(MOD % i) % MOD;
 }
 ```

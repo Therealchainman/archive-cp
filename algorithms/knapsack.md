@@ -45,6 +45,44 @@ bool canPartition(vector<int>& nums) {
 }
 ```
 
+## Unbounded Knapsack Problem
+
+Example of knapsack problem where you want to maximize the value for taking items up to total weight.  Unbounded means you can take an item an infinite number of times, or in another way you can take an item with no bounds. 
+
+This problem also had a fact that the total weight of all the items was bounded by something like 200,000, that means you can only have at most sqrt(MAXN) distinct weights for items in this regard.  So you can solve it in O(N*sqrt(N)) basically. 
+
+```cpp
+const int MAXN = 2e5 + 5;
+int N, M;
+int items[MAXN];
+vector<int> values, weights, dp;
+
+void solve() {
+    cin >> N >> M;
+    memset(items, 0, sizeof(items));
+    for (int i = 0; i < N; i++) {
+        int v;
+        string s;
+        cin >> s >> v;
+        items[s.size()] = max(items[s.size()], v);
+    }
+    for (int i = 1; i < MAXN; i++) {
+        if (!items[i]) continue;
+        weights.push_back(i);
+        values.push_back(items[i]);
+    }
+    int V = values.size();
+    dp.assign(M + 1, 0);
+    for (int cap = 0; cap <= M; cap++) {
+        for (int i = 0; i < V; i++) {
+            if (cap < weights[i]) break;
+            dp[cap] = max(dp[cap], dp[cap - weights[i]] + values[i]);
+        }
+    }
+    cout << dp.end()[-1] << endl;
+}
+```
+
 
 ## Min Cost Knapsack Problem
 
