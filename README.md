@@ -3,7 +3,7 @@
 This will be updated during the year as the season plays out with code for problems I've solved.  
 
 These are solved because they give real time practice with working with algorithms, data structures, 
-mathematics, and problem solving.
+mathematics, and problem solving in a fun and relaxing environment.
 
 ### Setup conda environment
 
