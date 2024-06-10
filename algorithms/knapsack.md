@@ -20,30 +20,39 @@ for i in range(x, k + 1):
     dp[i] -= dp[i - x]
 ```
 
-## Bounded Knapsack Problem
+## 0/1 Knapsack Problem
 
-This is the iteration style of knapsack dp
+This is the 0/1 knapsack iterative dp approach
 
 ```cpp
-bool canPartition(vector<int>& nums) {
-    int n = nums.size(), sum = accumulate(nums.begin(), nums.end(),0);
-    if (sum%2==1) {return false;}
-    sum/=2;
-    vector<vector<bool>> dp(n+1, vector<bool>(sum+1,false));
-    for (int i = 0;i<=n;i++) {
-        dp[i][0] = true;
+int N, W;
+vector<int> values, weights, dp, ndp;
+
+void solve() {
+    cin >> N >> W;
+    values.resize(N);
+    weights.resize(N);
+    for (int i = 0; i < N; i++) {
+        cin >> weights[i] >> values[i];
     }
-    for (int s = 1;s<=sum;s++) {
-        for (int i = 0;i<n;i++) {
-            dp[i+1][s] = dp[i][s];
-            if (nums[i]<=s) {
-                dp[i+1][s] = dp[i+1][s] || dp[i][s-nums[i]];
+    dp.assign(W + 1, 0);
+    for (int i = 0; i < N; i++) {
+        ndp.assign(W + 1, 0);
+        for (int cap = 0; cap <= W; cap++) {
+            if (cap >= weights[i]) {
+                ndp[cap] = max(ndp[cap], dp[cap - weights[i]] + values[i]);
             }
+            ndp[cap] = max(ndp[cap], dp[cap]);
         }
+        swap(dp, ndp);
     }
-    return dp[n][sum];
+    cout << dp[W] << endl;
 }
 ```
+
+## Bounded Knapsack Problem
+
+This one is slightly different than above, you are given some fixed amount of each item, but I think you can treat it like 0/1 knapsack if you treat each item as an individual item. 
 
 ## Unbounded Knapsack Problem
 
@@ -84,49 +93,39 @@ void solve() {
 ```
 
 
-## Min Cost Knapsack Problem
+## 0/1 Min Cost Knapsack Problem
 
-This is also bounded knapsack problem.
-
-Minimize the cost of items taken with a given total weight
-
-example implementation, the prefix sum is just because you aren't allowed to spend over some amount of cost at that specific iteration, notice it increments by a constant x.
-This was just an added constraint to the problem this solved, but otherwise it is a traditional dp approach to the min cost knapsack problem
-
-weight is happy vector here, and cost is costs vector
+Minimize the cost of items taken with a given total weight where you can take an item only once.
 
 ```cpp
 const int INF = 1e18;
+int N, W;
+vector<int> values, weights, dp, ndp;
 
 void solve() {
-    int m, x;
-    cin >> m >> x;
-    vector<int> costs(m);
-    vector<int> happy(m);
-    int H = 0; 
-    for (int i = 0; i < m; ++i) {
-        cin >> costs[i] >> happy[i];
-        H += happy[i];
+    cin >> N >> W;
+    int V = 0;
+    values.resize(N);
+    weights.resize(N);
+    for (int i = 0; i < N; i++) {
+        cin >> weights[i] >> values[i];
+        V += values[i];
     }
-    vector<int> dp(H + 1, INF), ndp(H + 1, INF);
-    dp[0] = 0; // (happiness) -> cheapest cost)
-    int psum = 0;
-    for (int i = 0; i < m; ++i) {
-        ndp.assign(H + 1, INF);
-        for (int j = 0; j < H; j++) {
-            if (dp[j] + costs[i] <= psum) {
-                ndp[j + happy[i]] = min(ndp[j + happy[i]], dp[j] + costs[i]);
+    dp.assign(V + 1, INF);
+    dp[0] = 0;
+    for (int i = 0; i < N; i++) {
+        ndp.assign(V + 1, INF);
+        for (int v = 0; v <= V; v++) {
+            ndp[v] = min(ndp[v], dp[v]);
+            if (values[i] <= v) {
+                ndp[v] = min(ndp[v], dp[v - values[i]] + weights[i]);
             }
-            ndp[j] = min(ndp[j], dp[j]);
         }
         swap(dp, ndp);
-        psum += x;
     }
     int ans = 0;
-    for (int i = 0; i <= H; i++) {
-        if (dp[i] < INF) {
-            ans = max(ans, i);
-        }
+    for (int v = 0; v <= V; v++) {
+        if (dp[v] <= W) ans = v;
     }
     cout << ans << endl;
 }

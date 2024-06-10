@@ -1075,20 +1075,60 @@ class Solution:
         return ans
 ```
 
-##
+## 846. Hand of Straights
 
-### Solution 1:
+### Solution 1:  compression, frequency array, two pointers 
 
-```py
-
+```cpp
+class Solution {
+public:
+    bool isNStraightHand(vector<int>& hand, int groupSize) {
+        sort(hand.begin(), hand.end());
+        vector<int> freq;
+        freq.push_back(1);
+        for (int i = 1; i < hand.size(); i++) {
+            if (hand[i] == hand[i - 1]) {
+                freq.end()[-1]++;
+            } else {
+                freq.push_back(1);
+            }
+        }
+        hand.erase(unique(hand.begin(), hand.end()), hand.end());
+        int N = hand.size();
+        int i = 0;
+        while (i < N) {
+            freq[i]--;
+            for (int j = 1; j < groupSize; j++) {
+                if (i + j == N) return false;
+                if (hand[i + j] != hand[i + j - 1] + 1 || freq[i + j] == 0) return false;
+                freq[i + j]--;
+            }
+            while (i < N && freq[i] == 0) i++;
+        }
+        return true;
+    }
+};
 ```
 
-##
+## 523. Continuous Subarray Sum
 
-### Solution 1:
+### Solution 1:  hash table, modular arithmetic, prefix sum under modulo
 
-```py
-
+```cpp
+class Solution {
+public:
+    bool checkSubarraySum(vector<int>& nums, int k) {
+        set<int> vis;
+        long long psum = 0, ppsum = 0;
+        for (long long num : nums) {
+            psum = (psum + num) % k;
+            if (vis.find(psum) != vis.end()) return true;
+            vis.insert(ppsum);
+            ppsum = psum;
+        }
+        return false;
+    }
+};
 ```
 
 ##

@@ -41,3 +41,29 @@ class Solution:
             search(i)
         return ans
 ```
+
+This is a more concrete example, where it is purely computing the cycles and marking all the nodes that are part of a cycle.
+
+```py
+    def search(u):
+        parent = {u: None}
+        is_cycle = False
+        while True:
+            vis[u] = 1
+            v = edges[u]
+            if v in parent: 
+                is_cycle = True
+                break
+            if vis[v]: break
+            parent[v] = u
+            u = v
+        if is_cycle:
+            crit_point = parent[edges[u]]
+            cnt = 0
+            while u != crit_point:
+                cycle[u] = 1
+                cnt += 1
+                u = parent[u]
+            return cnt
+        return 0
+```

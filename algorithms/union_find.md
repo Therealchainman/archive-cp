@@ -19,15 +19,15 @@ class UnionFind:
     """
     returns true if the nodes were not union prior. 
     """
-    def union(self,i: int,j: int) -> bool:
+    def same(self,i: int,j: int) -> bool:
         i, j = self.find(i), self.find(j)
         if i!=j:
             if self.size[i] < self.size[j]:
                 i,j=j,i
             self.parent[j] = i
             self.size[i] += self.size[j]
-            return True
-        return False
+            return False
+        return True
     @property
     def root_count(self):
         return sum(node == self.find(node) for node in range(len(self.parent)))
