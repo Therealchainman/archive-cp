@@ -212,6 +212,8 @@ Implement the function in here, such as max for func, but it can be other functi
 
 Inclusive queries [left, right].  
 
+this is the best one right now for C++
+
 ```cpp
 struct SegmentTree {
     int size;
@@ -220,7 +222,7 @@ struct SegmentTree {
     void init(int num_nodes) {
         size = 1;
         while (size < num_nodes) size *= 2;
-        nodes.resize(size * 2, 0);
+        nodes.assign(size * 2, 0);
     }
 
     int func(int x, int y) {
@@ -257,6 +259,51 @@ struct SegmentTree {
             left >>= 1, right >>= 1;
         }
         return res;
+    }
+};
+```
+
+## Segment tree for Point updates and full range queries
+
+The basic difference is that when you perform full range query, you can just get the value from seg.nodes[1]
+
+This one shows one with an interesting merge methodology.
+
+This is for a problem where you have a dynamic programming solution, but you are updating values, which you can then update the rest of the tree and propagate to the root or full segment by the fact you can merge two segments with some arithmetic.
+
+```cpp
+struct Node {
+    int cumsum_prefix_products, cumsum_suffix_products, prefix_product, exp;
+};
+
+struct SegmentTree {
+    int size;
+    vector<Node> nodes;
+    void init(int num_nodes) {
+        size = 1;
+        while (size < num_nodes) size *= 2;
+        nodes.assign(size * 2, {0, 0, 1, 0});
+    }
+    Node func(Node x, Node y) {
+        Node res;
+        res.cumsum_prefix_products = (x.cumsum_prefix_products + (y.cumsum_prefix_products * x.prefix_product) % MOD) % MOD;
+        res.prefix_product = (x.prefix_product * y.prefix_product) % MOD;
+        res.cumsum_suffix_products = ((x.cumsum_suffix_products * y.prefix_product) % MOD + y.cumsum_suffix_products) % MOD;
+        res.exp = (x.exp + y.exp + (x.cumsum_suffix_products * y.cumsum_prefix_products) % MOD) % MOD;
+        return res;
+    }
+    void ascend(int segment_idx) {
+        while (segment_idx > 0) {
+            int left_segment_idx = 2 * segment_idx, right_segment_idx = 2 * segment_idx + 1;
+            nodes[segment_idx] = func(nodes[left_segment_idx], nodes[right_segment_idx]);
+            segment_idx >>= 1;
+        }
+    }
+    void update(int segment_idx, int val) {
+        segment_idx += size;
+        nodes[segment_idx] = {val, val, val, val};
+        segment_idx >>= 1;
+        ascend(segment_idx);
     }
 };
 ```

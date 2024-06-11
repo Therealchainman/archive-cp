@@ -13,39 +13,42 @@
 ### Solution 1: 
 
 ```cpp
+
+```
+
+## E. Shuffle
+
+### Solution 1:  maximum independent set, dp on tree, reroot dp
+
+```cpp
 int N, ans;
-vector<vector<int>> adj;
-vector<int> max_leaves, deg, sz, p_max_leaves;
+vector<vector<int>> adj, dp, dpp;
+vector<int> deg;
 
 void dfs1(int u, int p) {
-    max_leaves[u] = 0;
-    sz[u] = 1;
-    bool is_leaf = true;
+    dp[u][1] = 1;
     for (int v : adj[u]) {
         if (v == p) continue;
         dfs1(v, u);
-        max_leaves[u] += max_leaves[v];
-        sz[u] += sz[v];
-        is_leaf = false;
+        dp[u][0] += max(dp[v][0], dp[v][1]);
+        dp[u][1] += dp[v][0];
     }
-    if (is_leaf) max_leaves[u]++;
-    cout << u << " " << sz[u] << endl;
 }
 
 void dfs2(int u, int p) {
-    int cur = p_max_leaves[u] + max_leaves[u];
-    // cout << u << " " << max_leaves[u] << endl;
-    if (p != -1 && deg[p] == 2 && N - sz[u] > 2) cur++;
-    if (u == 0 and deg[u] == 1) cur++;
+    int cand;
+    if (deg[u] > 1) {
+        cand = max(dpp[u][0] + max(dp[u][0], dp[u][1]), dpp[u][1] + dp[u][0]);
+    } else {
+        cand = max(dpp[u][0] + max(dp[u][0] + 1, dp[u][1]), dpp[u][1] + dp[u][0] + 1);
+    }
+    ans = max(ans, cand);
     for (int v : adj[u]) {
         if (v == p) continue;
-        p_max_leaves[v] = p_max_leaves[u] + max_leaves[u] - max_leaves[v];
+        dpp[v][0] = max(dpp[u][0], dpp[u][1]) + dp[u][0] - max(dp[v][0], dp[v][1]);
+        dpp[v][1] = dpp[u][0] + dp[u][1] - dp[v][0];
         dfs2(v, u);
-        // cout << " u: " << u << " " << cur << endl;
-        // cout << v << " " << deg[v] << " " << sz[v] << endl;
-        if (deg[v] == 2 && sz[v] > 2) cur++;
     }
-    ans = max(ans, cur);
 }
 
 void solve() {
@@ -61,11 +64,10 @@ void solve() {
         deg[u]++;
         deg[v]++;
     }
-    max_leaves.resize(N);
-    sz.resize(N);
-    dfs1(0, -1); // calculate maximum number of leaves for each subtree
+    dp.assign(N, vector<int>(2, 0));
+    dpp.assign(N, vector<int>(2, 0));
     ans = 0;
-    p_max_leaves.assign(N, 0);
+    dfs1(0, -1);
     dfs2(0, -1);
     cout << ans << endl;
 }
@@ -83,9 +85,9 @@ signed main() {
 }
 ```
 
-## E. Shuffle
+## F. Reconstruction
 
-### Solution 1:  maximum independent set, rerooting or dp on edges
+### Solution 1: 
 
 ```cpp
 

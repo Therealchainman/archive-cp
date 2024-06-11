@@ -1131,12 +1131,27 @@ public:
 };
 ```
 
-##
+## 1122. Relative Sort Array
 
-### Solution 1:
+### Solution 1:  rank, custom sorting
 
-```py
-
+```cpp
+class Solution {
+public:
+    vector<int> relativeSortArray(vector<int>& arr1, vector<int>& arr2) {
+        const int N = 1e3 + 5;
+        vector<int> rank(N, N);
+        int n1 = arr1.size(), n2 = arr2.size();
+        for (int i = 0; i < n2; i++) {
+            rank[arr2[i]] = i;
+        }
+        sort(arr1.begin(), arr1.end(), [&](const int& a, const int& b) {
+            if (rank[a] != rank[b]) return rank[a] < rank[b];
+            return a < b;
+        });
+        return arr1;
+    }
+};
 ```
 
 ##
