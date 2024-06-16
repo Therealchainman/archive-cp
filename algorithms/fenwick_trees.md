@@ -37,7 +37,7 @@ struct FenwickTree {
     }
 
     int query(int left, int right) {
-        return query(right) - query(left - 1);
+        return right >= left ? query(right) - query(left - 1) : 0;
     }
 
     int query(int idx) {
@@ -85,7 +85,7 @@ class FenwickTree:
         return res
 
     def query_range(self, i, j):
-        return self.query(j) - self.query(i - 1)
+        return self.query(j) - self.query(i - 1) if j >= i else 0
 
     def __repr__(self):
         return f"array: {self.sums}"

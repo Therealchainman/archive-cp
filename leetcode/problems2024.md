@@ -1154,11 +1154,55 @@ public:
 };
 ```
 
+## 945. Minimum Increment to Make Array Unique
+
+### Solution 1:  sort, two pointers
+
+```cpp
+class Solution {
+public:
+    int minIncrementForUnique(vector<int>& nums) {
+        sort(nums.begin(), nums.end());
+        int freq = 0, ans = 0, n = nums.size(), j = 0;
+        const int N = 2e5;
+        for (int i = 0; i <= N; i++) {
+            ans += freq;
+            for (; j < n && nums[j] == i; j++) freq++;
+            if (freq > 0) freq--;
+        }
+        return ans;
+    }
+};
+```
+
+## 330. Patching Array
+
+### Solution 1:  two pointers, reach
+
+```cpp
+class Solution {
+public:
+    int minPatches(vector<int>& nums, int n) {
+        int ans = 0;
+        long long reach = 0;
+        for (int i = 0; reach < n;) {
+            if (i < nums.size() && nums[i] <= reach + 1) {
+                reach += nums[i++];
+            } else {
+                reach += reach + 1;
+                ans++;
+            }
+        }
+        return ans;
+    }
+};
+```
+
 ##
 
 ### Solution 1:
 
-```py
+```cpp
 
 ```
 
@@ -1166,6 +1210,30 @@ public:
 
 ### Solution 1:
 
-```py
+```cpp
+
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
+##
+
+### Solution 1:
+
+```cpp
 
 ```

@@ -51,7 +51,7 @@ combinations pick r from n elements
 factorials are precomputed for calculating combinations frequently
 
 ```py
-def nCr(n, r):
+def choose(n, r):
     return (fact[n] * inv_fact[r] * inv_fact[n - r]) % mod if n >= r else 0
 ```
 
