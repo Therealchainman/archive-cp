@@ -31,6 +31,11 @@ void dfs(int u, int p) {
         }
     }
 }
+
+// initialization of values
+timer = 0;
+disc.assign(n, 0);
+low.assign(n, 0);
 ```
 
 ## With additional ability to track the size of each subtree, if you were converting the graph to a bridge tree
@@ -54,6 +59,8 @@ int dfs(int u, int p) {
     }
     return ++sz;
 }
+
+
 ```
 
 

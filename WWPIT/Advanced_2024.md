@@ -128,6 +128,8 @@ signed main() {
 
 ### Solution 1:  undirected graph, expectation value, degrees, matrix, matrix exponentiation, modular inverse, probability
 
+Still getting TLE for few two test cases in subtask 1
+
 ```cpp
 const int MOD = 1e9 + 7;
 int N, M, E, T;
@@ -207,68 +209,55 @@ signed main() {
 }
 ```
 
-##
+## AP Chemistry
 
-### Solution 1: 
+### Solution 1:  binary search, dfs, tarjan's bridge finding algorithm, connected graph
 
 ```cpp
 const int INF = 1e9;
-int N, M;
+int N, M, timer;
 vector<bool> vis;
 vector<pair<int, int>> edges;
-vector<int> times;
+vector<int> times, disc, low;
 vector<vector<int>> adj;
 
-struct UnionFind {
-    vector<int> parents, size;
-    void init(int n) {
-        parents.resize(n);
-        iota(parents.begin(),parents.end(),0);
-        size.assign(n,1);
-    }
-
-    int find(int i) {
-        if (i==parents[i]) {
-            return i;
-        }
-        return parents[i]=find(parents[i]);
-    }
-
-    bool same(int i, int j) {
-        i = find(i), j = find(j);
-        if (i!=j) {
-            if (size[j]>size[i]) {
-                swap(i,j);
+bool dfs(int u, int p) {
+    vis[u] = true;
+    disc[u] = low[u] = ++timer;
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        if (!disc[v]) {
+            if (dfs(v, u)) return true;
+            if (disc[u] < low[v]) {
+                return true;
             }
-            size[i]+=size[j];
-            parents[j]=i;
-            return false;
+            low[u] = min(low[u], low[v]);
+        } else {
+            low[u] = min(low[u], disc[v]); // back edge, disc[v] because of ap of cycle
         }
-        return true;
     }
-};
+    return false;
+}
 
 bool possible(int target) {
     adj.assign(N, vector<int>());
-    UnionFind dsu;
-    dsu.init(N);
-    vector<pair<int, int>> cycles;
+    disc.assign(N, 0);
+    low.assign(N, 0);
+    vis.assign(N, false);
+    timer = 0;
     for (int i = 0; i < M; i++) {
-        if (times[i] > target) {
+        if (times[i] >= target) {
             auto [u, v] = edges[i];
-            if (dsu.same(u, v)) {
-                cycles.emplace_back(u, v);
-            }
+            adj[u].push_back(v);
+            adj[v].push_back(u);
         }
     }
-    set<int> comps;
-    for (auto [u, v] : cycles) {
-        comps.insert(dsu.find(u));
-    }
+    bool is_bridge = dfs(0, -1);
+    // if not all vertex in single component, then return false
     for (int i = 0; i < N; i++) {
-        if (comps.find(dsu.find(i)) == comps.end()) return false;
+        if (!vis[i]) return false;
     }
-    return true;
+    return !is_bridge; // if there is a bridge, then return false
 }
 
 void solve() {
@@ -297,9 +286,9 @@ signed main() {
 }
 ```
 
-##
+## Power Outage
 
-### Solution 1: 
+### Solution 1:  dynamic programming, sorting, events, sort by end points, minimize the cost to reach a point
 
 ```cpp
 const int INF = 1e18;
@@ -308,7 +297,7 @@ int N, M;
 void solve() {
     cin >> N >> M;
     vector<int> dp(N, INF);
-    vector<tuple<int, int, int>> events(N);
+    vector<tuple<int, int, int>> events(M);
     for (int i = 0; i < M; i++) {
         int u, v, c;
         cin >> u >> v >> c;
@@ -316,7 +305,7 @@ void solve() {
         events[i] = {u, v, c};
     }
     sort(events.begin(), events.end(), [&](const tuple<int, int, int>& a, const tuple<int, int, int>& b) {
-        return get<2>(a) < get<2>(b);
+        return get<1>(a) < get<1>(b);
     });
     for (auto [s, e, c] : events) {
         dp[e] = min(dp[e], (s > 0 ? dp[s - 1]: 0) + c);

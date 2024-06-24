@@ -1,4 +1,4 @@
-
+# TACO 2024 Advanced
 
 ##
 
@@ -95,12 +95,61 @@ signed main() {
 }
 ```
 
-##
+## A. Yet Another No 7
 
-### Solution 1: 
+### Solution 1:  digit dp, binary search, count number of integers that do not contain 7 for some x
 
 ```cpp
+int count(int pos, bool tight, int num, vector<vector<int>>& dp, const vector<int>& digits) {
+    if (pos == digits.size()) {
+        return 1; // Found a valid number
+    }
 
+    if (dp[pos][tight] != -1) {
+        return dp[pos][tight];
+    }
+
+    int limit = tight ? digits[pos] : 9;
+    int res = 0;
+    for (int dig = 0; dig <= limit; ++dig) {
+        if (dig == 7) continue; // Skip if the digit is 7
+        res += count(pos + 1, tight && (dig == limit), num * 10 + dig, dp, digits);
+    }
+
+    dp[pos][tight] = res;
+    return res;
+}
+
+void solve() {
+    int n, k;
+    cin >> n >> k;
+    int lo = 0, hi = 2e18;
+    while (lo < hi) {
+        int mi = lo + (hi - lo) / 2;
+        string mi_str = to_string(mi);
+        vector<int> digits(mi_str.length());
+        for (int i = 0; i < mi_str.length(); ++i) {
+            digits[i] = mi_str[i] - '0';
+        }
+        vector<vector<int>> dp(digits.size(), vector<int>(2, -1));
+        int cnt = count(0, 1, 0, dp, digits) - 1;
+        if (cnt < k) {
+            lo = mi + 1;
+        } else {
+            hi = mi;
+        }
+    }
+    cout << (lo <= n ? lo : -1) << endl;
+}
+
+signed main() {
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
 ```
 
 ##

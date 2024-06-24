@@ -1517,7 +1517,7 @@ int32_t main() {
 
 ### Solution 1:  small to large merging, set, dfs
 
-```py
+```cpp
 const int MAXN = 2e5 + 5;
 int N, color;
 vector<int> adj[MAXN];
@@ -1574,7 +1574,7 @@ signed main() {
 
 ### Solution 1:
 
-```py
+```cpp
 
 ```
 
@@ -1582,7 +1582,7 @@ signed main() {
 
 ### Solution 1:
 
-```py
+```cpp
 
 ```
 
@@ -1590,7 +1590,7 @@ signed main() {
 
 ### Solution 1:
 
-```py
+```cpp
 
 ```
 
@@ -1598,7 +1598,7 @@ signed main() {
 
 ### Solution 1:
 
-```py
+```cpp
 
 ```
 
@@ -1606,6 +1606,6 @@ signed main() {
 
 ### Solution 1:
 
-```py
+```cpp
 
 ```

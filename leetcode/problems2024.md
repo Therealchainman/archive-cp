@@ -1198,6 +1198,225 @@ public:
 };
 ```
 
+## 633. Sum of Square Numbers
+
+### Solution 1:  hash table
+
+```cpp
+class Solution {
+public:
+    bool judgeSquareSum(int c) {
+        set<int> vis;
+        for (long long i = 0; i * i <= c; i++) {
+            int b2 = c - i * i;
+            if (i * i + i * i == c) return true;
+            if (vis.find(b2) != vis.end()) return true;
+            vis.insert(i * i);
+        }
+        return false;
+    }
+};
+```
+
+## 826. Most Profit Assigning Work
+
+### Solution 1:  sorting, prefix max, two pointers
+
+```cpp
+class Solution {
+public:
+    int maxProfitAssignment(vector<int>& difficulty, vector<int>& profit, vector<int>& worker) {
+        int pmax = 0, n = profit.size(), ans = 0;
+        sort(worker.begin(), worker.end());
+        vector<pair<int, int>> queries;
+        queries.reserve(n);
+        for (int i = 0; i < n; i++) {
+            queries.emplace_back(difficulty[i], profit[i]);
+        }
+        sort(queries.begin(), queries.end());
+        int j = 0;
+        for (int w : worker) {
+            while (j < n && queries[j].first <= w) {
+                auto [d, p] = queries[j];
+                j++;
+                pmax = max(pmax, p);
+            }
+            ans += pmax;
+        }
+        return ans;
+    }
+};
+```
+
+## 1482. Minimum Number of Days to Make m Bouquets
+
+### Solution 1:  greedy, binary search
+
+```cpp
+class Solution {
+public:
+    int minDays(vector<int>& bloomDay, int m, int k) {
+        function<bool(int)> possible = [&](int target) {
+            int cur = 0, cnt = 0;
+            for (int day : bloomDay) {
+                if (day <= target) {
+                    cur++;
+                } else {
+                    cur = 0;
+                }
+                if (cur == k) {
+                    cnt++;
+                    cur = 0;
+                }
+            }
+            return cnt < m;
+        };
+        const int INF = 1e9 + 5;
+        int lo = -1, hi = INF;
+        while (lo < hi) {
+            int mi = lo + (hi - lo) / 2;
+            if (possible(mi)) {
+                lo = mi + 1;
+            } else {
+                hi = mi;
+            }
+        }
+        return lo < INF ? lo : -1;
+    }
+};
+```
+
+## 1052. Grumpy Bookstore Owner
+
+### Solution 1:  fixed size sliding window
+
+```cpp
+class Solution {
+public:
+    int maxSatisfied(vector<int>& customers, vector<int>& grumpy, int minutes) {
+        int n = customers.size();
+        int sum = 0, wsum = 0, ans = 0;
+        for (int i = 0; i < n; i++) {
+            if (!grumpy[i]) sum += customers[i];
+            else wsum += customers[i];
+            if (i >= minutes) {
+                if (grumpy[i - minutes]) wsum -= customers[i - minutes];
+            }
+            ans = max(wsum, ans);
+        }
+        return sum + ans;
+    }
+};
+```
+
+## 1248. Count Number of Nice Subarrays
+
+### Solution 1:  preprocessed trick, calculating the prefix sum of count of even integers before every odd integer
+
+```cpp
+class Solution {
+public:
+    int numberOfSubarrays(vector<int>& nums, int k) {
+        vector<int> preprocessed;
+        int cnt = 0;
+        for (int num : nums) {
+            if (num % 2 == 0) cnt++;
+            else {
+                preprocessed.push_back(cnt);
+                cnt = 0;
+            }
+        }
+        preprocessed.push_back(cnt);
+        int n = preprocessed.size(), ans = 0;
+        for (int i = 0; i < n - k; i++) {
+            ans += (preprocessed[i] + 1) * (preprocessed[i + k] + 1);
+
+        }
+        return ans;
+    }
+};
+```
+
+### Solution 2:  Calculate number of subarrays with at most k odd integers, Take the difference to find how many subarrays with exactly k odd integers
+
+```cpp
+class Solution {
+public:
+    int numberOfSubarrays(vector<int>& nums, int k) {
+        function<int(int)> atMost = [&nums](int k) {
+            int cnt = 0, res = 0;
+            for (int l = 0, r = 0; r < nums.size(); r++) {
+                cnt += nums[r] % 2;
+                while (cnt > k) {
+                    cnt -= nums[l] % 2;
+                    l++;
+                }
+                res += r - l + 1;
+            }
+            return res;
+        };
+        return atMost(k) - atMost(k - 1);
+    }
+};
+```
+
+## 1438. Longest Continuous Subarray With Absolute Diff Less Than or Equal to Limit
+
+### Solution 1:  monotonic deques, min deque, max deque, two pointers
+
+```cpp
+class Solution {
+public:
+    int longestSubarray(vector<int>& nums, int limit) {
+        int n = nums.size(), ans = 0, j = 0;
+        deque<int> minq, maxq;
+        for (int i = 0; i < n; i++) {
+            while (!minq.empty() && nums[i] < nums[minq.back()]) minq.pop_back();
+            while (!maxq.empty() && nums[i] > nums[maxq.back()]) maxq.pop_back();
+            minq.push_back(i); maxq.push_back(i);
+            while (nums[maxq.front()] - nums[minq.front()] > limit) {
+                if (minq.front() < maxq.front()) {
+                    j = minq.front() + 1;
+                    minq.pop_front();
+                }
+                else {
+                    j = maxq.front() + 1;
+                    maxq.pop_front();
+                }
+            }
+            ans = max(ans, i - j + 1);
+        }
+        return ans;
+    }
+};
+```
+
+## 995. Minimum Number of K Consecutive Bit Flips
+
+### Solution 1:  deque, prefix count, start backwards, with target, greedily flip when it is required
+
+```cpp
+class Solution {
+public:
+    int minKBitFlips(vector<int>& nums, int k) {
+        deque<int> dq;
+        int parity = 0, N = nums.size(), ans = 0;
+        for (int i = 0; i < N; i++) {
+            if (parity == nums[i]) {
+                parity ^= 1;
+                ans++;
+                dq.push_back(i + k - 1);
+            }
+            if (!dq.empty() && i == dq.front()) {
+                dq.pop_front();
+                parity ^= 1;
+            }
+        }
+        return dq.empty() ? ans : -1;
+    }   
+};
+```
+
 ##
 
 ### Solution 1:
