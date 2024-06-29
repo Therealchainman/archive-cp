@@ -2992,7 +2992,7 @@ class Solution:
 
 ## 2285. Maximum Total Importance of Roads
 
-### Solution 1: count indegrees of undirected graph
+### Solution 1: count degrees of undirected graph
 
 ```py
 class Solution:
@@ -3014,6 +3014,28 @@ class Solution:
             indegrees[v]+=1
         indegrees.sort()
         return sum(node*cnt_indegrees for node, cnt_indegrees in enumerate(indegrees, start=1))
+```
+
+### Solution 2: count degrees of undirected graph, sort degrees and assign values
+
+```cpp
+class Solution {
+public:
+    long long maximumImportance(int n, vector<vector<int>>& roads) {
+        int m = roads.size();
+        vector<long long> deg(n, 0);
+        for (int i = 0; i < m; i++) {
+            int u = roads[i][0], v = roads[i][1];
+            deg[u]++; deg[v]++;
+        }
+        long long ans = 0;
+        sort(deg.begin(), deg.end());
+        for (int i = 0; i < n; i++) {
+            ans += deg[i] * (i + 1);
+        }
+        return ans;
+    }
+};
 ```
 
 ## 318. Maximum Product of Word Lengths

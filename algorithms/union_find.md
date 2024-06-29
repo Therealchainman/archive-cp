@@ -117,3 +117,66 @@ struct UnionFind {
     }
 };
 ```
+
+## Persistent Disjoint Union Set Data Structure
+
+With the pointers and values, you can use that to backtrack to the state of the disjoint set at an earlier time.  
+It allows time traveling to the past version of the data structure
+The sum is just what we are calculating for this problem not too important. 
+
+This does not have path compression, but it does have union by rank, which gives a time complexity of O(log(N))
+
+```cpp
+vector<int> values;
+vector<int*> pointers;
+struct UnionFind {
+    vector<int> parents, size;
+    void init(int n) {
+        parents.resize(n);
+        iota(parents.begin(),parents.end(),0);
+        size.assign(n,1);
+    }
+
+    int find(int i) {
+		if (i == parents[i]) return i;
+		return find(parents[i]);
+    }
+
+    void unite(int i, int j) {
+        i = find(i), j = find(j);
+		if (i == j) return;
+		if (comp[i] != comp[j]) return;
+		if (size[j] > size[i]) swap(i, j);
+		pointers.push_back(&sum);
+		values.push_back(sum);
+		sum = sum - cost(size[i]) - cost(size[j]) + cost(size[i] + size[j]);
+		pointers.push_back(&parents[j]);
+		values.push_back(parents[j]);
+		parents[j] = i;
+		pointers.push_back(&size[i]);
+		values.push_back(size[i]);
+		size[i] += size[j];
+    }
+};
+
+// example of how it backtracks in a divide and conquer algorithm, so it goes back to the time at start of segment
+int snap_time = values.size();
+// unite
+for (int i : events) {
+    if (i < mid) dsu.unite(edges[i].u, edges[i].v);
+}
+vector<int> tol, tor;
+for (int i : events) {
+    if (i >= mid) tor.push_back(i);
+    else if (dsu.find(edges[i].u) == dsu.find(edges[i].v)) tol.push_back(i);
+    else tor.push_back(i);
+}
+calc(mid, right, tor);
+// backtrack for the dsu
+while (values.size() > snap_time) {
+    *pointers.end()[-1] = values.end()[-1];
+    values.pop_back();
+    pointers.pop_back();
+}
+calc(left, mid, tol);
+```

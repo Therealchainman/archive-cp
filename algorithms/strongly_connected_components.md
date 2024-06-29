@@ -174,3 +174,51 @@ while stack:
         if indegrees[nei] == 0: stack.append(nei)
 print(max(memo))
 ```
+
+
+## Kosaraju's algorithm 
+
+This is great for creating Condensation Graphs
+
+It requires two dfs to compute the connected components, but the good thing is it has them grouped together, so very easy to identify all the vertex that belong to a particular component. Makes it super easy to make a condensation graph, can us disjoint union set further to represent the condensation graph.
+
+Without going into details, it uses a transpose graph as part of the algorithm.
+
+```cpp
+// similar to topological ordering of nodes for graph
+void dfs1(int u) {
+	if (vis[u]) return;
+	vis[u] = true;
+	for (int v : adj[u]) {
+		dfs1(v);
+	}
+	order.push_back(u);
+}
+
+// assigning components to nodes with transpose graph
+void dfs2(int u, int c) {
+	if (comp[u] != -1) return;
+	comp[u] = c;
+	for (int v : adj_t[u]) {
+		dfs2(v, c);
+	}
+}
+// Kosaraju's algorithm for finding SCC
+	order.clear();
+	for (int i : events) {
+		if (i < mid) {
+			int u = dsu.find(edges[i].u), v = dsu.find(edges[i].v);
+			for (int w: {u, v}) {
+				if (vis[w]) continue;
+				dfs1(w);
+			}
+		}
+	}
+	reverse(order.begin(), order.end());
+	int cur_comp = 0;
+	for (int i : order) {
+		if (comp[i] == -1) {
+			dfs2(i, cur_comp++);
+		}
+	}
+```

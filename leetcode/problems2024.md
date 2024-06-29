@@ -1417,6 +1417,40 @@ public:
 };
 ```
 
+## 1038. Binary Search Tree to Greater Sum Tree
+
+### Solution 1:  recursion, inorder tree traversal, binary search tree
+
+```cpp
+class Solution {
+public:
+    int sum = 0;
+    TreeNode* bstToGst(TreeNode* root) {
+        if (root == nullptr) return nullptr;
+        bstToGst(root -> right);
+        sum += root -> val;
+        root -> val = sum;
+        bstToGst(root -> left);
+        return root;
+    }
+};
+```
+
+## 1791. Find Center of Star Graph
+
+### Solution 1:  Node that appears in any two pair of edges is center
+
+```cpp
+class Solution {
+public:
+    int findCenter(vector<vector<int>>& edges) {
+        int u1 = edges[0][0], v1 = edges[0][1], u2 = edges[1][0], v2 = edges[1][1];
+        if (u1 == u2 || u1 == v2) return u1;
+        return v1;
+    }
+};
+```
+
 ##
 
 ### Solution 1:

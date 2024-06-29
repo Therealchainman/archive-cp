@@ -206,6 +206,8 @@ for num in arr:
 
 ## Fast Segment tree in C++ Point updates and Range Queries PURQ
 
+This is a good implementation, been using it for many problems.
+
 point update, range query
 
 Implement the function in here, such as max for func, but it can be other functions.  and update each index value. 
