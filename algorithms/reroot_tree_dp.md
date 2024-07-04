@@ -50,6 +50,29 @@ public:
 };
 ```
 
+Let's write some standard procedure to implement this algorithm.
+
+In this example I don't have it return, but it can return a value that is useful for the problem.
+
+Let's say the new_subtree_computation is representing the part that you are treating as a new subtree of the current node, because you are setting the current node to be the root of the tree. 
+
+```py
+
+def dfs1(u, p):
+    subtree_computation[u] = default_value
+    for v in adj[u]:
+        if v == p: continue
+        dfs1(v, u)
+        # subtree_computation[u] updated based on result of subtree_computation[v]
+def dfs2(u, p):
+    # update answer based on node u in tree, by using the subtree_computation[u] and the new_subtree_computation[u]
+    for v in adj[u]:
+        if v == p: continue
+        # update new_subtree_computation[v] based on new_subtree_computation[u] and all subtree_computation[w] for all w that are not v, so that for all the other chidren. 
+        # Need to find efficient way to do this. 
+        dfs2(v, u)
+```
+
 
 ## Example of rerooting and also computing the maximum independent set on a tree
 

@@ -1,11 +1,12 @@
 class Solution:
-    def minimumArea(self, grid: List[List[int]]) -> int:
-        R, C = len(grid), len(grid[0])
-        minr, maxr, minc, maxc = R, -1, C, -1
-        for r, c in product(range(R), range(C)):
-            if grid[r][c]:
-                minr = min(minr, r)
-                maxr = max(maxr, r)
-                minc = min(minc, c)
-                maxc = max(maxc, c)
-        return (maxr - minr + 1) * (maxc - minc + 1)
+    def maximumLength(self, nums: List[int]) -> int:
+        k = 2
+        n = len(nums)
+        dp = [[0] * k for _ in range(n)] # dp[n][k]
+        ans = 0
+        for i in range(1, n):
+            for j in range(i):
+                val = (nums[i] + nums[j]) % k
+                dp[i][val] = max(dp[i][val], dp[j][val] + 1, 2)
+                ans = max(ans, dp[i][val])
+        return ans
