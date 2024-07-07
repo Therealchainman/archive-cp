@@ -126,3 +126,27 @@ void dijkstra() {
 }
 ```
 
+## Dijkstra with Backtracking
+
+You can use parent map to keep track to backtrack, than you just move backwards from end node.
+
+```py
+def dijkstra(src, skip_mod):
+    minheap = [(0, src)]
+    dist = [math.inf] * n
+    dist[src] = 0
+    parent = {src: None}
+    while minheap:
+        cost, node = heapq.heappop(minheap)
+        if cost > dist[node]: continue
+        for nei, wei in adj_list[node]:
+            if wei == -1:
+                if skip_mod: continue
+                wei = lower_bound
+            ncost = cost + wei
+            if ncost < dist[nei]:
+                dist[nei] = ncost
+                heapq.heappush(minheap, (ncost, nei))
+                parent[nei] = node
+    return dist, parent
+```

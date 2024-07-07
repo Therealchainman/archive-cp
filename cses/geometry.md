@@ -174,7 +174,7 @@ Boundary works similarly, Once you find that a point is colinear with some line 
 
 This algorithm works for any polygon for most part, concave or convex.  Not certain works if polygon overlaps or intersects itself or has hole.  But any simple polygon
 
-Example of how a small ofset prevents it from intersecting a vertex of the polygon
+Example of how a small offset prevents it from intersecting a vertex of the polygon
 ![image](images/horizontal_ray.PNG)
 ![image](images/horizontal_ray_small_offset.PNG)
 

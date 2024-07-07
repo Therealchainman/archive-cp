@@ -320,7 +320,225 @@ signed main() {
 }
 ```
 
-##
+## AP Physics
+
+### Solution 1: 
+
+```cpp
+#define x first
+#define y second
+int side(pair<int,int>& a, pair<int,int>& b, pair<int,int>& c){
+    return (c.y-a.y)*(b.x-a.x)-(c.x-a.x)*(b.y-a.y);
+}
+
+for(int i = 0; i<n; i++) for(int j = i+1; j<n; j++) for(int k = i+1; k<n; k++)
+    if(j != k && side(p[i],p[j],p[k])>0) for(int l = i+1; l<n; l++) if(l != j && l != k)
+        if(side(p[j],p[k],p[l])>0 && side(p[k],p[l],p[i])>0 && side(p[l],p[i],p[j])>0)
+```
+
+## Congestion (Hard)
+
+### Solution 1:  depth array, set, binary search, dfs, tree
+
+```cpp
+int N, cnt;
+vector<vector<int>> adj;
+vector<set<int>> subtree_depths;
+vector<int>depth, subtree_id, ans;
+
+int dfs(int u, int p) {
+    subtree_id[u] = cnt;
+    depth[u] = depth[p] + 1;
+    int max_depth = depth[u];
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        max_depth = max(max_depth, dfs(v, u));
+    }
+    return max_depth;
+}
+
+void solve() {
+    cin >> N;
+    adj.assign(N, vector<int>());
+    for (int i = 0; i < N - 1; i++) {
+        int u, v;
+        cin >> u >> v;
+        u--, v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    cnt = 0;
+    depth.assign(N, 0);
+    subtree_id.resize(N);
+    for (int u : adj[0]) {
+        subtree_depths.push_back({});
+        int max_depth = dfs(u, 0);
+        for (int i = 1; i <= max_depth + 1; i++) {
+            subtree_depths[cnt].insert(i);
+        }
+        cnt++;
+    }
+    ans.assign(cnt, 0);
+    int mx = 0;
+    cout << 0 << " ";
+    for (int i = 1; i < N; i++) {
+        int id = subtree_id[i];
+        auto it = subtree_depths[id].lower_bound(depth[i]);
+        if (it == subtree_depths[id].end()) {
+            ans[id]++;
+        } else {
+            ans[id] = max(ans[id], *it);
+            subtree_depths[id].erase(it);
+        }
+        mx = max(mx, ans[id]);
+        cout << mx << " ";
+    }
+    cout << endl;
+}
+
+signed main() {
+    solve();
+    return 0;
+}
+```
+
+## Mirrors and Lasers
+
+### Solution 1:  grid, dijkstra, backtracking, direction
+
+```cpp
+struct State {
+    int r, c, d, cost;
+    bool operator<(const State& other) const {
+        if (r != other.r) return r < other.r;
+        if (c != other.c) return c < other.c;
+        if (d != other.d) return d < other.d;
+        return cost < other.cost;
+    }
+};
+
+struct stateComp {
+    bool operator()(const State& a, const State& b) const {
+        return a.cost > b.cost;
+    }
+};
+
+const char EMPTY = '_', BACKWARDS_LEANING = '\\', FORWARDS_LEANING = '/';
+const int INF = 1e9;
+int N;
+string row;
+vector<vector<char>> mat;
+vector<vector<array<int, 4>>> dp;
+priority_queue<State, vector<State>, stateComp> maxheap;
+map<State, State> parent;
+
+bool in_bounds(int r, int c) {
+    return r >= 0 && r < N && c >= 0 && c < N;
+}
+
+map<int, pair<int, int>> VECTORIZE = {
+    {0, {0, 1}},
+    {1, {1, 0}},
+    {2, {0, -1}},
+    {3, {-1, 0}}
+};
+
+map<pair<int, int>, int> INV_VECTORIZE = {
+    {{0, 1}, 0},
+    {{1, 0}, 1},
+    {{0, -1}, 2},
+    {{-1, 0}, 3}
+};
+
+void solve() {
+    freopen("input.txt", "r", stdin);
+    freopen("output.txt", "w", stdout);
+    cin >> N;
+    mat.resize(N, vector<char>(N));
+    for (int i = 0; i < N; i++) {
+        cin >> row;
+        for (int j = 0; j < N; j++) {
+            mat[i][j] = row[j];
+        }
+    }
+    dp.resize(N, vector<array<int, 4>>(N, {INF, INF, INF, INF}));
+    maxheap.push({0, 0, 0, 0});
+    State last_state;
+    while (!maxheap.empty()) {
+        State s = maxheap.top();
+        maxheap.pop();
+        last_state = s;
+        if (s.r == N - 1 && s.c == N - 1) break;
+        if (s.cost > dp[s.r][s.c][s.d]) continue;
+        dp[s.r][s.c][s.d] = s.cost;
+        if (mat[s.r][s.c] == BACKWARDS_LEANING || mat[s.r][s.c] == EMPTY) {
+            auto [dc, dr] = VECTORIZE[s.d];
+            int nr = s.r + dr, nc = s.c + dc;
+            if (in_bounds(nr, nc)) {
+                int nd = INV_VECTORIZE[{dr, dc}];
+                int ncost = s.cost + (mat[s.r][s.c] == EMPTY ? 1 : 0);
+                if (ncost < dp[nr][nc][nd]) {
+                    dp[nr][nc][nd] = ncost;
+                    State nstate = {nr, nc, nd, ncost};
+                    maxheap.push(nstate);
+                    parent[nstate] = s;
+                }
+            }
+        }
+        if (mat[s.r][s.c] == FORWARDS_LEANING || mat[s.r][s.c] == EMPTY) {
+            auto [dc, dr] = VECTORIZE[s.d];
+            dc = -dc; dr = -dr;
+            int nr = s.r + dr, nc = s.c + dc;
+            if (in_bounds(nr, nc)) {
+                int nd = INV_VECTORIZE[{dr, dc}];
+                int ncost = s.cost + (mat[s.r][s.c] == EMPTY ? 1 : 0);
+                if (ncost < dp[nr][nc][nd]) {
+                    dp[nr][nc][nd] = ncost;
+                    State nstate = {nr, nc, nd, ncost};
+                    maxheap.push(nstate);
+                    parent[nstate] = s;
+                }
+            }
+        }
+        if (mat[s.r][s.c] == EMPTY) {
+            auto [dr, dc] = VECTORIZE[s.d];
+            int nr = s.r + dr, nc = s.c + dc;
+            if (in_bounds(nr, nc) && s.cost < dp[nr][nc][s.d]) {
+                State nstate = {nr, nc, s.d, s.cost};
+                dp[nr][nc][s.d] = s.cost;
+                maxheap.push(nstate);
+                parent[nstate] = s;
+            }
+        }
+    }
+    // backtrack
+    while (parent.find(last_state) != parent.end()) {
+        auto [ndr, ndc] = VECTORIZE[last_state.d];
+        auto [dr, dc] = VECTORIZE[parent[last_state].d];
+        int r = parent[last_state].r, c = parent[last_state].c;
+        if (dr == ndc && dc == ndr) {
+            mat[r][c] = BACKWARDS_LEANING;
+        } else if (dr == -ndc && dc == -ndr) {
+            mat[r][c] = FORWARDS_LEANING;
+        }
+        last_state = parent[last_state];
+    } 
+    for (int r = 0; r < N; r++) {
+        for (int c = 0; c < N; c++) {
+            cout << mat[r][c];
+        }
+        cout << endl;
+    }
+    cout << endl;
+}
+
+signed main() {
+    solve();
+    return 0;
+}
+```
+
+## Minimum XOR
 
 ### Solution 1: 
 
@@ -328,9 +546,9 @@ signed main() {
 
 ```
 
-##
+## Mountain Climbing
 
-### Solution 1: 
+### Solution 1:  binary search, arithmetic progression, math
 
 ```cpp
 

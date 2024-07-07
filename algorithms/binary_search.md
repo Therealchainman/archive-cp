@@ -19,3 +19,29 @@ while left < right:
     if quadratic(mid) <= n: left = mid + 1
     else: right = mid
 ```
+
+## binary search lower and upper bound
+
+The way to write the lower_bound and upper_bound binary search function.  Where k is the goal.  This is for when the values of the array are weakly decreasing though.  So [5, 4, 3, 3, 2, 1] and it is saying FFFFTT and so on.  And it returns the last F.  for instance if k = 3
+but for lower_bound it is FFTTTT so you get 1 and 3 for lower and upper bound respectively.
+
+```py
+def upper_bound(start):
+    lo, hi = start, n - 1
+    while lo < hi:
+        mid = (lo + hi + 1) >> 1
+        if st.query(start, mid) < k:
+            hi = mid - 1
+        else:
+            lo = mid
+    return lo
+def lower_bound(start):
+    lo, hi = start, n - 1
+    while lo < hi:
+        mid = (lo + hi) >> 1
+        if st.query(start, mid) <= k:
+            hi = mid
+        else:
+            lo = mid + 1
+    return lo
+```

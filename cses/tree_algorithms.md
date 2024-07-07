@@ -71,7 +71,7 @@ input = lambda: sys.stdin.readline().rstrip("\r\n")
 
 ## Tree Diameter
 
-### Solution 1:  tree dp + store maximum length to leaf fro mnode + find the maximum length including the node and two paths to leaf nodes + O(n) time
+### Solution 1:  tree dp + store maximum length to leaf from node + find the maximum length including the node and two paths to leaf nodes + O(n) time
 
 This times out in python, must be implemented in c++
 

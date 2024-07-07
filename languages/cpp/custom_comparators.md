@@ -3,6 +3,8 @@
 
 ## Priority Queue
 
+You are comparing a and b, and if the operator returns true than a comes after b, order is (b, a)
+
 ```cpp
 struct priorityComp {
     // returns true mean it comes before in weak ordering, but means it comes after in priority queue.
@@ -12,6 +14,17 @@ struct priorityComp {
         return a.second < b.second;
     }
 };
+```
+
+```cpp
+struct stateComp {
+    bool operator()(const State& a, const State& b) const {
+        // min heap, if a.cost <= b.cost than it returns false, and it knows the order is (a, b)
+        return a.cost > b.cost;
+    }
+};
+
+priority_queue<State, vector<State>, stateComp> maxheap;
 ```
 
 ## Vector 
