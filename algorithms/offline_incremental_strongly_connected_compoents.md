@@ -123,7 +123,7 @@ void calc(int left, int right, vector<int>& events) {
 		else tor.push_back(i);
 	}
 	calc(mid, right, tor);
-	// backtrack for the dsu
+	// rollback to prior version for the disjoint set data structure
 	while (values.size() > snap_time) {
 		*pointers.end()[-1] = values.end()[-1];
 		values.pop_back();

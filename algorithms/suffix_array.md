@@ -2,6 +2,8 @@
 
 ## Simplest implementation O(nlog^2(n)) time and O(n) space
 
+"$" is smaller than any other character
+
 1. Form strings of one character and sort 
 1. log n time perform transition k to k + 1
 1. Assign equivalence classes to strings 2^k
@@ -46,12 +48,13 @@ if __name__ == '__main__':
     print(main())
 ```
 
-"""
 Suffix array is an array of integers, where the integers represent the suffix from a string.
 the integer in suffix array represents the starting index for the suffix. 
 suffix array is these suffix index sorted in order of suffix order from ascending order
 
 sorting is O(n+k) where k is the range of values in the string.
+
+To use this you must append the "$" character at end of the string, to get the suffix array sorted.
 
 ```py
 from typing import List
@@ -102,6 +105,76 @@ def suffix_array(s: str) -> List[int]:
         k <<= 1
         equivalence_class = updated_equivalence_class
     return leaderboard
+```
+
+### C++ implementation of suffix array
+
+```cpp
+vector<int> bucket_size, bucket_pos, leaderboard, update_leaderboard, equivalence_class, update_equivalence_class;
+
+void radix_sort() {
+    int n = leaderboard.size();
+    bucket_size.assign(n, 0);
+    for (int eq_class : equivalence_class) {
+        bucket_size[eq_class]++;
+    }
+    bucket_pos.assign(n, 0);
+    for (int i = 1; i < n; i++) {
+        bucket_pos[i] = bucket_pos[i - 1] + bucket_size[i - 1];
+    }
+    update_leaderboard.assign(n, 0);
+    for (int i = 0; i < n; i++) {
+        int eq_class = equivalence_class[leaderboard[i]];
+        int pos = bucket_pos[eq_class];
+        update_leaderboard[pos] = leaderboard[i];
+        bucket_pos[eq_class]++;
+    }
+}
+
+void suffix_array(string& s) {
+    int n = s.size();
+    vector<pair<char, int>> arr(n);
+    for (int i = 0; i < n; i++) {
+        arr[i] = {s[i], i};
+    }
+    sort(arr.begin(), arr.end());
+    leaderboard.assign(n, 0);
+    equivalence_class.assign(n, 0);
+    for (int i = 0; i < n; i++) {
+        leaderboard[i] = arr[i].second;
+    }
+    equivalence_class[leaderboard[0]] = 0;
+    for (int i = 1; i < n; i++) {
+        int left_segment = arr[i - 1].first;
+        int right_segment = arr[i].first;
+        equivalence_class[leaderboard[i]] = equivalence_class[leaderboard[i - 1]] + (left_segment != right_segment);
+    }
+    bool is_finished = false;
+    int k = 1;
+    while (k < n && !is_finished) {
+        for (int i = 0; i < n; i++) {
+            leaderboard[i] = (leaderboard[i] - k + n) % n; // create left segment, keeps sort of the right segment
+        }
+        radix_sort(); // radix sort for the left segment
+        swap(leaderboard, update_leaderboard);
+        update_equivalence_class.assign(n, 0);
+        update_equivalence_class[leaderboard[0]] = 0;
+        for (int i = 1; i < n; i++) {
+            pair<int, int> left_segment = {equivalence_class[leaderboard[i - 1]], equivalence_class[(leaderboard[i - 1] + k) % n]};
+            pair<int, int> right_segment = {equivalence_class[leaderboard[i]], equivalence_class[(leaderboard[i] + k) % n]};
+            update_equivalence_class[leaderboard[i]] = update_equivalence_class[leaderboard[i - 1]] + (left_segment != right_segment);
+            is_finished &= (update_equivalence_class[leaderboard[i]] != update_equivalence_class[leaderboard[i - 1]]);
+        }
+        k <<= 1;
+        swap(equivalence_class, update_equivalence_class);
+    }
+}
+
+/*
+how to call suffix array, then use the leaderboard
+string S + "$";
+suffix_array(S);
+*/
 ```
 
 ## suffix array and longest common prefix (lcp) array
@@ -228,3 +301,8 @@ def longestSubstring(self, S , N):
                     res = S[i - max_len + 1 : i + 1]
     return res if len(res) > 0 else -1
 ```
+
+## Given multiple patterns matching to a string text
+
+This can be used to solve problems involving you have Q queries, where each query is a string.
+Then you want to find the count or the positions in some text string S, where those queries are a substring of the text.

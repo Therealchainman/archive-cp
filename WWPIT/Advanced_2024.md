@@ -451,8 +451,6 @@ map<pair<int, int>, int> INV_VECTORIZE = {
 };
 
 void solve() {
-    freopen("input.txt", "r", stdin);
-    freopen("output.txt", "w", stdout);
     cin >> N;
     mat.resize(N, vector<char>(N));
     for (int i = 0; i < N; i++) {
@@ -536,6 +534,12 @@ signed main() {
     solve();
     return 0;
 }
+```
+
+### Solution 2: grid, 0-1 BFS, backtracking
+
+```cpp
+
 ```
 
 ## Minimum XOR

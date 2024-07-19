@@ -1451,6 +1451,230 @@ public:
 };
 ```
 
+## 1190. Reverse Substrings Between Each Pair of Parentheses
+
+### Solution 1: stack, reverse, string
+
+```cpp
+class Solution {
+public:
+    string reverseParentheses(string s) {
+        stack<string> stk;
+        stk.push("");
+        for (char ch : s) {
+            if (ch == ')') {
+                string prv = stk.top();
+                reverse(prv.begin(), prv.end());
+                stk.pop();
+                stk.top() += prv;
+            } else if (ch == '(') {
+                stk.push("");
+            } else {
+                stk.top() += ch;
+            }
+        }
+        return stk.top();
+    }
+};
+```
+
+### Solution 2: wormholes
+
+```cpp
+
+```
+
+## 1717. Maximum Score From Removing Substrings
+
+### Solution 1:  stack, pointers, greedy
+
+```cpp
+class Solution {
+public:
+    int maximumGain(string s, int x, int y) {
+        function<int(string, int)> score = [&s](const string pat, const int val) {
+            int res = 0, i = 0;
+            for (int j = 0; j < s.size(); j++) {
+                s[i++] = s[j];
+                if (i > 1 && s[i - 2] == pat[0] && s[i - 1] == pat[1]) {
+                    i -= 2;
+                    res += val;
+                }
+            }
+            s.resize(i);
+            return res;
+        };
+        string a = "ab", b = "ba";
+        if (x < y) {
+            swap(a, b);
+            swap(x, y);
+        };
+        return score(a, x) + score(b, y);
+    }
+};
+```
+
+## 726. Number of Atoms
+
+### Solution 1:  stack of map, frequency maps
+
+```cpp
+class Solution {
+public:
+    string countOfAtoms(string formula) {
+        stack<map<string, int>> stk;
+        stk.push(map<string, int>());
+        string element = "";
+        int cnt = 0;
+        function<void()> update = [&]() {
+            if (!element.empty()) {
+                if (cnt == 0) cnt++;
+                if (stk.top().find(element) == stk.top().end()) {
+                    stk.top()[element] = 0;
+                }
+                stk.top()[element] += cnt;
+            }
+        };
+        for (int i = 0; i < formula.size(); i++) {
+            char ch = formula[i];
+            if (isupper(ch) || ch == '(' || ch == ')') {
+                update();
+                element = "";
+                cnt = 0;
+                if (ch == '(') stk.push(map<string, int>());
+                else if (ch == ')') {
+                    i++;
+                    map<string, int> freq = stk.top();
+                    stk.pop();
+                    while (i < formula.size() && isdigit(formula[i])) {
+                        cnt = (cnt * 10) + formula[i] - '0';
+                        i++;
+                    }
+                    if (cnt == 0) cnt++;
+                    for (const auto [k, v] : freq) {
+                        if (stk.top().find(k) == stk.top().end()) stk.top()[k] = 0;
+                        stk.top()[k] += v * cnt;
+                    }
+                    i--;
+                    cnt = 0;
+                }
+            }
+            if (isalpha(ch)) element += ch;
+            if (isdigit(ch)) cnt = (cnt * 10) + ch - '0';
+        }
+        update();
+        string res = "";
+        for (const auto [k, v] : stk.top()) {
+            res += k;
+            if (v > 1) res += to_string(v);
+        }
+        return res;
+    }
+};
+```
+
+## 2096. Step-By-Step Directions From a Binary Tree Node to Another
+
+### Solution 1:  dfs, strings, string replacement, prefix matching cancel
+
+```cpp
+class Solution {
+public:
+    bool findPath(TreeNode* root, int target, string& path) {
+        if (root == nullptr) return false;
+        if (root -> val == target) return true;
+        if (findPath(root -> left, target, path)) {
+            path.push_back('L');
+            return true;
+        }
+        if (findPath(root -> right, target, path)) {
+            path.push_back('R');
+            return true;
+        }
+        return false;
+    }
+    string getDirections(TreeNode* root, int startValue, int destValue) {
+        string startPath, destPath;
+        findPath(root, startValue, startPath);
+        findPath(root, destValue, destPath);
+        while (!startPath.empty() && !destPath.empty() && startPath.end()[-1] == destPath.end()[-1]) {
+            startPath.pop_back();
+            destPath.pop_back();
+        }
+        reverse(startPath.begin(), startPath.end());
+        reverse(destPath.begin(), destPath.end());
+        replace(startPath.begin(), startPath.end(), 'L', 'U');
+        replace(startPath.begin(), startPath.end(), 'R', 'U');
+        string res = startPath + destPath;
+        return res;
+    }
+};
+```
+
+## 1530. Number of Good Leaf Nodes Pairs
+
+### Solution 1:  postorder dfs, frequency maps, merging maps
+```cpp
+class Solution {
+public:
+    int DIST, ans;
+    map<int, int> dfs(TreeNode* root) {
+        map<int, int> res;
+        if (root == nullptr) return res;
+        map<int, int> left_child = dfs(root -> left), right_child = dfs(root -> right);
+        if (left_child.empty() && right_child.empty()) res[0] = 1;
+        for (auto [k1, v1] : left_child) {
+            for (auto [k2, v2] : right_child) {
+                int cand = k1 + k2 + 2;
+                if (cand <= DIST) ans += v1 * v2;
+            }
+        }
+        for (auto [k, v] : left_child) {
+            if (res.find(k + 1) == res.end()) res[k + 1] = 0;
+            res[k + 1] += v;
+        }
+        for (auto [k, v] : right_child) {
+            if (res.find(k + 1) == res.end()) res[k + 1] = 0;
+            res[k + 1] += v;
+        }
+        return res;
+    }
+    int countPairs(TreeNode* root, int distance) {
+        DIST = distance;
+        ans = 0;
+        dfs(root);
+        return ans;
+    }
+};
+```
+
+## 1380. Lucky Numbers in a Matrix
+
+### Solution 1:  min and max precompute, loops, matrix
+
+```cpp
+class Solution {
+public:
+    vector<int> luckyNumbers (vector<vector<int>>& matrix) {
+        const int INF = 1e9;
+        int R = matrix.size(), C = matrix[0].size();
+        vector<int> ans, rows(R, INF), cols(C, -INF);
+        for (int r = 0; r < R; r++) {
+            for (int c = 0; c < C; c++) {
+                rows[r] = min(rows[r], matrix[r][c]);
+                cols[c] = max(cols[c], matrix[r][c]);
+            }
+        }
+        for (int r = 0; r < R; r++) {
+            for (int c = 0; c < C; c++) {
+                if (matrix[r][c] == rows[r] && matrix[r][c] == cols[c]) ans.push_back(matrix[r][c]);
+            }
+        }
+        return ans;
+    }
+};
+```
+
 ##
 
 ### Solution 1:

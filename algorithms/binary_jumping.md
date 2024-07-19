@@ -260,6 +260,10 @@ class ST_Min:
         return self.op(self.st[i][l], self.st[i][r - (1 << i) + 1])
 ```
 
+## C++ implementation
+
+The query is inclusive so [L,R]
+
 ```cpp
 const int LOG = 31;
 vector<int> nums;
