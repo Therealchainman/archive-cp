@@ -1059,6 +1059,64 @@ class Solution:
         return matrix
 ```
 
+```cpp
+class Solution {
+public:
+    vector<int> topologicalOrdering(const vector<set<int>>& adj) {
+        int N = adj.size();
+        vector<int> indegrees(N, 0);
+        for (int u = 1; u < N; u++) {
+            for (int v : adj[u]) {
+                indegrees[v]++;
+            }
+        }
+        vector<int> order;
+        deque<int> queue;
+        for (int i = 1; i < N; i++) {
+            if (indegrees[i] == 0) queue.push_back(i);
+        }
+        while (!queue.empty()) {
+            int u = queue.front();
+            order.push_back(u);
+            queue.pop_front();
+            for (int v : adj[u]) {
+                indegrees[v]--;
+                if (indegrees[v] == 0) queue.push_back(v);
+            }
+        }
+        return order.size() == N - 1 ? order : vector<int>();
+    }
+    vector<vector<int>> buildMatrix(int k, vector<vector<int>>& rowConditions, vector<vector<int>>& colConditions) {
+        vector<set<int>> row_adj, col_adj;
+        row_adj.resize(k + 1); col_adj.resize(k + 1);
+        for (const vector<int>& row : rowConditions) {
+            int u = row[0], v = row[1];
+            row_adj[u].insert(v);
+        }
+        for (const vector<int>& col : colConditions) {
+            int u = col[0], v = col[1];
+            col_adj[u].insert(v);
+        }
+        vector<int> rows = topologicalOrdering(row_adj), cols = topologicalOrdering(col_adj);
+        vector<vector<int>> ans;
+        if (rows.empty() || cols.empty()) return ans;
+        map<int, int> rmap, cmap;
+        for (int r = 0; r < k; r++) {
+            rmap[rows[r]] = r;
+        }
+        for (int c = 0; c < k; c++) {
+            cmap[cols[c]] = c;
+        }
+        ans.assign(k, vector<int>(k, 0));
+        for (int i = 1; i <= k; i++) {
+            int r = rmap[i], c = cmap[i];
+            ans[r][c] = i;
+        }
+        return ans;
+    }
+};
+```
+
 ## 1329. Sort the Matrix Diagonally
 
 ### Solution 1:  heap + hash map

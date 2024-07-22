@@ -59,3 +59,35 @@ def topological_ordering(n, nodes, adj_list):
             if indegrees[nei] == 0: queue.append(nei)
     return topo_order if len(topo_order) == n else []
 ```
+
+### C++ implementation of general topological ordering
+
+Given the adjacency list, and the number of nodes, and nodes are numbered from 0 to n - 1.
+
+If there is a cycle or something and it cannot find a valid topological ordering it will return an empty vector.
+
+```cpp
+vector<int> topologicalOrdering(const int N, const vector<vector<int>>& adj) {
+    vector<int> indegrees(N, 0);
+    for (int u = 0; u < N; u++) {
+        for (int v : adj[u]) {
+            indegrees[v]++;
+        }
+    }
+    vector<int> order;
+    deque<int> queue;
+    for (int i = 0; i < N; i++) {
+        if (indegrees[i] == 0) queue.push_back(i);
+    }
+    while (!queue.empty()) {
+        int u = queue.front();
+        order.push_back(u);
+        queue.pop_front();
+        for (int v : adj[u]) {
+            indegrees[v]--;
+            if (indegrees[v] == 0) queue.push_back(v);
+        }
+    }
+    return order.size() == N ? order : vector<int>();
+}
+```

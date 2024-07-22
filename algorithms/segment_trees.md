@@ -273,6 +273,8 @@ This one shows one with an interesting merge methodology.
 
 This is for a problem where you have a dynamic programming solution, but you are updating values, which you can then update the rest of the tree and propagate to the root or full segment by the fact you can merge two segments with some arithmetic.
 
+Just a tip you can implement this with a Node, or you can use arrays to represent these, I think it is easier to actually use separate arrays to represent the node. 
+
 ```cpp
 struct Node {
     int cumsum_prefix_products, cumsum_suffix_products, prefix_product, exp;
@@ -306,6 +308,71 @@ struct SegmentTree {
         nodes[segment_idx] = {val, val, val, val};
         segment_idx >>= 1;
         ascend(segment_idx);
+    }
+};
+```
+
+### Alternative approach, when storing multiple variables in segment tree
+
+Still for inclusive range queries [L, R], returns minimum and index
+
+```cpp
+const int INF = 1e9;
+struct SegmentTree {
+    int size;
+    vector<int> nodes, index;
+
+    void init(int num_nodes) {
+        size = 1;
+        while (size < num_nodes) size *= 2;
+        nodes.assign(size * 2, 0);
+        index.assign(size * 2, 0);
+    }
+
+    int func(int x, int y) {
+        return min(x, y);
+    }
+
+    void ascend(int segment_idx) {
+        while (segment_idx > 0) {
+            int left_segment_idx = 2 * segment_idx, right_segment_idx = 2 * segment_idx + 1;
+            int left_min = nodes[left_segment_idx], right_min = nodes[right_segment_idx];
+            if (left_min < right_min) index[segment_idx] = index[left_segment_idx];
+            else index[segment_idx] = index[right_segment_idx];
+            nodes[segment_idx] = func(nodes[left_segment_idx], nodes[right_segment_idx]);
+            segment_idx >>= 1;
+        }
+    }
+
+    void update(int segment_idx, int idx, int val) {
+        segment_idx += size;
+        nodes[segment_idx] = val;
+        index[segment_idx] = idx;
+        segment_idx >>= 1;
+        ascend(segment_idx);
+    }
+
+    pair<int, int> query(int left, int right) {
+        left += size, right += size;
+        int res = INF, idx = 0;
+        while (left <= right) {
+            if (left & 1) {
+                if (nodes[left] < res) {
+                    idx = index[left];
+                    res = nodes[left];
+                }
+                left++;
+            }
+            if (~right & 1) {
+                if (nodes[right] < res) {
+                    res = nodes[right];
+                    idx = index[right];
+                }
+                right--;
+            }
+            left >>= 1, right >>= 1;
+        }
+        return make_pair(res, idx);
     }
 };
 ```
