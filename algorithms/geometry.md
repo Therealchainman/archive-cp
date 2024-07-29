@@ -33,3 +33,15 @@ def intersects(p1, p2, p3, p4):
         p1, p2, p3, p4 = p3, p4, p1, p2
     return True
 ```
+
+## Determine if circles intersect
+
+returns true if circle with center (x1, y1) and radius r1 intersects circle with center (x2, y2) with radius r2.
+
+```cpp
+bool intersection(int x1, int y1, int x2, int y2, int r1, int r2) {
+    double d = sqrt((x1 - x2) * (x1 - x2)+ (y1 - y2) * (y1 - y2));
+    if (d <= r1 - r2 || d <= r2 - r1 || d < r1 + r2 || d == r1 + r2) return true;
+    return false;
+}
+```

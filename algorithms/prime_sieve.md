@@ -148,12 +148,6 @@ def factorize(n):
     return cnt
 ```
 
-Similar implementation in C++.
-
-```cpp
-
-```
-
 ## prime sieve to compute the sum of multiplicity for each integer
 
 ```py

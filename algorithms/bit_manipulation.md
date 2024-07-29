@@ -44,3 +44,7 @@ x+y=(x⊕y)+2⋅(x&y)
 ## Minimum xor of a pair of integers in an array
 
 This problem can be solved by sorting the array, and then the minimum xor of a pair will come from some adjacent elements in the array.
+
+## Set difference for submasks
+
+Given integer s and t which represent a bitmask that represents a set of elements.  If t is a submask of s, then you can find the integer x = s - t, which represents the set difference.  That is all elements in s that were not in t. 

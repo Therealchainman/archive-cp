@@ -1675,6 +1675,132 @@ public:
 };
 ```
 
+## 1636. Sort Array by Increasing Frequency
+
+### Solution 1: custom sorting, frequency
+
+```cpp
+class Solution {
+public:
+    vector<int> frequencySort(vector<int>& nums) {
+        const int MAXN = 205, OFFSET = 100;
+        vector<int> freq(MAXN, 0);
+        for (int x : nums) {
+            freq[x + OFFSET]++;
+        }
+        sort(nums.begin(), nums.end(), [&](const int& a, const int& b) {
+            if (freq[a + OFFSET] != freq[b + OFFSET]) return freq[a + OFFSET] < freq[b + OFFSET]; // ascending order
+            return a > b; // descending order
+        });
+        return nums;
+    }
+};
+```
+
+## 1395. Count Number of Teams
+
+### Solution 1: O(n^2) loop the middle index
+
+elements less than rating[j] to left
+elements greater than rating[j] to right
+arr[i] < rating[j] for i < j
+arr[i] > rating[j] for i > j
+
+```cpp
+class Solution {
+public:
+    int calc(const vector<int>& rating) {
+        int ans = 0, N = rating.size();
+        for (int j = 1; j < N; j++) {
+            int pcount = 0, scount = 0;
+            for (int i = 0; i < j; i++) {
+                if (rating[i] < rating[j]) pcount++;
+            }
+            for (int i = j + 1; i < N; i++) {
+                if (rating[i] > rating[j]) scount++;
+            }
+            ans += pcount * scount;
+        }
+        return ans;
+    }
+    int numTeams(vector<int>& rating) {
+        int ans = 0;
+        ans += calc(rating);
+        reverse(rating.begin(), rating.end());
+        ans += calc(rating);
+        return ans;
+    }
+};
+```
+
+## 2045. Second Minimum Time to Reach Destination
+
+### Solution 1:  shortest path unweighted graph, bfs, from source and from destination, bridge between two shortest paths
+
+```cpp
+class Solution {
+public:
+    int N;
+    vector<vector<int>> adj;
+    vector<int> bfs(int src) {
+        queue<int> q;
+        vector<int> dist(N, N + 1);
+        q.push(src);
+        dist[src] = 0;
+        while (!q.empty()) {
+            int u = q.front();
+            q.pop();
+            for (int v : adj[u]) {
+                if (dist[u] + 1 < dist[v]) {
+                    q.push(v);
+                    dist[v] = dist[u] + 1;
+                }
+            }
+        }
+        return dist;
+    }
+    int secondMinimum(int n, vector<vector<int>>& edges, int time, int change) {
+        N = n;
+        adj.assign(N, vector<int>());
+        for (const auto &edge : edges) {
+            int u = edge[0], v = edge[1];
+            u--; v--;
+            adj[u].push_back(v);
+            adj[v].push_back(u);
+        }
+        vector<int> src_dist = bfs(0), dst_dist = bfs(N - 1);
+        int ans = N + 1;
+        for (const auto &edge : edges) {
+            int u = edge[0], v = edge[1];
+            u--; v--;
+            if (src_dist[u] + dst_dist[v] + 1 > src_dist.end()[-1]) {
+                ans = min(ans, src_dist[u] + dst_dist[v] + 1);
+            }
+            if (dst_dist[u] + src_dist[v] + 1 > src_dist.end()[-1]) {
+                ans = min(ans, dst_dist[u] + src_dist[v] + 1);
+            }
+        }
+        int reach = 0;
+        while (ans--) {
+            int rem = reach % (2 * change);
+            if (rem >= change) {
+                reach += 2 * change - rem;
+            }
+            reach += time;
+        }
+        return reach;
+    }
+};
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
 ##
 
 ### Solution 1:

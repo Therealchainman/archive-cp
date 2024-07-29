@@ -150,3 +150,33 @@ def dijkstra(src, skip_mod):
                 parent[nei] = node
     return dist, parent
 ```
+
+## Dijkstra with unweighted graph
+
+Not really Dijkstra, can just use BFS when graph is unweighted. 
+
+```cpp
+int N;
+vector<vector<int>> adj;
+vector<int> bfs(int src) {
+    queue<int> q;
+    vector<int> dist(N, N + 1);
+    q.push(src);
+    dist[src] = 0;
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop();
+        for (int v : adj[u]) {
+            if (dist[u] + 1 < dist[v]) {
+                q.push(v);
+                dist[v] = dist[u] + 1;
+            }
+        }
+    }
+    return dist;
+}
+```
+
+## Dijkstra from source and destination
+
+This is sometimes useful to calculate the shortest path from source to all nodes and from destination to all nodes.  Then you can use the inverse shortest distance combined with shorest distance to find the second shortest path.
