@@ -50,16 +50,15 @@ void add_string(const string& s, const int cost) {
 void push_links() {
     int queue[trie.size()];
     queue[0] = 0;
-    int state = 0, next_state = 1;
-    while (state < trie.size()) {
-        int v = queue[state++];
+    for (int state = 0, next_state = 0; state < trie.size(); state++) {
+        int v = queue[state];
         int u = trie[v].suffix_link;
         if (trie[u].is_leaf) trie[v].output_link = u;
         else trie[v].output_link = trie[u].output_link;
         for (int c = 0; c < K; c++) {
             if (trie[v].transition[c] != 0) {
                 trie[trie[v].transition[c]].suffix_link = v ? trie[u].transition[c] : 0;
-                queue[next_state++] = trie[v].transition[c];
+                queue[++next_state] = trie[v].transition[c];
             } else {
                 trie[v].transition[c] = trie[u].transition[c];
             }

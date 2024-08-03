@@ -10,10 +10,90 @@
 
 ## F - Range Connect MST 
 
-### Solution 1:  
+### Solution 1:  union find, merge sets, sort, functional graph, next array
 
 ```cpp
+struct Item {
+    int c, l, r;
+    Item(int c, int l, int r) : c(c), l(l), r(r) {}
+    bool operator<(const Item &other) const {
+        return c < other.c;
+    }
+};
 
+struct UnionFind {
+    vector<int> parents, size;
+    void init(int n) {
+        parents.resize(n);
+        iota(parents.begin(),parents.end(),0);
+        size.assign(n,1);
+    }
+
+    int find(int i) {
+        if (i==parents[i]) {
+            return i;
+        }
+        return parents[i]=find(parents[i]);
+    }
+
+    bool same(int i, int j) {
+        i = find(i), j = find(j);
+        if (i!=j) {
+            if (size[j]>size[i]) {
+                swap(i,j);
+            }
+            size[i]+=size[j];
+            parents[j]=i;
+            return false;
+        }
+        return true;
+    }
+};
+
+int N, Q;
+vector<Item> arr;
+
+void solve() {
+    cin >> N >> Q;
+    for (int i = 0; i < Q; i++) {
+        int c, l, r;
+        cin >> l >> r >> c;
+        l--; r--;
+        arr.emplace_back(c, l, r);
+    }
+    sort(arr.begin(), arr.end());
+    UnionFind dsu;
+    dsu.init(N);
+    vector<int> nxt(N);
+    iota(nxt.begin(), nxt.end(), 0);
+    int ans = 0;
+    for (auto &[c, l, r] : arr) {
+        int u = l;
+        ans += c;
+        while (u < r) {
+            // find the last node in the current set
+            u = nxt[dsu.find(u)];
+            // merge with start of next set. 
+            if (u + 1 <= r) {
+                ans += c;
+                int v = nxt[dsu.find(u + 1)]; // determine last of next set
+                dsu.same(u, u + 1);
+                nxt[dsu.find(u)] = v; // set last of current merged set to the last of the next set.
+            }
+            u++;
+        }
+    }
+    if (dsu.size[dsu.find(0)] == N) {
+        cout << ans << endl;
+    } else {
+        cout << -1 << endl;
+    }
+}
+
+signed main() {
+    solve();
+    return 0;
+}
 ```
 
 ## G - Last Major City 

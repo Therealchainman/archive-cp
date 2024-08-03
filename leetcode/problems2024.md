@@ -1793,12 +1793,28 @@ public:
 };
 ```
 
-##
+## 1653. Minimum Deletions to Make String Balanced
 
-### Solution 1:
+### Solution 1:  prefix and suffix count, delete a's from suffix and b's from prefix
 
 ```cpp
-
+class Solution {
+public:
+    int minimumDeletions(string s) {
+        int N = s.size();
+        vector<int> scount(N + 1, 0);
+        for (int i = N - 1; i >= 0; i--) {
+            scount[i] = scount[i + 1];
+            if (s[i] == 'a') scount[i]++;
+        }
+        int ans = N, pcount = 0;
+        for (int i = 0; i < N; i++) {
+            ans = min(ans, pcount + scount[i]);
+            if (s[i] == 'b') pcount++;
+        }
+        return min(ans, pcount);
+    }
+};
 ```
 
 ##

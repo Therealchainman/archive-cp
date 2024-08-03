@@ -1,5 +1,56 @@
-# Rolling Hash
+# Polynomial Rolling Hash
 
+## Rolling hash 
+
+Sometimes you need different M value, and P needs to be adjusted so there are no collisions.  
+Sometimes you don't have the test cases offline, and it may be hard to avoid collisions, you can always try a double hash
+to reduce the chance of a collision.
+
+```cpp
+const int C = 4, B = 95, P = 96;
+int M = pow(B, C);
+
+int polynomial_hash(const string &s) {
+    int h = 0;
+    for (char c : s) {
+        h = (h * P + c) % M;
+    }
+    return h;
+}
+```
+
+Check for collisions in part 1:
+
+```cpp
+// try some p until it works. 
+int polynomial_hash(const string &s, int p) {
+    int h = 0;
+    for (char c : s) {
+        h = (h * p + c) % M;
+    }
+    return h;
+}
+
+void solve() {
+    while (getline(cin, text)) titles.push_back(text);
+    for (int p = 97; p < 3'000; p++) {
+        bool ok = true;
+        set<int> hashes;
+        for (const string &text : titles) {
+            int h = polynomial_hash(text, p);
+            if (hashes.find(h) != hashes.end()) { // found collision
+                ok = false;
+                break;
+            }
+            hashes.insert(h);
+        }
+        if (ok) {
+            cout << p << endl;
+            break;
+        }
+    }
+}
+```
 
 ## Rolling hash to find pattern in string
 
