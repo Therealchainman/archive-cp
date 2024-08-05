@@ -1190,7 +1190,7 @@ class LazySegmentTree:
     def __init__(self, n: int, neutral: int, noop: int, initial_val: int = 0):
         self.neutral = neutral
         self.size = 1
-        self.noop = noopmodify_op
+        self.noop = noop
         self.n = n 
         while self.size<n:
             self.size*=2

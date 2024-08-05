@@ -221,7 +221,7 @@ signed main() {
 
 ```
 
-##
+## G. Ifrit Tile
 
 ### Solution 1: 
 

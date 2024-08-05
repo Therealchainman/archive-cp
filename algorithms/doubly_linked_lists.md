@@ -2,12 +2,36 @@
 
 I created this because doubly linked lists are very useful data structure in some scenarios.  Especially if you need to delete an element in an array at any index.  And maintain what are the next and previous elements.
 
+## Initial
+
+```cpp
+vector<int> nxt, prv;
+int START, END;
+nxt.assign(n + 2, n + 1);
+prv.assign(n + 2, 0);
+START = 0;
+END = n + 1;
+for (int i = 1; i <= n; i++) {
+    nxt[i] = i + 1;
+    prv[i] = i - 1;
+}
+```
+
 ## ERASE x from doubly linked list
 
 ```py
 def erase(x):
     prv[nxt[x]] = prv[x]
     nxt[prv[x]] = nxt[x]
+```
+
+```cpp
+void erase(int x) {
+    prv[nxt[x]] = prv[x];
+    nxt[prv[x]] = nxt[x];
+    prv[x] = START;
+    nxt[x] = END;
+}
 ```
 
 ## INSERT y afterx in doubly linked list

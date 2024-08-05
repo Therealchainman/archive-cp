@@ -1817,12 +1817,28 @@ public:
 };
 ```
 
-##
+## 1460. Make Two Arrays Equal by Reversing Subarrays
 
-### Solution 1:
+### Solution 1:  same count of elements in both arrays, all_of in c++
 
 ```cpp
-
+class Solution {
+public:
+    bool canBeEqual(vector<int>& target, vector<int>& arr) {
+        const int MAXN = 1000 + 5;
+        int N = arr.size();
+        vector<int> counts(MAXN, 0);
+        for (int x : arr) {
+            counts[x]++;
+        }
+        for (int x : target) {
+            counts[x]--;
+        }
+        return all_of(counts.begin(), counts.end(), [](const int &x) {
+            return x == 0;
+            });
+    }
+};
 ```
 
 ##
