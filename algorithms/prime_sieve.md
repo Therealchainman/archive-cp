@@ -32,6 +32,8 @@ def prime_sieve(lim):
 
 This prime sieve will just return if prime or not in an arrays.  So an array will represent the status of each integer in a continuous range whether it is prime or not prime (composite)
 
+When primes[i] = 1, then i is prime.  When primes[i] = 0, then i is not prime.
+
 ```py
 def prime_sieve(lim):
     primes = [1] * lim
@@ -43,6 +45,24 @@ def prime_sieve(lim):
                 primes[i] = 0
         p += 1
     return primes
+```
+
+```cpp
+const int MAXN = 1e8 + 1;
+int primes[MAXN], N, ans;
+
+void sieve() {
+    fill(primes, primes + MAXN, 1);
+    primes[0] = primes[1] = 0;
+    int p = 2;
+    for (int p = 2; p * p <= N; p++) {
+        if (primes[p]) {
+            for (int i = p * p; i < N; i += p) {
+                primes[i] = 0;
+            }
+        }
+    }
+}
 ```
 
 ## fast prime sieve for prime factorizations of each integer
