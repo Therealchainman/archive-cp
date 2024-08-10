@@ -1189,3 +1189,114 @@ struct LazySegmentTree {
     }
 };
 ```
+
+## Lazy Segment Tree range queries and range updates
+
+- range assignment updates
+- range sum queries
+
+range updates are [L, R) (exclusive for right end point)
+
+
+
+```cpp
+int neutral = 0, noop = 0;
+
+struct LazySegmentTree {
+    vector<int> values;
+    vector<int> operations;
+    int size;
+
+    void init(int n) {
+        size = 1;
+        while (size < n) size *= 2;
+        values.assign(2 * size, neutral);
+        operations.assign(2 * size, noop);
+    }
+
+    int modify_op(int x, int y, int length = 1) {
+        return x + y * length;
+    }
+
+    int calc_op(int x, int y) {
+        return x + y;
+    }
+
+    bool is_leaf(int segment_right_bound, int segment_left_bound) {
+        return segment_right_bound - segment_left_bound == 1;
+    }
+
+    void propagate(int segment_idx, int segment_left_bound, int segment_right_bound) {
+        if (is_leaf(segment_right_bound, segment_left_bound) || operations[segment_idx] == noop) return;
+        int left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
+        int children_segment_len = (segment_right_bound - segment_left_bound) >> 1;
+        operations[left_segment_idx] = modify_op(operations[left_segment_idx], operations[segment_idx]);
+        operations[right_segment_idx] = modify_op(operations[right_segment_idx], operations[segment_idx]);
+        values[left_segment_idx] = modify_op(values[left_segment_idx], operations[segment_idx], children_segment_len);
+        values[right_segment_idx] = modify_op(values[right_segment_idx], operations[segment_idx], children_segment_len);
+        operations[segment_idx] = noop;
+    }
+
+    void ascend(int segment_idx) {
+        while (segment_idx > 0) {
+            segment_idx--;
+            segment_idx >>= 1;
+            int left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
+            values[segment_idx] = calc_op(values[left_segment_idx], values[right_segment_idx]);
+        }
+    }
+
+    void update(int left, int right, int val) {
+        stack<tuple<int, int, int>> stk;
+        stk.emplace(0, size, 0);
+        vector<int> segments;
+        int segment_left_bound, segment_right_bound, segment_idx;
+        while (!stk.empty()) {
+            tie(segment_left_bound, segment_right_bound, segment_idx) = stk.top();
+            stk.pop();
+            // NO OVERLAP
+            if (segment_left_bound >= right || segment_right_bound <= left) continue;
+            // COMPLETE OVERLAP
+            if (segment_left_bound >= left && segment_right_bound <= right) {
+                operations[segment_idx] = modify_op(operations[segment_idx], val);
+                int segment_len = segment_right_bound - segment_left_bound;
+                values[segment_idx] = modify_op(values[segment_idx], val, segment_len);
+                segments.push_back(segment_idx);
+                continue;
+            }
+            // PARTIAL OVERLAP
+            int mid_point = (segment_left_bound + segment_right_bound) >> 1;
+            int left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
+            propagate(segment_idx, segment_left_bound, segment_right_bound);
+            stk.emplace(mid_point, segment_right_bound, right_segment_idx);
+            stk.emplace(segment_left_bound, mid_point, left_segment_idx);
+        }
+        for (int segment_idx : segments) ascend(segment_idx);
+    }
+
+    int query(int left, int right) {
+        stack<tuple<int, int, int>> stk;
+        stk.emplace(0, size, 0);
+        int result = neutral;
+        int segment_left_bound, segment_right_bound, segment_idx;
+        while (!stk.empty()) {
+            tie(segment_left_bound, segment_right_bound, segment_idx) = stk.top();
+            stk.pop();
+            // NO OVERLAP
+            if (segment_left_bound >= right || segment_right_bound <= left) continue;
+            // COMPLETE OVERLAP
+            if (segment_left_bound >= left && segment_right_bound <= right) {
+                result = calc_op(result, values[segment_idx]);
+                continue;
+            }
+            // PARTIAL OVERLAP
+            int mid_point = (segment_left_bound + segment_right_bound) >> 1;
+            int left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
+            propagate(segment_idx, segment_left_bound, segment_right_bound);
+            stk.emplace(mid_point, segment_right_bound, right_segment_idx);
+            stk.emplace(segment_left_bound, mid_point, left_segment_idx);
+        }
+        return result;
+    }
+};
+```

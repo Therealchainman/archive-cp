@@ -1,3 +1,49 @@
+# Leetcode Biweekly Contest 135
+
+## Minimum Array Changes to Make Differences Equal
+
+### Solution 1:  sort, multiset, greedy
+
+```cpp
+class Solution {
+public:
+    int minChanges(vector<int>& nums, int k) {
+        int N = nums.size();
+        vector<pair<int, int>> data;
+        for (int i = 0; i < N / 2; i++) {
+            int a = nums[i], b = nums[N - i - 1];
+            if (a > b) swap(a, b);
+            int p = max(k - a, b);
+            data.emplace_back(b - a, p);
+        }
+        sort(data.begin(), data.end());
+        multiset<int> pool;
+        int ans = N / 2, ptr = 0, cur = N / 2;
+        for (int x = 0; x <= k; x++) {
+            int cnt_equal = 0;
+            for (auto it = pool.begin(); it != pool.end(); it++) {
+                if (x <= *it) break;
+                pool.erase(it);
+                cur++;
+            }
+            while (ptr < N / 2 && data[ptr].first == x) {
+                pool.insert(data[ptr++].second);
+                cnt_equal++;
+            }
+            ans = min(ans, cur - cnt_equal);
+        }
+        return ans;
+    }
+};
+```
+
+## Maximum Score From Grid Operations
+
+### Solution 1:  dynamic programming with 3 states, prefix sums, dp on matrix
+
+```cpp
+
+```
 
 # Leetcode Biweekly Contest 136
 

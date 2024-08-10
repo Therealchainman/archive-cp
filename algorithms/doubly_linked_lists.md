@@ -4,6 +4,8 @@ I created this because doubly linked lists are very useful data structure in som
 
 ## Initial
 
+START = 0 always, and represent the start node, 0 because allows indexing at 0th.  And END = one greater than largest index in the data.  So it will signify the end of the doubly linked list.  So if nxt points to END, that means it is a terminal node.  And if prv points to START that means it is the first node in the linked list chain. 
+
 ```cpp
 vector<int> nxt, prv;
 int START, END;
@@ -23,6 +25,8 @@ for (int i = 1; i <= n; i++) {
 def erase(x):
     prv[nxt[x]] = prv[x]
     nxt[prv[x]] = nxt[x]
+    prv[x] = START
+    nxt[x] = END
 ```
 
 ```cpp
@@ -34,7 +38,7 @@ void erase(int x) {
 }
 ```
 
-## INSERT y afterx in doubly linked list
+## INSERT y after x in doubly linked list
 
 ```py
 def insert(x, y): # insert y after x
@@ -42,6 +46,15 @@ def insert(x, y): # insert y after x
     prv[y] = x
     prv[nxt[x]] = y
     nxt[x] = y
+```
+
+```cpp
+void insert(int x, int y) {
+    nxt[y] = nxt[x];
+    prv[y] = x;
+    prv[nxt[x]] = y;
+    nxt[x] = y;
+}
 ```
 
 ## Example of a Doubly Linked List 

@@ -1841,6 +1841,156 @@ public:
 };
 ```
 
+## 840. Magic Squares In Grid
+
+### Solution 1:  only 8 magic squares, check if equals magic square
+
+```cpp
+class Solution {
+public:
+    const vector<vector<vector<int>>> MAGIC = {
+        {{4, 9, 2}, {3, 5, 7}, {8, 1, 6}},
+        {{2, 7, 6}, {9, 5, 1}, {4, 3, 8}},
+        {{6, 1, 8}, {7, 5, 3}, {2, 9, 4}},
+        {{8, 3, 4}, {1, 5, 9}, {6, 7, 2}},
+        {{4, 3, 8}, {9, 5, 1}, {2, 7, 6}},
+        {{2, 9, 4}, {7, 5, 3}, {6, 1, 8}},
+        {{6, 7, 2}, {1, 5, 9}, {8, 3, 4}},
+        {{8, 1, 6}, {3, 5, 7}, {4, 9, 2}}
+    };
+    int numMagicSquaresInside(vector<vector<int>>& grid) {
+        int R = grid.size(), C = grid[0].size(), ans = 0;
+        for (int r = 0; r <= R - 3; r++) {
+            for (int c = 0; c <= C - 3; c++) {
+                vector<vector<int>> subgrid(3, vector<int>(3, 0));
+                for (int i = 0; i < 3; i++) {
+                    for (int j = 0; j < 3; j++) {
+                        subgrid[i][j] = grid[i + r][j + c];
+                    }
+                }
+                for (int i = 0; i < 8; i++) {
+                    if (MAGIC[i] == subgrid) ans++;
+                }
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## 959. Regions Cut By Slashes
+
+### Solution 1:  disjoint set data structure, union find, undirected graph, grid
+
+```cpp
+struct UnionFind {
+    vector<int> parents, size;
+    void init(int n) {
+        parents.resize(n);
+        iota(parents.begin(),parents.end(),0);
+        size.assign(n,1);
+    }
+
+    int find(int i) {
+        if (i==parents[i]) {
+            return i;
+        }
+        return parents[i]=find(parents[i]);
+    }
+
+    bool same(int i, int j) {
+        i = find(i), j = find(j);
+        if (i!=j) {
+            if (size[j]>size[i]) {
+                swap(i,j);
+            }
+            size[i]+=size[j];
+            parents[j]=i;
+            return false;
+        }
+        return true;
+    }
+};
+class Solution {
+public:
+    const char FORWARD = '/', BACKWARD = '\\';
+    int N;
+    int id(int r, int c) {
+        return r * (N + 1) + c;
+    }
+    int regionsBySlashes(vector<string>& grid) {
+        N = grid.size();
+        UnionFind dsu;
+        dsu.init((N + 1) * (N + 1));
+        for (int r = 0; r <= N; r++) {
+            for (int c = 0; c <= N; c++) {
+                if (c > 0 && (r == 0 || r == N)) dsu.same(id(r, c), id(r, c - 1)); // upper and lower (horizontal) borders
+                if (r < N && (c == 0 || c == N)) dsu.same(id(r, c), id(r + 1, c)); // left and right (vertical) borders
+            }
+        }
+        int ans = 1;
+        for (int r = 0; r < N; r++) {
+            for (int c = 0; c < N; c++) {
+                if (grid[r][c] == FORWARD) {
+                    if (dsu.same(id(r, c + 1), id(r + 1, c))) ans++;
+                } else if (grid[r][c] == BACKWARD) {
+                    if (dsu.same(id(r, c), id(r + 1, c + 1))) ans++;
+                }
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## 885. Spiral Matrix III
+
+### Solution 1:  implementation, spiral loop
+
+```cpp
+class Solution {
+public:
+    vector<vector<int>> spiralMatrixIII(int rows, int cols, int rStart, int cStart) {
+        vector<vector<int>> ans;
+        function<bool(int, int)> in_bounds = [&](const int &r, const int &c) {
+            return r >= 0 && r < rows && c >= 0 && c < cols;
+        };
+        int r = rStart, c = cStart;
+        for (int R = cStart, L = cStart, U = rStart, D = rStart; R <= cols || L >= 0 || D <= rows || U >= 0; ) {
+            // move right
+            R++;
+            for (; c < R; c++) {
+                if (in_bounds(r, c)) ans.push_back({r, c});
+            }
+            // move down
+            D++;
+            for (; r < D; r++) {
+                if (in_bounds(r, c)) ans.push_back({r, c});
+            }
+            // move left
+            L--;
+            for (; c > L; c--) {
+                if (in_bounds(r, c)) ans.push_back({r, c});
+            }
+            // move up
+            U--;
+            for (; r > U; r--) {
+                if (in_bounds(r, c)) ans.push_back({r, c});
+            }
+        }
+        return ans;
+    }
+};
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
 ##
 
 ### Solution 1:

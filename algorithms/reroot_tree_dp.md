@@ -76,6 +76,8 @@ def dfs2(u, p):
 
 ## Example of rerooting and also computing the maximum independent set on a tree
 
+I don't recall how this works. 
+
 ```cpp
 int N, ans;
 vector<vector<int>> adj, dp, dpp;
