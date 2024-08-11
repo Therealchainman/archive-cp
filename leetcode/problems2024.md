@@ -1983,12 +1983,70 @@ public:
 };
 ```
 
-##
+## 1568. Minimum Number of Days to Disconnect Island
 
-### Solution 1:
+### Solution 1:  floodfill, connected components, either 0, 1, or 2 days are needed, check if 0 are needed, check if 1 are needed
 
 ```cpp
-
+class Solution {
+public:
+    const int WATER = 0, LAND = 1, VIS = 2;
+    int R, C, num_comp;
+    bool in_bounds(int r, int c) {
+        return r >= 0 && r < R && c >= 0 && c < C;
+    }
+    vector<pair<int, int>> neighborhood(int r, int c) {
+        return {{r + 1, c}, {r - 1, c}, {r, c + 1}, {r, c - 1}};
+    }
+    void floodfill(vector<vector<int>>& grid, int r, int c) {
+        if (!in_bounds(r, c) || grid[r][c] != LAND) return;
+        grid[r][c] = VIS;
+        vector<pair<int, int>> neighbors = neighborhood(r, c);
+        for (const auto &[nr, nc] : neighbors) {
+            floodfill(grid, nr, nc);
+        }
+    }
+    int minDays(vector<vector<int>>& grid) {
+        R = grid.size(), C = grid[0].size();
+        num_comp = 0;
+        for (int r = 0; r < R; r++) {
+            for (int c = 0; c < C; c++) {
+                if (grid[r][c] == LAND) {
+                    floodfill(grid, r, c);
+                    num_comp++;
+                }
+            }
+        }
+        if (num_comp != 1) return 0;
+        for (int r = 0; r < R; r++) {
+            for (int c = 0; c < C; c++) {
+                if (grid[r][c] == VIS) grid[r][c] = LAND;
+            }
+        }
+        for (int r = 0; r < R; r++) {
+            for (int c = 0; c < C; c++) {
+                if (grid[r][c] != LAND) continue;
+                grid[r][c] = VIS;
+                num_comp = 0;
+                for (int i = 0; i < R; i++) {
+                    for (int j = 0; j < C; j++) {
+                        if (grid[i][j] == LAND) {
+                            floodfill(grid, i, j);
+                            num_comp++;
+                        }
+                    }
+                }
+                if (num_comp != 1) return 1;
+                for (int i = 0; i < R; i++) {
+                    for (int j = 0; j < C; j++) {
+                        if (grid[i][j] == VIS) grid[i][j] = LAND;
+                    }
+                }
+            }
+        }
+        return 2;
+    }
+};
 ```
 
 ##
