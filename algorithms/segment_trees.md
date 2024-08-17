@@ -212,11 +212,14 @@ point update, range query
 
 Implement the function in here, such as max for func, but it can be other functions.  and update each index value. 
 
+0-indexed
+
 Inclusive queries [left, right].  
 
 this is the best one right now for C++
 
 ```cpp
+int neutral = 0;
 struct SegmentTree {
     int size;
     vector<int> nodes;
@@ -248,14 +251,14 @@ struct SegmentTree {
 
     int query(int left, int right) {
         left += size, right += size;
-        int res = 0;
+        int res = neutral;
         while (left <= right) {
             if (left & 1) {
-                res = max(res, nodes[left]);
+                res = func(res, nodes[left]);
                 left++;
             }
             if (~right & 1) {
-                res = max(res, nodes[right]);
+                res = func(res, nodes[right]);
                 right--;
             }
             left >>= 1, right >>= 1;

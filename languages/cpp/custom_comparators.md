@@ -36,3 +36,18 @@ sorting edges containing object Edge in descending order of w variable
         return a.w > b.w; // Descending order
     })
 ```
+
+## Custom sort in the struct
+
+sorts for w + h / (wh) < other.w + other.h / (other.wh)
+
+```cpp
+struct Rect {
+    int w, h;
+    Rect() {}
+    Rect(int w, int h) : w(w), h(h) {}
+    bool operator<(const Rect &other) const {
+        return (w + h) * other.w * other.h > (other.w + other.h) * w * h;
+    }
+};
+```

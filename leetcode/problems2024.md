@@ -2049,6 +2049,103 @@ public:
 };
 ```
 
+## 40. Combination Sum II
+
+### Solution 1:  recursion, backtracking, pruning, sorting, combinations
+
+```cpp
+class Solution {
+public:
+    int N;
+    vector<int> cur, cands;
+    vector<vector<int>> ans;
+    void recurse(int idx, int sum, int target) {
+        if (sum >= target) {
+            if (sum == target) ans.push_back(cur);
+            return;
+        }
+        for (int i = idx; i < N; i++) {
+            if (i > idx && cands[i] == cands[i - 1]) continue;
+            cur.push_back(cands[i]);
+            recurse(i + 1, sum + cands[i], target);
+            cur.pop_back();
+        }
+    }
+    vector<vector<int>> combinationSum2(vector<int>& candidates, int target) {
+        N = candidates.size();
+        cands = candidates;
+        sort(cands.begin(), cands.end());
+        recurse(0, 0, target);
+        return ans;
+    }
+};
+```
+
+## 719. Find K-th Smallest Pair Distance
+
+### Solution 1:  sort, sliding window, two pointers, binary search
+
+TTTTFFFF, return first F.
+since cnt < k is false
+
+```cpp
+class Solution {
+public:
+    int smallestDistancePair(vector<int>& nums, int k) {
+        int N = nums.size();
+        sort(nums.begin(), nums.end());
+        function<bool(int)> possible = [&](int target) {
+            int cnt = 0;
+            for (int l = 0, r = 0; r < N; r++) {
+                while (nums[r] - nums[l] > target) l++;
+                cnt += r - l;
+            }
+            return cnt < k;
+        };
+        int lo = 0, hi = 1e6 + 5;
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (possible(mid)) lo = mid + 1;
+            else hi = mid;
+        }
+        return lo;
+    }
+};
+```
+
+## 860. Lemonade Change
+
+### Solution 1:  greedy, use largest to smallest bills
+
+```cpp
+class Solution {
+public:
+    const vector<int> BILLS = {20, 10, 5};
+    bool lemonadeChange(vector<int>& bills) {
+        int reg[21];
+        for (int bill : bills) {
+            reg[bill]++;
+            int change = bill - 5;
+            for (int b : BILLS) {
+                int take = min(reg[b], change / b);
+                reg[b] -= take;
+                change -= take * b;
+            }
+            if (change > 0) return false;
+        }
+        return true;
+    }
+};
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
 ##
 
 ### Solution 1:

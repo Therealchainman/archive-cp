@@ -22,8 +22,12 @@ Binary Exponentiation is another algorithm to find it in log(m) time.
 
 Calculates 1/i, or the multiplicative inverse. 
 
+## C++ implementation modular inverse
+
+modular inverse of i under modulus m
+
 ```cpp
-int inv(int i) {
-  return i <= 1 ? i : MOD - (long long)(MOD/i) * inv(MOD % i) % MOD;
+int inv(int i, int m) {
+  return i <= 1 ? i : m - (int)(m/i) * inv(m % i, m) % m;
 }
 ```
