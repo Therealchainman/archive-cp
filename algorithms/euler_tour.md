@@ -65,47 +65,93 @@ for _ in range(q):
 
 Implemented in C++
 
+For a Fenwick Tree, but it can be used with segment tree or sparse table if there are no updates. 
+It can even be implemented with lazy segment tree probably.  But understanding how it builts the tin and tout array is the euler tour technique.  It is a dfs and construct those two arrays, that allow you to perform range queries over an array and get sum of all nodes in a subtree or node u. 
+
 ```cpp
-class EulerTour {
-public:
-    int num_nodes;
-    vector<vector<int>> edges;
-    vector<vector<int>> adj_list;
-    int root_node;
-    vector<int> enter_counter, exit_counter;
-    int counter;
+int N, Q, timer;
+vector<vector<int>> adj;
+vector<int> values, tin, tout;
 
-    EulerTour(int n, vector<vector<int>>& e) {
-        num_nodes = n;
-        edges = e;
-        adj_list.resize(num_nodes + 1);
-        root_node = 1;
-        enter_counter.resize(num_nodes + 1);
-        exit_counter.resize(num_nodes + 1);
-        counter = 1;
-        build_adj_list();
-        euler_tour(root_node, -1);
+void dfs(int u, int p = -1) {
+    tin[u] = timer++;
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        dfs(v, u);
+    }
+    tout[u] = timer - 1;
+}
+
+int neutral = 0;
+struct FenwickTree {
+    vector<int> nodes;
+    
+    void init(int n) {
+        nodes.assign(n + 1, neutral);
     }
 
-    void build_adj_list() {
-        for (auto edge : edges) {
-            int u = edge[0], v = edge[1];
-            adj_list[u].push_back(v);
-            adj_list[v].push_back(u);
+    void update(int idx, int val) {
+        while (idx < (int)nodes.size()) {
+            nodes[idx] += val;
+            idx += (idx & -idx);
         }
     }
 
-    void euler_tour(int node, int parent_node) {
-        enter_counter[node] = counter;
-        counter++;
-        for (auto child_node : adj_list[node]) {
-            if (child_node != parent_node) {
-                euler_tour(child_node, node);
-            }
+    int query(int left, int right) {
+        return right >= left ? query(right) - query(left - 1) : 0;
+    }
+
+    int query(int idx) {
+        int result = neutral;
+        while (idx > 0) {
+            result += nodes[idx];
+            idx -= (idx & -idx);
         }
-        exit_counter[node] = counter - 1;
+        return result;
     }
 };
+
+void solve() {
+    cin >> N >> Q;
+    adj.assign(N, vector<int>());
+    values.resize(N);
+    for (int i = 0; i < N; i++) {
+        cin >> values[i];
+    }
+    for (int i = 0; i < N - 1; i++) {
+        int u, v;
+        cin >> u >> v;
+        u--, v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    tin.resize(N);
+    tout.resize(N);
+    dfs(0);
+    FenwickTree ft;
+    ft.init(N);
+    for (int i = 0; i < N; i++) {
+        ft.update(tin[i] + 1, values[i]); // 1-indexed
+    }
+    while (Q--) {
+        int type;
+        cin >> type;
+        if (type == 1) {
+            int u, x;
+            cin >> u >> x;
+            u--;
+            int delta = x - values[u];
+            values[u] = x;
+            ft.update(tin[u] + 1, delta);
+        } else if (type == 2) {
+            int u;
+            cin >> u;
+            u--;
+            int ans = ft.query(tin[u] + 1, tout[u] + 1);
+            cout << ans << endl;
+        }
+    }
+}
 ```
 
 ## EULER TOUR FOR PATH QUERIES 

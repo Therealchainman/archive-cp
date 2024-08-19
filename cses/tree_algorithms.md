@@ -951,103 +951,29 @@ int main() {
 
 ### Solution 1:  euler tour technique for subtree queries + tree + binary index tree (Fenwick tree) + flatten tree
 
-```py
-sys.setrecursionlimit(1_000_000)
-class FenwickTree:
-    def __init__(self, N):
-        self.sums = [0 for _ in range(N+1)]
-
-    def update(self, i, delta):
-        while i < len(self.sums):
-            self.sums[i] += delta
-            i += i & (-i)
-
-    def query(self, i):
-        res = 0
-        while i > 0:
-            res += self.sums[i]
-            i -= i & (-i)
-        return res
-
-    def __repr__(self):
-        return f"array: {self.sums}"
-
-def main():
-    n, q = map(int, input().split())
-    values = list(map(int, input().split()))
-    adj_list = [[] for _ in range(n)]
-    for _ in range(n -1):
-        u, v = map(int, input().split())
-        u -= 1
-        v -= 1
-        adj_list[u].append(v)
-        adj_list[v].append(u)
-    # EULER TOUR TECHNIQUE
-    start, end = [0] * n, [0] * n
-    timer = 0
-    def dfs(node, parent):
-        nonlocal timer
-        start[node] = timer
-        timer += 1
-        for nei in adj_list[node]:
-            if nei == parent: continue
-            dfs(nei, node)
-        end[node] = timer
-    dfs(0, -1)
-    bit = FenwickTree(timer + 1)
-    for i, val in enumerate(values):
-        bit.update(start[i] + 1, val)
-    for _ in range(q):
-        queries = list(map(int, input().split()))
-        if queries[0] == 1:
-            u, s = queries[1:]
-            u -= 1
-            delta = s - values[u]
-            bit.update(start[u] + 1, delta)
-            values[u] = s
-        else:
-            u = queries[1] - 1
-            res = bit.query(end[u]) - bit.query(start[u])
-            print(res)
-
-if __name__ == '__main__':
-    main()
-```
-
 ```cpp
-#include <bits/stdc++.h>
-using namespace std;
+int N, Q, timer;
+vector<vector<int>> adj;
+vector<int> values, tin, tout;
 
-inline int read()
-{
-	int x = 0, y = 1; char c = getchar();
-	while (c < '0' || c > '9') {
-		if (c == '-') y = -1;
-		c = getchar();
-	}
-	while (c >= '0' && c <= '9') x = x * 10 + c - '0', c = getchar();
-	return x * y;
+void dfs(int u, int p = -1) {
+    tin[u] = timer++;
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        dfs(v, u);
+    }
+    tout[u] = timer - 1;
 }
 
-inline long long readll() {
-	long long x = 0, y = 1; char c = getchar();
-	while (c < '0' || c > '9') {
-		if (c == '-') y = -1;
-		c = getchar();
-	}
-	while (c >= '0' && c <= '9') x = x * 10 + c - '0', c = getchar();
-	return x * y;
-}
-
-long long neutral = 0;
+int neutral = 0;
 struct FenwickTree {
-    vector<long long> nodes;
+    vector<int> nodes;
     
     void init(int n) {
         nodes.assign(n + 1, neutral);
     }
 
-    void update(int idx, long long val) {
+    void update(int idx, int val) {
         while (idx < (int)nodes.size()) {
             nodes[idx] += val;
             idx += (idx & -idx);
@@ -1055,11 +981,11 @@ struct FenwickTree {
     }
 
     int query(int left, int right) {
-        return query(right) - query(left);
+        return right >= left ? query(right) - query(left - 1) : 0;
     }
 
-    long long query(int idx) {
-        long long result = neutral;
+    int query(int idx) {
+        int result = neutral;
         while (idx > 0) {
             result += nodes[idx];
             idx -= (idx & -idx);
@@ -1068,82 +994,51 @@ struct FenwickTree {
     }
 };
 
-class EulerTour {
-public:
-    int num_nodes;
-    vector<vector<int>> edges;
-    vector<vector<int>> adj_list;
-    int root_node;
-    vector<int> enter_counter, exit_counter;
-    int counter;
-
-    EulerTour(int n, vector<vector<int>>& e) {
-        num_nodes = n;
-        edges = e;
-        adj_list.resize(num_nodes + 1);
-        root_node = 1;
-        enter_counter.resize(num_nodes + 1);
-        exit_counter.resize(num_nodes + 1);
-        counter = 1;
-        build_adj_list();
-        euler_tour(root_node, -1);
+void solve() {
+    cin >> N >> Q;
+    adj.assign(N, vector<int>());
+    values.resize(N);
+    for (int i = 0; i < N; i++) {
+        cin >> values[i];
     }
-
-    void build_adj_list() {
-        for (auto edge : edges) {
-            int u = edge[0], v = edge[1];
-            adj_list[u].push_back(v);
-            adj_list[v].push_back(u);
+    for (int i = 0; i < N - 1; i++) {
+        int u, v;
+        cin >> u >> v;
+        u--, v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    tin.resize(N);
+    tout.resize(N);
+    dfs(0);
+    FenwickTree ft;
+    ft.init(N);
+    for (int i = 0; i < N; i++) {
+        ft.update(tin[i] + 1, values[i]); // 1-indexed
+    }
+    while (Q--) {
+        int type;
+        cin >> type;
+        if (type == 1) {
+            int u, x;
+            cin >> u >> x;
+            u--;
+            int delta = x - values[u];
+            values[u] = x;
+            ft.update(tin[u] + 1, delta);
+        } else if (type == 2) {
+            int u;
+            cin >> u;
+            u--;
+            int ans = ft.query(tin[u] + 1, tout[u] + 1);
+            cout << ans << endl;
         }
     }
+}
 
-    void euler_tour(int node, int parent_node) {
-        enter_counter[node] = counter;
-        counter++;
-        for (auto child_node : adj_list[node]) {
-            if (child_node != parent_node) {
-                euler_tour(child_node, node);
-            }
-        }
-        exit_counter[node] = counter - 1;
-    }
-};
-
-int main() {
-    // freopen("input.txt", "r", stdin);
-    // freopen("output.txt", "w", stdout);
-    int n = read(), q = read();
-    vector<int> arr(n + 1, 0);
-    for (int i = 1; i <= n; i++) {
-        arr[i] = readll();
-    }
-    vector<vector<int>> edges;
-    for (int i = 0; i < n - 1; i++) {
-        int u = read(), v = read();
-        edges.push_back({u, v});
-    }
-    EulerTour euler_tour(n, edges);
-    FenwickTree fenwick_tree;
-    fenwick_tree.init(n + 1);
-    for (int node = 1; node <= n; node++) {
-        int enter_counter = euler_tour.enter_counter[node];
-        fenwick_tree.update(enter_counter, arr[node]);
-    }
-    for (int i = 0; i < q; i++) {
-        int t = read();
-        if (t == 1) {
-            int u = read(); long long x = readll();
-            int node_index_in_flatten_tree = euler_tour.enter_counter[u];
-            int delta = x - arr[u];
-            arr[u] = x;
-            fenwick_tree.update(node_index_in_flatten_tree, delta);
-        }
-        else {
-            int s = read();
-            long long subtree_sum = fenwick_tree.query(euler_tour.exit_counter[s]) - fenwick_tree.query(euler_tour.enter_counter[s] - 1);
-            cout << subtree_sum << endl;
-        }
-    }
+signed main() {
+    solve();
+    return 0;
 }
 ```
 

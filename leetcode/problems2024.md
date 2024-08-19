@@ -2138,20 +2138,80 @@ public:
 };
 ```
 
-##
+## 1937. Maximum Number of Points with Cost
 
-### Solution 1:
+### Solution 1:  dynamic programming, prefix and suffix max
 
 ```cpp
-
+class Solution {
+public:
+    long long maxPoints(vector<vector<int>>& points) {
+        int R = points.size(), C = points[0].size();
+        vector<long long> dp(C, 0), ndp, pmax(C), smax(C);
+        for (int r = 0; r < R; r++) {
+            ndp.assign(C, 0);
+            pmax.assign(C, 0);
+            pmax[0] = dp[0];
+            for (int c = 1; c < C; c++) {
+                pmax[c] = max(pmax[c - 1] - 1, dp[c]);
+            }
+            smax.assign(C, 0);
+            smax.back() = dp.back();
+            for (int c = C - 2; c >= 0; c--) {
+                smax[c] = max(smax[c + 1] - 1, dp[c]);
+            }
+            for (int c = 0; c < C; c++) {
+                ndp[c] = points[r][c] + max(pmax[c], smax[c]);
+            }
+            swap(dp, ndp);
+        }
+        long long ans = *max_element(dp.begin(), dp.end());
+        return ans;
+    }
+};
 ```
 
-##
+## 650. 2 Keys Keyboard
 
-### Solution 1:
+### Solution 1:  dynamic programming, factorization, O(nsqrt(n))
 
 ```cpp
+class Solution {
+public:
+    const int INF = 1e9;
+    int minSteps(int n) {
+        vector<int> dp(n + 1, INF);
+        dp[1] = 0;
+        for (int i = 2; i <= n; i++) {
+            for (int j = 1; j * j <= i; j++) {
+                if (i % j == 0) {
+                    dp[i] = min(dp[i], dp[j] + i / j);
+                    int f = i / j;
+                    if (f != j) dp[i] = min(dp[i], dp[f] + i / f);
+                }
+            }
+        }
+        return dp[n];
+    }
+};
+```
 
+### Solution 2:  sum of prime factorization, O(n)
+
+```cpp
+class Solution {
+public:
+    int minSteps(int n) {
+        int ans = 0;
+        for (int d = 2; n > 1; d++) {
+            while (n % d == 0) {
+                n /= d;
+                ans += d;
+            }
+        }
+        return ans;
+    }
+};
 ```
 
 ##

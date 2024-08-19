@@ -13,12 +13,17 @@ This equation is 1-indexed based, so that means it starts at index=1, so if you 
 
 Initialize it with the following
 self.fenwick = FenwickTree(n)
+Do not need to do n + 1, it does that so it already works for 1-index arrays.
 
 self.fenwick.update(r+1,-k)
 
 if I query(5) it looks in the range [0,5], so it is inclusive
 
 point update range queries
+
+If you have an array of values, and you are updating a value from the array, you need to update the fenwick tree with the difference between the new value and the old value, so that the fenwick tree is updated with the new value.  It is all incremental.  So if you have a value of 5, and you update it to 10, you need to update the fenwick tree with 5, so that the fenwick tree is updated with the new value.
+
+But sometimes fenwick tree is used for counting, or marking if something is currently selected, in those case you usually adding 1 or -1 to the fenwick tree.
 
 ```cpp
 int neutral = 0;
