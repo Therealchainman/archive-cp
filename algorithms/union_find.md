@@ -87,6 +87,8 @@ class UnionFind:
 
 This is my favorite cpp implementation, it is rather simple.
 
+Intended for 0-indexed arrays
+
 ```cpp
 struct UnionFind {
     vector<int> parents, size;

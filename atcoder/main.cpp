@@ -4,7 +4,7 @@ using namespace std;
 #define endl '\n'
 
 void solve() {
-
+    
 }
 
 signed main() {

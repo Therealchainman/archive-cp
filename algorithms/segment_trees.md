@@ -317,7 +317,71 @@ struct SegmentTree {
 
 ### Alternative approach, when storing multiple variables in segment tree
 
-Still for inclusive range queries [L, R], returns minimum and index
+Still for inclusive range queries [L, R], returns minimum and the smallest index at which the min occurs.
+
+
+```cpp
+struct MinSegmentTree {
+    int size;
+    vector<int> nodes, index;
+    int neutral = INF;
+
+    void init(int num_nodes) {
+        size = 1;
+        while (size < num_nodes) size *= 2;
+        nodes.assign(size * 2, neutral);
+        index.assign(size * 2, neutral);
+    }
+
+    int func(int x, int y) {
+        return min(x, y);
+    }
+
+    void ascend(int segment_idx) {
+        while (segment_idx > 0) {
+            int left_segment_idx = 2 * segment_idx, right_segment_idx = 2 * segment_idx + 1;
+            int left_min = nodes[left_segment_idx], right_min = nodes[right_segment_idx];
+            if (left_min < right_min) index[segment_idx] = index[left_segment_idx];
+            else index[segment_idx] = index[right_segment_idx];
+            nodes[segment_idx] = func(nodes[left_segment_idx], nodes[right_segment_idx]);
+            segment_idx >>= 1;
+        }
+    }
+
+    void update(int segment_idx, int idx, int val) {
+        segment_idx += size;
+        nodes[segment_idx] = val;
+        index[segment_idx] = idx;
+        segment_idx >>= 1;
+        ascend(segment_idx);
+    }
+
+    pair<int, int> query(int left, int right) {
+        left += size, right += size;
+        int res = neutral, idx = INF;
+        while (left <= right) {
+            if (left & 1) {
+                if (nodes[left] == res) idx = min(idx, index[left]);
+                if (nodes[left] < res) {
+                    idx = index[left];
+                    res = nodes[left];
+                }
+                left++;
+            }
+            if (~right & 1) {
+                if (nodes[right] == res) idx = min(idx, index[right]);
+                if (nodes[right] < res) {
+                    res = nodes[right];
+                    idx = index[right];
+                }
+                right--;
+            }
+            left >>= 1, right >>= 1;
+        }
+        return make_pair(res, idx);
+    }
+};
+```
 
 ```cpp
 const int INF = 1e9;

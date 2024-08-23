@@ -1197,8 +1197,6 @@ struct LazySegmentTree {
 
 range updates are [L, R) (exclusive for right end point)
 
-
-
 ```cpp
 int neutral = 0, noop = 0;
 

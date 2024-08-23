@@ -16,6 +16,8 @@ struct priorityComp {
 };
 ```
 
+MIN HEAP EXAMPLE
+
 ```cpp
 struct stateComp {
     bool operator()(const State& a, const State& b) const {

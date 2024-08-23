@@ -2214,12 +2214,66 @@ public:
 };
 ```
 
-##
+## 592. Fraction Addition and Subtraction
 
-### Solution 1:
+### Solution 1:  fraction addition, lowest common multiple, prime integers, parsing string, irreducible fractions
 
 ```cpp
-
+class Solution {
+public:
+    const vector<int> PRIMES = {2, 3, 5, 7};
+    const int LCM = 2 * 2 * 2 * 3 * 3 * 5 * 7;
+    pair<int, int> parse_fraction(const string& s) {
+        auto idx = s.find('/');
+        int num = stoi(s.substr(0, idx));
+        int den = stoi(s.substr(idx + 1));
+        return {num, den};
+    }
+    string fractionAddition(string expression) {
+        vector<string> pos, neg;
+        // split based on two delimiters
+        bool sign = false;
+        string cur = "";
+        for (char ch : expression) {
+            if ((ch == '-' || ch == '+') && cur.size() > 0) {
+                if (sign) {
+                    neg.push_back(cur);
+                } else {
+                    pos.push_back(cur);
+                }
+                cur = "";
+            }
+            if (ch == '-') sign = true;
+            if (ch == '+') sign = false;
+            if (ch != '-' && ch != '+') cur += ch;
+        }
+        if (sign) {
+            neg.push_back(cur);
+        } else {
+            pos.push_back(cur);
+        }
+        int nsum = 0;
+        for (const string &f : pos) {
+            auto [num, den] = parse_fraction(f);
+            num *= LCM / den;
+            nsum += num;
+        }
+        for (const string &f : neg) {
+            auto [num, den] = parse_fraction(f);
+            num *= LCM / den;
+            nsum -= num;
+        }
+        int den = LCM;
+        for (int p : PRIMES) {
+            while (nsum % p == 0 && den % p == 0) {
+                nsum /= p;
+                den /= p;
+            }
+        }
+        string ans = to_string(nsum) + '/' + to_string(den);
+        return ans;
+    }
+};
 ```
 
 ##
