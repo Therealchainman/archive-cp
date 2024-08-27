@@ -142,14 +142,6 @@ class Solution:
         return -1
 ```
 
-## 1514. Path with Maximum Probability
-
-### Solution 1:
-
-```py
-
-```
-
 ## 126. Word Ladder II
 
 ### Solution 1:
@@ -14264,6 +14256,36 @@ class Solution:
                     dist[nei] = ncost
                     heappush(min_heap, (ncost, nei))
         return unlogarize(dist[end]) if dist[end] != math.inf else 0
+```
+
+```cpp
+class Solution {
+public:
+    const double INF =  1e7;
+    double maxProbability(int n, vector<vector<int>>& edges, vector<double>& succProb, int start, int end) {
+        vector<vector<pair<int, double>>> adj(n, vector<pair<int, double>>());
+        for (int i = 0; i < edges.size(); i++) {
+            int u = edges[i][0], v = edges[i][1];
+            double logprob = log(succProb[i]);
+            adj[u].emplace_back(v, -logprob);
+            adj[v].emplace_back(u, -logprob);
+        }
+        priority_queue<pair<double, int>, vector<pair<double, int>>, greater<pair<double, int>>> minheap; // log-prob, node
+        minheap.emplace(0, start);
+        vector<double> dp(n, INF);
+        while (!minheap.empty()) {
+            auto [prob, u] = minheap.top();
+            minheap.pop();
+            if (u == end) return exp(-prob);
+            if (prob >= dp[u]) continue;
+            dp[u] = prob;
+            for (auto [v, nprob] : adj[u]) {
+                minheap.emplace(prob + nprob, v);
+            }
+        }
+        return 0;
+    }
+};
 ```
 
 ## 250. Count Univalue Subtrees

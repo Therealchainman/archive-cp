@@ -65,3 +65,20 @@ def main(N, L, R, piles):
     grundy_number = grundy(0, total, num_piles)
     return "First" if grundy_number > 0 else "Second"
 ```
+
+
+
+```cpp
+A.resize(N);
+int xor_sum = 0;
+for (int i = 0; i < N; i++) {
+    cin >> A[i];
+    // count_primes gives number of stones in a pile.
+    xor_sum ^= count_primes(A[i]);
+}
+if (xor_sum) {
+    cout << "Anna" << endl;
+} else {
+    cout << "Bruno" << endl;
+}
+```

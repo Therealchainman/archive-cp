@@ -107,14 +107,17 @@ def factorize(x):
 Full example of smallest prime factor being used to count divisors in C++. 
 
 ```cpp
-const int N = 1e6 + 5;
-int spf[N];
+const int MAXN = 1e5 + 5;
+int spf[MAXN];
 
 // nloglog(n)
-void sieve() {
-    for (int i = 2; i < N; i++) {
+void sieve(int n) {
+    for (int i = 0; i < n; i++) {
+        spf[i] = i;
+    }
+    for (int i = 2; i < n; i++) {
         if (spf[i] != i) continue;
-        for (int j = i * i; j < N; j += i) {
+        for (int j = i * i; j < n; j += i) {
             if (spf[j] != j) continue;
             spf[j] = i;
         }
@@ -145,10 +148,7 @@ signed main() {
     cout.tie(0);
     int n, x;
     cin >> n;
-    for (int i = 0; i < N; i++) {
-        spf[i] = i;
-    }
-    sieve();
+    sieve(MAXN);
     for (int i = 0; i < n; i++) {
         cin >> x;
         cout << count_divisors(x) << endl;
@@ -159,13 +159,17 @@ signed main() {
 
 You can also count the number of prime integers in the prime factorization of an integer, excluding 1, which is not prime anyways. 
 
-```py
-def factorize(n):
-    cnt = 0
-    while n > 1:
-        cnt += 1
-        n //= spf[n]
-    return cnt
+
+```cpp
+// log(x) algorithm to count prime factors, so 2^2, counts as 2 prime factors
+int count_primes(int x) {
+    int res = 0;
+    while (x > 1) {
+        x /= spf[x];
+        res++;
+    }
+    return res;
+}
 ```
 
 ## prime sieve to compute the sum of multiplicity for each integer

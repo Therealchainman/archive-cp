@@ -26,10 +26,10 @@ If you have an array of values, and you are updating a value from the array, you
 But sometimes fenwick tree is used for counting, or marking if something is currently selected, in those case you usually adding 1 or -1 to the fenwick tree.
 
 ```cpp
-int neutral = 0;
 struct FenwickTree {
     vector<int> nodes;
-    
+    int neutral = 0;
+
     void init(int n) {
         nodes.assign(n + 1, neutral);
     }

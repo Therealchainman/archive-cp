@@ -2276,6 +2276,234 @@ public:
 };
 ```
 
+## 854. K-Similar Strings
+
+### Solution 1:  bfs + memoization
+
+```cpp
+class Solution {
+public:
+    int kSimilarity(string s1, string s2) {
+        int n = s1.size();
+        unordered_set<string> memo;
+        int ans = 0;
+        memo.insert(s1);
+        queue<pair<string, int>> dq;
+        dq.emplace(s1, 0);
+        while (!dq.empty()) {
+            int cnt = dq.size();
+            string s;
+            int idx;
+            while (cnt--) {
+                tie(s, idx) = dq.front();
+                dq.pop();
+                if (s == s2) return ans;
+                while (s[idx] == s2[idx]) idx++;
+                for (int j = idx + 1; j < n; j++) {
+                    if (s[j] != s2[idx]) continue;
+                    swap(s[idx], s[j]);
+                    if (memo.find(s) == memo.end()) {
+                        dq.emplace(s, idx);
+                        memo.insert(s);
+                    }
+                    swap(s[idx], s[j]);
+                }
+            }
+            ans++;
+        }
+        return ans;
+    }
+};
+```
+
+## 320. Generalized Abbreviation
+
+### Solution 1:  bitmask, string
+
+```cpp
+class Solution {
+public:
+    string decode(int mask, string &word) {
+        string res = "";
+        int cnt = 0;
+        for (int i = 0; i < word.size(); i++) {
+            if ((mask >> i) & 1) {
+                cnt++;
+            } else {
+                if (cnt > 0) res += to_string(cnt);
+                res += word[i];
+                cnt = 0;
+            }
+        }
+        if (cnt > 0) res += to_string(cnt);
+        return res;
+    }
+    vector<string> generateAbbreviations(string word) {
+        vector<string> ans;
+        int n = word.size();
+        for (int mask = 0; mask < (1 << n); mask++) {
+            ans.push_back(decode(mask, word));
+        }
+        return ans;
+    }
+};
+```
+
+## 937. Reorder Data in Log Files
+
+### Solution 1: custom sorting, struct, string, insert
+
+```cpp
+struct LetterLog {
+    string id, contents;
+    LetterLog() {}
+    LetterLog(const string &id, const string &contents) : id(id), contents(contents) {}
+    bool operator<(const LetterLog& other) const {
+        if (contents != other.contents) return contents < other.contents;
+        return id < other.id;
+    }
+};
+class Solution {
+public:
+    bool is_digitlog(const string &s) {
+        for (const char &ch : s) {
+            if (!isdigit(ch) && !isspace(ch)) return false;
+        }
+        return true;
+    }
+    vector<string> reorderLogFiles(vector<string>& logs) {
+        vector<string> dlogs;
+        vector<LetterLog> llogs;
+        for (const string& log : logs) {
+            int i = log.find(' ');
+            if (is_digitlog(log.substr(i + 1))) dlogs.push_back(log);
+            else llogs.emplace_back(log.substr(0, i), log.substr(i + 1));
+        }
+        sort(llogs.begin(), llogs.end());
+        vector<string> ans;
+        for (const LetterLog& log : llogs) {
+            ans.push_back(log.id + " " + log.contents);
+        }
+        ans.insert(ans.end(), dlogs.begin(), dlogs.end());
+        return ans;
+    }
+};
+```
+
+## 1650. Lowest Common Ancestor of a Binary Tree III
+
+### Solution 1:  tree, depth, parents, lca
+
+```cpp
+class Solution {
+public:
+    int compute_depth(Node* root) {
+        int ans = -1;
+        while (root != NULL) {
+            root = root -> parent;
+            ans++;
+        }
+        return ans;
+    }
+    Node* lowestCommonAncestor(Node* p, Node * q) {
+        int dp = compute_depth(p), dq = compute_depth(q);
+        while (p -> val != q -> val) {
+            if (dp > dq) {
+                p = p -> parent;
+                dp--;
+            } else {
+                q = q -> parent;
+                dq--;
+            }
+        }
+        return p;
+    }
+};
+```
+
+## 1676. Lowest Common Ancestor of a Binary Tree IV
+
+### Solution 1:  dfs, recursion, postorder traversal, set
+
+```cpp
+class Solution {
+public:
+    set<int> vis;
+    TreeNode* dfs(TreeNode* u) {
+        if (u == NULL) return NULL;
+        if (vis.find(u -> val) != vis.end()) return u;
+        TreeNode* left = dfs(u -> left);
+        TreeNode* right = dfs(u -> right);
+        if (left == NULL) return right;
+        if (right == NULL) return left;
+        return u;
+    }
+    TreeNode* lowestCommonAncestor(TreeNode* root, vector<TreeNode*> &nodes) {
+        for (auto u : nodes) {
+            vis.insert(u -> val);
+        }
+        return dfs(root);
+    }
+};
+```
+
+## 2534. Time Taken to Cross the Door
+
+### Solution 1:  queues, conditional logic
+
+```cpp
+class Solution {
+public:
+    vector<int> timeTaken(vector<int>& arrival, vector<int>& state) {
+        int N = arrival.size();
+        vector<int> ans(N);
+        queue<int> enterq, exitq;
+        int prv = -1;
+        for (int t = 0, i = 0; i < N || !enterq.empty() || !exitq.empty(); t++) {
+            while (i < N && arrival[i] == t) {
+                if (state[i]) {
+                    exitq.push(i);
+                } else {
+                    enterq.push(i);
+                }
+                i++;
+            }
+            if ((prv == 1 && !enterq.empty())) {
+                ans[enterq.front()] = t;
+                enterq.pop();
+            } else if (!exitq.empty()) {
+                ans[exitq.front()] = t;
+                exitq.pop();
+                prv = 0;
+            } else if (!enterq.empty()) {
+                ans[enterq.front()] = t;
+                enterq.pop();
+                prv = 1;
+            } else {
+                prv = -1;
+            }
+        }
+        return ans;
+    }
+};
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
 ##
 
 ### Solution 1:
