@@ -163,3 +163,69 @@ public:
 ```cpp
 
 ```
+
+# Leetcode Biweekly Contest 138
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 3273. Minimum Amount of Damage Dealt to Bob
+
+### Solution 1:  greedy, sorting, exchange argument
+
+```cpp
+int ceil(int x, int y) {
+    return (x + y - 1) / y;
+}
+struct Monster {
+    long long dmg, turns;
+    Monster() {}
+    Monster(long long dmg, long long turns) : dmg(dmg), turns(turns) {}
+    bool operator<(const Monster &other) const {
+        long long cost1 = turns * (dmg + other.dmg) + other.dmg * other.turns;
+        long long cost2 = other.turns * (dmg + other.dmg) + dmg * turns;
+        return cost1 < cost2;
+    }
+};
+class Solution {
+public:
+    long long minDamage(int power, vector<int>& damage, vector<int>& health) {
+        int N = damage.size();
+        long long ans = 0, dmg = 0;
+        vector<Monster> arr(N);
+        for (int i = 0; i < N; i++) {
+            dmg += damage[i];
+            arr[i] = Monster(damage[i], ceil(health[i], power));
+        }
+        sort(arr.begin(), arr.end());
+        for (const Monster &m : arr) {
+            ans += dmg * m.turns;
+            dmg -= m.dmg;
+        }
+        return ans;
+    }
+};
+```
+
+# Leetcode Biweekly Contest 139
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```

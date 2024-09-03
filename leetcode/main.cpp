@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+// remove duplicates in array in c++
 
 class Solution {
 public:

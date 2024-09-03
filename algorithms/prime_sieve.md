@@ -55,9 +55,9 @@ void sieve() {
     fill(primes, primes + MAXN, 1);
     primes[0] = primes[1] = 0;
     int p = 2;
-    for (int p = 2; p * p <= N; p++) {
+    for (int p = 2; p * p <= MAXN; p++) {
         if (primes[p]) {
-            for (int i = p * p; i < N; i += p) {
+            for (int i = p * p; i < MAXN; i += p) {
                 primes[i] = 0;
             }
         }

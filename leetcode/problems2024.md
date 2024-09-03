@@ -2488,12 +2488,46 @@ public:
 };
 ```
 
-##
+## 3268. Find Overlapping Shifts II
 
-### Solution 1:
+### Solution 1:  unpivot, melt, gropuby cumulative sum, combinatorics, math, join
 
-```cpp
+```py
+import pandas as pd
+import math
 
+def calculate_shift_overlaps(employee_shifts: pd.DataFrame) -> pd.DataFrame:
+    df = (
+        pd.melt(employee_shifts, id_vars = ["employee_id", ],
+        value_vars = ["start_time", "end_time"], value_name = "time")
+        .sort_values(["employee_id", "time"])
+    )
+    df.time = pd.to_datetime(df.time)
+    df["incr"] = df.variable.apply(lambda x: 1 if x == "start_time" else -1)
+    df["c_sum"] = df.groupby("employee_id").agg(
+        c_sum = ("incr", "cumsum")
+    )
+    df_max = (
+        df.groupby("employee_id").agg(
+            c_sum = ("c_sum", "max")
+        )
+        .reset_index()
+    )
+    df["multi"] = df.c_sum.apply(lambda x: math.comb(x, 2))
+    df["total_overlap_duration"] = (
+        ((df.time.shift(-1) - df.time) / pd.Timedelta(minutes = 1)) * df.multi
+    )
+    df_tot = (
+        df.groupby("employee_id").agg(
+            total_overlap_duration = ("total_overlap_duration", "sum")
+        )
+        .reset_index()
+    )
+    df = (
+        df_max.merge(df_tot, how = "inner", on = "employee_id")
+        .rename(columns = {"c_sum": "max_overlapping_shifts"})
+    )
+    return df
 ```
 
 ##
