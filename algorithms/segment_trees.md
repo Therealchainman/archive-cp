@@ -2,6 +2,237 @@
 
 ![max_range_query](images/max_range_query.PNG)
 
+## Fast Segment tree in C++ Point updates and Range Queries PURQ
+
+This is a good implementation, been using it for many problems.
+
+point update, range query
+
+Implement the function in here, such as max for func, but it can be other functions.  and update each index value. 
+
+0-indexed
+
+Inclusive queries [left, right].  
+
+this is the best one right now for C++
+
+you can just get the value from seg.nodes[1] if you are querying the full range of the array.
+
+```cpp
+
+struct SegmentTree {
+    int size;
+    int neutral = 0;
+    vector<int> nodes;
+
+    void init(int num_nodes) {
+        size = 1;
+        while (size < num_nodes) size *= 2;
+        nodes.assign(size * 2, 0);
+    }
+
+    int func(int x, int y) {
+        return max(x, y);
+    }
+
+    void ascend(int segment_idx) {
+        while (segment_idx > 0) {
+            int left_segment_idx = 2 * segment_idx, right_segment_idx = 2 * segment_idx + 1;
+            nodes[segment_idx] = func(nodes[left_segment_idx], nodes[right_segment_idx]);
+            segment_idx >>= 1;
+        }
+    }
+    // this is for assign, for addition change to += val
+    void update(int segment_idx, int val) {
+        segment_idx += size;
+        nodes[segment_idx] = val; // += val if want addition, to track frequency
+        segment_idx >>= 1;
+        ascend(segment_idx);
+    }
+
+    int query(int left, int right) {
+        left += size, right += size;
+        int res = neutral;
+        while (left <= right) {
+            if (left & 1) {
+                res = func(res, nodes[left]);
+                left++;
+            }
+            if (~right & 1) {
+                res = func(res, nodes[right]);
+                right--;
+            }
+            left >>= 1, right >>= 1;
+        }
+        return res;
+    }
+};
+```
+
+## Segment tree for mex
+
+It can deal with updates to values in an array and find the mex for each query. 
+
+```py
+class SegmentTree:
+    def __init__(self, n: int, neutral: int, func):
+        self.func = func
+        self.neutral = neutral
+        self.size = 1
+        self.n = n
+        while self.size<n:
+            self.size*=2
+        self.nodes = [neutral for _ in range(self.size*2)]
+    def ascend(self, segment_idx: int) -> None:
+        while segment_idx > 0:
+            segment_idx -= 1
+            segment_idx >>= 1
+            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
+            self.nodes[segment_idx] = self.func(self.nodes[left_segment_idx], self.nodes[right_segment_idx]) 
+    def update(self, segment_idx: int, val: int) -> None:
+        segment_idx += self.size - 1
+        self.nodes[segment_idx] += val
+        self.ascend(segment_idx)
+    def query_mex(self) -> int:
+        segment_left_bound, segment_right_bound, segment_idx = 0, self.size, 0
+        while segment_left_bound + 1 < segment_right_bound:
+            mid_point = (segment_left_bound + segment_right_bound) >> 1
+            left_segment_idx, right_segment_idx = 2 * segment_idx + 1, 2 * segment_idx + 2
+            child_segment_len = (segment_right_bound - segment_left_bound) >> 1
+            if self.nodes[left_segment_idx] < child_segment_len:
+                segment_idx = left_segment_idx
+                segment_right_bound = mid_point
+            else:
+                segment_idx = right_segment_idx
+                segment_left_bound = mid_point
+        return segment_left_bound
+    def __repr__(self) -> str:
+        return f"nodes array: {self.nodes}, next array: {self.nodes}"
+
+freq = Counter()
+summation = lambda x, y: x + y
+seg = SegmentTree(MAXN + 1, 0, summation)  
+for num in arr:
+    freq[num] += 1
+    if freq[num] == 1 and num <= MAXN:
+        seg.update(num, 1)
+```
+
+## Segment tree for Point updates and full range queries
+
+The basic difference is that when you perform full range query, you can just get the value from seg.nodes[1]
+
+This one shows one with an interesting merge methodology.
+
+This is for a problem where you have a dynamic programming solution, but you are updating values, which you can then update the rest of the tree and propagate to the root or full segment by the fact you can merge two segments with some arithmetic.
+
+Just a tip you can implement this with a Node, or you can use arrays to represent these, I think it is easier to actually use separate arrays to represent the node. 
+
+```cpp
+struct Node {
+    int cumsum_prefix_products, cumsum_suffix_products, prefix_product, exp;
+};
+
+struct SegmentTree {
+    int size;
+    vector<Node> nodes;
+    void init(int num_nodes) {
+        size = 1;
+        while (size < num_nodes) size *= 2;
+        nodes.assign(size * 2, {0, 0, 1, 0});
+    }
+    Node func(Node x, Node y) {
+        Node res;
+        res.cumsum_prefix_products = (x.cumsum_prefix_products + (y.cumsum_prefix_products * x.prefix_product) % MOD) % MOD;
+        res.prefix_product = (x.prefix_product * y.prefix_product) % MOD;
+        res.cumsum_suffix_products = ((x.cumsum_suffix_products * y.prefix_product) % MOD + y.cumsum_suffix_products) % MOD;
+        res.exp = (x.exp + y.exp + (x.cumsum_suffix_products * y.cumsum_prefix_products) % MOD) % MOD;
+        return res;
+    }
+    void ascend(int segment_idx) {
+        while (segment_idx > 0) {
+            int left_segment_idx = 2 * segment_idx, right_segment_idx = 2 * segment_idx + 1;
+            nodes[segment_idx] = func(nodes[left_segment_idx], nodes[right_segment_idx]);
+            segment_idx >>= 1;
+        }
+    }
+    void update(int segment_idx, int val) {
+        segment_idx += size;
+        nodes[segment_idx] = {val, val, val, val};
+        segment_idx >>= 1;
+        ascend(segment_idx);
+    }
+};
+```
+
+### Alternative approach, when storing multiple variables in segment tree
+
+Still for inclusive range queries [L, R], returns minimum and the smallest index at which the min occurs.
+
+
+```cpp
+struct MinSegmentTree {
+    int size;
+    vector<int> nodes, index;
+    int neutral = INF;
+
+    void init(int num_nodes) {
+        size = 1;
+        while (size < num_nodes) size *= 2;
+        nodes.assign(size * 2, neutral);
+        index.assign(size * 2, neutral);
+    }
+
+    int func(int x, int y) {
+        return min(x, y);
+    }
+
+    void ascend(int segment_idx) {
+        while (segment_idx > 0) {
+            int left_segment_idx = 2 * segment_idx, right_segment_idx = 2 * segment_idx + 1;
+            int left_min = nodes[left_segment_idx], right_min = nodes[right_segment_idx];
+            if (left_min < right_min) index[segment_idx] = index[left_segment_idx];
+            else index[segment_idx] = index[right_segment_idx];
+            nodes[segment_idx] = func(nodes[left_segment_idx], nodes[right_segment_idx]);
+            segment_idx >>= 1;
+        }
+    }
+
+    void update(int segment_idx, int idx, int val) {
+        segment_idx += size;
+        nodes[segment_idx] = val;
+        index[segment_idx] = idx;
+        segment_idx >>= 1;
+        ascend(segment_idx);
+    }
+
+    pair<int, int> query(int left, int right) {
+        left += size, right += size;
+        int res = neutral, idx = INF;
+        while (left <= right) {
+            if (left & 1) {
+                if (nodes[left] == res) idx = min(idx, index[left]);
+                if (nodes[left] < res) {
+                    idx = index[left];
+                    res = nodes[left];
+                }
+                left++;
+            }
+            if (~right & 1) {
+                if (nodes[right] == res) idx = min(idx, index[right]);
+                if (nodes[right] < res) {
+                    res = nodes[right];
+                    idx = index[right];
+                }
+                right--;
+            }
+            left >>= 1, right >>= 1;
+        }
+        return make_pair(res, idx);
+    }
+};
+```
+
 ## segment tree
 
 Base segment tree that takes in a function and a neutral element and some initial array
@@ -153,293 +384,4 @@ class SegmentTree:
     
     def __repr__(self) -> str:
         return f"nodes array: {self.nodes}, next array: {self.nodes}"
-```
-
-## Segment tree for mex
-
-It can deal with updates to values in an array and find the mex for each query. 
-
-```py
-class SegmentTree:
-    def __init__(self, n: int, neutral: int, func):
-        self.func = func
-        self.neutral = neutral
-        self.size = 1
-        self.n = n
-        while self.size<n:
-            self.size*=2
-        self.nodes = [neutral for _ in range(self.size*2)]
-    def ascend(self, segment_idx: int) -> None:
-        while segment_idx > 0:
-            segment_idx -= 1
-            segment_idx >>= 1
-            left_segment_idx, right_segment_idx = 2*segment_idx + 1, 2*segment_idx + 2
-            self.nodes[segment_idx] = self.func(self.nodes[left_segment_idx], self.nodes[right_segment_idx]) 
-    def update(self, segment_idx: int, val: int) -> None:
-        segment_idx += self.size - 1
-        self.nodes[segment_idx] += val
-        self.ascend(segment_idx)
-    def query_mex(self) -> int:
-        segment_left_bound, segment_right_bound, segment_idx = 0, self.size, 0
-        while segment_left_bound + 1 < segment_right_bound:
-            mid_point = (segment_left_bound + segment_right_bound) >> 1
-            left_segment_idx, right_segment_idx = 2 * segment_idx + 1, 2 * segment_idx + 2
-            child_segment_len = (segment_right_bound - segment_left_bound) >> 1
-            if self.nodes[left_segment_idx] < child_segment_len:
-                segment_idx = left_segment_idx
-                segment_right_bound = mid_point
-            else:
-                segment_idx = right_segment_idx
-                segment_left_bound = mid_point
-        return segment_left_bound
-    def __repr__(self) -> str:
-        return f"nodes array: {self.nodes}, next array: {self.nodes}"
-
-freq = Counter()
-summation = lambda x, y: x + y
-seg = SegmentTree(MAXN + 1, 0, summation)  
-for num in arr:
-    freq[num] += 1
-    if freq[num] == 1 and num <= MAXN:
-        seg.update(num, 1)
-```
-
-## Fast Segment tree in C++ Point updates and Range Queries PURQ
-
-This is a good implementation, been using it for many problems.
-
-point update, range query
-
-Implement the function in here, such as max for func, but it can be other functions.  and update each index value. 
-
-0-indexed
-
-Inclusive queries [left, right].  
-
-this is the best one right now for C++
-
-```cpp
-int neutral = 0;
-struct SegmentTree {
-    int size;
-    vector<int> nodes;
-
-    void init(int num_nodes) {
-        size = 1;
-        while (size < num_nodes) size *= 2;
-        nodes.assign(size * 2, 0);
-    }
-
-    int func(int x, int y) {
-        return max(x, y);
-    }
-
-    void ascend(int segment_idx) {
-        while (segment_idx > 0) {
-            int left_segment_idx = 2 * segment_idx, right_segment_idx = 2 * segment_idx + 1;
-            nodes[segment_idx] = func(nodes[left_segment_idx], nodes[right_segment_idx]);
-            segment_idx >>= 1;
-        }
-    }
-
-    void update(int segment_idx, int val) {
-        segment_idx += size;
-        nodes[segment_idx] = val;
-        segment_idx >>= 1;
-        ascend(segment_idx);
-    }
-
-    int query(int left, int right) {
-        left += size, right += size;
-        int res = neutral;
-        while (left <= right) {
-            if (left & 1) {
-                res = func(res, nodes[left]);
-                left++;
-            }
-            if (~right & 1) {
-                res = func(res, nodes[right]);
-                right--;
-            }
-            left >>= 1, right >>= 1;
-        }
-        return res;
-    }
-};
-```
-
-## Segment tree for Point updates and full range queries
-
-The basic difference is that when you perform full range query, you can just get the value from seg.nodes[1]
-
-This one shows one with an interesting merge methodology.
-
-This is for a problem where you have a dynamic programming solution, but you are updating values, which you can then update the rest of the tree and propagate to the root or full segment by the fact you can merge two segments with some arithmetic.
-
-Just a tip you can implement this with a Node, or you can use arrays to represent these, I think it is easier to actually use separate arrays to represent the node. 
-
-```cpp
-struct Node {
-    int cumsum_prefix_products, cumsum_suffix_products, prefix_product, exp;
-};
-
-struct SegmentTree {
-    int size;
-    vector<Node> nodes;
-    void init(int num_nodes) {
-        size = 1;
-        while (size < num_nodes) size *= 2;
-        nodes.assign(size * 2, {0, 0, 1, 0});
-    }
-    Node func(Node x, Node y) {
-        Node res;
-        res.cumsum_prefix_products = (x.cumsum_prefix_products + (y.cumsum_prefix_products * x.prefix_product) % MOD) % MOD;
-        res.prefix_product = (x.prefix_product * y.prefix_product) % MOD;
-        res.cumsum_suffix_products = ((x.cumsum_suffix_products * y.prefix_product) % MOD + y.cumsum_suffix_products) % MOD;
-        res.exp = (x.exp + y.exp + (x.cumsum_suffix_products * y.cumsum_prefix_products) % MOD) % MOD;
-        return res;
-    }
-    void ascend(int segment_idx) {
-        while (segment_idx > 0) {
-            int left_segment_idx = 2 * segment_idx, right_segment_idx = 2 * segment_idx + 1;
-            nodes[segment_idx] = func(nodes[left_segment_idx], nodes[right_segment_idx]);
-            segment_idx >>= 1;
-        }
-    }
-    void update(int segment_idx, int val) {
-        segment_idx += size;
-        nodes[segment_idx] = {val, val, val, val};
-        segment_idx >>= 1;
-        ascend(segment_idx);
-    }
-};
-```
-
-### Alternative approach, when storing multiple variables in segment tree
-
-Still for inclusive range queries [L, R], returns minimum and the smallest index at which the min occurs.
-
-
-```cpp
-struct MinSegmentTree {
-    int size;
-    vector<int> nodes, index;
-    int neutral = INF;
-
-    void init(int num_nodes) {
-        size = 1;
-        while (size < num_nodes) size *= 2;
-        nodes.assign(size * 2, neutral);
-        index.assign(size * 2, neutral);
-    }
-
-    int func(int x, int y) {
-        return min(x, y);
-    }
-
-    void ascend(int segment_idx) {
-        while (segment_idx > 0) {
-            int left_segment_idx = 2 * segment_idx, right_segment_idx = 2 * segment_idx + 1;
-            int left_min = nodes[left_segment_idx], right_min = nodes[right_segment_idx];
-            if (left_min < right_min) index[segment_idx] = index[left_segment_idx];
-            else index[segment_idx] = index[right_segment_idx];
-            nodes[segment_idx] = func(nodes[left_segment_idx], nodes[right_segment_idx]);
-            segment_idx >>= 1;
-        }
-    }
-
-    void update(int segment_idx, int idx, int val) {
-        segment_idx += size;
-        nodes[segment_idx] = val;
-        index[segment_idx] = idx;
-        segment_idx >>= 1;
-        ascend(segment_idx);
-    }
-
-    pair<int, int> query(int left, int right) {
-        left += size, right += size;
-        int res = neutral, idx = INF;
-        while (left <= right) {
-            if (left & 1) {
-                if (nodes[left] == res) idx = min(idx, index[left]);
-                if (nodes[left] < res) {
-                    idx = index[left];
-                    res = nodes[left];
-                }
-                left++;
-            }
-            if (~right & 1) {
-                if (nodes[right] == res) idx = min(idx, index[right]);
-                if (nodes[right] < res) {
-                    res = nodes[right];
-                    idx = index[right];
-                }
-                right--;
-            }
-            left >>= 1, right >>= 1;
-        }
-        return make_pair(res, idx);
-    }
-};
-```
-
-```cpp
-const int INF = 1e9;
-struct SegmentTree {
-    int size;
-    vector<int> nodes, index;
-
-    void init(int num_nodes) {
-        size = 1;
-        while (size < num_nodes) size *= 2;
-        nodes.assign(size * 2, 0);
-        index.assign(size * 2, 0);
-    }
-
-    int func(int x, int y) {
-        return min(x, y);
-    }
-
-    void ascend(int segment_idx) {
-        while (segment_idx > 0) {
-            int left_segment_idx = 2 * segment_idx, right_segment_idx = 2 * segment_idx + 1;
-            int left_min = nodes[left_segment_idx], right_min = nodes[right_segment_idx];
-            if (left_min < right_min) index[segment_idx] = index[left_segment_idx];
-            else index[segment_idx] = index[right_segment_idx];
-            nodes[segment_idx] = func(nodes[left_segment_idx], nodes[right_segment_idx]);
-            segment_idx >>= 1;
-        }
-    }
-
-    void update(int segment_idx, int idx, int val) {
-        segment_idx += size;
-        nodes[segment_idx] = val;
-        index[segment_idx] = idx;
-        segment_idx >>= 1;
-        ascend(segment_idx);
-    }
-
-    pair<int, int> query(int left, int right) {
-        left += size, right += size;
-        int res = INF, idx = 0;
-        while (left <= right) {
-            if (left & 1) {
-                if (nodes[left] < res) {
-                    idx = index[left];
-                    res = nodes[left];
-                }
-                left++;
-            }
-            if (~right & 1) {
-                if (nodes[right] < res) {
-                    res = nodes[right];
-                    idx = index[right];
-                }
-                right--;
-            }
-            left >>= 1, right >>= 1;
-        }
-        return make_pair(res, idx);
-    }
-};
 ```

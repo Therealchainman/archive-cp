@@ -1192,18 +1192,17 @@ struct LazySegmentTree {
 
 ## Lazy Segment Tree range queries and range updates
 
-- range assignment updates
+- range addition updates
 - range sum queries
 
 range updates are [L, R) (exclusive for right end point)
 
 ```cpp
-int neutral = 0, noop = 0;
-
 struct LazySegmentTree {
     vector<int> values;
     vector<int> operations;
     int size;
+    int neutral = 0, noop = 0;
 
     void init(int n) {
         size = 1;

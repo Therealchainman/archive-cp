@@ -2530,6 +2530,737 @@ def calculate_shift_overlaps(employee_shifts: pd.DataFrame) -> pd.DataFrame:
     return df
 ```
 
+## 3262. Find Overlapping Shifts
+
+### Solution 1:  unpivot, groupby applied to create a column, cumulative sum, delta
+
+```py
+import pandas as pd
+
+def find_overlapping_shifts(employee_shifts: pd.DataFrame) -> pd.DataFrame:
+    df = (
+        pd.melt(employee_shifts, id_vars = ["employee_id"], value_vars = ["start_time", "end_time"], value_name = "time")
+        .sort_values(["employee_id", "time"])
+    )
+    df["delta"] = df.variable.apply(lambda row: 1 if row == "start_time" else -1)
+    df["csum"] = df.groupby("employee_id")["delta"].cumsum()
+    mask = df.delta > 0
+    df = df[mask]
+    df["csum"] -= 1
+    overlap_df = (
+        df.groupby("employee_id").agg(
+            overlapping_shifts = ("csum", "sum")
+        )
+        .reset_index()
+    )
+    mask = overlap_df.overlapping_shifts > 0
+    return overlap_df[mask]
+
+```
+
+## 3278. Find Candidates for Data Scientist Position II
+
+### Solution 1: groupby with nunique and sum, joins, conditional masks, idxmax, and using label based indexing loc
+
+```py
+import pandas as pd
+
+def calc(row):
+    if row.proficiency > row.importance: return 10
+    if row.proficiency < row.importance: return -5
+    return 0
+
+def find_best_candidates(candidates: pd.DataFrame, projects: pd.DataFrame) -> pd.DataFrame:
+    proj_counts_df = (
+        projects.groupby("project_id").agg(
+            cnt = ("skill", "nunique")
+        )
+    )
+    df = candidates.merge(projects, how = "inner", on = "skill")
+    df["score"] = df[["proficiency", "importance"]].apply(lambda row: calc(row), axis = 1)
+    score_df = (
+        df.groupby(["project_id", "candidate_id"]).agg(
+            score = ("score", "sum"),
+            cnt = ("skill", "nunique")
+        )
+        .reset_index()
+        .sort_values(["project_id", "candidate_id"])
+    )
+    result_df = score_df.merge(proj_counts_df, how = "inner", on = ["project_id", "cnt"])
+    # finds the index with maximum value for score column for each project_id group. 
+    idx = result_df.groupby("project_id")["score"].idxmax()
+    result_df = result_df.loc[idx]
+    result_df["score"] += 100
+    return result_df.drop(columns = ["cnt"])
+```
+
+## 874. Walking Robot Simulation
+
+### Solution 1:  hash table, grid, 90 degree rotations, 
+
+```cpp
+#define x first
+#define y second
+
+pair<int, int> rotate_right(int x, int y) {
+    return {y, -x};
+}
+pair<int, int> rotate_left(int x, int y) {
+    return {-y, x};
+}
+int euclidean_distance(int x, int y) {
+    return x * x + y * y;
+}
+const int HASH_MULTIPLIER = 60'001;
+int hash_coords(int x, int y) {
+    return x + HASH_MULTIPLIER * y;
+}
+class Solution {
+public:
+    int robotSim(vector<int>& commands, vector<vector<int>>& obstacles) {
+        unordered_set<int> s;
+        for (const auto &vec : obstacles) {
+            s.insert(hash_coords(vec[0], vec[1]));
+        }
+        pair<int, int> dir = {0, 1}, pos = {0, 0};
+        int ans = 0;
+        for (int x : commands) {
+            if (x == -2) {
+                dir = rotate_left(dir.x, dir.y);
+            } else if (x == -1) {
+                dir = rotate_right(dir.x, dir.y);
+            } else {
+                while (x--) {
+                    pos.x += dir.x;
+                    pos.y += dir.y;
+                    if (s.find(hash_coords(pos.x, pos.y)) != s.end()) {
+                        pos.x -= dir.x;
+                        pos.y -= dir.y;
+                        break;
+                    }
+                    ans = max(ans, euclidean_distance(pos.x, pos.y));
+                }
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## 2386. Find the K-Sum of an Array
+
+### Solution 1:  minheap, decision tree, sort, next smallest subsequence sum, kth smallest subsequence sum
+
+```cpp
+class Solution {
+public:
+    long long kSum(vector<int>& nums, int k) {
+        int N = nums.size();
+        long long maxsum = 0;
+        for (int &x : nums) {
+            maxsum += max(0LL, (long long)x);
+            x = abs(x);
+        }
+        sort(nums.begin(), nums.end());
+        priority_queue<pair<long long, int>, vector<pair<long long, int>>, greater<pair<long long, int>>> minheap;
+        minheap.emplace(nums[0], 0);
+        long long subt = 0;
+        while (--k) {
+            auto [v, i] = minheap.top();
+            minheap.pop();
+            subt = v;
+            if (i + 1 < N) {
+                minheap.emplace(v + nums[i + 1], i + 1);
+                minheap.emplace(v + nums[i + 1] - nums[i], i + 1);
+            }
+        }
+        return maxsum - subt;
+    }
+};
+```
+
+## 2028 Find Missing Observations
+
+### Solution 1:  math, arithmetic mean
+
+```cpp
+class Solution {
+public:
+    vector<int> missingRolls(vector<int>& rolls, int mean, int n) {
+        int m = rolls.size();
+        int rem = mean * (n + m) - accumulate(rolls.begin(), rolls.end(), 0);
+        if (rem < n || rem > 6 * n) return {};
+        vector<int> ans;
+        while (n--) {
+            int take = min(rem - n, 6);
+            rem -= take;
+            ans.push_back(take);
+        }
+        return ans;
+    }
+};
+```
+
+## 3246. Premier League Table Ranking
+
+### Solution 1:  math, rank, sort
+
+1. create the points column based on the multiplier of wins added to draws
+2. Create position column by using rank and have it sort by points in descending order (largest to smallest), and use method = min, so that it will take the min index for the rank
+3. sort values by position and team name in ascending order.
+
+```py
+import pandas as pd
+
+def calculate_team_standings(team_stats: pd.DataFrame) -> pd.DataFrame:
+    team_stats["points"] = team_stats.wins * 3 + team_stats.draws
+    df = team_stats.drop(columns = ["matches_played", "wins", "draws", "losses"])
+    df["position"] = df["points"].rank(ascending = False, method = "min")
+    df = df.sort_values(["position", "team_name"])
+    return df
+```
+
+## 3252. Premier League Table Ranking II
+
+### Solution 1:  math, rank, sort, quantile, apply
+
+Learned about quantile function for pandas dataframe
+
+given a sorted array of elements, it calculates the position based on 
+(N - 1) * pct = pos,  it is 0 indexed, so if you get 1.3, that means it is between the
+2nd and 3rd element, and 0.3 is how much it is between them. 
+
+If you keep the default interpolation method of linear, then it will calculate it using
+given it is between i = 1 and j = 2 position, 
+i + (j - i) * fraction,  where fraction = 0.3, that is fraction = pos - i
+
+I'm not sure but for this problem to get correct answer, you have to round up the first and second quantile 
+to the next integer.  
+
+```py
+import pandas as pd
+import math
+
+def calculate_team_tiers(team_stats: pd.DataFrame) -> pd.DataFrame:
+    def tier(row):
+        if row <= first_quantile:
+            return "Tier 1"
+        elif row <= second_quantile:
+            return "Tier 2"
+        return "Tier 3"
+    team_stats["points"] = team_stats.wins * 3 + team_stats.draws
+    team_stats["position"] = team_stats["points"].rank(ascending = False, method = "min")
+    team_stats = team_stats.sort_values(["position", "team_name"])
+    team_stats = team_stats.drop(columns = ["matches_played", "wins", "draws", "losses", "team_id"])
+    first_quantile = math.ceil(team_stats.position.quantile(0.33))
+    second_quantile = math.ceil(team_stats.position.quantile(0.66))
+    team_stats["tier"] = team_stats.position.apply(lambda row: tier(row))
+    return team_stats
+```
+
+## 2916. Subarrays Distinct Element Sum of Squares II
+
+### Solution 1:  lazy segment tree, sums, range updates, range queries, arithmetic
+
+1. You need to derive how whenever you move from index i - 1 to index i.  You want to figure out how based on just the sum of distinct counts relates to the change when transitioning from i - 1 -> i
+2. You can derive a relationshipt between the sum of the distinct counts and how the sum changes for perfect squares, hint x1^2 + x2^2 + x3^2 -> (x1+1)^2 + (x2+1)^2 + (x3+1)^2
+3. There is another step though, because you only increase the distinct count for elements up to where you last saw this nums[i], so you track the latest index in which you've seen that value.  Because the distinct count doesn't increase for anything there and before it.  Only the range between.
+4. 
+
+```cpp
+const long long M = 1e9 + 7;
+struct LazySegmentTree {
+    vector<long long> values;
+    vector<long long> operations;
+    long long size;
+    long long neutral = 0, noop = 0;
+
+    void init(long long n) {
+        size = 1;
+        while (size < n) size *= 2;
+        values.assign(2 * size, neutral);
+        operations.assign(2 * size, noop);
+    }
+
+    long long modify_op(long long x, long long y, long long length = 1) {
+        return (x + y * length) % M;
+    }
+
+    long long calc_op(long long x, long long y) {
+        return (x + y) % M;
+    }
+
+    bool is_leaf(long long segment_right_bound, long long segment_left_bound) {
+        return segment_right_bound - segment_left_bound == 1;
+    }
+
+    void propagate(long long segment_idx, long long segment_left_bound, long long segment_right_bound) {
+        if (is_leaf(segment_right_bound, segment_left_bound) || operations[segment_idx] == noop) return;
+        long long left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
+        long long children_segment_len = (segment_right_bound - segment_left_bound) >> 1;
+        operations[left_segment_idx] = modify_op(operations[left_segment_idx], operations[segment_idx]);
+        operations[right_segment_idx] = modify_op(operations[right_segment_idx], operations[segment_idx]);
+        values[left_segment_idx] = modify_op(values[left_segment_idx], operations[segment_idx], children_segment_len);
+        values[right_segment_idx] = modify_op(values[right_segment_idx], operations[segment_idx], children_segment_len);
+        operations[segment_idx] = noop;
+    }
+
+    void ascend(long long segment_idx) {
+        while (segment_idx > 0) {
+            segment_idx--;
+            segment_idx >>= 1;
+            long long left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
+            values[segment_idx] = calc_op(values[left_segment_idx], values[right_segment_idx]);
+        }
+    }
+
+    void update(long long left, long long right, long long val) {
+        stack<tuple<long long, long long, long long>> stk;
+        stk.emplace(0, size, 0);
+        vector<long long> segments;
+        long long segment_left_bound, segment_right_bound, segment_idx;
+        while (!stk.empty()) {
+            tie(segment_left_bound, segment_right_bound, segment_idx) = stk.top();
+            stk.pop();
+            // NO OVERLAP
+            if (segment_left_bound >= right || segment_right_bound <= left) continue;
+            // COMPLETE OVERLAP
+            if (segment_left_bound >= left && segment_right_bound <= right) {
+                operations[segment_idx] = modify_op(operations[segment_idx], val);
+                long long segment_len = segment_right_bound - segment_left_bound;
+                values[segment_idx] = modify_op(values[segment_idx], val, segment_len);
+                segments.push_back(segment_idx);
+                continue;
+            }
+            // PARTIAL OVERLAP
+            long long mid_point = (segment_left_bound + segment_right_bound) >> 1;
+            long long left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
+            propagate(segment_idx, segment_left_bound, segment_right_bound);
+            stk.emplace(mid_point, segment_right_bound, right_segment_idx);
+            stk.emplace(segment_left_bound, mid_point, left_segment_idx);
+        }
+        for (long long segment_idx : segments) ascend(segment_idx);
+    }
+
+    long long query(long long left, long long right) {
+        stack<tuple<long long, long long, long long>> stk;
+        stk.emplace(0, size, 0);
+        long long result = neutral;
+        long long segment_left_bound, segment_right_bound, segment_idx;
+        while (!stk.empty()) {
+            tie(segment_left_bound, segment_right_bound, segment_idx) = stk.top();
+            stk.pop();
+            // NO OVERLAP
+            if (segment_left_bound >= right || segment_right_bound <= left) continue;
+            // COMPLETE OVERLAP
+            if (segment_left_bound >= left && segment_right_bound <= right) {
+                result = calc_op(result, values[segment_idx]);
+                continue;
+            }
+            // PARTIAL OVERLAP
+            long long mid_point = (segment_left_bound + segment_right_bound) >> 1;
+            long long left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
+            propagate(segment_idx, segment_left_bound, segment_right_bound);
+            stk.emplace(mid_point, segment_right_bound, right_segment_idx);
+            stk.emplace(segment_left_bound, mid_point, left_segment_idx);
+        }
+        return result;
+    }
+};
+class Solution {
+public:
+    const int MAXN = 1e5 + 1;
+    int sumCounts(vector<int>& nums) {
+        int N = nums.size();
+        LazySegmentTree seg;
+        seg.init(N);
+        long long ans = 0, sum = 0;
+        vector<int> last(MAXN, 0);
+        for (int i = 0; i < N; i++) {
+            int j = last[nums[i]];
+            long long delta_sum = seg.query(j, i);
+            long long delta = 2 * delta_sum + i - j + 1; // delta based on the range sum of distinct counts
+            sum = (sum + delta) % M; // updating the total sum with the delta
+            ans = (ans + sum) % M; // adding it to the answer
+            seg.update(j, i + 1, 1);
+            last[nums[i]] = i + 1;
+        }
+        return ans;
+    }
+};
+```
+
+## 2322. Minimum Score After Removals on a Tree
+
+### Solution 1:
+
+```cpp
+int N, ans;
+const int INF = 1e9;
+vector<vector<int>> adj;
+vector<int> dp, dpp;
+vector<bool> vis;
+class Solution {
+public:
+    void dfs(vector<int>& nums, int u, int p = -1) {
+        vis[u] = true;
+        dp[u] = nums[u];
+        for (int v : adj[u]) {
+            if (v == p) continue;
+            dfs(nums, v, u);
+            dp[u] ^= dp[v];
+        }
+    }
+    void reroot(vector<int>& nums, int u, int other, int p = -1) {
+        if (p != -1) {
+            int small = min(dpp[u], min(dp[u], other));
+            int large = max(dpp[u], max(dp[u], other));
+            ans = min(ans, large - small);
+        }
+        for (int v : adj[u]) {
+            if (v == p) continue;
+            // update
+            dpp[v] = dpp[u] ^ dp[u] ^ dp[v];
+            reroot(nums, v, other, u);
+        }
+    }
+    int calc(vector<int>& nums, vector<vector<int>>& edges, int idx) {
+        adj.assign(N, vector<int>());
+        for (int i = 0; i < N - 1; i++) {
+            if (i == idx) continue;
+            int u = edges[i][0], v = edges[i][1];
+            adj[u].push_back(v);
+            adj[v].push_back(u);
+        }
+        dp.assign(N, 0);
+        vis.assign(N, false);
+        vector<int> roots;
+        for (int i = 0; i < N; i++) {
+            if (vis[i]) continue;
+            dfs(nums, i);
+            roots.push_back(i);
+        }
+        assert(roots.size() == 2);
+        dpp.assign(N, 0);
+        for (int i = 0; i < 2; i++) {
+            reroot(nums, roots[i], dp[roots[i ^ 1]]);
+        }
+        return 0;
+    }
+    int minimumScore(vector<int>& nums, vector<vector<int>>& edges) {
+        N = nums.size();
+        ans = INF;
+        for (int i = 0; i < N - 1; i++) {
+            calc(nums, edges, i);
+        }
+        return ans;
+    }
+};
+```
+
+## 2945. Find Maximum Non-decreasing Array Length
+
+### Solution 1:  push dp, pull dp, binary search, prefix sum
+
+```cpp
+const long long INF = 1e18;
+int N;
+vector<long long> psum;
+long long sum(int l, int r) {
+    long long ans = psum[r];
+    if (l > 0) ans -= psum[l - 1];
+    return ans;
+}
+int search(int start, int target) {
+    int lo = start, hi = N;
+    while (lo < hi) {
+        int mid = lo + (hi - lo) / 2;
+        if (sum(start, mid) < target) lo = mid + 1;
+        else hi = mid;
+    }
+    return lo;
+}
+class Solution {
+public:
+    int findMaximumLength(vector<int>& nums) {
+        N = nums.size();
+        psum.assign(N, 0);
+        for (int i = 0; i < N; i++) {
+            psum[i] = nums[i];
+            if (i > 0) psum[i] += psum[i - 1];
+        }
+        int i = 1;
+        vector<int> dp(N, 0);
+        vector<long long> last_sum(N, INF);
+        dp[0] = 1;
+        last_sum[0] = nums[0];
+        for (int i = 0; i < N; i++) {
+            // pull
+            if (i > 0 && dp[i - 1] >= dp[i]) {
+                if (dp[i - 1] > dp[i]) {
+                    last_sum[i] = last_sum[i - 1] + nums[i];
+                } else {
+                    last_sum[i] = min(last_sum[i - 1] + nums[i], last_sum[i]);
+                }
+                dp[i] = dp[i - 1];
+            }
+            // push
+            int j = search(i + 1, last_sum[i]);
+            if (j < N && dp[i] + 1 >= dp[j]) {
+                if (dp[i] + 1 > dp[j]) {
+                    last_sum[j] = sum(i + 1, j);
+                } else {
+                    last_sum[j] = min(last_sum[j], sum(i + 1, j));
+                }
+                dp[j] = dp[i] + 1;
+            }
+        }
+        return dp.back();
+    }
+};
+```
+
+## 2334. Subarray With Elements Greater Than Varying Threshold
+
+### Solution 1:  sorting, disjoint sets, size of disjoint set, vis array
+
+```cpp
+struct UnionFind {
+    vector<int> parents, size;
+    void init(int n) {
+        parents.resize(n);
+        iota(parents.begin(),parents.end(),0);
+        size.assign(n,1);
+    }
+
+    int find(int i) {
+        if (i==parents[i]) {
+            return i;
+        }
+        return parents[i]=find(parents[i]);
+    }
+
+    bool same(int i, int j) {
+        i = find(i), j = find(j);
+        if (i!=j) {
+            if (size[j]>size[i]) {
+                swap(i,j);
+            }
+            size[i]+=size[j];
+            parents[j]=i;
+            return false;
+        }
+        return true;
+    }
+};
+
+int floor(int x, int y) {
+    return x / y;
+}
+class Solution {
+public:
+    int validSubarraySize(vector<int>& nums, int threshold) {
+        int N = nums.size();
+        UnionFind dsu;
+        dsu.init(N);
+        vector<pair<int, int>> arr(N);
+        for (int i = 0; i < N; i++) {
+            arr[i] = {nums[i], i};
+        }
+        sort(arr.begin(), arr.end(), greater<pair<int, int>>());
+        vector<bool> vis(N, false);
+        for (const auto &[x, i] : arr) {
+            if (i > 0 && vis[i - 1]) dsu.same(i, i - 1);
+            if (i + 1 < N && vis[i + 1]) dsu.same(i, i + 1);
+            vis[i] = true;
+            int sz = dsu.size[dsu.find(i)];
+            if (x > floor(threshold, sz)) return sz;
+        }
+        return -1;
+    }
+};
+```
+
+### Solution 2: monotonic stacks for next and previous
+
+```cpp
+
+```
+
+## 3104. Find Longest Self-Contained Substring
+
+### Solution 1:  first and last of each self contained string, iterate over characters, expand as much as possible for each start index
+
+```cpp
+class Solution {
+public:
+    int maxSubstringLength(string s) {
+        int N = s.size();
+        vector<int> first(26, N), last(26, 0);
+        for (int i = 0; i < N; i++) {
+            int v = s[i] - 'a';
+            last[v] = i;
+        }
+        for (int i = N - 1; i >= 0; i--) {
+            int v = s[i] - 'a';
+            first[v] = i;
+        }
+        for (int i = 0; i < 26; i++) {
+            for (int j = first[i]; j <= last[i]; j++) {
+                int v = s[j] - 'a';
+                first[i] = min(first[i], first[v]);
+                last[i] = max(last[i], last[v]);
+            }
+        }
+        int ans = -1;
+        for (int i = 0; i < N; i++) {
+            int c = s[i] - 'a';
+            if (first[c] < i) continue;
+            int l = first[c], r = last[c];
+            if (r - l + 1 < N) ans = max(ans, r - l + 1);
+            for (int j = r + 1; j < N; j++) {
+                int c = s[j] - 'a';
+                if (first[c] < l) break;
+                r = max(r, last[c]);
+                if (r - l + 1 < N) ans = max(ans, r - l + 1);
+                j = r;
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## 2927. Distribute Candies Among Children III
+
+### Solution 1:  math, arithmetic progression of natural integers
+
+```cpp
+long long summation(long long n) {
+    return n * (n + 1) / 2LL;
+}
+class Solution {
+public:
+    long long distributeCandies(int n, int limit) {
+        long long ans = 0;
+        if (n > 3 * limit) return ans;
+        if (n <= limit) return summation(n + 1);
+        if (n >= 2 * limit) return summation(3 * limit - n + 1);
+        ans = summation(limit + 1) + summation(limit) - summation(n - limit) - summation(2 * limit - n);
+        return ans;
+    }
+};
+```
+
+## 1889. Minimum Space Wasted From Packaging
+
+### Solution 1:  sorting, binary search, pointers, minimize the size of the boxes, minimize the wasted space. 
+
+```cpp
+class Solution {
+public:
+    const long long M = 1e9 + 7, INF = 1e18;
+    int minWastedSpace(vector<int>& packages, vector<vector<int>>& boxes) {
+        int N = packages.size();
+        sort(packages.begin(), packages.end());
+        long long min_box_size = INF; // min box size that can hold all packages
+        for (vector<int> &box : boxes) {
+            sort(box.begin(), box.end());
+            int i = 0;
+            long long cur = 0;
+            for (int b : box) {
+                int j = upper_bound(packages.begin() + i, packages.end(), b) - packages.begin() - 1;
+                cur += (j - i + 1) * (long long)b;
+                i = j + 1;
+            }
+            if (i == N) min_box_size = min(min_box_size, cur);
+        }
+        long long packages_size = accumulate(packages.begin(), packages.end(), 0LL);
+        if (min_box_size == INF) return -1;
+        int ans = (min_box_size - packages_size + M) % M;
+        return ans;
+    }
+};
+```
+
+## 2307. Check for Contradictions in Equations
+
+### Solution 1:  bidirectional graph, weighted graph, use sum of logarithm property for multiplication to prevent overflow/underflow issues
+
+When you follow a path you are following weights like w_bc * w_ca, and b / c * c / a and that give syou b / a and w_ba.  So they cancel
+so each value is from some fraction, so need to make sure no contradiction by exploring the graph cycles. 
+
+```cpp
+vector<vector<pair<int, long double>>> adj;
+vector<long double> vis;
+unordered_map<string, int> ind;
+vector<string> nodes;
+const long double TOL = 1e-5;
+// returns true if there is no contradiction, if valid
+bool dfs(int u, double val) {
+    if (vis[u] != -1.0) {
+        if (abs(val - vis[u]) <= TOL) return true;
+        return false;
+    }
+    vis[u] = val;
+    for (const auto &[v, w] : adj[u]) {
+        if (!dfs(v, val + w)) return false;
+    }
+    return true;
+}
+class Solution {
+public:
+    bool checkContradictions(vector<vector<string>>& equations, vector<double>& values) {
+        for (const auto &vec : equations) {
+            for (int i = 0; i < 2; i++) {
+                if (ind.count(vec[i]) == 0) {
+                    ind[vec[i]] = nodes.size();
+                    nodes.push_back(vec[i]);
+                }
+            }
+        }
+        int N = nodes.size();
+        adj.assign(N, vector<pair<int, long double>>());
+        for (int i = 0; i < equations.size(); i++) {
+            int u = ind[equations[i][0]], v = ind[equations[i][1]];
+            long double w = values[i];
+            adj[u].emplace_back(v, log(w));
+            adj[v].emplace_back(u, log(1.0 / w));
+        }
+        vis.assign(N, -1.0);
+        for (int i = 0; i < N; i++) {
+            if (vis[i] != -1.0) continue;
+            if (!dfs(i, 0.0)) return true;
+        }
+        return false;
+    }
+};
+```
+
+## 2949. Count Beautiful Substrings II
+
+### Solution 1:
+
+```cpp
+
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
 ##
 
 ### Solution 1:
