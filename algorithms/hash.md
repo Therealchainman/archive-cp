@@ -1,4 +1,4 @@
-# HASH
+# Hashing
 
 This is way to generate over a million unique hashes for indexing unique elements, so each bit represents a unique hash and element.
 
@@ -26,4 +26,10 @@ def f():
               print(i, j, x, y, x + y)
               return vis2.index(x + y)
   return -1
+```
+
+## Zobrist hashing
+
+```cpp
+
 ```
