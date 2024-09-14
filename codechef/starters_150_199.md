@@ -1,0 +1,458 @@
+# Starters 150
+
+## Equal Pairs (Hard)
+
+### Solution 1:  counter, hash table, combinatorics
+
+1. Greedy solution, where you want to assign all the 0s to be 1s
+2. You also need to track the frequency and update the total sum of pairs based on that. 
+3. And for the element with maximum frequency remove it from answer and add it with the count of 0s included
+
+```cpp
+int N;
+
+int choose(int n) {
+    return n * (n - 1) / 2;
+}
+
+void solve() {
+    cin >> N;
+    map<int, int> freq;
+    int mx = 0, ans = 0;
+    for (int i = N - 1; i >= 0; i--) {
+        int x, v;
+        cin >> x >> v;
+        ans += freq[v];
+        freq[v]++;
+        mx = max(mx, freq[v]);
+        int res = ans - choose(mx) + choose(i + mx);
+        cout << res << " ";
+    }
+    cout << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+
+```
+
+## Replacing Game
+
+### Solution 1:  array, pointers
+
+1. The idea is to iterate through array from left to right, and place into separate array anytime you have a chunk that is greater than size K
+2. Then you iterate from right to left, until it reaches the last K sized chunk, and it puts this back in array A
+3. Now you can construct it from this method. Also need to check if there is no K sized chunk, that means it will be impossible
+
+```cpp
+int N, K;
+string S, T;
+
+void solve() {
+    cin >> N >> K >> S >> T;
+    if (S == T) {
+        cout << 0 << endl;
+        return;
+    }
+    vector<pair<int, char>> A, B;
+    int streak = 0;
+    bool possible = false;
+    int last = 0;
+    for (int i = 0; i < N; i++) {
+        if (i > 0 && T[i] != T[i - 1]) streak = 0;
+        streak++;
+        if (streak >= K) {
+            possible = true;
+            B.emplace_back(i - K + 1, T[i]);
+            last = i;
+        } else if (i + K <= N) {
+            A.emplace_back(i, T[i]);
+        }
+    }
+    if (!possible) {
+        cout << -1 << endl;
+        return;
+    }
+    streak = 0;
+    for (int i = N - 1; i > last; i--) {
+        if (i + 1 < N && T[i] != T[i + 1]) streak = 0;
+        streak++;
+        A.emplace_back(i - K + 1, T[i]);
+    }
+    A.insert(A.end(), B.begin(), B.end());
+    int sz = A.size();
+    cout << sz << endl;
+    for (auto &[i, c] : A) {
+        cout << i + 1 << " " << c << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+# Starters 151
+
+## Ball Game
+
+### Solution 1:  monotonic stack, sort
+
+```cpp
+int N;
+vector<int> A, B; // A[i] = position of ith ball, B[i] = speed of ith ball
+vector<pair<int, int>> ball; // (position, speed)
+
+// i < j, will ball(j) collide with ball(i)?
+bool collide(int i, int j) {
+    if (ball[j].second <= ball[i].second) return false;
+    long double t = (long double)(ball[j].first - ball[i].first) / (ball[j].second - ball[i].second);
+    long double pos = ball[i].first - (long double)ball[i].second * t;
+    return pos > 0;
+}
+
+void solve() {
+    cin >> N;
+    A.resize(N);
+    B.resize(N);
+    ball.resize(N);
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+    }
+    for (int i = 0; i < N; i++) {
+        cin >> B[i];
+    }
+    for (int i = 0; i < N; i++) {
+        ball[i] = {A[i], B[i]};
+    }
+    sort(ball.begin(), ball.end());
+    stack<int> stk;
+    for (int i = 0; i < N; i++) {
+        while (!stk.empty() && collide(stk.top(), i)) {
+            stk.pop();
+        }
+        stk.push(i);
+    }
+    cout << stk.size() << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+
+```
+
+## Sequence Search
+
+### Solution 1:  binary search, count odd and even, find kth smallest
+
+```cpp
+const int INF = 1e18;
+int A, B, K;
+
+int floor(int x, int y) {
+    return x / y;
+}
+// count odd terms
+// count even terms
+// binary search the answer, based ont he count being less than or equal to K
+
+void solve() {
+    cin >> A >> B >> K;
+    int lo = 0, hi = INF;
+    while (lo < hi) {
+        int mid = lo + (hi - lo) / 2;
+        int cnt = floor(mid, B) + 1;
+        if (mid >= A) cnt += floor(mid - A, B) + 1;
+        if (cnt < K) lo = mid + 1;
+        else hi = mid;
+    }
+    cout << lo << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## Shooting (Hard)
+
+### Solution 1:  sort, manhattan trick, binary search, prefix sum
+
+```cpp
+int R, C;
+vector<vector<int>> grid;
+vector<int> psumx[2], psumy[2], arrx[2], arry[2];
+
+int calc(const vector<int>& arr, const vector<int>& psum, int v) {
+    int N = arr.size();
+    int lo = 0, hi = N;
+    while (lo < hi) {
+        int mid = lo + (hi - lo) / 2;
+        if (arr[mid] <= v) lo = mid + 1;
+        else hi = mid;
+    }
+    lo--;
+    int lsum = 0;
+    if (lo >= 0) lsum += v * (lo + 1) - psum[lo];
+    int rsum = -v * (N - 1 - lo);
+    if (N - 1 >= 0) rsum += psum[N - 1];
+    if (lo >= 0) rsum -= psum[lo];
+    int res = lsum + rsum;
+    return res;
+}
+
+void solve() {
+    cin >> R >> C;
+    grid.assign(R, vector<int>(C, 0));
+    for (int i = 0; i < 2; i++) {
+        arrx[i].clear();
+        arry[i].clear();
+        psumx[i].clear();
+        psumy[i].clear();
+    }
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++) {
+            cin >> grid[i][j];
+            if (grid[i][j] == 1) {
+                arrx[0].push_back(i + j);
+                arry[0].push_back(i - j);
+            } else if (grid[i][j] == 2) {
+                arrx[1].push_back(i + j);
+                arry[1].push_back(i - j);
+            }
+        }
+    }
+    for (int i = 0; i < 2; i++) {
+        sort(arrx[i].begin(), arrx[i].end());
+        sort(arry[i].begin(), arry[i].end());
+        psumx[i].assign(arrx[i].size(), 0);
+        psumy[i].assign(arry[i].size(), 0);
+        for (int j = 0; j < arrx[i].size(); j++) {
+            psumx[i][j] = arrx[i][j];
+            if (j > 0) {
+                psumx[i][j] += psumx[i][j - 1];
+            }
+            psumy[i][j] = arry[i][j];
+            if (j > 0) {
+                psumy[i][j] += psumy[i][j - 1];
+            }
+        }
+    }
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++) {
+            int s1 = calc(arrx[0], psumx[0], i + j) + calc(arry[0], psumy[0], i - j);
+            int s2 = calc(arrx[1], psumx[1], i + j) + calc(arry[1], psumy[1], i - j);
+            int ans = abs(s1 - s2) / 2;
+            cout << ans << " ";
+        }
+        cout << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## RGB Grid (Easy)
+
+### Solution 1:  dynamic programming, bitmask dp, binary exponentiation, push dp, base conversion
+
+1. get digit that is encoded with a base, find the ith term
+2. count valid, by counting invalid and taking total - invalid possibilities
+3. Use recursion dp, so it returns 1 when it reaches a final state
+
+```cpp
+int N, M, P;
+vector<vector<vector<int>>> dp;
+vector<int> masks;
+int POWS[8];
+
+// p = b^i
+// mask is the integer representation
+int get_digit(int mask, int p, int b = 3) {
+    return (mask / p) % b;
+}
+
+int exponentiation(int b, int p, int m) {
+    int res = 1;
+    while (p > 0) {
+        if (p & 1) res = (res * b) % m;
+        b = (b * b) % m;
+        p >>= 1;
+    }
+    return res;
+}
+
+bool is_valid(int m1, int m2, int m3) {
+    for (int i = 0; i < N; i++) {
+        int d1 = get_digit(m1, POWS[i]);
+        int d2 = get_digit(m2, POWS[i]);
+        int d3 = get_digit(m3, POWS[i]);
+        if (d1 == 0 && d2 == 1 && d3 == 2) return false;
+        if (d1 == 2 && d2 == 1 && d3 == 0) return false;
+    }
+    return true;
+}
+
+// solve by valid - invalid
+
+// use push dp since can't figure out how to do with pull dp
+
+// from (m1, m2) to (m2, m3)
+int push(int i, int m1, int m2) {
+    if (i == M) return 1;
+    if (dp[i][m1][m2] != -1) return dp[i][m1][m2];
+    int ans = 0;
+    for (int m3 : masks) {
+        if (is_valid(m1, m2, m3)) {
+            ans = (ans + push(i + 1, m2, m3)) % P;
+        }
+    }
+    return dp[i][m1][m2] = ans;
+}
+
+void solve() {
+    cin >> N >> M >> P;
+    POWS[0] = 1;
+    for (int i = 1; i < 7; i++) POWS[i] = POWS[i - 1] * 3;
+    for (int mask = 0; mask < POWS[N]; mask++) {
+        bool valid = true;
+        for (int i = 0; i < N - 2; i++) {
+            if (get_digit(mask, POWS[i]) == 0 && get_digit(mask, POWS[i + 1]) == 1 && get_digit(mask, POWS[i + 2]) == 2) {
+                valid = false;
+                break;
+            }
+            if (get_digit(mask, POWS[i]) == 2 && get_digit(mask, POWS[i + 1]) == 1 && get_digit(mask, POWS[i + 2]) == 0) {
+                valid = false;
+                break;
+            }
+        }
+        if (valid) masks.push_back(mask);
+    }
+    int total = exponentiation(3, N * M, P);
+    if (M == 1) {
+        total = (total - masks.size() + P) % P;
+        cout << total << endl;
+        return;
+    }
+    dp.assign(M, vector<vector<int>>(POWS[N], vector<int>(POWS[N], -1)));
+    for (int m1 : masks) {
+        for (int m2 : masks) {
+            total = (total - push(2, m1, m2) + P) % P; // at index 2, and taking m1, m2 from index 0, 1, and picking m3 from index 2
+        }
+    }
+    cout << total << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+# Starters 152
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+# Starters 153
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```

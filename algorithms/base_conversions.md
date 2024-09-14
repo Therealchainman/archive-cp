@@ -39,4 +39,21 @@ do this while V > 0
 1. $res = res * b$
 2. $res = res + c_{i}$
 
-both of these algorithms will have at most $\log_{b}{V}$ iterations. 
+both of these algorithms will have at most $\log_{b}{V}$ iterations.
+
+## Getting the ith digit in a base b
+
+There is an easy way to get the corresponding coefficient under a base.  This is that method. 
+
+c0x^0+c1x^1+c2x^2+c3x^3+c4x^4, I want to get the 2nd term, I need to divide by x^2 to get
+c2 + c3x + c4x^2, and then just take modulus x to get c2.
+
+if x = 10, you see how it works so easily.  
+
+```cpp
+// p = b^i
+// mask is the integer representation
+int get_digit(int mask, int p, int b = 3) {
+    return (mask / p) % b;
+}
+```

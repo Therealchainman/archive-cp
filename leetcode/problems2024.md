@@ -3266,6 +3266,138 @@ public:
 };
 ```
 
+## 3230. Customer Purchasing Behavior Analysis
+
+### Solution 1:  join, sort, groupby, transform, aggregation, rounding
+
+1. The idea is to join the dataframes together to get the categories
+2. Create the category score based on the count using groupby on (customer_id, category)
+3. Sort the values in descending order by (category_score, transaction_date)
+4. Then in the aggregation, you can pick the top category by just using first
+5. The rest are calculated with corresponding aggregation functions, sum, count, nunique, mean, first
+6. Then need to calculate loyalty_score, and apply custom round function cause otherwise WA.
+7. mixed sort, where you sort descend and ascend on separate columns
+
+```py
+import pandas as pd
+
+round_ = lambda x: round(x + 0.00001, 2)
+
+def analyze_customer_behavior(transactions: pd.DataFrame, products: pd.DataFrame) -> pd.DataFrame:
+    df = (
+        transactions.merge(products, how = "inner", on = ["product_id"])
+    )
+    df["category_score"] = (
+        df.groupby(["customer_id", "category"])["category"].transform("count")
+    )
+    df.sort_values(["category_score", "transaction_date"], ascending = [False, False], inplace = True)
+    df = (
+        df.groupby("customer_id")
+        .agg(
+            total_amount = ("amount", "sum"),
+            transaction_count = ("transaction_id", "count"),
+            unique_categories = ("category", "nunique"),
+            avg_transaction_amount = ("amount", "mean"),
+            top_category = ("category", "first")
+        )
+        .reset_index()
+    )
+    df["loyalty_score"] = (df.transaction_count * 10 + df.total_amount / 100)
+    df["total_amount"] = df.total_amount.apply(lambda row: round_(row))
+    df["avg_transaction_amount"] = df.avg_transaction_amount.apply(lambda row: round_(row))
+    df["loyalty_score"] = df.loyalty_score.apply(lambda row: round_(row))
+    df.sort_values(["loyalty_score", "customer_id"], ascending = [False, True], inplace = True)
+    return df
+```
+
+## 3204. Bitwise User Permissions Analysis
+
+### Solution 1: reduce, operator for bitwise and an or operation, create pandas dataframe from dictionary
+
+```py
+import pandas as pd
+import operator
+
+def analyze_permissions(user_permissions: pd.DataFrame) -> pd.DataFrame:
+    common_perms = reduce(operator.and_, user_permissions.permissions)
+    any_perms = reduce(operator.or_, user_permissions.permissions)
+    return pd.DataFrame(
+        {"common_perms": [common_perms],
+        "any_perms": [any_perms]}
+    )
+```
+
+## 1684. Count the Number of Consistent Strings
+
+### Solution 1:  sorting, pointer, deduplication
+
+```cpp
+class Solution {
+public:
+    int countConsistentStrings(string allowed, vector<string>& words) {
+        int ans = 0;
+        sort(allowed.begin(), allowed.end());
+        for (string &w : words) {
+            sort(w.begin(), w.end());
+            w.erase(unique(w.begin(), w.end()), w.end());
+            int i = 0;
+            for (const char &ch : allowed) {
+                if (w[i] == ch) i++;
+                if (i == w.size()) break;
+            }
+            if (i == w.size()) ans++;
+        }
+        return ans;
+    }
+};
+```
+
+## 1310. XOR Queries of a Subarray
+
+### Solution 1:  prefix xor, static xor sum range queries
+
+```cpp
+class Solution {
+public:
+    vector<int> prefix;
+    int xorsum(int l, int r) {
+        int ans = prefix[r];
+        if (l > 0) ans ^= prefix[l - 1];
+        return ans;
+    }
+    vector<int> xorQueries(vector<int>& arr, vector<vector<int>>& queries) {
+        int N = arr.size(), M = queries.size();
+        prefix.assign(N, 0);
+        vector<int> ans(M);
+        for (int i = 0; i < N; i++) {
+            prefix[i] = arr[i];
+            if (i > 0) prefix[i] ^= prefix[i - 1];
+        }
+        for (int i = 0; i < M; i++) {
+            int l = queries[i][0], r = queries[i][1];
+            ans[i] = xorsum(l, r);
+        }
+        return ans;
+    }
+};
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
 ##
 
 ### Solution 1:
