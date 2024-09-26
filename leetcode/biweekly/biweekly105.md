@@ -32,6 +32,28 @@ class Solution:
         return dp[-1]
 ```
 
+```cpp
+class Solution {
+public:
+    int minExtraChar(string s, vector<string>& dictionary) {
+        unordered_set<string> seen(dictionary.begin(), dictionary.end());
+        int N = s.size();
+        vector<int> dp(N + 1, 0);
+        for (int i = 0; i < N; i++) {
+            dp[i + 1] = dp[i] + 1;
+            string cur = "";
+            for (int j = i; j >= 0; j--) {
+                cur = s[j] + cur;
+                if (seen.count(cur)) {
+                    dp[i + 1] = min(dp[i + 1], dp[i - cur.size() + 1]);
+                }
+            }
+        }
+        return dp[N];
+    }
+};
+```
+
 ## 2708. Maximum Strength of a Group
 
 ### Solution 1:  sort + O(nlogn)

@@ -15,3 +15,10 @@ bool intersection(int s0, int s1, int e0, int e1) {
     return max(s0, s1) <= min(e0, e1);
 }
 ```
+
+```cpp
+// half open interval [s, e)
+bool intersection(int s0, int s1, int e0, int e1) {
+    return max(s0, s1) < min(e0, e1);
+}
+```

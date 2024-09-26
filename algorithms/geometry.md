@@ -6,6 +6,14 @@
 outer_product = lambda v1, v2: v1[0]*v2[1] - v1[1]*v2[0]
 ```
 
+These are vectors from points p1 to p and p2 to p, and so if the outer product equals to 0 that means all points p1, p2 and p are collinear. 
+
+```cpp
+int outer_product(const pair<int, int>& v1, const pair<int, int>& v2) {
+    return v1.x * v2.y - v1.y * v2.x;
+}
+```
+
 # function to test if a point is on the line segment p1p2
 
 ```py

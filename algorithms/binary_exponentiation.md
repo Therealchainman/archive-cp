@@ -27,3 +27,17 @@ int exponentiation(int b, int p, int m) {
     return res;
 }
 ```
+
+without modulus
+
+```cpp
+int exponentiation(int b, int p) {
+    int res = 1;
+    while (p > 0) {
+        if (p & 1) res = (res * b);
+        b = (b * b);
+        p >>= 1;
+    }
+    return res;
+}
+```

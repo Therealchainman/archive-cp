@@ -3382,6 +3382,363 @@ public:
 };
 ```
 
+## 884. Uncommon Words from Two Sentences
+
+### Solution 1: istringstream, unordered_map, frequency count, split string by delimiter with getline
+
+```cpp
+class Solution {
+public:
+    unordered_map<string, int> freq;
+    void process(const string& s) {
+        istringstream iss(s);
+        string word;
+        while (getline(iss, word, ' ')) freq[word]++;
+    }
+    vector<string> uncommonFromSentences(string s1, string s2) {
+        process(s1);
+        process(s2);
+        vector<string> ans;
+        for (const auto &[w, c] : freq) {
+            if (c == 1) ans.push_back(w);
+        }
+        return ans;
+    }
+};
+```
+
+## 241. Different Ways to Add Parentheses
+
+### Solution 1:  recursion, divide and conquer, expression tree
+
+1. You can visualize this as having intermediate nodes which are operators, and leaf nodes which are numbers.  This is called an expression tree.
+2. You just want to divide the expression into two parts, and then recursively solve the subproblems.
+
+```cpp
+class Solution {
+public:
+    int operation(int x, int y, char c) {
+        if (c == '+') return x + y;
+        if (c == '-') return x - y;
+        return x * y;
+    }
+    vector<int> diffWaysToCompute(string expression) {
+        int N = expression.size();
+        vector<int> ans;
+        bool is_number = true;
+        for (int i = 0; i < N; i++) {
+            if (!isdigit(expression[i])) {
+                is_number = false;
+                vector<int> left = diffWaysToCompute(expression.substr(0, i));
+                vector<int> right = diffWaysToCompute(expression.substr(i + 1));
+                for (int x : left) {
+                    for (int y : right) {
+                        ans.push_back(operation(x, y, expression[i]));
+                    }
+                }
+            }
+        }
+        if (is_number) return {stoi(expression)};
+        return ans;
+    }
+};
+```
+
+## 214. Shortest Palindrome
+
+### Solution 1:  manacher's algorithm, odd length palindrome, longest palindrome substring
+
+```cpp
+class Solution {
+public:
+    string manacher(const string& s) {
+        string t = "#";
+        for (char ch : s) {
+            t += ch;
+            t += "#";
+        }
+        vector<int> parr = manacher_odd(t);
+        int mxi = 0;
+        for (int i = 0; i < parr.size(); i++) {
+            if (parr[i] > i) mxi = max(mxi, i + parr[i] - 1);
+        }
+        string ans = "";
+        for (int i = parr.size() - 1; i > mxi; i--) {
+            if (t[i] == '#') continue;
+            ans += t[i];
+        }
+        return ans;
+    }
+    vector<int> manacher_odd(string& s) {
+        int N = s.size();
+        s = "$" + s + "^";
+        vector<int> P(N + 2, 0);
+        int l = 1, r = 1;
+        for (int i = 1; i <= N; i++) {
+            P[i] = max(0, min(r - i, P[l + (r - i)]));
+            while (s[i - P[i]] == s[i + P[i]]) {
+                P[i]++;
+            }
+            if (i + P[i] > r) {
+                l = i - P[i];
+                r = i + P[i];
+            }
+        }
+        return vector<int>(P.begin() + 1, P.end() - 1);
+    }
+    string shortestPalindrome(string s) {
+        int N = s.size();
+        string ans = manacher(s) + s;
+        return ans;
+    }
+};
+```
+
+## Solution 2:  kmp, longest prefix suffix, reverse string, concatenate
+
+```cpp
+class Solution {
+public:
+    vector<int> kmp(const string& s) {
+        int N = s.size();
+        vector<int> pi(N, 0);
+        for (int i = 1; i < N; i++) {
+            int j = pi[i - 1];
+            while (j > 0 && s[i] != s[j]) {
+                j = pi[j - 1];
+            }
+            if (s[j] == s[i]) j++;
+            pi[i] = j;
+        }
+        return pi;
+    }
+    string shortestPalindrome(string s) {
+        int N = s.size();
+        string t = s + "#";
+        string rs = s;
+        reverse(rs.begin(), rs.end());
+        t += rs;
+        vector<int> pi = kmp(t);
+        int mxi = pi.back();
+        string sub = s.substr(mxi);
+        reverse(sub.begin(), sub.end());
+        string ans = sub + s;
+        return ans;
+    }
+};
+```
+
+## 386. Lexicographical Numbers
+
+### Solution 1:  dfs, lexicographical order, leaft leaning tree
+
+```cpp
+class Solution {
+public:
+    int N;
+    vector<int> ans;
+    void dfs(int x) {
+        if (x > N) return;
+        ans.push_back(x);
+        for (int d = 0; d < 10; d++) {
+            dfs(10 * x + d);
+        }
+    }
+    vector<int> lexicalOrder(int n) {
+        N = n;
+        for (int i = 1; i < 10; i++) {
+            dfs(i);
+        }
+        return ans;
+    }
+};
+```
+
+## 440. K-th Smallest in Lexicographical Order
+
+### Solution 1:  tree, count size of subtree, dfs, lexicographical order
+
+```cpp
+class Solution {
+public:
+    int N;
+    int size_(long long prefix1, long long prefix2) {
+        int ans = 0;
+        while (prefix1 <= N) {
+            ans += min((long long)N + 1, prefix2) - prefix1;
+            prefix1 *= 10;
+            prefix2 *= 10;
+        }
+        return ans;
+    }
+    int findKthNumber(int n, int k) {
+        int ans = 1;
+        k--;
+        N = n;
+        while (k > 0) {
+            int cnt = size_(ans, ans + 1);
+            if (k < cnt) {
+                ans *= 10;
+                k--;
+            } else {
+                ans++;
+                k -= cnt;
+            }
+        }   
+        return ans;
+    }
+};
+```
+
+## 1858. Longest Word With All Prefixes
+
+### Solution 1:  postorder dfs, recursion, set, dynamic programming with memoization
+
+```cpp
+class Solution {
+public:
+    unordered_map<string, bool> dp;
+    unordered_set<string> words_set;
+    bool dfs(string& s) {
+        if (s.empty()) return true;
+        if (!words_set.count(s)) return false;
+        if (dp.count(s)) return dp[s];
+        char ch = s.back();
+        s.pop_back();
+        bool ans = dfs(s);
+        s.push_back(ch);
+        return dp[s] = ans;
+    }
+    string longestWord(vector<string>& words) {
+        words_set.insert(words.begin(), words.end());
+        string ans = "";
+        for (string w : words) {
+            dfs(w);
+            if (w.size() >= ans.size() && dp[w]) {
+                if (w.size() > ans.size()) ans = w;
+                else ans = min(ans, w);
+            }
+        }
+        return ans;
+    }
+};
+```
+
+### Solution 2:  trie, prefix tree
+
+```cpp
+struct Node {
+    int children[26];
+    bool isLeaf;
+    void init() {
+        memset(children, 0 ,sizeof(children));
+        isLeaf = false;
+    }
+};
+struct Trie {
+    vector<Node> trie;
+    void init() {
+        Node root;
+        root.init();
+        trie.push_back(root);
+    }
+    void insert(const string& s) {
+        int cur = 0;
+        for (const char &c : s) {
+            int i = c-'a';
+            if (trie[cur].children[i]==0) {
+                Node root;
+                root.init();
+                trie[cur].children[i] = trie.size();
+                trie.push_back(root);
+            }
+            cur = trie[cur].children[i];
+        }
+        trie[cur].isLeaf= true;
+    }
+    int search(const string& s) {
+        int cur = 0;
+        bool ans = true;
+        for (const char &c : s) {
+            int i = c-'a';
+            if (!trie[cur].children[i]) { return false;
+            }
+            cur = trie[cur].children[i];
+            if (!trie[cur].isLeaf) return false;
+        }
+        return trie[cur].isLeaf;
+    }
+};
+class Solution {
+public:
+    string longestWord(vector<string>& words) {
+        Trie trie;
+        trie.init();
+        string ans = "";
+        for (const string& w : words) {
+            trie.insert(w);
+        }
+        for (const string& w : words) {
+            if (w.size() < ans.size()) continue;
+            if (w.size() == ans.size() && ans < w) continue;
+            if (trie.search(w)) ans = w;
+        }
+        return ans;
+    }
+};
+```
+
+## 729. My Calendar I
+
+### Solution 1:  binary search, set, overlapping intervals
+
+1. time complexity should be O(NlogN), where N is number of events
+1. 
+
+```cpp
+struct Event {
+    int s, e;
+    Event() {}
+    Event(int s, int e) : s(s), e(e) {}
+    bool operator<(const Event& other) const {
+        return s < other.s;
+    }
+};
+// overlap of half open intervals [s, e)
+bool overlap(int s1, int e1, int s2, int e2) {
+    return min(e1, e2) - max(s1, s2) > 0;
+}
+class MyCalendar {
+public:
+    set<Event> events;
+    MyCalendar() {
+        events.clear();
+    }
+    bool book(int start, int end) {
+        Event ev(start, end);
+        auto it = events.upper_bound(ev);
+        if (it != events.end()) {
+            Event ev2 = *it;
+            if (overlap(ev.s, ev.e, ev2.s, ev2.e)) return false;
+        }
+        if (it != events.begin()) {
+            Event ev2 = *prev(it);
+            if (overlap(ev.s, ev.e, ev2.s, ev2.e)) return false;
+        }
+        events.insert(ev);
+        return true;
+    }
+};
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
 ##
 
 ### Solution 1:

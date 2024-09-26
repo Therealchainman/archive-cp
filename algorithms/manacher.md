@@ -29,3 +29,32 @@ for i in range(len(parr)):
         parr[i] -= 1
     parr[i] //= 2
 ```
+
+```cpp
+    vector<int> manacher(const string& s) {
+        string t = "#";
+        for (char ch : s) {
+            t += ch;
+            t += "#";
+        }
+        vector<int> parr = manacher_odd(t);
+        return parr;
+    }
+    vector<int> manacher_odd(string& s) {
+        int N = s.size();
+        s = "$" + s + "^";
+        vector<int> P(N + 2, 0);
+        int l = 1, r = 1;
+        for (int i = 1; i <= N; i++) {
+            P[i] = max(0, min(r - i, P[l + (r - i)]));
+            while (s[i - P[i]] == s[i + P[i]]) {
+                P[i]++;
+            }
+            if (i + P[i] > r) {
+                l = i - P[i];
+                r = i + P[i];
+            }
+        }
+        return vector<int>(P.begin() + 1, P.end() - 1);
+    }
+```

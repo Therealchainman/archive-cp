@@ -21,6 +21,22 @@ def kmp(s):
 parr = kmp(s)
 ```
 
+```cpp
+vector<int> kmp(const string& s) {
+    int N = s.size();
+    vector<int> pi(N, 0);
+    for (int i = 1; i < N; i++) {
+        int j = pi[i - 1];
+        while (j > 0 && s[i] != s[j]) {
+            j = pi[j - 1];
+        }
+        if (s[j] == s[i]) j++;
+        pi[i] = j;
+    }
+    return pi;
+}
+```
+
 ## KMP algortihm (Knuth-Morris-Pratt)
 
 This is example of using kmp algorithm to find the number of occurrences of pattern in a text.  

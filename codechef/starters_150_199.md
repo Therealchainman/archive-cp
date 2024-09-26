@@ -433,6 +433,266 @@ signed main() {
 
 # Starters 153
 
+## Another Game
+
+### Solution 1:  max, array, sorting, permutations
+
+```cpp
+int N;
+vector<int> arr;
+
+void solve() {
+    cin >> N;
+    arr.resize(N);
+    int mx = -1;
+    for (int i = 0; i < N; i++) {
+        cin >> arr[i];
+        if (arr[i] != i + 1) mx = max(mx, arr[i]);
+    }
+    int ans = mx + 1;
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## Colorful Tree (Easy Version)
+
+### Solution 1:  undirected graph, tree, degree
+
+1. if the degree = 1 it contributes 2 to the answer, otherwise it contributes 3
+
+```cpp
+int N;
+vector<int> deg;
+
+void solve() {
+    cin >> N;
+    deg.assign(N, 0);
+    for (int i = 0; i < N - 1; i++) {
+        int u, v;
+        cin >> u >> v;
+        u--; v--;
+        deg[u]++;
+        deg[v]++;
+    }
+    int ans = 0;
+    for (int i = 0; i < N; i++) {
+        ans += 2;
+        if (deg[i] == 1) ans++;
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+
+```
+
+## Xometry (Easy Version)
+
+### Solution 1:  frequency array, math
+
+1. The idea is to iterate through the array and find the xor of the two elements
+1. Then you can find the frequency of the xor and add it to the answer
+1. The answer is the frequency of the xor * 8
+1. This only works because all the elements are distinct
+
+```cpp
+const int MAXN = 5'005, MAX_XOR = 1 << 20;
+int N;
+int arr[MAXN];
+int freq[MAX_XOR];
+
+void solve() {
+    cin >> N;
+    for (int i = 0; i < N; i++) {
+        cin >> arr[i];
+    }
+    memset(freq, 0, sizeof(freq));
+    int ans = 0;
+    for (int i = 0; i < N; i++) {
+        for (int j = i + 1; j < N; j++) {
+            int v = arr[i] ^ arr[j];
+            ans += freq[v];
+            freq[v]++;
+        }
+    }
+    cout << ans * 8LL << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## Xometry (Hard Version)
+
+### Solution 1:  prefix sums, combinatorics, frequency arrays, xor, math
+
+```cpp
+const int MAXN = 1e6 + 5, MAX_XOR = 1 << 20;
+int N;
+vector<int> arr;
+int freq[MAXN], freq_xor[MAX_XOR];
+
+int choose(int n) {
+    return n * (n - 1) / 2;
+}
+
+void solve() {
+    cin >> N;
+    arr.resize(N);
+    memset(freq, 0, sizeof(freq));
+    set<int> vals;
+    for (int i = 0; i < N; i++) {
+        cin >> arr[i];
+        freq[arr[i]]++;
+        vals.insert(arr[i]);
+    }
+    memset(freq_xor, 0, sizeof(freq_xor));
+    vector<int> vals_vec(vals.begin(), vals.end());
+    int ans = 0, M = vals_vec.size();
+    int sum = 0, pways = 0;
+    vector<int> xor_vals;
+    for (int i = 0; i < M; i++) {
+        sum += pways * choose(freq[vals_vec[i]]);
+        pways += choose(freq[vals_vec[i]]);
+        for (int j = i + 1; j < M; j++) {
+            int val = vals_vec[i] ^ vals_vec[j];
+            if (!freq_xor[val]) xor_vals.push_back(val);
+            ans -= choose(freq[vals_vec[i]] * freq[vals_vec[j]]);
+            freq_xor[val] += freq[vals_vec[i]] * freq[vals_vec[j]];
+        }
+    }
+    for (int v : xor_vals) {
+        ans += choose(freq_xor[v]);
+    }
+    ans += sum;
+    cout << ans * 8LL << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+
+```
+
+# Starters 154
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+# Starters 155
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+# Starters 156
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+# Starters 157
+
 ##
 
 ### Solution 1: 
