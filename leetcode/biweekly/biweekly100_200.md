@@ -229,3 +229,184 @@ public:
 ```cpp
 
 ```
+
+# Leetcode Biweekly Contest 140
+
+## 3301. Maximize the Total Height of Unique Towers
+
+### Solution 1:  greedy, sorting
+
+```cpp
+class Solution {
+public:
+    const long long INF = 1e12;
+    long long maximumTotalSum(vector<int>& A) {
+        long long ans = 0;
+        long long cur = INF;
+        sort(A.rbegin(), A.rend());
+        for (long long x : A) {
+            cur = min(cur, x);
+            if (cur <= 0) return -1;
+            ans += cur;
+            cur--;
+        }
+        return ans;
+    }
+};
+```
+
+## 3302. Find the Lexicographically Smallest Valid Sequence
+
+### Solution 1:  suffix, lexicographically smallest, greedy
+
+1. Track the earliest matching position from some character, that is matching the suffix of the string.
+1. Then try matching the prefix, until you get to the point where
+
+```cpp
+class Solution {
+public:
+    vector<int> validSequence(string word1, string word2) {
+        int N = word1.size(), M = word2.size();
+        vector<int> suffix(N + 1);
+        suffix.back() = M;
+        for (int i = N - 1, j = M; i >= 0; i--) {
+            if (j > 0 && word1[i] == word2[j - 1]) j--;
+            suffix[i] = j;
+        }
+        vector<int> ans;
+        bool flag = false;
+        for (int i = 0, j = 0; i < N && j < M; i++) {
+            if (word1[i] == word2[j]) {
+                ans.push_back(i);
+                j++;
+            } else if (!flag && suffix[i + 1] - j - 1 <= 0) {
+                ans.push_back(i);
+                j++;
+                flag = true;
+            }
+        }
+        if (ans.size() < M) return {};
+        return ans;
+    }
+};
+```
+
+## 3303. Find the Occurrence of First Almost Equal Substring
+
+### Solution 1:  z algorithm, string matching, reverse string
+
+```cpp
+std::vector<int> z_algorithm(const std::string& s) {
+    int n = s.length();
+    std::vector<int> z(n, 0);
+    int left = 0, right = 0;
+    for (int i = 1; i < n; ++i) {
+        if (i > right) {
+            left = right = i;
+            while (right < n && s[right-left] == s[right]) {
+                right++;
+            }
+            z[i] = right - left;
+            right--;
+        } else {
+            int k = i - left;
+            if (z[k] < right - i + 1) {
+                z[i] = z[k];
+            } else {
+                left = i;
+                while (right < n && s[right-left] == s[right]) {
+                    right++;
+                }
+                z[i] = right - left;
+                right--;
+            }
+        }
+    }
+    return z;
+}
+class Solution {
+public:
+    int minStartingIndex(string s, string pattern) {
+        int N = s.size(), M = pattern.size();
+        vector<int> temp1 = z_algorithm(pattern + '$' + s);
+        reverse(pattern.begin(), pattern.end());
+        reverse(s.begin(), s.end());
+        vector<int> temp2 = z_algorithm(pattern + '$' + s);
+        vector<int> z1(temp1.begin() + M + 1, temp1.end()), z2(temp2.begin() + M + 1, temp2.end());
+        for (int i = 0; i <= N - M; i++) {
+            if (z1[i] + z2[N - i - M] + 1 >= M) return i;
+        }
+        return -1;
+    }
+};
+```
+
+### Solution 2:  polynomial hash, rolling hash, string matching
+
+1. This solution is hard to get to work, if you try some smaller prime integers for modulus it doesn't work for me.  But the larger the prime integer it helped. 
+1. Non-deterministic solution, but it works for the test cases.
+
+```cpp
+class Solution {
+public:
+    const int INF = 1e9;
+    const long long p = 31, MOD1 = pow(2, 43) - 1;
+    int coefficient(char ch) {
+        return ch - 'a' + 1;
+    }
+    int minStartingIndex(string s, string pattern) {
+        int N = s.size(), M = pattern.size();
+        unordered_map<long long, int> hashv;
+        vector<long long> POW(M);
+        POW[0] = 1;
+        for (int i = 1; i < M; i++) {
+            POW[i] = (POW[i - 1] * p) % MOD1;
+        }
+        long long hash = 0;
+        for (int i = 0; i < N; i++) {
+            hash = (p * hash + coefficient(s[i])) % MOD1;
+            if (i >= M - 1) {
+                if (!hashv.count(hash)) hashv[hash] = i - M + 1;
+                hash = (hash - (POW[M - 1] * coefficient(s[i - M + 1])) % MOD1 + MOD1) % MOD1; 
+            }
+        }
+        long long prefix_hash = 0;
+        int ans = INF;
+        vector<long long> suffix_hash(M + 1);
+        suffix_hash[M] = 0;
+        for (int i = M - 1; i >= 0; i--) {
+            suffix_hash[i] = POW[M - i - 1] * coefficient(pattern[i]) % MOD1;
+            suffix_hash[i] = (suffix_hash[i] + suffix_hash[i + 1]) % MOD1;
+        }
+        for (int i = 0; i < M; i++) {
+            for (int j = 1; j <= 26; j++) {
+                long long val = POW[M - i - 1] * j % MOD1;
+                long long cand = (prefix_hash + val + suffix_hash[i + 1]) % MOD1;
+                if (hashv.count(cand)) {
+                    ans = min(ans, hashv[cand]);
+                }
+            }
+            prefix_hash = (prefix_hash + POW[M - i - 1] * coefficient(pattern[i])) % MOD1;
+        }
+        return ans != INF ? ans : -1;
+    }
+};
+```
+
+# Leetcode Biweekly Contest 141
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```

@@ -3731,28 +3731,185 @@ public:
 };
 ```
 
-##
+## 432. All O`one Data Structure
 
-### Solution 1:
+### Solution 1:  min heap, max heap, frequency array
 
 ```cpp
-
+class AllOne {
+public:
+    priority_queue<pair<int, string>> maxheap;
+    priority_queue<pair<int, string>, vector<pair<int, string>>, greater<pair<int, string>>> minheap;
+    unordered_map<string, int> freq;
+    AllOne() {
+        // max heap and min heap yes. 
+        freq.clear();
+    }
+    
+    void inc(string key) {
+        freq[key]++;
+        maxheap.emplace(freq[key], key);
+        minheap.emplace(freq[key], key);
+    }
+    
+    void dec(string key) {
+        freq[key]--;
+        maxheap.emplace(freq[key], key);
+        minheap.emplace(freq[key], key);
+    }
+    
+    string getMaxKey() {
+        while (!maxheap.empty()) {
+            auto [k, s] = maxheap.top();
+            if (k > 0 && k == freq[s]) return s;
+            maxheap.pop();
+        }
+        return "";
+    }
+    
+    string getMinKey() {
+        while (!minheap.empty()) {
+            auto [k, s] = minheap.top();
+            if (k > 0 && k == freq[s]) return s;
+            minheap.pop();
+        }
+        return "";
+    }
+};
 ```
 
-##
+## 641. Design Circular Deque
 
-### Solution 1:
+### Solution 1:  ring buffer, count, modulus, two pointers, front, rear, circular buffer
+
+trivial solution would be just using a deque. 
 
 ```cpp
-
+class MyCircularDeque {
+private:
+    int k, cnt, front, rear;
+    vector<int> buffer;
+public:
+    MyCircularDeque(int k) : k(k), cnt(0), front(0), rear(1 % k), buffer(k, 0) {}
+    int advance(int v) {
+        return (v + 1) % k;
+    }
+    int retreat(int v) {
+        return (v - 1 + k) % k;
+    }
+    bool insertFront(int value) {
+        if (isFull()) return false;
+        buffer[front] = value;
+        front = retreat(front);
+        cnt++;
+        return true;
+    }
+    bool insertLast(int value) {
+        if (isFull()) return false;
+        buffer[rear] = value;
+        rear = advance(rear);
+        cnt++;
+        return true;
+    }
+    bool deleteFront() {
+        if (isEmpty()) return false;
+        front = advance(front);
+        cnt--;
+        return true;
+    }
+    bool deleteLast() {
+        if (isEmpty()) return false;
+        rear = retreat(rear);
+        cnt--;
+        return true;
+    }
+    int getFront() {
+        if (isEmpty()) return -1;
+        return buffer[advance(front) % k];
+    }
+    int getRear() {
+        if (isEmpty()) return -1;
+        return buffer[retreat(rear) % k];
+    }
+    bool isEmpty() {
+        return cnt == 0;
+    }
+    bool isFull() {
+        return cnt == k;
+    }
+};
 ```
 
-##
+## 731. My Calendar II
 
-### Solution 1:
+### Solution 1:  line sweep, frequency array, position sorted set
+
+1. This will work well with k bookings, just instead of cnt > 2, just say cnt > k - 1.  And it will prvent k simultaneous bookings.
 
 ```cpp
+class MyCalendarTwo {
+private:
+    set<int> pos;
+    unordered_map<int, int> delta;
+public:
+    MyCalendarTwo() {}
+    
+    bool book(int start, int end) {
+        delta[start]++;
+        delta[end]--;
+        pos.insert(start);
+        pos.insert(end);
+        int cnt = 0;
+        bool tripled_book = false;
+        for (int p : pos) {
+            cnt += delta[p];
+            if (cnt > 2) {
+                tripled_book = true;
+                break;
+            }
+        }
+        if (tripled_book) {
+            delta[start]--;
+            delta[end]++;
+        }
+        return !tripled_book;
+    }
+};
+```
 
+## 1381. Design a Stack With Increment Operation
+
+### Solution 1:  vector, stack, delta array, lazy update
+
+```cpp
+class CustomStack {
+private:
+    int cnt, maxSize;
+    vector<int> stk, delta;
+public:
+    CustomStack(int maxSize) : cnt(0), maxSize(maxSize), stk(maxSize, 0), delta(maxSize + 1, 0) {}
+    bool isFull() {
+        return cnt == maxSize;
+    }
+    bool isEmpty() {
+        return cnt == 0;
+    }
+    void push(int x) {
+        if (isFull()) return;
+        stk[cnt++] = x;
+    }
+    int pop() {
+        if (isEmpty()) return -1;
+        delta[cnt - 1] += delta[cnt];
+        int val = stk[cnt - 1] + delta[cnt];
+        delta[cnt] = 0;
+        cnt--;
+        return val;
+    }
+    void increment(int k, int val) {
+        delta[min(k, cnt)] += val;
+    }
+};
 ```
 
 ##
