@@ -3912,6 +3912,74 @@ public:
 };
 ```
 
+## 1497. Check If Array Pairs Are Divisible by k
+
+### Solution 1:  modular arithmetic, multiset
+
+1. TC O(NlogN)
+
+```cpp
+class Solution {
+public:
+    int modulus(int x, int m) {
+        return (x % m + m) % m;
+    }
+    bool canArrange(vector<int>& arr, int k) {
+        multiset<int> pool;
+        for (int x : arr) {
+            auto it = pool.find(modulus(k - modulus(x, k), k));
+            if (it != pool.end()) {
+                pool.erase(it);
+            } else {
+                pool.insert(modulus(x, k));
+            }
+        }
+        return pool.empty();
+    }
+};
+```
+
+## 1331. Rank Transform of an Array
+
+### Solution 1:  sorted map
+
+```cpp
+class Solution {
+public:
+    vector<int> arrayRankTransform(vector<int>& arr) {
+        int N = arr.size();
+        map<int, vector<int>> pairs;
+        for (int i = 0; i < N; i++) {
+            pairs[arr[i]].push_back(i);
+        }
+        int rank = 1;
+        for (auto [k, indices] : pairs) {
+            for (int i : indices) {
+                arr[i] = rank;
+            }
+            rank++;
+        }
+        return arr;
+    }
+};
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
 ##
 
 ### Solution 1:

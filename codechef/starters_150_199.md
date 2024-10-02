@@ -615,28 +615,237 @@ signed main() {
 
 # Starters 154
 
-##
+## Add 1 or 2 Game
 
-### Solution 1: 
+### Solution 1:  observation
 
 ```cpp
+int N;
+
+void solve() {
+    cin >> N;
+    if (N == 1) {
+        cout << "ALICE" << endl;
+    } else {
+        cout << "BOB" << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
 
 ```
 
-##
+## GCD and XOR
 
-### Solution 1: 
+### Solution 1:  greedy, gcd, xor
 
 ```cpp
+int N, K;
+vector<int> arr;
 
+bool check() {
+    vector<int> vals;
+    vector<int> indices;
+    for (int i = 0; i < N; i++) {
+        if (arr[i] != K) {
+            vals.push_back(arr[i]);
+            indices.push_back(i);
+        }
+    }
+    for (int i = 1; i < vals.size(); i++) {
+        if (vals[i] != vals[i - 1]) {
+            return false;
+        }
+    }
+    for (int i = 1; i < indices.size(); i++) {
+        if (indices[i] != indices[i - 1] + 1) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void solve() {
+    cin >> N >> K;
+    arr.resize(N);
+    for (int i = 0; i < N; i++) {
+        cin >> arr[i];
+    }
+    if (all_of(arr.begin(), arr.end(), [&](int x) { return x == K; })) {
+        cout << 0 << endl;
+    } else if (check()) {
+        cout << 1 << endl;
+    } else if (all_of(arr.begin(), arr.end(), [&](int x) { return gcd(x, K) == K; })) {
+        cout << 1 << endl;
+    } else {
+        cout << 2 << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
 ```
 
-##
+## Triangle Count (Easy)
 
-### Solution 1: 
+### Solution 1:  math, triangle inequality, sort, intervals
 
 ```cpp
+const int INF = 1e18;
+int N;
+vector<int> arr;
 
+void solve() {
+    cin >> N;
+    arr.resize(N);
+    for (int i = 0; i < N; i++) {
+        cin >> arr[i];
+    }
+    sort(arr.begin(), arr.end());
+    int ans = 0;
+    vector<pair<int, int>> intervals;
+    for (int i = 1; i < N; i++) {
+        int l = arr[i] - arr[i - 1] + 1;
+        int r = arr[i - 1] + arr[i] - 1;
+        intervals.emplace_back(l, r);
+    }
+    sort(intervals.begin(), intervals.end());
+    int upper = -INF;
+    for (auto [l, r] : intervals) {
+        int val = max(0LL, r - max(upper, l) + 1);
+        ans += val;
+        upper = max(upper, r + 1) ;
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## Count Winning Subarrays
+
+### Solution 1:  pointers, greedy
+
+```cpp
+int N;
+vector<int> arr;
+
+void solve() {
+    cin >> N;
+    arr.resize(N);
+    for (int i = 0; i < N; i++) {
+        cin >> arr[i];
+    }
+    int last1 = -1, last2 = -1;
+    int ans = 0;
+    for (int i = 1; i < N; i++) {
+        if (arr[i] == arr[i - 1] && arr[i] == 1) {
+            last1 = i - 1;
+        } 
+        if (i > 1 && arr[i] == 1 && arr[i - 1] == 0 && arr[i - 2] == 1) {
+            last2 = i - 2;
+        }
+        int diff = max(last1, last2) + 1;
+        ans += diff;
+    }
+    ans += count(arr.begin(), arr.end(), 1);
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## Tree Cut Xor
+
+### Solution 1:  tree, xor, stack, dfs
+
+```cpp
+int N;
+vector<vector<int>> adj;
+stack<pair<int, int>> edges;
+
+void dfs(int u, int p = -1) {
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        edges.emplace(u, v);
+        dfs(v, u);
+    }
+}
+
+void solve() {
+    cin >> N;
+    adj.assign(N, vector<int>());
+    for (int i = 0; i < N - 1; i++) {
+        int u, v;
+        cin >> u >> v;
+        u--, v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    dfs(0);
+    int ans = N > 2 ? 0 : 1;
+    cout << ans << endl;
+    while (!edges.empty()) {
+        auto [u, v] = edges.top(); // u - v (v is leaf)
+        if (N & 1 || edges.size() > 3) {
+            cout << u + 1 << " " << v + 1 << " " << v + 1 << endl;
+        } else {
+            cout << u + 1 << " " << v + 1 << " " << u + 1 << endl;
+        }
+        edges.pop();
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
 ```
 
 # Starters 155

@@ -164,45 +164,141 @@ signed main() {
 
 # TheForces Round 35
 
-##
+## A. Simple Update - I
+ 
+### Solution 1:  sliding window, counting 0s and 1s
 
-### Solution 1: 
+```cpp
+int N, K;
+string S;
+ 
+void solve() {
+    cin >> N >> K >> S;
+    int sum = 0;
+    for (int i = 0; i < N; i++) {
+        sum += S[i] - '0';
+    }
+    int cur = sum, ans = sum;
+    // window
+    for (int i = 0; i < 2 * K; i++) {
+        if (i < K) {
+            if (S[i] == '0') cur++;
+        } else {
+            if (S[i] == '1') cur--;
+        }
+    }
+    ans = max(ans, cur);
+    for (int i = 2 * K; i < N; i++) {
+        cur++;
+        if (S[i] == '1') cur--;
+        ans = max(ans, cur);
+    }
+    cout << ans << endl;
+}
+ 
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## B. Simple Update - II
+
+### Solution 1:  first and last 0, ceil
+
+```cpp
+int N, K;
+string S;
+ 
+int ceil(int x, int y) {
+    return (x + y - 1) / y;
+}
+ 
+void solve() {
+    cin >> N >> K >> S;
+    int zeros = 0;
+    for (int i = 0; i < N; i++) {
+        if (S[i] == '0') zeros++;
+    }
+    if (zeros <= K) {
+        cout << 0 << endl;
+        return;
+    }
+    int l = 0, r = 0;
+    for (int i = 0; i < N; i++) {
+        if (S[i] == '0') r = i + 1;
+    }
+    r -= K;
+    for (int i = N - 1; i >= 0; i--) {
+        if (S[i] == '0') l = i;
+    }
+    int ans = ceil(r - l, K);
+    cout << ans << endl;
+}
+ 
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## C. Yet Another Nim Game
+
+### Solution 1:  parity, loop
+
+```cpp
+int N;
+vector<int> A;
+ 
+void solve() {
+    cin >> N;
+    A.resize(N);
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+    }
+    int ans = 0, last = 0;
+    for (int i = 1; i <= N; i++) {
+        if (A[i - 1] & 1) last = i;
+        ans += last;
+    }
+    cout << ans << endl;
+}
+ 
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## D. String From Another World
+
+### Solution 1:  dynamic programming
 
 ```cpp
 
 ```
 
-##
-
-### Solution 1: 
-
-```cpp
-
-```
-
-##
-
-### Solution 1: 
-
-```cpp
-
-```
-
-##
-
-### Solution 1: 
-
-```cpp
-
-```
-
-##
-
-### Solution 1: 
-
-```cpp
-
-```
 # TheForces Round 36
 
 ##
