@@ -1,6 +1,6 @@
 # Meta Hacker Cup 2024
 
-## Practice Round
+# Practice Round
 
 ## Problem A: Walk the Line
 
@@ -277,7 +277,148 @@ I get feeling it may involve stack.
 
 ```
 
-## Round 1
+# Round 1
+
+## Problem A: Subsonic Subway
+
+### Solution 1: 
+
+```cpp
+string base = "subsonic_subway";
+// string name = base + "_sample_input.txt";
+// string name = base + "_validation_input.txt";
+string name = base + "_input.txt";
+
+const long double INF = 1e18;
+int N;
+vector<pair<int, int>> stations;
+
+void solve() {
+    cin >> N;
+    stations.resize(N);
+    long double lower = 0.0, upper = INF;
+    for (int i = 0; i < N; i++) {
+        int l, r;
+        cin >> l >> r;
+        stations[i] = {l, r};
+        long double min_speed = (long double) (i + 1) / r;
+        long double max_speed = (long double) (i + 1) / l;
+        lower = max(lower, min_speed);
+        upper = min(upper, max_speed);
+    }
+    if (lower > upper) {
+        cout << -1 << endl;
+    } else {
+        cout << fixed << setprecision(15) << lower << endl;
+    }
+}
+
+signed main() {
+	ios_base::sync_with_stdio(0);
+    cin.tie(NULL);
+    string in = "inputs/" + name;
+    string out = "outputs/" + name;
+    freopen(in.c_str(), "r", stdin);
+    freopen(out.c_str(), "w", stdout);
+    int T;
+    cin >> T;
+    for (int i = 1; i <= T ; i++) {
+        cout << "Case #" << i << ": ";
+        solve();
+    }
+    return 0;
+}
+```
+
+## Problem B: Prime Subtractorization
+
+### Solution 1: 
+
+```cpp
+string base = "prime_subtractorization";
+// string name = base + "_sample_input.txt";
+// string name = base + "_validation_input.txt";
+string name = base + "_input.txt";
+
+
+const int MAXN = 1e7 + 5;
+int primes[MAXN], N, ans, dp[MAXN];
+
+void sieve() {
+    fill(primes, primes + MAXN, 1);
+    primes[0] = primes[1] = 0;
+    int p = 2;
+    for (int p = 2; p * p <= MAXN; p++) {
+        if (primes[p]) {
+            for (int i = p * p; i < MAXN; i += p) {
+                primes[i] = 0;
+            }
+        }
+    }
+}
+
+void solve() {
+    cin >> N;
+    if (dp[N]) {
+        cout << dp[N] + 1 << endl;
+    } else {
+        cout << dp[N] << endl;
+    }
+}
+
+signed main() {
+	ios_base::sync_with_stdio(0);
+    cin.tie(NULL);
+    string in = "inputs/" + name;
+    string out = "outputs/" + name;
+    freopen(in.c_str(), "r", stdin);
+    freopen(out.c_str(), "w", stdout);
+    sieve();
+    memset(dp, 0, sizeof(dp));
+    for (int i = 5; i < MAXN; i++) {
+        dp[i] = dp[i - 1];
+        if (primes[i]) dp[i] += primes[i - 2];
+    }
+    int T;
+    cin >> T;
+    for (int i = 1; i <= T ; i++) {
+        cout << "Case #" << i << ": ";
+        solve();
+    }
+    return 0;
+}
+```
+
+## Problem C: Substantial Losses
+
+### Solution 1: 
+
+```py
+
+sys.stdout = open(f"outputs/{name}", "w")
+sys.stdin = open(f"inputs/{name}", "r")
+M = 998244353
+def main():
+    W, G, L = map(int, input().split())
+    v = (2 * L + 1) % M
+    ans = ((W - G) * v) % M
+    return ans
+
+if __name__ == '__main__':
+    T = int(input())
+    for t in range(1, T + 1):
+        print(f"Case #{t}: {main()}")
+```
+
+## Problem D: Substitution Cipher
+
+### Solution 1: 
+
+```cpp
+
+```
+
+# Round 2
 
 ##
 

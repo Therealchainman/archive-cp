@@ -6989,39 +6989,6 @@ class Solution:
         return True
 ```
 
-## 2491. Divide Players Into Teams of Equal Skill
-
-### Solution 1:  two pointer + sort + greedy pair strongest with weakest player + O(nlogn) time
-
-```py
-class Solution:
-    def dividePlayers(self, skill: List[int]) -> int:
-        skill.sort()
-        n = len(skill)
-        expectedSkill = 2*sum(skill)//n
-        res = 0
-        for i in range(n//2):
-            cur = skill[i] + skill[~i]
-            if cur != expectedSkill: return -1
-            res += skill[i]*skill[~i]
-        return res
-```
-
-### Solution 2:  counter + expected skill value + checking that the skill and the complement skill value have equal number of occurrences + O(n) time
-
-```py
-class Solution:
-    def dividePlayers(self, skill: List[int]) -> int:
-        n = len(skill)
-        expected = 2*sum(skill)//n
-        res = 0
-        counts = Counter(skill)
-        for key, vals in counts.items():
-            if vals != counts[expected-key]: return -1
-            res += vals*key*(expected-key)
-        return res//2
-```
-
 ## 2492. Minimum Score of a Path Between Two Cities
 
 ### Solution 1: modified union find + compute minimum score in each connected graph

@@ -3964,28 +3964,82 @@ public:
 };
 ```
 
-##
+## 1590. Make Sum Divisible by P
 
-### Solution 1:
+### Solution 1:  map, prefix sum, modular arithmetic
 
 ```cpp
-
+class Solution {
+public:
+    const int INF = 1e9;
+    int minSubarray(vector<int>& nums, int p) {
+        int N = nums.size();
+        unordered_map<int, int> lookup = {{0, -1}};
+        long long psum = 0, sum = accumulate(nums.begin(), nums.end(), 0LL);
+        if (sum % p == 0) return 0;
+        int ans = INF;
+        for (int i = 0; i < N; i++) {
+            psum = (psum + nums[i]) % p;
+            int x = (psum - sum % p + p) % p;
+            if (lookup.count(x)) {
+                ans = min(ans, i - lookup[x]);
+            }
+            lookup[psum] = i;
+        }
+        return ans < N ? ans : -1;
+    }
+};
 ```
 
-##
+## 2491. Divide Players Into Teams of Equal Skill
 
-### Solution 1:
+### Solution 1: two pointer, sort, greedy pair strongest with weakest player, O(nlogn) time
 
 ```cpp
-
+class Solution {
+public:
+    long long dividePlayers(vector<int>& skill) {
+        int N = skill.size();
+        sort(skill.begin(), skill.end());
+        int x = skill.front() + skill.back();
+        long long ans = 0;
+        for (int i = 0; i < N / 2; i++) {
+            if (skill[i] + skill[N - i - 1] != x) return -1;
+            ans += skill[i] * skill[N - i - 1];
+        }
+        return ans;
+    }
+};
 ```
 
-##
+## 1813. Sentence Similarity III
 
-### Solution 1:
+### Solution 1:  prefix and suffix, string
 
 ```cpp
-
+class Solution {
+public:
+    vector<string> process(const string& s) {
+        vector<string> ans;
+        istringstream iss(s);
+        string word;
+        while (getline(iss, word, ' ')) ans.push_back(word);
+        return ans;
+    }
+    bool areSentencesSimilar(string s1, string s2) {
+        vector<string> A = process(s1), B = process(s2);
+        if (A.size() < B.size()) swap(A, B);
+        int N = A.size(), M = B.size();
+        int p = 0, s = M - 1;
+        for (; p < M; p++) {
+            if (A[p] != B[p]) break;
+        }
+        for (int i = N - 1; s >= 0; s--, i--) {
+            if (A[i] != B[s]) break;
+        }
+        return p > s;
+    }
+};
 ```
 
 ##

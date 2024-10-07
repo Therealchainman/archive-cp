@@ -94,6 +94,12 @@ def dijkstra(adj, src):
     return dist
 ```
 
+for weighted undirected graph
+
+```cpp
+
+```
+
 ## dijkstra for matrix or grid search, where you can only move in 4 directions
 
 For this particular implementation it is multisource, and every position that is on the boundary is a source.  Then it computes the minimum distance to get from boundary to any other position inside the grid.  In this case it finds the cheapest way to get from every position to escape the grid.

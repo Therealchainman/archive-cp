@@ -2,12 +2,13 @@
 using namespace std;
 #define int long long
 #define endl '\n'
+#define x first
+#define y second
 
-string base = "line_of_delivery_part_1";
-// string name = base + "_sample_input.txt";
+string base = "substantial_losses";
+string name = base + "_sample_input.txt";
 // string name = base + "_validation_input.txt";
-string name = base + "_input.txt";
-
+// string name = base + "_input.txt";
 
 void solve() {
     // solve the problem
@@ -36,5 +37,9 @@ You can output floats with using cout << fixed << setprecision(12) << p << endl;
 
 This is to avoid stack overflow error
 
-g++ "-Wl,--stack,1078749825" main.cpp -o main
+on linux:
+g++ -O2 main.cpp -o main
+ulimit -s unlimited in each shell, then run the ./main file
+on windows this works. 
+g++ "-Wl,--stack=26843546" main.cpp -o main
 */
