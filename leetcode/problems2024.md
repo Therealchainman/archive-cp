@@ -4042,6 +4042,93 @@ public:
 };
 ```
 
+## 921. Minimum Add to Make Parentheses Valid
+
+### Solution 1:  balance, greedy
+
+```cpp
+class Solution {
+public:
+    int minAddToMakeValid(string s) {
+        int ans = 0, bal = 0;
+        for (char ch : s) {
+            if (ch == '(') {
+                bal++;
+            } else {
+                bal--;
+            }
+            if (bal < 0) {
+                ans++;
+                bal = 0;
+            }
+        }
+        return ans + bal;
+    }
+};
+```
+
+## 962. Maximum Width Ramp
+
+### Solution 1:  sparse tables, range maximum query
+
+```cpp
+const int LOG = 17, INF = 1e9;
+vector<vector<int>> st;
+
+int query(int L, int R) {
+	int k = log2(R - L + 1);
+	return max(st[k][L], st[k][R - (1LL << k) + 1]);
+}
+
+class Solution {
+public:
+    int maxWidthRamp(vector<int>& nums) {
+        int N = nums.size();
+        int mx = *max_element(nums.begin(), nums.end());
+        st.assign(LOG, vector<int>(mx + 1, -INF));
+        for (int i = 0; i < N; i++) {
+            st[0][nums[i]] = i;
+        }
+        for (int i = 1; i < LOG; i++) {
+            for (int j = 0; j + (1LL << (i - 1)) <= mx; j++) {
+                st[i][j] = max(st[i - 1][j], st[i - 1][j + (1LL << (i - 1))]);
+            }
+        }
+        int ans = 0;
+        for (int i = 0; i < N; i++) {
+            int j = query(nums[i], mx);
+            ans = max(ans, j - i);
+        }
+        return ans;
+    }
+};
+```
+
+### Solution 2:  Monotonic stack, weakly decreasing stack
+
+It is a bit hard to understand this one, not as straight forward.  But it is maybe genius. 
+It builds a monotonically decrease stack from the left to right scan of array.  Then it scans from right to left, and it can pop off any element that is less than or equal to the current, why because this will give the largest width with that specific element from stack.  
+
+```cpp
+class Solution {
+public:
+    int maxWidthRamp(vector<int>& nums) {
+        int N = nums.size(), ans = 0;
+        stack<int> stk;
+        for (int i = 0; i < N; i++) {
+            if (stk.empty() || nums[i] < nums[stk.top()]) stk.push(i);
+        }
+        for (int i = N - 1; i >= 0; i--) {
+            while (!stk.empty() && nums[i] >= nums[stk.top()]) {
+                ans = max(ans, i - stk.top());
+                stk.pop();
+            }
+        }
+        return ans;
+    }
+};
+```
+
 ##
 
 ### Solution 1:
