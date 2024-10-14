@@ -395,6 +395,108 @@ public:
 
 # Leetcode Biweekly Contest 141
 
+## 3316. Find Maximum Removals From Source String
+
+### Solution 1:  recursive dynamic programming, 
+
+```cpp
+class Solution {
+public:
+    const int INF = 1e9;
+    int N, M, T;
+    vector<vector<int>> dp;
+    string S, P;
+    vector<int> targets;
+    int dfs(int i, int j, int k) {
+        if (i == N) {
+            if (j == M) return 0;
+            return -INF;
+        }
+        if (dp[i][j] != INF) return dp[i][j];
+        int ans = -INF;
+        if (k < T && targets[k] < i) k++;
+        if (j < M && S[i] == P[j]) {
+            ans = max(ans, dfs(i + 1, j + 1, k));
+        } else {
+            ans = max(ans, dfs(i + 1, j, k));
+        }
+        if (k < T && targets[k] == i) {
+            ans = max(ans, dfs(i + 1, j, k) + 1);
+        }
+        return dp[i][j] = ans;
+    }
+    int maxRemovals(string source, string pattern, vector<int>& targetIndices) {
+        N = source.size(), M = pattern.size(), T = targetIndices.size();
+        S = source;
+        P = pattern;
+        targets = targetIndices;
+        dp.assign(N, vector<int>(M + 1, INF));
+        return dfs(0, 0, 0);
+    }
+};
+```
+
+## 3317. Find the Number of Possible Ways for an Event
+
+### Solution 1:  dynamic programming, combinatorics, combinations, permutations, stirlings number of the second kind
+
+```cpp
+class Solution {
+public:
+    const long long MOD = 1e9 + 7;
+    vector<vector<long long>> s;
+    void stirlings(int n) {
+        s[0][0] = 1;
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= i; j++) {
+                s[i][j] = (s[i - 1][j - 1] + j * s[i - 1][j]) % MOD;
+            }
+        }
+    }
+    long long inv(long long i) {
+        return i <= 1 ? i : MOD - (long long)(MOD/i) * inv(MOD % i) % MOD;
+    }
+
+    vector<long long> fact, inv_fact;
+
+    void factorials(int n) {
+        fact.assign(n + 1, 1);
+        inv_fact.assign(n + 1, 0);
+        for (int i = 2; i <= n; i++) {
+            fact[i] = (fact[i - 1] * i) % MOD;
+        }
+        inv_fact.end()[-1] = inv(fact.end()[-1]);
+        for (int i = n - 1; i >= 0; i--) {
+            inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % MOD;
+        }
+    }
+    long long choose(int n, int r) {
+        if (n < r) return 0;
+        return (fact[n] * inv_fact[r] % MOD) * inv_fact[n - r] % MOD;
+    }
+    int numberOfWays(int n, int x, int y) {
+        s.assign(n + 1, vector<long long>(n + 1, 0));
+        stirlings(n);
+        factorials(x);
+        long long ans = 0, score_ways = 1, group_perms = 1;
+        long long res;
+        for (int i = 1; i <= min(x, n); i++) {
+            score_ways = (score_ways * y) % MOD;
+            group_perms = (group_perms * i) % MOD;
+            long long group_ways = choose(x, i);
+            long long partition_ways = s[n][i]; 
+            res = score_ways * group_perms % MOD;
+            res = res * group_ways % MOD;
+            res = res * partition_ways % MOD;
+            ans = (ans + res) % MOD;
+        }
+        return ans;
+    }
+};
+```
+
+# Leetcode Biweekly Contest 142
+
 ## 
 
 ### Solution 1: 
