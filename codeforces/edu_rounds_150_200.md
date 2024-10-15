@@ -206,6 +206,10 @@ signed main() {
 
 ## F. Choose Your Queries
 
+You are given an array of n pairs of integers, where each pair is of the form [(x1, y1), (x2, y2), ... (xn, yn)], with the integers xi and yi in each pair satisfying 1 ≤ xi, yi ≤ N, and N ≤ 300,000. From each pair, you must select exactly one integer. Your goal is to select integers in such a way that minimizes the number of distinct integers that are chosen an odd number of times across all pairs.
+
+You can also think of it as a directed graph, and analysis of indegree parity.
+
 ### Solution 1: 
 
 ```cpp

@@ -8,11 +8,11 @@ Solves it in O(V^3), really good for dense graphs.
 const int INF = 1e12;
 vector<vector<int>> dist;
 
-void floyd_warshall() {
+void floyd_warshall(int n) {
     // floyd warshall, all pairs shortest path
-    for (int k = 0; k < N; k++) {  // Intermediate vertex
-        for (int i = 0; i < N; i++) {  // Source vertex
-            for (int j = 0; j < N; j++) {  // Destination vertex
+    for (int k = 0; k < n; k++) {  // Intermediate vertex
+        for (int i = 0; i < n; i++) {  // Source vertex
+            for (int j = 0; j < n; j++) {  // Destination vertex
                 dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);
             }
         }
@@ -31,5 +31,5 @@ for (int i = 0; i < M; i++) {
 for (int i = 0; i < N; i++) {
     dist[i][i] = 0;
 }
-
+floyd_warshall(N);
 ```
