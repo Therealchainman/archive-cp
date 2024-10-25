@@ -48,3 +48,12 @@ This problem can be solved by sorting the array, and then the minimum xor of a p
 ## Set difference for submasks
 
 Given integer s and t which represent a bitmask that represents a set of elements.  If t is a submask of s, then you can find the integer x = s - t, which represents the set difference.  That is all elements in s that were not in t. 
+
+
+## Check if a number is a power of 2
+
+```cpp
+bool is_power_of_two(int x) {
+    return x > 0 && (x & (x - 1)) == 0;
+};
+```

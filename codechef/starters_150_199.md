@@ -850,28 +850,144 @@ signed main() {
 
 # Starters 155
 
-##
+## GCD to 1 (Hard)
 
 ### Solution 1: 
 
 ```cpp
+int R, C;
+vector<vector<int>> mat;
 
+void solve() {
+    cin >> R >> C;
+    mat.assign(R, vector<int>(C, 2));
+    for (int i = 0; i < max(R , C); i++) {
+        mat[i % R][i % C] = 3;
+    }
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++) {
+            cout << mat[i][j] << " ";
+        }
+        cout << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
 ```
 
-##
+## Prefix Suffix Min Max
 
 ### Solution 1: 
 
 ```cpp
+int N;
+vector<int> A, B;
 
+void solve() {
+    cin >> N;
+    B.resize(N);
+    for (int i = 0; i < N; i++) {
+        cin >> B[i];
+    }
+    A.assign(N, 0);
+    for (int i = 1; i < N; i++) {
+        A[0] = max(A[0], B[i] - B[i - 1]);
+    }
+    for (int i = 1; i < N; i++) {
+        A[i] = B[i] - B[i - 1];
+    }
+    for (int i = 0; i < N; i++) {
+        cout << A[i] << " ";
+    }
+    cout << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
 ```
 
-##
+## Array Concatanation
 
-### Solution 1: 
+### Solution 1:  combinatorics, counting, parity
 
 ```cpp
+const int MOD = 1e9 + 7, MAXN = 2e6 + 5;
+int a, b;
 
+int ceil(int x, int y) {
+    return (x + y - 1) / y;
+}
+
+int floor(int x, int y) {
+    return x / y;
+}
+
+int inv(int i) {
+  return i <= 1 ? i : MOD - (int)(MOD/i) * inv(MOD % i) % MOD;
+}
+
+vector<int> fact, inv_fact;
+
+void factorials(int n) {
+    fact.assign(n + 1, 1);
+    inv_fact.assign(n + 1, 0);
+    for (int i = 2; i <= n; i++) {
+        fact[i] = (fact[i - 1] * i) % MOD;
+    }
+    inv_fact.end()[-1] = inv(fact.end()[-1]);
+    for (int i = n - 1; i >= 0; i--) {
+        inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % MOD;
+    }
+}
+
+int choose(int n, int r) {
+    if (n < r) return 0;
+    return (fact[n] * inv_fact[r] % MOD) * inv_fact[n - r] % MOD;
+}
+
+void solve() {
+    cin >> a >> b;
+    int cnt1 = ceil(a + b, 4), cnt2 = floor(a + b, 4);
+    int ans = 0;
+    for (int i = 0; i <= floor(b, 2); i++) {
+        int c1 = choose(cnt1, i) * choose(cnt2, i) % MOD;
+        int c2 = c1 * choose(a + b - cnt1 - cnt2, b - 2 * i) % MOD;
+        ans = (ans + c2) % MOD;
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    factorials(MAXN);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
 ```
 
 # Starters 156
@@ -901,6 +1017,112 @@ signed main() {
 ```
 
 # Starters 157
+
+## Unmedian
+
+### Solution 1:  min, max, index
+
+```cpp
+int N;
+vector<int> A;
+
+void solve() {
+    cin >> N;
+    A.resize(N);
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+    }
+    int smallest = *min_element(A.begin(), A.end());
+    int largest = *max_element(A.begin(), A.end());
+    int si = 0, li = 0;
+    for (int i = 0; i < N; i++) {
+        if (A[i] == smallest) si = i;
+        if (A[i] == largest) li = i;
+    }
+    if (li < si) {
+        cout << -1 << endl;
+        return;
+    }
+    cout << N - 2 << endl;
+    for (int i = 0; i < N - 2; i++) {
+        cout << 1 << " " << 3 << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## Normal is Good
+
+### Solution 1:  stack, frequency, map, prefix sum
+
+1. The key to solving this is to map the values to A[i] - 2, then 1 -> -1, 2 -> 0, 3 -> 1,  then if the subarray sum equals to 0 that indicates it is the case where median is 2.  That is you have same number of 1s and 3s, count(1) == count(3).  Which is necessary for median = 2, but also for there to be at least one occurrence of 2 in the subarray. 
+
+```cpp
+int N;
+vector<int> A;
+
+int calc(int n) {
+    return n * (n + 1) / 2;
+}
+
+void solve() {
+    cin >> N;
+    A.resize(N);
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+    }
+    int ans = 0, psum = 0, prv = -1, cur = 0;
+    stack<int> stk;
+    stk.push(0);
+    map<int, int> freq;
+    for (int i = 0; i < N; i++) {
+        int x = A[i] - 2;
+        psum += x;
+        if (x == 0) {
+            while (!stk.empty()) {
+                int top = stk.top();
+                stk.pop();
+                freq[top]++;
+            }
+        }
+        if (x != prv) {
+            cur = 0;
+            prv = x;
+        }
+        cur++;
+        if (x != 0) ans += cur;
+        ans += freq[psum];
+        stk.push(psum);
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+
+```
+
+# Starters 158
 
 ##
 

@@ -31,30 +31,82 @@ for i in range(len(parr)):
 ```
 
 ```cpp
-    vector<int> manacher(const string& s) {
-        string t = "#";
-        for (char ch : s) {
-            t += ch;
-            t += "#";
-        }
-        vector<int> parr = manacher_odd(t);
-        return parr;
+vector<int> manacher(const string& s) {
+    string t = "#";
+    for (char ch : s) {
+        t += ch;
+        t += "#";
     }
-    vector<int> manacher_odd(string& s) {
-        int N = s.size();
-        s = "$" + s + "^";
-        vector<int> P(N + 2, 0);
-        int l = 1, r = 1;
-        for (int i = 1; i <= N; i++) {
-            P[i] = max(0, min(r - i, P[l + (r - i)]));
-            while (s[i - P[i]] == s[i + P[i]]) {
-                P[i]++;
-            }
-            if (i + P[i] > r) {
-                l = i - P[i];
-                r = i + P[i];
-            }
+    vector<int> parr = manacher_odd(t);
+    return parr;
+}
+vector<int> manacher_odd(string& s) {
+    int N = s.size();
+    s = "$" + s + "^";
+    vector<int> P(N + 2, 0);
+    int l = 1, r = 1;
+    for (int i = 1; i <= N; i++) {
+        P[i] = max(0, min(r - i, P[l + (r - i)]));
+        while (s[i - P[i]] == s[i + P[i]]) {
+            P[i]++;
         }
-        return vector<int>(P.begin() + 1, P.end() - 1);
+        if (i + P[i] > r) {
+            l = i - P[i];
+            r = i + P[i];
+        }
     }
+    return vector<int>(P.begin() + 1, P.end() - 1);
+}
+```
+
+## Manacher for static range queries
+
+Example of how this manacher's algorithm works and what it returns
+given string s = "abaaba"
+You get the following string t = "#a#b#a#a#b#a#"
+And you get parr = [1, 2, 1, 4, 1, 2, 7, 2, 1, 2, 1]
+
+You can use manacher's array to perform range queries on the string to determine if the substring is palindromic.  
+Let's call these static palindromic range queries
+
+Important to note the range query is for range [l, r).  
+
+```cpp
+vector<int> marr;
+vector<int> manacher(const string& s) {
+    string t = "#";
+    for (char ch : s) {
+        t += ch;
+        t += "#";
+    }
+    vector<int> parr = manacher_odd(t);
+    return parr;
+}
+vector<int> manacher_odd(string& s) {
+    int N = s.size();
+    s = "$" + s + "^";
+    vector<int> P(N + 2, 0);
+    int l = 1, r = 1;
+    for (int i = 1; i <= N; i++) {
+        P[i] = max(0, min(r - i, P[l + (r - i)]));
+        while (s[i - P[i]] == s[i + P[i]]) {
+            P[i]++;
+        }
+        if (i + P[i] > r) {
+            l = i - P[i];
+            r = i + P[i];
+        }
+    }
+    return vector<int>(P.begin() + 1, P.end() - 1);
+}
+// [l, r)
+bool query(int l, int r) {
+    return marr[l + r] > r - l;
+}
+```
+
+call with where t is the string.
+
+```cpp
+marr = manacher(t);
 ```

@@ -420,33 +420,171 @@ if __name__ == '__main__':
 
 # Round 2
 
-##
+## Problem A1: Cottontail Climb (Part 1)
 
-### Solution 1: 
+### Solution 1:  brute force, precalculate all possible values
 
-```cpp
-
-```
-
-##
-
-### Solution 1: 
+1. There were only 45 possible values, so not very many.
 
 ```cpp
+string base = "cottontail_climb_part_1";
+// string name = base + "_sample_input.txt";
+// string name = base + "_validation_input.txt";
+string name = base + "_input.txt";
 
+int A, B, M;
+vector<int> values;
+
+int calc(int x, int m) {
+    int ans = 0;
+    for (int v : values) {
+        if (v > x) continue;
+        if (v % m == 0) ans++;
+    }
+    return ans;
+}
+
+void solve() {
+    cin >> A >> B >> M;
+    int ans = calc(B, M);
+    if (A > 0) ans -= calc(A - 1, M);
+    cout << ans << endl;
+}
+
+signed main() {
+	ios_base::sync_with_stdio(0);
+    cin.tie(NULL);
+    string in = "inputs/" + name;
+    string out = "outputs/" + name;
+    freopen(in.c_str(), "r", stdin);
+    freopen(out.c_str(), "w", stdout);
+    for (int i = 1; i < 10; i++) {
+        for (int j = 1; j < 10; j++) {
+            int val = 0;
+            for (int k = i; k < j; k++) {
+                val = (val * 10) + k;
+            }
+            for (int k = j; k >= i; k--) {
+                val = (val * 10) + k;
+            }
+            if (!val) continue;
+            values.emplace_back(val);
+        }
+    }
+    int T;
+    cin >> T;
+    for (int i = 1; i <= T ; i++) {
+        cout << "Case #" << i << ": ";
+        solve();
+        cout.flush();
+    }
+    return 0;
+}
 ```
 
-##
+## Problem A2: Cottontail Climb (Part 2)
 
-### Solution 1: 
+### Solution 1:  digit dp, recursive
+
+1.  Appears you didn't need digit dp for this problem. 
 
 ```cpp
+string base = "cottontail_climb_part_2";
+// string name = base + "_sample_input.txt";
+// string name = base + "_validation_input.txt";
+string name = base + "_input.txt";
 
+int A, B, M;
+map<int, int> dp[10][19][10][2];
+
+int convert(char x, char base = '0') {
+    return x - base;
+}
+
+int dfs(int p, int i, int rem, int last, int tight, const string& num) {
+    if (dp[p][i][last][tight].count(rem)) return dp[p][i][last][tight][rem];
+    if (i > 2 * p) return rem == 0;
+    if (i == num.size()) return 0;
+    int ans = 0;
+    for (int d = 1; d < 10; d++) {
+        if (tight && d > convert(num[i])) break;
+        if (i < p && d < last) continue;
+        if (i == p + 1 && d >= last) continue;
+        if (i > p && d > last) break;
+        if (i == p && d <= last) continue;
+        int nrem = (rem * 10 + d) % M;
+        ans += dfs(p, i + 1, nrem, d, tight && d == convert(num[i]), num);
+    }
+    return dp[p][i][last][tight][rem] = ans;
+}
+
+void solve() {
+    cin >> A >> B >> M;
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 19; j++) {
+            for (int k = 0; k < 10; k++) {
+                for (int l = 0; l < 2; l++) {
+                    dp[i][j][k][l].clear();
+                }
+            }
+        }
+    }
+    string s1 = to_string(B);
+    int ans = 0;
+    for (int i = 0; i < 10; i++) {
+        if (2 * i + 1 < s1.size()) ans += dfs(i, 0, 0, 0, 0, s1);
+        else ans += dfs(i, 0, 0, 0, 1, s1);
+    }
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 19; j++) {
+            for (int k = 0; k < 10; k++) {
+                for (int l = 0; l < 2; l++) {
+                    dp[i][j][k][l].clear();
+                }
+            }
+        }
+    }
+    if (A > 0) {
+        s1 = to_string(A - 1);
+        for (int i = 0; i < 10; i++) {
+            if (2 * i + 1 < s1.size()) ans -= dfs(i, 0, 0, 0, 0, s1);
+            else ans -= dfs(i, 0, 0, 0, 1, s1);
+        }
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+	ios_base::sync_with_stdio(0);
+    cin.tie(NULL);
+    string in = "inputs/" + name;
+    string out = "outputs/" + name;
+    freopen(in.c_str(), "r", stdin);
+    freopen(out.c_str(), "w", stdout);
+    int T;
+    cin >> T;
+    for (int i = 1; i <= T ; i++) {
+        cout << "Case #" << i << ": ";
+        solve();
+        cout.flush();
+    }
+    return 0;
+}
 ```
 
-##
+## Problem C: Bunny Hopscotch
 
 ### Solution 1: 
+
+Suppose I want to perform a range query to count all the integers in a range that are equal to x?  
+
+given a grid, and a specific cell (r, c) in the grid.  I am calculating the distance from this cell to other cells to be the max(|r1 - r2|, |c1 - c2|), how can I quickly count for each distance the number of other cells that are that distance away, such as distance = 1, there might be at most 8 cells, for distance = 2, 16 cells, distance = 3, 24 cells.  Basically the maximum number of other cells within the boundary of the grid is going to be 4 * 2 * distance.  But some of the cells may be outside of the grid, how do I calculate with that consideration? 
+
+I think I can count how many cells there are at a distance 1 <= d <= 800 in about O(N^2) time complexity.  But this is not aware of cells that have the same owner.  How could I possibly calculate that quickly.  I'd have to know how many cells have the same owner at each distance.  
+
+I guess you can do this if you know which cells have same values.  
+
+I just don't know how to query what cells have same value as the current one fast enough.  So yeah I give up.  
 
 ```cpp
 

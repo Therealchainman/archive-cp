@@ -4129,12 +4129,310 @@ public:
 };
 ```
 
-##
+## 1405. Longest Happy String
 
-### Solution 1:
+### Solution 1:  greedy, frequency, maximum
 
 ```cpp
+class Solution {
+private:
+    const string CHARS = "abc";
+    int freq[3];
+    int cur, prv;
+    string ans;
+    void calc() {
+        int mx = 0;
+        prv = cur;
+        cur = -1;
+        for (int i = 0; i < 3; i++) {
+            if (i == prv) continue;
+            if (freq[i] > mx) {
+                mx = freq[i];
+                cur = i;
+            }
+        }
+    }
+    void update(int i) {
+        if (!freq[i]) return;
+        ans += CHARS[i];
+        freq[i]--;
+    }
+public:
+    string longestDiverseString(int a, int b, int c) {
+        freq[0] = a; freq[1] = b; freq[2] = c;
+        cur = -1;
+        calc();
+        while (cur != -1) {
+            if (freq[cur] == *max_element(freq, freq + 3)) {
+                update(cur); update(cur);
+            } else {
+                update(cur);
+            }
+            calc();
+        }
+        return ans;
+    }
+};
+```
 
+## 670. Maximum Swap
+
+### Solution 1:  greedy
+
+```cpp
+class Solution {
+public:
+    int maximumSwap(int num) {
+        string s = to_string(num);
+        int N = s.size();
+        int mxi = -1, i1 = 0, i2 = 0;
+        for (int i = N - 1; i >= 0; i--) {
+            if (mxi == -1 || s[i] > s[mxi]) {
+                mxi = i;
+            } else if (s[i] < s[mxi]) {
+                i1 = i;
+                i2 = mxi;
+            }
+        }
+        swap(s[i1], s[i2]);
+        return stoi(s);
+    }
+};
+```
+
+## 2044. Count Number of Maximum Bitwise-OR Subsets
+
+### Solution 1:  0/1 knapsack problem, dynamic programming, bitmask
+
+```cpp
+class Solution {
+public:
+    int dp[1 << 17];
+    int countMaxOrSubsets(vector<int>& nums) {
+        int N = nums.size();
+        dp[0] = 1;
+        int max_ = 0;
+        for (const int& num : nums) {
+            for (int mask = max_; mask >= 0; mask--) {
+                dp[mask | num] += dp[mask];
+            }
+            max_ |= num;
+        }
+        return dp[max_];
+    }
+};
+```
+
+## 1545. Find Kth Bit in Nth Binary String
+
+### Solution 1:  recursion, bit manipulation, power of two, parity
+
+```cpp
+class Solution {
+public:
+    bool is_power_of_two(int x) {
+        return x > 0 && (x & (x - 1)) == 0;
+    };
+    char conv(int x, char base = '0') {
+        return x + base;
+    }
+    char findKthBit(int n, int k) {
+        int steps = 0;
+        int p = 1;
+        while (p < k) {
+            p <<= 1;
+        }
+        for (; k > 1 && !is_power_of_two(k); p >>= 1) {
+            if (p > k) continue;
+            k = 2 * p - k;
+            steps ^= 1;
+        }
+        if (k > 1) steps ^= 1;
+        return conv(0 ^ (steps % 2));
+    }
+};
+```
+
+## 1106. Parsing A Boolean Expression
+
+### Solution 1:  stacks, parsing, boolean expression
+
+```cpp
+class Solution {
+public:
+    void eval(char op, bool& res, bool b) {
+        if (op == '!') res = !b;
+        else if (op == '&') res &= b;
+        else res |= b;
+    }
+    bool parseBoolExpr(string expression) {
+        stack<char> operand_stk;
+        stack<bool> results;
+        for (char ch : expression) {
+             if (ch == ')') {
+                operand_stk.pop();
+                if (results.size() > 1) {
+                    bool prv_bool = results.top();
+                    results.pop();
+                    eval(operand_stk.top(), results.top(), prv_bool);
+                }
+            } else if (ch == 't' || ch == 'f') {
+                eval(operand_stk.top(), results.top(), ch == 't');
+            } else if (ch == '&' || ch == '|' || ch == '!') {
+                operand_stk.push(ch);
+                results.push(ch == '&');
+            }
+        }
+        return results.top();
+    }
+};
+```
+
+## 1593. Split a String Into the Max Number of Unique Substrings
+
+### Solution 1:  bitmask, set, brute force
+
+```cpp
+class Solution {
+public:
+    int maxUniqueSplit(string s) {
+        int N = s.size();
+        int ans = 1;
+        for (int mask = 0; mask < (1 << (N - 1)); mask++) {
+            unordered_set<string> vis;
+            string cur = "";
+            int cnt = 1;
+            bool flag = true;
+            for (int i = 0; i < N; i++) {
+                cur += s[i];
+                if ((mask >> i) & 1) {
+                    if (vis.contains(cur)) {
+                        flag = false;
+                        break;
+                    }
+                    vis.insert(cur);
+                    cur = "";
+                    cnt++;
+                }
+            }
+            if (vis.contains(cur)) flag = false;
+            if (flag) ans = max(ans, cnt);
+        }
+        return ans;
+    }
+};
+```
+
+## 951. Flip Equivalent Binary Trees
+
+### Solution 1:  recursion, binary tree, boolean logic
+
+```cpp
+class Solution {
+public:
+    bool flipEquiv(TreeNode* root1, TreeNode* root2) {
+        if (root1 == NULL || root2 == NULL) return root1 == NULL && root2 == NULL;
+        if (root1 -> val != root2 -> val) return false;
+        bool stay = flipEquiv(root1 -> left, root2 -> left) && flipEquiv(root1 -> right, root2 -> right);
+        bool flip = flipEquiv(root1 -> left, root2 -> right) && flipEquiv(root1 -> right, root2 -> left);
+        return stay || flip;
+    }
+};
+```
+
+
+## 1233. Remove Sub-Folders from the Filesystem
+
+### Solution 1:  trie, dfs, map, string processing
+
+```cpp
+struct Node {
+    map<string, int> children;
+    bool isMarked;
+    void init() {
+        isMarked = false;
+    }
+};
+struct Trie {
+    vector<Node> trie;
+    void init() {
+        Node root;
+        root.init();
+        trie.emplace_back(root);
+    }
+    void insert(const vector<string>& vec) {
+        int cur = 0;
+        for (const string& s : vec) {
+            if (!trie[cur].children.count(s)) {
+                Node root;
+                root.init();
+                trie[cur].children[s] = trie.size();
+                trie.emplace_back(root);
+            }
+            cur = trie[cur].children[s];
+        }
+        trie[cur].isMarked = true;
+    }
+    const Node& operator[](int idx) {
+        return trie[idx];
+    }
+};
+class Solution {
+public:
+    vector<string> process(const string& s, char delimiter = ' ') {
+        vector<string> ans;
+        istringstream iss(s.substr(1));
+        string word;
+        while (getline(iss, word, delimiter)) ans.emplace_back(word);
+        return ans;
+    }
+    vector<string> ans;
+    string path;
+    Trie trie;
+    void dfs(int u) {
+        if (trie[u].isMarked) {
+            ans.emplace_back(path);
+            return;
+        }
+        path += '/';
+        for (const auto& [s, v] : trie[u].children) {
+            path += s;
+            dfs(v);
+            for (int i = 0; i < s.size(); i++) {
+                path.pop_back();
+            }
+        }
+        path.pop_back();
+    }
+    vector<string> removeSubfolders(vector<string>& folder) {
+        trie.init();
+        for (const string& f : folder) {
+            vector<string> folds = process(f, '/');
+            trie.insert(folds);
+        }
+        dfs(0);
+        return ans;
+    }
+};
+```
+
+### Solution 2:  sorting, string comparison
+
+```cpp
+class Solution {
+public:
+    vector<string> removeSubfolders(vector<string>& folder) {
+        int N = folder.size();
+        sort(folder.begin(), folder.end());
+        vector<string> res;
+        res.emplace_back(folder[0]);
+        for (int i = 1; i < N; i++) {
+            string lastFolder = res.back() + '/';
+            if (folder[i].compare(0, lastFolder.size(), lastFolder)) res.emplace_back(folder[i]);
+        }
+        return res;
+    }
+};
 ```
 
 ##
@@ -4144,6 +4442,7 @@ public:
 ```cpp
 
 ```
+
 
 ##
 

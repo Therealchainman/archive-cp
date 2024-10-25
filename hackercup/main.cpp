@@ -10,8 +10,14 @@ string name = base + "_sample_input.txt";
 // string name = base + "_validation_input.txt";
 // string name = base + "_input.txt";
 
+const int M = 998244353;
+int W, G, L;
+
 void solve() {
-    // solve the problem
+    cin >> W >> G >> L;
+    int v = (2LL * L + 1) % M;
+    int ans = ((W - G) * v) % M;
+    cout << ans << endl;
 }
 
 signed main() {
