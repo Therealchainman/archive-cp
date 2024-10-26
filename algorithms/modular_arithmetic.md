@@ -34,5 +34,9 @@ Which means that there is integer result from the division of a - b by c. So c d
 
 
 
+## Modular arithmetic helpful functions
+
+
+
 
 

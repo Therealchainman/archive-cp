@@ -497,6 +497,147 @@ public:
 
 # Leetcode Biweekly Contest 142
 
+## 3331. Find Subtree Sizes After Changes
+
+### Solution 1: tree, dfs, backtracking
+
+```cpp
+class Solution {
+public:
+    vector<vector<int>> adj;
+    vector<int> sz, par;
+    int last[26];
+    int unicode(char ch) {
+        return ch - 'a';
+    }
+    string S;
+    int N;
+    void dfs1(int u) {
+        int cv = unicode(S[u]);
+        int p = last[cv];
+        if (p != -1) {
+            par[u] = p;
+        }
+        last[cv] = u;
+        for (int v : adj[u]) {
+            dfs1(v);
+        }
+        last[cv] = p;
+    }
+    void dfs2(int u) {
+        sz[u] = 1;
+        for (int v : adj[u]) {
+            dfs2(v);
+            sz[u] += sz[v];
+        }
+    }
+    vector<int> findSubtreeSizes(vector<int>& parent, string s) {
+        S = s;
+        par = vector(parent.begin(), parent.end());
+        N = s.size();
+        adj.assign(N, vector<int>());
+        for (int i = 0; i < N; i++) {
+            if (par[i] == -1) continue;
+            adj[par[i]].emplace_back(i);
+        }
+        fill(last, last + 26, -1);
+        dfs1(0);
+        adj.assign(N, vector<int>());
+        for (int i = 0; i < N; i++) {
+            if (par[i] == -1) continue;
+            adj[par[i]].emplace_back(i);
+        }
+        sz.assign(N, 0);
+        dfs2(0);
+        return sz;
+    }
+};
+```
+
+## 3332. Maximum Points Tourist Can Earn
+
+### Solution 1:  dynamic programming, 2D dp
+
+1. O(N^3) is fast enough for this problem, so that is straightforward, just trying every transition at every point in time.
+1. Always have it calculated the maximum value for being at a node at a certain time, dp[time][city].
+
+```cpp
+class Solution {
+public:
+    int maxScore(int n, int k, vector<vector<int>>& stayScore, vector<vector<int>>& travelScore) {
+        vector<vector<int>> dp(k + 1, vector<int>(n, 0));
+        for (int i = 0; i < k; i++) {
+            for (int src = 0; src < n; src++) {
+                for (int dst = 0; dst < n; dst++) {
+                    dp[i + 1][dst] = max(dp[i + 1][dst], dp[i][src] + travelScore[src][dst] + (src == dst ? stayScore[i][dst] : 0));
+                }
+            }
+        }
+        return *max_element(dp[k].begin(), dp[k].end());
+    }
+};
+```
+
+## 3333. Find the Original Typed String II
+
+### Solution 1:  dynamic programming, run length encoding, counting
+
+1. It is easy to count the total number of possible strings taking the product of the run length encoding lengths.
+1. Now if k <= N, then we can just return the total number of possible strings.
+1. If k > N, there is a problem because taking 1 of every character is not possible, and will only reach size N, which is not at least K.
+1. So for this scenario we can calcualte with dynammic programming the number of ways to have a string of length between 0 to k - 1, and then these are the number of ways that are not going to achieve at least length k, so subtract these from final result.
+1. Counting these can be done in O(k^2) time complexity, if you make sure you use a fixed sized window sum.  Write out the transitions to understand why this works exactly.
+
+```cpp
+class Solution {
+public:
+    int possibleStringCount(string word, int k) {
+        int mod = 1e9 + 7;
+        vector<int> rle;
+        long long ans = 1;
+        int cnt = 1;
+        for (int i = 1; i < word.size(); i++) {
+            if (word[i - 1] != word[i]) {
+                ans = (ans * cnt) % mod;
+                rle.emplace_back(cnt);
+                cnt = 0;
+            }
+            cnt++;
+        }
+        ans = (ans * cnt) % mod;
+        rle.emplace_back(cnt);
+        int N = rle.size();
+        if (k <= N) return ans;
+        vector<int> dp(k, 0), ndp(k);
+        dp[0] = 1;
+        for (int i = 0; i < N; i++) {
+            ndp.assign(k, 0);
+            int wsum = 0;
+            for (int j = i; j < k; j++) {
+                ndp[j] = (ndp[j] + wsum) % mod;
+                wsum = (wsum + dp[j]) % mod;
+                if (j >= rle[i]) wsum = (wsum - dp[j - rle[i]] + mod) % mod;
+            }
+            swap(ndp, dp);
+        }
+        for (const int& x : dp) {
+            ans = (ans - x + mod) % mod;
+        }
+        return ans;
+    }
+};
+```
+
+# Leetcode Biweekly Contest 143
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
 ## 
 
 ### Solution 1: 
