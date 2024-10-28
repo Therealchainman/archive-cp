@@ -4435,6 +4435,108 @@ public:
 };
 ```
 
+## 2458. Height of Binary Tree After Subtree Removal Queries
+
+### Solution 1: post order traversal, pre order traversal, dfs, binary tree
+
+1. Precompute the max height from each subtree
+1. In preorder fashion track the maximum height of the tree possible by the subtree that is not going to be removed. 
+1. So it is tracking it down the backbone of the binary tree in a sense.  And it updates appropriately for if you move left or right. 
+1. The answer is the maximum height of any other subtree along the backbone of the binary tree, and the current depth.  
+
+Some other solutions answer the queries in two passes by traversing the tree in different order, left to right and right to left children.  This is actually interesting solution as well.
+
+```cpp
+class Solution {
+private:
+    map<int, int> heights, answer;
+    int dfs(TreeNode* root, int h = -1) {
+        if (!root) return h;
+        int mh = max(dfs(root -> left, h + 1), dfs(root -> right, h + 1));
+        heights[root -> val] = mh;
+        return mh;
+    }
+    void dfs2(TreeNode* root, int mh = 0, int d = 0) {
+        if (!root) return;
+        answer[root -> val] = max(mh, d - 1);
+        int rmax = root -> right ? max(mh, heights[root -> right -> val]) : mh;
+        int lmax = root -> left ? max(mh, heights[root -> left -> val]) : mh;
+        dfs2(root -> left, rmax, d + 1);
+        dfs2(root -> right, lmax, d + 1);
+    }
+public:
+    vector<int> treeQueries(TreeNode* root, vector<int>& queries) {
+        int m = queries.size();
+        dfs(root);
+        dfs2(root);
+        vector<int> ans(m);
+        for (int i = 0; i < m; i++) {
+            ans[i] = answer[queries[i]];
+        }
+        return ans;
+    }
+};
+```
+
+### Solution 2:  binary tree, euler tour, prefix max, suffix max
+
+1. Basically once you have euler tour, you just need to know enter and exit
+1. Then you want to query the maximum depth if you remove the subtree, which means ignore any of the values in the middle between the enter and exit for that node. 
+1. So you can do that by query prefix and suffix max.  
+
+Also it turn out to be a lot faster to precompute the size of the tree then to use maps.
+
+```cpp
+class Solution {
+private:
+    int N, timer;
+    vector<int> depths, enter, exit;
+    void pre(TreeNode* root) {
+        if (!root) return;
+        N++;
+        pre(root -> left);
+        pre(root -> right);
+    }
+    void dfs(TreeNode* root, int d = 0) {
+        if (!root) return;
+        int v = root -> val;
+        enter[v] = timer;
+        depths[timer] = d;
+        timer++;
+        dfs(root -> left, d + 1);
+        dfs(root -> right, d + 1);
+        exit[v] = timer;
+        depths[timer] = d;
+        timer++;
+    }
+public:
+    vector<int> treeQueries(TreeNode* root, vector<int>& queries) {
+        N = 0;
+        pre(root);
+        enter.resize(N + 1);
+        exit.resize(N + 1);
+        depths.resize(2 * N);
+        int m = queries.size();
+        timer = 0;
+        dfs(root);
+        vector<int> pmax(2 * N, 0), smax(2 * N, 0);
+        for (int i = 1; i < 2 * N; i++) {
+            pmax[i] = max(depths[i], pmax[i - 1]);
+        }
+        for (int i = 2 * N - 2; i >= 0; i--) {
+            smax[i] = max(depths[i], smax[i + 1]);
+        }
+        vector<int> ans(m);
+        for (int i = 0; i < m; i++) {
+            int l = enter[queries[i]], r = exit[queries[i]];
+            ans[i] = max(pmax[l - 1], smax[r + 1]);
+        }
+        return ans;
+    }
+};
+```
+
+
 ##
 
 ### Solution 1:
@@ -4443,6 +4545,21 @@ public:
 
 ```
 
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
 
 ##
 
