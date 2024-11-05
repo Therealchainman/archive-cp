@@ -4723,44 +4723,6 @@ class Solution:
         return total_cost
 ```
 
-## 2463. Minimum Total Distance Traveled
-
-### Solution 1:  recursive dynamic programming + two states, repair robot at current factory or skip + O(nmk)
-
-```py
-class Solution:
-    def minimumTotalDistance(self, robot: List[int], factory: List[List[int]]) -> int:
-        robot.sort()
-        factory.sort()
-        @cache
-        def dp(i: int, j: int, k: int) -> int:
-            if i == len(robot): return 0
-            if j == len(factory): return inf
-            # repair robot at current factory
-            current = dp(i+1, j, k-1) + abs(robot[i] - factory[j][0]) if k > 0 else inf
-            # skip repair robot at current factory
-            if j < len(factory)-1:
-                current = min(current, dp(i, j+1, factory[j+1][1]))
-            return current
-        return dp(0,0,factory[0][1])
-```
-
-### Solution 2:  iterative dynamic programming + flatten factories + find all robots that can be placed at current factory and find the cheapest cost to place the robot at that location.
-
-```py
-class Solution:
-    def minimumTotalDistance(self, rob, factory):
-        rob.sort()
-        factory.sort()
-        fac = [f for f, lim in factory for _ in range(lim)]
-        n, m = len(rob), len(fac)
-        dp = [0] + [inf]*n
-        for j, f in enumerate(fac):
-            left, right = max(n - (m-j), 0), min(j, n-1)
-            for i in reversed(range(left, right+1)):
-                dp[i+1] = min(abs(f-rob[i])+dp[i], dp[i+1])
-        return dp[-1]
-```
 
 ## 1047. Remove All Adjacent Duplicates In String
 

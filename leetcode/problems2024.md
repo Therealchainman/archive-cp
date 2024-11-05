@@ -4536,6 +4536,111 @@ public:
 };
 ```
 
+## 2463. Minimum Total Distance Traveled
+
+### Solution 1:  iterative dp, sorting
+
+```cpp
+class Solution {
+public:
+    const long long INF = 1e18;
+    long long distance(long long x, long long y) {
+        return abs(x - y);
+    }
+    long long minimumTotalDistance(vector<int>& robot, vector<vector<int>>& factory) {
+        sort(factory.begin(), factory.end());
+        sort(robot.begin(), robot.end());
+        int N = robot.size(), M = factory.size();
+        vector<long long> dp(N + 1, INF), ndp(N + 1);
+        dp[0] = 0;
+        for (int i = 1; i <= M; i++) {
+            ndp.assign(N + 1, INF);
+            for (int j = 0; j <= N; j++) {
+                long long distSum = 0;
+                ndp[j] = dp[j];
+                for (int k = j - 1; k >= max(0, j - factory[i - 1][1]); k--) {
+                    distSum += distance(robot[k], factory[i - 1][0]);
+                    if (dp[k] != INF) ndp[j] = min(ndp[j], dp[k] + distSum);
+                }
+            }
+            swap(dp, ndp);
+        }
+        return dp[N];
+    }
+};
+```
+
+## 1671. Minimum Number of Removals to Make Mountain Array
+
+### Solution 1:  reverse, longest increasing subsequence, dynamic programming, binary search
+
+```cpp
+class Solution {
+public:
+    vector<int> longestIncreasing(const vector<int>& arr) {
+        int N = arr.size();
+        vector<int> pool;
+        vector<int> dp(N, 0);
+        for (int i = 0; i < N; i++) {
+            int idx = lower_bound(pool.begin(), pool.end(), arr[i]) - pool.begin();
+            if (idx == pool.size()) {
+                pool.emplace_back(arr[i]);
+            } else {
+                pool[idx] = arr[i];
+            }
+            dp[i] = pool.size();
+        }
+        return dp;
+    }
+    int minimumMountainRemovals(vector<int>& nums) {
+        int N = nums.size();
+        vector<int> prefix = longestIncreasing(nums);
+        reverse(nums.begin(), nums.end());
+        vector<int> suffix = longestIncreasing(nums);
+        reverse(suffix.begin(), suffix.end());
+        reverse(nums.begin(), nums.end());
+        int ans = 1e9, pmin = 1e9;
+        vector<int> smin(N + 1, 1e9);
+        for (int i = N - 1; i >= 0; i--) {
+            smin[i] = min(nums[i], smin[i + 1]);
+        }
+        for (int i = 0; i < N; i++) {
+            if (nums[i] > pmin && nums[i] > smin[i]) {
+                int mountainSize = prefix[i] + suffix[i] - 1;
+                ans = min(ans, N - mountainSize);
+            }
+            pmin = min(pmin, nums[i]);
+        }
+        return ans;
+    }
+};
+```
+
+## 2914. Minimum Number of Changes to Make Binary String Beautiful
+
+### Solution 1:  greedy, disparate pairs
+
+```cpp
+class Solution {
+public:
+    int minChanges(string s) {
+        int N = s.size();
+        int ans = 0;
+        for (int i = 1; i < N; i += 2) {
+            if (s[i] != s[i - 1]) ans++;
+        }
+        return ans;
+    }
+};
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
 
 ##
 
