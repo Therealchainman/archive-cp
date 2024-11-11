@@ -4634,12 +4634,40 @@ public:
 };
 ```
 
-##
+## 1829. Maximum XOR for Each Query
 
-### Solution 1:
+### Solution 1:  bit manipulation, bitwise xor operation
 
 ```cpp
-
+class Solution {
+public:
+    bool isSet(int v, int i) {
+        return (v >> i) & 1;
+    }
+    int calc(int x, int b) {
+        int ans = 0;
+        for (int i = 0; i < b; i++) {
+            if (!isSet(x, i)) {
+                ans |= (1 << i);
+            }
+        }
+        return ans;
+    }
+    vector<int> getMaximumXor(vector<int>& nums, int maximumBit) {
+        int N = nums.size();
+        vector<int> ans(N);
+        int x = 0;
+        for (int v : nums) {
+            x ^= v;
+        }
+        for (int i = 0; i < N; i++) {
+            ans[i] = calc(x, maximumBit);
+            x ^= nums.back();
+            nums.pop_back();
+        }
+        return ans;
+    }
+};
 ```
 
 ##
