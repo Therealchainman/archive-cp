@@ -48,17 +48,18 @@ def prime_sieve(lim):
 ```
 
 ```cpp
-const int MAXN = 1e8 + 1;
-int primes[MAXN], N, ans;
+const int MAXN = 4e5 + 5;
+int N;
+bool primes[MAXN];
 
-void sieve() {
-    fill(primes, primes + MAXN, 1);
-    primes[0] = primes[1] = 0;
+void sieve(int n) {
+    fill(primes, primes + n, true);
+    primes[0] = primes[1] = false;
     int p = 2;
-    for (int p = 2; p * p <= MAXN; p++) {
+    for (int p = 2; p * p <= n; p++) {
         if (primes[p]) {
-            for (int i = p * p; i < MAXN; i += p) {
-                primes[i] = 0;
+            for (int i = p * p; i < n; i += p) {
+                primes[i] = false;;
             }
         }
     }

@@ -4670,12 +4670,81 @@ public:
 };
 ```
 
-##
+## 862. Shortest Subarray with Sum at Least K
 
-### Solution 1:
+### Solution 1:  monotonically increasing stack, prefix sum, binary search
+
+1. Play around with this equation psum[r] - psum[l] <= k
+1. Then it can be written in a way that you binary search, if you keep stack of increasing values of psum for each index.
+1. Best to keep the index values in the stack, because can get prefix sum from that and also get the size of the subarray.
 
 ```cpp
+#define int64 long long
+class Solution {
+private:
+    vector<int> stk;
+    vector<int64> psum;
+    int binarySearch(int64 target) {
+        int lo = 0, hi = stk.size() - 1;
+        while (lo < hi) {
+            int mid = lo + (hi - lo + 1) / 2;
+            if (psum[stk[mid]] <= target) lo = mid;
+            else hi = mid - 1;
+        }
+        return lo;
+    }
+public:
+    int shortestSubarray(vector<int>& nums, int k) {
+        int N = nums.size();
+        psum.assign(N + 1, 0);
+        stk.emplace_back(0);
+        int ans = N + 1;
+        for (int i = 0; i < N; i++) {
+            psum[i + 1] = psum[i] + nums[i];
+            while (!stk.empty() && psum[i + 1] <= psum[stk.back()]) stk.pop_back();
+            if (!stk.empty()) {
+                int64 target = psum[i + 1] - k;
+                int j = binarySearch(target); // increasing array of values
+                if (psum[stk[j]] <= target) {
+                    ans = min(ans, i - stk[j] + 1);
+                }
+            }
+            stk.emplace_back(i + 1);
+        }
+        return ans <= N ? ans : -1;
+    }
+};
+```
 
+### Solution 2:  montonically increasing deque, prefix sum
+
+1. This using property that when you consume an element from the deque, it forms the smallest subarray at that time. 
+1. You will never need to use it again.
+
+```cpp
+#define int64 long long
+class Solution {
+private:
+    deque<int> dq;
+    vector<int64> psum;
+public:
+    int shortestSubarray(vector<int>& nums, int k) {
+        int N = nums.size();
+        psum.assign(N + 1, 0);
+        dq.emplace_back(0);
+        int ans = N + 1;
+        for (int i = 0; i < N; i++) {
+            psum[i + 1] = psum[i] + nums[i];
+            while (!dq.empty() && psum[i + 1] <= psum[dq.back()]) dq.pop_back();
+            while (!dq.empty() && psum[i + 1] - psum[dq.front()] >= k) {
+                ans = min(ans, i - dq.front() + 1);
+                dq.pop_front();
+            }
+            dq.emplace_back(i + 1);
+        }
+        return ans <= N ? ans : -1;
+    }
+};
 ```
 
 ##
