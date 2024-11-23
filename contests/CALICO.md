@@ -580,20 +580,13 @@ signed main() {
 }
 ```
 
-##
-
-### Solution 1: 
-
-```cpp
-
-```
-
-
 # calico fall 2024
 
 ## Problem 5: Better Call McKirby
 
 ### Solution 1:  greedy binary search
+
+This is on the right path but it gives WA
 
 ```cpp
 const int INF = 1e18;
@@ -649,12 +642,89 @@ signed main() {
 }
 ```
 
-##
+## Problem 6: Big Brother Ben
 
-### Solution 1: 
+### Solution 1:  totient function, greatest common divisor, prefix sum, primes, sieve of Eratosthenes, principle of inclusion exclusion
 
 ```cpp
+const int MAXN = 60'000;
+int N;
+int totient[MAXN], totient_sum[MAXN];
+vector<int> primes[MAXN];
 
+void sieve(int n) {
+    iota(totient, totient + n, 0LL);
+    memset(totient_sum, 0, sizeof(totient_sum));
+    for (int i = 2; i < n; i++) {
+        if (totient[i] == i) { // i is prime integer
+            for (int j = i; j < n; j += i) {
+                totient[j] -= totient[j] / i;
+                primes[j].emplace_back(i);
+            }
+        }   
+    }
+    for (int i = 2; i < n; i++) {
+        totient_sum[i] = totient_sum[i - 1] + totient[i];
+    }
+}
+
+// count number of coprimes of x to m
+int num_coprimes(int x, int m) {
+    int ans = x;
+    int endMask = 1 << primes[m].size();
+    for (int mask = 1; mask < endMask; mask++) {
+        int numBits = 0, val = 1;
+        for (int i = 0; i < primes[m].size(); i++) {
+            if ((mask >> i) & 1) {
+                numBits++;
+                val *= primes[m][i];
+            }
+        }
+        if (numBits % 2 == 0) { // even add
+            ans += x / val;
+        } else {
+            ans -= x / val;
+        }
+    }
+    return ans;
+}
+
+void solve() {
+    cin >> N;
+    int lo = 0, hi = MAXN;
+    while (lo < hi) {
+        int mid = lo + (hi - lo) / 2;
+        if (totient_sum[mid] < N) {
+            lo = mid + 1;
+        } else {
+            hi = mid;
+        }
+    }
+    N -= totient_sum[lo - 1];
+    int M = lo;
+    lo = 1, hi = M;
+    while (lo < hi) {
+        int mid = lo + (hi - lo) / 2;
+        int cnt = num_coprimes(mid, M);
+        if (cnt < N) {
+            lo = mid + 1;
+        } else {
+            hi = mid;
+        }
+    }
+    cout << lo << " " << M - lo << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    sieve(MAXN);
+    int T;
+    cin >> T;
+    while (T--) solve();
+    return 0;
+}
 ```
 
 ## Problem 7: Nobody Jumps for the Rank 3
@@ -938,7 +1008,7 @@ signed main() {
 
 ## Problem 9: Dijkstra in Dungeon
 
-### Solution 1: 
+### Solution 1:  
 
 ```cpp
 

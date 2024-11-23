@@ -12,20 +12,26 @@ If you take from 1 to 1,000,000 here are some useful facts:
 
 ## Euler Totient Theorem
 
-precompute the euler totient function (phi) value from 1 to n in O(nlog(log(n))) time.
+The euler totient function calculates the number of integers that are coprime with totient(i) from [1, i] 
+
+precompute the euler totient function (phi) value from 1 to n in O(nlog(log(n))) time using the sieve of Eratosthenes algorithm.  You can also easily calculate the prefix sum, and also get the prime factorization of all the integers in this. 
 
 ```cpp
-vector<int> phi;
-void phi_1_to_n(int n) {
-    phi.resize(n + 1);
-    for (int i = 0; i <= n; i++)
-        phi[i] = i;
-
-    for (int i = 2; i <= n; i++) {
-        if (phi[i] == i) {
-            for (int j = i; j <= n; j += i)
-                phi[j] -= phi[j] / i;
-        }
+int totient[MAXN], totient_sum[MAXN];
+vector<int> primes[MAXN];
+void sieve(int n) {
+    iota(totient, totient + n, 0LL);
+    memset(totient_sum, 0, sizeof(totient_sum));
+    for (int i = 2; i < n; i++) {
+        if (totient[i] == i) { // i is prime integer
+            for (int j = i; j < n; j += i) {
+                totient[j] -= totient[j] / i;
+                primes[j].emplace_back(i);
+            }
+        }   
+    }
+    for (int i = 2; i < n; i++) {
+        totient_sum[i] = totient_sum[i - 1] + totient[i];
     }
 }
 ```
