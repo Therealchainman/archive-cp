@@ -606,3 +606,69 @@ signed main() {
     return 0;
 }
 ```
+
+# UTPC Contest 11-20-24 Div. 1 (Advanced)
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```

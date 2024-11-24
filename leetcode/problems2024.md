@@ -4747,6 +4747,74 @@ public:
 };
 ```
 
+## 1975. Maximum Matrix Sum
+
+### Solution 1:  parity, matrix, 
+
+```cpp
+#define int64 long long
+class Solution {
+private:
+    const int INF = 1e9;
+public:
+    int64 maxMatrixSum(vector<vector<int>>& matrix) {
+        int R = matrix.size(), C = matrix[0].size();
+        int64 ans = 0;
+        bool parity = false;
+        int minVal = INF;
+        for (int r = 0; r < R; r++) {
+            for (int c = 0; c < C; c++) {
+                ans += abs(matrix[r][c]);
+                if (matrix[r][c] < 0) parity ^= true;
+                minVal = min(minVal, abs(matrix[r][c]));
+            }
+        }
+        if (parity) ans -= 2 * minVal;
+        return ans;
+    }
+};
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
 ##
 
 ### Solution 1:

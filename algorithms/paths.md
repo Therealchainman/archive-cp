@@ -42,6 +42,53 @@ implement this solution in O(2nn
 2
 ) time
 
+This finds a hamiltonian path that happens to contain all the nodes, so it is a line graph.  But yeah it uses dp bitmask algorithm.
+This is trying to find the minimum maximum distance between any two nodes in the graph.  or in other words minimize the maximum edge weight between any 
+two nodes connected in the hamiltonian path.
+
+```cpp
+const int INF = 1e18;
+int N;
+vector<vector<int>> dp;
+vector<pair<int, int>> points;
+
+int squaredDistance(int x1, int y1, int x2, int y2) {
+    return (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+}
+
+bool isSet(int mask, int v) {
+    return (mask >> v) & 1;
+}
+
+void solve() {
+    cin >> N;
+    int endMask = 1 << N;
+    dp.assign(endMask, vector<int>(N, INF));
+    points.resize(N);
+    for (int i = 0; i < N; i++) {
+        int x, y;
+        cin >> x >> y;
+        points[i] = {x, y};
+        dp[1 << i][i] = 0;
+    }
+    for (int mask = 1; mask < endMask; mask++) {
+        for (int u = 0; u < N; u++) {
+            if (dp[mask][u] == INF) continue;
+            for (int v = 0; v < N; v++) {
+                if (isSet(mask, v)) continue;
+                int nmask = mask | (1 << v);
+                auto [x1, y1] = points[u];
+                auto [x2, y2] = points[v];
+                int dist = max(dp[mask][u], squaredDistance(x1, y1, x2, y2));
+                dp[nmask][v] = min(dp[nmask][v], dist);
+            }
+        }
+    }
+    int ans = *min_element(dp[endMask - 1].begin(), dp[endMask - 1].end());
+    cout << (N > 2 ? 2 : 1) << " " << ans << endl;
+}
+```
+
 # EULERIAN CIRCUITS
 
 ## EULERIAN CIRCUITS IN UNDIRECTED GRAPH USING HIERHOLZER'S ALGORITHM
