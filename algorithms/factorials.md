@@ -25,11 +25,11 @@ def factorials(n):
 ```
 
 ```cpp
-int64 inv(int i, int64 m) {
-  return i <= 1 ? i : m - (int64)(m/i) * inv(m % i, m) % m;
+int inv(int i, int m) {
+  return i <= 1 ? i : m - (int)(m/i) * inv(m % i, m) % m;
 }
 
-vector<int64> fact, inv_fact;
+vector<int> fact, inv_fact;
 
 void factorials(int n, int m) {
     fact.assign(n + 1, 1);
@@ -37,7 +37,7 @@ void factorials(int n, int m) {
     for (int i = 2; i <= n; i++) {
         fact[i] = (fact[i - 1] * i) % m;
     }
-    inv_fact.end()[-1] = inv(fact.end()[-1]);
+    inv_fact.end()[-1] = inv(fact.end()[-1], m);
     for (int i = n - 1; i >= 0; i--) {
         inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % m;
     }
@@ -56,7 +56,7 @@ def choose(n, r):
 ```
 
 ```cpp
-int64 choose(int n, int r, int m) {
+int choose(int n, int r, int m) {
     if (n < r) return 0;
     return (fact[n] * inv_fact[r] % m) * inv_fact[n - r] % m;
 }

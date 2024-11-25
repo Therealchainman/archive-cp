@@ -4775,12 +4775,86 @@ public:
 };
 ```
 
-##
+## 773. Sliding Puzzle
 
-### Solution 1:
+### Solution 1:  bfs, brute force, set, struct
 
 ```cpp
-
+struct Board {
+    int pos[6];
+    Board() {}
+    Board(const vector<vector<int>>& board) {
+        for (int r = 0; r < 2; r++) {
+            for (int c = 0; c < 3; c++) {
+                pos[r * 3 + c] = board[r][c];
+            }
+        }
+    }
+    Board(int arr[6]) {
+        for (int i = 0; i < 6; i++) {
+            pos[i] = arr[i];
+        }
+    }
+    bool operator<(const Board &other) const {
+        for (int i = 0; i < 6; i++) {
+            if (other.pos[i] != pos[i]) return other.pos[i] < pos[i];
+        }
+        return false;
+    }
+    bool check() {
+        for (int i = 1; i < 6; i++) {
+            if (pos[i - 1] != i) return false;
+        }
+        return pos[5] == 0;
+    }
+};
+class Solution {
+private:
+    const int N = 6;
+    const vector<vector<int>> adj = {
+            {1, 3},    // 0
+            {0, 2, 4}, // 1
+            {1, 5},    // 2
+            {0, 4},    // 3
+            {1, 3, 5}, // 4
+            {2, 4}     // 5
+        };
+    set<Board> vis;
+public:
+    int slidingPuzzle(vector<vector<int>>& board) {
+        Board b(board);
+        queue<Board> q;
+        q.push(b);
+        vis.insert(b);
+        int ans = 0;
+        while (!q.empty()) {
+            int sz = q.size();
+            for (int i = 0; i < sz; i++) {
+                Board b = q.front();
+                q.pop();
+                if (b.check()) return ans;
+                int s;
+                for (int i = 0; i < 6; i++) {
+                    if (b.pos[i] == 0) {
+                        s = i;
+                        break;
+                    }
+                }
+                for (int v : adj[s]) {
+                    swap(b.pos[s], b.pos[v]);
+                    Board nboard(b.pos);
+                    if (!vis.count(nboard)) {
+                        vis.insert(nboard);
+                        q.push(nboard);
+                    }
+                    swap(b.pos[s], b.pos[v]);
+                }
+            }
+            ans++;
+        }
+        return -1;
+    }
+};
 ```
 
 ##
