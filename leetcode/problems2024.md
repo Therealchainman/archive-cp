@@ -4857,15 +4857,32 @@ public:
 };
 ```
 
-##
+## 2924. Find Champion II
 
-### Solution 1:
+### Solution 1: dag, indegree counts
 
 ```cpp
-
+class Solution {
+public:
+    int findChampion(int n, vector<vector<int>>& edges) {
+        vector<int> indegrees(n, 0);
+        for (const auto &edge : edges) {
+            int u = edge[0], v = edge[1];
+            indegrees[v]++;
+        }
+        int ans = -1;
+        for (int i = 0; i < n; i++) {
+            if (indegrees[i] == 0) {
+                if (ans != -1) return -1;
+                ans = i;
+            }
+        }
+        return ans;
+    }
+};
 ```
 
-##
+## 3243. Shortest Distance After Road Addition Queries I
 
 ### Solution 1:
 

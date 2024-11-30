@@ -3314,31 +3314,56 @@ class Solution:
 
 ### Solution 2: 0/1 BFS + Modified BFS
 
-```py
-class Solution:
-    def minimumObstacles(self, grid: List[List[int]]) -> int:
-        R, C = len(grid), len(grid[0])
-        queue = deque([(0,0,0)]) # (num_obstacles_removed, row, col)
-        # goal is to minimize on the num_obstacles_removed
-        dist = [[inf]*C for _ in range(R)]
-        in_bounds = lambda r, c: 0<=r<R and 0<=c<C
-        def neighbors(row, col):
-            for nr, nc in [(row-1,col),(row+1,col),(row,col-1),(row,col+1)]:
-                if not in_bounds(nr,nc) or dist[nr][nc] < inf: continue
-                yield nr, nc
-        dist[0][0] = 0
-        while queue:
-            cost, row, col = queue.popleft()
-            if row == R-1 and col == C-1:
-                return cost
-            for nr, nc in neighbors(row,col):
-                if grid[nr][nc] == 1:
-                    dist[nr][nc] = cost + 1
-                    queue.append((cost+1,nr,nc))
-                else:
-                    dist[nr][nc] = cost
-                    queue.appendleft((cost, nr,nc))
-        return -1
+```cpp
+struct Cell {
+    int r, c, cost;
+    Cell() {}
+    Cell(int r, int c, int cost) : r(r), c(c), cost(cost) {}
+    void output() const {
+        cout << r << " " << c << " " << cost << endl;
+    }
+};
+class Solution {
+private:
+    int R, C;
+    bool inBounds(int r, int c) {
+        return r >= 0 && r < R && c >= 0 && c < C;
+    }
+    vector<pair<int, int>> neighborhood(int r, int c) {
+        vector<pair<int, int>> ans;
+        for (int dr = -1; dr <= 1; dr++) {
+            for (int dc = -1; dc <= 1; dc++) {
+                if (abs(dr + dc) != 1) continue;
+                ans.emplace_back(r + dr, c + dc);
+            }
+        }
+        return ans;
+    }
+public:
+    int minimumObstacles(vector<vector<int>>& grid) {
+        R = grid.size(), C = grid[0].size();
+        deque<Cell> dq;
+        dq.emplace_back(0, 0, 0);
+        grid[0][0] = 2;
+        while (!dq.empty()) {
+            Cell cell = dq.front();
+            dq.pop_front();
+            if (cell.r == R - 1 && cell.c == C - 1) {
+                return cell.cost;
+            }
+            for (const auto &[nr, nc] : neighborhood(cell.r, cell.c)) {
+                if (!inBounds(nr, nc) || grid[nr][nc] == 2) continue;
+                if (grid[nr][nc]) {
+                    dq.emplace_back(nr, nc, cell.cost + 1);
+                } else {
+                    dq.emplace_front(nr, nc, cell.cost);
+                }
+                grid[nr][nc] = 2;
+            }
+        }
+        return -1;
+    }
+};
 ```
 
 ## 1667. Fix Names in a Table

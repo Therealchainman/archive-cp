@@ -656,6 +656,183 @@ public:
 
 # Leetcode Biweekly Contest 144
 
+## 3361. Shift Distance Between Two Strings
+
+### Solution 1:  string, greedy
+
+```cpp
+#define int64 long long
+class Solution {
+private:
+    vector<int> nxt, prv;
+    int64 calcNext(int s, int e) {
+        int64 ans = 0;
+        while (s != e) {
+            ans += nxt[s];
+            s++;
+            s %= 26;
+        }
+        return ans;
+    }
+    int64 calcPrev(int s, int e) {
+        int64 ans = 0;
+        while (s != e) {
+            ans += prv[s];
+            s = (s - 1 + 26) % 26;
+        }
+        return ans;
+    }
+    int decode(char ch) {
+        return ch - 'a';
+    }
+public:
+    int64 shiftDistance(string s, string t, vector<int>& nextCost, vector<int>& previousCost) {
+        int N = s.size();
+        nxt = nextCost, prv = previousCost;
+        int64 ans = 0;
+        for (int i = 0; i < N; i++) {
+            int u = decode(s[i]), v = decode(t[i]);
+            ans += min(calcNext(u, v), calcPrev(u, v));
+        }
+        return ans;
+    }
+};
+```
+
+## 3362. Zero Array Transformation III
+
+### Solution 1:  max heap, greedy, sorting
+
+```cpp
+class Solution {
+public:
+    int maxRemoval(vector<int>& nums, vector<vector<int>>& queries) {
+        priority_queue<int> maxheap;
+        sort(queries.begin(), queries.end());
+        int N = nums.size(), M = queries.size(), cur = 0;
+        vector<int> end(N + 1, 0);
+        for (int i = 0, j = 0; i < N; i++) {
+            cur -= end[i];
+            while (j < M && queries[j][0] <= i) {
+                maxheap.push(queries[j][1]);
+                j++;
+            }
+            while (cur < nums[i]) {
+                if (maxheap.empty() || maxheap.top() < i) return -1;
+                cur++;
+                int e = maxheap.top();
+                maxheap.pop();
+                end[e + 1]++;
+            }
+        }
+        return maxheap.size();
+    }
+};
+```
+
+## 3363. Find the Maximum Number of Fruits Collected
+
+### Solution 1:  dynamic programming, grid, 
+
+```cpp
+class Solution {
+private:
+    vector<vector<int>> dp1, dp2;
+    vector<vector<int>> grid;
+    const int INF = 1e9;
+    int N;
+    bool inBounds(int r, int c) {
+        return r >= 0 && r < N && c >= 0 && c < N;
+    }
+    int dfs1(int r, int c, int x) {
+        if (!inBounds(r, c)) return -INF;
+        if (x == N - 1) {
+            return r == N - 1 && c == N - 1 ? 0 : -INF;
+        }
+        if (dp1[r][c] != -1) return dp1[r][c];
+        int ans = -INF;
+        for (int d = -1; d <= 1; d++) {
+            ans = max(ans, dfs1(r + 1, c + d, x + 1) + grid[r][c]);
+        }
+        return dp1[r][c] = ans;
+    }
+    int dfs2(int r, int c, int x) {
+        if (!inBounds(r, c)) return -INF;
+        if (x == N - 1) {
+            return r == N - 1 && c == N - 1 ? 0 : -INF;
+        }
+        if (dp2[r][c] != -1) return dp2[r][c];
+        int ans = -INF;
+        for (int d = -1; d <= 1; d++) {
+            ans = max(ans, dfs2(r + d, c + 1, x + 1) + grid[r][c]);
+        }
+        return dp2[r][c] = ans;
+    }
+public:
+    int maxCollectedFruits(vector<vector<int>>& fruits) {
+        grid = fruits;
+        N = fruits.size();
+        int ans = 0;
+        for (int i = 0; i < N; i++) {
+            ans += grid[i][i];
+            grid[i][i] = 0;
+        }
+        dp1.assign(N, vector<int>(N, -1));
+        dp2.assign(N, vector<int>(N, -1));
+        ans += dfs1(0, N - 1, 0);
+        ans += dfs2(N - 1, 0, 0);
+        return ans;
+    }
+};
+```
+
+```cpp
+class Solution {
+private:
+    vector<vector<int>> dp1, dp2;
+    vector<vector<int>> grid;
+    const int INF = 1e9;
+    int N;
+    bool inBounds(int i) {
+        return i >= 0 && i < N;
+    }
+public:
+    int maxCollectedFruits(vector<vector<int>>& fruits) {
+        grid = fruits;
+        N = fruits.size();
+        int ans = 0;
+        for (int i = 0; i < N; i++) {
+            ans += grid[i][i];
+            grid[i][i] = 0;
+        }
+        dp1.assign(N, vector<int>(N, -INF));
+        dp1[0][N - 1] = grid[0][N - 1];
+        dp2.assign(N, vector<int>(N, -INF));
+        dp2[N - 1][0] = grid[N - 1][0];
+        for (int r = 1; r < N; r++) {
+            for (int c = 0; c < N; c++) {
+                for (int d = -1; d <= 1; d++) {
+                    if (!inBounds(c + d)) continue;
+                    dp1[r][c] = max(dp1[r][c], dp1[r - 1][c + d] + grid[r][c]);
+                }
+            }
+        }
+        for (int c = 1; c < N; c++) {
+            for (int r = 0; r < N; r++) {
+                for (int d = -1; d <= 1; d++) {
+                    if (!inBounds(r + d)) continue;
+                    dp2[r][c] = max(dp2[r][c], dp2[r + d][c - 1] + grid[r][c]);
+                }
+            }
+        }
+        ans = (ans + dp1[N - 1][N - 1] + dp2[N - 1][N - 1]);
+        return ans;
+    }
+};
+```
+
+# Leetcode Biweekly Contest 145
+
 ## 
 
 ### Solution 1: 

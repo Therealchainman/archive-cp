@@ -13,13 +13,10 @@ In the first case, each Eulerian path is also an Eulerian circuit. In the second
 case, the odd-degree nodes are the starting and ending nodes of an Eulerian path
 which is not an Eulerian circuit.
 
-In a directed graph, we focus on indegrees and outdegrees of the nodes. A
-directed graph contains an Eulerian path exactly when all the edges belong to
-the same connected component and
-• in each node, the indegree equals the outdegree, or
-• in one node, the indegree is one larger than the outdegree, in another node,
-the outdegree is one larger than the indegree, and in all other nodes, the
-indegree equals the outdegree.
+## Eulerian Circuit in Directed Graphs
+
+For an Eulerian circuit in each node belongs to the same strongly connected component 
+and the indegree equals the outdegree for each node. 
 
 # HAMILTONIANS
 
@@ -38,9 +35,7 @@ A more efficient solution is based on dynamic programming (see Chapter
 10.5). The idea is to calculate values of a function possible(S, x), where S is a
 subset of nodes and x is one of the nodes. The function indicates whether there is
 a Hamiltonian path that visits the nodes of S and ends at node x. It is possible to
-implement this solution in O(2nn
-2
-) time
+implement this solution in O(n*2^n) time
 
 This finds a hamiltonian path that happens to contain all the nodes, so it is a line graph.  But yeah it uses dp bitmask algorithm.
 This is trying to find the minimum maximum distance between any two nodes in the graph.  or in other words minimize the maximum edge weight between any 
@@ -128,9 +123,20 @@ def hierholzers_undirected(adj_list):
     return circuit
 ```
 
-# EULERIAN PATH
+## Eulerian Path in Directed Graphs
 
-## EULERIAN PATH IN DIRECTED GRAPH USING HIERHOLZER'S ALGORITHM
+In a directed graph, we focus on indegrees and outdegrees of the nodes. A
+directed graph contains an Eulerian path exactly when all the edges belong to
+the same connected component and
+• in each node, the indegree equals the outdegree, or
+• in one node, the indegree is one larger than the outdegree, in another node,
+the outdegree is one larger than the indegree, and in all other nodes, the
+indegree equals the outdegree.
+
+### Function checking if Eulerian Path exists
+
+Just to know this checks if there is an Eulerian path from the
+specified start node to the end node. 
 
 ```py
 def is_eulerian_path(n, adj_list, indegrees, outdegrees):
@@ -151,7 +157,15 @@ def is_eulerian_path(n, adj_list, indegrees, outdegrees):
         if ((outdegrees[i] > 0 or indegrees[i] > 0) and not vis[i]): return False
         if (indegrees[i] != outdegrees[i] and i not in (start_node, end_node)): return False
     return True
+```
 
+### Finding the Eulerian Path in using Hierholzer's Algorithm
+
+This assumes you know the start and end node.  A trick is you can find the start and end node based on the following logic.
+if outdegree > indegree that will be the start node
+if outdegree < indegree that will be the end node
+
+```py
 def hierholzers_directed(n, adj_list):
     start_node = 1
     end_node = n
@@ -165,4 +179,46 @@ def hierholzers_directed(n, adj_list):
             nei = adj_list[node].pop()
             stack.append(nei)
     return euler_path[::-1]
+```
+
+This is a specific implementation that uses unordered_map because the node values are all over the place.
+It needs coordinate compression. 
+
+```cpp
+class Solution {
+private:
+    unordered_set<int> nodes;
+    unordered_map<int, int> outdeg, indeg;
+    unordered_map<int, vector<int>> adj;
+    vector<vector<int>> eulerPath;
+    void dfs(int u) {
+        while (outdeg[u]) {
+            outdeg[u]--;
+            int v = adj[u][outdeg[u]];
+            dfs(v);
+            eulerPath.push_back({u, v});
+        }
+    }
+public:
+    vector<vector<int>> validArrangement(vector<vector<int>>& pairs) {
+        for (const auto &edge : pairs) {
+            int u = edge[0], v = edge[1];
+            outdeg[u]++;
+            indeg[v]++;
+            adj[u].emplace_back(v);
+            nodes.insert(u);
+            nodes.insert(v);
+        }
+        int s = pairs[0][0];
+        for (int u : nodes) {
+            if (outdeg[u] - indeg[u] == 1) {
+                s = u;
+                break;
+            }
+        }
+        dfs(s);
+        reverse(eulerPath.begin(), eulerPath.end());
+        return eulerPath;
+    }
+};
 ```
