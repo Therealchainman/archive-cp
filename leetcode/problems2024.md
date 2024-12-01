@@ -4882,20 +4882,23 @@ public:
 };
 ```
 
-## 3243. Shortest Distance After Road Addition Queries I
+## 1346. Check If N and Its Double Exist
 
 ### Solution 1:
 
 ```cpp
-
-```
-
-##
-
-### Solution 1:
-
-```cpp
-
+class Solution {
+public:
+    bool checkIfExist(vector<int>& arr) {
+        unordered_set<int> vis;
+        for (int x : arr) {
+            if (vis.count(2 * x)) return true;
+            if (x % 2 == 0 && vis.count(x / 2)) return true;
+            vis.insert(x);
+        }
+        return false;
+    }
+};
 ```
 
 ##
