@@ -104,7 +104,6 @@ for (int i = 1; i <= N; i++) {
 for (int i = N; i > 0; i--) {
     sprod[i] = (sprod[i + 1] * i) % M;
 }
-
 ```
 
 Then to compute N! / i => pprod[i - 1] * sprod[i + 1]

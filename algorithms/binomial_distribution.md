@@ -12,7 +12,6 @@ def pmf_binomial_distribution(n, m, p):
 
 alternative for when math.comb is not availabe with a class
 
-
 ```py
 mod = int(1e9) + 7
 

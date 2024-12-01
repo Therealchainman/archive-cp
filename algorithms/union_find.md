@@ -92,7 +92,7 @@ Intended for 0-indexed arrays
 ```cpp
 struct UnionFind {
     vector<int> parents, size;
-    void init(int n) {
+    UnionFind(int n) {
         parents.resize(n);
         iota(parents.begin(),parents.end(),0);
         size.assign(n,1);
@@ -118,6 +118,7 @@ struct UnionFind {
         return true;
     }
 };
+
 ```
 
 ## Persistent Disjoint Union Set Data Structure

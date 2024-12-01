@@ -625,12 +625,71 @@ signed main() {
 
 ```
 
-## 
+## E. Crossroads
 
 ### Solution 1: 
 
 ```cpp
 
+```
+
+## F. Tipsy Chick
+
+### Solution 1:  hamiltonian path, bitmask dynamic programming, undirected graph
+
+1. Visit each node is hamiltonian path
+1. form a linear graph will minimize the maximum distance and connect them all in the fewest number of rounds
+1. The maximum number of rounds is 2, you can always get it done in 2 rounds.
+
+```cpp
+const int INF = 1e18;
+int N;
+vector<vector<int>> dp;
+vector<pair<int, int>> points;
+ 
+int squaredDistance(int x1, int y1, int x2, int y2) {
+    return (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+}
+ 
+bool isSet(int mask, int v) {
+    return (mask >> v) & 1;
+}
+ 
+void solve() {
+    cin >> N;
+    int endMask = 1 << N;
+    dp.assign(endMask, vector<int>(N, INF));
+    points.resize(N);
+    for (int i = 0; i < N; i++) {
+        int x, y;
+        cin >> x >> y;
+        points[i] = {x, y};
+        dp[1 << i][i] = 0;
+    }
+    for (int mask = 1; mask < endMask; mask++) {
+        for (int u = 0; u < N; u++) {
+            if (dp[mask][u] == INF) continue;
+            for (int v = 0; v < N; v++) {
+                if (isSet(mask, v)) continue;
+                int nmask = mask | (1 << v);
+                auto [x1, y1] = points[u];
+                auto [x2, y2] = points[v];
+                int dist = max(dp[mask][u], squaredDistance(x1, y1, x2, y2));
+                dp[nmask][v] = min(dp[nmask][v], dist);
+            }
+        }
+    }
+    int ans = *min_element(dp[endMask - 1].begin(), dp[endMask - 1].end());
+    cout << (N > 2 ? 2 : 1) << " " << ans << endl;
+}
+ 
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ## 
@@ -649,20 +708,89 @@ signed main() {
 
 ```
 
-## 
+## H. The Fo Sho
 
-### Solution 1: 
-
-```cpp
-
-```
-
-## 
-
-### Solution 1: 
+### Solution 1:  disjoint sets, factorials, combinatorics
 
 ```cpp
+const int MAXN = 2e5 + 5, MOD = 998244353;
+int N, M;
 
+int inv(int i, int m) {
+  return i <= 1 ? i : m - (int)(m/i) * inv(m % i, m) % m;
+}
+
+vector<int> fact, inv_fact;
+
+void factorials(int n, int m) {
+    fact.assign(n + 1, 1);
+    inv_fact.assign(n + 1, 0);
+    for (int i = 2; i <= n; i++) {
+        fact[i] = (fact[i - 1] * i) % m;
+    }
+    inv_fact.end()[-1] = inv(fact.end()[-1], m);
+    for (int i = n - 1; i >= 0; i--) {
+        inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % m;
+    }
+}
+
+struct UnionFind {
+    vector<int> parents, size;
+    UnionFind(int n) {
+        parents.resize(n);
+        iota(parents.begin(),parents.end(),0);
+        size.assign(n,1);
+    }
+
+    int find(int i) {
+        if (i==parents[i]) {
+            return i;
+        }
+        return parents[i]=find(parents[i]);
+    }
+
+    bool same(int i, int j) {
+        i = find(i), j = find(j);
+        if (i!=j) {
+            if (size[j]>size[i]) {
+                swap(i,j);
+            }
+            size[i]+=size[j];
+            parents[j]=i;
+            return false;
+        }
+        return true;
+    }
+};
+
+void solve() {
+    cin >> N >> M;
+    UnionFind dsu(N);
+    int countGroups = N;
+    int ans = fact[N];
+    while (M--) {
+        int a, b;
+        cin >> a >> b;
+        a--; b--;
+        int ga = dsu.find(a), gb = dsu.find(b);
+        int sa = dsu.size[ga], sb = dsu.size[gb];
+        if (ga != gb) {
+            ans = ans * inv(countGroups, MOD) % MOD;
+            ans = ans * inv(fact[sa], MOD) % MOD;
+            ans = ans * inv(fact[sb], MOD) % MOD;
+            ans = ans * fact[sa + sb] % MOD;
+            countGroups--;
+            dsu.same(a, b);
+        }
+        cout << countGroups << " " << ans << endl;
+    }
+}
+
+signed main() {
+    factorials(MAXN, MOD);
+    solve();
+    return 0;
+}
 ```
 
 ## 
