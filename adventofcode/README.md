@@ -122,3 +122,9 @@ My solution is able to programmatically determine how edges line up on the cube.
 Once these inner corners have been identified, you can travel along the perimeter of the 2D pattern in the two opposite directions (moving one unit-length line segment at a time). Each of these line-segment pair (one segment for the two directions we are traveling) will end up fusing when we fold the cube, so we can convert this into adjacency information for the corresponding grid-points in the 2D pattern.
 
 The one thing to keep track of is that you need to know when to stop this zipping process. The termination criterion for a single zip is to see if, while traveling along the perimeter of the 2D pattern in opposite directions, you have to round two corners simultaneously (rounding a single corner corresponds to a single fold in the 2D pattern).
+
+## Tricks to debugging
+
+1. Use a brute force validator
+1. Generate random datasets
+1. Generate synthetic datasets
