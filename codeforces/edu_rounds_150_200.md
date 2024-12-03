@@ -241,3 +241,127 @@ You can also think of it as a directed graph, and analysis of indegree parity.
 ```cpp
 
 ```
+
+# Codeforces Round 172
+
+## D. Recommendations
+
+### Solution 1:  sorting, segment overlapping, binary search, set
+
+```cpp
+struct Segment {
+    int l, r, i;
+    Segment() {}
+    Segment(int l, int r, int i) : l(l), r(r), i(i) {}
+    bool operator==(const Segment &other) const {
+        return l == other.l && r == other.r;
+    }
+};
+
+bool sortByLAscendingRDescending(const Segment &a, const Segment &b) {
+    if (a.l != b.l) return a.l < b.l;  // Ascending order of l
+    return a.r > b.r;                 // Descending order of r
+}
+
+bool sortByRDescendingLAscending(const Segment &a, const Segment &b) {
+    if (a.l != b.l) return a.l > b.l; // Descending order of r
+    return a.r < b.r;             // Ascending order of l
+}
+
+int N;
+vector<int> ans;
+
+void calcForward(vector<Segment> &segments) {
+    set<int> endPoints;
+    sort(segments.begin(), segments.end(), sortByLAscendingRDescending);
+    for (const Segment &seg : segments) {
+        auto it = endPoints.lower_bound(seg.r);
+        if (it != endPoints.end()) {
+            ans[seg.i] += (*it) - seg.r;
+        }
+        endPoints.insert(seg.r);
+    }
+}
+
+void calcBackward(vector<Segment> &segments) {
+    set<int> endPoints;
+    sort(segments.begin(), segments.end(), sortByRDescendingLAscending);
+    for (const Segment &seg : segments) {
+        auto it = endPoints.upper_bound(seg.r);
+        if (it != endPoints.begin()) {
+            it--;
+            ans[seg.i] += seg.r - (*it);
+        }
+        endPoints.insert(seg.r);
+    }
+}
+
+void solve() {
+    cin >> N;
+    vector<Segment> segments;
+    for (int i = 0; i < N; i++) {
+        int l, r;
+        cin >> l >> r;
+        segments.emplace_back(l, r, i);
+    }
+    ans.assign(N, 0);
+    calcForward(segments);
+    for (Segment &seg : segments) swap(seg.l, seg.r);
+    calcBackward(segments);
+    for (int i = 1; i < N; i++) {
+        if (segments[i] == segments[i - 1]) {
+            ans[segments[i].i] = ans[segments[i - 1].i] = 0;
+        }
+    }
+    for (int x : ans) {
+        cout << x << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+# Codeforces Round 173
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
