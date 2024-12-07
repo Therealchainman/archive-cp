@@ -833,6 +833,191 @@ public:
 
 # Leetcode Biweekly Contest 145
 
+## 3376. Minimum Time to Break Locks I
+
+### Solution 1:  permutations, brute force, sorting
+
+```cpp
+class Solution {
+private:
+    const int INF = 1e9;
+    int ceil(int x, int y) {
+        return (x + y - 1) / y;
+    }
+public:
+    int findMinimumTime(vector<int>& strength, int K) {
+        sort(strength.begin(), strength.end());
+        int ans = INF;
+        do {
+            int cost = 0;
+            int X = 1;
+            for (int s : strength) {
+                cost += ceil(s, X);
+                X += K;
+            }
+            ans = min(ans, cost);
+        } while (next_permutation(strength.begin(), strength.end()));
+        return ans;
+    }
+};
+```
+
+## 3377. Digit Operations to Make Two Integers Equal
+
+### Solution 1:  weighted directed graph, shortest path, min heap, prime sieve
+
+```cpp
+const int MAXN = 1e5;
+class Solution {
+private:
+    int decode(char ch) {
+        return ch - '0';
+    }
+    char encode(int d) {
+        return d + '0';
+    }
+    static bool precomputed;
+    static bool primes[MAXN];
+    void sieve(int n) {
+        if (precomputed) return;
+        fill(primes, primes + n, true);
+        primes[0] = primes[1] = false;
+        int p = 2;
+        for (int p = 2; p * p <= n; p++) {
+            if (primes[p]) {
+                for (int i = p * p; i < n; i += p) {
+                    primes[i] = false;;
+                }
+            }
+        }
+        precomputed = true;
+    }
+public:
+    int minOperations(int n, int m) {
+        sieve(MAXN);
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> minheap;
+        minheap.emplace(n, n);
+        unordered_map<int, int> memo;
+        int cost;
+        while (!minheap.empty()) {
+            tie(cost, n) = minheap.top();
+            minheap.pop();
+            if (primes[n]) continue;
+            if (n == m) return cost;
+            string ni = to_string(n);
+            for (int i = 0; i < ni.size(); i++) {
+                int dig = decode(ni[i]);
+                if (dig < 9) {
+                    string node = ni;
+                    node[i] = encode(dig + 1);
+                    int u = stoi(node);
+                    if (!memo.contains(u) || cost + u < memo[u]) {
+                        minheap.emplace(cost + u, u);
+                        memo[u] = cost + u;
+                    }
+                }
+                if (dig > 0) {
+                    string node = ni;
+                    node[i] = encode(dig - 1);
+                    int u = stoi(node);
+                    if (!memo.contains(u) || cost + u < memo[u]) {
+                        minheap.emplace(cost + u, u);
+                        memo[u] = cost + u;
+                    }
+                }
+            }
+        }
+        return -1;
+    }
+};
+
+bool Solution::precomputed = false;
+bool Solution::primes[MAXN];
+```
+
+## 3378. Count Connected Components in LCM Graph
+
+### Solution 1:  disjoint sets, union find algorithm, precompute factorizaiton of all numbers, set, connected components, undirected graph
+
+```cpp
+struct UnionFind {
+    vector<int> parents, size;
+    UnionFind(int n) {
+        parents.resize(n);
+        iota(parents.begin(),parents.end(),0);
+        size.assign(n,1);
+    }
+
+    int find(int i) {
+        if (i==parents[i]) {
+            return i;
+        }
+        return parents[i]=find(parents[i]);
+    }
+
+    bool same(int i, int j) {
+        i = find(i), j = find(j);
+        if (i!=j) {
+            if (size[j]>size[i]) {
+                swap(i,j);
+            }
+            size[i]+=size[j];
+            parents[j]=i;
+            return false;
+        }
+        return true;
+    }
+};
+class Solution {
+private:
+    static const int MAXN = 2e5 + 5;
+    static bool precomputed;
+    static vector<int> factors[MAXN];
+    void precomputeFactors(int n) {
+        if (precomputed) return;
+        for (int i = 1; i < MAXN; i++) {
+            for (int j = i; j < MAXN; j += i) {
+                factors[j].emplace_back(i);
+            }
+        }
+        precomputed = true;
+    }
+public:
+    int countComponents(vector<int>& nums, int threshold) {
+        precomputeFactors(MAXN);
+        UnionFind dsu(threshold + 1);
+        unordered_set<int> numbersSet(nums.begin(), nums.end());
+        int ans = 0;
+        for (int l = 2; l <= threshold; l++) {
+            int last = -1;
+            for (int f : factors[l]) {
+                if (numbersSet.contains(f)) {
+                    if (last != -1) {
+                        dsu.same(last, f);
+                    }
+                    last = f;
+                }
+            }
+        }
+        unordered_set<int> connectedComponents;
+        for (int x : nums) {
+            if (x > threshold) {
+                ans++;
+            } else {
+                connectedComponents.insert(dsu.find(x));
+            }
+        }
+        ans += connectedComponents.size();
+        return ans;
+    }
+};
+
+bool Solution::precomputed = false;
+vector<int> Solution::factors[MAXN];
+```
+
+# Leetcode Biweekly Contest 146
+
 ## 
 
 ### Solution 1: 

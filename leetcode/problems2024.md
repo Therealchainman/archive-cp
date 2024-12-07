@@ -4901,12 +4901,36 @@ public:
 };
 ```
 
-##
+## 1760. Minimum Limit of Balls in a Bag
 
-### Solution 1:
+### Solution 1:  greedy binary search
 
 ```cpp
-
+class Solution {
+private:
+    vector<int> nums;
+    int ceil(int x, int y) {
+        return (x + y - 1) / y;
+    }
+    int calc(int target) {
+        int ans = 0;
+        for (int x : nums) {
+            ans += ceil(x, target) - 1;
+        }
+        return ans;
+    }
+public:
+    int minimumSize(vector<int>& A, int maxOperations) {
+        nums = A;
+        int lo = 1, hi = 1e9;
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (calc(mid) > maxOperations) lo = mid + 1;
+            else hi = mid;
+        }
+        return lo;
+    }
+};
 ```
 
 ##

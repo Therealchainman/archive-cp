@@ -9,26 +9,7 @@ So it gives you the prime factorization of all numbers in the range.
 
 the time complexity is O(n log log n) most likely
 
-## prime sieve that gets the prime factorization
-
-This prime seive constructs the prime factorization of the composite integers 
-This algorithm is rather slow actually, because it is storing the prime factorization of each integer.  There is a heavy constant factor overhead most likely. 
-
-```py
-def prime_sieve(lim):
-    sieve,primes = [[] for _ in range(lim)], []
-    for integer in range(2,lim):
-        if not len(sieve[integer]):
-            primes.append(integer)
-            for possibly_divisible_integer in range(integer,lim,integer):
-                current_integer = possibly_divisible_integer
-                while not current_integer%integer:
-                    sieve[possibly_divisible_integer].append(integer)
-                    current_integer //= integer
-    return primes
-```
-
-## fast prime sieve
+## prime sieve to precompute all integers that are prime
 
 This prime sieve will just return if prime or not in an arrays.  So an array will represent the status of each integer in a continuous range whether it is prime or not prime (composite)
 

@@ -1,4 +1,4 @@
-# Factors
+# Factorization
 
 ## Precomputing all the factors for each integer
 
@@ -8,12 +8,17 @@ The limitation of this algorithm is that n can't be too large, maybe 10^8 is abo
 
 You want to compute this just once, not for each test case also.
 
-```py
-LIM = int(1e6)
-factors = [[] for _ in range(LIM + 1)]
-for i in range(1, LIM + 1):
-    for j in range(i, LIM + 1, i):
-        factors[j].append(i)
+```cpp
+const int MAXN = 2e5 + 5;
+bool precomputed;
+vector<int> factors[MAXN];
+void precomputeFactors(int n) {
+    for (int i = 1; i < MAXN; i++) {
+        for (int j = i; j < MAXN; j += i) {
+            factors[j].emplace_back(i);
+        }
+    }
+}
 ```
 
 ## Factorize in sqrt(n) time

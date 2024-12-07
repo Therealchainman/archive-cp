@@ -320,18 +320,23 @@ def query(left, right):
 ```
 
 ```cpp
-const int LOG = 21;
-int st_gcd[21][LIM + 1];
+const int LOG = 31;
+int N, Q;
+vector<int> st_gcd[LOG];
 
-int query_gcd(int L, int R) {
+int query(int L, int R) {
     int k = log2(R - L + 1);
     return gcd(st_gcd[k][L], st_gcd[k][R - (1LL << k) + 1]);
 }
+
+for (int i = 0; i < LOG; i++) {
+    st_gcd[i].assign(N, 0);
+}
 for (int i = 0; i < N; i++) {
-    st_gcd[0][i] = A[i] - B[i] > 0 ? A[i] - B[i] : 1;
+    st_gcd[0][i] = A[i];
 }
 for (int i = 1; i < LOG; i++) {
-    for (int j = 0; j + (1LL << (i - 1)) < N; j++) {
+    for (int j = 0; j + (1LL << (i - 1)) < N - 1; j++) {
         st_gcd[i][j] = gcd(st_gcd[i - 1][j], st_gcd[i - 1][j + (1LL << (i - 1))]);
     }
 }
