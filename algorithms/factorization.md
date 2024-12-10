@@ -1,6 +1,6 @@
 # Factorization
 
-## Precomputing all the factors for each integer
+## Precomputing all the factors with factorization sieve
 
 This can be solved in O(nlogn) time complexity.
 

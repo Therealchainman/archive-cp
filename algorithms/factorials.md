@@ -107,3 +107,18 @@ for (int i = N; i > 0; i--) {
 ```
 
 Then to compute N! / i => pprod[i - 1] * sprod[i + 1]
+
+## Multinomial theorem 
+
+An implementation I can use for multionmial calculations
+
+```cpp
+int multinomial(const vector<int> &items) {
+    int cnt = accumulate(items.begin(), items.end(), 0LL);
+    int ans = fact[cnt];
+    for (int x : items) {
+        ans = (ans * inv_fact[x / 2]) % MOD;
+    }
+    return ans;
+}
+```

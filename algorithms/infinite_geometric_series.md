@@ -35,6 +35,45 @@ The expected value of geometric distribution is 1/p
 
 important to realize that p represents the probability of a success at each instance of taking an action.
 
+## Geometric Distribution
+
+The infinite geometric series 1 + p + p^2 + p^3 + ..., where 0 < p < 1 can be solved by the formula 1 / (1 - p)
+
+where p = 1 / n
+
+This one uses modular arithmetic, and inverse mod
+
+```cpp
+const int MOD = 1e9 + 7;
+int inv(int i, int m) {
+  return i <= 1 ? i : m - (int)(m/i) * inv(m % i, m) % m;
+}
+
+int infiniteGeometricSeries(int p, int m) {
+    int term = (1 - p + m) % m;
+    return inv(term, m);
+}
+```
+
+## Deriviate of geometric distribution
+
+The infinite geometric series p + 2 * p^2 + 3 * p^3 + 4 * p^4 + ..., where 0 < p < 1 can be solved by the formula p / (1 - p)^2
+
+where p = 1 / n
+
+```cpp
+const int MOD = 1e9 + 7;
+int inv(int i, int m) {
+  return i <= 1 ? i : m - (int)(m/i) * inv(m % i, m) % m;
+}
+
+int infiniteDerivateGeometricSeries(int p, int m) {
+    int term = (1 - p + m) % m;
+    int coef = term * term % m;
+    return p * inv(coef, m) % m;
+}
+```
+
 
 
 

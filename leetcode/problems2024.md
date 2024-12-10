@@ -4933,6 +4933,50 @@ public:
 };
 ```
 
+## 2054. Two Best Non-Overlapping Events
+
+### Solution 1:  sorting, line sweep algorithm
+
+```cpp
+struct Event {
+    int t, x, v;
+    Event() {}
+    Event(int t, int x, int v) : t(t), x(x), v(v) {}
+    bool operator<(const Event &other) const {
+        if (t != other.t) return t < other.t;
+        return x < other.x;
+    }
+};
+class Solution {
+public:
+    int maxTwoEvents(vector<vector<int>>& events) {
+        vector<Event> processedEvents;
+        for (const vector<int> &event : events) {
+            processedEvents.emplace_back(event[0], -1, event[2]);
+            processedEvents.emplace_back(event[1], 1, event[2]);
+        }
+        sort(processedEvents.begin(), processedEvents.end());
+        int endVal = 0, ans = 0;
+        for (const Event &event : processedEvents) {
+            if (event.x == 1) {
+                endVal = max(endVal, event.v);
+            } else {
+                ans = max(ans, event.v + endVal);
+            }
+        }
+        return ans;
+    }
+};
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
 ##
 
 ### Solution 1:

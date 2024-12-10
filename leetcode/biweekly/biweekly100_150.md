@@ -937,7 +937,7 @@ bool Solution::primes[MAXN];
 
 ## 3378. Count Connected Components in LCM Graph
 
-### Solution 1:  disjoint sets, union find algorithm, precompute factorizaiton of all numbers, set, connected components, undirected graph
+### Solution 1:  disjoint sets, union find algorithm, factorization sieve, set, connected components, undirected graph
 
 ```cpp
 struct UnionFind {
