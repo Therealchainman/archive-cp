@@ -104,6 +104,18 @@ def displayData(self):
     return "\n".join(["".join(row) for row in grid])
 ```
 
+```py
+def display_data(grid):
+    return "\n".join(["".join(row) for row in grid])
+```
+
+## Useful hash function for md5 hash
+
+```py
+def hash(s):
+    return hashlib.md5(s.encode("utf-8")).hexdigest()
+```
+
 # Debugging tricks
 
 ## If output text too large for terminal, write it to a file. 
