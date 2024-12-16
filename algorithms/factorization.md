@@ -13,8 +13,8 @@ const int MAXN = 2e5 + 5;
 bool precomputed;
 vector<int> factors[MAXN];
 void precomputeFactors(int n) {
-    for (int i = 1; i < MAXN; i++) {
-        for (int j = i; j < MAXN; j += i) {
+    for (int i = 1; i < n; i++) {
+        for (int j = i; j < n; j += i) {
             factors[j].emplace_back(i);
         }
     }

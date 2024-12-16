@@ -67,3 +67,41 @@ This is a more concrete example, where it is purely computing the cycles and mar
             return cnt
         return 0
 ```
+
+## Condensation graph
+
+Find the cycles, which are strongly connected components and condense them into a single node, by marking the nodes in cycles.
+
+```cpp
+int N, cnt;
+vector<int> out, inCycle;
+vector<vector<int>> cycleNodes;
+vector<bool> vis;
+
+void search(int u) {
+    map<int, int> par;
+    par[u] = -1;
+    bool isCycle = false;
+    while (true) {
+        vis[u] = true;
+        int v = out[u];
+        if (par.count(v)) {
+            isCycle = true;
+            break;
+        }
+        if (vis[v]) break;
+        par[v] = u;
+        u = v;
+    }
+    if (isCycle) {
+        int critPoint = par[out[u]];
+        vector<int> cycle;
+        while (u != critPoint) {
+            cycle.emplace_back(u);
+            u = par[u];
+        }
+        cnt++;
+        cycleNodes.emplace_back(cycle);
+    }
+}
+```

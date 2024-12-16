@@ -4969,6 +4969,90 @@ public:
 };
 ```
 
+## 1792. Maximum Average Pass Ratio
+
+### Solution 1:  greedy, max heap, floats, averages, math
+
+```cpp
+struct Class {
+    int x, y;
+    long double gain;
+    Class() {}
+    Class(int x, int y) : x(x), y(y) {
+        gain = (long double)(x + 1) / (y + 1) - (long double)x / y;
+    }
+    bool operator<(const Class &other) const {
+        return gain < other.gain;
+    }
+};
+
+class Solution {
+public:
+    double maxAverageRatio(vector<vector<int>>& classes, int extraStudents) {
+        int N = classes.size();
+        priority_queue<Class> maxheap;
+        for (const vector<int> &c : classes) {
+            maxheap.emplace(c[0], c[1]);
+        }
+        while (extraStudents--) {
+            Class cls = maxheap.top();
+            maxheap.pop();
+            cls.x++;
+            cls.y++;
+            maxheap.emplace(cls.x, cls.y);
+        }
+        long double ans = 0;
+        while (!maxheap.empty()) {
+            Class cls = maxheap.top();
+            maxheap.pop();
+            ans += (long double)cls.x / cls.y;
+        }
+        ans /= N;
+        return ans;
+    }
+};
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
 ##
 
 ### Solution 1:
