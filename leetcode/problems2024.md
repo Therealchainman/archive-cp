@@ -5013,12 +5013,23 @@ public:
 };
 ```
 
-##
+## 769. Max Chunks To Make Sorted
 
-### Solution 1:
+### Solution 1:  max element, greedy
 
 ```cpp
-
+class Solution {
+public:
+    int maxChunksToSorted(vector<int>& arr) {
+        int N = arr.size();
+        int mx = 0, ans = 0;
+        for (int i = 0; i < N; i++) {
+            mx = max(mx, arr[i]);
+            if (mx == i) ans++;
+        }
+        return ans;
+    }
+};
 ```
 
 ##
