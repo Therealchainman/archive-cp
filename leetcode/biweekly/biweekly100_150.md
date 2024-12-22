@@ -1018,6 +1018,152 @@ vector<int> Solution::factors[MAXN];
 
 # Leetcode Biweekly Contest 146
 
+## 3393. Count Paths With the Given XOR Value
+
+### Solution 1:  dynamic programming, bitwise operations, 
+
+```cpp
+#define int64 long long
+class Solution {
+public:
+    int countPathsWithXorValue(vector<vector<int>>& grid, int k) {
+        int R = grid.size(), C = grid[0].size();
+        int MOD = 1e9 + 7;
+        vector<vector<vector<int64>>> dp(R, vector<vector<int64>>(C, vector<int64>(32, 0)));
+        dp[0][0][grid[0][0]] = 1;
+        for (int r = 0; r < R; r++) {
+            for (int c = 0; c < C; c++) {
+                if (r == 0 && c == 0) continue;
+                for (int i = 0; i < 32; i++) {
+                    if (r > 0) dp[r][c][i] += dp[r - 1][c][i ^ grid[r][c]];
+                    if (c > 0) dp[r][c][i] += dp[r][c-1][i ^ grid[r][c]];
+                    dp[r][c][i] %= MOD;
+                }
+            }
+        }
+        return dp[R-1][C-1][k];
+    }
+};
+```
+
+## 3394. Check if Grid can be Cut into Sections
+
+### Solution 1:  sorting, line sweep
+
+```cpp
+class Solution {
+private:
+    bool check(vector<pair<int, int>> &arr) {
+        sort(arr.begin(), arr.end());
+        int cnt = 0, ans = 0;
+        for (int i = 0; i < arr.size(); i++) {
+            cnt += arr[i].second;
+            if (cnt == 0 && i + 1 < arr.size()) ans++;
+        }
+        return ans >= 2;
+    }
+public:
+    bool checkValidCuts(int n, vector<vector<int>>& rectangles) {
+        int N = rectangles.size();
+        vector<pair<int, int>> X, Y;
+        for (const vector<int> &rect : rectangles) {
+            X.emplace_back(rect[0], 1);
+            X.emplace_back(rect[2], -1);
+            Y.emplace_back(rect[1], 1);
+            Y.emplace_back(rect[3], -1);
+        }
+        return check(X) || check(Y);
+    }
+};
+```
+
+## 3395. Subsequences with a Unique Middle Mode I
+
+### Solution 1:  combinatorics, math, counting, linear algebra, 
+
+```cpp
+
+#define int64 long long
+const int64 MOD = 1e9 + 7;
+
+class Solution {
+private:
+    int64 chooseTwo(int64 n) {
+        return n * (n - 1) / 2;
+    }
+public:
+    int subsequencesWithMiddleMode(vector<int>& nums) {
+                int N = nums.size();
+        int64 ans = 0;
+        unordered_map<int, int> lfreq, rfreq;
+        int64 rightSquaredSum = 0, leftSquaredSum = 0;
+        for (int i = 0; i < N; i++) {
+            if (i < 2) {
+                lfreq[nums[i]]++;
+            } else {
+                rfreq[nums[i]]++;
+            }
+        }
+        for (auto [_, f] : rfreq) {
+            rightSquaredSum += f * f;
+        }
+        for (auto [_, f] : lfreq) {
+            leftSquaredSum += f * f;
+        }
+        for (int i = 2; i < N - 2; i++) {
+            rightSquaredSum -= rfreq[nums[i]] * rfreq[nums[i]];
+            rfreq[nums[i]]--;
+            int lf = lfreq[nums[i]], rf = rfreq[nums[i]];
+            rightSquaredSum += rf * rf;
+            // left: count(nums[i]]) = 1
+            // right: count(nums[i]) = 1
+            int64 leftTerm = lf * (i - lf);
+            int64 rightTerm = rf * (N - i - 1 - rf);
+            ans = (ans + leftTerm * rightTerm) % MOD;
+            // left: count(nums[i]) = 2
+            // right: count(nums[i]) < 2
+            int64 coef = chooseTwo(lf);
+            int64 val = chooseTwo(N - i - 1) - chooseTwo(rf);
+            ans = (ans + coef * val) % MOD;
+            // left: count(nums[i]) < 2
+            // right: count(nums[i]) = 2
+            coef = chooseTwo(rf);
+            val = chooseTwo(i) - chooseTwo(lf);
+            ans = (ans + coef * val) % MOD;
+            // left: count(nums[i]) = 2
+            // right: count(nums[i]) = 2
+            int64 cand = chooseTwo(lf) * chooseTwo(rf) % MOD;
+            ans = (ans + cand) % MOD;
+            // side 1: count(nums[i]) = 1
+            // side 2: count(nums[i]) = 0
+            for (int j = 0; j < N; j++) {
+                if (nums[i] == nums[j]) continue;
+                int lfj = lfreq[nums[j]], rfj = rfreq[nums[j]];
+                if (j < i) {
+                    int64 rightSum = N - i - 1 - rf - rfj;
+                    int64 squaredSumCorrected = rightSquaredSum - rf * rf - rfj * rfj;
+                    int64 cand = ((rightSum * rightSum - squaredSumCorrected) / 2) % MOD;
+                    int64 totalCand = lf * cand % MOD;
+                    ans = (ans + totalCand) % MOD;
+                } else {
+                    int64 leftSum = i - lf - lfj;
+                    int64 squaredSumCorrected = leftSquaredSum - lf * lf - lfj * lfj;
+                    int64 cand = ((leftSum * leftSum - squaredSumCorrected) / 2) % MOD;
+                    int64 totalCand = rf * cand % MOD;
+                    ans = (ans + totalCand) % MOD;
+                }
+            }
+            leftSquaredSum -= lf * lf;
+            lfreq[nums[i]]++;
+            leftSquaredSum += lfreq[nums[i]] * lfreq[nums[i]];
+        }
+        return ans;
+    }
+};
+```
+
+# Leetcode Biweekly Contest 147
+
 ## 
 
 ### Solution 1: 

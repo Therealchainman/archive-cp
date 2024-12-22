@@ -5,26 +5,15 @@ This will be updated during the year as the season plays out with code for probl
 These are solved because they give real time practice with working with algorithms, data structures, 
 mathematics, and problem solving in a fun and relaxing environment.
 
-### Setup conda environment
-
-The conda environment has updated python version of 3.10
+### Setup python virtual environment
 
 ```sh
-conda env create -f environment.yaml
-conda activate programming
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
-Some reason it installed the wrong python so I had to manually conda install with
-
-```sh
-conda install python=3.10
-```
-
-A simpler installation and install packages as needed is to just run the following using python 3.11
-
-```sh
-conda create --name programming python=3.11
-```
+### Reference for running C++ code
 
 ```sh
 g++ main.cpp -o main
@@ -72,3 +61,12 @@ pypyjit.set_param('max_unroll_recursion=-1')
 Setting max_unroll_recursion to -1 essentially disables recursion unrolling, meaning that the JIT compiler will not attempt to unroll recursive function calls at all. This can be useful in cases where unrolling causes performance degradation due to increased memory usage or when recursion depth is unknown or unpredictable. However, disabling unrolling may also result in slower execution for recursive code.
 
 https://kenkoooo.com/atcoder/#/table/
+
+
+##
+
+On MacOS to compile using the Apple Clang compiler, at version 16.0.0, with target arm64-app-darwin24.1.0 you need to specify the standar for C++, cause it uses a legacy C++ standard by default. 
+
+```sh
+g++ -std=c++20 <program file> -o main
+```

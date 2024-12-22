@@ -1,1 +1,14 @@
 ipykernel
+pandas
+numpy
+z3-solver
+matplotlib
+scipy
+scikit-learn
+seaborn
+networkx
+pyvis
+sympy
+parse
+shapely
+
