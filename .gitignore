@@ -1,4 +1,4 @@
-.vscode
-.ipynb_checkpoints
-.venv
+*.vscode
+*.ipynb_checkpoints
+*.venv
 *.DS_Store
