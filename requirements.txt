@@ -11,4 +11,4 @@ pyvis
 sympy
 parse
 shapely
-
+graphviz

@@ -1,5 +1,4 @@
-
-
+# Python
 
 # Reading inputs in python
 
@@ -140,3 +139,24 @@ The one thing to keep track of is that you need to know when to stop this zippin
 1. Use a brute force validator
 1. Generate random datasets
 1. Generate synthetic datasets
+
+## Graphviz
+
+Installation was straightforward on macOS, just using homebrew really
+
+```sh
+brew install graphviz
+```
+
+This is how to generate a graphviz visualization to look at graphs.  It has been very helpful in the past.  It allows to understand the graph and discover patterns in the graph. 
+
+```py
+dot = graphviz.Digraph()
+dot.edge(u, v, label = "One")
+output_path = dot.render(
+    filename = "graph",
+    format = "png",
+    directory = "output",
+    cleanup = True
+)
+```
