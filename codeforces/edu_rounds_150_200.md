@@ -342,6 +342,132 @@ signed main() {
 
 # Codeforces Round 173
 
+## C. Sums on Segments
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## D. Problem about GCD
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## E. Matrix Transformation
+
+### Solution 1:  bit manipulation, directed graph, three color to detect cycle
+
+1. The key observation is that when x = 11, it can always be split into 1, 2, and 8.  So you just care about the bits.
+1. So solve the problem for each bit individually.
+1. Understand the relationship between when A_ij = 0 and B_ij = 1, and A_ij = 1 and B_ij = 0, for one you must perform operation on ith row and other jth column.
+1. Then you can construct a directed graph based on the fact that if B_ij = 0 or 1, that indicates if you have to perform operation to unset it you then need to perform another operation like an edge x -> y to return back to proper value.
+1. So for each bit begin search from operation that must happen and it will determine if there is cycle.
+1. Does this for each bit separately so you have 30 directed graphs to handle and determine if any has a cycle.
+
+```cpp
+enum Color {
+    WHITE,
+    GREY,
+    BLACK
+};
+
+const int BITS = 32;
+int R, C;
+vector<vector<int>> A, B;
+vector<vector<int>> adj;
+vector<int> color;
+
+bool isSet(int mask, int i) {
+    return (mask >> i) & 1;
+}
+
+bool hasCycle(int u) {
+    if (color[u] == BLACK) return false;
+    if (color[u] == GREY) return true;
+    color[u] = GREY;
+    bool res = false;
+    for (int v : adj[u]) {
+        res |= hasCycle(v);
+    }
+    color[u] = BLACK;
+    return res;
+}
+
+bool isDAG(int i) {
+    adj.assign(R + C, vector<int>());
+    vector<bool> hasRow(R, false);
+    vector<bool> hasCol(C, false);
+    color.assign(R + C, WHITE);
+    for (int r = 0; r < R; r++) {
+        for (int c = 0; c < C; c++) {
+            if (!isSet(A[r][c], i) && isSet(B[r][c], i)) {
+                hasCol[c] = true;
+            } else if (isSet(A[r][c], i) && !isSet(B[r][c], i)) {
+                hasRow[r] = true;
+            }
+            if (isSet(B[r][c], i)) {
+                adj[r].emplace_back(c + R);
+            } else {
+                adj[c + R].emplace_back(r);
+            }
+        }
+    }
+    for (int r = 0; r < R; r++) {
+        if (hasRow[r]) {
+            if (hasCycle(r)) return false; 
+        }
+    }
+    for (int c = 0; c < C; c++) {
+        if (hasCol[c]) {
+            if (hasCycle(c + R)) return false;
+        }
+    }
+    return true;
+}
+
+void solve() {
+    cin >> R >> C;
+    A.assign(R, vector<int>(C, 0));
+    B.assign(R, vector<int>(C, 0));
+    for (int r = 0; r < R; r++) {
+        for (int c = 0; c < C; c++) {
+            cin >> A[r][c];
+        }
+    }
+    for (int r = 0; r < R; r++) {
+        for (int c = 0; c < C; c++) {
+            cin >> B[r][c];
+        }
+    }
+    for (int i = 0; i < BITS; i++) {
+        if (!isDAG(i)) {
+            cout << "No" << endl;
+            return;
+        }
+    }
+    cout << "Yes" << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+# Codeforces Round 174
+
 ## 
 
 ### Solution 1: 

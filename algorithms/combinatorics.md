@@ -8,6 +8,25 @@ A combination is a selection of items from a collection, such that (unlike permu
 
 - order does not matter
 
+This is an implementation in C++ that will return an array of all combinations of size K.  It can run in binomial coefficient time complexity that is O(k $\binom{n}{k}$)
+
+```cpp
+vector<int> A, cur;
+vector<vector<int>> combinations;
+
+void dfs(int i) {
+    if (cur.size() == K) {
+        combinations.push_back(cur);
+        return;
+    }
+    for (int j = i; j < N; j++) {
+        cur.emplace_back(A[j]);
+        dfs(j + 1);
+        cur.pop_back();
+    }
+}
+```
+
 ## Permutations
 
 A permutation is an arrangement of items in a specific order. For example, the numbers 1, 2, and 3 can be arranged in six different ways: 123, 132, 213, 231, 312, and 321. These are all permutations of the set {1, 2, 3}. 

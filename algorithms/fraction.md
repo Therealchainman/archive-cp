@@ -15,3 +15,12 @@ class Fraction:
     def __lt__(self, other):
         return self.num * other.denom < other.num * self.denom
 ```
+
+## Using GCD to store ratios 
+
+This avoid floating-point form that can have precision issues, and you can perform exact matching between two fractions without the loss of precision. 
+
+```cpp
+int g = gcd(nums[p], nums[q]);
+pair<int, int> reducedForm = {nums[p] / g, nums[q] / g}; // nums[p] / nums[q] in reduced form
+```

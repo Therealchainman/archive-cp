@@ -2,6 +2,31 @@
 
 ## cycle detection in directed graph
 
+### cycle detection with three color mechanism and DFS
+
+```cpp
+enum Color {
+    WHITE,
+    GREY,
+    BLACK
+};
+
+vector<vector<int>> adj;
+vector<int> color;
+
+bool hasCycle(int u) {
+    if (color[u] == BLACK) return false;
+    if (color[u] == GREY) return true;
+    color[u] = GREY;
+    bool res = false;
+    for (int v : adj[u]) {
+        res |= hasCycle(v);
+    }
+    color[u] = BLACK;
+    return res;
+}
+```
+
 ### cycle detection with recursive dfs
 
 ```py

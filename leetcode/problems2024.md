@@ -5032,20 +5032,85 @@ public:
 };
 ```
 
-##
+## 494. Target Sum
 
-### Solution 1:
+### Solution 1:  counting, dynamic programming, map
 
 ```cpp
-
+class Solution {
+public:
+    int findTargetSumWays(vector<int>& nums, int target) {
+        int N = nums.size();
+        unordered_map<int, int> dp, ndp;
+        dp[0] = 1;
+        for (int num : nums) {
+            ndp.clear();
+            for (const auto [k, v] : dp) {
+                ndp[k + num] += v;
+                ndp[k - num] += v;
+            }
+            swap(dp, ndp);
+        }
+        return dp[target];
+    }
+};
 ```
 
-##
+## 689. Maximum Sum of 3 Non-Overlapping Subarrays
 
-### Solution 1:
+### Solution 1:  prefix sum, split between middle term
+
+1. split by middle element and track the best option on left and right side
 
 ```cpp
-
+class Solution {
+private:
+    vector<int> psum;
+    int getSum(int l, int r) {
+        int ans = psum[r];
+        if (l > 0) ans -= psum[l - 1];
+        return ans;
+    }
+public:
+    vector<int> maxSumOfThreeSubarrays(vector<int>& nums, int k) {
+        int N = nums.size();
+        psum.assign(N, 0);
+        for (int i = 0; i < N; i++) {
+            psum[i] = nums[i];
+            if (i > 0) psum[i] += psum[i - 1];
+        }
+        vector<int> ans(3, 0);
+        vector<int> leftMaxIndex(N, 0), rightMaxIndex(N, 0);
+        int curSum = 0;
+        for (int i = 0; i <= N - k; i++) {
+            int v = getSum(i, i + k - 1);
+            if (i > 0) leftMaxIndex[i] = leftMaxIndex[i - 1];
+            if (v > curSum) {
+                leftMaxIndex[i] = i;
+                curSum = v;
+            }
+        }
+        curSum = 0;
+        for (int i = N - k; i >= 0; i--) {
+            int v = getSum(i, i + k - 1);
+            if (i + 1 < N) rightMaxIndex[i] = rightMaxIndex[i + 1];
+            if (v >= curSum) {
+                rightMaxIndex[i] = i;
+                curSum = v;
+            }
+        }
+        curSum = 0;
+        for (int i = k; i <= N - 2 * k; i++) {
+            int l = leftMaxIndex[i - k], r = rightMaxIndex[i + k];
+            int v = getSum(i, i + k - 1) + getSum(l, l + k - 1) + getSum(r, r + k - 1);
+            if (v > curSum) {
+                ans[0] = l; ans[1] = i; ans[2] = r;
+                curSum = v;
+            }
+        }
+        return ans;
+    }
+};
 ```
 
 ##
