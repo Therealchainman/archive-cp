@@ -700,8 +700,58 @@ signed main() {
 
 ### Solution 1:  bitmask dynamic programming
 
-```cpp
+1. dp over subsets of used y and z coordinates
+1. The key is that it doesn't traverse only 2^(2n) pairs of (Y, Z) it only traverses sum of 
+1. There is a trick to this one that you can get how many of one of the values of x coordinates, you processed from the current mask1,  because you must have taken the same number from both mask for y and mask for z values.
 
+```cpp
+const int INF = 1e15;
+int N;
+vector<vector<vector<int>>> mat;
+
+bool isSet(int mask, int i) {
+    return (mask >> i) & 1;
+}
+
+void solve() {
+    cin >> N;
+    mat.assign(N, vector<vector<int>>(N, vector<int>(N)));
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            for (int k = 0; k < N; k++) {
+                cin >> mat[i][j][k];
+            }
+        }
+    }
+    int endMask = (1 << N) - 1;
+    vector<vector<int>> dp(1 << N, vector<int>(1 << N, INF));
+    dp[0][0] = 0;
+    for (int mask1 = 0; mask1 < (1 << N); mask1++) {
+        int k = __builtin_popcount(mask1);
+        for (int mask2 = 0; mask2 < (1 << N); mask2++) {
+            int l = __builtin_popcount(mask2);
+            if (l != k) continue;
+            for (int i = 0; i < N; i++) {
+                if (isSet(mask1, i)) continue;
+                for (int j = 0; j < N; j++) {
+                    if (isSet(mask2, j)) continue;
+                    if (dp[mask1][mask2] == INF) continue;
+                    int nmask1 = mask1 | (1 << i), nmask2 = mask2 | (1 << j);
+                    dp[nmask1][nmask2] = min(dp[nmask1][nmask2], dp[mask1][mask2] + mat[i][j][k]);
+                }
+            }
+        }
+    }
+    cout << dp[endMask][endMask] << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ## H. Sheet Music
