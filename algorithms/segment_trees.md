@@ -136,10 +136,10 @@ struct Node {
 struct SegmentTree {
     int size;
     vector<Node> nodes;
-    void init(int num_nodes) {
+    SegmentTree(int n) {
         size = 1;
-        while (size < num_nodes) size *= 2;
-        nodes.assign(size * 2, {0, 0, 1, 0});
+        while (size < n) size *= 2;
+        nodes.assign(size * 2, {-INF, INF, -INF, INF, 0});
     }
     Node func(Node x, Node y) {
         Node res;
