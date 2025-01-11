@@ -1,115 +1,6 @@
-# Mit Contest 2024
+# MITIT 
 
-## Sample Contest
-
-## Transition Game
-
-### Solution 1: functional graph, cycle detection, length of cycles in functional graph
-
-```py
-n = int(input())
-edges = list(map(lambda x: int(x) - 1, input().split()))
-ans = 0
-vis = [0] * n
-def search(u):
-    cycle_len = 0
-    parent = {u: None}
-    is_cycle = False
-    while True:
-        vis[u] = 1
-        v = edges[u]
-        if v in parent: 
-            is_cycle = True
-            break
-        if vis[v]: break
-        parent[v] = u
-        u = v
-    if is_cycle:
-        crit_point = parent[edges[u]]
-        while u != crit_point:
-            cycle_len += 1
-            u = parent[u]
-    return cycle_len
-for i in range(n):
-    if vis[i]: continue
-    ans += search(i)
-print(ans)
-```
-
-## Social distance on a graph
-
-### Solution 1:  binary search, bipartite graph, directed weighted graph, 2-Colorable
-
-```py
-MAX = 10**10
-UNVISITED = -1
-RED = 0
-BLUE = 1
-
-def main():
-    N, M = map(int, input().split())
-    adj = [[] for _ in range(N)]
-    edges = [None] * M
-    for i in range(M):
-        u, v, w = map(int, input().split())
-        u -= 1; v -= 1
-        edges[i] = (u, v, w)
-    edges.sort(key = lambda x: x[-1])
-    for u, v, w in edges:
-        adj[u].append((v, w))
-        adj[v].append((u, w))
-    def possible(target):
-        colors = [UNVISITED] * N
-        for i in range(N):
-            if colors[i] != UNVISITED: continue
-            colors[i] = RED
-            stack = [i]
-            while stack:
-                u = stack.pop()
-                for v, w in adj[u]:
-                    if w >= target: break
-                    if colors[v] != UNVISITED: 
-                        if colors[u] == colors[v]: return False
-                        continue
-                    colors[v] = colors[u] ^ 1
-                    stack.append(v)
-                edge_count = edge_sum = 0
-                while edge_count < 2:
-                    if edge_count == len(adj[u]): break
-                    edge_sum += adj[u][edge_count][-1]
-                    edge_count += 1
-                if edge_count == 2 and edge_sum < target: return False
-        return True
-    left, right = 0, MAX
-    while left < right:
-        mid = (left + right + 1) >> 1
-        if possible(mid):
-            left = mid
-        else:
-            right = mid - 1
-    print(left)
-
-if __name__ == '__main__':
-    main()
-```
-
-## Zigzag Tree
-
-### Solution 1:  
-
-```py
-
-```
-
-## Guessing Permutation for as Long as Possible
-
-### Solution 1:  
-
-```py
-
-```
-
-## Combined Round
+# MITIT 2024 Combined Round
 
 tromino packing, I think it might be inclusion, exclusion principle
 But yeah I'm not entirely certain, you'd have to figure out how to appropriately count them though
@@ -143,11 +34,12 @@ In each division connect them back and so on.
 I think that would be N^2 time complexity if you just keep dividing the problem up into smaller and smaller problems. 
 
 
-## 
+## Monotonically Increasing Tardiness Informatics Tournament
 
 ### Solution 1:  ceil division
 
 ```py
+import math
 N, M = map(int, input().split())
 ans = 0
 for _ in range(N):
@@ -157,7 +49,7 @@ for _ in range(N):
 print(ans + 1)
 ```
 
-## 
+## Min-Max Game
 
 ### Solution 1:  sort, median
 
@@ -167,9 +59,11 @@ arr = sorted(map(int, input().split()))
 print(arr[N // 2])
 ```
 
-## 
+## Tromino Packing
 
 ### Solution 1:  dynamic programming
+
+This only solves subproblem
 
 ```py
 from itertools import product
@@ -201,38 +95,15 @@ for _ in range(T):
     print(ans)
 ```
 
-## 
+## Tree 2-Coloring
 
 ### Solution 1:  dp on tree?
 
-```py
+```cpp
 
 ```
 
-## 
-
-### Solution 1:  
-
-```py
-
-```
-
-## 
-
-### Solution 1:  
-
-```py
-
-```
-=========================================
-
-
-if it is 10^8 I could compute all factors in 10^4 time
-and then you could try deleting each one, and check if it is divisble by any prime factor.
-All you need are the prime factors
-
-
-To get full credit you'd need some form of digit dp, but I'm not sure how you would check that it is divisible if you delete this one digit. 
+# MITIT 2024 Beginner Round
 
 ## A. MITIT
 
@@ -298,53 +169,6 @@ if __name__ == '__main__':
 
 ### Solution 1:  binary search, dijkstra's algorithm
 
-This should work, it just gives TLE because python is not fast enough for this problems time constraints.
-
-```py
-import heapq
- 
-# cutoff dijkstra to determine if source can reach target within cutoff
-def dijkstra(adj, cutoff):
-    N = len(adj)
-    min_heap = [(0, 0)]
-    vis = [0] * N
-    while min_heap:
-        cost, u = heapq.heappop(min_heap)
-        if u == N - 1: return True
-        if vis[u]: continue
-        vis[u] == 1
-        for v, c, r in adj[u]:
-            if cost + c > cutoff: continue
-            if r > c: return True
-            if vis[v]: continue
-            heapq.heappush(min_heap, (cost + c - r, v))
-    return False
- 
-def main():
-    N, M = map(int, input().split())
-    adj = [[] for _ in range(N)]
-    for _ in range(M):
-        u, v, c, r = map(int, input().split())
-        u -= 1; v -= 1
-        adj[u].append((v, c, r))
-        adj[v].append((u, c, r))
-    left, right = 0, 10**14 + 5
-    while left < right:
-        mid = (left + right) >> 1
-        if not dijkstra(adj, mid):
-            left = mid + 1
-        else:
-            right = mid
-    print(left)
- 
-if __name__ == '__main__':
-    T = 1
-    for _ in range(T):
-        main()
-```
-
-Same thing implemented in C++ gives AC.
-
 ```cpp
 const int MAXN = 2e5 + 5;
 int N, M;
@@ -407,19 +231,133 @@ signed main() {
 }
 ```
 
-## E. 101 Things To Do Before You Graduate
+# MITIT 2024 Spring Invitational Qualification
 
-### Solution 1:  
+## 3-SAT 
+
+### Solution 1: 
+
+only partial results
+
+```py
+from collections import Counter
+def main():
+    N, M = map(int, input().split())
+    outdegrees = Counter()
+    for i in range(M):
+        x, y, z = map(int, input().split())
+        x -= 1; y -= 1; z -= 1
+        clause = tuple(sorted(set([x, y, z])))
+        outdegrees[clause] += 1
+    ans = [0] * N
+    if M & 1:
+        print("YES")
+        print(*[1] * N)
+    else:
+        for c, v in outdegrees.items():
+            if v & 1:
+                print("YES")
+                for i in c:
+                    ans[i] = 1
+                print(*ans)
+                return
+        print("NO")
+    
+if __name__ == "__main__":
+    T = int(input())
+    for _ in range(T):
+        main()
+```
+
+## Busy Marksman
+
+### Solution 1:  greedy, pick from lanes with one target immediately, else pick from rest
+
+```cpp
+const int MAXN = 300'005, MAXM = 500'005;
+int N, A[MAXN], ans[MAXM];
+
+void solve() {
+    cin >> N;
+    int sum = 0;
+    vector<int> rest, ones;
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+        sum += A[i];
+        if (A[i] == 1) ones.push_back(i);
+        else if (A[i] > 0) rest.push_back(i);
+    }
+    int i;
+    for (i = 1; i <= sum; i++) {
+        if (i & 1) {
+            if (ones.size()) {
+                int v = ones.end()[-1];
+                ones.pop_back();
+                ans[i - 1] = v + 1;
+                A[v]--;
+            } else if (rest.size()) {
+                int v = rest.end()[-1];
+                ans[i - 1] = v + 1;
+                A[v]--;
+                if (A[v] == 1) {
+                    ones.push_back(v);
+                    rest.pop_back();
+                }
+            } else {
+                break;
+            }
+        } else {
+            if (rest.size()) {
+                int v = rest.end()[-1];
+                ans[i - 1] = v + 1;
+                A[v]--;
+                if (A[v] == 1) {
+                    ones.push_back(v);
+                    rest.pop_back();
+                }
+            } else {
+                break;
+            }
+        }
+    }
+
+    if (i > sum) {
+        cout << "YES" << endl;
+        for (int j = 0; j < sum; j++) cout << ans[j] << " ";
+        cout << endl;
+    } else {
+        cout << "NO" << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## NM Chars
+
+### Solution 1: 
 
 ```py
 
 ```
 
-## F. Beavers and Revaebs
+#
+
+## 
 
 ### Solution 1:  
 
-```py
+```cpp
 
 ```
 
@@ -427,7 +365,7 @@ signed main() {
 
 ### Solution 1:  
 
-```py
+```cpp
 
 ```
 
@@ -435,7 +373,48 @@ signed main() {
 
 ### Solution 1:  
 
-```py
+```cpp
 
 ```
 
+## 
+
+### Solution 1:  
+
+```cpp
+
+```
+
+#
+
+## 
+
+### Solution 1:  
+
+```cpp
+
+```
+
+## 
+
+### Solution 1:  
+
+```cpp
+
+```
+
+## 
+
+### Solution 1:  
+
+```cpp
+
+```
+
+## 
+
+### Solution 1:  
+
+```cpp
+
+```

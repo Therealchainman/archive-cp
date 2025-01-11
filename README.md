@@ -5,6 +5,8 @@ This will be updated during the year as the season plays out with code for probl
 These are solved because they give real time practice with working with algorithms, data structures, 
 mathematics, and problem solving in a fun and relaxing environment.
 
+Can expect to find solutions written in the following programming languages, C++, python (legacy), and Rust (soon).
+
 ### Setup python virtual environment
 
 ```sh
@@ -17,27 +19,6 @@ pip install -r requirements.txt
 
 ```sh
 g++ main.cpp -o main
-```
-
-Way to read in int fast in c++
-
-```c++
-inline int read()
-{
-	int x = 0, y = 1; char c = getchar();
-	while (c < '0' || c > '9') {
-		if (c == '-') y = -1;
-		c = getchar();
-	}
-	while (c >= '0' && c <= '9') x = x * 10 + c - '0', c = getchar();
-	return x * y;
-}
-```
-
-### How to export a conda environment
-
-```sh
-conda env export > environment.yaml
 ```
 
 ### Monitoring resources on ubuntu
@@ -60,13 +41,16 @@ pypyjit.set_param('max_unroll_recursion=-1')
 
 Setting max_unroll_recursion to -1 essentially disables recursion unrolling, meaning that the JIT compiler will not attempt to unroll recursive function calls at all. This can be useful in cases where unrolling causes performance degradation due to increased memory usage or when recursion depth is unknown or unpredictable. However, disabling unrolling may also result in slower execution for recursive code.
 
-https://kenkoooo.com/atcoder/#/table/
+## MacOS Set up
 
-
-##
-
-On MacOS to compile using the Apple Clang compiler, at version 16.0.0, with target arm64-app-darwin24.1.0 you need to specify the standar for C++, cause it uses a legacy C++ standard by default. 
+On MacOS to compile using the Apple Clang compiler, at version 16.0.0, with target arm64-app-darwin24.1.0 you need to specify the standard for C++, cause it uses a legacy C++ standard by default. 
 
 ```sh
 g++ -std=c++20 <program file> -o main
 ```
+
+## Template files
+
+The intended purpose of the following templates is for platforms like Codeforces, and AtCoder. 
+There exists template file that is used to compile C++ code, `template.cpp`
+And there is a template for python code, `template.py`
