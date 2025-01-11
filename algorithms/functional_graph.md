@@ -82,7 +82,7 @@ void search(int u) {
     map<int, int> par;
     par[u] = -1;
     bool isCycle = false;
-    while (true) {
+    while (!vis[u]) {
         vis[u] = true;
         int v = out[u];
         if (par.count(v)) {
@@ -102,6 +102,41 @@ void search(int u) {
         }
         cnt++;
         cycleNodes.emplace_back(cycle);
+    }
+}
+```
+
+This implementation is good for finding cycles, and taking all nodes in a cycle and assigning them all to a single representative node, and updating the indegrees for that representative node.  Basically this is creating a condensation graph and condensing the strongly connected component.
+
+```cpp
+
+void search(int u) {
+    map<int, int> par;
+    par[u] = -1;
+    bool isCycle = false;
+    while (!vis[u]) {
+        vis[u] = true;
+        int v = child[u];
+        if (par.count(v)) {
+            isCycle = true;
+            break;
+        }
+        if (vis[v]) break;
+        par[v] = u;
+        u = v;
+    }
+    if (isCycle) {
+        int critPoint = par[child[u]];
+        int cycleNode = u;
+        int indegree = 0;
+        while (u != critPoint) {
+            node[u] = cycleNode;
+            indegree += indegrees[u] - 1;
+            indegrees[u] = 0;
+            u = par[u];
+        }
+        indegrees[cycleNode] = indegree;
+        inCycle[cycleNode] = true;
     }
 }
 ```

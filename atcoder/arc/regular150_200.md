@@ -34,7 +34,7 @@
 
 # Atcoder Regular Contest 187
 
-## 
+## Add and Swap
 
 ### Solution 1: 
 
@@ -42,23 +42,7 @@
 
 ```
 
-## 
-
-### Solution 1: 
-
-```cpp
-
-```
-
-## 
-
-### Solution 1: 
-
-```cpp
-
-```
-
-## 
+## Sum of CC
 
 ### Solution 1: 
 
@@ -68,36 +52,33 @@
 
 # Atcoder Regular Contest 188
 
-## 
+## Symmetric Painting
 
-### Solution 1: 
+### Solution 1:  number theory, modular arithmetic, gcd, parity
 
-```cpp
-
-```
-
-## 
-
-### Solution 1: 
+1.  Really need to know the rules of gcd and modular arithmetic, and how you can move about a circle. 
 
 ```cpp
+int N, K;
 
-```
+void solve() {
+    cin >> N >> K;
+    int g = gcd(N, 2 * K);
+    if (g == 1 || (g == 2 && K % 2 != (K + N / 2) % 2)) {
+        cout << "Yes" << endl;
+    } else {
+        cout << "No" << endl;
+    }
+}
 
-## 
-
-### Solution 1: 
-
-```cpp
-
-```
-
-## 
-
-### Solution 1: 
-
-```cpp
-
+signed main() {
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
 ```
 
 # Atcoder Regular Contest 189

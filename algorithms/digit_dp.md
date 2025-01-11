@@ -100,3 +100,55 @@ public:
     }
 };
 ```
+
+## Example of digit dp
+
+This example handles a scenario where you are counting the number of scenarios where the head digit is greater than all other digits.
+This handles the case of the integers that have fewer number of digits than the integer x in a way that I think is easy to code and understand.  It just resets the ndp[i][i][0] = 1 in each layer.  
+
+```cpp
+int L, R;
+
+int calc(int x) {
+    // head, last, is tight, is zero
+    vector<vector<vector<int>>> dp(10, vector<vector<int>>(10, vector<int>(2, 0)));
+    string num = to_string(x);
+    for (int i = 1; i < 10; i++) {
+        int d = num[0] - '0';
+        if (i > d) break;
+        dp[i][i][i == d] = 1;
+    }
+    for (int idx = 1; idx < num.size(); idx++) {
+        int d = num[idx] - '0';
+        vector<vector<vector<int>>> ndp(10, vector<vector<int>>(10, vector<int>(2, 0)));        
+        for (int i = 0; i < 10; i++) {
+            if (i > 0) ndp[i][i][0] = 1;
+            for (int j = 0; j <= i; j++) {
+                for (int k = 0; k < 2; k++) {
+                    for (int cur = 0; cur < 10; cur++) {
+                        if (cur >= i) break;
+                        if (k == 1 && cur > d) break;
+                        ndp[i][cur][k == 1 && cur == d] += dp[i][j][k];
+                    }
+                }
+            }
+        }
+        swap(dp, ndp);
+    }
+    int ans = 0;
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
+            for (int k = 0; k < 2; k++) {
+                ans += dp[i][j][k];
+            }
+        }
+    }
+    return ans;
+}
+
+void solve() {
+    cin >> L >> R;
+    int ans = calc(R) - calc(L - 1);
+    cout << ans << endl;
+}
+```
