@@ -25,12 +25,40 @@ public:
 };
 ```
 
-##
+## 2116. Check if a Parentheses String Can Be Valid
 
-### Solution 1: 
+### Solution 1:  stack
 
 ```cpp
-
+class Solution {
+public:
+    bool canBeValid(string s, string locked) {
+        int N = s.size();
+        if (N & 1) return false;
+        stack<int> openBracket, unlocked;
+        for (int i = 0; i < N; i++) {
+            if (locked[i] == '0') {
+                unlocked.push(i);
+            } else if (s[i] == '(') {
+                openBracket.push(i);
+            } else {
+                if (!openBracket.empty()) {
+                    openBracket.pop();
+                } else if (!unlocked.empty()) {
+                    unlocked.pop();
+                } else {
+                    return false;
+                }
+            }
+        }
+        while (!openBracket.empty() && !unlocked.empty() && openBracket.top() < unlocked.top()) {
+            openBracket.pop();
+            unlocked.pop();
+        }
+        if (!openBracket.empty()) return false;
+        return true;
+    }
+};
 ```
 
 ##
