@@ -61,6 +61,57 @@ public:
 };
 ```
 
+## 3223. Minimum Length of String After Operations
+
+### Solution 1:  counting, parity, string
+
+```cpp
+class Solution {
+private:
+    int encode(char ch) {
+        return ch - 'a';
+    }
+public:
+    int minimumLength(string s) {
+        vector<int> freq(26, 0);
+        for (const char ch : s) {
+            freq[encode(ch)]++;
+        }
+        int ans = 0;
+        for (int x : freq) {
+            if (!x) continue;
+            ans++;
+            if (x % 2 == 0) ans++;
+        }
+        return ans;
+    }
+};
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
 ##
 
 ### Solution 1: 
