@@ -6,6 +6,7 @@
 #include <deque>
 #include <queue>
 #include <numeric>
+#include <stack>
 using namespace std;
 #define int long long
 #define endl '\n'

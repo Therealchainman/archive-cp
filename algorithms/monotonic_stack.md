@@ -28,3 +28,22 @@ for (int i = N - 1; i >= 0; i--) {
     stk.push(i);
 }
 ```
+
+## Finding the next greater element
+
+Finding the next greater element that is to the right of the current element, so if you have 5, 4, 3, 7.  The answer for 3 is 7.
+
+```cpp
+vector<int> calcNextGreater(const vector<int>& A) {
+    vector<int> ans(N, N);
+    stack<int> stk;
+    for (int i = N - 1; i >= 0; i--) {
+        while (!stk.empty() && A[i] >= A[stk.top()]) {
+            stk.pop();
+        }
+        if (!stk.empty()) ans[i] = stk.top();
+        stk.push(i);
+    }
+    return ans;
+}
+```

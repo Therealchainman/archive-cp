@@ -1187,3 +1187,157 @@ public:
 ```cpp
 
 ```
+
+# Leetcode Biweekly Contest 148
+
+## 3424. Minimum Cost to Make Arrays Identical
+
+### Solution 1:  sorting, greedy
+
+```cpp
+#define int64 long long
+
+class Solution {
+public:
+    int64 minCost(vector<int>& arr, vector<int>& brr, int64 k) {
+        int N = arr.size();
+        int64 ans = 0;
+        for (int i = 0; i < N; i++) {
+            int64 cost = abs(arr[i] - brr[i]);
+            ans += cost;
+        }
+        int64 cand = k;
+        sort(arr.begin(), arr.end());
+        sort(brr.begin(), brr.end());
+        for (int i = 0; i < N; i++) {
+            int64 cost = abs(arr[i] - brr[i]);
+            cand += cost;
+        }
+        ans = min(ans, cand);
+        return ans;
+    }
+};
+```
+
+## 3425. Longest Special Path
+
+### Solution 1:  unweighted tree, dfs, monotonic stack, depth, fenwick tree
+
+```cpp
+const int INF = 1e9;
+struct FenwickTree {
+    vector<int> nodes;
+    int neutral = 0;
+
+    void init(int n) {
+        nodes.assign(n + 1, neutral);
+    }
+
+    void update(int idx, int val) {
+        while (idx < (int)nodes.size()) {
+            nodes[idx] += val;
+            idx += (idx & -idx);
+        }
+    }
+
+    int query(int left, int right) {
+        return right >= left ? query(right) - query(left - 1) : 0;
+    }
+
+    int query(int idx) {
+        int result = neutral;
+        while (idx > 0) {
+            result += nodes[idx];
+            idx -= (idx & -idx);
+        }
+        return result;
+    }
+};
+
+class Solution {
+private:
+    FenwickTree ft;
+    int N;
+    vector<int> ans;
+    vector<vector<pair<int, int>>> adj;
+    stack<int> monoStack;
+    vector<int> values;
+    map<int, vector<int>> path;
+    void dfs(int u, int p = -1, int d = 1) {
+        int lastDepth = path.find(values[u]) == path.end() ? 0 : path[values[u]].back();
+        if (monoStack.empty() || monoStack.top() < lastDepth) {
+            monoStack.push(lastDepth);
+        }
+        int prevDepth = monoStack.top();
+        int pathLength = ft.query(prevDepth + 1, d - 1);
+        int numberNodes = d - prevDepth;
+        if (pathLength >= ans[0]) {
+            ans[1] = pathLength > ans[0] ? numberNodes : min(ans[1], numberNodes);
+            ans[0] = pathLength;
+        }
+        path[values[u]].emplace_back(d);
+        for (auto &[v, w] : adj[u]) {
+            if (v == p) continue;
+            ft.update(d, w);
+            dfs(v, u, d + 1);
+            ft.update(d, -w);
+        }
+        path[values[u]].pop_back();
+        if (path[values[u]].empty()) path.erase(values[u]);
+        else {
+            if (monoStack.top() == lastDepth) monoStack.pop();
+        }
+    }
+public:
+    vector<int> longestSpecialPath(vector<vector<int>>& edges, vector<int>& nums) {
+        N = nums.size();
+        ft.init(N);
+        values = nums;
+        adj.assign(N, vector<pair<int, int>>());
+        for (auto& edge : edges) {
+            int u = edge[0], v = edge[1], w = edge[2];
+            adj[u].emplace_back(v, w);
+            adj[v].emplace_back(u, w);
+        }
+        ans.assign(2, 0);
+        ans[1] = INF;
+        monoStack.push(0);
+        dfs(0);
+        return ans;
+    }
+};
+```
+
+## 3426. Manhattan Distances of All Arrangements of Pieces
+
+### Solution 1: 
+
+```cpp
+
+```
+
+# Leetcode Biweekly Contest 149
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```

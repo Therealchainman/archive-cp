@@ -88,20 +88,89 @@ public:
 };
 ```
 
-##
+## 2429. Minimize XOR
 
-### Solution 1: 
+### Solution 1:  bit manipulation
 
 ```cpp
-
+class Solution {
+private:
+    bool isSet(int mask, int i) {
+        return (mask >> i) & 1;
+    }
+public:
+    int minimizeXor(int num1, int num2) {
+        int cnt = __builtin_popcount(num2);
+        int x = 0;
+        for (int i = 31; i >= 0 && cnt > 0; i--) {
+            if (isSet(num1, i)) {
+                x |= (1 << i);
+                cnt--;
+            }
+        }
+        for (int i = 0; i < 32 && cnt > 0; i++) {
+            if (!isSet(x, i)) {
+                x |= (1 << i);
+                cnt--;
+            }
+        }
+        return x;
+    }
+};
 ```
 
-##
+## 407. Trapping Rain Water II
 
-### Solution 1: 
+### Solution 1:  greedy, min heap, grid
 
 ```cpp
+struct Cell {
+    int r, c, h;
+    Cell(int r, int c, int h) : r(r), c(c), h(h) {}
+    Cell(){}
+    bool operator<(const Cell &other) const {
+        return h > other.h;
+    }
+};
 
+class Solution {
+private:
+    int R, C;
+    vector<pair<int, int>> neighborhood(int r, int c) {
+        return {{r - 1, c}, {r + 1, c}, {r, c - 1}, {r, c + 1}};
+    }
+    bool in_bounds(int r, int c) {
+        return r >= 0 && r < R && c >= 0 && c < C;
+    }
+public:
+    int trapRainWater(vector<vector<int>>& heightMap) {
+        R = heightMap.size(), C = heightMap[0].size();
+        vector<vector<bool>> vis(R, vector<bool>(C, false));
+        priority_queue<Cell> minheap;
+        for (int r = 0; r < R; r++) {
+            minheap.emplace(r, 0, heightMap[r][0]);
+            minheap.emplace(r, C - 1, heightMap[r][C - 1]);
+            vis[r][0] = vis[r][C - 1] = true;
+        }
+        for (int c = 0; c < C; c++) {
+            minheap.emplace(0, c, heightMap[0][c]);
+            minheap.emplace(R - 1, c, heightMap[R - 1][c]);
+            vis[0][c] = vis[R - 1][c] = true;
+        }
+        int ans = 0;
+        while (!minheap.empty()) {
+            auto [r, c, h] = minheap.top();
+            minheap.pop();
+            for (const auto &[nr, nc] : neighborhood(r, c)) {
+                if (!in_bounds(nr, nc) || vis[nr][nc]) continue;
+                vis[nr][nc] = true;
+                ans += max(0, h - heightMap[nr][nc]);
+                minheap.emplace(nr, nc, max(h, heightMap[nr][nc]));
+            }
+        }
+        return ans;
+    }
+};
 ```
 
 ##

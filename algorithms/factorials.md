@@ -112,6 +112,10 @@ Then to compute N! / i => pprod[i - 1] * sprod[i + 1]
 
 An implementation I can use for multionmial calculations
 
+Can count situations where you have balls of [2,2,2,3,5], so you have some identical, to find the number of ways you can use the multinomial theorem to place in 10 boxes or something. 
+
+N! / (a! * b! * c! * d! * e!), where a + b + c + d + e = N
+
 ```cpp
 int multinomial(const vector<int> &items) {
     int cnt = accumulate(items.begin(), items.end(), 0LL);

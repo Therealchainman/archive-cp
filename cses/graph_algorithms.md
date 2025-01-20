@@ -709,11 +709,75 @@ if __name__ == '__main__':
     main()
 ```
 
-## 
+## Giant Pizza
 
-### Solution 1:  
+### Solution 1:  2SAT, strongly connected components, Tarjan's algorithm, topological sort
 
-```py
+```cpp
+int N, M, timer, scc_count;
+vector<vector<int>> adj, cond_adj;
+vector<int> disc, low, comp;
+stack<int> stk;
+vector<bool> on_stack;
+ 
+void dfs(int u) {
+    disc[u] = low[u] = ++timer;
+    stk.push(u);
+    on_stack[u] = true;
+    for (int v : adj[u]) {
+        if (not disc[v]) dfs(v);
+        if (on_stack[v]) low[u] = min(low[u], low[v]);
+    }
+    if (disc[u] == low[u]) { // found scc
+        scc_count++;
+        while (!stk.empty()) {
+            int v = stk.top();
+            stk.pop();
+            on_stack[v] = false;
+            low[v] = low[u];
+            comp[v] = scc_count;
+            if (v == u) break;
+        }
+    }
+}
+ 
+signed main() {
+	cin >> M >> N;
+    adj.assign(2 * N, vector<int>());
+    disc.assign(2 * N, 0);
+    low.assign(2 * N, 0);
+    comp.assign(2 * N, -1);
+    on_stack.assign(2 * N, false);
+    scc_count = -1;
+    for (int i = 0; i < M; i++) {
+        char s1, s2;
+        int u, v;
+        cin >> s1 >> u >> s2 >> v;
+        u--; v--;
+        if (s1 == '-') u = N + u;
+        if (s2 == '-') v = N + v;
+        // implications
+        adj[(u + N) % (2 * N)].push_back(v);
+        adj[(v + N) % (2 * N)].push_back(u);
+    }
+    for (int i = 0; i < 2 * N; i++) {
+        if (not disc[i]) dfs(i);
+    }
+    for (int i = 0; i < N; i++) {
+        if (comp[i] == comp[i + N]) {
+            cout << "IMPOSSIBLE" << endl;
+            return 0;
+        }
+    }
+    vector<int> ans(N, 0);
+    for (int i = 0; i < N; i++) {
+        ans[i] = comp[i] < comp[i + N];
+    }
+    for (int i = 0; i < N; i++) {
+        cout << (ans[i] ? '+' : '-') << " ";
+    }
+    cout << endl;
+}
 
 ```
 

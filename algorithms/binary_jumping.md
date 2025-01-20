@@ -409,3 +409,58 @@ class ST_And:
         i = self.lg[length]
         return self.op(self.st[i][l], self.st[i][r - (1 << i) + 1])
 ```
+
+##  Binary jumping, sparse table for next greater jumps and cost of jumps
+
+Preprocessing with “Next Greater” jumps (Sparse Table / Binary Lifting)
+
+This code uses a “binary lifting” (or sparse table) approach based on the “next greater element” information. For each index i, it stores where the next jump lands (stNextGreater) and the accumulated cost of that jump (stMinOperations). This lets you quickly “jump” in powers of two from one next-greater position to another, rather than moving step by step. The 
+query(l,r) function uses these jumps to accumulate a specific cost from 
+l up to 
+r and makes a final adjustment by subtracting the subarray sum. Essentially, it provides an efficient way to calculate a certain “cost” (related to next greater elements) for subranges in 
+O(logN) time per query.
+
+```cpp
+vector<int> stNextGreater[BITS];
+vector<int64> stMinOperations[BITS];
+
+int64 query(int l, int r) {
+    int64 res = 0;
+    int idx = l;
+    for (int i = BITS - 1; i >= 0; i--) {
+        int candIdx = stNextGreater[i][idx];
+        if (candIdx <= r) {
+            res += stMinOperations[i][idx];
+            idx = candIdx;
+        }
+    }
+    if (idx <= r) {
+        int segmentLen = r - idx + 1;
+        res += (int64)nums[idx] * segmentLen;
+    }
+    res -= rangeSum(l, r);
+    return res;
+}
+for (int i = 0; i < BITS; i++) {
+    stNextGreater[i].assign(N, N);
+    stMinOperations[i].assign(N, 0);
+}
+for (int i = 0; i < N; i++) {
+    psum[i] = nums[i];
+    if (i > 0) psum[i] += psum[i - 1];
+    stNextGreater[0][i] = nextGreater[i];
+    stMinOperations[0][i] = (int64)nums[i] * (nextGreater[i] - i);
+}
+for (int i = 1; i < BITS; i++) {
+    for (int j = 0; j < N; j++) {
+        int mid = stNextGreater[i - 1][j];
+        if (mid >= N) {
+            stNextGreater[i][j] = mid;
+            stMinOperations[i][j] = stMinOperations[i - 1][j];
+        } else {
+            stNextGreater[i][j] = stNextGreater[i - 1][mid];
+            stMinOperations[i][j] = stMinOperations[i - 1][j] + stMinOperations[i - 1][mid];
+        }
+    }
+}
+```
