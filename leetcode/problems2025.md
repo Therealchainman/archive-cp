@@ -173,6 +173,33 @@ public:
 };
 ```
 
+## 2017. Grid Game
+
+### Solution 1:  prefix sums, greedy
+
+1. Basically let index i represent when the first robot moves down, and to the bottom row, in that scenario there are only two options for robot 2 that are optimal. 
+2. The first option is to move and collect all the values of the remaining element in the top row, which are only set to 0 for up to index i. And then the robot moves down.
+3. The second option is to move down at the start and collect all the values of the bottom row, which are only set to 0 for everything after and including index i. 
+4. draw it out and it becomes obvious, but the trick is the second robot will either move down right away or stay on the top row.  Cause, when it reaches the index that robot 1 moves down, there is no reason to move down anymore, so if you stayed up you didn't collect any points, but now you will. And to get points in bottom row you should move down right away.
+
+```cpp
+#define int64 long long
+class Solution {
+public:
+    int64 gridGame(vector<vector<int>>& grid) {
+        int N = grid[0].size();
+        int64 firstRowSum = accumulate(grid[0].begin(), grid[0].end(), 0LL);
+        int64 secondRowSum = 0, ans = 1e18;
+        for (int i = 0; i < N; i++) {
+            firstRowSum -= grid[0][i];
+            ans = min(ans, max(firstRowSum, secondRowSum));
+            secondRowSum += grid[1][i];
+        }
+        return ans;
+    }
+};
+```
+
 ##
 
 ### Solution 1: 

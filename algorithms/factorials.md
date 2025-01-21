@@ -42,6 +42,7 @@ void factorials(int n, int m) {
         inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % m;
     }
 }
+
 ```
 
 ## binomial coefficient or combinations

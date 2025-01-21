@@ -16,6 +16,8 @@ struct Item {
 
 This is a way to avoid recomputing something, have it only initialize once when the class is initialized, and have it be accessible to all instances of the class.  This is where static variable comes into play.  You also need a boolean to avoid recomputing, otherwise it will recalculate everything regardless of fact it is static.  The static aspect just means it is shared across all instances of the class. 
 
+Another thing to note about this is all functions called by static function, must also be declared as static.  
+
 ```cpp
 const int MAXN = 50'001;
 
