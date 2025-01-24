@@ -200,6 +200,43 @@ public:
 };
 ```
 
+## 1267. Count Servers that Communicate
+
+### Solution 1:  counting, grid, matrix
+
+```cpp
+class Solution {
+public:
+    int countServers(vector<vector<int>>& grid) {
+        int R = grid.size(), C = grid[0].size(), ans = 0;
+        vector<int> rowCount(R, 0), colCount(C, 0);
+        for (int r = 0; r < R; ++r) {
+            for (int c = 0; c < C; ++c) {
+                rowCount[r] += grid[r][c];
+                colCount[c] += grid[r][c];
+            }
+        }
+        for (int r = 0; r < R; ++r) {
+            for (int c = 0; c < C; ++c) {
+                ans += grid[r][c];
+                if (grid[r][c] && rowCount[r] == 1 && colCount[c] == 1) {
+                    ans--;
+                }
+            }
+        }
+        return ans;
+    }
+};
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
 ##
 
 ### Solution 1: 

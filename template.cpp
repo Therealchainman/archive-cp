@@ -8,8 +8,16 @@
 #include <numeric>
 #include <stack>
 using namespace std;
-#define int long long
 #define endl '\n'
+#define LOCAL
+
+using int64 = long long;
+
+#ifdef LOCAL
+#include "debug.h"
+#else
+#define debug(...) 42
+#endif
 
 void solve() {
     
