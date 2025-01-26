@@ -14,7 +14,7 @@ using namespace std;
 using int64 = long long;
 
 #ifdef LOCAL
-#include "debug.h"
+#include "src/debug.h"
 #else
 #define debug(...) 42
 #endif

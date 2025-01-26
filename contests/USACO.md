@@ -118,7 +118,7 @@ signed main() {
 
 ```
 
-# USACO 2024 January Contest, Silver
+# USACO 2025 January Contest, Silver
 
 ##
 
@@ -144,7 +144,7 @@ signed main() {
 
 ```
 
-# USACO 2024 February Contest, Silver
+# USACO 2025 February Contest, Silver
 
 ##
 
@@ -170,7 +170,7 @@ signed main() {
 
 ```
 
-#
+# USACO 2025 Open???
 
 ##
 
