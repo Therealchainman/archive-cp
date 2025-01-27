@@ -154,6 +154,40 @@ void solve() {
 }
 ```
 
+## Euler Tour for Subtree Queries for prefix or suffix sums, 
+
+This works for if you want to find the maximum value or minimum value of all nodes in or not in the subtree. or finding range sums, but it only works when the values are static, otherwise need something more advanced with segment trees etc.
+
+```cpp
+vector<int> values, tin, tout, timerToNode;
+vector<vector<int>> adj;
+
+void dfs(int u, int p = -1) {
+    tin[u] = ++timer;
+    timerToNode[timer] = u;
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        dfs(v, u);
+    }
+    tout[u] = timer;
+}
+
+vector<int> pmax(N + 2, 0), smax(N + 2, 0);
+for (int i = 1; i <= N; ++i) {
+    pmax[i] = max(pmax[i - 1], values[timerToNode[i]]);
+}
+for (int i = N; i > 0; --i) {
+    smax[i] = max(smax[i + 1], values[timerToNode[i]]);
+}
+int64 ans = 0;
+for (int u = 0; u < N; ++u) {
+    int maxAroundSubtree = max(pmax[tin[u] - 1], smax[tout[u] + 1]);
+    if (maxAroundSubtree > values[u] && (!ans || values[u] > values[ans])) {
+        ans = u;
+    }
+}
+```
+
 ## EULER TOUR FOR PATH QUERIES 
 
 This one always increments the counter so that enter and exit counter will be differeent for each node. 

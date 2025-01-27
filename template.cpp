@@ -7,6 +7,7 @@
 #include <queue>
 #include <numeric>
 #include <stack>
+#include <cassert>
 using namespace std;
 #define endl '\n'
 #define LOCAL
