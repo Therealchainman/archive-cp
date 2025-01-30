@@ -800,3 +800,249 @@ signed main() {
 ```cpp
 
 ```
+
+# UTPC Contest 1-29-25 Div. 1 (Advanced)
+
+## Lion Dancers
+
+### Solution 1:  combinatorics, counting, independent events, factorials
+
+```cpp
+const int64 MOD = 1e9 + 7, MAXN = 1e5 + 5;
+int N, M;
+
+int64 inv(int i, int64 m) {
+  return i <= 1 ? i : m - (m / i) * inv(m % i, m) % m;
+}
+
+vector<int64> fact, inv_fact;
+
+void factorials(int n, int64 m) {
+    fact.assign(n + 1, 1);
+    inv_fact.assign(n + 1, 0);
+    for (int i = 2; i <= n; i++) {
+        fact[i] = (fact[i - 1] * i) % m;
+    }
+    inv_fact.end()[-1] = inv(fact.end()[-1], m);
+    for (int i = n - 1; i >= 0; i--) {
+        inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % m;
+    }
+}
+
+int64 choose(int n, int r, int64 m) {
+    if (n < r) return 0;
+    return (fact[n] * inv_fact[r] % m) * inv_fact[n - r] % m;
+}
+
+void solve() {
+    cin >> N >> M;
+    int ans = 1;
+    for (int i = 0; i < M; i++) {
+        int k;
+        cin >> k;
+        ans = (ans * choose(k, N, MOD)) % MOD;
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    factorials(MAXN, MOD);
+    solve();
+    return 0;
+}
+```
+
+## Lunar Phases
+
+### Solution 1:  geometry, math, dot product, vectors
+
+1. The key idea is if you take the vector and the perpendicular vector to it, you can determine which quadrant the point that represents the moon is in by using the dot product of the two vectors.
+
+```cpp
+int64 dotProduct(int64 x1, int64 y1, int64 x2, int64 y2) {
+    return x1 * x2 + y1 * y2;
+}
+
+void solve() {
+    int64 sx, sy, mx, my;
+    cin >> sx >> sy >> mx >> my;
+    int64 px = -sy, py = sx;
+    int64 dot1 = dotProduct(sx, sy, mx, my);
+    int64 dot2 = dotProduct(px, py, mx, my);
+    if (dot1 > 0 && dot2 > 0) {
+        cout << "Third quarter" << endl;
+    } else if (dot1 > 0 && dot2 < 0) {
+        cout << "Full moon" << endl;
+    } else if (dot1 < 0 && dot2 > 0) {
+        cout << "New moon" << endl;
+    } else {
+        cout << "First quarter" << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+
+```
+
+## Lantern Hopping
+
+### Solution 1:  max heap, greedy
+
+1. The observation is you just need the maximum height over the entire segment, and the required energy to hop everywhere is the how much lower you are from the max height in the entire segment.
+
+```cpp
+int N, Q;
+vector<int> A;
+
+void solve() {
+    cin >> N >> Q;
+    A.resize(N);
+    priority_queue<pair<int, int>> maxheap;
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+        maxheap.emplace(A[i], i);
+    }
+    while (Q--) {
+        int t, i;
+        cin >> t >> i;
+        --i;
+        while (maxheap.top().first != A[maxheap.top().second]) maxheap.pop();
+        if (t == 1) {
+            int maxHeight = maxheap.top().first;
+            int ans = maxHeight - A[i];
+            cout << ans << endl;
+        } else {
+            int h;
+            cin >> h;
+            A[i] = h;
+            maxheap.emplace(h, i);
+        }
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## Dragon Scales
+
+### Solution 1:  line sweep, math
+
+1. LIne sweep from left to right works well if you figure out how to update when starting a new segment, and when ending a segment (everything it contributes must be undone)
+
+```cpp
+int N, M;
+vector<vector<int>> starts, ends_;
+vector<int64> P, L;
+
+void solve() {
+    cin >> N >> M;
+    starts.assign(M + 1, vector<int>());
+    ends_.assign(M + 2, vector<int>());
+    P.resize(N);
+    L.resize(N);
+    for (int i = 0; i < N; i++) {
+        int l, r, p;
+        cin >> l >> r >> p;
+        P[i] = p;
+        L[i] = r - l + 1;
+        starts[l].emplace_back(i);
+        ends_[r + 1].emplace_back(i);
+    }
+    int64 ans = 0, baseSum = 0;
+    for (int i = 1; i <= M; i++) {
+        for (int j : starts[i]) baseSum += P[j];
+        for (int j : ends_[i]) {
+            baseSum -= P[j];
+            ans -= L[j] * P[j];
+        }
+        ans += baseSum;
+        cout << ans << " ";
+    }
+    cout << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## Sally's Stroll (Easy Version)
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## Red Envelope
+
+### Solution 1: 
+
+```cpp
+
+```
+
+# ????
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```

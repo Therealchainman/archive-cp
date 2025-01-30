@@ -229,12 +229,100 @@ public:
 };
 ```
 
-##
+## 2493. Divide Nodes Into the Maximum Number of Groups
 
-### Solution 1: 
+### Solution 1:  bipartite, 2-coloring, undirected graph, connected components, bfs
 
 ```cpp
-
+class Solution {
+private:
+    vector<int> colors;
+    vector<bool> vis;
+    vector<vector<int>> adj;
+    bool bipartite_dfs(int source) {
+        stack<int> stk;
+        stk.push(source);
+        colors[source] = 1;
+        bool ans = true;
+        while (!stk.empty()) {
+            int u = stk.top();
+            stk.pop();
+            for (int v: adj[u]) {
+                if (colors[v] == 0) {
+                    colors[v] = 3 - colors[u];
+                    stk.push(v);
+                } else if (colors[u] == colors[v]) {
+                    ans = false;
+                }
+            }
+        }
+        return ans;
+    }
+    void dfs(int u, vector<int>& comp) {
+        if (vis[u]) return;
+        vis[u] = true;
+        comp.emplace_back(u);
+        for (int v : adj[u]) {
+            dfs(v, comp);
+        }
+    }
+    int bfs(int src) {
+        queue<int> dq;
+        dq.emplace(src);
+        vis[src] = true;
+        int ans = 0;
+        while (!dq.empty()) {
+            int sz = dq.size();
+            for (int i = 0; i < sz; i++) {
+                int u = dq.front();
+                dq.pop();
+                for (int v : adj[u]) {
+                    if (vis[v]) continue;
+                    dq.emplace(v);
+                    vis[v] = true;
+                }
+            }
+            ++ans;
+        }
+        return ans;
+    }
+public:
+    int magnificentSets(int n, vector<vector<int>>& edges) {
+        adj.assign(n, vector<int>());
+        for (const auto& edge : edges) {
+            int u = edge[0], v = edge[1];
+            --u, --v;
+            adj[u].emplace_back(v);
+            adj[v].emplace_back(u);
+        }
+        colors.assign(n, 0);
+        for (int i = 0; i < n; i++) {
+            if (colors[i]) continue;
+            if (!bipartite_dfs(i)) return -1;
+        }
+        vis.assign(n, false);
+        vector<vector<int>> components;
+        for (int i = 0; i < n; i++) {
+            if (vis[i]) continue;
+            vector<int> comp;
+            dfs(i, comp);
+            components.emplace_back(comp);
+        }
+        int ans = 0;
+        vis.assign(n, false);
+        for (const vector<int>& comp : components) {
+            int mx = 0;
+            for (int u : comp) {
+                for (int v : comp) {
+                    vis[v] = false;
+                }
+                mx = max(mx, bfs(u));
+            }
+            ans += mx;
+        }
+        return ans;
+    }
+};
 ```
 
 ##

@@ -13,6 +13,12 @@ Expects vectors of any dimension
 inner_product = lambda v1, v2: sum(x1*x2 for x1, x2 in zip(v1, v2))
 ```
 
+```cpp
+int64 dotProduct(int64 x1, int64 y1, int64 x2, int64 y2) {
+    return x1 * x2 + y1 * y2;
+}
+```
+
 ### APPLICATION OF INNER PRODUCTS
 
 An application of inner product is for suppose you have found that a point may be on a line segment, you can confirm if the point is on a line segment with the inner product. 

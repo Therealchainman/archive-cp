@@ -25,13 +25,13 @@ def factorials(n):
 ```
 
 ```cpp
-int inv(int i, int m) {
-  return i <= 1 ? i : m - (int)(m/i) * inv(m % i, m) % m;
+int64 inv(int i, int64 m) {
+  return i <= 1 ? i : m - (m / i) * inv(m % i, m) % m;
 }
 
-vector<int> fact, inv_fact;
+vector<int64> fact, inv_fact;
 
-void factorials(int n, int m) {
+void factorials(int n, int64 m) {
     fact.assign(n + 1, 1);
     inv_fact.assign(n + 1, 0);
     for (int i = 2; i <= n; i++) {
@@ -43,6 +43,10 @@ void factorials(int n, int m) {
     }
 }
 
+int64 choose(int n, int r, int64 m) {
+    if (n < r) return 0;
+    return (fact[n] * inv_fact[r] % m) * inv_fact[n - r] % m;
+}
 ```
 
 ## binomial coefficient or combinations
@@ -54,13 +58,6 @@ factorials are precomputed for calculating combinations frequently
 ```py
 def choose(n, r):
     return (fact[n] * inv_fact[r] * inv_fact[n - r]) % mod if n >= r else 0
-```
-
-```cpp
-int choose(int n, int r, int m) {
-    if (n < r) return 0;
-    return (fact[n] * inv_fact[r] % m) * inv_fact[n - r] % m;
-}
 ```
 
 ## log base 2 factorials
