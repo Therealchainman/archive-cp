@@ -132,6 +132,8 @@ This particular implementation is for range addition updates
 
 range updates are [L, R) (exclusive for right end point)
 
+- Initialization array can speed up it significantly, recommended to use that. 
+
 ```cpp
 struct LazySegmentTree {
     vector<int> values;

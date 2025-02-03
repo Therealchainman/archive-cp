@@ -1,3 +1,5 @@
+# Leetcode Biweekly Rounds 100-149
+
 # Leetcode Biweekly Contest 135
 
 ## Minimum Array Changes to Make Differences Equal
@@ -1318,26 +1320,147 @@ public:
 
 # Leetcode Biweekly Contest 149
 
-## 
+## 3439. Reschedule Meetings for Maximum Free Time I
 
-### Solution 1: 
-
-```cpp
-
-```
-
-## 
-
-### Solution 1: 
+### Solution 1: intervals, fixed sized sliding window
 
 ```cpp
-
+class Solution {
+public:
+    int maxFreeTime(int eventTime, int k, vector<int>& startTime, vector<int>& endTime) {
+        int N = startTime.size();
+        vector<int> gaps;
+        int prv = 0;
+        for (int i = 0; i < N; i++) {
+            int gap = startTime[i] - prv;
+            gaps.emplace_back(gap);
+            prv = endTime[i];
+        }
+        gaps.emplace_back(eventTime - prv);
+        int ans = 0, wgap = gaps[0];
+        for (int i = 0; i < N; i++) {
+            wgap += gaps[i + 1];
+            if (i >= k) {
+                wgap -= gaps[i - k];
+            }
+            ans = max(ans, wgap);
+        }
+        return ans;
+    }
+};
 ```
 
-## 
+## 3440. Reschedule Meetings for Maximum Free Time II
 
-### Solution 1: 
+### Solution 1:  greedy, sorting, intervals
 
 ```cpp
-
+class Solution {
+public:
+    int maxFreeTime(int eventTime, vector<int>& startTime, vector<int>& endTime) {
+        int N = startTime.size();
+        vector<int> gaps;
+        int prv = 0;
+        for (int i = 0; i < N; i++) {
+            int gap = startTime[i] - prv;
+            gaps.emplace_back(gap);
+            prv = endTime[i];
+        }
+        gaps.emplace_back(eventTime - prv);
+        vector<int> sortedGaps = gaps;
+        sort(sortedGaps.begin(), sortedGaps.end());
+        int ans = 0;
+        for (int i = 0; i < N; i++) {
+            int gl = gaps[i], gr = gaps[i + 1], len = endTime[i] - startTime[i];
+            ans = max(ans, gl + gr);
+            int g = 0;
+            if (sortedGaps.end()[-1] != max(gl, gr)) {
+                g = sortedGaps.end()[-1];
+            } else if (sortedGaps.end()[-2] != min(gl, gr)) {
+                g = sortedGaps.end()[-2];
+            } else {
+                g = sortedGaps.end()[-3];
+            }
+            if (g < len) continue;
+            ans = max(ans, gl + gr + len);
+        }
+        return ans;
+    }
+};
 ```
+
+## 3441. Minimum Cost Good Caption
+
+### Solution 1:  recursive dynamic programming, greedy, lexicographical sorting
+
+1. The tricky part of this dynamic programming problem is the following
+1. I think recursion makes this one a lot easier
+1. The first observation is that you want to minimize the cost, for the current segment of characters independent of later.  And also it makes sense it will be one of the characters in the current segment you are looking at.  Which also means these segments will be length 3 to 5.
+1. Then you have the recursive dfs calculate the best answer for the next state, and return that. 
+1. The reason you need this is because you want to minimize total operations of current distance to the end. 
+1. But also there is a tie breaker for when cost is the same and that is when the next character picked for the next segment is lexicographically smaller. 
+
+```cpp
+struct State {
+    int cost, cnt;
+    char ch;
+    State() {}
+    State(int cost, int cnt, char ch) : cost(cost), cnt(cnt), ch(ch) {}
+};
+
+const int INF = 1e9;
+class Solution {
+private:
+    int N;
+    string S;
+    vector<State> dp;
+    State dfs(int idx) {
+        if (idx == N) return State(0, 0, 'a');
+        if (dp[idx].cost != -1) return dp[idx];
+        State res = State(INF, 0, 'a');
+        vector<char> seen;
+        string current = "";
+        for (int i = idx; i < idx + 5; ++i) {
+            if (i >= N) break;
+            seen.emplace_back(S[i]);
+            if (i < idx + 2) continue;
+            int cost = INF;
+            char character = 'a';
+            int cnt = i - idx + 1;
+            for (const char &ch : seen) {
+                int newCost = 0;
+                for (const char &c : seen) {
+                    newCost += abs(c - ch);
+                }
+                if (newCost < cost || (newCost == cost && ch < character)) {
+                    cost = newCost;
+                    character = ch;
+                }
+            }
+            State nextState = dfs(i + 1);
+            string cand = string(cnt, character) + string(nextState.cnt, nextState.ch);
+            if (cost + nextState.cost < res.cost || (cost + nextState.cost == res.cost && cand < current)) {
+                res = State(cost + nextState.cost, cnt, character);
+                current = cand;
+            }
+        }
+        return dp[idx] = res;
+    }
+public:
+    string minCostGoodCaption(string caption) {
+        N = caption.size();
+        if (N < 3) return "";
+        string ans = "";
+        int i = 0;
+        S = caption;
+        dp.assign(N, State(-1, -1, -1));
+        while (i < N) {
+            State nxtState = dfs(i);
+            ans += string(nxtState.cnt, nxtState.ch);
+            i += nxtState.cnt;
+        }
+        return ans;
+    }   
+};
+```
+

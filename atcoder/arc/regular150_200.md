@@ -174,7 +174,72 @@ signed main() {
 
 ```
 
-# Atcoder Regular Contest 190
+# Atcoder Regular Contest 191
+
+## Replace Digits
+
+### Solution 1:  greedy, constructive, implementation, strings, lexicographically sorting
+
+1. The catch me is that the last element in T if not used must still be used so put it in the least worst place in S. Which is whereevery S[i] is equal to to T.back() or if there isn't just replace the last element in S with T.back().
+
+```cpp
+int N, M;
+string S, T;
+
+int decode(char c) {
+    return c - '0';
+}
+
+char encode(int i) {
+    return i + '0';
+}
+
+void solve() {
+    cin >> N >> M >> S >> T;
+    vector<vector<int>> adj(10, vector<int>());
+    for (int i = 0; i < M; i++) {
+        adj[decode(T[i])].emplace_back(i);
+    }
+    bool lastRemains = true;
+    for (int i = 0; i < N; ++i) {
+        int cur = decode(S[i]);
+        for (int j = 9; j > cur; --j) {
+            if (!adj[j].empty()) {
+                S[i] = encode(j);
+                if (adj[j].back() == M - 1) lastRemains = false;
+                adj[j].pop_back();
+                break;
+            }
+        }
+    }
+    for (int i = 0; i < N && lastRemains; ++i) {
+        if (S[i] == T.back()) {
+            S[i] = T.back();
+            lastRemains = false;
+        }
+    }
+    if (lastRemains) S.back() = T.back();
+    cout << S << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## XOR = MOD
+
+### Solution 1: 
+
+```cpp
+
+```
+
+# Atcoder Regular Contest 192
 
 ## 
 

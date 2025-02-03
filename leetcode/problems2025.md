@@ -325,12 +325,31 @@ public:
 };
 ```
 
-##
+## 3105. Longest Strictly Increasing or Strictly Decreasing Subarray
 
-### Solution 1: 
+### Solution 1:  loop
 
 ```cpp
-
+class Solution {
+public:
+    int longestMonotonicSubarray(vector<int>& nums) {
+        int ans = 0, cur = 0, prv = 0;
+        for (int x : nums) {
+            if (x <= prv) cur = 0;
+            ++cur;
+            prv = x;
+            ans = max(ans, cur);
+        }
+        cur = 0;
+        for (int x : nums) {
+            if (x >= prv) cur = 0;
+            ++cur;
+            prv = x;
+            ans = max(ans, cur);
+        }
+        return ans;
+    }
+};
 ```
 
 ##
