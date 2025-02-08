@@ -352,6 +352,51 @@ public:
 };
 ```
 
+## 1726. Tuple with Same Product
+
+### Solution 1: counting, map, combinatorics
+
+```cpp
+class Solution {
+private:
+    int calc(int n) {
+        return n * (n - 1);
+    }
+public:
+    int tupleSameProduct(vector<int>& nums) {
+        int N = nums.size();
+        map<int, int> freq;
+        for (int i = 0; i < N; ++i) {
+            for (int j = 0; j < i; ++j) {
+                int x = nums[i] * nums[j];
+                ++freq[x];
+            }
+        }
+        int ans = accumulate(freq.begin(), freq.end(), 0, [&](int accum, pair<int, int> item) {
+            return accum + calc(item.second);
+        });
+        ans *= 4;
+        return ans;
+    }
+};
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
 ##
 
 ### Solution 1: 

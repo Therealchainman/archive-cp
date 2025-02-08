@@ -8,6 +8,8 @@
 #include <numeric>
 #include <stack>
 #include <cassert>
+#include <cstring>
+#include <cmath>
 using namespace std;
 #define endl '\n'
 #define LOCAL

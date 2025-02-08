@@ -2,6 +2,126 @@
 
 A fast Fourier transform (FFT) is an algorithm that computes the discrete Fourier transform (DFT) of a sequence, or its inverse (IDFT).
 
+## Convolution of two polynomials
+
+This program performs polynomial multiplication using Number Theoretic Transform (NTT) to efficiently count certain properties of a given sequence. Let's analyze the components in detail.
+
+This namespace implements the Number Theoretic Transform (NTT), a modular Fast Fourier Transform (FFT).
+P = 998244353 is a prime modulus commonly used in competitive programming.
+R = 3 is a primitive root of P (used for NTT).
+IR = (P + 1) / 3 is the modular inverse of R, used for inverse NTT.
+
+`initNTT`
+Finds the smallest power of 2 (N = 2^L) greater than or equal to l (length of the polynomial).
+Computes IN = 1/N % P using modular inverse, required for inverse NTT.
+Precomputes rev array for bit-reversal permutation used in iterative NTT.
+
+`NTT`
+Iterative butterfly operation:
+Processes pairs of elements (x, y) using roots of unity.
+Uses modular arithmetic to ensure values stay within P.
+Applies radix-2 Cooley-Tukey FFT algorithm.
+
+Given n numbers, the code:
+Creates a frequency array a where a[x] = 1 if x appears.
+Computes polynomial multiplication A(x) * A(x) using NTT.
+Extracts valid (x, y) pairs such that x + y is present.
+Computes the final count of valid pairs.
+
+Uses NTT (modular FFT) for fast polynomial multiplication.
+Efficient O(N log N) approach instead of naive O(N²).
+Uses modular arithmetic with P = 998244353 for performance.
+Solves pair counting problems efficiently.
+
+This example is being used to count pairs of ordered triplets such that A + C = 2 * B, but think of it as A + C = k
+
+```cpp
+namespace NTT{
+    const int P = 998244353, R = 3, IR = (P + 1) / 3;
+
+    int L, N, IN;
+    vector<int> rev;
+
+    int qpow(int b, int k) {
+        int ret = 1;
+        while(k > 0) {
+            if(k & 1) ret = static_cast<int64>(ret) * b % P;
+            b = static_cast<int64>(b) * b % P;
+            k >>= 1;
+        }
+        return ret;
+    }
+
+    void initNTT(int l) {
+        L = 0;
+        while((1 << L) < l) L ++;
+        N = 1 << L;
+        IN = qpow(N, P - 2);
+        
+        rev = vector<int>(N);
+
+        for(int i = 0; i < N; i ++)
+            rev[i] = (rev[i >> 1] >> 1) | ((i & 1) << (L - 1));
+    }
+
+    void NTT(vector<int> &a, bool type) {
+        a.resize(N);
+        for(int i = 0; i < N; i ++)
+            if(i < rev[i])
+                swap(a[i], a[rev[i]]);
+        
+        for(int i = 1; i < N; i *= 2) {
+            int64 g = qpow(type ? R : IR, (P - 1) / (i * 2));
+            for(int j = 0; j < N; j += i * 2) {
+                int64 gn = 1;
+                for(int k = 0; k < i; k ++, gn = gn * g % P) {
+                    int x = a[j + k], y = a[i + j + k] * gn % P;
+                    a[j + k] = (x + y) % P;
+                    a[i + j + k] = (x - y + P) % P;
+                }
+            }
+        }
+    }
+
+    vector<int> convolution(vector<int> a, vector<int> b) {
+        int len = (int)a.size() + (int)b.size() - 1;
+        NTT(a, 1);
+        NTT(b, 1);
+        for(int i = 0; i < N; i ++)
+            a[i] = a[i] * static_cast<int64>(b[i]) % P;
+        NTT(a, 0);
+        a.resize(len);
+        for(auto &x : a)
+            x = static_cast<int64>(x) * IN % P;
+        return a;
+    }
+}
+
+vector<int> polynomialMultiplication(const vector<int>& a, const vector<int>& b) {
+    NTT::initNTT(a.size() + b.size() - 1);
+    return NTT::convolution(a, b);
+}
+
+const int MAXN = 1e6 + 5;
+int N;
+vector<int> A;
+
+void solve() {
+    cin >> N;
+    A.assign(MAXN, 0);
+    for (int i = 0, x; i < N; ++i) {
+        cin >> x;
+        A[x] = 1;
+    }
+    int64 ans = 0;
+    vector<int> B = polynomialMultiplication(A, A);
+    for (int i = 0; i < B.size(); i += 2) {
+        if (A[i / 2]) ans += (B[i] - 1) / 2;
+    }
+    cout << ans << endl;
+}
+```
+
 ## pythonic atcoder library implementation
 
 This is an implementation that allows convolution using the fast fourier tranform algorithm.  It can be used for convolutions (such as multiplication of polynomials)
