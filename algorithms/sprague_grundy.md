@@ -10,10 +10,7 @@ What games does this theorem apply to?
 
 calculate a Grundy number
 
-
-
 mex is minimum excludant
-
 
 To calculate the Grundy value of a given state you need to:
 
@@ -82,3 +79,7 @@ if (xor_sum) {
     cout << "Bruno" << endl;
 }
 ```
+
+Always be on the lookout for if a you can reduce a problem to the simple Nim game. 
+
+Nim is a combinatorial game, where two players alternately take turns in taking objects from several heaps. The only rule is that each player must take at least one object on their turn, but they may take more than one object in a single turn, as long as they all come from the same heap.

@@ -10,6 +10,7 @@
 #include <cassert>
 #include <cstring>
 #include <cmath>
+#include <random>
 using namespace std;
 #define endl '\n'
 #define LOCAL

@@ -991,18 +991,142 @@ signed main() {
 
 ## Sally's Stroll (Easy Version)
 
-### Solution 1: 
+### Solution 1: grid, undirected graph, connected components, bfs, combinatorics
+
+1. precomputation to help with construction of undirected graph is hard to figure out and implement, but you need to mark passagble horizontal and vertical segments in two directions.  This needs to be precomputed, so you know which pair of two movements works to add connect two vertices with an edge.
 
 ```cpp
+int R, C, KH, KV, sz, Q;
+vector<vector<char>> grid;
+vector<vector<int>> adj;
+vector<bool> vis;
 
+int map2Dto1D(int r, int c) {
+    return r * C + c;
+}
+
+int64 countPairs(int64 n) {
+    return n * (n - 1);
+}
+
+void dfs(int u) {
+    if (vis[u]) return;
+    vis[u] = true;
+    sz++;
+    for (int v : adj[u]) {
+        dfs(v);
+    }
+}
+
+void solve() {
+    cin >> R >> C >> KV >> KH;
+    grid.assign(R, vector<char>(C));
+    adj.assign(R * C, vector<int>());
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++) {
+            cin >> grid[i][j];
+        }
+    }
+    cin >> Q;
+    vector<vector<vector<bool>>> segments(R, vector<vector<bool>>(C, vector<bool>(4, false)));
+    // horizontal segments
+    for (int i = 0; i < R; i++) {
+        int dist = 0;
+        for (int j = 0; j < C; j++) {
+            if (grid[i][j] == '*') dist++;
+            else dist = 0;
+            if (dist >= KH + 1) {
+                segments[i][j][2] = true;
+                segments[i][j - KH][0] = true;
+            }
+        }
+    }
+    // vertical segments
+    for (int j = 0; j < C; j++) {
+        int dist = 0;
+        for (int i = 0; i < R; i++) {
+            if (grid[i][j] == '*') dist++;
+            else dist = 0;
+            if (dist >= KV + 1) {
+                segments[i][j][3] = true;
+                segments[i - KV][j][1] = true;
+            }
+        }
+    }
+    // build graph
+    vector<int> dr = {0, 1, 0, -1}, dc = {1, 0, -1, 0};
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++) {
+            for (int d1 = 0; d1 < 4; d1++) {
+                if (!segments[i][j][d1]) continue;
+                int r = i + dr[d1] * KV, c = j + dc[d1] * KH;
+                for (int d2 = 0; d2 < 4; d2++) {
+                    if (!segments[r][c][d2]) continue;
+                    int r1 = r + dr[d2] * KV, c1 = c + dc[d2] * KH;
+                    int u = map2Dto1D(i, j), v = map2Dto1D(r1, c1);
+                    adj[u].emplace_back(v);
+                    adj[v].emplace_back(u);
+                }
+            }
+        }
+    }
+    // explore connected components
+    int64 ans = 0;
+    vis.assign(R * C, false);
+    for (int i = 0; i < R * C; i++) {
+        if (vis[i]) continue;
+        sz = 0;
+        dfs(i);
+        ans += countPairs(sz);
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ## Red Envelope
 
-### Solution 1: 
+### Solution 1:  reduction to nim game, xor sum, parity
+
+1. You have to realize that if you have an even number of coins in a an envelope that is worthless, and basically it cancels out so the second player wins.  So reduce those to 0
+1. If you have odd number of coins, now it gives a nim advantage because if there is just one than first player can pick it and win now. 
+1. But the thing is you have frequency of these odd number of coins, and you can reduce it to be that the odd number represents a pile and the frequency is the size of the pile.  And now it is a standard nim gam, and can solve with xor sum, it must be non-zero for first player to win. 
 
 ```cpp
+int N;
+map<int, int> freq;
 
+void solve() {
+    cin >> N;
+    for (int i = 0, x; i < N; i++) {
+        cin >> x;
+        freq[x]++;
+    }
+    int xorSum = 0;
+    for (auto [x, f] : freq) {
+        if (x & 1) xorSum ^= f;
+    }
+    if (xorSum > 0) {
+        cout << "Ai" << endl;
+    } else {
+        cout << "Bo" << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 # ????
