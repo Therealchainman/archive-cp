@@ -51,6 +51,8 @@ void sieve(int n) {
 
 precomputes the prime factorization for each integer from 0 to upper_bound (inclusive).  This one is a bit worrisome, it may be too slow in actually.  A faster approach is below for how to get the prime factorization of integer queries. 
 
+Note: this does not get the multiplicity of each prime factor, just the prime factors themselves.
+
 ```py
 def prime_sieve(upper_bound):
     prime_factorizations = [[] for _ in range(upper_bound + 1)]
@@ -59,6 +61,21 @@ def prime_sieve(upper_bound):
         for j in range(i, upper_bound + 1, i):
             prime_factorizations[j].append(i)
     return prime_factorizations
+```
+
+```cpp
+vector<vector<int>> primes;
+
+void sieve(int n) {
+    primes.assign(n + 1, vector<int>());
+    for (int i = 2; i <= n; i++) {
+        if (primes[i].empty()) {
+            for (int j = i; j <= n; j += i) {
+                primes[j].push_back(i);
+            }
+        }
+    }
+}
 ```
 
 ## prime sieve for smallest prime factor and fast prime factorization of integers
