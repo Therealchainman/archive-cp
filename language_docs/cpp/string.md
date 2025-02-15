@@ -7,7 +7,7 @@ This is an example function that takes a string where each word is separated by 
 ```cpp
 vector<string> process(const string& s, char delimiter = ' ') {
     vector<string> ans;
-    istringstream iss(s.substr(1));
+    istringstream iss(s);
     string word;
     while (getline(iss, word, delimiter)) ans.emplace_back(word);
     return ans;

@@ -385,3 +385,113 @@ class SegmentTree:
     def __repr__(self) -> str:
         return f"nodes array: {self.nodes}, next array: {self.nodes}"
 ```
+
+## Segment tree with line sweep for area of union of rectangles
+
+This is a segment tree that is used to track which segments are currently covered and efficiently compute the union of covered x-intervals.
+
+line sweeps over the y-coordinate events. able to track the width of each region covered by squares with the segment tree. And you know the current height based on previous y and current y value. 
+
+Example problem with how it is used to calculate the area of the union of rectangles on a 2d plane. 
+
+The union of rectangles refers to the total area covered by multiple rectangles, where some rectangles may overlap with each other. The goal is to compute the unique area occupied by at least one rectangle, without counting overlapping regions multiple times.
+
+```cpp
+using int64 = long long;
+const int64 INF = 1e9;
+
+struct SegmentTree {
+    int N;
+    vector<int64> count, total;
+    vector<int64> xs;
+    SegmentTree(vector<int64>& arr) {
+        xs = vector<int64>(arr.begin(), arr.end());
+        sort(xs.begin(), xs.end());
+        xs.erase(unique(xs.begin(), xs.end()), xs.end());
+        N = xs.size();
+        count.assign(4 * N + 1, 0);
+        total.assign(4 * N + 1, 0);
+    }
+    void update(int segmentIdx, int segmentLeftBound, int segmentRightBound, int64 l, int64 r, int64 val) {
+        if (l >= r) return;
+        if (l == xs[segmentLeftBound] && r == xs[segmentRightBound]) {
+            count[segmentIdx] += val;
+        } else {
+            int mid = (segmentLeftBound + segmentRightBound) / 2;
+
+            if (l < xs[mid]) {
+                update(2 * segmentIdx, segmentLeftBound, mid, l, min(r, xs[mid]), val);
+            }
+            if (r > xs[mid]) {
+                update(2 * segmentIdx + 1, mid, segmentRightBound, max(l, xs[mid]), r, val);
+            }
+        }
+        if (count[segmentIdx] > 0) {
+            total[segmentIdx] = xs[segmentRightBound] - xs[segmentLeftBound];
+        } else {
+            total[segmentIdx] = 2 * segmentIdx + 1 < total.size() ? total[2 * segmentIdx] + total[2 * segmentIdx + 1] : 0;
+        }
+    }
+    void update(int l, int r, int val) {
+        update(1, 0, N - 1, l, r, val);
+    }
+    int64 query() {
+        return total[1];
+    }
+};
+
+struct Event {
+    int v, t, l, r;
+    Event() {}
+    Event(int v, int t, int l, int r) : v(v), t(t), l(l), r(r) {}
+    bool operator<(const Event& other) const {
+        if (v != other.v) return v < other.v;
+        return t < other.t;
+    }
+};
+
+class Solution {
+public:
+    double separateSquares(vector<vector<int>>& squares) {
+        int N = squares.size();
+        vector<int64> xs;
+        for (const vector<int>& square : squares) {
+            int x = square[0], y = square[1], l = square[2];
+            xs.emplace_back(x);
+            xs.emplace_back(x + l);
+        }
+        SegmentTree st(xs);
+        vector<Event> events;
+        for (const vector<int>& square : squares) {
+            int x = square[0], y = square[1], l = square[2];
+            events.emplace_back(y, 1, x, x + l);
+            events.emplace_back(y + l, -1, x, x + l);
+        }
+        sort(events.begin(), events.end());
+        int64 prevY = -INF;
+        long double totalArea = 0;
+        for (const Event& event : events) {
+            long double dh = event.v - prevY;
+            long double dw = st.query();
+            totalArea += dh * dw;
+            st.update(event.l, event.r, event.t);
+            prevY = event.v;
+        }
+        prevY = -INF;
+        long double curSumArea = 0;
+        for (const Event& event : events) {
+            long double dh = event.v - prevY;
+            long double dw = st.query();
+            long double area = dh * dw;
+            if (2 * (area + curSumArea) >= totalArea) {
+                return (totalArea / 2.0 - curSumArea) / dw + prevY;
+            }
+            curSumArea += area;
+            st.update(event.l, event.r, event.t);
+            prevY = event.v;
+        }
+        return curSumArea;
+    }
+};
+
+```

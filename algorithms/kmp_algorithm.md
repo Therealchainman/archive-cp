@@ -6,6 +6,9 @@ Just know that for any pi[i] it tells you the longest suffix that ends at i (inc
 
 Computes prefix array
 
+merge the pattern with string like the following usually works
+pattern + "$" + S
+
 ```py
 def kmp(s):
     n = len(s)

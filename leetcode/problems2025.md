@@ -381,12 +381,29 @@ public:
 };
 ```
 
-##
+## 1352. Product of the Last K Numbers
 
-### Solution 1: 
+### Solution 1:  prefix product
 
 ```cpp
-
+class ProductOfNumbers {
+private:
+    vector<int> pre;
+public:
+    ProductOfNumbers() {
+        pre.emplace_back(1);
+    }
+    
+    void add(int num) {
+        pre.emplace_back(pre.back() * num);
+        if (!num) pre = {1};
+    }
+    
+    int getProduct(int k) {
+        if (k >= pre.size()) return 0;
+        return pre.back() / pre.end()[-k - 1];
+    }
+};
 ```
 
 ##

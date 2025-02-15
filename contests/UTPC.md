@@ -1129,6 +1129,48 @@ signed main() {
 }
 ```
 
+# UTPC Contest 2-12-25 Div. 1 (Advanced)	
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
 # ????
 
 ## 
