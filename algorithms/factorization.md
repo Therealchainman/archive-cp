@@ -2,11 +2,18 @@
 
 ## Precomputing all the factors with factorization sieve
 
-This can be solved in O(nlogn) time complexity.
+This algorithm efficiently precomputes the factors of all integers from 1 to n using a modified sieve approach in O(n log n) time complexity. It stores the factors of each number in a sorted order, making subsequent queries for factors extremely fast.
 
-The limitation of this algorithm is that n can't be too large, maybe 10^8 is about as reasonably large you'd want it.  And you can compute all the factors for each integer from 1 to 10^8.  They will also be sorted for each integer in order of ascending factors.
-
-You want to compute this just once, not for each test case also.
+Algorithm Overview:
+Time Complexity Analysis:
+The outer loop runs from 1 to n, and the inner loop runs approximately n / i times for each i.
+The total number of iterations across all loops is n (1 + 1/2 + 1/3 + ... + 1/n) ≈ O(n log n).
+Limitations:
+The algorithm requires O(n log n) time, so it is feasible for n up to approximately 10⁸.
+Storing all factors requires O(n log n) space, which may become a bottleneck for very large values of n.
+Usage Considerations:
+This precomputation should be performed once per program execution, not per test case, to optimize performance.
+The resulting factor lists can be used for efficient factor-related computations such as divisor sums, prime factorization, and number-theoretic applications.
 
 ```cpp
 const int MAXN = 2e5 + 5;
