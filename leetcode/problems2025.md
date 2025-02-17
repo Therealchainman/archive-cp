@@ -406,12 +406,49 @@ public:
 };
 ```
 
-##
+## 1718. Construct the Lexicographically Largest Valid Sequence
 
-### Solution 1: 
+### Solution 1: recursion, backtracking, early pruning, greedy
 
 ```cpp
-
+class Solution {
+private:
+    vector<int> ans;
+    vector<bool> used;
+    int N;
+    bool dfs(int i) {
+        if (i == 2 * N - 1) {
+            return true;
+        }
+        if (ans[i] != -1) return dfs(i + 1);
+        for (int v = N; v > 1; v--) {
+            if (used[v]) continue;
+            if (i + v < 2 * N - 1 && ans[i] == -1 && ans[i + v] == -1) {
+                ans[i] = ans[i + v] = v;
+                used[v] = true;
+                if (dfs(i + 1)) return true;
+                used[v] = false;
+                ans[i] = ans[i + v] = -1;
+            }
+        }
+        if (!used[1]) {
+            used[1] = true;
+            ans[i] = 1;
+            if (dfs(i + 1)) return true;
+            used[1] = false;
+            ans[i] = -1;
+        }
+        return false;
+    }
+public:
+    vector<int> constructDistancedSequence(int n) {
+        N = n;
+        ans.assign(2 * N - 1, -1);
+        used.assign(N + 1, false);
+        dfs(0);
+        return ans;
+    }
+};
 ```
 
 ##

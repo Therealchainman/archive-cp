@@ -32,3 +32,7 @@ if (it != s.end()) {
     s.erase(it);
 }
 ```
+
+## Checking for containment
+
+Do not use count(x) with multiset, it will return the number of elements with value x. Instead, use find(x) != end(), it is much faster.  That is count() does not run in O(logn) time, as it does for set.  So use find() which does run in O(logn) time.
