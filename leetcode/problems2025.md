@@ -451,6 +451,89 @@ public:
 };
 ```
 
+## 1054. Distant Barcodes
+
+### Solution 1: greedy, frequency array, sorting
+
+```cpp
+class Solution {
+public:
+    vector<int> rearrangeBarcodes(vector<int>& barcodes) {
+        int N = barcodes.size();
+        map<int, int> freq;
+        for (int x : barcodes) {
+            freq[x]++;
+        }
+        vector<pair<int, int>> events;
+        for (const auto [k, v] : freq) {
+            events.emplace_back(v, k);
+        }
+        sort(events.begin(), events.end());
+        int cnt = 0, val = 0;
+        for (int i = 0; i < N; i += 2) {
+            if (!cnt) {
+                tie(cnt, val) = events.back();
+                events.pop_back();
+            }
+            barcodes[i] = val;
+            cnt--;
+        }
+        for (int i = 1; i < N; i += 2) {
+            if (!cnt) {
+                tie(cnt, val) = events.back();
+                events.pop_back();
+            }
+            barcodes[i] = val;
+            cnt--;
+        }
+        return barcodes;
+    }
+};
+```
+
+## 1079. Letter Tile Possibilities
+
+### Solution 1: recursion, backtracking, set, strings
+
+```cpp
+class Solution {
+private:
+    int N;
+    set<string> ans;
+    vector<bool> vis;
+    string cur, tiles;
+    void dfs() {
+        if (ans.count(cur)) return;
+        ans.insert(cur);
+        for (int j = 0; j < N; j++) {
+            if (vis[j]) continue;
+            vis[j] = true;
+            cur += tiles[j];
+            dfs();
+            cur.pop_back();
+            vis[j] = false;
+        }
+    }
+public:
+    int numTilePossibilities(string S) {
+        tiles = S;
+        N = tiles.size();
+        cur = "";
+        vis.assign(N, false);
+        dfs();
+        return ans.size() - 1;
+    }
+};
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
 ##
 
 ### Solution 1: 
