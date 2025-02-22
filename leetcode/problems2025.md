@@ -526,6 +526,114 @@ public:
 };
 ```
 
+## 1415. The k-th Lexicographical String of All Happy Strings of Length n
+
+### Solution 1: recursion, backtracking, strings
+
+```cpp
+class Solution {
+private:
+    int N, K;
+    string CHARS = "abc", cur;
+    string dfs() {
+        if (cur.size() == N) {
+            K--;
+            if (!K) return cur;
+            return "";
+        }
+        for (char ch : CHARS) {
+            if (!cur.empty() && cur.back() == ch) continue;
+            cur += ch;
+            string resp = dfs();
+            if (!resp.empty()) return resp;
+            cur.pop_back();
+        }
+        return "";
+    }
+public:
+    string getHappyString(int n, int k) {
+        N = n;
+        K = k;
+        cur = "";
+        return dfs();
+    }
+};
+```
+
+## 1261. Find Elements in a Contaminated Binary Tree
+
+### Solution 1: set, dfs, binary tree, recursion
+
+```cpp
+class FindElements {
+private:
+    set<int> seen;
+    void dfs(TreeNode* root, int x) {
+        if (root == nullptr) return;
+        seen.insert(x);
+        dfs(root -> left, 2 * x + 1);
+        dfs(root -> right, 2 * x + 2);
+    }
+public:
+    FindElements(TreeNode* root) {
+        dfs(root, 0);
+    }
+    
+    bool find(int target) {
+        return seen.count(target);
+    }
+};
+```
+
+## 1028. Recover a Tree From Preorder Traversal
+
+### Solution 1:  recursion, preorder tree traversal, dfs, depth
+
+```cpp
+class Solution {
+private:
+    string S;
+    int idx;
+    int decode(char ch) {
+        return ch - '0';
+    }
+    TreeNode* dfs(int depth) {
+        if (idx >= S.size()) return nullptr;
+        int dashes = 0;
+        while (S[idx] == '-') {
+            dashes++;
+            idx++;
+        }
+        if (dashes < depth) {
+            idx -= dashes;
+            return nullptr;
+        }
+        int val = 0;
+        while (idx < S.size() && isdigit(S[idx])) {
+            val = val * 10 + decode(S[idx++]);
+        }
+        TreeNode* node = new TreeNode(val);
+        node -> left = dfs(depth + 1);
+        node -> right = dfs(depth + 1);
+        return node;
+    }
+public:
+    TreeNode* recoverFromPreorder(string traversal) {
+        S = traversal;
+        idx = 0;
+        return dfs(0);
+    }
+};
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
 ##
 
 ### Solution 1: 

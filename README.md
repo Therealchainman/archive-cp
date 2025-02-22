@@ -54,3 +54,11 @@ g++ -std=c++20 <program file> -o main
 The intended purpose of the following templates is for platforms like Codeforces, and AtCoder. 
 There exists template file that is used to compile C++ code, `template.cpp`
 And there is a template for python code, `template.py`
+
+## Debugging on MacOS
+
+```cpp
+g++ -g <program file> -o main
+lldb main
+run
+```
