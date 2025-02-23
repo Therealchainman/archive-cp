@@ -58,3 +58,45 @@ void debug(const T &first, const Args &...rest) {
 void debug(const std::string &s) {
     std::cerr << "\"" << s << "\"";
 }
+
+// TreeNode definition
+struct TreeNode {
+    int val;
+    TreeNode *left;
+    TreeNode *right;
+    TreeNode() : val(0), left(nullptr), right(nullptr) {}
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+    TreeNode(int x, TreeNode* left, TreeNode* right) : val(x), left(left), right(right) {}
+};
+
+// Helper function to recursively print the tree in a hierarchical format.
+void printTree(TreeNode* node, const string &prefix, bool isLeft) {
+    std::cerr << prefix;
+    std::cerr << (isLeft ? "├── " : "└── ");
+    if (node == nullptr) {
+        std::cerr << "null" << endl;
+        return;
+    }
+    std::cerr << node->val << endl;
+    // Only print children if at least one exists
+    if (node->left != nullptr || node->right != nullptr) {
+        string newPrefix = prefix + (isLeft ? "│   " : "    ");
+        printTree(node->left, newPrefix, true);
+        printTree(node->right, newPrefix, false);
+    }
+}
+
+// Overload for TreeNode* to integrate with the debug library.
+void debug(TreeNode* root) {
+    if (root == nullptr) {
+        std::cerr << "null" << endl;
+        return;
+    }
+    // Print root without any branch symbol.
+    std::cerr << root->val << endl;
+    // If at least one child exists, print them with appropriate branches.
+    if (root->left != nullptr || root->right != nullptr) {
+        printTree(root->left, "", true);
+        printTree(root->right, "", false);
+    }
+}

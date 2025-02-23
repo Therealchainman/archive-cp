@@ -626,12 +626,41 @@ public:
 };
 ```
 
-##
+## 889. Construct Binary Tree from Preorder and Postorder Traversal
 
-### Solution 1: 
+### Solution 1: recursion, two pointers, preorder, postorder, tree traversal, binary tree
 
 ```cpp
-
+class Solution {
+private:
+    int i, j, N;
+    vector<int> preorder, postorder;
+    TreeNode* dfs() {
+        if (i == N) return nullptr;
+        TreeNode* root = new TreeNode(preorder[i++]);
+        if (root -> val == postorder[j]) {
+            j++;
+            return root;
+        }
+        root -> left = dfs();
+        if (postorder[j] == root -> val) {
+            j++;
+            return root;
+        }
+        root -> right = dfs();
+        if (postorder[j] == root -> val) j++;
+        return root;
+    }
+public:
+    TreeNode* constructFromPrePost(vector<int>& preorder, vector<int>& postorder) {
+        i = 0;
+        j = 0;
+        N = preorder.size();
+        this -> preorder = preorder;
+        this -> postorder = postorder;
+        return dfs();
+    }
+};
 ```
 
 ##
