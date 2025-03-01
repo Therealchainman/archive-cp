@@ -216,11 +216,102 @@ public:
 
 # Leetcode Biweekly Contest 151
 
+## 3468. Find the Number of Copy Arrays
+
+### Solution 1: interval, greedy, lower and upper bounds
+
+```py
+class Solution:
+    def countArrays(self, original: List[int], bounds: List[List[int]]) -> int:
+        N = len(original)
+        lower, upper = bounds[0]
+        delta = 0
+        for i in range(1, N):
+            l, r = bounds[i]
+            delta += original[i] - original[i - 1]
+            lower += max(0, l - lower - delta)
+            upper -= max(0, upper + delta - r)
+        return max(0, upper - lower + 1)
+```
+
+## 3469. Find Minimum Cost to Remove Array Elements
+
+### Solution 1: prefix, dynamic programming
+
+1. The trick is that there can only be one element that remains in array that is before the current prefix. 
+1. map out the possiblities that is enough to solve this one. 
+
+```py
+
+```
+
+## 3470. Permutations IV
+
+### Solution 1: recursion, factorial, counting, combinatorics, parity
+
+```py
+def ceil(x, y):
+    return (x + y - 1) // y
+def floor(x, y):
+    return x // y
+class Solution:
+    def permute(self, n: int, k: int) -> List[int]:
+        ans = []
+        odd = [False for _ in range(ceil(n, 2))]
+        even = [False for _ in range(floor(n, 2))]
+        def calc(N, rem, parity):
+            if not N: return
+            cnt = 0
+            if not parity:
+                for i in range(len(even)):
+                    if even[i]: continue
+                    nxt = math.factorial(floor(N - 1, 2)) * math.factorial(ceil(N - 1, 2))
+                    if rem <= cnt + nxt:
+                        ans.append(2 * i + 2)
+                        even[i] = True
+                        calc(N - 1, rem - cnt, parity ^ 1)
+                        return
+                    cnt += nxt
+            else:
+                for i in range(len(odd)):
+                    if odd[i]: continue
+                    nxt = math.factorial(floor(N - 1, 2)) * math.factorial(ceil(N - 1, 2))
+                    if rem <= cnt + nxt:
+                        ans.append(2 * i + 1)
+                        odd[i] = True
+                        calc(N - 1, rem - cnt, parity ^ 1)
+                        return
+                    cnt += nxt
+        cnt = 0
+        if n % 2 == 0:
+            for i in range(n):
+                nxt = math.factorial(floor(n - 1, 2)) * math.factorial(ceil(n - 1, 2))
+                if k <= cnt + nxt:
+                    ans.append(i + 1)
+                    if i % 2 == 0: odd[i // 2] = True
+                    else: even[i // 2] = True
+                    calc(n - 1, k - cnt, i % 2)
+                    break
+                cnt += nxt
+        else:
+            for i in range(len(odd)):
+                nxt = math.factorial(floor(n - 1, 2)) * math.factorial(ceil(n - 1, 2))
+                if k <= cnt + nxt:
+                    ans.append(2 * i + 1)
+                    odd[i] = True
+                    calc(n - 1, k - cnt, 0)
+                    break
+                cnt += nxt
+        return ans if len(ans) == n else []©leetcode
+```
+
+# Leetcode Biweekly Contest 152
+
 ## 
 
 ### Solution 1: 
 
-```cpp
+```py
 
 ```
 
@@ -228,7 +319,7 @@ public:
 
 ### Solution 1: 
 
-```cpp
+```py
 
 ```
 
@@ -236,6 +327,6 @@ public:
 
 ### Solution 1: 
 
-```cpp
+```py
 
 ```

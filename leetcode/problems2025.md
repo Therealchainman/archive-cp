@@ -663,11 +663,35 @@ public:
 };
 ```
 
+## 873. Length of Longest Fibonacci Subsequence
+
+### Solution 1: dynamic programming, dictionary, fibonacci, subsequence
+
+```py
+class Solution:
+    def lenLongestFibSubseq(self, arr: List[int]) -> int:
+        N = len(arr)
+        ans = 0
+        dp = [[0] * N for _ in range(N)]
+        val_to_idx = {num: i for i, num in enumerate(arr)}
+        for i in range(N):
+            for j in range(i):
+                delta = arr[i] - arr[j]
+                k = val_to_idx.get(delta, math.inf)
+                dp[j][i] = (
+                    dp[k][j] + 1 
+                    if delta < arr[j] and k < j 
+                    else 2
+                )
+                ans = max(ans, dp[j][i])
+        return ans if ans > 2 else 0
+```
+
 ##
 
 ### Solution 1: 
 
-```cpp
+```py
 
 ```
 
@@ -675,7 +699,7 @@ public:
 
 ### Solution 1: 
 
-```cpp
+```py
 
 ```
 
@@ -683,6 +707,14 @@ public:
 
 ### Solution 1: 
 
-```cpp
+```py
+
+```
+
+##
+
+### Solution 1: 
+
+```py
 
 ```

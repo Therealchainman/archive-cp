@@ -32,6 +32,15 @@ void debug(const pair<T1, T2> &p) {
     cerr << ")";
 }
 
+void debug(const std::vector<bool> &vb) {
+    std::cerr << "{";
+    for (size_t i = 0; i < vb.size(); ++i) {
+        if (i > 0) std::cerr << ", ";
+        std::cerr << (vb[i] ? "true" : "false");
+    }
+    std::cerr << "}";
+}
+
 // Debug for containers (vector, set, map, etc.)
 template <typename T>
 typename std::enable_if<is_container<T>::value>::type

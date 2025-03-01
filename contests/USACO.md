@@ -267,6 +267,209 @@ signed main() {
 
 # USACO 2025 February Contest, Silver
 
+## The Best Lineup
+
+### Solution 1: range max query, sparse table, sorting, greedy
+
+```cpp
+const int LOG = 31, INF = 1e9;
+int N;
+vector<int> A, pos;
+vector<vector<int>> st;
+
+// [L, R]
+int query(int L, int R) {
+    if (L > R) return -INF;
+	int k = log2(R - L + 1);
+	return max(st[k][L], st[k][R - (1LL << k) + 1]);
+}
+
+// j < i, move i to j
+void move(int i, int j) {
+    int v = A[i];
+    A.erase(A.begin() + i);
+    A.insert(A.begin() + j, v);
+}
+
+void solve() {
+    cin >> N;
+    A.assign(N, 0);
+    pos.assign(N, 0);
+    st.assign(LOG, vector<int>(N, -INF));
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+        pos[i] = i;
+        st[0][i] = A[i];
+    }
+    for (int i = 1; i < LOG; i++) {
+        for (int j = 0; j + (1 << (i - 1)) < N; j++) {
+            st[i][j] = max(st[i - 1][j], st[i - 1][j + (1 << (i - 1))]);
+        }
+    }
+    sort(pos.begin(), pos.end(), [&](int i, int j) {
+        if (A[i] == A[j]) return i > j;
+        return A[i] > A[j];
+    });
+    int l = 0;
+    for (int i = 0; i < N; i++) {
+        int p = pos[i];
+        int v = A[p];
+        if (i + 1 < N && A[pos[i + 1]] == v) {
+            l = max(l, pos[i + 1] + 1);
+        }
+        int maxL = query(l, p - 1);
+        int maxR = query(p + 1, N - 1);
+        if (maxL >= maxR) {
+            move(p, l);
+            break;
+        }
+        l = max(l, p + 1);
+    }
+    sort(pos.begin(), pos.end(), [&](int i, int j) {
+        if (A[i] == A[j]) return i < j;
+        return A[i] > A[j];
+    });
+    l = 0;
+    vector<int> ans;
+    for (int i = 0; i < N; i++) {
+        int p = pos[i];
+        int v = A[p];
+        if (p < l) continue;
+        ans.emplace_back(v);
+        l = p + 1;
+    }
+    for (int i = 0; i < ans.size(); i++) {
+        if (i + 1 == ans.size()) {
+            cout << ans[i] << endl;
+        } else {
+            cout << ans[i] << " ";
+        }
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## Vocabulary Quiz
+
+### Solution 1: tree, leaf nodes, depth, set, reverse queries
+
+```cpp
+int N, M;
+vector<int> depth, P;
+vector<set<int>> depthSeen;
+vector<bool> isLeaf;
+
+void solve() {
+    cin >> N;
+    P.assign(N + 1, -1);
+    depth.assign(N + 1, 0);
+    int M = N + 1;
+    isLeaf.assign(N + 1, true);
+    depthSeen.assign(N + 1, set<int>());
+    for (int i = 1; i <= N; i++) {
+        cin >> P[i];
+        depth[i] = depth[P[i]] + 1;
+        if (isLeaf[P[i]]) {
+            M--;
+            isLeaf[P[i]] = false;
+        }
+    }
+    vector<int> queries;
+    vector<int> ans;
+    while (M--) {
+        int u;
+        cin >> u;
+        queries.emplace_back(u);
+    }
+    reverse(queries.begin(), queries.end());
+    for (int u : queries) {
+        u = P[u];
+        bool isCompleted = true;
+        while (u != -1) {
+            if (depthSeen[depth[u]].count(u)) {
+                ans.emplace_back(depth[u] + 1);
+                isCompleted = false;
+                break;
+            }
+            depthSeen[depth[u]].insert(u);
+            u = P[u];
+        }
+        if (isCompleted) {
+            ans.emplace_back(0);
+        }
+    }
+    reverse(ans.begin(), ans.end());
+    for (int u : ans) {
+        cout << u << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## Transforming pairs
+
+### Solution 1: recursion
+
+1. only partial credit, waiting for editorial to get the full credit solution, it is something number theory, extended euclidean algorithm? gcd?
+
+```cpp
+const int64 INF = 1e18;
+int64 A, B, C, D;
+
+int64 dfs(int64 a, int64 b) {
+    if (a == C && b == D) return 0;
+    if (a > C || b > D) return INF;
+    int64 res = INF;
+    int64 v1 = dfs(a + b, b);
+    int64 v2 = dfs(a, a + b);
+    if (v1 != INF) res = min(res, v1 + 1);
+    if (v2 != INF) res = min(res, v2 + 1);
+    return res;
+}
+
+void solve() {
+    cin >> A >> B >> C >> D;
+    if (C < A || D < B) {
+        cout << -1 << endl;
+        return;
+    }
+    int64 ans = dfs(A, B);
+    cout << (ans != INF ? ans : -1) << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+# US Open 2025, Silver
+
 ##
 
 ### Solution 1: 
@@ -291,7 +494,7 @@ signed main() {
 
 ```
 
-# USACO 2025 Open???
+# TBD
 
 ##
 

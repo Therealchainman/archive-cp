@@ -6,9 +6,179 @@ The data structure that is a combination of the Binary Search Tree and Heap
 
 I first began creating treap using rand() in C++, but this is not actually that great for some reason. If you use the following instead it is much better, and just call rng()
 
+## Split
+
+Function Purpose:
+
+It splits the treap t into two subtrees: l (left) and r (right).
+The first val elements go to l, and the remaining elements go to r.
+
+Splitting a treap into two smaller treaps for efficient data structure operations.
+Inserting an element at a specific position by first splitting and then merging.
+Range queries and modifications in treap-based solutions.
+
+## Merge
+
+Undoing a split operation (merge is the inverse of split).
+Inserting a new node at a specific position:
+Split the treap at the insertion index.
+Merge the left part, the new node, and the right part back together.
+Deleting a node:
+Split around the node, then merge the left and right parts back together.
+Range queries and modifications:
+Useful when paired with lazy propagation techniques for range updates.
+
+## Push and Pull
+
+When Do You Need push and pull Functions in a Treap?
+You should include push and pull functions in your treap implementation when you need to handle lazy propagation or additional structural operations like reversing a subtree, range modifications, or maintaining additional augmented data.
+
+1. Understanding push
+The push function is used for lazy propagation, specifically when implementing range updates or subtree reversals.
+
+When Do You Need push?
+Reversing a range efficiently (rev flag):
+If you have a "reverse operation" that flips a subtree, push ensures that the reversal is applied only when needed and propagated lazily to children.
+Applying lazy operations before accessing children:
+If your treap has operations that affect an entire range (e.g., range addition), you should propagate those changes when splitting or querying.
+How push Works
+If a node has a rev flag set:
+Swap its left and right children.
+Push the reversal flag to its children (rev ^= true ensures toggling).
+Clear the current node’s flag (t->rev = false).
+
+2. Understanding pull
+The pull function is used to update a node's metadata based on its children.
+
+When Do You Need pull?
+Maintaining subtree aggregates like size and sum:
+Whenever the structure of the treap changes (e.g., after merge or split), the affected node’s metadata must be recomputed.
+Keeping auxiliary information updated after modifying the treap.
+Ensuring lazy propagation before querying metadata:
+Calls push before computing subtree values to guarantee correctness.
+How pull Works
+Calls push on children to ensure any pending updates are applied.
+Recomputes the node’s:
+Size (1 + size of left subtree + size of right subtree)
+Sum (node’s value + sum of left subtree + sum of right subtree)
+
 ```cpp
 mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
 ```
+
+## Treap with lazy propagation
+
+This specific example uses lazy propagation to negate values and sums, this can calculate sum of a range.
+
+```cpp
+mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
+
+struct Item {
+    int64 val, prior, size, sum;
+    bool neg;
+    Item *l, *r;
+    Item() {};
+    Item(int64 val) : val(val), prior(rng()), size(1), sum(val), neg(false), l(NULL), r(NULL) {};
+    Item(int64 val, int64 prior) : val(val), prior(prior), size(1), sum(val), neg(false), l(NULL), r(NULL) {};
+};
+typedef Item* pitem;
+
+void push(pitem t) {
+    if (t && t -> neg) {
+        t -> val = -t -> val;
+        t -> sum = -t -> sum;
+        t -> neg = false;
+        if (t -> l) t -> l -> neg ^= 1;
+        if (t -> r) t -> r -> neg ^= 1;
+    }
+}
+
+// prints the in-order traversal of a tree
+void output(Item *t) {
+    if (!t) return;
+    push(t);
+    output(t -> l);
+    cout << t -> val << " ";
+    output(t -> r);
+}
+
+void flip(pitem t) {
+    if (t) {
+        t -> neg ^= 1;
+        push(t);
+    }
+}
+
+int size(const pitem &item) { return item ? item -> size : 0; }
+int sum(const pitem &t) { return t ? t -> sum : 0; }
+
+void pull(pitem t) {
+    if(t) {
+        push(t -> l); push(t -> r);
+        t->size = 1 + (t->l ? t->l->size : 0) + (t->r ? t->r->size : 0);
+        t->sum = t->val + (t->l ? t->l->sum : 0) + (t->r ? t->r->sum : 0);
+    }
+}
+
+void split(pitem t, pitem &l, pitem &r, int cnt) {
+    push(t);
+    if (!t) {
+        l = r = nullptr;
+        return;
+    }
+    if ( (t->l ? t->l->size : 0) < cnt ) {
+        split(t->r, t->r, r, cnt - (t->l ? t->l->size : 0) - 1);
+        l = t;
+    }
+    else {
+        split(t->l, l, t->l, cnt);
+        r = t;
+    }
+    pull(t);
+}
+
+void merge(pitem &t, pitem l, pitem r) {
+    push(l); push(r);
+    if (!l || !r) {
+        t = l ? l : r;
+        return;
+    }
+    if (l->prior > r->prior) {
+        merge(l->r, l->r, r);
+        t = l;
+    }
+    else {
+        merge(r->l, l, r->l);
+        t = r;
+    }
+    pull(t);
+}
+
+int N, Q;
+vector<int64> A;
+
+void solve() {
+    cin >> N >> Q;
+    A.resize(N);
+    int64 curSum = 0;
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+    }
+    pitem root = NULL;
+    for (int i = 0; i < N; i++) {
+        if (i % 2 == 0) {
+            curSum += A[i];
+            merge(root, root, new Item(A[i]));
+        } else {
+            curSum -= A[i];
+            merge(root, root, new Item(-A[i]));
+        }
+    }
+    // more code to solve problem here
+}
+```
+
+There are lots of example problems with treaps
 
 ## Shandom Ruffle
 
@@ -19,7 +189,7 @@ struct Item {
     int key, prior, size;
     Item *l, *r;
     Item() {};
-    Item(int key) : key(key), prior(rand()), size(1), l(NULL), r(NULL) {};
+    Item(int key) : key(key), prior(rng()), size(1), l(NULL), r(NULL) {};
     Item(int key, int prior) : key(key), prior(prior), size(1), l(NULL), r(NULL) {};
 
 };
@@ -364,7 +534,7 @@ struct Item {
     int prior, size;
     Item *l, *r;
     Item() {};
-    Item(char key) : key(key), prior(rand()), size(1), l(NULL), r(NULL) {};
+    Item(char key) : key(key), prior(rng()), size(1), l(NULL), r(NULL) {};
     Item(char key, int prior) : key(key), prior(prior), size(1), l(NULL), r(NULL) {};
  
 };
@@ -451,7 +621,7 @@ struct Item {
     bool rev;
     Item *l, *r;
     Item() {};
-    Item(char key) : key(key), prior(rand()), size(1), l(NULL), r(NULL) {};
+    Item(char key) : key(key), prior(rng()), size(1), l(NULL), r(NULL) {};
     Item(char key, int prior) : key(key), prior(prior), size(1), l(NULL), r(NULL) {};
  
 };
@@ -555,7 +725,7 @@ struct Item {
     bool rev;
     Item *l, *r;
     Item() {};
-    Item(int val) : val(val), prior(rand()), size(1), l(NULL), r(NULL) {};
+    Item(int val) : val(val), prior(rng()), size(1), l(NULL), r(NULL) {};
     Item(int val, int prior) : val(val), prior(prior), size(1), l(NULL), r(NULL) {};
 };
 typedef Item* pitem;
@@ -678,7 +848,7 @@ struct Item {
     int key, prior;
     Item *l, *r;
     Item() {};
-    Item(int key) : key(key), prior(rand()), l(NULL), r(NULL) {};
+    Item(int key) : key(key), prior(rng()), l(NULL), r(NULL) {};
     Item(int key, int prior) : key(key), prior(prior), l(NULL), r(NULL) {};
 
 };

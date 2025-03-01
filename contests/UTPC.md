@@ -1171,6 +1171,516 @@ signed main() {
 
 ```
 
+# UTPC Contest 2-26-25 Div. 1 (Advanced)
+
+## Crumby Conundrum
+
+### Solution 1: grid, multisource bfs, queue, multisource shortest path, prefix sum, probability, counting
+
+```cpp
+int N, Q;
+vector<vector<char>> grid;
+vector<int> psum;
+
+bool inBounds(int r, int c) {
+    return r >= 0 && r < N && c >= 0 && c < N;
+}
+
+vector<pair<int, int>> neighborhood(int r, int c) {
+    return {{r - 1, c}, {r + 1, c}, {r, c - 1}, {r, c + 1}};
+}
+
+void solve() {
+    cin >> N >> Q;
+    queue<pair<int, int>> q;
+    grid.resize(N, vector<char>(N));
+    int total = 0;
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            cin >> grid[i][j];
+            if (grid[i][j] == 'E') {
+                q.emplace(i, j);
+            } else if (grid[i][j] == '.') {
+                total++;
+            }
+        }
+    }
+    psum.assign(N * N, 0);
+    int dist = 0;
+    while (!q.empty()) {
+        int sz = q.size();
+        while (sz--) {
+            auto [r, c] = q.front();
+            q.pop();
+            psum[dist]++;
+            for (auto [nr, nc] : neighborhood(r, c)) {
+                if (inBounds(nr, nc) && grid[nr][nc] == '.') {
+                    grid[nr][nc] = 'E';
+                    q.emplace(nr, nc);
+                }
+            }
+        }
+        dist++;
+    }
+    psum[0] = 0;
+    for (int i = 1; i < N * N; i++) {
+        psum[i] += psum[i - 1];
+    }
+    while (Q--) {
+        int q;
+        cin >> q;
+        if (!psum[q - 1]) {
+            cout << 0 << endl;
+            continue;
+        }
+        long double ans = static_cast<long double>(psum[q - 1]) / total;
+        cout << fixed << setprecision(15) << ans << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## Far Far Away
+
+### Solution 1: tree, dfs
+
+1. just want to use dfs to determine which nodes are on path from root to destination.
+1. Then just need to find which nodes contain the item, and if the subtree does, then you need to increment 2, but only if it is not on the path. That is why you track which ones are on the path.
+
+```cpp
+int N, ans;
+string S;
+vector<vector<int>> adj;
+vector<bool> onPath;
+
+bool dfs(int u, int p = -1) {
+    if (u == N - 1) {
+        onPath[u] = true;
+        return true;
+    }
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        if (dfs(v, u)) {
+            onPath[u] = true;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool dfs1(int u, int p = -1) {
+    if (onPath[u]) {
+        ans++;
+    }
+    bool res = false;
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        res |= dfs1(v, u);
+    }
+    res |= S[u] == '1';
+    if (res && !onPath[u]) {
+        ans += 2;
+    }
+    return res;
+}
+
+void solve() {
+    cin >> N >> S;
+    adj.assign(N, vector<int>());
+    for (int i = 0; i < N - 1; i++) {
+        int u, v;
+        cin >> u >> v;
+        u--, v--;
+        adj[u].emplace_back(v);
+        adj[v].emplace_back(u);
+    }
+    onPath.assign(N, false);
+    ans = 0;
+    dfs(0);
+    dfs1(0);
+    ans--;
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## Time is Moinkney
+
+### Solution 1: greedy, two pointers
+
+1. This doesn't pass all test cases, but I believe it is on the path to correct solution. 
+
+```cpp
+int64 T, C, N, M, B;
+vector<int64> sticks, bricks;
+
+void solve() {
+    cin >> T >> C >> N;
+    sticks.resize(N);
+    for (int i = 0; i < N; i++) {
+        cin >> sticks[i];
+    }
+    cin >> B >> M;
+    bricks.resize(M);
+    for (int i = 0; i < M; i++) {
+        cin >> bricks[i];
+    }
+    int64 ans = 0, curVal = 0, curCost = 0, cntBricks = 0;
+    vector<int64> costs;
+    int idx = 0;
+    while (curCost < T) {
+        if (B < 3LL * C && curCost + B <= T) {
+            costs.emplace_back(B);
+            curCost += B;
+            curVal += 3;
+            cntBricks++;
+            B += bricks[idx++];
+            idx %= M;
+        } else if (curCost + C <= T) {
+            costs.emplace_back(C);
+            curCost += C;
+            curVal++;
+        } else {
+            break;
+        }
+    }
+    ans = curVal;
+    idx = 0;
+    while (!costs.empty()) {
+        curCost -= costs.back();
+        costs.pop_back();
+        curVal--;
+        if (costs.size() < cntBricks) {
+            costs.emplace_back(C);
+            costs.emplace_back(C);
+            curCost += 2LL * C;
+            cntBricks--;
+        }
+        while (curCost + sticks[idx] <= T) {
+            curCost += sticks[idx++];
+            curVal += 2LL;
+            idx %= N;
+        }
+        debug(curCost, curVal, costs, "\n");
+        ans = max(ans, curVal);
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## Humpty Dumpty
+
+### Solution 1: line sweep algorithm, sorting, grid, leftmost, rightmost
+
+1. The difficult part is you need to track leftmost and right most, that is where he can roll.  And also note where he can't. 
+1. If you determine where he will roll until, and then fall, I store values in where you can fall. 
+
+```cpp
+enum EventType {
+    PLATFORM, QUERY
+};
+
+struct Event {
+    int x, y, i;
+    EventType type;
+    Event() {};
+    Event(int x, int y, int i, EventType type) : x(x), y(y), i(i), type(type) {};
+    bool operator<(const Event& other) const {
+        if (y == other.y) return type < other.type;
+        return y < other.y;
+    }
+};
+
+const int MAXN = 1e5 + 5, INF = 1e9;
+int N, Q;
+vector<int> minDp, maxDp, lastPlatform, leftmost, rightmost;
+set<pair<int, int>> platforms;
+vector<vector<pair<int, int>>> pointsY;
+vector<Event> events;
+
+void process(vector<pair<int, int>> &arr, vector<pair<int, int>> &above) {
+    if (arr.empty()) return;
+    sort(arr.begin(), arr.end());
+    sort(above.begin(), above.end());
+    bool blocked = false;
+    int last = arr[0].first;
+    for (int i = 0, j = 0; i < arr.size(); i++) {
+        auto [x, idx] = arr[i];
+        if (i > 0 && arr[i - 1].first + 1 != x) { // finds gap
+            blocked = false;
+            last = x;
+        }
+        while (j < above.size() && above[j].first < x) j++;
+        if (j < above.size() && above[j].first == x) {
+            blocked = true;
+        }
+        if (blocked) {
+            leftmost[idx] = -1;
+        } else {
+            leftmost[idx] = last - 1;
+        }
+    }
+    blocked = false;
+    sort(arr.rbegin(), arr.rend());
+    sort(above.rbegin(), above.rend());
+    last = arr[0].first;
+    for (int i = 0, j = 0; i < arr.size(); i++) {
+        auto [x, idx] = arr[i];
+        if (i > 0 && arr[i - 1].first != x + 1) { // finds gap
+            blocked = false;
+            last = x;
+        }
+        while (j < above.size() && above[j].first > x) j++;
+        if (j < above.size() && above[j].first == x) {
+            blocked = true;
+        }
+        if (blocked) {
+            rightmost[idx] = -1;
+        } else {
+            rightmost[idx] = last + 1;
+        }
+    }
+}
+
+void solve() {
+    minDp.assign(MAXN, -INF);
+    maxDp.assign(MAXN, -INF);
+    lastPlatform.assign(MAXN, 1);
+    pointsY.assign(MAXN, vector<pair<int, int>>());
+    cin >> N;
+    for (int i = 0; i < N; i++) {
+        int x, y;
+        cin >> x >> y;
+        events.emplace_back(x, y + 1, i, PLATFORM);
+        platforms.emplace(x, y);
+        pointsY[y + 1].emplace_back(x, i);
+    }
+    leftmost.assign(MAXN, INF);
+    rightmost.assign(MAXN, -INF);
+    for (int y = 1; y < MAXN; y++) {
+        process(pointsY[y], pointsY[y + 1]);
+    }
+    cin >> Q;
+    for (int i = 0; i < Q; i++) {
+        int x, y;
+        cin >> x >> y;
+        events.emplace_back(x, y, i, QUERY);
+    }
+    vector<pair<int, int>> ans(Q);
+    sort(events.begin(), events.end());
+    for (const auto &[x, y, i, type] : events) {
+        if (type == PLATFORM) {
+            int l = leftmost[i], r = rightmost[i];
+            int minLeft = INF, maxLeft = -INF;
+            if (l != -1 && !platforms.count({l, y})) {
+                int distLeft = y - lastPlatform[l];
+                minLeft = max(minDp[l], distLeft);
+                maxLeft = max(maxDp[l], distLeft);
+            }
+            int minRight = INF, maxRight = -INF;
+            if (r != -1 && !platforms.count({r, y})) {
+                int distRight = y - lastPlatform[r];
+                minRight = max(minDp[r], distRight);
+                maxRight = max(maxDp[r], distRight);
+            }
+            minDp[x] = minLeft == INF && minRight == INF ? -INF : min(minLeft, minRight);
+            maxDp[x] = max(maxLeft, maxRight);
+            lastPlatform[x] = y;
+        } else {
+            int dist = y - lastPlatform[x];
+            int minDist = max(minDp[x], dist);
+            int maxDist = max(maxDp[x], dist);
+            ans[i] = {maxDist, minDist};
+        }
+    }
+    for (const auto &[x, y] : ans) {
+        cout << x << " " << y << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## The Tale of the Fisherman and the Fish
+
+### Solution 1:  treap, randomized self-balancing binary search tree, lazy propagation
+
+1. The lazy propagation is needed because you are pushing the fact if you need to negate the values to the sums.
+1. You can use the split and merge to move elements around with segments.  Write these down to track them. 
+
+```cpp
+mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
+
+struct Item {
+    int64 val, prior, size, sum;
+    bool neg;
+    Item *l, *r;
+    Item() {};
+    Item(int64 val) : val(val), prior(rng()), size(1), sum(val), neg(false), l(NULL), r(NULL) {};
+    Item(int64 val, int64 prior) : val(val), prior(prior), size(1), sum(val), neg(false), l(NULL), r(NULL) {};
+};
+typedef Item* pitem;
+
+void push(pitem t) {
+    if (t && t -> neg) {
+        t -> val = -t -> val;
+        t -> sum = -t -> sum;
+        t -> neg = false;
+        if (t -> l) t -> l -> neg ^= 1;
+        if (t -> r) t -> r -> neg ^= 1;
+    }
+}
+
+// prints the in-order traversal of a tree
+void output(Item *t) {
+    if (!t) return;
+    push(t);
+    output(t -> l);
+    cout << t -> val << " ";
+    output(t -> r);
+}
+
+void flip(pitem t) {
+    if (t) {
+        t -> neg ^= 1;
+        push(t);
+    }
+}
+
+int size(const pitem &item) { return item ? item -> size : 0; }
+int sum(const pitem &t) { return t ? t -> sum : 0; }
+
+void pull(pitem t) {
+    if(t) {
+        push(t -> l); push(t -> r);
+        t->size = 1 + (t->l ? t->l->size : 0) + (t->r ? t->r->size : 0);
+        t->sum = t->val + (t->l ? t->l->sum : 0) + (t->r ? t->r->sum : 0);
+    }
+}
+
+void split(pitem t, pitem &l, pitem &r, int cnt) {
+    push(t);
+    if (!t) {
+        l = r = nullptr;
+        return;
+    }
+    if ( (t->l ? t->l->size : 0) < cnt ) {
+        split(t->r, t->r, r, cnt - (t->l ? t->l->size : 0) - 1);
+        l = t;
+    }
+    else {
+        split(t->l, l, t->l, cnt);
+        r = t;
+    }
+    pull(t);
+}
+
+void merge(pitem &t, pitem l, pitem r) {
+    push(l); push(r);
+    if (!l || !r) {
+        t = l ? l : r;
+        return;
+    }
+    if (l->prior > r->prior) {
+        merge(l->r, l->r, r);
+        t = l;
+    }
+    else {
+        merge(r->l, l, r->l);
+        t = r;
+    }
+    pull(t);
+}
+
+int N, Q;
+vector<int64> A;
+
+void solve() {
+    cin >> N >> Q;
+    A.resize(N);
+    int64 curSum = 0;
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+    }
+    pitem root = NULL;
+    for (int i = 0; i < N; i++) {
+        if (i % 2 == 0) {
+            curSum += A[i];
+            merge(root, root, new Item(A[i]));
+        } else {
+            curSum -= A[i];
+            merge(root, root, new Item(-A[i]));
+        }
+    }
+    while (Q--) {
+        int l, r;
+        cin >> l >> r;
+        l--, r--;
+        pitem left = nullptr, mid = nullptr, right = nullptr;
+        split(root, left, mid, l);
+        pitem midSegment = nullptr;
+        split(mid, midSegment, right, r - l + 1);
+        int64 midSegSum = midSegment ? midSegment->sum : 0;
+        curSum -= midSegSum;
+        pitem shiftSegment = nullptr, isoSegment = nullptr;
+        split(midSegment, isoSegment, shiftSegment, 1);
+        flip(shiftSegment);
+        if (l % 2 != r % 2) {
+            flip(isoSegment);
+        }
+        pitem midSegment2 = nullptr;
+        merge(midSegment2, shiftSegment, isoSegment);
+        midSegSum = midSegment2 ? midSegment2->sum : 0;
+        curSum += midSegSum;
+        merge(mid, midSegment2, right);
+        merge(root, left, mid);
+        if (curSum > 0) {
+            cout << "FISH" << endl;
+        } else if (curSum < 0) {
+            cout << "MAN" << endl;
+        } else {
+            cout << "TIE" << endl;
+        }
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
 # ????
 
 ## 

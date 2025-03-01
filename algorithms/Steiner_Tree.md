@@ -8,6 +8,16 @@ Given a graph and a subset of vertices in the graph, a Steiner tree spans throug
 
 Understand dp transitions is important. 
 
+The Steiner Tree problem is a well-known combinatorial optimization problem where:
+
+Given a graph with N nodes and M edges, certain nodes called terminals must be connected in the shortest possible way.
+Other non-terminal nodes may be used to reduce the overall cost.
+The goal is to find the minimum weight tree that connects all K terminal nodes.
+This algorithm:
+
+Uses bitmask DP (dp[mask][i]) to store the shortest path cost to connect a subset of terminals while ending at node i.
+Uses Dijkstra's algorithm for fast relaxation of edges
+
 ```cpp
 const int INF = 1e16;
 int N, M, K;
