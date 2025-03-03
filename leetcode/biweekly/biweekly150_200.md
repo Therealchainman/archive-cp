@@ -242,7 +242,22 @@ class Solution:
 1. map out the possiblities that is enough to solve this one. 
 
 ```py
-
+class Solution:
+    def minCost(self, nums: List[int]) -> int:
+        N = len(nums)
+        dp = [[math.inf] * N for _ in range(N)]
+        def dfs(last, idx):
+            if idx >= N:
+                return nums[last] if last < N else 0
+            if dp[last][idx] != math.inf: return dp[last][idx]
+            ans = math.inf
+            ans = min(ans, dfs(idx + 1, idx + 2) + max(nums[last], nums[idx]))
+            if idx + 1 < N:
+                ans = min(ans, dfs(idx, idx + 2) + max(nums[last], nums[idx + 1]))
+                ans = min(ans, dfs(last, idx + 2) + max(nums[idx], nums[idx + 1]))
+            dp[last][idx] = ans
+            return dp[last][idx]
+        return dfs(0, 1)
 ```
 
 ## 3470. Permutations IV
