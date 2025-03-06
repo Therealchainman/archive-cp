@@ -182,10 +182,60 @@ signed main() {
 
 ## Heaps of Queries
 
-### Solution 1: 
+### Solution 1: power of two, skew heap, mathematics, remainders
 
 ```cpp
+int64 N, X;
+string S;
 
+void solve() {
+    cin >> N >> X >> S;
+    int64 pw2 = 1;
+    while (2LL * pw2 <= X) pw2 *= 2LL;
+    for (char ch : S) {
+        if (ch == 'U') {
+            if (X == 1) {
+                cout << -1 << endl;
+                return;
+            }
+            if (X < pw2 + pw2 / 2LL) {
+                X -= pw2 / 2LL;
+            } else {
+                X -= pw2;
+            }
+            pw2 /= 2LL;
+        } else {
+            int l = X + pw2, r = X + 2LL * pw2;
+            int64 rem = N - X;
+            int v = ((rem / pw2) % 2) ^ 1;
+            int p = ch == 'L' ? 0 : 1;
+            p ^= v;
+            if (p == 0) {
+                X = l;
+            } else {
+                X = r;
+            }
+            pw2 *= 2LL;
+        }
+        if (X > N) {
+            cout << -1 << endl;
+            return;
+        }
+    }
+    cout << X << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
 ```
 
 ## In the News
@@ -266,52 +316,59 @@ signed main() {
 
 ## Count Pairs
 
-### Solution 1: dynamic programming, bit manipulation, greedy, sorting
+### Solution 1: bit manipulation, sum of subsets, sos dp, highest set bit
 
-1. I get WA, but I think I'm really close with this solution. 
+1. This is a really interesting problem, I was off because of a simple thing. 
+1. You count the number of possible ways to pick some integers with distinct highest set bit. highest set bit cannot be the same between two elements in the set. 
+1. But in addition to that you need to make sure you pick integers, such that an integer with a highest set bit, doesn't contain any other bit that overlaps with the highest set bit of another integer.
+1. This shows a way to implement such a solution, where it looks for tails, and does that complicated logic to get the complement mask for the mask of highest set bits.  
+1. But also it needs to calculate sum of subsets, so that you can consider subsets as well, if you want to check if a subset is valid, any subset of that subset is also valid.  so that is where sos dp comes in to help.  Although you could just set boolean flag as well. 
 
 ```cpp
-const int BITS = 30;
+const int BITS = 22;
+const int MAXN = 1 << BITS;
+vector<vector<int>> sos;
+
 int N;
-vector<int> A;
-int dp[BITS];
 
 bool isSet(int mask, int i) {
     return (mask >> i) & 1;
 }
 
-void output(int* arr) {
-    for (int i = 0; i < BITS; i++) {
-        cout << arr[i] << " ";
-    }
-    cout << endl;
-}
-
 void solve() {
     cin >> N;
-    A.resize(N);
-    for (int i = 0; i < N; i++) {
-        cin >> A[i];
+    sos.assign(BITS, vector<int>(MAXN, false));
+    for (int i = 0, x; i < N; i++) {
+        cin >> x;
+        int hsb = log2(x);
+        sos[hsb][x ^ (1 << hsb)] = true;
     }
-    sort(A.rbegin(), A.rend());
-    memset(dp, 0, sizeof(dp));
-    for (int x : A) {
-        int b = log2(x);
-        bool found = false;
-        for (int i = BITS - 2; i >= 0; i--) {
-            dp[i] = max(dp[i], dp[i + 1]);
+    // sum of subsets
+    for (int i = 0; i < BITS; i++) {
+        for (int j = 0; j < i; j++) {
+            for (int mask = 0; mask < (1 << i); mask++) {
+                if (isSet(mask, j)) {
+                    sos[i][mask] |= sos[i][mask ^ (1 << j)];
+                }
+            }
         }
-        for (int i = b; i >= 0; i--) {
-            if (!isSet(x, i)) found = true;
-            if (found) dp[i + 1] = max(dp[i + 1], dp[b + 1] + 1);
-        }
-        dp[0] = max(dp[0], dp[b + 1] + 1);
-        for (int i = BITS - 2; i >= 0; i--) {
-            dp[i] = max(dp[i], dp[i + 1]);
-        }
-        // output(dp);
     }
-    int ans = *max_element(dp, dp + BITS);
+    int ans = 0;
+    for (int mask = 1; mask < MAXN; mask++) {
+        int cnt = 0;
+        bool isGood = true;
+        for (int i = 0; i < BITS; i++) {
+            if (isSet(mask, i)) {
+                int cmask = (mask ^ (MAXN - 1)) & ((1 << i) - 1);
+                cnt++;
+                if (!sos[i][cmask]) {
+                    isGood = false;
+                    break;
+                }
+            }
+        }
+        if (isGood) ans = max(ans, cnt);
+    }
     cout << ans << endl;
 }
 
@@ -322,12 +379,4 @@ signed main() {
     solve();
     return 0;
 }
-```
-
-## Killer Cows
-
-### Solution 1: 
-
-```cpp
-
 ```
