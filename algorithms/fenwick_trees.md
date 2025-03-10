@@ -26,34 +26,39 @@ If you have an array of values, and you are updating a value from the array, you
 But sometimes fenwick tree is used for counting, or marking if something is currently selected, in those case you usually adding 1 or -1 to the fenwick tree.
 
 ```cpp
+template <typename T>
 struct FenwickTree {
-    vector<int> nodes;
-    int neutral = 0;
+    vector<T> nodes;
+    T neutral;
 
-    void init(int n) {
+    FenwickTree() : neutral(T(0)) {}
+
+    void init(int n, T neutral_val = T(0)) {
+        neutral = neutral_val;
         nodes.assign(n + 1, neutral);
     }
 
-    void update(int idx, int val) {
+    void update(int idx, T val) {
         while (idx < (int)nodes.size()) {
             nodes[idx] += val;
             idx += (idx & -idx);
         }
     }
 
-    int query(int left, int right) {
-        return right >= left ? query(right) - query(left - 1) : 0;
-    }
-
-    int query(int idx) {
-        int result = neutral;
+    T query(int idx) {
+        T result = neutral;
         while (idx > 0) {
             result += nodes[idx];
             idx -= (idx & -idx);
         }
         return result;
     }
+
+    T query(int left, int right) {
+        return right >= left ? query(right) - query(left - 1) : T(0);
+    }
 };
+
 ```
 
 ### IMPLEMENTED IN PYTHON + PURQ

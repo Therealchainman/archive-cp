@@ -1,5 +1,28 @@
 # Leetcode BiWeekly Contest 134
 
+## Alternating Groups II
+
+### Solution 1: two pointers
+
+```cpp
+class Solution {
+public:
+    int numberOfAlternatingGroups(vector<int>& colors, int k) {
+        int ans = 0, N = colors.size();
+        for (int i = 0, j = 0; i < N; j++) {
+            if (j > i && colors[(j - 1 + N) % N] == colors[j % N]) {
+                i = j;
+            }
+            if (j - i + 1 == k) {
+                ans++;
+                i++;
+            }
+        }
+        return ans;
+    }
+};
+```
+
 ## Number of Subarrays With AND Value of K
 
 ### Solution 1:  sparse table, range AND queries, binary search

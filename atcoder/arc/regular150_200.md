@@ -257,3 +257,252 @@ signed main() {
 
 ```
 
+# Atcoder Regular Contest 193
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+# Atcoder Regular Contest 194 Div 2
+
+## Operations on a Stack
+
+### Solution 1: 
+
+```cpp
+const int64 INF = 1e18;
+int N;
+vector<int> A;
+vector<int64> dp;
+
+void solve() {
+    cin >> N;
+    A.resize(N);
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+    }
+    dp.assign(N + 1, -INF);
+    dp[0] = 0;
+    for (int i = 0; i < N; i++) {
+        dp[i + 1] = max(dp[i] + A[i], i > 0 ? dp[i - 1] : -INF);
+    }
+    cout << dp[N] << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## Minimum Cost Sort
+
+### Solution 1: fenwick tree, sum of natural numbers, greedy, 
+
+```cpp
+int N;
+vector<int> A;
+
+int64 calc(int64 n) {
+    return n * (n + 1) / 2;
+}
+
+struct FenwickTree {
+    vector<int> nodes;
+    int neutral = 0;
+
+    void init(int n) {
+        nodes.assign(n + 1, neutral);
+    }
+
+    void update(int idx, int val) {
+        while (idx < (int)nodes.size()) {
+            nodes[idx] += val;
+            idx += (idx & -idx);
+        }
+    }
+
+    int query(int left, int right) {
+        return right >= left ? query(right) - query(left - 1) : 0;
+    }
+
+    int query(int idx) {
+        int result = neutral;
+        while (idx > 0) {
+            result += nodes[idx];
+            idx -= (idx & -idx);
+        }
+        return result;
+    }
+};
+
+void solve() {
+    cin >> N;
+    A.resize(N);
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+    }
+    int64 ans = 0;
+    FenwickTree ft;
+    ft.init(N);
+    for (int i = 0; i < N; i++) {
+        int cnt = ft.query(A[i]);
+        ans += calc(i) - calc(cnt);
+        ft.update(A[i], 1);
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## Cost to Flip
+
+### Solution 1: fenwick tree, greedy, sorting
+
+1. Uses fenwick tree for counting and prefix sums
+1. The hard part is realizing that you take the states that are of type (1, 1) and transition them from 1 -> 0 and 0 -> 1. in the decreasing order of the value, so you optimally can take the largest. 
+
+```cpp
+struct FenwickTree {
+    vector<int64> nodes;
+    int neutral = 0;
+
+    void init(int n) {
+        nodes.assign(n + 1, neutral);
+    }
+
+    void update(int idx, int64 val) {
+        while (idx < (int)nodes.size()) {
+            nodes[idx] += val;
+            idx += (idx & -idx);
+        }
+    }
+
+    int64 query(int left, int right) {
+        return right >= left ? query(right) - query(left - 1) : 0;
+    }
+
+    int64 query(int idx) {
+        int64 result = neutral;
+        while (idx > 0) {
+            result += nodes[idx];
+            idx -= (idx & -idx);
+        }
+        return result;
+    }
+};
+
+const int MAXN = 1e6 + 5;
+int N;
+vector<int> A, B, costs;
+
+void solve() {
+    cin >> N;
+    A.resize(N);
+    B.resize(N);
+    costs.resize(N);
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+    }
+    for (int i = 0; i < N; i++) {
+        cin >> B[i];
+    }
+    for (int i = 0; i < N; i++) {
+        cin >> costs[i];
+    }
+    FenwickTree ftSumX, ftSumY, ftCntX, ftCntY;
+    ftSumX.init(MAXN);
+    ftSumY.init(MAXN);
+    ftCntX.init(MAXN);
+    ftCntY.init(MAXN);
+    vector<int64> X, Y, Z;
+    int64 zsum = 0;
+    for (int i = 0; i < N; i++) {
+        if (A[i] == 1 && B[i] == 0) {
+            X.emplace_back(costs[i]);
+        } else if (A[i] == 0 && B[i] == 1) {
+            Y.emplace_back(costs[i]);
+        } else if (A[i] == 1 && B[i] == 1) {
+            Z.emplace_back(costs[i]);
+            zsum += costs[i];
+        }
+    }
+    sort(X.rbegin(), X.rend());
+    sort(Y.begin(), Y.end());
+    int64 base = 0;
+    for (int i = 0; i < X.size(); i++) {
+        base += X[i] * i;
+        ftSumX.update(X[i], X[i]);
+        ftCntX.update(X[i], 1);
+    }
+    for (int i = 0; i < Y.size(); i++) {
+        base += Y[i] * (Y.size() - i);
+        ftSumY.update(Y[i], Y[i]);
+        ftCntY.update(Y[i], 1);
+    }
+    int64 cnt = X.size() + Y.size();
+    int64 ans = base + zsum * cnt;
+    sort(Z.rbegin(), Z.rend());
+    for (int i = 0; i < Z.size(); i++) {
+        base += ftSumX.query(Z[i] - 1) + ftCntX.query(Z[i], MAXN) * Z[i];
+        base += ftSumY.query(Z[i] - 1) + (ftCntY.query(Z[i], MAXN) + 1) * Z[i];
+        cnt += 2;
+        zsum -= Z[i];
+        ans = min(ans, base + zsum * cnt);
+        ftSumX.update(Z[i], Z[i]);
+        ftCntX.update(Z[i], 1);
+        ftSumY.update(Z[i], Z[i]);
+        ftCntY.update(Z[i], 1);
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+# Atcoder Regular Contest 195
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
