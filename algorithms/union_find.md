@@ -274,3 +274,77 @@ int map2Dto1D(int i, int j) {
     return i * C + j;
 }
 ```
+
+## Union-Find with Additional Counters for Grid Connectivity
+
+This Union-Find (Disjoint Set Union, DSU) data structure is designed to efficiently manage and merge connected components in a grid-like structure. It extends the standard Union-Find by maintaining additional metadata (F and C arrays) to track specific properties of each connected component.
+
+```cpp
+struct UnionFind {
+    vector<int> parents, size, F, C;
+    vector<long double> tot;
+    UnionFind(int n) {
+        parents.resize(n);
+        iota(parents.begin(),parents.end(),0);
+        size.assign(n,1);
+        F.assign(n, 0);
+        C.assign(n, 0);
+        tot.assign(n, 0.0);
+    }
+
+    void incrementC(int i) {
+        i = find(i);
+        if (tot[i] >= 0) ans -= tot[i];
+        C[i]++;
+        tot[i] = F[i] - sqrt(C[i]);
+        if (tot[i] >= 0) ans += tot[i];
+    }
+
+    void incrementF(int i) {
+        i = find(i);
+        if (tot[i] >= 0) ans -= tot[i];
+        F[i]++;
+        tot[i] = F[i] - (C[i] ? sqrt(C[i]) : 0);
+        if (tot[i] >= 0) ans += tot[i];
+    }
+
+    int find(int i) {
+        if (i==parents[i]) {
+            return i;
+        }
+        return parents[i]=find(parents[i]);
+    }
+
+    void merge(int i, int j) {
+        i = find(i), j = find(j);
+        if (i!=j) {
+            if (size[j]>size[i]) {
+                swap(i,j);
+            }
+            if (tot[i] >= 0) ans -= tot[i];
+            if (tot[j] >= 0) ans -= tot[j];
+            size[i]+=size[j];
+            F[i] += F[j];
+            C[i] += C[j];
+            tot[i] = F[i] - (C[i] ? sqrt(C[i]) : 0);
+            if (tot[i] >= 0) ans += tot[i];
+            parents[j]=i;
+        }
+    }
+
+    void add(int i) {
+        if (i % N != N - 1 && vis[i + 1]) {
+            merge(i, i + 1);
+        }
+        if (i % N != 0 && vis[i - 1]) {
+            merge(i, i - 1);
+        }
+        if (i + N < M && vis[i + N]) {
+            merge(i, i + N);
+        }
+        if (i - N >= 0 && vis[i - N]) {
+            merge(i, i - N);
+        }
+    }
+};
+```

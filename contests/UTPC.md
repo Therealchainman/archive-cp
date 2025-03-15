@@ -1681,6 +1681,184 @@ signed main() {
 }
 ```
 
+# UTPC x WiCS Contest 3-12-25 
+
+## 
+
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## Walrus Wallflowers
+
+### Solution 1: union find, undirected graph, grid, merge neighbors, connected components
+
+```cpp
+vector<bool> vis;
+vector<vector<int>> adj;
+int N, D, M;
+long double ans;
+
+struct UnionFind {
+    vector<int> parents, size, F, C;
+    vector<long double> tot;
+    UnionFind(int n) {
+        parents.resize(n);
+        iota(parents.begin(),parents.end(),0);
+        size.assign(n,1);
+        F.assign(n, 0);
+        C.assign(n, 0);
+        tot.assign(n, 0.0);
+    }
+
+    void incrementC(int i) {
+        i = find(i);
+        if (tot[i] >= 0) ans -= tot[i];
+        C[i]++;
+        tot[i] = F[i] - sqrt(C[i]);
+        if (tot[i] >= 0) ans += tot[i];
+    }
+
+    void incrementF(int i) {
+        i = find(i);
+        if (tot[i] >= 0) ans -= tot[i];
+        F[i]++;
+        tot[i] = F[i] - (C[i] ? sqrt(C[i]) : 0);
+        if (tot[i] >= 0) ans += tot[i];
+    }
+
+    int find(int i) {
+        if (i==parents[i]) {
+            return i;
+        }
+        return parents[i]=find(parents[i]);
+    }
+
+    void merge(int i, int j) {
+        i = find(i), j = find(j);
+        if (i!=j) {
+            if (size[j]>size[i]) {
+                swap(i,j);
+            }
+            if (tot[i] >= 0) ans -= tot[i];
+            if (tot[j] >= 0) ans -= tot[j];
+            size[i]+=size[j];
+            F[i] += F[j];
+            C[i] += C[j];
+            tot[i] = F[i] - (C[i] ? sqrt(C[i]) : 0);
+            if (tot[i] >= 0) ans += tot[i];
+            parents[j]=i;
+        }
+    }
+
+    void add(int i) {
+        if (i % N != N - 1 && vis[i + 1]) {
+            merge(i, i + 1);
+        }
+        if (i % N != 0 && vis[i - 1]) {
+            merge(i, i - 1);
+        }
+        if (i + N < M && vis[i + N]) {
+            merge(i, i + N);
+        }
+        if (i - N >= 0 && vis[i - N]) {
+            merge(i, i - N);
+        }
+    }
+};
+
+int map2Dto1D(int i, int j) {
+    return i * N + j;
+}
+
+void solve() {
+    cin >> N >> D;
+    M = N * N;
+    UnionFind dsu(M);
+    vis.assign(M, false);
+    adj.assign(M, vector<int>());
+    for (int r = 0; r < N; r++) {
+        string row;
+        cin >> row;
+        for (int c = 0; c < N; c++) {
+            if (row[c] == '0') continue;
+            int i = map2Dto1D(r, c);
+            vis[i] = true;
+            dsu.incrementF(i);
+            dsu.add(i);
+        }
+    }
+    for (int d = 0; d < D; d++) {
+        int t;
+        cin >> t;
+        if (t == 1) {
+            int r, c;
+            cin >> r >> c;
+            int i = map2Dto1D(r, c);
+            if (!vis[i]) {
+                vis[i] = true;
+                dsu.incrementF(i);
+                dsu.add(i);
+                for (int v : adj[i]) {
+                    dsu.merge(i, v);
+                }
+            }
+        } else {
+            int r1, c1, r2, c2;
+            cin >> r1 >> c1 >> r2 >> c2;
+            int u = map2Dto1D(r1, c1);
+            int v = map2Dto1D(r2, c2);
+            if (vis[u] && vis[v]) {
+                dsu.incrementC(u);
+                dsu.merge(u, v);
+            } else if (vis[u]) {
+                dsu.incrementC(u);
+            } else {
+                dsu.incrementC(v);
+            }
+            adj[u].emplace_back(v);
+            adj[v].emplace_back(u);
+        }
+        cout << fixed << setprecision(10) << ans << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
 # ????
 
 ## 
