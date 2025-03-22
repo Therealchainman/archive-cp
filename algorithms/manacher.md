@@ -71,17 +71,10 @@ Let's call these static palindromic range queries
 
 Important to note the range query is for range [l, r).  
 
+The goal is to preprocess a string so that you can answer in constant time whether any substring s[l...r-1] is a palindrome using the query(l, r) function.
+
 ```cpp
 vector<int> marr;
-vector<int> manacher(const string& s) {
-    string t = "#";
-    for (char ch : s) {
-        t += ch;
-        t += "#";
-    }
-    vector<int> parr = manacher_odd(t);
-    return parr;
-}
 vector<int> manacher_odd(string& s) {
     int N = s.size();
     s = "$" + s + "^";
@@ -98,6 +91,15 @@ vector<int> manacher_odd(string& s) {
         }
     }
     return vector<int>(P.begin() + 1, P.end() - 1);
+}
+vector<int> manacher(const string& s) {
+    string t = "#";
+    for (char ch : s) {
+        t += ch;
+        t += "#";
+    }
+    vector<int> parr = manacher_odd(t);
+    return parr;
 }
 // [l, r)
 bool query(int l, int r) {
