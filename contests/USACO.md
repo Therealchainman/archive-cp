@@ -468,25 +468,144 @@ signed main() {
 }
 ```
 
-# US Open 2025, Silver
+# USACO 2025 US Open Contest, Gold
 
-##
+## Moo Decomposition
 
-### Solution 1: 
+### Solution 1: binary exponentiation, binomial coefficients, factorials, combinatorics, reverse
 
 ```cpp
+const int64 MOD = 1e9 + 7, MAXN = 1e6 + 5;
+int64 K, N, L;
+string S;
+
+int64 inv(int i, int64 m) {
+    return i <= 1 ? i : m - (m / i) * inv(m % i, m) % m;
+}
+  
+vector<int64> fact, inv_fact;
+void factorials(int n, int64 m) {
+    fact.assign(n + 1, 1);
+    inv_fact.assign(n + 1, 0);
+    for (int i = 2; i <= n; i++) {
+        fact[i] = (fact[i - 1] * i) % m;
+    }
+    inv_fact.end()[-1] = inv(fact.end()[-1], m);
+    for (int i = n - 1; i >= 0; i--) {
+        inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % m;
+    }
+}
+  
+int64 choose(int n, int r, int64 m) {
+    if (n < r) return 0;
+    return (fact[n] * inv_fact[r] % m) * inv_fact[n - r] % m;
+}
+
+int64 exponentiation(int64 b, int64 p, int64 m) {
+    int64 res = 1;
+    while (p > 0) {
+        if (p & 1) res = (res * b) % m;
+        b = (b * b) % m;
+        p >>= 1;
+    }
+    return res;
+}
+
+void solve() {
+    cin >> K >> N >> L >> S;
+    int64 ans = 1, cnt = 0;
+    for (int i = N - 1; i >= 0; i--) {
+        if (S[i] == 'M') {
+            ans = (ans * choose(cnt, K, MOD)) % MOD;
+            cnt -= K;
+        } else {
+            cnt++;
+        }
+    }
+    ans = exponentiation(ans, L, MOD);
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    factorials(MAXN, MOD);
+    solve();
+    return 0;
+}
 
 ```
 
-##
+## Election Queries
 
 ### Solution 1: 
 
-```cpp
+partial solve, O(NQ) time complexity
 
+```cpp
+int N, Q;
+vector<int> A, counts;
+
+void solve() {
+    cin >> N >> Q;
+    A.resize(N);
+    counts.assign(N + 1, 0);
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+        counts[A[i]]++;
+    }
+    priority_queue<pair<int, int>> mheap;
+    for (int i = 1; i <= N; i++) {
+        if (counts[i] == 0) continue;
+        mheap.emplace(counts[i], i);
+    }
+    while (Q--) {
+        int idx, val;
+        cin >> idx >> val;
+        idx--;
+        counts[A[idx]]--;
+        A[idx] = val;
+        counts[val]++;
+        mheap.emplace(counts[val], val);
+        while (counts[mheap.top().second] != mheap.top().first) mheap.pop();
+        auto [cmax, _] = mheap.top();
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> minheap;
+        priority_queue<pair<int, int>> maxheap;
+        for (int i = 1; i <= N; i++) {
+            if (counts[i] == 0) continue;
+            minheap.emplace(counts[i], i);
+            maxheap.emplace(counts[i], i);
+        }
+        int ans = 0;
+        int minIdx = N, maxIdx = 0;
+        while (!minheap.empty()) {
+            auto [cl, i] = minheap.top();
+            minheap.pop();
+            int cr = cmax - cl;
+            while (!maxheap.empty() && maxheap.top().first >= cr) {
+                auto [_, j] = maxheap.top();
+                maxheap.pop();
+                minIdx = min(minIdx, j);
+                maxIdx = max(maxIdx, j);
+            }
+            ans = max(ans, maxIdx - i);
+            ans = max(ans, i - minIdx);
+        }
+        cout << ans << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
-##
+## OohMoo Milk
 
 ### Solution 1: 
 

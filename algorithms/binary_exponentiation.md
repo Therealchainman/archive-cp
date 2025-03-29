@@ -17,8 +17,8 @@ int b is the base, int p is the power, and int m is the modulus.
 return b^p % m
 
 ```cpp
-int exponentiation(int b, int p, int m) {
-    int res = 1;
+int64 exponentiation(int64 b, int64 p, int64 m) {
+    int64 res = 1;
     while (p > 0) {
         if (p & 1) res = (res * b) % m;
         b = (b * b) % m;
