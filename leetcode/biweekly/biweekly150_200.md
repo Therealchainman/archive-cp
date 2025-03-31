@@ -326,7 +326,7 @@ class Solution:
 
 ### Solution 1: 
 
-```py
+```cpp
 
 ```
 
@@ -334,7 +334,7 @@ class Solution:
 
 ### Solution 1: 
 
-```py
+```cpp
 
 ```
 
@@ -342,6 +342,152 @@ class Solution:
 
 ### Solution 1: 
 
-```py
+```cpp
+
+```
+
+# Leetcode Biweekly Contest 153
+
+## 3500. Minimum Cost to Divide Array Into Subarrays
+
+### Solution 1: dynamic programming, mathematics, prefix sums, range queries, 
+
+```cpp
+using int64 = long long;
+const int64 INF = (1LL << 63) - 1;
+class Solution {
+private:
+    int N, K;
+    vector<int64> A, C, prefA, prefC;
+    vector<vector<int64>> dp;
+    int64 query(const vector<int64>& psum, int l, int r) {
+        if (l > r) return 0;
+        int64 res = psum[r];
+        if (l > 0) res -= psum[l - 1];
+        return res;
+    }
+    int64 dfs(int l, int r) {
+        if (r == N) {
+            if (l == N) return 0;
+            return INF;
+        }
+        if (dp[l][r] != -1) return dp[l][r];
+        int64 costSubarray = (query(prefA, l, r) + K) * query(prefC, l, N - 1);
+        int64 nextSubarrayCost = dfs(r + 1, r + 1);
+        int64 cutSubarrayCost = INF;
+        if (nextSubarrayCost != INF) cutSubarrayCost = costSubarray + nextSubarrayCost;
+        int64 extendSubarrayCost = dfs(l, r + 1);
+        return dp[l][r] = min(extendSubarrayCost, cutSubarrayCost);
+    }
+public:
+    int64 minimumCost(vector<int>& nums, vector<int>& cost, int k) {
+        N = nums.size();
+        K = k;
+        A = vector<int64>(nums.begin(), nums.end());
+        C = vector<int64>(cost.begin(), cost.end());
+        prefA.assign(N, 0);
+        prefC.assign(N, 0);
+        for (int i = 0; i < N; i++) {
+            prefA[i] = A[i];
+            prefC[i] = C[i];
+            if (i > 0) {
+                prefA[i] += prefA[i - 1];
+                prefC[i] += prefC[i - 1];
+            }
+        }
+        dp.assign(N + 1, vector<int64>(N + 1, -1));
+        return dfs(0, 0);
+    }
+};
+```
+
+## 3501. Maximize Active Section with Trade II
+
+### Solution 1: sparse table, range maximum query, consecutive blocks, remap index to zero blocks
+
+```cpp
+class Solution {
+private:
+    const int LOG = 24;
+    vector<int> nums;
+    vector<vector<int>> st;
+
+    int query(int L, int R) {
+        int k = log2(R - L + 1);
+        return max(st[k][L], st[k][R - (1 << k) + 1]);
+    }
+public:
+    vector<int> maxActiveSectionsAfterTrade(string s, vector<vector<int>>& queries) {
+        int N = s.size(), M = queries.size(), baseActive = 0;
+        vector<pair<int, int>> zblocks;
+        vector<int> indexMap(N, 0);
+        for (int i = 0; i < N; i++) {
+            if (s[i] == '0') {
+                if (i > 0 && s[i - 1] == '0') zblocks.back().second++;
+                else zblocks.emplace_back(i, 1);
+            } else {
+                baseActive++;
+            }
+            indexMap[i] = zblocks.size() - 1;
+        }
+        int NZ = zblocks.size();
+        st.assign(LOG, vector<int>(N, 0));
+        for (int i = 0; i + 1 < NZ; i++) {
+            int gain = zblocks[i].second + zblocks[i + 1].second;
+            st[0][i] = gain;
+        }
+        for (int i = 1; i < LOG; i++) {
+            for (int j = 0; j + (1 << (i - 1)) < N; j++) {
+                st[i][j] = max(st[i - 1][j], st[i - 1][j + (1 << (i - 1))]);
+            }
+        }
+        vector<int> ans(M, 0);
+        for (int i = 0; i < M; i++) {
+            int l = queries[i][0], r = queries[i][1];
+            int zl = indexMap[l] + 1, zr = indexMap[r] - (s[r] == '0');
+            int cntLeft = indexMap[l] >= 0 ? zblocks[indexMap[l]].second - (l - zblocks[indexMap[l]].first): -1;
+            int cntRight = indexMap[r] >= 0 ? r - zblocks[indexMap[r]].first + 1: -1;
+            if (zr > zl) {
+                ans[i] = max(ans[i], query(zl, zr - 1));
+            }
+            if (s[l] == '0' && s[r] == '0' && indexMap[l] + 1 == indexMap[r]) {
+                ans[i] = max(ans[i], cntLeft + cntRight);
+            }
+            if (s[l] == '0' && indexMap[r] - indexMap[l] + (s[r] == '1') > 1) {
+                ans[i] = max(ans[i], cntLeft + zblocks[indexMap[l] + 1].second);
+            }
+            if (s[r] == '0' && indexMap[r] - indexMap[l] > 1) {
+                ans[i] = max(ans[i], cntRight + zblocks[indexMap[r] - 1].second);
+            }
+            ans[i] += baseActive;
+        }
+        return ans;
+    }
+};
+```
+
+# Leetcode Biweekly Contest 154
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
 
 ```

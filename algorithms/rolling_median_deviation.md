@@ -29,3 +29,79 @@ def RMD(nums, k): # rolling median deviation
 ```
 
 This is useful, because when you want to calculate the best value to set all elements to in a fixed sized subarray, the median is the best option, can be proved because if you move away from the median, it will increase more elements than those it decreases. 
+
+
+## Fixed sized sliding window
+
+The RMD struct efficiently calculates the sum of absolute differences from the median for every prefix of a given array arr, and for a sliding window of size k if desired.
+
+Calculates the sum of the absolute difference from the median for the ith index in result, and contains k elements, so goes back i - k + 1
+
+This one is 1-indexed also.  So result[3] = elements from 0,1,2 index are in there. 
+
+
+```cpp
+using int64 = long long;
+const int64 INF = (1LL << 63) - 1;
+struct RMD {
+    vector<int64> result;
+    multiset<int64> left, right;
+    int64 leftSum, rightSum;
+    void init(const vector<int>& arr, int k) {
+        int N = arr.size();
+        leftSum = rightSum = 0;
+        result.assign(N + 1, 0);
+        for (int i = 0; i < N; i++) {
+            add(arr[i]);
+            int64 median = *prev(left.end());
+            int64 cost = median * left.size() - leftSum + rightSum - median * right.size();
+            result[i + 1] = cost;
+            if (i >= k - 1) {
+                remove(arr[i - k + 1]);
+            }
+        }
+    }
+    void balance() {
+        while (left.size() > right.size() + 1) {
+            auto it = prev(left.end());
+            int val = *it;
+            leftSum -= val;
+            left.erase(it);
+            rightSum += val;
+            right.insert(val);
+        }
+        while (left.size() < right.size()) {
+            auto it = right.begin();
+            int val = *it;
+            rightSum -= val;
+            right.erase(it);
+            leftSum += val;
+            left.insert(val);
+        }
+    }
+    void add(int num) {
+        if (left.empty() || num <= *prev(left.end())) {
+            left.insert(num);
+            leftSum += num;
+        } else {
+            right.insert(num);
+            rightSum += num;
+        }
+        balance();
+    }
+    void remove(int num) {
+        if (left.find(num) != left.end()) {
+            auto it = left.find(num);
+            int64 val = *it;
+            leftSum -= val;
+            left.erase(it);
+        } else {
+            auto it = right.find(num);
+            int64 val = *it;
+            rightSum -= val;
+            right.erase(it);
+        }
+        balance();
+    }
+};
+```

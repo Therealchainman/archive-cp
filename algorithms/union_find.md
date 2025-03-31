@@ -117,8 +117,19 @@ struct UnionFind {
         }
         return true;
     }
+    vector<vector<int>> groups() {
+        int n = parents.size();
+        unordered_map<int, vector<int>> group_map;
+        for (int i = 0; i < n; ++i) {
+            group_map[find(i)].emplace_back(i);
+        }
+        vector<vector<int>> res;
+        for (auto& [_, group] : group_map) {
+            res.emplace_back(move(group));
+        }
+        return res;
+    }
 };
-
 ```
 
 ## Persistent Disjoint Union Set Data Structure
