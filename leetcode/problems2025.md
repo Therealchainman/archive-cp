@@ -687,11 +687,37 @@ class Solution:
         return ans if ans > 2 else 0
 ```
 
+## 1123. Lowest Common Ancestor of Deepest Leaves
+
+### Solution 1: recursion, depth, binary tree
+
+```cpp
+class Solution {
+private:
+    pair<TreeNode*, int> dfs(TreeNode* root) {
+        if (!root) return {nullptr, 0};
+        auto left = dfs(root -> left);
+        auto right = dfs(root -> right);
+        if (left.second > right.second) {
+            return {left.first, left.second + 1};
+        }
+        if (left.second < right.second) {
+            return {right.first, right.second + 1};
+        }
+        return {root, left.second + 1};
+    }
+public:
+    TreeNode* lcaDeepestLeaves(TreeNode* root) {
+        return dfs(root).first;
+    }
+};
+```
+
 ##
 
 ### Solution 1: 
 
-```py
+```cpp
 
 ```
 
@@ -699,7 +725,7 @@ class Solution:
 
 ### Solution 1: 
 
-```py
+```cpp
 
 ```
 
@@ -707,14 +733,6 @@ class Solution:
 
 ### Solution 1: 
 
-```py
-
-```
-
-##
-
-### Solution 1: 
-
-```py
+```cpp
 
 ```

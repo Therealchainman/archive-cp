@@ -55,6 +55,7 @@ void insert(int x, int y) {
     prv[nxt[x]] = y;
     nxt[x] = y;
 }
+
 ```
 
 ## Example of a Doubly Linked List 
