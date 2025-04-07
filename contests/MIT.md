@@ -796,3 +796,230 @@ signed main() {
 ```cpp
 
 ```
+
+# M(IT)^2 2025 Spring Invitationals Qualification Round 1
+
+## Kites
+
+### Solution 1: sorting, prefix min
+
+```cpp
+const int INF = 1e9;
+int N;
+vector<int> A;
+
+void solve() {
+    cin >> N;
+    A.assign(N, 0);
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+    }
+    sort(A.begin(), A.end());
+    int delta1 = INF, delta2 = INF, ans = INF;
+    for (int i = 1; i < N; i++) {
+        int delta = A[i] - A[i - 1];
+        ans = min(ans, delta + delta1);
+        delta1 = min(delta1, delta2);
+        delta2 = delta;
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## Feeding Beavers
+
+### Solution 1: greedy, deque
+
+1. Greedily take smallest pair that satisfies the condition of even or odd. 
+
+```cpp
+const int INF = 1e9;
+int N;
+string S;
+
+void solve() {
+    cin >> N >> S;
+    deque<int> dq;
+    for (int i = 1; i <= 2 * N; i++) {
+        dq.emplace_back(i);
+    }
+    vector<pair<int, int>> ans;
+    for (char ch : S) {
+        bool found = false;
+        if (ch == 'O') {
+            vector<int> tmp;
+            int x = dq.front();
+            dq.pop_front();
+            while (!dq.empty()) {
+                int y = dq.front();
+                dq.pop_front();
+                if ((x + y) & 1) {
+                    ans.emplace_back(x, y);
+                    found = true;
+                    break;
+                }
+                tmp.emplace_back(y);
+            }
+            for (int y : tmp) {
+                dq.emplace_front(y);
+            }
+        } else {
+            vector<int> tmp;
+            int x = dq.front();
+            dq.pop_front();
+            while (!dq.empty()) {
+                int y = dq.front();
+                dq.pop_front();
+                if ((x + y) % 2 == 0) {
+                    ans.emplace_back(x, y);
+                    found = true;
+                    break;
+                }
+                tmp.emplace_back(y);
+            }
+            for (int y : tmp) {
+                dq.emplace_front(y);
+            }
+        }
+        if (!found) {
+            cout << "NO" << endl;
+            return;
+        }
+    }
+    cout << "YES" << endl;
+    for (auto [x, y] : ans) {
+        cout << x << " " << y << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## Beaverland
+
+### Solution 1: greedy, bfs
+
+1. since it is strictly increasing order, just make the first one be distance = 1, 2, 3, 4 and so on if the first node is not 1, if it is 1 just 0, 1, 2, 3 instead
+
+```cpp
+int N, M, K;
+vector<int> A;
+vector<vector<int>> adj;
+
+vector<int> bfs() {
+    vector<int> dist(N, -1);
+    deque<int> dq;
+    dq.emplace_back(0);
+    dist[0] = 0;
+    while (!dq.empty()) {
+        int u = dq.front();
+        dq.pop_front();
+        for (int v : adj[u]) {
+            if (dist[v] == -1) {
+                dist[v] = dist[u] + 1;
+                dq.emplace_back(v);
+            }
+        }
+    }
+    return dist;
+}
+
+void solve() {
+    cin >> N >> M >> K;
+    A.assign(K, 0);
+    adj.assign(N, vector<int>());
+    for (int i = 0; i < K; i++) {
+        cin >> A[i];
+        A[i]--;
+    }
+    for (int i = 0; i < M; i++) {
+        int u, v;
+        cin >> u >> v;
+        u--, v--;
+        adj[u].emplace_back(v);
+        adj[v].emplace_back(u);
+    }
+    vector<pair<int, int>> ans;
+    if (A[0] != 0) {
+        ans.emplace_back(0, A[0]);
+        adj[0].emplace_back(A[0]);
+        adj[A[0]].emplace_back(0);
+    }
+    for (int i = 1; i < K; i++) {
+        ans.emplace_back(A[i - 1], A[i]);
+        adj[A[i - 1]].emplace_back(A[i]);
+        adj[A[i]].emplace_back(A[i - 1]);
+    }
+    vector<int> dist = bfs();
+    for (int i = 1; i < K; i++) {
+        if (dist[A[i]] <= dist[A[i - 1]]) {
+            cout << -1 << endl;
+            return;
+        }
+    }
+    cout << ans.size() << endl;
+    for (auto [x, y] : ans) {
+        cout << x + 1 << " " << y + 1 << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+# M(IT)^2 2025 Spring Invitationals Qualification Round 2
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```

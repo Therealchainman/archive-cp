@@ -23,7 +23,7 @@ you can just get the value from seg.nodes[1] if you are querying the full range 
 struct SegmentTree {
     int size;
     int neutral = 0;
-    vector<int> nodes;
+    vector<int64> nodes;
 
     void init(int num_nodes) {
         size = 1;
@@ -31,8 +31,8 @@ struct SegmentTree {
         nodes.assign(size * 2, 0);
     }
 
-    int func(int x, int y) {
-        return max(x, y);
+    int64 func(int64 x, int64 y) {
+        return x + y;
     }
 
     void ascend(int segment_idx) {
@@ -43,16 +43,16 @@ struct SegmentTree {
         }
     }
     // this is for assign, for addition change to += val
-    void update(int segment_idx, int val) {
+    void update(int segment_idx, int64 val) {
         segment_idx += size;
         nodes[segment_idx] = val; // += val if want addition, to track frequency
         segment_idx >>= 1;
         ascend(segment_idx);
     }
 
-    int query(int left, int right) {
+    int64 query(int left, int right) {
         left += size, right += size;
-        int res = neutral;
+        int64 res = neutral;
         while (left <= right) {
             if (left & 1) {
                 res = func(res, nodes[left]);

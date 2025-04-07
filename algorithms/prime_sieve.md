@@ -185,3 +185,20 @@ def prime_sieve(lim):
                 num //= i
     return multi_sum
 ```
+
+## sieve of Eratosthenes to count the number of distinct primes that make up each integer
+
+```cpp
+void sieve(int n) {
+    fill(isprime, isprime + n, true);
+    isprime[0] = isprime[1] = false;
+    for (int64 p = 2; p < n; p++) {
+        if (isprime[p]) {
+            for (int64 i = p; i < n; i += p) {
+                isprime[i] = false;
+                primesCount[i]++;
+            }
+        }
+    }
+}
+```

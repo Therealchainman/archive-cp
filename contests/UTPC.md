@@ -1859,14 +1859,348 @@ signed main() {
 
 ```
 
-# ????
+# UT Open 2025
 
-## 
+## Card Counting
 
-### Solution 1: 
+### Solution 1: fenwick tree, segment tree, range queries
 
 ```cpp
+template <typename T>
+struct FenwickTree {
+    vector<T> nodes;
+    T neutral;
+ 
+    FenwickTree() : neutral(T(0)) {}
+ 
+    void init(int n, T neutral_val = T(0)) {
+        neutral = neutral_val;
+        nodes.assign(n + 1, neutral);
+    }
+ 
+    void update(int idx, T val) {
+        while (idx < (int)nodes.size()) {
+            nodes[idx] += val;
+            idx += (idx & -idx);
+        }
+    }
+ 
+    T query(int idx) {
+        T result = neutral;
+        while (idx > 0) {
+            result += nodes[idx];
+            idx -= (idx & -idx);
+        }
+        return result;
+    }
+ 
+    T query(int left, int right) {
+        return right >= left ? query(right) - query(left - 1) : T(0);
+    }
+};
+ 
+struct SegmentTree {
+    int size;
+    int neutral = 0;
+    vector<int64> nodes;
+ 
+    void init(int num_nodes) {
+        size = 1;
+        while (size < num_nodes) size *= 2;
+        nodes.assign(size * 2, 0);
+    }
+ 
+    int64 func(int64 x, int64 y) {
+        return x + y;
+    }
+ 
+    void ascend(int segment_idx) {
+        while (segment_idx > 0) {
+            int left_segment_idx = 2 * segment_idx, right_segment_idx = 2 * segment_idx + 1;
+            nodes[segment_idx] = func(nodes[left_segment_idx], nodes[right_segment_idx]);
+            segment_idx >>= 1;
+        }
+    }
+    // this is for assign, for addition change to += val
+    void update(int segment_idx, int64 val) {
+        segment_idx += size;
+        nodes[segment_idx] = val; // += val if want addition, to track frequency
+        segment_idx >>= 1;
+        ascend(segment_idx);
+    }
+ 
+    int64 query(int left, int right) {
+        left += size, right += size;
+        int64 res = neutral;
+        while (left <= right) {
+            if (left & 1) {
+                res = func(res, nodes[left]);
+                left++;
+            }
+            if (~right & 1) {
+                res = func(res, nodes[right]);
+                right--;
+            }
+            left >>= 1, right >>= 1;
+        }
+        return res;
+    }
+};
+ 
+int N;
+vector<int> C;
+ 
+void solve() {
+    cin >> N;
+    C.resize(N);
+    for (int i = 0; i < N; ++i) {
+        cin >> C[i];
+    }
+    FenwickTree<int64> ft;
+    ft.init(N + 1);
+    SegmentTree seg;
+    seg.init(N + 1);
+    int64 ans = 0;
+    for (int i = 0; i < N; i++) {
+        int64 m = ft.query(C[i], N);
+        ans += m * C[i];
+        ans += seg.query(C[i], N);
+        ft.update(C[i], 1);
+        seg.update(C[i], C[i]);
+    }
+    cout << ans << endl;
+}
+ 
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
 
+## City Renewal
+
+### Solution 1: dynamic programming, two pointers
+
+```cpp
+int N, D;
+vector<pair<int, int>> proposals;
+vector<int64> X, P;
+ 
+void solve() {
+    cin >> N >> D;
+    X.resize(N);
+    P.resize(N);
+    for (int i = 0; i < N; i++) {
+        cin >> X[i] >> P[i];
+        proposals.emplace_back(X[i], P[i]);
+    }
+    sort(proposals.begin(), proposals.end());
+    for (int i = 0; i < N; i++) {
+        X[i] = proposals[i].first;
+        P[i] = proposals[i].second;
+    }
+    vector<int64> dp(N, 0);
+    for (int i = 0, j = 0; i < N; i++) {
+        while (j + 1 < N && X[i] - X[j + 1] >= D) j++;
+        if (i == 0) dp[i] = P[i];
+        else dp[i] = max(dp[i - 1], P[i]);
+        if (X[i] - X[j] >= D) dp[i] = max(dp[i], dp[j] + P[i]);
+    }
+    cout << dp.back() << endl;
+}
+ 
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## Lineism
+
+### Solution 1: greedy, set
+
+```cpp
+set<pair<int, int>> verts;
+int R, C;
+vector<vector<char>> grid;
+vector<vector<int>> rowToCol;
+vector<set<int>> colToRow;
+ 
+void solve() {
+    cin >> R >> C;
+    vector<int> counts(C, 0);
+    rowToCol.assign(R, vector<int>());
+    colToRow.assign(C, set<int>());
+    for (int r = 0; r < R; r++) {
+        string S;
+        cin >> S;
+        for (int c = 0; c < C; c++) {
+            if (S[c] == 'X') {
+                rowToCol[r].emplace_back(c);
+                counts[c]++;
+                colToRow[c].emplace(r);
+            }
+        }
+    }
+    for (int c = 0; c < C; c++) {
+        if (!counts[c]) continue;
+        verts.emplace(counts[c], c);
+    }
+    int ans = verts.size();
+    int cur = ans; // just vertical strokes
+    while (!verts.empty()) {
+        auto [cnt, c] = *verts.begin();
+        if (!cnt) {
+            cur--; // don't need vertical stroke anymore
+            ans = min(ans, cur);
+            verts.erase(verts.begin());
+            continue;
+        }
+        cur++;
+        ans = min(ans, cur);
+        int r = *colToRow[c].begin();
+        for (int c2 : rowToCol[r]) {
+            auto it = verts.find({counts[c2], c2});
+            verts.erase(it);
+            counts[c2]--;
+            verts.emplace(counts[c2], c2);
+            colToRow[c2].erase(r);
+        }
+    }
+    cout << ans << endl;
+}
+ 
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## Security Breach
+
+### Solution 1: dijkstra, weighted directed graph, transpose graph, minimax path
+
+1. Dijkstra variant where you are taking the minimax at each level so the new cost is max(dist[u], w), and you want to minimize the maximum cost from any path to this node u.
+1. minimum maximum edge weight from node 0 to every other node 
+
+```cpp
+const int INF = (1 << 31) - 1;
+int N, M;
+vector<int> cost, costR;
+vector<vector<pair<int, int>>> adj, tadj;
+ 
+void dijkstra(vector<int> &dist, const vector<vector<pair<int, int>>> &adj) {
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> minheap;
+    minheap.emplace(0, 0);
+    dist[0] = 0;
+    while (!minheap.empty()) {
+        auto [d, u] = minheap.top();
+        minheap.pop();
+        if (dist[u] < d) continue;
+        for (auto [v, w] : adj[u]) {
+            int ncost = max(dist[u], w);
+            if (ncost < dist[v]) {
+                dist[v] = ncost;
+                minheap.emplace(dist[v], v);
+            }
+        }
+    }
+}
+ 
+void solve() {
+    cin >> N >> M;
+    adj.assign(N, vector<pair<int, int>>());
+    tadj.assign(N, vector<pair<int, int>>());
+    for (int i = 0; i < M; i++) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        u--; v--;
+        adj[u].emplace_back(v, w);
+        tadj[v].emplace_back(u, w);
+    }
+    cost.assign(N, INF);
+    costR.assign(N, INF);
+    dijkstra(cost, adj);
+    dijkstra(costR, tadj);
+    debug(cost, costR, "\n");
+    for (int i = 0; i < N; i++) {
+        if (costR[i] > cost[i]) {
+            cout << "NO" << endl;
+            return;
+        }
+    }
+    cout << "YES" << endl;
+}
+ 
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## Tea Party
+
+### Solution 1: knapsack dynamic programming, square root time complexity, counting dp
+
+```cpp
+const int64 MOD = 1e9 + 7;
+int N;
+vector<int64> A;
+ 
+void solve() {
+    cin >> N;
+    A.resize(N + 1);
+    int64 sumW = 0;
+    for (int i = 1; i <= N; i++) {
+        cin >> A[i];
+        sumW += A[i];
+    }
+    vector<int64> dp(sumW + 1, 0);
+    dp[0] = 1;
+    bool found = false;
+    for (int64 t = 1; t <= N; t++) {
+        if (t * t <= sumW) {
+            for (int i = t * t; i >= 0; i--) {
+                if (i - A[t] >= 0) dp[i] = (dp[i] + dp[i - A[t]]) % MOD;
+            }
+        } else {
+            if (!found) {
+                for (int i = 0; i < sumW; i++) {
+                    dp.back() = (dp.back() + dp[i]) % MOD;
+                    dp[i] = 0;
+                }
+                found = true;
+            }
+            dp.back() = (dp.back() + dp.back()) % MOD;
+        }
+        debug(t, A[t], dp, "\n");
+    }
+    int64 ans = 0;
+    for (int64 x : dp) {
+        ans = (ans + x) % MOD;
+    }
+    cout << ans << endl;
+}
+ 
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ## 
