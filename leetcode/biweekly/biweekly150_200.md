@@ -468,6 +468,160 @@ public:
 
 # Leetcode Biweekly Contest 154
 
+## Number of Unique XOR Triplets I
+
+### Solution 1: powers of 2, binary search
+
+```cpp
+class Solution {
+public:
+    int uniqueXorTriplets(vector<int>& nums) {
+        int N = nums.size();
+        vector<int> powers(20, 1);
+        for (int i = 1; i < 20; i++) {
+            powers[i] = powers[i - 1] * 2;
+        }
+        auto it = upper_bound(powers.begin(), powers.end(), N);
+        if (N < 3) it--;
+        int ans = *it;
+        return ans;
+    }
+};
+```
+
+## Number of Unique XOR Triplets II
+
+### Solution 1: set, preocompute the first pair, then add the third
+
+1. Because the number of possible unique xors of just a pair of numbers is relatively small this gets the time complexity to roughly O(N^2)
+
+```cpp
+class Solution {
+public:
+    int uniqueXorTriplets(vector<int>& nums) {
+        int N = nums.size();
+        sort(nums.begin(), nums.end());
+        nums.erase(unique(nums.begin(), nums.end()), nums.end());
+        unordered_set<int> doubles, triplets;
+        for (int i = 0; i < N; i++) {
+            for (int j = i; j < N; j++) {
+                doubles.insert(nums[i] ^ nums[j]);
+            }
+        }
+        for (int x : nums) {
+            for (int v : doubles) {
+                triplets.insert(x ^ v);
+            }
+        }
+        int ans = triplets.size();
+        return ans;
+    }
+};
+```
+
+## Shortest Path in a Weighted Tree
+
+### Solution 1: fenwick tree, euler tour for path queries, tree
+
+```cpp
+template <typename T>
+struct FenwickTree {
+    vector<T> nodes;
+    T neutral;
+
+    FenwickTree() : neutral(T(0)) {}
+
+    void init(int n, T neutral_val = T(0)) {
+        neutral = neutral_val;
+        nodes.assign(n + 1, neutral);
+    }
+
+    void update(int idx, T val) {
+        while (idx < (int)nodes.size()) {
+            nodes[idx] += val;
+            idx += (idx & -idx);
+        }
+    }
+
+    T query(int idx) {
+        T result = neutral;
+        while (idx > 0) {
+            result += nodes[idx];
+            idx -= (idx & -idx);
+        }
+        return result;
+    }
+
+    T query(int left, int right) {
+        return right >= left ? query(right) - query(left - 1) : T(0);
+    }
+};
+class Solution {
+private:
+    int N, timer;
+    vector<int> start, end_, values;
+    vector<vector<pair<int, int>>> adj;
+    void dfs(int u, int p = -1) {
+        for (auto &[v, w] : adj[u]) {
+            if (v == p) continue;
+            values[v] = w;
+            dfs(v, u);
+        }
+    }
+    void dfs1(int u, int p = -1) {
+        start[u] = ++timer;
+        for (auto &[v, w] : adj[u]) {
+            if (v == p) continue;
+            dfs1(v, u);
+        }
+        end_[u] = ++timer;
+    }
+public:
+    vector<int> treeQueries(int n, vector<vector<int>>& edges, vector<vector<int>>& queries) {
+        N = n;
+        adj.assign(N, vector<pair<int, int>>());
+        values.assign(N, 0);
+        start.resize(N);
+        end_.resize(N);
+        for (const auto &edge : edges) {
+            int u = edge[0], v = edge[1], w = edge[2];
+            u--, v--;
+            adj[u].emplace_back(v, w);
+            adj[v].emplace_back(u, w);
+        }
+        dfs(0);
+        dfs1(0);
+        FenwickTree<int> ft;
+        ft.init(timer);
+        for (int i = 0; i < N; i++) {
+            ft.update(start[i], values[i]);
+            ft.update(end_[i], -values[i]);
+        }
+
+        vector<int> ans;
+        for (const auto &query : queries) {
+            int t = query[0];
+            if (t == 1) {
+                int u = query[1], v = query[2], nw = query[3];
+                u--, v--;
+                if (start[v] > start[u]) swap(u, v);
+                int delta = nw - values[u];
+                ft.update(start[u], delta);
+                ft.update(end_[u], -delta);
+                values[u] = nw;
+            } else {
+                int u = query[1];
+                u--;
+                ans.emplace_back(ft.query(start[u]));
+            }
+        }
+        return ans;
+    }
+};
+```
+
+# Leetcode Biweekly Contest 155
+
 ## 
 
 ### Solution 1: 

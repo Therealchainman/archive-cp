@@ -196,44 +196,112 @@ Allows to undo operation and get the sum along a path from root to a node in O(l
 
 Uses a fenwick tree to compute the sum along a path, from root you just do fenwick_tree.query(enter_counter[node]) get's sum from root to node.
 
-This is 1-indexed, that is the nodes are numbered from 1 to n
+This is 0-indexed, that is the nodes are numbered from 0 to n - 1
+
+But the timer and counter for fenwick tree is 1-indexed, it starts at 1.
 
 Example of how need to update fenwick tree for each enter/exit counter for a node that is being updated, wich a delta value (change in value from current value in array)
 fenwick_tree.update(enter_counter, delta) # update the fenwick tree
 fenwick_tree.update(exit_counter, -delta)
 
+This particular example you push the weight of the edge into the node, and are querying the edges by querying the nodes. 
 
-```py
-# EULER TOUR TECHNIQUE FOR PATH QUERIES
-start, end = [0] * n, [0] * n
-timer = 1
-def dfs(node, parent):
-    nonlocal timer
-    start[node] = timer
-    timer += 1
-    for nei in adj_list[node]:
-        if nei == parent: continue
-        dfs(nei, node)
-    timer += 1
-    end[node] = timer
-dfs(0, -1)
-bit = FenwickTree(timer + 1)
-for i, val in enumerate(values):
-    bit.update(start[i], val)
-    bit.update(end[i], -val)
-for _ in range(q):
-    queries = list(map(int, input().split()))
-    if queries[0] == 1:
-        u, s = queries[1:]
-        u -= 1
-        delta = s - values[u]
-        bit.update(start[u], delta)
-        bit.update(end[u], -delta)
-        values[u] = s
-    else:
-        u = queries[1] - 1
-        res = bit.query(start[u])
-        print(res)
+
+```cpp
+template <typename T>
+struct FenwickTree {
+    vector<T> nodes;
+    T neutral;
+
+    FenwickTree() : neutral(T(0)) {}
+
+    void init(int n, T neutral_val = T(0)) {
+        neutral = neutral_val;
+        nodes.assign(n + 1, neutral);
+    }
+
+    void update(int idx, T val) {
+        while (idx < (int)nodes.size()) {
+            nodes[idx] += val;
+            idx += (idx & -idx);
+        }
+    }
+
+    T query(int idx) {
+        T result = neutral;
+        while (idx > 0) {
+            result += nodes[idx];
+            idx -= (idx & -idx);
+        }
+        return result;
+    }
+
+    T query(int left, int right) {
+        return right >= left ? query(right) - query(left - 1) : T(0);
+    }
+};
+class Solution {
+private:
+    int N, timer;
+    vector<int> start, end_, values;
+    vector<vector<pair<int, int>>> adj;
+    void dfs(int u, int p = -1) {
+        for (auto &[v, w] : adj[u]) {
+            if (v == p) continue;
+            values[v] = w;
+            dfs(v, u);
+        }
+    }
+    void dfs1(int u, int p = -1) {
+        start[u] = ++timer;
+        for (auto &[v, w] : adj[u]) {
+            if (v == p) continue;
+            dfs1(v, u);
+        }
+        end_[u] = ++timer;
+    }
+public:
+    vector<int> treeQueries(int n, vector<vector<int>>& edges, vector<vector<int>>& queries) {
+        N = n;
+        adj.assign(N, vector<pair<int, int>>());
+        values.assign(N, 0);
+        start.resize(N);
+        end_.resize(N);
+        for (const auto &edge : edges) {
+            int u = edge[0], v = edge[1], w = edge[2];
+            u--, v--;
+            adj[u].emplace_back(v, w);
+            adj[v].emplace_back(u, w);
+        }
+        dfs(0);
+        dfs1(0);
+        FenwickTree<int> ft;
+        ft.init(timer);
+        for (int i = 0; i < N; i++) {
+            ft.update(start[i], values[i]);
+            ft.update(end_[i], -values[i]);
+        }
+
+        vector<int> ans;
+        for (const auto &query : queries) {
+            int t = query[0];
+            if (t == 1) {
+                int u = query[1], v = query[2], nw = query[3];
+                u--, v--;
+                if (start[v] > start[u]) swap(u, v);
+                int delta = nw - values[u];
+                ft.update(start[u], delta);
+                ft.update(end_[u], -delta);
+                values[u] = nw;
+            } else {
+                int u = query[1];
+                u--;
+                ans.emplace_back(ft.query(start[u]));
+            }
+        }
+        return ans;
+    }
+};
 ```
 
 ## Euler Tour and RMQ to find LCA of nodes u and v in tree
