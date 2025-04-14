@@ -39,6 +39,9 @@ Calculates the sum of the absolute difference from the median for the ith index 
 
 This one is 1-indexed also.  So result[3] = elements from 0,1,2 index are in there. 
 
+This algorithm implements a sliding window median cost computation, often used in range median queries or optimization problems. Here's a concise summary of its core functionality:
+
+Given an array arr and a window size k, for each position i (0-based), compute the total absolute deviation from the median of the k elements in the sliding window ending at i.
 
 ```cpp
 using int64 = long long;
@@ -59,6 +62,73 @@ struct RMD {
             if (i >= k - 1) {
                 remove(arr[i - k + 1]);
             }
+        }
+    }
+    void balance() {
+        while (left.size() > right.size() + 1) {
+            auto it = prev(left.end());
+            int val = *it;
+            leftSum -= val;
+            left.erase(it);
+            rightSum += val;
+            right.insert(val);
+        }
+        while (left.size() < right.size()) {
+            auto it = right.begin();
+            int val = *it;
+            rightSum -= val;
+            right.erase(it);
+            leftSum += val;
+            left.insert(val);
+        }
+    }
+    void add(int num) {
+        if (left.empty() || num <= *prev(left.end())) {
+            left.insert(num);
+            leftSum += num;
+        } else {
+            right.insert(num);
+            rightSum += num;
+        }
+        balance();
+    }
+    void remove(int num) {
+        if (left.find(num) != left.end()) {
+            auto it = left.find(num);
+            int64 val = *it;
+            leftSum -= val;
+            left.erase(it);
+        } else {
+            auto it = right.find(num);
+            int64 val = *it;
+            rightSum -= val;
+            right.erase(it);
+        }
+        balance();
+    }
+};
+```
+
+## Rolling Medians for calculating difference between larger half and smaller half
+
+MedianBalancer is a data structure that dynamically maintains the balanced partition of a prefix of integers into two halves (lower and upper), and for every even-length prefix, it computes the difference between the sum of the upper half and the lower half.
+
+result[i]=sum of larger half−sum of smaller half
+
+```cpp
+struct MedianBalancer {
+    vector<int64> result;
+    multiset<int64> left, right;
+    int64 leftSum, rightSum;
+    void init(const vector<int>& arr, int k) {
+        int N = arr.size();
+        leftSum = rightSum = 0;
+        result.assign(N + 1, 0);
+        for (int i = 0; i < N; i++) {
+            if (i % 2 == 0) {
+                result[i] = rightSum - leftSum;;
+            }
+            add(arr[i]);
         }
     }
     void balance() {

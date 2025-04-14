@@ -1,6 +1,5 @@
 # Prefix Tree
 
-
 # Trie datastructure that is very useful for prefix matching
 
 This inherits the defaultdict class which makes it easier to work with trie data structure.  This specifict one is able to count the number of words that have a certain prefix.
@@ -126,6 +125,128 @@ struct Trie {
 
 Trie trie;
 trie.init();
+```
+
+## bitwise trie data structure
+
+## 🔍 Purpose
+
+This algorithm finds the **shortest subarray** in array `A` such that the **XOR of two elements** `A[i]` and `A[j]` within the subarray satisfies:  
+
+---
+
+## 🧠 Core Idea
+
+- Use a **bitwise trie** (prefix tree) to store numbers from the array as binary strings.
+- While iterating over the array:
+  - Insert the current number into the trie with its index.
+  - Query the trie to find the largest index `j` such that `A[i] ^ A[j] ≥ K`.
+  - Track the minimum distance between such pairs to find the shortest subarray.
+
+---
+
+## ⚙️ Key Components
+
+### 1. `Trie` Structure
+
+- Each node has two children (`0` and `1`) and stores the **last index** of an inserted number on that path.
+- Max bit length is 30 (`BITS = 30`) to support integers up to ~1e9.
+
+### 2. `add(mask, idx)`
+
+- Adds the binary representation of `mask` (an element of `A`) into the trie.
+- Updates the `last` field to remember the latest index on that path.
+
+### 3. `find(val, border)`
+
+- Searches for the **largest index** `j` in the trie such that:  
+
+
+```cpp
+const int BITS = 30;
+int N, K;
+vector<int> A;
+
+struct Node {
+    int children[2];
+    int last;
+    void init() {
+        memset(children, 0, sizeof(children));
+        last = -1;
+    }
+};
+struct Trie {
+    vector<Node> trie;
+    void init() {
+        Node root;
+        root.init();
+        trie.emplace_back(root);
+    }
+    void add(int mask, int idx) {
+        int cur = 0;
+        trie[cur].last = max(trie[cur].last, idx);
+        for (int i = BITS - 1; i >= 0; i--) {
+            int bit = (mask >> i) & 1;
+            if (trie[cur].children[bit] == 0) {
+                Node root;
+                root.init();
+                trie[cur].children[bit] = trie.size();
+                trie.emplace_back(root);
+            }
+            cur = trie[cur].children[bit];
+            trie[cur].last = max(trie[cur].last, idx);
+        }
+    }
+    int find(int val, int border) {
+        int cur = 0, ans = -1;
+        bool isMatching = true;
+        for (int i = BITS - 1; i >= 0 && isMatching; i--) {
+            int valBit = (val >> i) & 1;
+            int borderBit = (border >> i) & 1;
+            if (borderBit) {
+                if (trie[cur].children[valBit ^ 1] != 0) {
+                    cur = trie[cur].children[valBit ^ 1];
+                } else {
+                    isMatching = false;
+                }
+            } else {
+                if (trie[cur].children[valBit ^ 1] != 0) {
+                    ans = max(ans, trie[trie[cur].children[valBit ^ 1]].last); // pointers to next node on this path. 
+                }
+                if (trie[cur].children[valBit] != 0) {
+                    cur = trie[cur].children[valBit];
+                } else {
+                    isMatching = false;
+                }
+            }
+        }
+        if (isMatching) {
+            ans = max(ans, trie[cur].last);
+        }
+        return ans;
+    }
+};
+
+void solve() {
+    cin >> N >> K;
+    A.assign(N, 0);
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+    }
+    Trie trie;
+    trie.init();
+    int ans = N + 1;
+    for (int i = 0; i < N; i++) {
+        trie.add(A[i], i);
+        int j = trie.find(A[i], K);
+        if (j != -1) ans = min(ans, i - j + 1);
+    }
+    if (ans == N + 1) {
+        cout << -1 << endl;
+        return;
+    }
+    cout << ans << endl;
+}
 ```
 
 ## Prefix Tree for maximizing bitwise and storing the sorted indices in each node

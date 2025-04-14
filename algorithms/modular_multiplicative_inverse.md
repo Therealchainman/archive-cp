@@ -28,6 +28,6 @@ modular inverse of i under modulus m
 
 ```cpp
 int inv(int i, int m) {
-  return i <= 1 ? i : m - (int)(m/i) * inv(m % i, m) % m;
+    return i <= 1 ? i : m - (m/i) * inv(m % i, m) % m;
 }
 ```

@@ -506,3 +506,127 @@ signed main() {
 
 ```
 
+# Atcoder Regular Contest 196
+
+## Adjacent Delete
+
+### Solution 1: greedy, sorting, rolling median, rolling difference between larger half and smaller half
+
+```cpp
+int N;
+vector<int> A;
+
+struct MedianBalancer {
+    vector<int64> result;
+    multiset<int64> left, right;
+    int64 leftSum, rightSum;
+    void init(const vector<int>& arr, int k) {
+        int N = arr.size();
+        leftSum = rightSum = 0;
+        result.assign(N + 1, 0);
+        for (int i = 0; i < N; i++) {
+            if (i % 2 == 0) {
+                result[i] = rightSum - leftSum;;
+            }
+            add(arr[i]);
+        }
+    }
+    void balance() {
+        while (left.size() > right.size() + 1) {
+            auto it = prev(left.end());
+            int val = *it;
+            leftSum -= val;
+            left.erase(it);
+            rightSum += val;
+            right.insert(val);
+        }
+        while (left.size() < right.size()) {
+            auto it = right.begin();
+            int val = *it;
+            rightSum -= val;
+            right.erase(it);
+            leftSum += val;
+            left.insert(val);
+        }
+    }
+    void add(int num) {
+        if (left.empty() || num <= *prev(left.end())) {
+            left.insert(num);
+            leftSum += num;
+        } else {
+            right.insert(num);
+            rightSum += num;
+        }
+        balance();
+    }
+    void remove(int num) {
+        if (left.find(num) != left.end()) {
+            auto it = left.find(num);
+            int64 val = *it;
+            leftSum -= val;
+            left.erase(it);
+        } else {
+            auto it = right.find(num);
+            int64 val = *it;
+            rightSum -= val;
+            right.erase(it);
+        }
+        balance();
+    }
+};
+
+void solve() {
+    cin >> N;
+    A.resize(N);
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+    }
+    int64 ans = 0;
+    if (N % 2 == 0) {
+        sort(A.begin(), A.end());
+        for (int i = 0; i < N; i++) {
+            if (i < N / 2) ans -= A[i];
+            else ans += A[i];
+        }
+        cout << ans << endl;
+        return;
+    }
+    MedianBalancer prefRMD;
+    prefRMD.init(A, N);
+    reverse(A.begin(), A.end());
+    MedianBalancer suffRMD;
+    suffRMD.init(A, N);
+    reverse(suffRMD.result.begin(), suffRMD.result.end());
+    for (int i = 0; i < N; i++) {
+        ans = max(ans, prefRMD.result[i] + suffRMD.result[i + 1]);
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+# Atcoder Regular Contest 197
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
