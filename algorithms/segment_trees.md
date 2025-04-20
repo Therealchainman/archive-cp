@@ -54,17 +54,135 @@ struct SegmentTree {
         left += size, right += size;
         int64 res = neutral;
         while (left <= right) {
-            if (left & 1) {
+           if (left & 1) {
+                // res on left
                 res = func(res, nodes[left]);
                 left++;
             }
             if (~right & 1) {
-                res = func(res, nodes[right]);
+                // res on right
+                res = func(nodes[right], res);
                 right--;
             }
             left >>= 1, right >>= 1;
         }
         return res;
+    }
+};
+```
+
+## Segment Tree for Modular Product Frequency Queries
+
+This algorithm implements a Segment Tree designed to efficiently handle queries and updates on an array of integers, where the focus is on modular arithmetic. Specifically, it supports:
+
+Building a segment tree based on the modular remainder (mod K) of array elements.
+
+Updating an element at a specific index.
+
+Querying how many contiguous subarray products (within a range) result in a specific value modulo K.
+
+Data Structures
+struct Node
+Each node in the segment tree stores:
+
+vector<int> freq: Frequency count of all possible values modulo K. freq[i] is the number of subarrays in the node's range whose product modulo K equals i.
+
+int prod: The total product of the range modulo K.
+
+clear(): Resets the node (used during merging).
+
+struct SegmentTree
+Core segment tree with the following components:
+
+int size: Size of the segment tree (next power of 2 ≥ array size).
+
+int K: The modulus value used throughout.
+
+vector<Node> tree: The segment tree array storing the Node objects.
+
+```cpp
+struct Node {
+    vector<int> freq;
+    int prod;
+    Node(int k) : freq(k, 0), prod(1) {}
+    void clear() {
+        fill(freq.begin(), freq.end(), 0);
+        prod = 1;
+    }
+};
+
+struct SegmentTree {
+    int size;
+    int K;
+    vector<Node> tree;
+    void init(int num_nodes, int k) {
+        K = k;
+        size = 1;
+        while (size < num_nodes) size *= 2;
+        tree.assign(2 * size, Node(K));
+    }
+    void build(const vector<int> &nums) {
+        int n = nums.size();
+        for (int i = 0; i < size; i++) {
+            int p = size + i;
+            if (i < n) {
+                int r = nums[i] % K;
+                tree[p].prod = r;
+                tree[p].freq[r] = 1;
+            }
+        }
+        for (int i = size - 1; i >= 1; i--) {
+            int l = 2 * i, r = 2 * i + 1;
+            merge_(tree[i], tree[l], tree[r]);
+        }
+    }
+    void merge_(Node &res, const Node& left, const Node& right) {
+        for (int i = 0; i < K; i++) {
+            res.freq[i] = left.freq[i];
+        }
+        for (int i = 0; i < K; i++) {
+            res.freq[(i * left.prod) % K] += right.freq[i];
+        }
+        res.prod = left.prod * right.prod % K;
+    }
+    void ascend(int segment_idx) {
+        while (segment_idx > 0) {
+            int left_segment_idx = 2 * segment_idx, right_segment_idx = 2 * segment_idx + 1;
+            merge_(tree[segment_idx], tree[left_segment_idx], tree[right_segment_idx]);
+            segment_idx >>= 1;
+        }
+    }
+    void update(int segment_idx, int val) {
+        segment_idx += size;
+        tree[segment_idx].prod = val % K;
+        fill(tree[segment_idx].freq.begin(), tree[segment_idx].freq.end(), 0);
+        tree[segment_idx].freq[val % K] = 1;
+        segment_idx >>= 1;
+        ascend(segment_idx);
+    }
+    int query(int left, int right, int k) {
+        left += size, right += size;
+        Node leftRes(K), rightRes(K), result(K);
+        while (left <= right) {
+            if (left & 1) {
+                // res on left
+                result.clear();
+                merge_(result, leftRes, tree[left]);
+                swap(result, leftRes);
+                left++;
+            }
+            if (~right & 1) {
+                // res on right
+                result.clear();
+                merge_(result, tree[right], rightRes);
+                swap(result, rightRes);
+                right--;
+            }
+            left >>= 1, right >>= 1;
+        }
+        result.clear();
+        merge_(result, leftRes, rightRes);
+        return result.freq[k];
     }
 };
 ```

@@ -2203,11 +2203,94 @@ signed main() {
 }
 ```
 
-## 
+## Philadelphia Museum of Art
 
-### Solution 1: 
+### Solution 1: tree, game theory, dp on tree, backward induction, general sum game, perfect information
+
+Perfect information & no chance moves
+
+Both Kuroni and Tfg know the entire tree layout and each other’s marked rooms.
+
+There’s no randomness—every choice deterministically sends them into one child subtree.
+
+Alternating moves
+
+They start at the root, Kuroni chooses which adjacent room to visit, then Tfg chooses from there, then Kuroni, and so on, until they reach a leaf.
+
+Payoffs are additive scores, not zero‑sum
+
+Each player’s payoff is “how many of their marked rooms they visit.”
+
+Unlike classic zero‑sum minimax (where one’s gain is exactly the other’s loss), here both players could score points in the same branch. It’s a general‑sum game, but each still assumes the other will play to maximize their own score.
+
+Subgame‑perfect equilibrium via backward induction
+
+Because the tree is finite and acyclic, every node defines a subgame. By starting at the leaves and working upward, you can compute for each node “—if it’s Kuroni’s turn here, what final (Kuroni_score, Tfg_score) pair will result?—” and likewise if it’s Tfg’s turn.
+
+At each node, the player to move will pick the child that gives them the highest own score; ties are broken (as per the problem statement) by picking the branch that gives the other player the highest score.
+
+This tie‑breaking isn’t standard minimax (which usually breaks ties arbitrarily or assumes adversarial tie‑breaks), but it’s just a lexicographic preference:
+
+Maximize your own score
+
+Subject to that, maximize your opponent’s score
 
 ```cpp
+int N;
+vector<vector<int>> adj, pref;
+vector<vector<pair<int, int>>> dp; // 0: kuroni turn -> (kuroni score, tfg score), 1: tfg turn -> (kuroni score, tfg score)
+
+void dfs(int u, int p = -1) {
+    pair<int, int> bestKuroni = {0, 0}, bestTfg = {0, 0}; // kuroni turn, tfg turn, (kuroni score, tfg score)
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        dfs(v, u);
+        if (dp[v][1][0] > bestKuroni.first || (dp[v][1].first == bestKuroni.first && dp[v][1].second > bestKuroni.second)) {
+            bestKuroni = dp[v][1];
+        }
+        if (dp[v][0].second > bestTfg.second || (dp[v][0].second == bestTfg.second && dp[v][0].first > bestTfg.first)) {
+            bestTfg = dp[v][0];
+        }
+    }
+    dp[u][0] = bestKuroni;
+    dp[u][1] = bestTfg;
+    for (int i = 0; i < 2; i++) {
+        dp[u][i].first += pref[u][0];
+        dp[u][i].second += pref[u][1];
+    }
+}
+
+void solve() {
+    cin >> N;
+    adj.assign(N, vector<int>());
+    pref.assign(N, vector<int>(2, 0));
+    dp.assign(N, vector<pair<int, int>>(2, {0, 0}));
+    for (int i = 0, x; i < N; i++) {
+        cin >> x;
+        pref[i][0] = x;
+    }
+    for (int i = 0, x; i < N; i++) {
+        cin >> x;
+        pref[i][1] = x;
+    }
+    for (int i = 0; i < N - 1; i++) {
+        int u, v;
+        cin >> u >> v;
+        u--, v--;
+        adj[u].emplace_back(v);
+        adj[v].emplace_back(u);
+    }
+    dfs(0);
+    cout << dp[0][0].first << " " << dp[0][0].second << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 
 ```
 

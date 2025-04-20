@@ -114,9 +114,9 @@ void sieve(int n) {
     for (int i = 0; i < n; i++) {
         spf[i] = i;
     }
-    for (int i = 2; i < n; i++) {
+    for (int64 i = 2; i < n; i++) {
         if (spf[i] != i) continue;
-        for (int j = i * i; j < n; j += i) {
+        for (int64 j = i * i; j < n; j += i) {
             if (spf[j] != j) continue;
             spf[j] = i;
         }
@@ -200,5 +200,48 @@ void sieve(int n) {
             }
         }
     }
+}
+```
+
+## Sieve of Eratosthenes to get all divisors fast with smallest prime factor
+
+fast a lot of times, especially if MAXN <= 10^5, most divisors is like 128. 
+
+```cpp
+const int MAXN = 1e5 + 5;
+int spf[MAXN];
+
+// nloglog(n)
+void sieve(int n) {
+    for (int i = 0; i < n; i++) {
+        spf[i] = i;
+    }
+    for (int64 i = 2; i < n; i++) {
+        if (spf[i] != i) continue;
+        for (int64 j = i * i; j < n; j += i) {
+            if (spf[j] != j) continue;
+            spf[j] = i;
+        }
+    }
+}
+
+vector<int> divisors(int x) {
+    vector<pair<int,int>> pf;
+    while (x > 1) {
+        int p = spf[x], cnt = 0;
+        while (x % p == 0) { x /= p; ++cnt; }
+        pf.emplace_back(p, cnt); // prime, multiplicity
+    }
+    vector<int> divs{1};
+    for (auto [p, c] : pf) {
+        int sz = (int)divs.size();
+        int mult = 1;
+        for (int e = 1; e <= c; ++e) {
+            mult *= p;
+            for (int i = 0; i < sz; ++i)
+                divs.emplace_back(divs[i] * mult);
+        }
+    }
+    return divs;
 }
 ```

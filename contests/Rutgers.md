@@ -175,13 +175,61 @@ signed main() {
 
 ## Subsequence Mex
 
+### Solution 1: greedy, constructive
+
+```cpp
+string S;
+
+int decode(char ch) {
+    return ch - '0';
+}
+
+string notN(int n) {
+    string s;
+    for (int i = 1; i < 10; i++) {
+        if (i == n) continue;
+        s += to_string(i);
+    }
+    if (n != 0) s += '0';
+    return s;
+}
+
+void solve() {
+    cin >> S;
+    int N = S.size();
+    string ans;
+    for (int i = 0; i < N; i++) {
+        ans += notN(decode(S[i]));
+        if (i + 1 < N) {
+            ans += notN(decode(S[i]));
+            ans += S[i];
+        }
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## Maxwell's Tiles
+
 ### Solution 1: 
 
 ```cpp
 
 ```
 
-##
+## Distributive Property
 
 ### Solution 1: 
 
@@ -189,15 +237,7 @@ signed main() {
 
 ```
 
-##
-
-### Solution 1: 
-
-```cpp
-
-```
-
-##
+## 
 
 ### Solution 1: 
 

@@ -713,6 +713,40 @@ public:
 };
 ```
 
+## 781. Rabbits in Forest
+
+### Solution 1: frequency array, ceil division
+
+```cpp
+class Solution {
+private:
+    int ceil(int x, int y) {
+        return (x + y - 1) / y;
+    }
+public:
+    int numRabbits(vector<int>& answers) {
+        int MAXN = *max_element(answers.begin(), answers.end());
+        vector<int> freq(MAXN + 1, 0);
+        for (int x : answers) {
+            freq[x]++;
+        }
+        int ans = 0;
+        for (int i = 0; i <= MAXN; i++) {
+            ans += (i + 1) * ceil(freq[i], i + 1);
+        }
+        return ans;
+    }
+};
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
 ##
 
 ### Solution 1: 

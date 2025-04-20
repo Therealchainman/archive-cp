@@ -65,3 +65,26 @@ public:
         return minimax(N, 0, true); // (idx, mask, ismax)
     }
 };
+```
+
+## General Sum Game, backward induction
+
+We have a finite rooted tree (or any finite acyclic, directed graph) where two players, P₁ and P₂, move a shared token from the root toward a leaf. They alternate turns—P₁ starts—choosing which child to visit next. Each node u has two non‑negative payoffs, A[u] for P₁ and B[u] for P₂, which are collected exactly once when the node is first visited. The game ends when no children remain (i.e. at a leaf), and each player’s total score is the sum of their payoffs over the visited path.
+
+Because there are no cycles and perfect information, the unique rational outcome is given by backward induction: at each node, the current mover anticipates the opponent’s optimal responses all the way to a leaf, and picks the branch that maximizes their own final score (ties broken by maximizing the opponent’s).
+
+This is like a variation of minimax, but there is no minimizing player, they are both maximizing, bust mostly for themselves. 
+
+Payoffs are general‑sum.
+In classic zero‑sum minimax you have a single “value” V(u), and one player maximizes that value while the other minimizes it (equivalently, they maximize –V). Here both players have their distinct payoff and each actively maximizes only their own score.
+
+### Connection to backward induction
+
+This algorithm is a textbook application of backward induction (or subgame‑perfect equilibrium) in extensive‑form games:
+Identify subgames (every node is a subgame root).
+Solve leaf subgames trivially by payoff at the node.
+Propagate backward, at each decision node choosing the action that best serves the mover’s objectives, given the already‑computed outcomes of smaller subgames.
+
+```cpp
+
+```
