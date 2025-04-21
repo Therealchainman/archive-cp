@@ -85,6 +85,36 @@ Identify subgames (every node is a subgame root).
 Solve leaf subgames trivially by payoff at the node.
 Propagate backward, at each decision node choosing the action that best serves the mover’s objectives, given the already‑computed outcomes of smaller subgames.
 
-```cpp
+### Example with tree
 
+kuroni and tf are playing a game on tree, at kuroni's turn, they want to maximize their score, and if there is a tie, choose that will maximize tfg's score.
+And same for tfg, they alternate between turns.  And Kuroni goest first and starts on the root node.
+
+```cpp
+int N;
+vector<vector<int>> adj, pref;
+vector<vector<pair<int, int>>> dp; // 0: kuroni turn -> (kuroni score, tfg score), 1: tfg turn -> (kuroni score, tfg score)
+
+void dfs(int u, int p = -1) {
+    pair<int, int> bestKuroni = {0, 0}, bestTfg = {0, 0}; // kuroni turn, tfg turn, (kuroni score, tfg score)
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        dfs(v, u);
+        if (dp[v][1][0] > bestKuroni.first || (dp[v][1].first == bestKuroni.first && dp[v][1].second > bestKuroni.second)) {
+            bestKuroni = dp[v][1];
+        }
+        if (dp[v][0].second > bestTfg.second || (dp[v][0].second == bestTfg.second && dp[v][0].first > bestTfg.first)) {
+            bestTfg = dp[v][0];
+        }
+    }
+    dp[u][0] = bestKuroni;
+    dp[u][1] = bestTfg;
+    for (int i = 0; i < 2; i++) {
+        dp[u][i].first += pref[u][0];
+        dp[u][i].second += pref[u][1];
+    }
+}
+...
+dfs(0);
+cout << dp[0][0].first << " " << dp[0][0].second << endl;
 ```
