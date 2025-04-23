@@ -739,12 +739,36 @@ public:
 };
 ```
 
-##
+## 1399. Count Largest Group
 
-### Solution 1: 
+### Solution 1: map for frequency, digit sum, accumulate
 
 ```cpp
-
+class Solution {
+private:
+    int calc(int n) {
+        int res = 0;
+        while (n > 0) {
+            res += n % 10;
+            n /= 10;
+        }
+        return res;
+    }
+public:
+    int countLargestGroup(int n) {
+        int maxFreq = 0;
+        map<int, int> freq;
+        for (int i = 1; i <= n; i++) {
+            int digitSum = calc(i);
+            freq[digitSum]++;
+            maxFreq = max(maxFreq, freq[digitSum]);
+        }
+        int ans = accumulate(freq.begin(), freq.end(), 0, [&](int accum, const pair<int, int> &elem) {
+            return accum + (elem.second == maxFreq);
+        });
+        return ans;
+    }
+};
 ```
 
 ##
