@@ -1013,3 +1013,166 @@ signed main() {
 ```cpp
 
 ```
+
+# CALICO Spring 2025
+
+## The Fault in Our Bricks
+
+### Solution 1: min and max, area of rectangle
+
+```cpp
+int N;
+vector<pair<long double, long double>> points;
+
+void solve() {
+    cin >> N;
+    points.clear();
+    long double minX = 1e5, maxX = -1e5, minY = 1e5, maxY = -1e5;
+    for (int i = 0; i < N; i++) {
+        long double x, y;
+        cin >> x >> y;
+        minX = min(minX, x);
+        maxX = max(maxX, x);
+        minY = min(minY, y);
+        maxY = max(maxY, y);
+        points.emplace_back(x, y);
+    }
+    long double ans = (maxX - minX) * (maxY - minY);
+    cout << fixed << setprecision(10) << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## Sussy Smooth Brain Tasking
+
+### Solution 1: manhattan distance with wrap around on grid
+
+```cpp
+int R, C;
+
+void solve() {
+    cin >> R >> C;
+    vector<pair<int, int>> points(R * C + 1, {0, 0});
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++) {
+            int x;
+            cin >> x;
+            points[x] = {i, j};
+        }
+    }
+    int ans = 0;
+    for (int label = 1; label <= R * C; label++) {
+        auto [r1, c1] = points[label - 1];
+        auto [r2, c2] = points[label];
+        int dr = min(abs(r1 - r2), R - abs(r1 - r2));
+        int dc = min(abs(c1 - c2), C - abs(c1 - c2));
+        ans += dr + dc;
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## Miku in the Middle
+
+### Solution 1: prefix sum, counting
+
+```cpp
+string S;
+
+void solve() {
+    cin >> S;
+    int64 ans = 0, cnt = 0, cur = 0;
+    for (char c : S) {
+        if (c == 'u') {
+            ans += cnt;
+            cur++;
+        } else if (c == 'w') {
+            cnt += cur;
+            cur = 0;
+        }
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## Indomitable Human Spirit vs AAA Company
+
+### Solution 1: hmmm
+
+```cpp
+
+```
+
+## Is a configuration of blocks stable?
+
+### Solution 1:  center of mass, tree, subtree calculations, postorder dfs
+
+1. know how center of mass calculation works, and how you can do it separate for the 2 coordinates, xcm and ycm
+1. So you can accumulate the center of mass for each coordinates and the total mass of each subtree
+1. Then you just have to check that the center of mass xcm is within the range x_r and x_l of it's parent node, cause that means it is stable
+1. If you find it is outside of the range it is unstable. 
+
+```cpp
+
+```
+
+## Ben in the Middle
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## Gates to Infinite Winnings :money_mouth:
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## PokéRogue Daily Run
+
+### Solution 1: 
+
+1. How do you solve this, some kind of dp but idk
+
+```cpp
+
+```

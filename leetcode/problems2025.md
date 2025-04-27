@@ -771,12 +771,28 @@ public:
 };
 ```
 
-##
+## 2845. Count of Interesting Subarrays
 
-### Solution 1: 
+### Solution 1: modular arithmetic, prefix sum, map
 
 ```cpp
-
+using int64 = long long;
+class Solution {
+public:
+    int64 countInterestingSubarrays(vector<int>& nums, int modulo, int k) {
+        int64 ans = 0;
+        int N = nums.size(), psum = 0;
+        map<int, int> freq;
+        freq[0] = 1;
+        for (int x : nums) {
+            if (x % modulo == k) psum++;
+            int val = psum % modulo;
+            ans += freq[(val - k + modulo) % modulo];
+            freq[val]++;
+        }
+        return ans;
+    }
+};
 ```
 
 ##

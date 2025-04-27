@@ -622,6 +622,178 @@ public:
 
 # Leetcode Biweekly Contest 155
 
+## 3528. Unit Conversion I
+
+### Solution 1: DAG, tree with directed graph, topological order, dfs
+
+```cpp
+using int64 = long long;
+const int64 MOD = 1e9 + 7;
+class Solution {
+private:
+    vector<int> ans;
+    vector<vector<pair<int, int64>>> adj;
+    void dfs(int u) {
+        for (auto &[v, w]: adj[u]) {
+            ans[v] = ans[u] * w % MOD;
+            dfs(v);
+        }
+    }
+public:
+    vector<int> baseUnitConversions(vector<vector<int>>& conversions) {
+        int N = 0;
+        for (const vector<int> &edge : conversions) {
+            N = max({N, edge[0] + 1, edge[1] + 1});
+        }
+        adj.assign(N, vector<pair<int, int64>>());
+        for (const vector<int> &edge : conversions) {
+            int u = edge[0], v = edge[1], w = edge[2];
+            adj[u].emplace_back(v, w);
+        }
+        ans.assign(N, 1);
+        dfs(0);
+        return ans;
+    }
+};
+```
+
+## 3529. Count Cells in Overlapping Horizontal and Vertical Substrings
+
+### Solution 1: z alborithm, transpose, grid, string matching
+
+```cpp
+class Solution {
+private:
+    int R, C, N;
+    std::vector<int> z_algorithm(const string& s) {
+        int n = s.length();
+        vector<int> z(n, 0);
+        int left = 0, right = 0;
+        for (int i = 1; i < n; ++i) {
+            if (i > right) {
+                left = right = i;
+                while (right < n && s[right-left] == s[right]) {
+                    right++;
+                }
+                z[i] = right - left;
+                right--;
+            } else {
+                int k = i - left;
+                if (z[k] < right - i + 1) {
+                    z[i] = z[k];
+                } else {
+                    left = i;
+                    while (right < n && s[right-left] == s[right]) {
+                        right++;
+                    }
+                    z[i] = right - left;
+                    right--;
+                }
+            }
+        }
+        return z;
+    }
+    vector<bool> calc(const vector<int> &zarr) {
+        vector<bool> vis(R * C, false);
+        int cnt = 0;
+        for (int i = 0; i < zarr.size(); i++) {
+            if (zarr[i] == N) {
+                cnt = N;
+            }
+            if (cnt) {
+                vis[i - N - 1] = true;
+                cnt--;
+            }
+        }
+        return vis;
+    }
+    vector<vector<char>> transpose(const vector<vector<char>>& mat) {
+        vector<vector<char>> ans(C, vector<char>(R));
+        for (int i = 0; i < R; i++) {
+            for (int j = 0; j < C; j++) {
+                ans[j][i] = mat[i][j];
+            }
+        }
+        return ans;
+    }
+    pair<int, int> map1dTo2d(int idx) {
+        return {idx / R, idx % R};
+    }
+    int map2dTo1d(int r, int c) {
+        return r * C + c;
+    }
+public:
+    int countCells(vector<vector<char>>& grid, string pattern) {
+        R = grid.size(), C = grid[0].size(), N = pattern.size();
+        string hs = pattern + '$';
+        for (int r = 0; r < R; r++) {
+            for (int c = 0; c < C; c++) {
+                hs += grid[r][c];
+            }
+        }
+        vector<int> zarr = z_algorithm(hs);
+        vector<bool> vis = calc(zarr);
+        string vs = pattern + '$';
+        vector<vector<char>> tgrid = transpose(grid);
+        for (int r = 0; r < C; r++) {
+            for (int c = 0; c < R; c++) {
+                vs += tgrid[r][c];
+            }
+        }
+        vector<int> zarr2 = z_algorithm(vs);
+        vector<bool> transVis = calc(zarr2);
+        int ans = 0;
+        for (int i = 0; i < R * C; i++) {
+            auto [r, c] = map1dTo2d(i);
+            int j = map2dTo1d(c, r);
+            ans += transVis[i] & vis[j];
+        }
+        return ans;
+    }
+};
+```
+
+## 3530. Maximum Profit from Valid Topological Order in DAG
+
+### Solution 1: DAG, topological ordering, bitmask dp, prerequisite bitmask, bit manipulation
+
+1. prerequisite bitmask can determine if from some state of nodes visited, if you can visit the next node, has all prerequisites been satisfied by current mask/state.
+
+```cpp
+using int64 = long long;
+const int64 INF = (1LL << 63) - 1;
+class Solution {
+private:
+    bool isSet(int mask, int i) {
+        return (mask >> i) & 1;
+    }
+public:
+    int maxProfit(int n, vector<vector<int>>& edges, vector<int>& score) {
+        vector<vector<int>> adj(n, vector<int>());
+        vector<int> prereq(n, 0);
+        for (const vector<int> &edge : edges) {
+            int u = edge[0], v = edge[1];
+            adj[u].emplace_back(v);
+            prereq[v] |= (1 << u);
+        }
+        vector<int64> dp(1 << n, -INF);
+        dp[0] = 0;
+        for (int mask = 0; mask < (1 << n); mask++) {
+            int64 pos = __builtin_popcount(mask) + 1;
+            if (dp[mask] == -INF) continue; // unreachable state
+            for (int i = 0; i < n; i++) {
+                if (isSet(mask, i) || (mask & prereq[i]) != prereq[i]) continue;
+                int nmask = mask | (1 << i);
+                dp[nmask] = max(dp[nmask], dp[mask] + pos * score[i]);
+            }
+        }
+        return dp[(1 << n) - 1];
+    }
+};
+```
+
+# Leetcode Biweekly Contest 156
+
 ## 
 
 ### Solution 1: 

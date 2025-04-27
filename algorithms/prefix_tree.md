@@ -81,13 +81,87 @@ class Trie:
         node.word_count -= 1
 ```
 
+## Prefix Tree (Trie) for strings in C++
+
+This is an implementation of a Trie (prefix tree) specialized for lowercase English letters (`'a'` to `'z'`).  
+It efficiently supports insertion, prefix queries, counting prefixes, and erasing prefixes with adjustable counts.
+
+---
+
+## Structures
+
+### `struct Node`
+
+Represents a single node in the Trie.
+
+- **Members:**
+  - `int children[26]`  
+    Array holding indices of child nodes for each character `'a'` to `'z'`.
+    If `children[i] == 0`, there is no child for character `('a' + i)`.
+  - `bool isLeaf`  
+    Indicates if the node marks the end of a word.
+  - `int cnt`  
+    Number of words that pass through or end at this node.
+
+- **Methods:**
+  - `void init()`  
+    Initializes the node:
+    - Sets all `children` to 0 (no children).
+    - Sets `isLeaf` to `false`.
+    - Sets `cnt` to `0`.
+
+---
+
+### `struct Trie`
+
+Represents the entire Trie structure.
+
+- **Members:**
+  - `vector<Node> trie`  
+    Dynamic array of nodes forming the Trie.
+
+- **Methods:**
+  - `void init()`  
+    Initializes the Trie with a root node.
+  
+  - `void insert(const string& s)`  
+    Inserts a string `s` into the Trie:
+    - Creates new nodes as needed.
+    - Increments `cnt` along the path.
+    - Marks the end node with `isLeaf = true`.
+
+  - `bool startsWith(const string& s)`  
+    Checks if a prefix `s` exists **and** is a complete word in the Trie:
+    - Traverses the nodes for each character.
+    - Returns `true` if it encounters a `isLeaf` node after following `s`.
+
+  - `int countPrefix(const string& s)`  
+    Counts how many words in the Trie have the prefix `s`:
+    - Traverses the prefix path.
+    - Returns the `cnt` at the last node.
+  
+  - `void eraseCount(const string& s, int val)`  
+    Decreases the count `cnt` by `val` along the prefix path of `s`, and recursively clears all descendants' `cnt` values if needed:
+    - Useful for batch deletion or invalidation of words starting with a certain prefix.
+
+---
+
+## Notes
+
+- The Trie supports only **lowercase English letters** (`'a'` to `'z'`).
+- The `children` array uses **0-based indexing**, with `'a'` corresponding to index `0`, `'b'` to `1`, and so on.
+- `cnt` tracks how many words pass through a node, allowing efficient prefix counting and deletions.
+- New nodes are dynamically allocated and indexed by the `vector`'s size.
+
 ```cpp
 struct Node {
     int children[26];
     bool isLeaf;
+    int cnt;
     void init() {
-        memset(children,0,sizeof(children));
+        memset(children, 0, sizeof(children));
         isLeaf = false;
+        cnt = 0;
     }
 };
 struct Trie {
@@ -95,31 +169,62 @@ struct Trie {
     void init() {
         Node root;
         root.init();
-        trie.push_back(root);
+        trie.emplace_back(root);
     }
-    void insert(string& s) {
+    void insert(const string& s) {
         int cur = 0;
-        for (char &c : s) {
-            int i = c-'a';
+        for (const char &c : s) {
+            int i = c - 'a';
             if (trie[cur].children[i]==0) {
                 Node root;
                 root.init();
                 trie[cur].children[i] = trie.size();
-                trie.push_back(root);
+                trie.emplace_back(root);
             }
             cur = trie[cur].children[i];
+            trie[cur].cnt++;
         }
         trie[cur].isLeaf= true;
     }
-    int search(string& s) {
+    bool startsWith(const string& s) {
         int cur = 0;
-        for (char &c : s) {
-            int i = c-'a';
-            if (!trie[cur].children[i]) { return false;
-            }
+        for (const char &c : s) {
+            int i = c - 'a';
+            if (!trie[cur].children[i]) return false;
+            cur = trie[cur].children[i];
+            if (trie[cur].isLeaf) return true;
+        }
+        return false;
+    }
+    int countPrefix(const string& s) {
+        int cur = 0;
+        for (const char &c : s) {
+            int i = c - 'a';
+            if (!trie[cur].children[i]) return 0;
             cur = trie[cur].children[i];
         }
-        return trie[cur].isLeaf;
+        return trie[cur].cnt;
+    }
+    void eraseCount(const string& s, int val) {
+        int cur = 0;
+        for (const char &c : s) {
+            int i = c - 'a';
+            if (!trie[cur].children[i]) return;
+            cur = trie[cur].children[i];
+            trie[cur].cnt -= val;
+        }
+        queue<int> q;
+        q.emplace(cur);
+        while (!q.empty()) {
+            int node = q.front();
+            q.pop();
+            trie[node].cnt = 0;
+            for (int i = 0; i < 26; i++) {
+                if (trie[node].children[i] && trie[trie[node].children[i]].cnt) {
+                    q.emplace(trie[node].children[i]);
+                }
+            }
+        }
     }
 };
 

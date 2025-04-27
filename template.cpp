@@ -15,6 +15,7 @@
 #include <unordered_set>
 #include <iomanip>
 #include <chrono>
+#include <sstream>
 using namespace std;
 #define endl '\n'
 #define LOCAL
