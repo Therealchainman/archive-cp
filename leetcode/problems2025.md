@@ -795,6 +795,100 @@ public:
 };
 ```
 
+## 2071. Maximum Number of Tasks You Can Assign
+
+### Solution 1:  greedy, binary search, multiset, sorting
+
+1. The key is that you try to complete k tasks.
+1. Always best to try to complete the k easiest tasks, using the strongest workers.
+1. Iterate from largest to smallest task in those k easiest tasks, and if the stronger worker available can do it do that.
+1. Otherwise, take the weakest worker that can do it with a pill.
+1. If it is possible under that logic you are good and binary search works because if you can do it for k workers, you can do it for k - 1 workers.
+
+```cpp
+class Solution {
+private:
+    vector<int> A;
+    int K, S;
+    bool possible(int target, multiset<int> pool) {
+        int cnt = 0;
+        for (int i = target - 1; i >= 0; i--) {
+            if (pool.empty()) return false;
+            auto it = prev(pool.end());
+            if (*it >= A[i]) {
+                pool.erase(it);
+            } else {
+                auto it = pool.lower_bound(A[i] - S);
+                if (it == pool.end()) return false;
+                pool.erase(it);
+                cnt++;
+
+            }
+            if (cnt > K) return false;
+        }
+        return true;
+    }
+public:
+    int maxTaskAssign(vector<int>& tasks, vector<int>& B, int pills, int strength) {
+        int N = tasks.size();
+        K = pills, S = strength;
+        sort(tasks.begin(), tasks.end());
+        A = tasks;
+        multiset<int> workers(B.begin(), B.end());
+        int lo = 0, hi = N;
+        while (lo < hi) {
+            int mid = lo + (hi - lo + 1) / 2;
+            if (possible(mid, workers)) lo = mid;
+            else hi = mid - 1;
+        }
+        return lo;
+    }
+};
+```
+
+## 1128. Number of Equivalent Domino Pairs
+
+### Solution 1: map, counter, combinatorics
+
+```cpp
+class Solution {
+private:
+    int calc(int n) {
+        return n * (n - 1) / 2;
+    }
+public:
+    int numEquivDominoPairs(vector<vector<int>>& dominoes) {
+        map<int, int> freq;
+        int ans = 0;
+        for (vector<int> &dom : dominoes) {
+            sort(dom.begin(), dom.end());
+            int val = dom[0] * 10 + dom[1];
+            freq[val]++;
+        }
+        for (const auto &[k, v] : freq) {
+            ans += calc(v);
+        }
+        return ans;
+    }
+};
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
 ##
 
 ### Solution 1: 

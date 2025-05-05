@@ -11,43 +11,59 @@ Centroid decomposition is a recursive technique that splits a tree into smaller 
 - `sub[v]`: size of the (active) subtree rooted at v  
 - `del[v]`: boolean flag marking whether v has been “deleted” in the decomposition 
 
+Important to note that this you need the nodes to be 1-indexed, cause it makes a dummy node labeled as 0 to be the root of the centroid tree.
+
+### calcSums
+Compute the size of each (remaining) subtree rooted at node, storing it in sub[node]. This size count excludes any nodes already “removed” (marked in del[]).
+
+### findCentroid
+
+Given a connected component of (un‐deleted) nodes of total size sz, find its centroid: a node which, if chosen as root and “removed,” leaves no child‐subtree of size ≥ sz/2.
+
+### centroidDecomposition
+
+Recursively assemble the centroid‐decomposition tree. Each time you pick a centroid of some remaining component, you:
+1. Record it as a child of its parent‐centroid in the cd adjacency list.
+1. Mark it deleted in del[], so subsequent centroids ignore it.
+1. For each of the resulting smaller components (each neighbor subtree under that centroid), recompute sizes, find that component’s centroid, and recurse.
+
 ```cpp
-vector<vector<int>> tree, cd;
-vector<int> sub, val;
-vector<bool> del;
-int n, cdRoot = -1;
+vector<vector<int>> adj, cd;
+vector<int> sub;
+vector<bool> vis;
+int cdRoot = -1;
 
-void calc_sums(int node, int par = 0) {
-    sub[node] = 0;
-    if (del[node]) return;
-    for (auto next: tree[node]) {
-        if (next == par) continue;
-        calc_sums(next, node);
-        sub[node] += sub[next];
+void calcSums(int u, int p = -1) {
+    sub[u] = 0;
+    if (vis[u]) return;
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        calcSums(v, u);
+        sub[u] += sub[v];
     }
-    sub[node]++;
+    sub[u]++;
 }
  
-int find_centroid(int node, int sz, int par = 0) {
-    for (auto next: tree[node]) {
-        if (next == par || del[next]) continue;
-        if (sub[next] * 2 >= sz) return find_centroid(next, sz, node);
+int findCentroid(int u, int sz, int p = -1) {
+    for (int v : adj[u]) {
+        if (v == p || vis[v]) continue;
+        if (sub[v] * 2 >= sz) return findCentroid(v, sz, u);
     }
-    return node;
+    return u;
 }
  
-void build(int node, int prev) {
-    cd[prev].push_back(node);
-    del[node] = true;
-    for (auto next: tree[node]) {
-        if (del[next]) continue;
-        calc_sums(next, node);
-        int cent = find_centroid(next, sub[next], node);
-        build(cent, node);
+void centroidDecomposition(int u, int p) {
+    cd[p].emplace_back(u);
+    vis[u] = true;
+    for (int v : adj[u]) {
+        if (vis[v]) continue;
+        calcSums(v, u);
+        int cent = findCentroid(v, sub[v], u);
+        centroidDecomposition(cent, u);
     }
 }
 
- calc_sums(1);
-cdRoot = find_centroid(1, n);
-build(cdRoot, 0);
+calcSums(1);
+cdRoot = findCentroid(1, n);
+centroidDecomposition(cdRoot, 0);
 ```
