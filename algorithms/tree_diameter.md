@@ -62,6 +62,70 @@ void solve() {
 }
 ```
 
+## Tree‐Diameter Decomposition Algorithm with twice DFS algorithm
+
+This routine takes an undirected tree on $N$ nodes (numbered 1…$N$) and repeatedly extracts the diameter of each remaining component until no nodes remain. Each extracted path is “deleted” from the tree, and its length and endpoints are recorded. Finally, all extracted diameters are output in descending order by length.
+
+---
+
+### Data Structures
+
+- **`adj`**: `vector<vector<int>>` — adjacency list of the current forest  
+- **`vis`**: `vector<bool>` — temporary marker for “visited” in each DFS  
+- **`del`**: `vector<bool>` — marks nodes that have already been deleted  
+- **`par`**: `vector<int>` — parent pointers set during DFS  
+
+---
+
+### `dfs(int u, int p = -1) → pair<int,int>`
+
+Performs a depth‐first search rooted at `u`, ignoring the incoming edge to `p` and any deleted nodes. Returns:
+
+1. **`.first`** — distance (number of edges) from `u` to its farthest reachable descendant  
+2. **`.second`** — the index of that farthest node  
+
+As a side‐effect, `par[v]` is set to the parent of `v`, and `vis[v]` is marked true.
+
+Compute its diameter via two DFS passes:
+1. First DFS from i locates one endpoint j of the diameter.
+1. Second DFS from j finds the opposite endpoint k and the true diameter length d2.
+
+In any tree, the longest simple path (i.e., the diameter) starts at some node and ends at the farthest node from it. If you start from any node and go to its farthest reachable node, then repeat that process starting from that farthest node, you'll reach the other end of the diameter.
+
+---
+
+```cpp
+pair<int, int> dfs(int u, int p = -1) {
+    pair<int, int> ans = {1, u};
+    par[u] = p;
+    vis[u] = true;
+    for (int v : adj[u]) {
+        if (v == p || del[v]) continue;
+        pair<int, int> child = dfs(v, u);
+        child.first++;
+        ans = max(ans, child);
+    }
+    return ans;
+}
+
+del.assign(N, false); // used to track which nodes have been deleted
+int cnt = 0;
+while (cnt < N) {
+    vis.assign(N, false);
+    for (int i = 0; i < N; i++) {
+        if (del[i] || vis[i]) continue;
+        auto [d1, j] = dfs(i);
+        auto [d2, k] = dfs(j);
+        ans.emplace_back(vector<int>{d2, max(j, k), min(j, k)});
+        while (k != -1) { // mark the path from k to root as deleted, this is the diameter of current tree
+            del[k] = true;
+            k = par[k];
+            cnt++;
+        }
+    }
+}
+```
+
 ## reroot dp to compute tree diameter
 
 ```cpp
