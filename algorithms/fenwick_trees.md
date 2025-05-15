@@ -115,3 +115,6 @@ assert fenwick.query_range(1, 2) == 2, "Wrong"
 assert fenwick.query_range(2, 2) == 1, "Wrong"
 ```
 
+Number of inversions is easy to calculate with Fenwick Trees
+
+

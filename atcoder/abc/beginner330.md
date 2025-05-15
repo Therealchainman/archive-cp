@@ -74,19 +74,3 @@ def main():
 if __name__ == '__main__':
     main()
 ```
-
-## F - Minimize Bounding Square 
-
-### Solution 1: 
-
-```py
-
-```
-
-## G - Inversion Squared 
-
-### Solution 1: 
-
-```py
-
-```

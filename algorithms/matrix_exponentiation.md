@@ -63,37 +63,38 @@ Example, just fill in transition matrix and base matrix to solve the specific ta
 
 ```cpp
 const int MOD = 1e9 + 7;
-vector<vector<int>> transition_matrix, base_matrix;
+vector<vector<int64>> transitionMatrix, baseMatrix;
 
-vector<vector<int>> mat_mul(const vector<vector<int>>& mat1, const vector<vector<int>>& mat2) {
+vector<vector<int64>> matMul(const vector<vector<int64>>& mat1, const vector<vector<int64>>& mat2) {
     int rows1 = mat1.size(), cols1 = mat1[0].size();
     int rows2 = mat2.size(), cols2 = mat2[0].size();
-    vector<vector<int>> result_matrix(rows1, vector<int>(cols2, 0));
+    vector<vector<int64>> resultMatrix(rows1, vector<int64>(cols2, 0));
     for (int i = 0; i < rows1; i++) {
         for (int j = 0; j < cols2; j++) {
             for (int k = 0; k < cols1; k++) {
-                result_matrix[i][j] = (result_matrix[i][j] + (long long)mat1[i][k] * mat2[k][j]) % MOD;
+                resultMatrix[i][j] = (resultMatrix[i][j] + mat1[i][k] * mat2[k][j]) % MOD;
             }
         }
     }
-    return result_matrix;
+    return resultMatrix;
 }
 
-vector<vector<int>> mat_pow(const vector<vector<int>>& matrix, int power) {
+vector<vector<int64>> matPow(const vector<vector<int64>>& matrix, int power) {
     if (power <= 0) {
         cout << "n must be non-negative integer" << endl;
         return {};
     }
     if (power == 1) return matrix;
-    if (power == 2) return mat_mul(matrix, matrix);
+    if (power == 2) return matMul(matrix, matrix);
 
-    vector<vector<int>> t1 = mat_pow(matrix, power / 2);
+    vector<vector<int64>> t1 = matPow(matrix, power / 2);
     if (power % 2 == 0) {
-        return mat_mul(t1, t1);
+        return matMul(t1, t1);
     }
-    return mat_mul(t1, mat_mul(matrix, t1));
+    return matMul(t1, matMul(matrix, t1));
 }
 
+// this example is right in the idea
 void solve() {
     int m, n;
     cin >> m >> n;
