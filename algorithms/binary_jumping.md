@@ -114,6 +114,91 @@ def lca(u, v):
     return ancestor[0][u]
 ```
 
+Implementation of the above code in C++
+
+```cpp
+struct Tree {
+    int N, LOG;
+    vector<vector<pair<int,int>>> adj;
+    vector<int> depth, parent, dist;
+    vector<vector<int>> up;
+
+    Tree(int n) : N(n) {
+        LOG = 20;
+        adj.assign(N, vector<pair<int, int>>());
+        depth.assign(N, 0);
+        parent.assign(N, -1);
+        dist.assign(N, 0);
+        up.assign(LOG, vector<int>(N, -1));
+    }
+    void addEdge(int u, int v, int w = 1) {
+        adj[u].emplace_back(v, w);
+        adj[v].emplace_back(u, w);
+    }
+    void preprocess(int root = 0) {
+        dfs(root);
+        buildLiftingTable();
+    }
+    int kthAncestor(int u, int k) const {
+        for (int i = 0; i < LOG && u != -1; i++) {
+            if ((k >> i) & 1) {
+                u = up[i][u];
+            }
+        }
+        return u;
+    }
+    int lca(int u, int v) const {
+        if (depth[u] < depth[v]) swap(u, v);
+        // Bring u up to the same depth as v
+        u = kthAncestor(u, depth[u] - depth[v]);
+        if (u == v) return u;
+        // Binary lift both
+        for (int i = LOG - 1; i >= 0; i--) {
+            if (up[i][u] != up[i][v]) {
+                u = up[i][u];
+                v = up[i][v];
+            }
+        }
+        // Now parents are equal
+        return parent[u];
+    }
+    int distance(int u, int v) const {
+        int a = lca(u, v);
+        return dist[u] + dist[v] - 2 * dist[a];
+    }
+private:
+    void dfs(int u, int p = -1) {
+        parent[u] = p;
+        up[0][u] = p;
+        for (auto &[v, w] : adj[u]) {
+            if (v == p) continue;
+            depth[v] = depth[u] + 1;
+            dist[v] = dist[u] + w;
+            dfs(v, u);
+        }
+    }
+    void buildLiftingTable() {
+        for (int i = 1; i < LOG; i++) {
+            for (int j = 0; j < N; j++) {
+                if (up[i - 1][j] == -1) continue;
+                up[i][j] = up[i - 1][up[i - 1][j]];
+            }
+        }
+    }
+};
+/*
+example
+Tree tree(N);
+for (const vector<int> &edge : edges) {
+    int u = edge[0], v = edge[1], w = edge[2];
+    tree.addEdge(u, v, w);
+}
+tree.preprocess();
+*/
+```
+
+
+
 ## Binary jumping to calculate minimum node value on path queries in tree with LCA
 
 So take care of the sparse table because it is looking at the nodes value it has a few edge cases.
