@@ -873,12 +873,72 @@ public:
 };
 ```
 
-##
+## 1931. Painting a Grid With Three Different Colors
 
-### Solution 1: 
+### Solution 1: dfs, base encoding, base 3 representation, undirected graph, dynamic programming, counting
+
+1. The key is to represent the grid as a number in base 3, where each digit represents the color of a cell.
+1. The number of states is 3 * 2^(m - 1), where m is the number of rows.
+1. The adjacency list is built by checking if two states are compatible (i.e., they can be painted without conflicts).
+1. The dp array is used to count the number of ways to paint the grid, where dp[i][j] represents the number of ways to paint the first i rows with state j.
+
 
 ```cpp
-
+const int MOD = 1e9 + 7;
+class Solution {
+private:
+    int M;
+    vector<int> states;
+    void dfs(int idx, int code, int prv) {
+        if (idx == M) {
+            states.emplace_back(code);
+            return;
+        }
+        for (int i = 0; i < 3; i++) {
+            if (i == prv) continue;
+            dfs(idx + 1, 3 * code + i, i);
+        }
+    }
+    bool isCompatible(int x, int y) {
+        for (int i = 0; i < M; i++) {
+            if (x % 3 == y % 3) return false;
+            x /= 3;
+            y /= 3;
+        }
+        return true;
+    }
+public:
+    int colorTheGrid(int m, int n) {
+        M = m;
+        dfs(0, 0, -1);
+        int numStates = states.size();
+        vector<vector<int>> adj(numStates, vector<int>());
+        for (int i = 0; i < numStates; i++) {
+            for (int j = 0; j < i; j++) {
+                int u = states[i], v = states[j];
+                if (!isCompatible(u, v)) continue;
+                adj[i].emplace_back(j);
+                adj[j].emplace_back(i);
+            }
+        }
+        vector<vector<int>> dp(n, vector<int>(numStates, 0));
+        for (int i = 0; i < numStates; i++) {
+            dp[0][i] = 1; // start with all of the states, in first column
+        }
+        for (int i = 1; i < n; i++) {
+            for (int j = 0; j < numStates; j++) {
+                for (int k : adj[j]) {
+                    dp[i][j] = (dp[i][j] + dp[i - 1][k]) % MOD;
+                }
+            }
+        }
+        int ans = 0;
+        for (int i = 0; i < numStates; i++) {
+            ans = (ans + dp[n - 1][i]) % MOD;
+        }
+        return ans;
+    }
+};
 ```
 
 ##

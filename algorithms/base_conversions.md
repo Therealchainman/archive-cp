@@ -57,3 +57,50 @@ int get_digit(int mask, int p, int b = 3) {
     return (mask / p) % b;
 }
 ```
+
+## Encoding a State in Base-*b* as an Integer
+
+### 1. The Idea of Base-*b* Encoding
+
+Suppose you have a sequence (vector) of length `m`:
+
+
+You can pack this sequence into a single integer using base-$b$ encoding:
+
+$$
+\text{code} = d_0 \cdot b^{m-1} + d_1 \cdot b^{m-2} + \dots + d_{m-2} \cdot b^1 + d_{m-1} \cdot b^0
+$$
+
+This is exactly how base-10 numbers are represented — we just use base $b$ instead.
+
+---
+
+### 2. Building the Code Incrementally
+
+Rather than computing all powers of $b$ explicitly, you can **build the integer incrementally** by “shifting and appending” each digit. Start from $\text{code} = 0$, and for each digit $d$:
+
+code = code * b + d
+
+Multiplying by $b$ shifts the current digits to the left (in base $b$).
+
+Adding the new digit $d$ appends it to the least-significant position.
+
+#### Example
+
+Let $b = 5$, $m = 4$, and the digits be $[2, 0, 4, 1]$.
+
+We compute the encoded integer step by step:
+
+| Step         | Operation              | Resulting Code | Base-5 Representation |
+|--------------|------------------------|----------------|------------------------|
+| Start        | —                      | $0$            | `[]`                   |
+| Append `2`   | $0 \cdot 5 + 2$        | $2$            | `[2]`                  |
+| Append `0`   | $2 \cdot 5 + 0$        | $10$           | `[2, 0]`               |
+| Append `4`   | $10 \cdot 5 + 4$       | $54$           | `[2, 0, 4]`            |
+| Append `1`   | $54 \cdot 5 + 1$       | $271$          | `[2, 0, 4, 1]`         |
+
+So the final encoded integer is:
+
+$$
+\text{code} = 2 \cdot 5^3 + 0 \cdot 5^2 + 4 \cdot 5^1 + 1 \cdot 5^0 = 271
+$$
