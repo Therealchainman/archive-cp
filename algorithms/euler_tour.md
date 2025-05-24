@@ -65,8 +65,7 @@ for _ in range(q):
 
 Implemented in C++
 
-For a Fenwick Tree, but it can be used with segment tree or sparse table if there are no updates. 
-It can even be implemented with lazy segment tree probably.  But understanding how it builts the tin and tout array is the euler tour technique.  It is a dfs and construct those two arrays, that allow you to perform range queries over an array and get sum of all nodes in a subtree or node u. 
+This technique is often used with a Fenwick Tree, but it can also be applied with a Segment Tree or a Sparse Table when there are no updates. It could even be implemented using a Lazy Segment Tree. The key idea lies in how it builds the tin and tout arrays using the Euler Tour technique. This involves a depth-first search (DFS) that constructs these arrays, enabling efficient range queries and allowing you to compute the sum of all nodes in a subtree rooted at a given node u.
 
 ```cpp
 int N, Q, timer;

@@ -37,6 +37,35 @@ $\binom{n}{k}$ = $\binom{n - 1}{k - 1} + \binom{n - 1}{k}$
 
 Fast way is to precompute the factorials and inverse factorials and use that to solve in O(1) for each time using the formula. 
 
+## Calculating binomial coefficients with dynamic programming
+
+$c[i][j] = \binom{i}{j}$
+
+transitions for dynamic programming
+
+c[i+1][j+1] += c[i][j]; // chose bit i to be 1
+c[i+1][j]   += c[i][j]; // chose bit i to be 0
+
+time complexity is O(N^2), so it is not feasible for large N.
+Use modular arithmetic to reduce the size of the numbers.
+
+```cpp
+const int MOD = 9998244353, MAXN = 61;
+int C[MAXN][MAXN];
+
+void binomial_coefficients() {
+    C[0][0] = 1;
+    for (int i = 0; i < MAXN; i++) {
+        for (int j = 1; j <= i; j++) {
+            C[i + 1][j + 1] += C[i][j];
+            C[i + 1][j + 1] %= MOD;
+            C[i + 1][j] += C[i][j];
+            C[i + 1][j] %= MOD;
+        }
+    }
+}
+```
+
 
 
 
