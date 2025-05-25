@@ -116,6 +116,8 @@ def lca(u, v):
 
 Implementation of the above code in C++
 
+If unweighted edges, just use addEdge(u, v) without the weight parameter, it will set to 1 by default.
+
 ```cpp
 struct Tree {
     int N, LOG;
@@ -206,89 +208,137 @@ So take care of the sparse table because it is looking at the nodes value it has
 But basically the sparse table over the nodes is along these lines, that is if you have a node u and looking at 4 away, the value over that sparse table is including node u and the next 3 nodes, while the ancestor would be pointing to the 4th node.  So it is behind the ancestor in a sense, so you must return st[0][u] and st[1][u] instead of what it does for lca. 
 
 ```cpp
-// binary lifting algorithm
+const int INF = (1LL << 31) - 1;
+int N, Q;
 
-vector<int> depth, parent;
-const int LOG = 20, inf = INT_MAX;
-vector<vector<int>> ancestor, st, adj;
-vector int n;
+struct Tree {
+    int N, LOG;
+    vector<vector<pair<int,int>>> adj;
+    vector<int> depth, parent, dist, coins;
+    vector<vector<int>> up, st;
 
-// bfs from root of tree to calculate depth of nodes in the tree
-void bfs(int root) {
-    queue<int> q;
-    depth.assign(block_id, inf);
-    parent.assign(block_id, -1);
-    q.push(root);
-    depth[root] = 0;
-    while (!q.empty()) {
-        int u = q.front();
-        q.pop();
-        for (int v : adj[u]) {
-            if (depth[u] + 1 < depth[v]) {
-                depth[v] = depth[u] + 1;
-                parent[v] = u;
-                q.push(v);
+    Tree(int n) : N(n) {
+        LOG = 20;
+        adj.assign(N, vector<pair<int, int>>());
+        depth.assign(N, 0);
+        parent.assign(N, -1);
+        dist.assign(N, 0);
+        coins.assign(N, INF);
+        up.assign(LOG, vector<int>(N, -1));
+        st.assign(LOG, vector<int>(N, INF));
+
+    }
+    void addEdge(int u, int v, int w = 1) {
+        adj[u].emplace_back(v, w);
+        adj[v].emplace_back(u, w);
+    }
+    void preprocess(int root = 0) {
+        processCoins();
+        dfs(root);
+        buildLiftingTable();
+    }
+    int kthAncestor(int u, int k) const {
+        for (int i = 0; i < LOG && u != -1; i++) {
+            if ((k >> i) & 1) {
+                u = up[i][u];
             }
         }
+        return u;
     }
-}
-
-// preprocess the ancestor and sparse table for minimum array
-void preprocess() {
-    ancestor.assign(LOG, vector<int>(n, -1));
-    st.assign(LOG, vector<int>(n, inf));
-    for (int i = 0; i < n; i++) {
-        ancestor[0][i] = parent[i];
-        st[0][i] = dist[i];
-    }
-    for (int i = 1; i < LOG; i++) {
-        for (int j = 0; j < n; j++) {
-            if (ancestor[i - 1][j] != -1) {
-                ancestor[i][j] = ancestor[i - 1][ancestor[i - 1][j]];
-                st[i][j] = min(st[i - 1][j], st[i - 1][ancestor[i - 1][j]]);
+    int lca(int u, int v) const {
+        if (depth[u] < depth[v]) swap(u, v);
+        // Bring u up to the same depth as v
+        u = kthAncestor(u, depth[u] - depth[v]);
+        if (u == v) return u;
+        // Binary lift both
+        for (int i = LOG - 1; i >= 0; i--) {
+            if (up[i][u] != up[i][v]) {
+                u = up[i][u];
+                v = up[i][v];
             }
         }
+        // Now parents are equal
+        return parent[u];
     }
-}
-
-// LCA queries to calculate the minimum node value in path from u to v
-int lca(int u, int v) {
-    if (depth[u] < depth[v]) swap(u, v);
-    int ans = inf;
-    int k = depth[u] - depth[v];
-    if (k > 0) {
-        for (int i = 0; i < LOG; i++) {
+    int query(int u, int v) const {
+        if (depth[u] < depth[v]) swap(u, v);
+        int ans = INF;
+        // Bring u up to the same depth as v
+        int k = depth[u] - depth[v];
+        for (int i = 0; i < LOG && u != -1; i++) {
             if ((k >> i) & 1) {
                 ans = min(ans, st[i][u]);
-                u = ancestor[i][u];
+                u = up[i][u];
+            }
+        }
+        if (u == v) {
+            ans = min(ans, st[0][u]);
+            return ans;
+        }
+        // Binary lift both
+        for (int i = LOG - 1; i >= 0; i--) {
+            if (up[i][u] != up[i][v]) {
+                ans = min(ans, st[i][u]);
+                ans = min(ans, st[i][v]);
+                u = up[i][u];
+                v = up[i][v];
+            }
+        }
+        ans = min(ans, st[1][u]);
+        ans = min(ans, st[1][v]);
+        return ans;
+    }
+    int distance(int u, int v) const {
+        int a = lca(u, v);
+        return dist[u] + dist[v] - 2 * dist[a];
+    }
+private:
+    void processCoins() {
+        queue<pair<int, int>> q;
+        for (int i = 0; i < N; i++) {
+            if (!coins[i]) q.emplace(i, 0);
+        }
+        while (!q.empty()) {
+            auto [u, d] = q.front();
+            q.pop();
+            for (auto [v, w] : adj[u]) {
+                if (coins[v] != INF) continue;
+                coins[v] = d + w;
+                q.emplace(v, d + w);
             }
         }
     }
-    if (u == v) {
-        ans = min(ans, st[0][u]);
-        return ans;
-    }
-    for (int i = LOG - 1; i >= 0; i--) {
-        if (ancestor[i][u] != -1 && ancestor[i][u] != ancestor[i][v]) {
-            ans = min(ans, st[i][u]);
-            ans = min(ans, st[i][v]);
-            u = ancestor[i][u]; v = ancestor[i][v];
+    void dfs(int u, int p = -1) {
+        parent[u] = p;
+        up[0][u] = p;
+        st[0][u] = coins[u];
+        for (auto &[v, w] : adj[u]) {
+            if (v == p) continue;
+            depth[v] = depth[u] + 1;
+            dist[v] = dist[u] + w;
+            dfs(v, u);
         }
     }
-    ans = min(ans, st[1][u]);
-    ans = min(ans, st[1][v]);
-    return ans;
-}
-void solve() {
-    bfs(0);
-    preprocess();
-    int Q = read();
-    while (Q--) {
-        int u = read(), v = read();
-        // path min query on the bridge tree
-        res += lca(u, v);
+    void buildLiftingTable() {
+        for (int i = 1; i < LOG; i++) {
+            for (int j = 0; j < N; j++) {
+                if (up[i - 1][j] == -1) continue;
+                up[i][j] = up[i - 1][up[i - 1][j]];
+                st[i][j] = min(st[i - 1][j], st[i - 1][up[i - 1][j]]);
+            }
+        }
     }
+};
+/*
+Tree tree(N);
+for (const vector<int> &edge : edges) {
+    int u = edge[0], v = edge[1], w = edge[2];
+    tree.addEdge(u, v, w);
 }
+tree.preprocess();
+query(u, v); // returns minimum value on path from u to v
+distance(u, v); // returns distance from u to v
+*/
 
 ```
 

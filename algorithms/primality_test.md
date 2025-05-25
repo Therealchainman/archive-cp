@@ -6,6 +6,8 @@ This miller rabin primality test is deterministic for any 64 bit integer.  It ha
 
 This is something log(n) time, maybe not exactly but close to that for sure. 
 
+Don't try to do this in C++, very hard to avoid 64 bit integer overflow. Python is much better for this.  The code is simple and easy to understand.  It is a probabilistic test, but it is deterministic for the bases used in the test.
+
 ```py
 def check_composite(n, a, d, s):
     x = pow(a, d, n)

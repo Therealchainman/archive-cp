@@ -817,3 +817,209 @@ public:
 ```cpp
 
 ```
+
+# Leetcode Biweekly Contest 157
+
+## Sum of Largest Prime Substrings
+
+### Solution 1: primality test, miller rabin, string to number, set
+
+```py
+def check_composite(n, a, d, s):
+    x = pow(a, d, n)
+    if x == 1 or x == n - 1: return False
+    for r in range(1, s):
+        x = x * x % n
+        if x == n - 1: return False
+    return True
+
+def miller_rabin(n):
+    if n < 4: return n == 2 or n == 3
+    r = 0
+    d = n - 1
+    while d % 2 == 0:
+        r += 1
+        d >>= 1
+    bases = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37]
+    for a in bases:
+        if n == a: return True
+        if check_composite(n, a, d, r): return False
+    return True
+class Solution:
+    def sumOfLargestPrimes(self, s: str) -> int:
+        n = len(s)
+        primes = set()
+        for i in range(n):
+            for j in range(i + 1, n + 1):
+                val = int(s[i : j])
+                if (miller_rabin(val)): primes.add(val)
+        ans = 0
+        primes = sorted(primes, reverse = True)
+        for i in range(min(3, len(primes))):
+            ans += primes[i]
+        return ans
+```
+
+## Find Maximum Number of Non Intersecting Substrings
+
+### Solution 1: dynamic programming, greedy
+
+```cpp
+class Solution {
+private:
+    int decode(char ch) {
+        return ch - 'a';
+    }
+public:
+    int maxSubstrings(string word) {
+        int N = word.size();
+        vector<int> dp(N + 1, 0);
+        vector<vector<int>> last(26, vector<int>());
+        for (int i = 1; i <= N; i++) {
+            dp[i] = dp[i - 1];
+            int u = decode(word[i - 1]);
+            for (int idx = last[u].size() - 1; idx >= 0; idx--) {
+                int j = last[u][idx];
+                int d = i - j + 1;
+                if (d >= 4) {
+                    dp[i] = max(dp[i], dp[i - d] + 1);
+                    break;
+                }
+            }
+            last[u].emplace_back(i);
+        } 
+        return dp[N];
+    }
+};
+```
+
+## Number of Ways to Assign Edge Weights II
+
+### Solution 1: binary lifting, tree, lca, distance, dynamic programming
+
+```cpp
+const int MOD = 1e9 + 7;
+struct Tree {
+    int N, LOG;
+    vector<vector<int>> adj;
+    vector<int> depth, parent, dist;
+    vector<vector<int>> up;
+
+    Tree(int n) : N(n) {
+        LOG = 20;
+        adj.assign(N, vector<int>());
+        depth.assign(N, 0);
+        parent.assign(N, -1);
+        dist.assign(N, 0);
+        up.assign(LOG, vector<int>(N, -1));
+    }
+    void addEdge(int u, int v, int w = 1) {
+        adj[u].emplace_back(v);
+        adj[v].emplace_back(u);
+    }
+    void preprocess(int root = 0) {
+        dfs(root);
+        buildLiftingTable();
+    }
+    int kthAncestor(int u, int k) const {
+        for (int i = 0; i < LOG && u != -1; i++) {
+            if ((k >> i) & 1) {
+                u = up[i][u];
+            }
+        }
+        return u;
+    }
+    int lca(int u, int v) const {
+        if (depth[u] < depth[v]) swap(u, v);
+        // Bring u up to the same depth as v
+        u = kthAncestor(u, depth[u] - depth[v]);
+        if (u == v) return u;
+        // Binary lift both
+        for (int i = LOG - 1; i >= 0; i--) {
+            if (up[i][u] != up[i][v]) {
+                u = up[i][u];
+                v = up[i][v];
+            }
+        }
+        // Now parents are equal
+        return parent[u];
+    }
+    int distance(int u, int v) const {
+        int a = lca(u, v);
+        return dist[u] + dist[v] - 2 * dist[a];
+    }
+private:
+    void dfs(int u, int p = -1) {
+        parent[u] = p;
+        up[0][u] = p;
+        for (int v : adj[u]) {
+            if (v == p) continue;
+            depth[v] = depth[u] + 1;
+            dist[v] = dist[u] + 1;
+            dfs(v, u);
+        }
+    }
+    void buildLiftingTable() {
+        for (int i = 1; i < LOG; i++) {
+            for (int j = 0; j < N; j++) {
+                if (up[i - 1][j] == -1) continue;
+                up[i][j] = up[i - 1][up[i - 1][j]];
+            }
+        }
+    }
+};
+class Solution {
+public:
+    vector<int> assignEdgeWeights(vector<vector<int>>& edges, vector<vector<int>>& queries) {
+        int N = edges.size() + 1, M = queries.size();
+        vector<vector<int>> dp(N + 1, vector<int>(2, 0));
+        dp[0][0] = 1;
+        for (int i = 1; i <= N; i++) {
+            int add = (dp[i - 1][0] + dp[i - 1][1]) % MOD;
+            dp[i][0] = (dp[i][0] + add) % MOD;
+            dp[i][1] = (dp[i][1] + add) % MOD;
+        }
+        Tree tree(N);
+        for (const auto &edge : edges) {
+            int u = edge[0], v = edge[1];
+            u--; v--;
+            tree.addEdge(u, v);
+        }
+        tree.preprocess(0);
+        vector<int> ans(M, 0);
+        for (int i = 0; i < M; i++) {
+            int u = queries[i][0], v = queries[i][1];
+            u--; v--;
+            int d = tree.distance(u, v);
+            ans[i] = dp[d][1];
+        }
+        return ans;
+    }
+};
+```
+
+# Leetcode Biweekly Contest 158
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
