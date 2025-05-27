@@ -941,12 +941,54 @@ public:
 };
 ```
 
-##
+## 1857. Largest Color Value in a Directed Graph
 
-### Solution 1: 
+### Solution 1: directed graph, topological sort, dynamic programming, counting
+
+After doing this for all 26 colors, v's table reflects the best possible color-counts on any path that reaches v via node u.
+
+Correctness follows because we’re doing a DP on a DAG in topological order. By the time we “visit” a node, we’ve already computed the optimum counts for every path into it.
+
+Finds the maximum number of identically-colored nodes on any root-to-leaf path in a directed graph, or detects a cycle.
 
 ```cpp
-
+class Solution {
+private:
+    int decode(char ch) {
+        return ch - 'a';
+    }
+public:
+    int largestPathValue(string colors, vector<vector<int>>& edges) {
+        int N = colors.size(), cnt = 0, ans = 0;
+        vector<vector<int>> adj(N, vector<int>()), dp(N, vector<int>(26, 0));
+        vector<int> ind(N, 0);
+        for (const auto &edge : edges) {
+            int u = edge[0], v = edge[1];
+            adj[u].emplace_back(v);
+            ind[v]++;
+        }
+        queue<int> q;
+        for (int i = 0; i < N; i++) {
+            if (!ind[i]) q.emplace(i);
+        }
+        while (!q.empty()) {
+            int u = q.front();
+            dp[u][decode(colors[u])]++;
+            ans = max(ans, dp[u][decode(colors[u])]);
+            cnt++;
+            q.pop();
+            for (int v : adj[u]) {
+                ind[v]--;
+                for (int i = 0; i < 26; i++) {
+                    dp[v][i] = max(dp[v][i], dp[u][i]);
+                }
+                if (ind[v]) continue;
+                q.emplace(v);
+            }
+        }
+        return cnt == N ? ans : -1;
+    }
+};
 ```
 
 ##

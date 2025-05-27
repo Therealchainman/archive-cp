@@ -408,10 +408,164 @@ signed main() {
 
 ## MST Edge Cost
 
-### Solution 1: 
+### Solution 1: binary lifting, max path query on edges of tree, lca, kruskal's algorithm, union find, weighted undirectd graph
 
 ```cpp
+const int INF = numeric_limits<int>::max();
+int N, M;
 
+struct UnionFind {
+    vector<int> parents, size;
+    UnionFind(int n) {
+        parents.resize(n);
+        iota(parents.begin(),parents.end(),0);
+        size.assign(n,1);
+    }
+
+    int find(int i) {
+        if (i==parents[i]) {
+            return i;
+        }
+        return parents[i]=find(parents[i]);
+    }
+
+    bool same(int i, int j) {
+        i = find(i), j = find(j);
+        if (i!=j) {
+            if (size[j]>size[i]) {
+                swap(i,j);
+            }
+            size[i]+=size[j];
+            parents[j]=i;
+            return false;
+        }
+        return true;
+    }
+};
+
+struct Tree {
+    int N, LOG;
+    vector<vector<pair<int,int>>> adj;
+    vector<int> depth, parent, dist;
+    vector<vector<int>> up, st;
+
+    Tree(int n) : N(n) {
+        LOG = 20;
+        adj.assign(N, vector<pair<int, int>>());
+        depth.assign(N, 0);
+        parent.assign(N, -1);
+        dist.assign(N, 0);
+        up.assign(LOG, vector<int>(N, -1));
+        st.assign(LOG, vector<int>(N, -INF));
+
+    }
+    void addEdge(int u, int v, int w = 1) {
+        adj[u].emplace_back(v, w);
+        adj[v].emplace_back(u, w);
+    }
+    void preprocess(int root = 0) {
+        dfs(root);
+        buildLiftingTable();
+    }
+    int query(int u, int v) const {
+        if (depth[u] < depth[v]) swap(u, v);
+        int ans = -INF;
+        // Bring u up to the same depth as v
+        int k = depth[u] - depth[v];
+        for (int i = 0; i < LOG && u != -1; i++) {
+            if ((k >> i) & 1) {
+                ans = max(ans, st[i][u]);
+                u = up[i][u];
+            }
+        }
+        if (u == v) {
+            return ans;
+        }
+        // Binary lift both
+        for (int i = LOG - 1; i >= 0; i--) {
+            if (up[i][u] != up[i][v]) {
+                ans = max(ans, st[i][u]);
+                ans = max(ans, st[i][v]);
+                u = up[i][u];
+                v = up[i][v];
+            }
+        }
+        ans = max(ans, st[0][u]);
+        ans = max(ans, st[0][v]);
+        return ans;
+    }
+private:
+    void dfs(int u, int p = -1) {
+        parent[u] = p;
+        up[0][u] = p;
+        if (p == -1) st[0][u] = 0;
+        for (auto &[v, w] : adj[u]) {
+            if (v == p) {
+                st[0][u] = w;
+                continue;
+            }
+            depth[v] = depth[u] + 1;
+            dist[v] = dist[u] + w;
+            dfs(v, u);
+        }
+    }
+    void buildLiftingTable() {
+        for (int i = 1; i < LOG; i++) {
+            for (int j = 0; j < N; j++) {
+                if (up[i - 1][j] == -1) continue;
+                up[i][j] = up[i - 1][up[i - 1][j]];
+                st[i][j] = max(st[i - 1][j], st[i - 1][up[i - 1][j]]);
+            }
+        }
+    }
+};
+
+struct Edge {
+    int u, v, w, i;
+    Edge() {}
+    Edge(int u, int v, int w, int i) : u(u), v(v), w(w), i(i) {}
+    bool operator<(const Edge &other) const {
+        return w < other.w;
+    }
+};
+
+void solve() {
+    cin >> N >> M;
+    vector<Edge> edges;
+    for (int i = 0; i < M; i++) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        u--; v--;
+        edges.emplace_back(u, v, w, i);
+    }
+    sort(edges.begin(), edges.end());
+    Tree tree(N);
+    UnionFind dsu(N);
+    int64 minCost = 0;
+    for (const Edge &edge : edges) {
+        if (!dsu.same(edge.u, edge.v)) {
+            minCost += edge.w;
+            tree.addEdge(edge.u, edge.v, edge.w);
+        }
+    }
+    tree.preprocess();
+    vector<int64> ans(M);
+    for (const Edge &edge : edges) {
+        int maxEdge = tree.query(edge.u, edge.v);
+        ans[edge.i] = minCost + edge.w - maxEdge;
+    }
+    for (int64 x : ans) {
+        cout << x << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ## 

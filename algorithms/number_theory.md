@@ -6,9 +6,21 @@ These facts seem to be useful for enough problems that they are worth memorizing
 
 If you take from 1 to 1,000,000 here are some useful facts:
 - The maximum number of distinct prime factors a number can have is 7.
-- The maximum number of total prime factors a number can have is 75.
-- The maximum number of divisors a number can have is 240, and it is number 720,720
+- The maximum number of total prime factors a number can have is 19.
+- The maximum number of divisors a number can have is 240, and it is number 720,720.
 
+
+## Finding all divisors of a number in square root time complexity
+
+```cpp
+vector<int> div;
+for (int i = 1; i * i <= x; i++) {
+    if (x % i == 0) {
+        div.emplace_back(i);
+        if (i * i < x) div.emplace_back(x / i);
+    }
+}
+```
 
 ## Euler Totient Theorem
 

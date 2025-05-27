@@ -1,6 +1,55 @@
 # Manhattan Trick
 
-There are a few useful tricks with manhattan distances that from searching online is apparently called manhattan trick
+Chebyshev distance is a metric that is defined as the maximum of the absolute differences of the coordinates. In a 2D grid, it can be expressed as:
+
+```
+max(|x2 - x1|, |y2 - y1|)
+```
+
+When you change the coordinates to a different reference frame, such as `s = x + y` and `t = x - y`, the Chebyshev distance can be expressed in terms of these new coordinates.
+This transformation allows you to compute the Chebyshev distance using the maximum of the absolute differences of `s` and `t`:
+
+``` 
+|x2 - x1| + |y2 - y1| = max(|s2 - s1|, |t2 - t1|)
+```
+
+Because in the (s, t) world:
+- Manhattan distance becomes simpler to compute: just a max!
+- Certain problems become easier to solve: like finding closest or farthest points.
+- You can take advantage of grid-aligned data like in image processing, pathfinding, or city maps.
+
+## Example: Compute the Two Points with Maximum Manhattan Distance
+
+Using the transformed coordinates s = x + y and t = x - y, the maximum Manhattan distance between any two points in a list can be found by computing the widest span in either s or t.
+
+Here's a Python function that does this in linear time:
+```py
+def max_manhattan_distance(points, remove = -1):
+    smin = dmin = math.inf
+    smax = dmax = -math.inf
+    smax_i = smin_i = dmax_i = dmin_i = None
+    for i, (x, y) in enumerate(points):
+        if remove == i: continue
+        s = x + y
+        d = x - y
+        if s > smax:
+            smax = s
+            smax_i = i
+        if s < smin:
+            smin = s
+            smin_i = i
+        if d > dmax:
+            dmax = d
+            dmax_i = i
+        if d < dmin:
+            dmin = d
+            dmin_i = i
+    return (smax_i, smin_i) if smax - smin >= dmax - dmin else (dmax_i, dmin_i)
+```
+
+This function returns the indices of the two points that produce the maximum Manhattan distance. It works by finding the maximum spread in either the s or t dimensions — whichever is greater determines the farthest-apart pair.
+
+_________________________________________________________________________________________________________________
 
 The first one is this
 max(|x2-x1|,|y2-y1|) = 2*(|s2-s1| + |t2-t1|)
@@ -82,33 +131,3 @@ void solve() {
 ```
 
 
-And sometimes it goes the other way that is |x2-x1|+|y2-y1| = max(|s2-s1|,|t2-t1|)
-
-
-This can be solved in O(n) time using this manhattan trick
-
-example where it uses the smax - smin, and dmax - dmin to find the two index that lead to maximum manhattan distance, finds the two points that lead to maximum manhattan distance.  which is either going to be from |s2-s1| or |t2-t1|
-
-```py
-def max_manhattan_distance(points, remove = -1):
-    smin = dmin = math.inf
-    smax = dmax = -math.inf
-    smax_i = smin_i = dmax_i = dmin_i = None
-    for i, (x, y) in enumerate(points):
-        if remove == i: continue
-        s = x + y
-        d = x - y
-        if s > smax:
-            smax = s
-            smax_i = i
-        if s < smin:
-            smin = s
-            smin_i = i
-        if d > dmax:
-            dmax = d
-            dmax_i = i
-        if d < dmin:
-            dmin = d
-            dmin_i = i
-    return (smax_i, smin_i) if smax - smin >= dmax - dmin else (dmax_i, dmin_i)
-```

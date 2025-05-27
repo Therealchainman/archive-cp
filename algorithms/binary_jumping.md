@@ -342,6 +342,53 @@ distance(u, v); // returns distance from u to v
 
 ```
 
+To modify a standard LCA-based tree structure (which typically handles vertex values) to instead compute the maximum or minimum edge weight along the path between two nodes, the following changes are necessary:
+
+```cpp
+    int query(int u, int v) const {
+        if (depth[u] < depth[v]) swap(u, v);
+        int ans = -INF;
+        // Bring u up to the same depth as v
+        int k = depth[u] - depth[v];
+        for (int i = 0; i < LOG && u != -1; i++) {
+            if ((k >> i) & 1) {
+                ans = max(ans, st[i][u]);
+                u = up[i][u];
+            }
+        }
+        if (u == v) {
+            return ans;
+        }
+        // Binary lift both
+        for (int i = LOG - 1; i >= 0; i--) {
+            if (up[i][u] != up[i][v]) {
+                ans = max(ans, st[i][u]);
+                ans = max(ans, st[i][v]);
+                u = up[i][u];
+                v = up[i][v];
+            }
+        }
+        ans = max(ans, st[0][u]);
+        ans = max(ans, st[0][v]);
+        return ans;
+    }
+
+    void dfs(int u, int p = -1) {
+        parent[u] = p;
+        up[0][u] = p;
+        if (p == -1) st[0][u] = 0;
+        for (auto &[v, w] : adj[u]) {
+            if (v == p) {
+                st[0][u] = w;
+                continue;
+            }
+            depth[v] = depth[u] + 1;
+            dist[v] = dist[u] + w;
+            dfs(v, u);
+        }
+    }
+```
+
 # Sparse Tables
 
 sparse tables are best for range queries with an immutable array or static array.  They even have O(1) query for indempotent functions and the rest O(logn)

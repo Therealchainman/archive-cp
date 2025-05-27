@@ -646,42 +646,6 @@ class Solution:
         return prev
 ```
 
-## 1857. Largest Color Value in a Directed Graph
-
-### Solution 1:  topological sort + store count for each path + deque
-
-```py
-class Solution:
-    def largestPathValue(self, colors: str, edges: List[List[int]]) -> int:
-        n = len(colors)
-        # CONSTRUCT GRAPH
-        graph = [[] for _ in range(n)]
-        indegrees = [0]*n
-        for node_out, node_in in edges:
-            graph[node_out].append(node_in)
-            indegrees[node_in] += 1
-        queue = deque()
-        counters = [[0]*26 for _ in range(n)]
-        get_unicode = lambda ch: ord(ch) - ord('a')
-        for i in range(n):
-            if indegrees[i] == 0:
-                queue.append(i)
-        largest_path = processed_nodes = 0
-        while queue:
-            node = queue.popleft()
-            color = get_unicode(colors[node])
-            counters[node][color] += 1
-            largest_path = max(largest_path, counters[node][color])
-            processed_nodes += 1
-            for nei in graph[node]:
-                indegrees[nei] -= 1
-                for i in range(26):
-                    counters[nei][i] = max(counters[nei][i], counters[node][i])
-                if indegrees[nei] == 0:
-                    queue.append(nei)
-        return largest_path if processed_nodes == n else -1
-```
-
 ## 1203. Sort Items by Groups Respecting Dependencies
 
 ### Solution 1:  topological sort + topological sort of groups then topological sort of nodes within each group + preprocess data

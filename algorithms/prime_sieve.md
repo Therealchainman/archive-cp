@@ -123,6 +123,15 @@ void sieve(int n) {
     }
 }
 
+vector<int> factorize(int x) {
+    vector<int> factors;
+    while (x > 1) {
+        factors.emplace_back(spf[x]);
+        x /= spf[x];
+    }
+    return factors;
+}
+
 // log(x) algorithm with spf
 int count_divisors(int x) {
     int res = 1;
@@ -204,8 +213,6 @@ void sieve(int n) {
 ```
 
 ## Sieve of Eratosthenes to get all divisors
-
-
 
 ```cpp
 vector<vector<int>> fac(n+2);

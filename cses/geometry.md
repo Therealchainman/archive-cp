@@ -433,3 +433,53 @@ signed main() {
     }
 }
 ```
+
+## Maximum Manhattan Distances
+
+### Solution 1:  manhattan trick, 45 degree rotation, chebyshev distance
+
+```cpp
+const int64 INF = numeric_limits<int64>::max();
+int N;
+
+void solve() {
+    cin >> N;
+    int64 minS = INF, maxS = -INF, minT = INF, maxT = -INF, ans = 0;
+    for (int i = 0, x, y; i < N; i++) {
+        cin >> x >> y;
+        int64 s = x + y, t = x - y;
+        if (i > 0) {
+            ans = max({ans, abs(s - maxS), abs(s - minS), abs(t - maxT), abs(t - minT)});
+        }
+        maxS = max(maxS, s);
+        minS = min(minS, s);
+        maxT = max(maxT, t);
+        minT = min(minT, t);
+        cout << ans << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
