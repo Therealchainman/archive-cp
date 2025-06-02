@@ -991,6 +991,65 @@ public:
 };
 ```
 
+## 2929. Distribute Candies Among Children II
+
+### Solution 1: dynamic programming, prefix sum, counting, knapsack related, bounded weak integer composition problem
+
+What is the name of this problem? 
+This is known as the  bounded weak integer composition problem, — not to be confused with integer partitioning. While partitions treat order as irrelevant, compositions are ordered sequences of integers that sum to a target number.
+
+Specifically, we are interested in counting the number of bounded weak compositions of a number n into exactly 3 parts, where each part is an integer between 0 and L. 
+
+Composition: An ordered sequence of integers summing to n.
+Weak composition: Allows zero as a valid part (i.e., parts are in {0, 1, …, L}).
+Bounded: Each part has a maximum value of L.
+Fixed number of parts: We're composing n into exactly 3 parts, which ensures the solution space is finite, even though zeros are allowed.
+
+Without the restriction on the number of parts, weak compositions into unbounded-length sequences would be infinite. So fixing the number of parts (in this case, 3) is crucial to make the problem well-defined and tractable.
+
+I'm solving this using a counting dynamic programming (DP) approach, which tracks how many ways I can reach a sum n given constraints on how many parts and how large each part can be.
+
+dp[i][j] = number of ways to compose sum j using i parts
+
+With constraints ensuring each part is in [0, L].
+
+To optimize the computation, I'm using a sliding window prefix sum technique — which reduces the inner loop's complexity by keeping track of rolling sums rather than recalculating the sum of L + 1 terms each time. This helps bring down the runtime to O(3n), or more generally O(kn) for k parts.
+
+```cpp
+using int64 = long long;
+class Solution {
+private:
+    int64 rangeSum(const vector<int64> &psum, int l, int r) {
+        int64 ans = psum[r];
+        if (l > 0) ans -= psum[l - 1];
+        return ans;
+    }
+public:
+    int64 distributeCandies(int n, int limit) {
+        vector<int64> dp(n + 1, 0), psum(n + 1, 0);
+        dp[0] = 1;
+        for (int k = 0; k < 3; k++) {
+            for (int i = 0; i <= n; i++) {
+                psum[i] = dp[i];
+                if (i > 0) psum[i] += psum[i - 1];
+            }
+            for (int i = 0; i <= n; i++) {
+                dp[i] = rangeSum(psum, i - limit, i);
+            }
+        }
+        return dp[n];
+    }
+};
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
 ##
 
 ### Solution 1: 
