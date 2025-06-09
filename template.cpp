@@ -21,7 +21,7 @@ using namespace std;
 #define endl '\n'
 #define LOCAL
 
-using int64 = long long;
+using int64 = int64_t;
 
 #ifdef LOCAL
 #include "src/debug.h"

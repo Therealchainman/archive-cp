@@ -1000,6 +1000,204 @@ public:
 
 # Leetcode Biweekly Contest 158
 
+## Best Time to Buy and Sell Stock V
+
+### Solution 1: dynamic programming, state transition, maximum profit
+
+```cpp
+using int64 = int64_t;
+const int64 INF = numeric_limits<int64>::max();
+class Solution {
+public:
+    int64 maximumProfit(vector<int>& prices, int k) {
+        vector<vector<int64>> dp(k + 1, vector<int64>(3, -INF)), ndp(k + 1, vector<int64>(3, -INF));
+        dp[0][0] = 0;
+        for (int x : prices) {
+            for (int i = 0; i <= k; i++) {
+                ndp[i] = dp[i];
+                if (i > 0 && dp[i - 1][0] != -INF) {
+                    ndp[i][1] = max(ndp[i][1], dp[i - 1][0] - x);
+                    ndp[i][2] = max(ndp[i][2], dp[i - 1][0] + x);
+                }
+                if (dp[i][1] != -INF) ndp[i][0] = max(ndp[i][0], dp[i][1] + x);
+                if (dp[i][2] != -INF) ndp[i][0] = max(ndp[i][0], dp[i][2] - x);
+            }
+            swap(dp, ndp);
+        }
+        int64 ans = 0;
+        for (int i = 0; i <= k; i++) {
+            ans = max(ans, dp[i][0]);
+        }
+        return ans;
+    }
+};
+```
+
+## Maximize Subarray GCD Score
+
+### Solution 1: prefix gcd, powers of 2
+
+```cpp
+using int64 = int64_t;
+class Solution {
+public:
+    int64 maxGCDScore(vector<int>& nums, int k) {
+        int N = nums.size();
+        int64 ans = 0;
+        vector<int64> pow2(N, 1);
+        for (int i = 0; i < N; i++) {
+            while (nums[i] % (2 * pow2[i]) == 0) pow2[i] *= 2;
+        }
+        for (int i = 0; i < N; i++) {
+            int64 g = 0;
+            int cnt = 0, minPower = numeric_limits<int>::max();
+            for (int j = i; j < N; j++) {
+                g = gcd(g, nums[j]);
+                if (pow2[j] < minPower) {
+                    minPower = pow2[j];
+                    cnt = 0;
+                }
+                if (pow2[j] == minPower) cnt++;
+                int64 cand = cnt <= k ? 2 * (j - i + 1) * g : (j - i + 1) * g;
+                ans = max(ans, cand);
+            }
+        }
+        return ans;
+    }
+};
+```
+
+### Solution 2: sparse table, range gcd query, powers of 2
+
+```cpp
+using int64 = int64_t;
+const int LOG = 30;
+struct SparseGCD {
+    int N;
+    vector<vector<int64>> st;
+    SparseGCD(const vector<int> &arr) : N(arr.size()), st(LOG, vector<int64>(N, 0)) {
+        for (int i = 0; i < N; i++) {
+            st[0][i] = arr[i];
+        }
+        for (int i = 1; i < LOG; i++) {
+            for (int j = 0; j + (1LL << (i - 1)) < N - 1; j++) {
+                st[i][j] = gcd(st[i - 1][j], st[i - 1][j + (1LL << (i - 1))]);
+            }
+        }
+    }
+    int64 query(int l, int r) const {
+        int k = log2(r - l + 1);
+        return gcd(st[k][l], st[k][r - (1LL << k) + 1]);
+    }
+};
+class Solution {
+public:
+    int64 maxGCDScore(vector<int>& nums, int k) {
+        int N = nums.size();
+        SparseGCD sparseGCD(nums);
+        int64 ans = 0;
+        vector<int64> pow2(N, 1);
+        for (int i = 0; i < N; i++) {
+            while (nums[i] % (2 * pow2[i]) == 0) pow2[i] *= 2;
+        }
+        for (int len = 1; len <= N; len++) {
+            map<int64, int> freq; // value of power of 2 -> count
+            for (int i = 0; i < N; i++) {
+                freq[pow2[i]]++;
+                int j = i - len + 1;
+                if (j >= 0) {
+                    pair<int64, int> p = *freq.begin();
+                    int64 cand = sparseGCD.query(j, i);
+                    if (p.second <= k) {
+                        cand *= 2;
+                    }
+                    ans = max(ans, len * cand);
+                    freq[pow2[j]]--;
+                    if (!freq[pow2[j]]) {
+                        freq.erase(pow2[j]);
+                    }
+                }
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## Maximum Good Subtree
+
+### Solution 1: bitmask dp, tree-dp, dfs, post order merging of children values
+
+Tree‐DP with bitmask‐based state merging
+
+```cpp
+const int MOD = 1e9 + 7;
+class Solution {
+private:
+    int ans = 0;
+    vector<int> vals;
+    vector<map<int, int>> dp;
+    vector<vector<int>> adj;
+    bool isValid(int x) {
+        vector<int> freq(10, 0);
+        while (x > 0) {
+            freq[x % 10]++;
+            x /= 10;
+        }
+        return all_of(freq.begin(), freq.end(), [](const int x) {
+            return x <= 1;
+        });
+    }
+    int buildMask(int x) {
+        int ans = 0;
+        while (x > 0) {
+            int v = x % 10;
+            ans |= (1 << v);
+            x /= 10;
+        }
+        return ans;
+    }
+    void dfs(int u, int p = -1) {
+        dp[u][0] = 0;
+        if (isValid(vals[u])) {
+            int mask = buildMask(vals[u]);
+            dp[u][mask] = vals[u];
+        }
+        for (int v : adj[u]) {
+            if (v == p) continue;
+            dfs(v, u);
+            vector<pair<int, int>> values(dp[u].begin(), dp[u].end());
+            for (auto [mu, vu] : values) {
+                for (auto [mv, vv] : dp[v]) {
+                    if ((mu & mv) != 0) continue;
+                    dp[u][mu | mv] = max(dp[u][mu | mv], vu + vv);
+                }
+            }            
+        }
+        int best = 0;
+        for (auto [mu, vu] : dp[u]) {
+            best = max(best, vu);
+        }
+        ans = (ans + best) % MOD;
+    }
+public:
+    int goodSubtreeSum(vector<int>& vals, vector<int>& par) {
+        int N = vals.size();
+        this -> vals = vals;
+        dp.assign(N, map<int, int>());
+        adj.assign(N, vector<int>());
+        for (int i = 1; i < N; i++) {
+            adj[i].emplace_back(par[i]);
+            adj[par[i]].emplace_back(i);
+        }
+        dfs(0);
+        return ans;
+    }
+};
+```
+
+# Leetcode Biweekly Contest 159
+
 ## 
 
 ### Solution 1: 

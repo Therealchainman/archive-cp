@@ -1042,6 +1042,77 @@ public:
 };
 ```
 
+## 1298. Maximum Candies You Can Get from Boxes
+
+### Solution 1:  bfs, queue, visited
+
+```cpp
+class Solution {
+public:
+    int maxCandies(vector<int>& status, vector<int>& candies, vector<vector<int>>& keys, vector<vector<int>>& containedBoxes, vector<int>& initialBoxes) {
+        int N = status.size(), ans = 0;
+        queue<int> q;
+        vector<bool> boxes(N, false);
+        for (int x : initialBoxes) {
+            if (status[x]) q.emplace(x);
+            else boxes[x] = true;
+        }
+        while (!q.empty()) {
+            int u = q.front();
+            q.pop();
+            ans += candies[u];
+            for (int v : keys[u]) {
+                status[v] = 1; // box can be opend now
+                if (boxes[v]) { // box could not be opened earlier
+                    boxes[v] = false;
+                    q.emplace(v);
+                }
+            }
+            for (int v : containedBoxes[u]) {
+                if (status[v]) q.emplace(v); // box can be opened
+                else boxes[v] = true; // box cannot be opened yet
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## 3170. Lexicographically Minimum String After Removing Stars
+
+### Solution 1:  stack, greedy, simulation
+
+```cpp
+class Solution {
+public:
+    string clearStars(string s) {
+        int N = s.size();
+        vector<vector<int>> last(26, vector<int>());
+        vector<bool> remains(N, true);
+        for (int i = 0; i < N; i++) {
+            if (s[i] == '*') {
+                remains[i] = false;
+                for (int j = 0; j < 26; j++) {
+                    if (!last[j].empty()) {
+                        remains[last[j].back()] = false;
+                        last[j].pop_back();
+                        break;
+                    }
+                }
+            } else {
+                last[s[i] - 'a'].emplace_back(i);
+            }
+        }
+        string ans;
+        for (int i = 0; i < N; i++) {
+            if (!remains[i]) continue;
+            ans += s[i];
+        }
+        return ans;
+    }
+};
+```
+
 ##
 
 ### Solution 1: 

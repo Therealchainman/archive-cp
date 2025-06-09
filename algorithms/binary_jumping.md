@@ -502,26 +502,25 @@ def query(left, right):
 ```
 
 ```cpp
-const int LOG = 31;
-int N, Q;
-vector<int> st_gcd[LOG];
-
-int query(int L, int R) {
-    int k = log2(R - L + 1);
-    return gcd(st_gcd[k][L], st_gcd[k][R - (1LL << k) + 1]);
-}
-
-for (int i = 0; i < LOG; i++) {
-    st_gcd[i].assign(N, 0);
-}
-for (int i = 0; i < N; i++) {
-    st_gcd[0][i] = A[i];
-}
-for (int i = 1; i < LOG; i++) {
-    for (int j = 0; j + (1LL << (i - 1)) < N - 1; j++) {
-        st_gcd[i][j] = gcd(st_gcd[i - 1][j], st_gcd[i - 1][j + (1LL << (i - 1))]);
+const int LOG = 30;
+struct SparseGCD {
+    int N;
+    vector<vector<int64>> st;
+    SparseGCD(const vector<int> &arr) : N(arr.size()), st(LOG, vector<int64>(N, 0)) {
+        for (int i = 0; i < N; i++) {
+            st[0][i] = arr[i];
+        }
+        for (int i = 1; i < LOG; i++) {
+            for (int j = 0; j + (1LL << (i - 1)) < N - 1; j++) {
+                st[i][j] = gcd(st[i - 1][j], st[i - 1][j + (1LL << (i - 1))]);
+            }
+        }
     }
-}
+    int64 query(int l, int r) const {
+        int k = log2(r - l + 1);
+        return gcd(st[k][l], st[k][r - (1LL << k) + 1]);
+    }
+};
 ```
 
 ## Range Bitwise Or Queries

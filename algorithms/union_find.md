@@ -105,7 +105,7 @@ struct UnionFind {
         return parents[i]=find(parents[i]);
     }
 
-    bool same(int i, int j) {
+    void unite(int i, int j) {
         i = find(i), j = find(j);
         if (i!=j) {
             if (size[j]>size[i]) {
@@ -113,10 +113,13 @@ struct UnionFind {
             }
             size[i]+=size[j];
             parents[j]=i;
-            return false;
         }
-        return true;
     }
+
+    bool same(int i, int j) {
+        return find(i) == find(j);
+    }
+    
     vector<vector<int>> groups() {
         int n = parents.size();
         unordered_map<int, vector<int>> group_map;
