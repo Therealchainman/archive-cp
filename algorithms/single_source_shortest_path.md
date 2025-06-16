@@ -8,6 +8,68 @@ Dijkstra's algorithm can solve this problem if the graph contained positive edge
 
 For a given source node in the graph, the algorithm finds the shortest path between that node and every other.  It can also be used for finding the shortest paths from a single node to a single destination node by stopping the algorithm once the shortest path to the destination node has been determined. 
 
+At a high level, Dijkstra's algorithm assumes that once a node has been visited with the smallest known cost, no cheaper path to it will ever be found. To ensure this holds, the following property must be satisfied:
+
+- Edge weights must be non-negative.
+- Cost of a path must be non-decreasing as the path extends.
+
+This ensures that once you find a "shortest path" to a node, no alternative path discovered later will be better.
+
+So commonly it is used for path sum and path max. 
+
+### C++ implementation for source to all nodes
+
+```cpp
+namespace Graph {
+    template<typename CostType, typename Transition>
+    vector<CostType> dijkstra(int src, Transition transitionFunction) {
+        priority_queue<pair<CostType, int>, vector<pair<CostType, int>>, greater<pair<CostType, int>>> minheap;
+        vector<CostType> dist(N, numeric_limits<CostType>::max());
+        minheap.emplace(0, src);
+        dist[src] = 0;
+        while (!minheap.empty()) {
+            auto [cost, u] = minheap.top();
+            minheap.pop();
+            if (dist[u] < cost) continue;
+            for (auto [v, w] : adj[u]) {
+                CostType ncost = transitionFunction(cost, w);
+                if (dist[v] <= ncost) continue;
+                dist[v] = ncost;
+                minheap.emplace(ncost, v);
+            }
+        }
+        return dist;
+    }
+}
+```
+
+```cpp
+Graph::dijkstra<int>(src, [](int cost, int w) { return cost + w; });
+```
+
+### C++ implementation for source to destination node
+
+```cpp
+int dijkstra(int src, int dst) {
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+    vector<bool> vis(N, false);
+    pq.emplace(0, src);
+    while (!pq.empty()) {
+        auto [cost, u] = pq.top();
+        pq.pop();
+        if (u == dst) return cost;
+        if (vis[u]) continue;
+        vis[u] = true;
+        for (auto [v, w] : adj[u]) {
+            if (vis[v]) continue;
+            pq.emplace(cost + w, v);
+        }
+    }
+    return -1;
+}
+```
+```
+
 ### Python implementation for source to destination node
 
 This is a good implementation that has a constant time improvement over a few other ways you could implement it.  The vis[v]: continue prevents it from adding values that are not necessary.
@@ -50,30 +112,6 @@ def dijkstra(adj, src):
             if vis[v] < math.inf: continue
             heapq.heappush(min_heap, (cost + w, v))
     return -1
-```
-
-### Cpp implementation for source to destination node
-
-untested, but same as python dijkstra
-
-```cpp
-int dijkstra(int src, int dst) {
-    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
-    vector<bool> vis(N, false);
-    pq.emplace(0, src);
-    while (!pq.empty()) {
-        auto [cost, u] = pq.top();
-        pq.pop();
-        if (u == dst) return cost;
-        if (vis[u]) continue;
-        vis[u] = true;
-        for (auto [v, w] : adj[u]) {
-            if (vis[v]) continue;
-            pq.emplace(cost + w, v);
-        }
-    }
-    return -1;
-}
 ```
 
 ## dijkstra for when you need the distance to all nodes from source node

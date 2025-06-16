@@ -1113,12 +1113,24 @@ public:
 };
 ```
 
-##
+## 2016. Maximum Difference Between Increasing Elements
 
-### Solution 1: 
+### Solution 1:  prefix minimum, greedy
 
 ```cpp
-
+const int INF = numeric_limits<int>::max();
+class Solution {
+public:
+    int maximumDifference(vector<int>& nums) {
+        int N = nums.size();
+        int pmin = INF, ans = -1;
+        for (int x : nums) {
+            if (x > pmin) ans = max(ans, x - pmin);
+            pmin = min(pmin, x);
+        }
+        return ans;
+    }
+};
 ```
 
 ##

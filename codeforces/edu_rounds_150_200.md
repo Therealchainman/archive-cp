@@ -466,7 +466,7 @@ signed main() {
 }
 ```
 
-# Codeforces Round 174
+# Codeforces Round 178
 
 ## 
 
@@ -476,44 +476,130 @@ signed main() {
 
 ```
 
-## 
+# Codeforces Round 179
 
-### Solution 1: 
+## Creating a Schedule
+
+### Solution 1: greedy, sorting, two pointers
+
+N / 2 largest and N / 2 smallest and do some alternating pattern to maximize the delta between each classroom for each group.
 
 ```cpp
+int N, M;
+vector<int> A;
 
+void solve() {
+    cin >> N >> M;
+    A.assign(M, 0);
+    vector<vector<int>> ans(N, vector<int>(6, 0));
+    for (int i = 0; i < M; ++i) {
+        cin >> A[i];
+    }
+    sort(A.begin(), A.end());
+    for (int j = 0; j < 6; j++) {
+        for (int i = 0, l = 0, r = M - 1; i < N; i++) {
+            if (j % 2 == 0 && i < N / 2) {
+                ans[i][j] = A[l++];
+            } else if (j % 2 == 0) {
+                ans[i][j] = A[r--];
+            } else if (i < N / 2) {
+                ans[i][j] = A[r--];
+            } else {
+                ans[i][j] = A[l++];
+            }
+        }
+    }
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < 6; j++) {
+            cout << ans[i][j] << " ";
+        }
+        cout << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
 ```
 
-## 
+## Changing the String
 
-### Solution 1: 
-
-```cpp
-
-```
-
-# Codeforces Round 175
-
-## 
-
-### Solution 1: 
+### Solution 1: greedy, set, two pointers
 
 ```cpp
+int N, Q;
+string S;
+vector<vector<set<int>>> adj;
 
-```
+int decode(char ch) {
+    return ch - 'a';
+}
 
-## 
+void solve() {
+    cin >> N >> Q >> S;
+    adj.assign(3, vector<set<int>>(3));
+    for (int i = 0; i < Q; i++) {
+        char s, t;
+        cin >> s >> t;
+        int u = decode(s), v = decode(t);
+        adj[u][v].insert(i);
+    }
+    for (int i = 0; i < N; i++) {
+        if (S[i] == 'b') {
+            if (!adj[1][0].empty()) {
+                adj[1][0].erase(adj[1][0].begin());
+                S[i] = 'a';
+                continue;
+            }
+            if (adj[1][2].empty()) continue;
+            int u = *adj[1][2].begin();
+            auto it = adj[2][0].lower_bound(u);
+            if (it == adj[2][0].end()) continue;
+            int v = *it;
+            adj[1][2].erase(u);
+            adj[2][0].erase(v);
+            S[i] = 'a';
+        } else if (S[i] == 'c') {
+            if (!adj[2][0].empty()) {
+                adj[2][0].erase(adj[2][0].begin());
+                S[i] = 'a';
+                continue;
+            }
+            if (adj[2][1].empty()) continue;
+            int u = *adj[2][1].begin();
+            auto it = adj[1][0].lower_bound(u);
+            if (it == adj[1][0].end()) {
+                S[i] = 'b';
+                adj[2][1].erase(u);
+                continue;
+            }
+            int v = *it;
+            adj[2][1].erase(u);
+            adj[1][0].erase(v);
+            S[i] = 'a';
+        }
+    }
+    cout << S << endl;
+}
 
-### Solution 1: 
-
-```cpp
-
-```
-
-## 
-
-### Solution 1: 
-
-```cpp
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
 
 ```

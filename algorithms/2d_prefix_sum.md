@@ -1,9 +1,26 @@
 # 2D PREFIX SUM 
 
+## C++ implementation of 2d prefix sum
 
-TODO: rewrite this with a class 2d prefix sum that includes a query function and the function that constructs the 2d array representation of a prefix sum. 
+This is inclusive range for submatrix so from upper left corner (r1, c1) to bottom right corner (r2, c2)
 
-## Simplest implementation
+The inclusive nature makes it easy to work with so if I want to query the sum of a rectangle from (1, 1) to (3, 3) I just do:
+query(ps, 1, 1, 3, 3)
+
+```cpp
+int query(const vector<vector<int>> &ps, int r1, int c1, int r2, int c2) {
+    return ps[r2 + 1][c2 + 1] - ps[r1][c2 + 1] - ps[r2 + 1][c1] + ps[r1][c1];
+}
+
+vector<vector<int>> ps(R + 1, vector<int>(C + 1, 0));
+for (int r = 1; r <= R; r++) {
+    for (int c = 1; c <= C; c++) {
+        ps[r][c] = ps[r - 1][c] + ps[r][c - 1] - ps[r - 1][c - 1] + mat[r - 1][c - 1];
+    }
+}
+```
+
+## Python implementation of 2d prefix sum
 
 ```py
 R, C = len(matrix), len(matrix[0])
@@ -13,23 +30,6 @@ for r, c in product(range(1,R+1),range(1,C+1)):
     ps[r][c] = ps[r-1][c] + ps[r][c-1] + matrix[r-1][c-1] - ps[r-1][c-1]
 # query
 psum = ps[max_row][max_col] - ps[max_row][min_col] - ps[min_row][max_col] + ps[min_row][min_col]
-```
-
-This is inclusive range for submatrix so from upper left corner (r1, c1) to bottom right corner (r2, c2)
-
-change this to R, and C in future.
-
-```cpp
-int query(const vector<vector<int>> &ps, int r1, int c1, int r2, int c2) {
-    return ps[r2 + 1][c2 + 1] - ps[r1][c2 + 1] - ps[r2 + 1][c1] + ps[r1][c1];
-}
-
-vector<vector<int>> ps(N + 1, vector<int>(N + 1, 0));
-for (int r = 1; r <= N; r++) {
-    for (int c = 1; c <= N; c++) {
-        ps[r][c] = ps[r - 1][c] + ps[r][c - 1] - ps[r - 1][c - 1] + mat[r - 1][c - 1];
-    }
-}
 ```
 
 ## column-wise prefix sum

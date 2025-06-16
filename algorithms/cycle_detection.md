@@ -27,6 +27,9 @@ bool hasCycle(int u) {
 }
 ```
 
+Why GREY→GREY is a cycle
+In a DFS, an edge from the current node back to a GREY node means you’ve found a back‐edge into your own active recursion chain—by definition that’s a cycle in a directed graph.
+
 ### cycle detection with recursive dfs
 
 ```py
