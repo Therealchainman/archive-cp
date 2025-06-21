@@ -31,7 +31,22 @@ def miller_rabin(n):
     return True
 ```
 
-## Simple prime test
+## Simple prime test in square root time complexity
+
+```cpp
+bool isPrime(int n) {
+    if (n <= 1) return false;
+    if (n <= 3) return true;
+    if (n % 2 == 0 || n % 3 == 0) return false;
+    int limit = static_cast<int>(sqrt(n));
+    for (int i = 5; i <= limit; i += 2) {
+        if (n % i == 0) return false;
+    }
+    return true;
+}
+```
+
+## in python
 
 Determines if n is a prime integer,  This is a slow one that runs in sqrt(n) time, so you can get away with integers with up to 16 digits or so.  It is slower than the method above.  So to test a lot of large integers this one quickly becomes too slow.
 
