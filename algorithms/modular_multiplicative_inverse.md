@@ -27,7 +27,7 @@ Calculates 1/i, or the multiplicative inverse.
 modular inverse of i under modulus m
 
 ```cpp
-int inv(int i, int m) {
-    return i <= 1 ? i : m - (m/i) * inv(m % i, m) % m;
+int64 inv(int i, int64 m) {
+    return i <= 1 ? i : m - (m / i) * inv(m % i, m) % m;
 }
 ```
