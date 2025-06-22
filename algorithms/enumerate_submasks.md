@@ -1,5 +1,7 @@
 # Enumerating over all submasks of a bitmask
 
+This is actually enumerating every subset of the set represented by the bitmask. 
+
 ## Implementation
 
 time complexity is O(3^n)
