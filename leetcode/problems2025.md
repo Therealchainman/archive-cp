@@ -1133,6 +1133,110 @@ public:
 };
 ```
 
+## 2014. Longest Subsequence Repeated k Times
+
+### Solution 1: brute force, permutations, two pointer, frequency array, bfs queue
+
+```cpp
+class Solution {
+private:
+    int N, K;
+    string S;
+    bool repeatsKTimes(string s) {
+        int cntMatches = 0, M = s.size();
+        for (int i = 0, pos = 0; i < N; ++i) {
+            if (s[pos] == S[i]) {
+                if (++pos == M) cntMatches++;
+                pos %= M;
+            }
+        }
+        return cntMatches >= K;
+    }
+public:
+    string longestSubsequenceRepeatedK(string s, int k) {
+        S = s, N = s.size(), K = k;
+        vector<char> candidates;
+        vector<int> freq(26, 0);
+        for (char ch : s) freq[ch - 'a']++;
+        for (int i = 25; i >= 0; --i) {
+            if (freq[i] < k) continue;
+            candidates.emplace_back(i + 'a');
+        }
+        queue<string> q;
+        for (char ch : candidates) {
+            q.emplace(string(1, ch));
+        }
+        string ans = "";
+        while (!q.empty()) {
+            string seq = q.front();
+            q.pop();
+            if (seq.size() > ans.size()) ans = seq;
+            for (char ch : candidates) {
+                string candSeq = seq + ch;
+                if (repeatsKTimes(candSeq)) {
+                    q.emplace(candSeq);
+                }
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## 2040. Kth Smallest Product of Two Sorted Arrays
+
+### Solution 1:  greedy binary search, product, nested binary search
+
+1. Handle the separate cases of when x is positive or negative.
+
+```cpp
+using int64 = int64_t;
+int64 INF = 1e10 + 5;
+class Solution {
+private:
+    vector<int> A, B, rB;
+    int helper(int64 target, int64 x, const vector<int> &arr) {
+        int N = arr.size();
+        int lo = 0, hi = N;
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            int64 prod = x * arr[mid];
+            if (prod <= target) lo = mid + 1;
+            else hi = mid;
+        }
+        return lo;
+    }
+    int64 calc(int64 target) {
+        int64 ans = 0;
+        int N = A.size(), M = B.size();
+        for (int x : A) {
+            if (x < 0) {
+                ans += helper(target, x, rB);
+            } else {
+                ans += helper(target, x, B);
+            }
+        }
+        return ans;
+    }
+public:
+    int64 kthSmallestProduct(vector<int>& nums1, vector<int>& nums2, int64 k) {
+        A = vector<int>(nums1.begin(), nums1.end());
+        B = vector<int>(nums2.begin(), nums2.end());
+        rB = vector<int>(nums2.rbegin(), nums2.rend());
+        int64 lo = -INF, hi = INF;
+        while (lo < hi) {
+            int64 mid = lo + (hi - lo) / 2;
+            if (calc(mid) < k) {
+                lo = mid + 1;
+            } else {
+                hi = mid;
+            }
+        }
+        return lo;
+    }
+};
+```
+
 ##
 
 ### Solution 1: 
