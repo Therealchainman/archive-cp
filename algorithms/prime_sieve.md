@@ -220,3 +220,39 @@ for(int i = 1; i<=n; i++)
     for(int j = i; j<=n; j+=i)
         fac[j].emplace_back(i);
 ```
+
+## Segmented Sieve
+
+This segmented sieve is used to find all prime numbers in a range [l, r] where l and r can be very large, up to 10^12 or more.  the main requirement is that the range [l, r] should not be too large, ideally less than 10^7.  
+
+time complexity is $\mathcal{O}\left((R - L + 1) \log\log R + \sqrt{R} \log\log \sqrt{R} \right)$
+
+
+```cpp
+int64 L, R;
+
+int64 ceil(int64 x, int64 y) {
+    return (x + y - 1) / y;
+}
+
+vector<bool> segmentedSieve(int64 l, int64 r) {
+    int64 lim = sqrt(r);
+    vector<bool> marked(lim + 1, false);
+    vector<int64> primes;
+    for (int64 i = 2; i <= lim; ++i) {
+        if (marked[i]) continue;
+        primes.emplace_back(i);
+        for (int64 j = i * i; j <= lim; j += i) {
+            marked[j] = true;
+        }
+    }
+    vector<bool> isPrime(r - l + 1, true);
+    for (int64 p : primes) {
+        for (int64 i = max(p * p, ceil(L, i) * i); i <= r; i += p) {
+            isPrime[l - i] = false;
+        }
+    }
+    if (l == 1) isPrime[0] = false;
+    return isPrime;
+}
+```

@@ -1237,6 +1237,25 @@ public:
 };
 ```
 
+## 594. Longest Harmonious Subsequence
+
+### Solution 1: sorting, two pointers
+
+```cpp
+class Solution {
+public:
+    int findLHS(vector<int>& nums) {
+        int N = nums.size(), ans = 0;
+        sort(nums.begin(), nums.end());
+        for (int i = 0, j = 0; i < N; ++i) {
+            while (nums[i] - nums[j] > 1) ++j;
+            if (nums[i] - nums[j] == 1) ans = max(ans, i - j + 1);
+        }
+        return ans;
+    }
+};
+```
+
 ##
 
 ### Solution 1: 

@@ -622,6 +622,88 @@ int32_t main() {
 
 ```
 
+## Candy Lottery
+
+### Solution 1:  Expected value, difference of CDF to get PMF
+
+```cpp
+int N, K;
+
+long double Pr(int x) {
+    return pow(static_cast<long double>(x) / K, N);
+}
+
+long double round_(long double x) {
+    return nearbyint(1e6 * x) / 1e6;
+}
+
+void solve() {
+    cin >> N >> K;
+    long double ans = 0;
+    for (int k = 1; k <= K; k++) {
+        long double term = k * (Pr(k) - Pr(k - 1));
+        ans += term;
+    }
+    cout << fixed << setprecision(6) << round_(ans) << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## Inversion Probability
+
+### Solution 1: expected value, probability
+
+Inversion of weakly increasing order. (could say this is the natural ordering of the sequence)
+
+This has slightly wrong rounding apparently in online judge, but works locally, something is off in other machine, I can't figure out yet. 
+
+```cpp
+int N;
+vector<int> A;
+ 
+long double Pr(int k, int rj, int ri) {
+    long double num = max(0, rj - k);
+    long double den = rj * ri;
+    return num / den;
+}
+ 
+long double round_(long double x) {
+    return nearbyintl(1e6L * x) / 1e6L;
+}
+ 
+void solve() {
+    cin >> N;
+    A.assign(N, 0);
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+    }
+    long double ans = 0;
+    for (int i = 0; i < N; ++i) {
+        for (int j = 0; j < i; ++j) {
+            for (int k = 1; k <= A[i]; ++k) {
+                ans += Pr(k, A[j], A[i]);
+            }
+        }
+    }
+    cout << fixed << setprecision(6) << round_(ans) << endl;
+}
+ 
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
 ## Stick Game
 
 ### Solution 1:
