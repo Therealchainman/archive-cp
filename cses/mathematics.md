@@ -662,7 +662,7 @@ signed main() {
 
 Inversion of weakly increasing order. (could say this is the natural ordering of the sequence)
 
-This has slightly wrong rounding apparently in online judge, but works locally, something is off in other machine, I can't figure out yet. 
+Seems lots of folks have trouble getting C++ to work, some kind of rounding error
 
 ```cpp
 int N;
@@ -672,10 +672,6 @@ long double Pr(int k, int rj, int ri) {
     long double num = max(0, rj - k);
     long double den = rj * ri;
     return num / den;
-}
- 
-long double round_(long double x) {
-    return nearbyintl(1e6L * x) / 1e6L;
 }
  
 void solve() {
@@ -692,7 +688,7 @@ void solve() {
             }
         }
     }
-    cout << fixed << setprecision(6) << round_(ans) << endl;
+    cout << fixed << setprecision(6) << ans << endl;
 }
  
 signed main() {
@@ -702,6 +698,29 @@ signed main() {
     solve();
     return 0;
 }
+```
+
+The only way I could find to get AC was to use python with Fraction and Decimal module. 
+
+```py
+from decimal import Decimal, ROUND_HALF_EVEN
+from fractions import Fraction
+
+def Pr(k, rj, ri):
+    return Fraction(rj - k, rj * ri) if k < rj else Fraction(0)
+def main():
+    N = int(input())
+    A = list(map(int, input().split()))
+    ans = Fraction(0)
+    for i in range(N):
+        for j in range(i):
+            for k in range(1, A[i] + 1):
+                ans += Pr(k, A[j], A[i])
+    ans_dec = Decimal(ans.numerator) / Decimal(ans.denominator)
+    print(ans_dec.quantize(Decimal('0.000001'), rounding=ROUND_HALF_EVEN))
+
+if __name__ == '__main__':
+    main()
 ```
 
 ## Stick Game
