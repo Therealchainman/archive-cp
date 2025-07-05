@@ -1643,6 +1643,144 @@ public:
 
 # Leetcode Biweekly Contest 160
 
+## Minimum Cost Path with Alternating Directions II
+
+### Solution 1: grid, dynamic programming
+
+```cpp
+using int64 = int64_t;
+const int64 INF = numeric_limits<int64>::max();
+class Solution {
+public:
+    int64 minCost(int R, int C, vector<vector<int>>& waitCost) {
+        vector<vector<int64>> dp(R, vector<int64>(C, INF));
+        dp[0][0] = 1;
+        for (int r = 0; r < R; r++) {
+            for (int c = 0; c < C; c++) {
+                int64 cost = (r + 1) * (c + 1) + waitCost[r][c];
+                if (r > 0) dp[r][c] = dp[r - 1][c] + cost;
+                if (c > 0) dp[r][c] = min(dp[r][c], dp[r][c - 1] + cost);
+            }
+        }
+        return dp[R - 1][C - 1] - waitCost[R - 1][C - 1];
+    }
+};
+```
+
+## Minimum Time to Reach Destination in Directed Graph
+
+### Solution 1: directed graph, dijkstra's algorithm, minheap
+
+```cpp
+const int INF = numeric_limits<int>::max();
+class Solution {
+public:
+    int minTime(int n, vector<vector<int>>& edges) {
+        vector<vector<int>> adj(n, vector<int>());
+        for (int i = 0; i < edges.size(); ++i) {
+            int u = edges[i][0], v = edges[i][1];
+            adj[u].emplace_back(i);
+        }
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> minheap;
+        minheap.emplace(0, 0);
+        vector<int> dist(n, INF);
+        dist[0] = 0;
+        while (!minheap.empty()) {
+            auto [d, u] = minheap.top();
+            minheap.pop();
+            if (d > dist[u]) continue;
+            if (u == n - 1) return d;
+            for (int i : adj[u]) {
+                int v = edges[i][1], s = edges[i][2], e = edges[i][3];
+                if (d > e) continue;
+                int nd = max(d + 1, s + 1);
+                if (nd < dist[v]) {
+                    dist[v] = nd;
+                    minheap.emplace(nd, v);
+                }
+            }
+        }
+        return -1;
+    }
+};
+```
+
+## Minimum Stability Factor of Array
+
+### Solution 1: binary search, sparse table, gcd, greedy
+
+```cpp
+const int LOG = 30;
+struct SparseGCD {
+    int N;
+    vector<vector<int>> st;
+    SparseGCD(const vector<int> &arr) : N(arr.size()), st(LOG, vector<int>(N, 0)) {
+        for (int i = 0; i < N; i++) {
+            st[0][i] = arr[i];
+        }
+        for (int i = 1; i < LOG; i++) {
+            for (int j = 0; j + (1LL << i) <= N; j++) {
+                st[i][j] = gcd(st[i - 1][j], st[i - 1][j + (1LL << (i - 1))]);
+            }
+        }
+    }
+    int query(int l, int r) const {
+        int k = log2(r - l + 1);
+        return gcd(st[k][l], st[k][r - (1LL << k) + 1]);
+    }
+};
+class Solution {
+private:
+    int K, N;
+    vector<int> arr;
+    bool feasible(int target) {
+        int cnt = 0;
+        for (int i = 0, j = 0; i < N; ++i) {
+            int len = arr[i] - i + 1;
+            int splits = len / (target + 1);
+            if (splits) i = i + splits * (target + 1) - 1;
+            cnt += splits;
+        }
+        return cnt <= K;
+    }
+public:
+    int minStable(vector<int>& nums, int maxC) {
+        K = maxC, N = nums.size();
+        int cnt = count_if(nums.begin(), nums.end(), [](int x) {
+            return x > 1;
+        });
+        if (cnt <= maxC) return 0;
+        SparseGCD sp(nums);
+        arr.assign(N, 0);
+        for (int i = 0; i < N; i++) {
+            int lo = i, hi = N - 1;
+            while (lo < hi) {
+                int mid = lo + (hi - lo + 1) / 2;
+                int v = sp.query(i, mid);
+                if (v > 1) {
+                    lo = mid;
+                } else {
+                    hi = mid - 1;
+                }
+            }
+            arr[i] = lo;
+        }
+        int lo = 1, hi = N;
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (feasible(mid)) {
+                hi = mid;
+            } else {
+                lo = mid + 1;
+            }
+        }
+        return lo;
+    }
+};
+```
+
+# Leetcode Biweekly Contest 161
+
 ## 
 
 ### Solution 1: 

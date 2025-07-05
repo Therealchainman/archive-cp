@@ -120,26 +120,46 @@ if __name__ == '__main__':
 
 ## Dice Probability
 
-### Solution 1:  math + probability + and or logic of probability
+### Solution 1:  dynamic programming, probability, reverse iteration, knapsack like dp
 
-```py
-def main():
-    n, a, b = map(int, input().split())
-    dp = [0] * (b + 1)
-    for i in range(1, min(7, b + 1)):
-        dp[i] = 1 / 6
-    for _ in range(n - 1):
-        ndp = [0] * (b + 1)
-        for i in range(b):
-            for j in range(1, 7):
-                if i + j > b: continue
-                ndp[i + j] += dp[i] / 6
-        dp = ndp
-    res = f"{sum(dp[a : b + 1]):0.6f}"
-    print(res)
+The sum is similar to the weight in knapsack dp.  
 
-if __name__ == '__main__':
-    main()
+Dice DP:
+dp[i][s] = probability to get a total of s after i throws.
+
+Knapsack DP:
+dp[i][w] = maximum value (or number of ways, or feasibility) to fill exactly weight w using the first i items.
+
+```cpp
+int N, A, B;
+
+void solve() {
+    cin >> N >> A >> B;
+    vector<long double> Pr(B + 1, 0);
+    Pr[0] = 1;
+    for (int i = 0; i < N; ++i) {
+        for (int j = B; j >= 0; --j) {
+            Pr[j] = 0;
+            for (int k = 1; k <= 6; ++k) {
+                if (j - k < 0) break;
+                Pr[j] += Pr[j - k] / 6;
+            }
+        }
+    }
+    long double ans = 0;
+    for (int i = A; i <= B; i++) {
+        ans += Pr[i];
+    }
+    cout << fixed << setprecision(6) << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ## Binomial Coefficients
@@ -184,32 +204,6 @@ def main():
         a, b = map(int, input().split())
         res = fact[a] * inv_fact[b] * inv_fact[a - b] % mod
         print(res)
-
-if __name__ == '__main__':
-    main()
-```
-
-## Candy Lottery
-
-### Solution 1: Expected maximum
-
-given n items, and k possible values it computes the expected maximum it represents a square, for the proof
-
-1 2 3
-2 2 3
-3 3 3
-
-as you can see 1 is in a 1 sided square, 1^2
-2 is in a 2 sidied square, 2^2 = 4
-3 is in 3 sided square 3^2,
-but that is at least those values, so need to take f(x) - f(x - 1) to calculate the number of 3. But this is for 2 items, so extrapolate it to n items. 
-
-```py
-def main():
-    n, k = map(int, input().split())
-    prob = lambda x: pow((x / k), n)
-    res = sum(i * (prob(i) - prob(i - 1)) for i in range(1, k + 1))
-    print(f"{res:0.6f}")
 
 if __name__ == '__main__':
     main()
@@ -658,9 +652,11 @@ signed main() {
 
 ## Inversion Probability
 
-### Solution 1: expected value, probability
+### Solution 1: expected value, probability, linearity of expectation, indicator random variable
 
 Inversion of weakly increasing order. (could say this is the natural ordering of the sequence)
+
+Use linearity of expectation and instead of solving for the probability of x number of inversions, solve for the probability of each pair being inverted.
 
 Seems lots of folks have trouble getting C++ to work, some kind of rounding error
 
@@ -702,6 +698,8 @@ signed main() {
 
 The only way I could find to get AC was to use python with Fraction and Decimal module. 
 
+This solution basically iterates over A[i] and then over A[j] where j < i, and then you just need to ask what is the probability that A[j] is greater than A[i].
+
 ```py
 from decimal import Decimal, ROUND_HALF_EVEN
 from fractions import Fraction
@@ -720,6 +718,28 @@ def main():
     print(ans_dec.quantize(Decimal('0.000001'), rounding=ROUND_HALF_EVEN))
 
 if __name__ == '__main__':
+    main()
+```
+
+Also solve the inverse, the probability that A[i] is greater than A[j] for all i < j, which is the same as the probability that A[i] is not less than A[j].
+
+Basicaly you iterate over A[i], and then over A[j] where j > i, and then you just need to ask what is probability that A[j] is not greater than A[i]. 
+
+```py
+def Pr(k, ri, rj):
+    return Fraction(min(k - 1, rj), rj * ri)
+def main():
+    N = int(input())
+    A = list(map(int, input().split()))
+    ans = Fraction(0)
+    for i in range(N):
+        for j in range(i + 1, N):
+            for k in range(1, A[i] + 1):
+                ans += Pr(k, A[i], A[j])
+    ans_dec = Decimal(ans.numerator) / Decimal(ans.denominator)
+    print(ans_dec.quantize(Decimal('0.000001'), rounding=ROUND_HALF_EVEN))
+
+if __name__ == "__main__":
     main()
 ```
 

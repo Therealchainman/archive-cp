@@ -1256,6 +1256,35 @@ public:
 };
 ```
 
+## Find Lucky Integer in an Array
+
+### Solution 1: frequency, reverse iteration
+
+```cpp
+const int MAXN = 505;
+class Solution {
+private:
+    int freq[MAXN];
+public:
+    int findLucky(vector<int>& arr) {
+        memset(freq, 0, sizeof(freq));
+        for (int x : arr) freq[x]++;
+        for (int i = MAXN - 1; i > 0; --i) {
+            if (freq[i] == i) return i;
+        }
+        return -1;
+    }
+};
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
 ##
 
 ### Solution 1: 

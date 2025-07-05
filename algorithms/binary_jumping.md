@@ -511,7 +511,7 @@ struct SparseGCD {
             st[0][i] = arr[i];
         }
         for (int i = 1; i < LOG; i++) {
-            for (int j = 0; j + (1LL << (i - 1)) < N - 1; j++) {
+            for (int j = 0; j + (1LL << i) <= N; j++) {
                 st[i][j] = gcd(st[i - 1][j], st[i - 1][j + (1LL << (i - 1))]);
             }
         }

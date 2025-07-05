@@ -78,3 +78,46 @@ def main():
 if __name__ == '__main__':
     main()
 ```
+
+## Expected Value with Recurrence
+
+The expected value can also be computed using a recurrence relation. This is particularly useful in dynamic programming problems where the expected value of a state can be expressed in terms of the expected values of previous states.
+
+For these you usually have to define some states and the state transitions. 
+
+They are using related to the number of steps to complete a process
+
+Here’s a general template for solving expected-value problems with state transitions, especially of the kind where you simulate a process until some stopping condition (like your sock problem). 
+
+### Step 1: Define the States Clearly
+What does a “state” represent?
+- A specific configuration of the process (e.g., which sock you're holding)
+- States should be small and uniquely representable (e.g., by an index)
+
+### Step 2: Determine the Transitions
+From each state, list out:
+- What are the possible next states?
+- What are the probabilities of those transitions?
+- What cost or action happens during that transition?
+
+### Step 3: Write the Recurrence
+Let $E[X]$ be the expected number of steps from state $X$. Then:
+$$E[X] = (immediate \ cost) + \sum_{all \ Y} Pr(X \to Y) \cdot E[Y]$$
+
+### Step 4: Identify Absorbing/Base Cases
+These are states where the process ends (e.g., success, match found)
+For such states, set:
+$$E[\text{absorbing state}] = 0$$
+Start solving from these known values.
+
+### Step 5: Optimize Transitions
+- Replace summations with prefix/suffix sums when possible.
+- Use memoization or DP to avoid redundant computation.
+- When probabilities have denominators, compute modular inverses efficiently.
+- Avoid brute-force summation when transitions follow an order (like sorted array).
+
+### Step 6: Compute in Correct Order
+If the recurrence depends on higher-indexed states (e.g., E[x]), solve in reverse order.
+E[x] depends on E[y] for y>x), solve in reverse order.
+
+Otherwise, forward or topological order may work.
