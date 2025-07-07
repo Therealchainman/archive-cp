@@ -1277,12 +1277,26 @@ public:
 };
 ```
 
-##
+## 3601. Find Drivers with Improved Fuel Efficiency
 
-### Solution 1: 
+### Solution 1: datetime, mean, groupby, calculations
 
-```cpp
+```py
+import pandas as pd
 
+def find_improved_efficiency_drivers(drivers: pd.DataFrame, trips: pd.DataFrame) -> pd.DataFrame:
+    trips['efficiency'] = trips['distance_km'] / trips['fuel_consumed']
+    trips['trip_date'] = pd.to_datetime(trips['trip_date'])
+    trips['half'] = trips['trip_date'].dt.month.le(6).map({True: 'first_half_avg', False: 'second_half_avg'})
+    avg = trips.groupby(['driver_id', 'half'])['efficiency'].mean().unstack()
+    avg = avg.dropna(subset = ['first_half_avg', 'second_half_avg'])
+    avg['efficiency_improvement'] = (avg['second_half_avg'] - avg['first_half_avg']).round(2)
+    avg = avg[avg['efficiency_improvement'] > 0]
+    avg['first_half_avg'] = avg['first_half_avg'].round(2)
+    avg['second_half_avg'] = avg['second_half_avg'].round(2)
+    res = avg.reset_index().merge(drivers, on = 'driver_id')
+    res = res.sort_values(by = ['efficiency_improvement', 'driver_name'], ascending = [False, True])
+    return res[['driver_id', 'driver_name', 'first_half_avg', 'second_half_avg', 'efficiency_improvement']] 
 ```
 
 ##
