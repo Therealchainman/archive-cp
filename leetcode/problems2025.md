@@ -1299,12 +1299,48 @@ def find_improved_efficiency_drivers(drivers: pd.DataFrame, trips: pd.DataFrame)
     return res[['driver_id', 'driver_name', 'first_half_avg', 'second_half_avg', 'efficiency_improvement']] 
 ```
 
-##
+## 1900. The Earliest and Latest Rounds Where Players Compete
 
-### Solution 1: 
+### Solution 1: recursive dynamic programming, state transition, memoization, two pointers
+
+Track distance from begining to first player and end to second player.  use that with dynamic programming to minimize and maximize the rounds where players compete, before they are equal distance from both ends of the current players.
 
 ```cpp
-
+class Solution {
+private:
+    int N, f, s;
+    vector<vector<vector<pair<int, int>>>> dp;
+    int ceil(int x, int y) {
+        return (x + y - 1) / y;
+    }
+    pair<int, int> dfs(int l, int r, int sz) {
+        if (l > r) return dfs(r, l, sz); // symmetry
+        if (l == r) return {1, 1};
+        if (dp[l][r][sz].first != -1) return dp[l][r][sz];
+        int mn = N, mx = 0;
+        int halfUp   = ceil(sz, 2);
+        int halfDown =  sz / 2;
+        for (int i = 1; i <= l; ++i) {
+            int jMin = max( l - i + 1,
+                   l + r - i - halfDown );
+            int jMax = min( r - i,
+                   halfUp   - i );
+            for (int j = jMin; j <= jMax; ++j) {
+                auto [x, y] = dfs(i, j, ceil(sz, 2));
+                mn = min(mn, x + 1);
+                mx = max(mx, y + 1);
+            }
+        }
+        return dp[l][r][sz] = {mn, mx};
+    }
+public:
+    vector<int> earliestAndLatest(int n, int firstPlayer, int secondPlayer) {
+        N = n, f = firstPlayer, s = n - secondPlayer + 1;
+        dp.assign(N + 1, vector<vector<pair<int, int>>>(N + 1, vector<pair<int, int>>(N + 1, {-1, -1}))); // dp(l, r, remaining players)
+        auto [u, v] = dfs(f, s, N);
+        return {u, v};
+    }
+};
 ```
 
 ##

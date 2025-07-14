@@ -299,8 +299,8 @@ void solve() {
         cin >> A[i];
     }
     int endMask = 1 << LOG;
-    subsets.assign(endMask + 1, 0);
-    supersets.assign(endMask + 1, 0);
+    subsets.assign(endMask, 0);
+    supersets.assign(endMask, 0);
     for (int i = 0; i < N; ++i) {
         ++subsets[A[i]];
         ++supersets[A[i]];
@@ -308,8 +308,9 @@ void solve() {
     for (int i = 0; i < LOG; ++i) { // iterate over bits
         for (int mask = 0; mask < endMask; ++mask) { // iterate over all masks
             if ((mask >> i) & 1) {
-                subsets[mask] += subsets[mask ^ (1 << i)]; // subset
-                supersets[mask ^ (1 << i)] += supersets[mask]; // superset
+                int nmask = mask ^ (1 << i);
+                subsets[mask] += subsets[nmask]; // subset
+                supersets[nmask] += supersets[mask]; // superset
             }
         }
     }
@@ -360,8 +361,8 @@ void solve() {
             if ((mask >> i) & 1) supersets[mask ^ (1 << i)] += supersets[mask]; // superset
         }
     }
-    vector<int> pow2(endMask, 1);
-    for (int i = 1; i < endMask; ++i) {
+    vector<int> pow2(N + 1, 1);
+    for (int i = 1; i <= N; ++i) {
         pow2[i] = (2LL * pow2[i - 1]) % MOD; // precompute powers of 2
     }
     vector<int> G(endMask, 0);
