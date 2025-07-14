@@ -234,6 +234,54 @@ trie.init();
 
 ## bitwise trie data structure
 
+The simplest for finding the largest xor sum subarray
+
+```cpp
+const int BITS = 30;
+struct Node {
+    int children[2];
+    int last;
+    void init() {
+        memset(children, 0, sizeof(children));
+        last = -1;
+    }
+};
+struct Trie {
+    vector<Node> trie;
+    void init() {
+        Node root;
+        root.init();
+        trie.emplace_back(root);
+    }
+    void add(int mask) {
+        int cur = 0;
+        for (int i = BITS - 1; i >= 0; i--) {
+            int bit = (mask >> i) & 1;
+            if (trie[cur].children[bit] == 0) {
+                Node root;
+                root.init();
+                trie[cur].children[bit] = trie.size();
+                trie.emplace_back(root);
+            }
+            cur = trie[cur].children[bit];
+        }
+    }
+    int find(int val) {
+        int cur = 0, ans = 0;
+        for (int i = BITS - 1; i >= 0; i--) {
+            int valBit = (val >> i) & 1;
+            if (trie[cur].children[valBit ^ 1] != 0) { // best result with xor is always with opposite bit
+                ans |= (1 << i);
+                cur = trie[cur].children[valBit ^ 1];
+            } else {
+                cur = trie[cur].children[valBit];
+            }
+        }
+        return ans;
+    }
+};
+```
+
 ## 🔍 Purpose
 
 This algorithm finds the **shortest subarray** in array `A` such that the **XOR of two elements** `A[i]` and `A[j]` within the subarray satisfies:  

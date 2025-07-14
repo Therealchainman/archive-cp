@@ -57,3 +57,7 @@ bool is_power_of_two(int x) {
     return x > 0 && (x & (x - 1)) == 0;
 };
 ```
+
+## Calculating the bit-width of a number
+
+$$n = \left\lfloor \log_2 N \right\rfloor + 1$$

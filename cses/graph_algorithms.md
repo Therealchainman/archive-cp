@@ -785,7 +785,7 @@ signed main() {
 
 ### Solution 1:  
 
-```py
+```cpp
 
 ```
 
@@ -793,6 +793,6 @@ signed main() {
 
 ### Solution 1:  
 
-```py
+```cpp
 
 ```
