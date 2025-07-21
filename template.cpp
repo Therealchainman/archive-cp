@@ -22,6 +22,7 @@ using namespace std;
 #define LOCAL
 
 using int64 = int64_t;
+using uint64 = unsigned long long;
 
 #ifdef LOCAL
 #include "src/debug.h"

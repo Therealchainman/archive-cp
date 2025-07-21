@@ -24,3 +24,20 @@ This avoid floating-point form that can have precision issues, and you can perfo
 int g = gcd(nums[p], nums[q]);
 pair<int, int> reducedForm = {nums[p] / g, nums[q] / g}; // nums[p] / nums[q] in reduced form
 ```
+
+This concept can extend to when you calculate slope since it is a fraction and you need an exact way to store it sometimes, especially if it is used as key to map or set data structures.
+
+```cpp
+pair<int, int> normalizedSlope(int dx, int dy) {
+    if (dx == 0) return {0, 1};
+    if (dy == 0) return {1, 0};
+    int g = gcd(abs(dx), abs(dy));
+    dx /= g;
+    dy /= g;
+    if (dy < 0) {
+        dx = -dx;
+        dy = -dy;
+    }
+    return {dx, dy};
+}
+```

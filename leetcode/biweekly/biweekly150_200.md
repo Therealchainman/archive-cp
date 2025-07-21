@@ -1781,6 +1781,116 @@ public:
 
 # Leetcode Biweekly Contest 161
 
+## 3619. Count Islands With Total Value Divisible by K
+
+### Solution 1: dfs, connected component
+
+```cpp
+using int64 = int64_t;
+class Solution {
+private:
+    int R, C;
+    vector<vector<int>> grid;
+    bool inBounds(int r, int c) {
+        return 0 <= r && r < R && 0 <= c && c < C;
+    }
+    int64 dfs(int r, int c) {
+        int64 ans = grid[r][c];
+        if (!grid[r][c]) return ans;
+        grid[r][c] = 0;
+        for (int dr = -1; dr <= 1; ++dr) {
+            for (int dc = -1; dc <= 1; ++dc) {
+                if (abs(dr) + abs(dc) != 1) continue;
+                int nr = r + dr, nc = c + dc;
+                if (!inBounds(nr, nc)) continue;
+                ans += dfs(nr, nc);
+            }
+        }
+        return ans;
+    }
+public:
+    int countIslands(vector<vector<int>>& A, int k) {
+        grid = A;
+        R = grid.size(), C = grid[0].size();
+        int ans = 0;
+        for (int r = 0; r < R; ++r) {
+            for (int c = 0; c < C; ++c) {
+                if (!grid[r][c]) continue;
+                int64 val = dfs(r, c);
+                if (val % k == 0) ++ans;
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## 3620. Network Recovery Pathways
+
+### Solution 1: binary search, greedy decision problem, feasibility check, directed graph, dijkstra algorithm, 
+
+```cpp
+using int64 = int64_t;
+const int INF = 1e9 + 5;
+class Solution {
+private:
+    int N;
+    int64 K;
+    vector<bool> online;
+    vector<vector<pair<int, int>>> adj;
+    bool feasible(int target) {
+        priority_queue<pair<int64, int>, vector<pair<int64, int>>, greater<pair<int64, int>>> minheap;
+        vector<int64> dist(N, K + 1);
+        minheap.emplace(0, 0);
+        dist[0] = 0;
+        while (!minheap.empty()) {
+            auto [cost, u] = minheap.top();
+            minheap.pop();
+            if (cost > dist[u]) continue;
+            if (u == N - 1) return true;
+            for (auto [v, w] : adj[u]) {
+                if (!online[v]) continue;
+                if (w < target) continue;
+                int64 ncost = cost + w;
+                if (ncost > K) continue;
+                if (ncost < dist[v]) {
+                    dist[v] = ncost;
+                    minheap.emplace(ncost, v);
+                }
+            }
+        }
+        return false;
+    }
+public:
+    int findMaxPathScore(vector<vector<int>>& edges, vector<bool>& _online, long long k) {
+        online = _online;
+        N = online.size(), K = k;
+        adj.assign(N, vector<pair<int, int>>());
+        for (const auto &edge : edges) {
+            int u = edge[0], v = edge[1], w = edge[2];
+            adj[u].emplace_back(v, w);
+        }
+        int lo = 0, hi = INF;
+        while (lo < hi) {
+            int mid = lo + (hi - lo + 1) / 2;
+            if (feasible(mid)) lo = mid;
+            else hi = mid - 1;
+        }
+        return feasible(lo) ? lo : -1;
+    }
+};
+```
+
+## 3621. Number of Integers With Popcount-Depth Equal to K I
+
+### Solution 1: 
+
+```cpp
+
+```
+
+# Leetcode Biweekly Contest 162
+
 ## 
 
 ### Solution 1: 

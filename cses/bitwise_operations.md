@@ -92,23 +92,176 @@ signed main() {
 }
 ```
 
-## Maximum XOR Subset
+## Maximum Xor Subset
 
-### Solution 1:  
+### Solution 1:  linear algebra, basis of vector subspace, gaussian elimination over GF(2), xor basis
+
+I've seen this referred to as the xor basis technique.  But I think it really is also the Gaussian Elimination over GF(2) as well.  The goal is to find a basis for the vector subspace, which you can do by converting the matrix representation of the vector space into row echelon form. 
+
+I'm going to write down all the observations needed to understand this algorithm.
+
+You are given an array A of integers, you want to represent them as vectors in the vector space $\mathbb{Z}_2^n$ where n is the number of bits in the integers, in this case 31 bits, so we have the specific vector space $\mathbb{Z}_2^{31}$.
+
+So we are imagining each element in array as a vector, where the values of the coordinates are $\mathbb{Z}_2 = \{0, 1\}$.  We are performing addition modulo 2 for each element in the vector, this simulates the xor operation of each element in the array, where each element is each bit in the binary representation of the integer.
+
+Therefore we are given in the original problem $S = \{v_1, v_2, \dots, v_N\}$ where $v_i$ is the vector representation of the integer $A_i$ in $\mathbb{Z}_2^{31}$.  Now the $\text{span}(S)$ is the set of all possible linear combinations of the vectors in S, which is the set of all possible xor sums of the elements in S, which will include the maximum xor sum of a subset of S.
+
+If we represent this set of vectors as a matrix, we can perform Gaussian elimination to find the basis of the vector space. The basis will be a set of vectors that can be used to represent any vector in the span of S, and in this case, it will allow us to find the maximum xor sum.  But the basis will need at most 31 vectors, because we are in $\mathbb{Z}_2^{31}$, so the maximum number of linearly independent vectors is 31.
+
+So this is really neat, we've reduced the problem from finding a subset of S that produces the maximum xor sum, to just finding a subset of at most 31 basis vectors to produce the maximum xor sum.
+
+And the process to find the basis is so simple, because you just need to do Gaussian elimination to get it into row echelon form. An important fact is that the row echelon form is a basis for the row space of the matrix, which is the same as the span of the vectors in S.
+
+Gaussian elimination can be done simply, cause we just need to subtract the vectors from each other. And then pick that as a basis, or rather going to be a row in the row echelon form where one entry is nonzero.  You are guaranteed to not have two rows with a leading 1 in the same column, because you are always subtracting the vectors that have a leading 1 in the current column.
+
+And to truly get into row echelon form you can swap rows, to get it to look visually like the upper triangular matrix, and the zero vectors are at the bottom, and you don't care about those.  You can see you will have at most 31 rows, which are not the trivial zero vectors, and they will be the basis for the vector space.
+
+You have a greedy property now that you can utilize to find the linear combination of the basis vectors that will give you the maximum xor sum.  You can iterate over the basis vectors from the most significant bit to the least significant bit, and for each basis vector, you can check if adding it to the current xor sum will increase the value. If it does, you add it to the current xor sum.  This works because you greedily want the msb to be 1.  
 
 ```cpp
+const int BITS = 31;
+int N;
 
+void solve() {
+    cin >> N;
+    vector<int> basis(BITS, 0);
+    for (int i = 0; i < N; ++i) {
+        int x;
+        cin >> x;
+        for (int b = BITS - 1; b >= 0; --b) {
+            if (!((x >> b) & 1)) continue;
+            if (!basis[b]) {
+                basis[b] = x;
+                break;
+            }
+            x ^= basis[b];
+        }
+    }
+    int ans = 0;
+    for (int b = BITS - 1; b >= 0; --b) {
+        if ((ans >> b) & 1) continue;
+        ans ^= basis[b];
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
-## 
+## Number of Subset Xors
 
-### Solution 1:  
+### Solution 1:  linear algebra, basis of vector subspace, gaussian elimination over GF(2), xor basis
+
+linear independence: From linear independence it follows immediately that the way you write any given vector in terms of the basis is unique.
 
 ```cpp
+const int BITS = 31;
+int N;
+vector<int> A;
 
+void solve() {
+    cin >> N;
+    vector<int> basis(31, 0);
+    for (int i = 0; i < N; ++i) {
+        int x;
+        cin >> x;
+        for (int b = BITS - 1; b >= 0; --b) {
+            if (!((x >> b) & 1)) continue;
+            if (!basis[b]) {
+                basis[b] = x;
+                break;
+            }
+            x ^= basis[b];
+        }
+    }
+    int ans = 1;
+    for (int b = 0; b < BITS; ++b) {
+        if (!basis[b]) continue;
+        ans <<= 1;
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
-## 
+## K Subset Xors
+
+### Solution 1:  linear algebra, basis of vector subspace, gaussian elimination over GF(2), xor basis, reduced row echelon form
+
+This problem is a slight variation where you want to generate the basis vectors but in a specific form called reduced row echelon form.  This means that you want to generate the basis vectors in a way that they are sorted by their most significant bit, and each basis vector has a leading 1 in a different position.
+
+
+
+```cpp
+const int BITS = 31;
+int N, K;
+
+void solve() {
+    cin >> N >> K;
+    vector<int> basis;
+    for (int i = 0; i < N; ++i) {
+        int x;
+        cin >> x;
+        for (int b : basis) {
+            x = min(x, x ^ b);
+        }
+        if (!x) continue;
+        for (int &b : basis) {
+            b = min(b, b ^ x);
+        }
+        basis.emplace_back(x);
+    }
+    sort(basis.begin(), basis.end());
+    int r = basis.size();
+    int numNull = N - r;
+    int repeats = numNull < 18 ? 1 << numNull : K + 1;
+    vector<int> ans, values, nvalues;
+    values.emplace_back(0);
+    for (int i = 0; i < repeats && static_cast<int>(ans.size()) < K; ++i) {
+        ans.emplace_back(0);
+    }
+    for (int b : basis) {
+        nvalues.clear();
+        for (int x : values) {
+            nvalues.emplace_back(x ^ b);
+        }
+        for (int x : nvalues) {
+            for (int i = 0; i < repeats && static_cast<int>(ans.size()) < K; ++i) {
+                ans.emplace_back(x);
+            }
+        }
+        if (static_cast<int>(ans.size()) == K) break;
+        values.insert(values.end(), nvalues.begin(), nvalues.end());
+    }
+    for (int x : ans) {
+        cout << x << " ";
+    }
+    cout << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## All Subarray Xors
 
 ### Solution 1:  
 
