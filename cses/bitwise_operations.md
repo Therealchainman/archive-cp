@@ -263,10 +263,90 @@ signed main() {
 
 ## All Subarray Xors
 
-### Solution 1:  
+### Solution 1:  xor convolution, prefix xor, fast walsh hadamard transform
+
+The trick is that with the xor convolution on the prefix xor you are calculating the number of segments where the xor will be equal to some value i ^ j = k, where they equal to k. 
 
 ```cpp
+int N;
+vector<int64> A;
 
+void fwht(vector<int64>& A, int n) {
+    for (int len = 1; len < n; len <<= 1) {
+        for (int i = 0; i < n; i += len << 1) {
+            for (int j = 0; j < len; ++j) {
+                int64 u = A[i + j];
+                int64 v = A[i + j + len];
+                A[i + j] = u + v;
+                A[i + j + len] = u - v;
+            }
+        }
+    }
+}
+
+vector<int64> xor_convolution(vector<int64> f, vector<int64> g) {
+    int n = f.size();
+    // 1) FWHT
+    fwht(f, n);
+    fwht(g, n);
+    // 2) point‑wise multiply
+    vector<int64> h(n);
+    for (int i = 0; i < n; ++i)
+        h[i] = f[i] * g[i];
+    // 3) inverse = same transform
+    fwht(h, n);
+    // 4) normalize
+    for (int i = 0; i < n; ++i)
+        h[i] /= n;
+    return h;
+}
+
+void solve() {
+    cin >> N;
+    A.resize(N);
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+    }
+    vector<int> pref(N + 1, 0);
+    int maxVal = 0;
+    for (int i = 1; i <= N; ++i) {
+        pref[i] = pref[i - 1] ^ A[i - 1];
+        maxVal = max(maxVal, pref[i]);
+    }
+    int bits = 0;
+    while (1 << bits <= maxVal) ++bits;
+    if (bits == 0) bits = 1;
+    int M = 1 << bits;
+
+    vector<int64> freq(M, 0);
+    for (int x : pref) {
+        ++freq[x];
+    }
+    vector<int64> h = xor_convolution(freq, freq);
+    vector<int> ans;
+    for (int cnt : freq) {
+        if (cnt > 1) {
+            ans.emplace_back(0);
+            break;
+        }
+    }
+    for (int i = 1; i < M; ++i) {
+        if (h[i] > 0) ans.emplace_back(i);
+    }
+    cout << static_cast<int>(ans.size()) << endl;
+    for (int x : ans) {
+        cout << x << " ";
+    }
+    cout << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ## XOR Pyramid Peak
