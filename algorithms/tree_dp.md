@@ -81,3 +81,10 @@ function<dp_state(int, int)> dfs = [&](int node, int parent) {
 };
 dp_state dp = dfs(1, 0);
 ```
+
+## Knapsack over children by maintaining a prefix dp
+
+This is a common technique that is necessary for some tree dp problems. 
+
+loop over the paths used so far in prefix
+and then loop over paths us in child v.
