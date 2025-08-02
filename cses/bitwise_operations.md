@@ -119,28 +119,30 @@ And to truly get into row echelon form you can swap rows, to get it to look visu
 You have a greedy property now that you can utilize to find the linear combination of the basis vectors that will give you the maximum xor sum.  You can iterate over the basis vectors from the most significant bit to the least significant bit, and for each basis vector, you can check if adding it to the current xor sum will increase the value. If it does, you add it to the current xor sum.  This works because you greedily want the msb to be 1.  
 
 ```cpp
-const int BITS = 31;
 int N;
+vector<int> A;
 
 void solve() {
     cin >> N;
-    vector<int> basis(BITS, 0);
+    A.resize(N);
     for (int i = 0; i < N; ++i) {
-        int x;
-        cin >> x;
-        for (int b = BITS - 1; b >= 0; --b) {
-            if (!((x >> b) & 1)) continue;
-            if (!basis[b]) {
-                basis[b] = x;
-                break;
-            }
-            x ^= basis[b];
-        }
+        cin >> A[i];
     }
+    vector<int> basis;
+    for (int i = 0; i < N; ++i) {
+        for (int b : basis) {
+            A[i] = min(A[i], A[i] ^ b);
+        }
+        if (!A[i]) continue;
+        for (int &b : basis) {
+            b = min(b, b ^ A[i]);
+        }
+        basis.emplace_back(A[i]);
+    }
+    sort(basis.rbegin(), basis.rend());
     int ans = 0;
-    for (int b = BITS - 1; b >= 0; --b) {
-        if ((ans >> b) & 1) continue;
-        ans ^= basis[b];
+    for (int b : basis) {
+        if ((ans ^ b) > ans) ans ^= b;
     }
     cout << ans << endl;
 }
@@ -161,28 +163,28 @@ signed main() {
 linear independence: From linear independence it follows immediately that the way you write any given vector in terms of the basis is unique.
 
 ```cpp
-const int BITS = 31;
 int N;
 vector<int> A;
 
 void solve() {
     cin >> N;
-    vector<int> basis(31, 0);
+    A.resize(N);
     for (int i = 0; i < N; ++i) {
-        int x;
-        cin >> x;
-        for (int b = BITS - 1; b >= 0; --b) {
-            if (!((x >> b) & 1)) continue;
-            if (!basis[b]) {
-                basis[b] = x;
-                break;
-            }
-            x ^= basis[b];
+        cin >> A[i];
+    }
+    vector<int> basis;
+    for (int i = 0; i < N; ++i) {
+        for (int b : basis) {
+            A[i] = min(A[i], A[i] ^ b);
         }
+        if (!A[i]) continue;
+        for (int &b : basis) {
+            b = min(b, b ^ A[i]);
+        }
+        basis.emplace_back(A[i]);
     }
     int ans = 1;
-    for (int b = 0; b < BITS; ++b) {
-        if (!basis[b]) continue;
+    for (int b : basis) {
         ans <<= 1;
     }
     cout << ans << endl;
@@ -202,8 +204,6 @@ signed main() {
 ### Solution 1:  linear algebra, basis of vector subspace, gaussian elimination over GF(2), xor basis, reduced row echelon form
 
 This problem is a slight variation where you want to generate the basis vectors but in a specific form called reduced row echelon form.  This means that you want to generate the basis vectors in a way that they are sorted by their most significant bit, and each basis vector has a leading 1 in a different position.
-
-
 
 ```cpp
 const int BITS = 31;

@@ -1,30 +1,12 @@
 # XOR Basis
 
-
 Gaussian elimination over GF(2) to find the basis of $\mathbb{Z}_2^{31}$.
 
-Gaussian elimination to get the row echelon form which also represents the basis. 
+Gaussian elimination to get the reduced row echelon form which also represents the basis. 
 
 This works because we are performing xor bitwise operations on each element of the vectors, and this is just addition modulo 2. 
 
-```cpp
-BITS = 31;
-vector<int> basis(BITS, 0);
-for (int i = 0; i < N; ++i) {
-    int x;
-    cin >> x;
-    for (int b = BITS - 1; b >= 0; --b) {
-        if (!((x >> b) & 1)) continue;
-        if (!basis[b]) {
-            basis[b] = x;
-            break;
-        }
-        x ^= basis[b];
-    }
-}
-```
-
-There is another way to do basis though, which is important some times: 
+Might have to sort to find max or smallest numbers. 
 
 ```cpp
 vector<int> basis;
