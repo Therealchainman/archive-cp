@@ -1343,6 +1343,83 @@ public:
 };
 ```
 
+## 2561. Rearranging Fruits
+
+### Solution 1: greedy, frequency, sorting, map
+
+1. Just need to figure out that sometimes it is beneficial to use a minFactor to swap which requires 2 swaps using the minFactor to get the values in place. 
+
+```cpp
+using int64 = int64_t;
+class Solution {
+public:
+    int64 minCost(vector<int>& b1, vector<int>& b2) {
+        int N = b1.size();
+        map<int, int> f1, f2;
+        vector<int> values;
+        for (int x : b1) {
+            ++f1[x];
+            values.emplace_back(x);
+        }
+        for (int x : b2) {
+            ++f2[x];
+            values.emplace_back(x);
+        }
+        sort(values.begin(), values.end());
+        values.erase(unique(values.begin(), values.end()), values.end());
+        vector<int> b1b2, b2b1;
+        for (int x : values) {
+            if ((f1[x] + f2[x]) & 1) return -1;
+            while (f1[x] > f2[x]) {
+                --f1[x], ++f2[x];
+                b1b2.emplace_back(x);
+            }
+            while (f1[x] < f2[x]) {
+                ++f1[x], --f2[x];
+                b2b1.emplace_back(x);
+            }
+        }
+        sort(b1b2.begin(), b1b2.end());
+        sort(b2b1.rbegin(), b2b1.rend());
+        int M = b1b2.size();
+        int64 ans = 0;
+        for (int i = 0; i < M; ++i) {
+            ans += min(b1b2[i], b2b1[i]);
+        }
+        if (!M) return ans;
+        int64 minFactor = min(*min_element(b1.begin(), b1.end()), *min_element(b2.begin(), b2.end()));
+        int64 res = 0;
+        for (int i = 0; i < M; ++i) {
+            int64 p = min(b1b2[i], b2b1[i]);
+            res += min(p, 2 * minFactor);
+        }
+        ans = min(ans, res);
+        return ans;
+    }
+};
+```
+
+## 898. Bitwise ORs of Subarrays
+
+### Solution 1: bit manipulation, OR logic, set
+
+```cpp
+class Solution {
+public:
+    int subarrayBitwiseORs(vector<int>& arr) {
+        unordered_set<int> ans, cur, ncur;
+        for (int x : arr) {
+            ncur.clear();
+            ncur.insert(x);
+            for (int y : cur) ncur.insert(y | x);
+            swap(ncur, cur);
+            for (int y : cur) ans.insert(y);
+        }
+        return ans.size();
+    }
+};
+```
+
 ##
 
 ### Solution 1: 

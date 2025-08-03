@@ -1883,13 +1883,149 @@ public:
 
 ## 3621. Number of Integers With Popcount-Depth Equal to K I
 
+### Solution 1:  binary number, bit digit dp, popcount, depth, memoization
+
+Basically count the number of binary number less than or equal to n with exactly k bits set.  This can be solved with the following algorithm:
+
+```cpp
+using int64 = int64_t;
+const int BITS = 64;
+class Solution {
+private:
+    string S;
+    int64 dp[BITS][BITS][2];
+    int64 dfs(int idx, int rem, bool tight) {
+        if (rem < 0) return 0;
+        if (idx == S.size()) return rem == 0 ? 1 : 0;
+        if (dp[idx][rem][tight] != -1) return dp[idx][rem][tight];
+        int64 ans = 0;
+        int curBit = S[idx] - '0';
+        for (int i = 0; i < 2; ++i) {
+            if (tight && i > curBit) continue; 
+            ans += dfs(idx + 1, rem - i, tight && curBit == i);
+        }
+        return dp[idx][rem][tight] = ans;
+    }
+public:
+    int64 popcountDepth(long long n, int k) {
+        if (k == 0) return 1;
+        vector<int> cnt(BITS, 1);
+        for (int i = 2; i < BITS; ++i) {
+            cnt[i] = cnt[__builtin_popcount(i)] + 1;
+        }
+        bool found = false;
+        for (int i = BITS - 1; i >= 0; --i) {
+            if ((n >> i) & 1LL) found = true;
+            if (!found) continue;
+            if ((n >> i) & 1LL) S.push_back('1');
+            else S.push_back('0');
+        }
+        int64 ans = 0;
+        for (int i = 1; i < BITS; ++i) {
+            if (cnt[i] != k) continue;
+            cout << i << endl;
+            fill(&dp[0][0][0], &dp[0][0][0] + BITS * BITS * 2, -1LL);
+            ans += dfs(0, i, true);
+            if (i == 1) --ans; // don't count 1
+        }
+        return ans;
+    }
+};
+```
+
+# Leetcode Biweekly Contest 162
+
+## 3634. Minimum Removals to Balance Array
+
+### Solution 1:  sorting, sliding window, two pointers
+
+```cpp
+using int64 = int64_t;
+class Solution {
+public:
+    int minRemoval(vector<int>& nums, int k) {
+        int N = nums.size();
+        sort(nums.begin(), nums.end());
+        int ans = 0;
+        for (int i = 0, j = 0; i < N; ++i) {
+            while (static_cast<int64>(nums[i]) > static_cast<int64>(k) * nums[j]) ++j;
+            ans = max(ans, i - j + 1);
+        }
+        return N - ans;
+    }
+};
+```
+
+## 3635. Earliest Finish Time for Land and Water Rides II
+
+### Solution 1: sorting, sets
+
+1. Treat the case that the previous ride can be completed before the start of this ride.
+2. Treat the case that another ride becomes available before the end of this ride, so take it right after this one ends. 
+
+```cpp
+const int INF = numeric_limits<int>::max();
+class Solution {
+public:
+    int earliestFinishTime(vector<int>& sA, vector<int>& landDuration, vector<int>& sB, vector<int>& waterDuration) {
+        int N = sA.size(), M = sB.size();
+        vector<pair<int, int>> land, water;
+        set<int> setA, setB;
+        for (int i = 0; i < N; ++i) {
+            land.emplace_back(sA[i], landDuration[i]);
+            setA.insert(sA[i] + landDuration[i]);
+        }
+        for (int i = 0; i < M; ++i) {
+            water.emplace_back(sB[i], waterDuration[i]);
+            setB.insert(sB[i] + waterDuration[i]);
+        }
+        sort(land.begin(), land.end());
+        sort(water.begin(), water.end());
+        int ans = INF;
+        for (int i = 0; i < N; ++i) {
+            int start = sA[i], end = sA[i] + landDuration[i];
+            auto it = setB.upper_bound(start);
+            if (it == setB.begin()) continue;
+            int cand = *prev(it);
+            if (cand <= start) ans = min(ans, end);
+        }
+        for (int i = 0; i < M; ++i) {
+            int start = sB[i], end = sB[i] + waterDuration[i];
+            auto it = setA.upper_bound(start);
+            if (it == setA.begin()) continue;
+            int cand = *prev(it);
+            if (cand <= start) ans = min(ans, end);
+        }
+        int minDuration = INF, i = 0;
+        for (int x : setA) { // land
+            while (i < M && water[i].first < x) {
+                minDuration = min(minDuration, water[i].second);
+                ++i;
+            }
+            if (minDuration != INF) ans = min(ans, x + minDuration);
+        }
+        minDuration = INF, i = 0;
+        for (int x : setB) { // water
+            while (i < N && land[i].first < x) {
+                minDuration = min(minDuration, land[i].second);
+                ++i;
+            }
+            if (minDuration != INF) ans = min(ans, x + minDuration);
+        }
+        return ans;
+    }
+};
+```
+
+## 3636. Threshold Majority Queries
+
 ### Solution 1: 
 
 ```cpp
 
 ```
 
-# Leetcode Biweekly Contest 162
+# Leetcode Biweekly Contest 163
 
 ## 
 
