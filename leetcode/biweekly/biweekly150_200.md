@@ -2019,10 +2019,75 @@ public:
 
 ## 3636. Threshold Majority Queries
 
-### Solution 1: 
+### Solution 1: Mo's algorithm, offline queries, sorting, maxheap, frequency
 
 ```cpp
+int block_size;
 
+struct Query {
+    int l, r, threshold, idx;
+    bool operator<(const Query &other) const {
+        int b1 = l / block_size, b2 = other.l / block_size;
+        if (b1 != b2) return b1 < b2;
+        if (b1 & 1) return r > other.r;
+        return r < other.r;
+    }
+};
+
+struct Point {
+    int f, v;
+    bool operator<(const Point &other) const {
+        if (f != other.f) return f < other.f;
+        return v > other.v;
+    }
+};
+
+class Solution {
+private:
+    int N, M;
+    vector<int> arr;
+    map<int, int> freq;
+    priority_queue<Point> maxheap;
+    void add(int pos) {
+        maxheap.emplace(++freq[arr[pos]], arr[pos]);
+    }
+    void remove(int pos) {
+        maxheap.emplace(--freq[arr[pos]], arr[pos]);
+    }
+    int getAnswer(int threshold) {
+        int ans = 0;
+        while (!maxheap.empty() && maxheap.top().f != freq[maxheap.top().v]) maxheap.pop();
+        if (maxheap.empty()) return -1;
+        if (maxheap.top().f < threshold) return -1;
+        return maxheap.top().v;
+    }
+    vector<int> mo_s_algorithm(vector<Query> queries) {
+        block_size = max(1, (int)(N / max(1.0, sqrt(M))));
+        vector<int> answers(M);
+        sort(queries.begin(), queries.end());
+        int curL = 0, curR = -1;
+        for (const Query& q : queries) {
+            while (curL > q.l) add(--curL);
+            while (curR < q.r) add(++curR);
+            while (curL < q.l) { remove(curL); ++curL; }
+            while (curR > q.r) { remove(curR); --curR; }
+            answers[q.idx] = getAnswer(q.threshold);
+        }
+        return answers;
+    }
+public:
+    vector<int> subarrayMajority(vector<int>& nums, vector<vector<int>>& queries) {
+        N = nums.size(), M = queries.size();
+        arr = nums;
+        vector<Query> moQuery;
+        for (int i = 0; i < M; ++i) {
+            int l = queries[i][0], r = queries[i][1], thres = queries[i][2];
+            moQuery.emplace_back(l, r, thres, i);
+        }
+        vector<int> ans = mo_s_algorithm(moQuery);
+        return ans;
+    }
+};
 ```
 
 # Leetcode Biweekly Contest 163
