@@ -41,3 +41,11 @@ pair<int, int> normalizedSlope(int dx, int dy) {
     return {dx, dy};
 }
 ```
+
+useful way to store instead of having to use map<pair<int, int>, int>, you can single integer to represent a pair of points
+
+```cpp
+static inline uint64 pack32(int a, int b) {
+    return (uint64)(uint32_t)a << 32 | (uint32_t)b;
+}
+```
