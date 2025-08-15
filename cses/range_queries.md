@@ -1246,28 +1246,396 @@ signed main() {
 }
 ```
 
-##
+## Polynomial Queries
 
-### Solution 1:
+### Solution 1: lazy segment tree, multiple lazy tags, sum 1 to N
 
-```py
+1. Derive how you can use sum from 1 to N combined with the left endpoint to perform updates
 
+```cpp
+int64 sumN(int64 n) {
+    return n * (n + 1) / 2;
+}
+
+int64 sumRange(int l, int r) {
+    if (l > r) return 0;
+    int64 ans = sumN(r);
+    if (l > 0) ans -= sumN(l - 1);
+    return ans;
+}
+
+struct LazySegmentTree {
+    vector<int64> arr;
+    vector<int64> lazyTag, lazyTagAdd;
+    int size;
+    int neutral = 0, noop = 0;
+
+    void init(int n) {
+        size = 1;
+        while (size < n) size *= 2;
+        arr.assign(2 * size, neutral);
+        lazyTag.assign(2 * size, noop);
+        lazyTagAdd.assign(2 * size, noop);
+    }
+
+    void build(const vector<int64>& inputArr) {
+        copy(inputArr.begin(), inputArr.end(), arr.begin() + (size - 1));
+        for (int i = size - 2; i >= 0; --i) {
+            arr[i] = arr[2 * i + 1] + arr[2 * i + 2];
+        }
+    }
+
+    int64 modify_op(int64 x, int64 y, int64 length = 1) {
+        return x + y * length;
+    }
+
+    int64 calc_op(int64 x, int64 y) {
+        return x + y;
+    }
+
+    bool is_leaf(int segment_right_bound, int segment_left_bound) {
+        return segment_right_bound - segment_left_bound == 1;
+    }
+
+    void push(int segment_idx, int segment_left_bound, int segment_right_bound) {
+        bool pendingUpdate = lazyTag[segment_idx] != noop || lazyTagAdd[segment_idx] != noop;
+        if (is_leaf(segment_right_bound, segment_left_bound) || !pendingUpdate) return;
+        int left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
+        int children_segment_len = (segment_right_bound - segment_left_bound) >> 1;
+        int mid_point = segment_left_bound + children_segment_len;
+        lazyTag[left_segment_idx] = modify_op(lazyTag[left_segment_idx], lazyTag[segment_idx]);
+        lazyTag[right_segment_idx] = modify_op(lazyTag[right_segment_idx], lazyTag[segment_idx]);
+        lazyTagAdd[left_segment_idx] = modify_op(lazyTagAdd[left_segment_idx], lazyTagAdd[segment_idx]);
+        lazyTagAdd[right_segment_idx] = modify_op(lazyTagAdd[right_segment_idx], lazyTagAdd[segment_idx]);
+        arr[left_segment_idx] = modify_op(arr[left_segment_idx], lazyTagAdd[segment_idx], children_segment_len);
+        arr[right_segment_idx] = modify_op(arr[right_segment_idx], lazyTagAdd[segment_idx], children_segment_len);
+        arr[left_segment_idx] += sumRange(segment_left_bound, mid_point - 1) * lazyTag[segment_idx];
+        arr[right_segment_idx] += sumRange(mid_point, segment_right_bound - 1) * lazyTag[segment_idx];
+        lazyTag[segment_idx] = lazyTagAdd[segment_idx] = noop;
+    }
+
+    void update(int left, int right, int64 val) {
+        update(0, 0, size, left, right, val);
+    }
+
+    void update(int segment_idx, int segment_left_bound, int segment_right_bound, int left, int right, int64 val) {
+        // NO OVERLAP
+        if (right <= segment_left_bound || segment_right_bound <= left) return;
+        // COMPLETE OVERLAP
+        if (left <= segment_left_bound && segment_right_bound <= right) {
+            ++lazyTag[segment_idx];
+            lazyTagAdd[segment_idx] += val;
+            int segment_len = segment_right_bound - segment_left_bound;
+            arr[segment_idx] = modify_op(arr[segment_idx], val, segment_len);
+            arr[segment_idx] += sumRange(segment_left_bound, segment_right_bound - 1);
+            return;
+        }
+        // PARTIAL OVERLAP;
+        push(segment_idx, segment_left_bound, segment_right_bound);
+        int mid_point = (segment_left_bound + segment_right_bound) >> 1;
+        int left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
+        update(left_segment_idx, segment_left_bound, mid_point, left, right, val);
+        update(right_segment_idx, mid_point, segment_right_bound, left, right, val);
+        // pull
+        arr[segment_idx] = arr[left_segment_idx] + arr[right_segment_idx];
+    }
+
+    int64 query(int left, int right) {
+        return query(0, 0, size, left, right);
+    }
+
+    int64 query(int segment_idx, int segment_left_bound, int segment_right_bound, int left, int right) {
+        // NO OVERLAP
+        if (right <= segment_left_bound || segment_right_bound <= left) return neutral;
+        // COMPLETE OVERLAP
+        if (left <= segment_left_bound && segment_right_bound <= right) {
+            return arr[segment_idx];
+        }
+        // PARTIAL OVERLAP
+        push(segment_idx, segment_left_bound, segment_right_bound);
+        int mid_point = (segment_left_bound + segment_right_bound) >> 1;
+        int left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
+        int64 left_res = query(left_segment_idx, segment_left_bound, mid_point, left, right);
+        int64 right_res = query(right_segment_idx, mid_point, segment_right_bound, left, right);
+        return calc_op(left_res, right_res);
+    }
+};
+
+int N, Q;
+vector<int64> A;
+
+void solve() {
+    cin >> N >> Q;
+    A.resize(N);
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+    }
+    LazySegmentTree seg;
+    seg.init(N);
+    seg.build(A);
+    while (Q--) {
+        int t, l, r;
+        cin >> t >> l >> r;
+        --l, --r;
+        if (t == 1) {
+            seg.update(l, r + 1, 1 - l);
+        } else {
+            int64 ans = seg.query(l, r + 1);
+            cout << ans << endl;
+        }
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
-##
+## Range Updates and Sums
 
-### Solution 1:
+### Solution 1: lazy segment tree, multiple lazy tags, lazy tag for addition and assignment
 
-```py
+add and assign
+means that you assign then add 
+push any pending assigns to children nodes
+kill any pending adds in children nodes
+push any pending add to children nodes
 
+add
+push any pending adds to children nodes
+
+assign
+push any pending assigns to children nodes
+kill any pending adds in children nodes
+
+```cpp
+struct LazySegmentTree {
+    vector<int64> arr;
+    vector<int64> lazyTagAdd, lazyTagAssign;
+    int size;
+    int neutral = 0, noop = 0;
+
+    void init(int n) {
+        size = 1;
+        while (size < n) size *= 2;
+        arr.assign(2 * size, neutral);
+        lazyTagAdd.assign(2 * size, noop);
+        lazyTagAssign.assign(2 * size, noop);
+    }
+
+    void build(const vector<int64>& inputArr) {
+        copy(inputArr.begin(), inputArr.end(), arr.begin() + (size - 1));
+        for (int i = size - 2; i >= 0; --i) {
+            arr[i] = arr[2 * i + 1] + arr[2 * i + 2];
+        }
+    }
+
+    int64 assign_op(int64 x, int64 length = 1) {
+        return x * length;
+    }
+
+    int64 add_op(int64 x, int64 y, int64 length = 1) {
+        return x + y * length;
+    }
+
+    int64 merge_op(int64 x, int64 y) {
+        return x + y;
+    }
+
+    bool is_leaf(int segment_right_bound, int segment_left_bound) {
+        return segment_right_bound - segment_left_bound == 1;
+    }
+
+    void push(int segment_idx, int segment_left_bound, int segment_right_bound) {
+        bool pendingUpdate = lazyTagAssign[segment_idx] != noop || lazyTagAdd[segment_idx] != noop;;
+        if (is_leaf(segment_right_bound, segment_left_bound) || !pendingUpdate) return;
+        int left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
+        int children_segment_len = (segment_right_bound - segment_left_bound) >> 1;
+        if (lazyTagAssign[segment_idx] != noop) {
+            lazyTagAssign[left_segment_idx] = lazyTagAssign[segment_idx];
+            lazyTagAssign[right_segment_idx] = lazyTagAssign[segment_idx];
+            arr[left_segment_idx] = lazyTagAssign[segment_idx] * children_segment_len;
+            arr[right_segment_idx] = lazyTagAssign[segment_idx] * children_segment_len;
+            lazyTagAdd[left_segment_idx] = lazyTagAdd[right_segment_idx] = noop; // assign kills pending adds in children
+        }
+        lazyTagAdd[left_segment_idx] += lazyTagAdd[segment_idx];
+        lazyTagAdd[right_segment_idx] += lazyTagAdd[segment_idx];
+        arr[left_segment_idx] += lazyTagAdd[segment_idx] * children_segment_len;
+        arr[right_segment_idx] += lazyTagAdd[segment_idx] * children_segment_len;
+        lazyTagAdd[segment_idx] = lazyTagAssign[segment_idx] = noop;
+    }
+
+    void update(int left, int right, int64 val, bool isAssign = false) {
+        update(0, 0, size, left, right, val, isAssign);
+    }
+
+    void update(int segment_idx, int segment_left_bound, int segment_right_bound, int left, int right, int64 val, bool isAssign = false) {
+        // NO OVERLAP
+        if (right <= segment_left_bound || segment_right_bound <= left) return;
+        // COMPLETE OVERLAP
+        if (left <= segment_left_bound && segment_right_bound <= right) {
+            int segment_len = segment_right_bound - segment_left_bound;
+            if (isAssign) {
+                lazyTagAssign[segment_idx] = val;
+                lazyTagAdd[segment_idx] = noop; // assign kills pending adds
+                arr[segment_idx] = val * segment_len;
+            } else {
+                lazyTagAdd[segment_idx] += val;
+                arr[segment_idx] += val * segment_len;
+            }
+            return;
+        }
+        // PARTIAL OVERLAP;
+        push(segment_idx, segment_left_bound, segment_right_bound);
+        int mid_point = (segment_left_bound + segment_right_bound) >> 1;
+        int left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
+        update(left_segment_idx, segment_left_bound, mid_point, left, right, val, isAssign);
+        update(right_segment_idx, mid_point, segment_right_bound, left, right, val, isAssign);
+        // pull
+        arr[segment_idx] = arr[left_segment_idx] + arr[right_segment_idx];
+    }
+
+    int64 query(int left, int right) {
+        return query(0, 0, size, left, right);
+    }
+
+    int64 query(int segment_idx, int segment_left_bound, int segment_right_bound, int left, int right) {
+        // NO OVERLAP
+        if (right <= segment_left_bound || segment_right_bound <= left) return neutral;
+        // COMPLETE OVERLAP
+        if (left <= segment_left_bound && segment_right_bound <= right) {
+            return arr[segment_idx];
+        }
+        // PARTIAL OVERLAP
+        push(segment_idx, segment_left_bound, segment_right_bound);
+        int mid_point = (segment_left_bound + segment_right_bound) >> 1;
+        int left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
+        int64 left_res = query(left_segment_idx, segment_left_bound, mid_point, left, right);
+        int64 right_res = query(right_segment_idx, mid_point, segment_right_bound, left, right);
+        return merge_op(left_res, right_res);
+    }
+};
+
+int N, Q;
+vector<int64> A;
+
+void solve() {
+    cin >> N >> Q;
+    A.resize(N);
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+    }
+    LazySegmentTree seg;
+    seg.init(N);
+    seg.build(A);
+    while (Q--) {
+        int t, l, r;
+        cin >> t >> l >> r;
+        --l, --r;
+        if (t == 1) { // add
+            int64 x;
+            cin >> x;
+            seg.update(l, r + 1, x, false);
+        } else if (t == 2) { // assign
+            int64 x;
+            cin >> x;
+            seg.update(l, r + 1, x, true);
+        } else {
+            int64 ans = seg.query(l, r + 1);
+            cout << ans << endl;
+        }
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
-##
+## Forest Queries II
 
-### Solution 1:
+### Solution 1: 2D BIT, 2d array point updates, 2d rectangular sum queries
 
-```py
+```cpp
+int N, Q;
+vector<vector<int>> grid;
 
+struct BIT2D {
+    int n;
+    vector<vector<int64>> bit;
+    BIT2D(int n) : n(n), bit(n + 1, vector<int64>(n + 1, 0)) {}
+
+    void add(int r, int c, int64 delta) {
+        for (int i = r; i <= n; i += i & -i) {
+            for (int j = c; j <= n; j += j & -j) {
+                bit[i][j] += delta;
+            }
+        }
+    }
+
+    int64 sum(int r, int c) const {
+        int64 res = 0;
+        for (int i = r; i > 0; i -= i & -i) {
+            for (int j = c; j > 0; j -= j & -j) {
+                res += bit[i][j];
+            }
+        }
+        return res;
+    }
+
+    int64 rect(int r1, int c1, int r2, int c2) const {
+        if (r1 > r2) swap(r1, r2);
+        if (c1 > c2) swap(c1, c2);
+        int64 res = sum(r2, c2) - sum(r1 - 1, c2) - sum(r2, c1 - 1) + sum(r1 - 1, c1 - 1);
+        return res;
+    }
+};
+
+void solve() {
+    cin >> N >> Q;
+    grid.assign(N + 1, vector<int>(N + 1, 0));
+    BIT2D seg(N);
+    for (int i = 1; i <= N; ++i) {
+        string s;
+        cin >> s;
+        for (int j = 1; j <= N; ++j) {
+            if (s[j - 1] == '*') grid[i][j] = 1;
+            seg.add(i, j, grid[i][j]);
+        }
+    }
+    while (Q--) {
+        int t;
+        cin >> t;
+        if (t == 1) { // update
+            int r, c;
+            cin >> r >> c;
+            seg.add(r, c, -grid[r][c]); // remove old value
+            grid[r][c] ^= 1; // flip value of cell
+            seg.add(r, c, grid[r][c]); // add new value
+        } else { // query
+            int r1, c1, r2, c2;
+            cin >> r1 >> c1 >> r2 >> c2;
+            int64 ans = seg.rect(r1, c1, r2, c2);
+            cout << ans << endl;
+        }
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ##

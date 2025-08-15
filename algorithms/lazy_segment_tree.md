@@ -1,6 +1,8 @@
 # Lazy Segment Tree
 
-## Lazy Segment Tree range queries and range updates
+Lazy propagation lets you defer work: you record a pending update on a node that fully lies inside the update range, and you push it to children only when you need to go below that node.
+
+## Lazy Segment Tree for range queries and range updates
 
 - range updates
 - range queries
@@ -14,30 +16,30 @@ range updates are [L, R) (exclusive for right end point)
 
 ```cpp
 struct LazySegmentTree {
-    vector<int> values;
-    vector<int> operations;
+    vector<int64> arr;
+    vector<int64> lazyTag;
     int size;
     int neutral = 0, noop = 0;
 
     void init(int n) {
         size = 1;
         while (size < n) size *= 2;
-        values.assign(2 * size, neutral);
-        operations.assign(2 * size, noop);
+        arr.assign(2 * size, neutral);
+        lazyTag.assign(2 * size, noop);
     }
 
-    void build(const vector<int>& arr) {
-        copy(arr.begin(), arr.end(), values.begin() + size);
-        for (int i = size - 1; i > 0; i--) {
-            values[i] = values[2 * i] + values[2 * i + 1];
+    void build(const vector<int64>& inputArr) {
+        copy(inputArr.begin(), inputArr.end(), arr.begin() + (size - 1));
+        for (int i = size - 2; i >= 0; --i) {
+            arr[i] = arr[2 * i + 1] + arr[2 * i + 2];
         }
     }
 
-    int modify_op(int x, int y, int length = 1) {
+    int64 modify_op(int64 x, int64 y, int64 length = 1) {
         return x + y * length;
     }
 
-    int calc_op(int x, int y) {
+    int64 calc_op(int64 x, int64 y) {
         return x + y;
     }
 
@@ -45,77 +47,61 @@ struct LazySegmentTree {
         return segment_right_bound - segment_left_bound == 1;
     }
 
-    void propagate(int segment_idx, int segment_left_bound, int segment_right_bound) {
-        if (is_leaf(segment_right_bound, segment_left_bound) || operations[segment_idx] == noop) return;
+    void push(int segment_idx, int segment_left_bound, int segment_right_bound) {
+        bool pendingUpdate = lazyTag[segment_idx] != noop;
+        if (is_leaf(segment_right_bound, segment_left_bound) || !pendingUpdate) return;
         int left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
         int children_segment_len = (segment_right_bound - segment_left_bound) >> 1;
-        operations[left_segment_idx] = modify_op(operations[left_segment_idx], operations[segment_idx]);
-        operations[right_segment_idx] = modify_op(operations[right_segment_idx], operations[segment_idx]);
-        values[left_segment_idx] = modify_op(values[left_segment_idx], operations[segment_idx], children_segment_len);
-        values[right_segment_idx] = modify_op(values[right_segment_idx], operations[segment_idx], children_segment_len);
-        operations[segment_idx] = noop;
+        int mid_point = segment_left_bound + children_segment_len;
+        lazyTag[left_segment_idx] = modify_op(lazyTag[left_segment_idx], lazyTag[segment_idx]);
+        lazyTag[right_segment_idx] = modify_op(lazyTag[right_segment_idx], lazyTag[segment_idx]);
+        arr[left_segment_idx] = modify_op(arr[left_segment_idx], lazyTag[segment_idx], children_segment_len);
+        arr[right_segment_idx] = modify_op(arr[right_segment_idx], lazyTag[segment_idx], children_segment_len);
+        lazyTag[segment_idx] = noop;
     }
 
-    void ascend(int segment_idx) {
-        while (segment_idx > 0) {
-            segment_idx--;
-            segment_idx >>= 1;
-            int left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
-            values[segment_idx] = calc_op(values[left_segment_idx], values[right_segment_idx]);
-        }
+    void update(int left, int right, int64 val) {
+        update(0, 0, size, left, right, val);
     }
 
-    void update(int left, int right, int val) {
-        stack<tuple<int, int, int>> stk;
-        stk.emplace(0, size, 0);
-        vector<int> segments;
-        int segment_left_bound, segment_right_bound, segment_idx;
-        while (!stk.empty()) {
-            tie(segment_left_bound, segment_right_bound, segment_idx) = stk.top();
-            stk.pop();
-            // NO OVERLAP
-            if (segment_left_bound >= right || segment_right_bound <= left) continue;
-            // COMPLETE OVERLAP
-            if (segment_left_bound >= left && segment_right_bound <= right) {
-                operations[segment_idx] = modify_op(operations[segment_idx], val);
-                int segment_len = segment_right_bound - segment_left_bound;
-                values[segment_idx] = modify_op(values[segment_idx], val, segment_len);
-                segments.push_back(segment_idx);
-                continue;
-            }
-            // PARTIAL OVERLAP
-            int mid_point = (segment_left_bound + segment_right_bound) >> 1;
-            int left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
-            propagate(segment_idx, segment_left_bound, segment_right_bound);
-            stk.emplace(mid_point, segment_right_bound, right_segment_idx);
-            stk.emplace(segment_left_bound, mid_point, left_segment_idx);
+    void update(int segment_idx, int segment_left_bound, int segment_right_bound, int left, int right, int64 val) {
+        // NO OVERLAP
+        if (right <= segment_left_bound || segment_right_bound <= left) return;
+        // COMPLETE OVERLAP
+        if (left <= segment_left_bound && segment_right_bound <= right) {
+            lazyTag[segment_idx] = modify_op(lazyTag[segment_idx], val);
+            int segment_len = segment_right_bound - segment_left_bound;
+            arr[segment_idx] = modify_op(arr[segment_idx], val, segment_len);
+            return;
         }
-        for (int segment_idx : segments) ascend(segment_idx);
+        // PARTIAL OVERLAP;
+        push(segment_idx, segment_left_bound, segment_right_bound);
+        int mid_point = (segment_left_bound + segment_right_bound) >> 1;
+        int left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
+        update(left_segment_idx, segment_left_bound, mid_point, left, right, val);
+        update(right_segment_idx, mid_point, segment_right_bound, left, right, val);
+        // pull
+        arr[segment_idx] = arr[left_segment_idx] + arr[right_segment_idx];
     }
 
-    int query(int left, int right) {
-        stack<tuple<int, int, int>> stk;
-        stk.emplace(0, size, 0);
-        int result = neutral;
-        int segment_left_bound, segment_right_bound, segment_idx;
-        while (!stk.empty()) {
-            tie(segment_left_bound, segment_right_bound, segment_idx) = stk.top();
-            stk.pop();
-            // NO OVERLAP
-            if (segment_left_bound >= right || segment_right_bound <= left) continue;
-            // COMPLETE OVERLAP
-            if (segment_left_bound >= left && segment_right_bound <= right) {
-                result = calc_op(result, values[segment_idx]);
-                continue;
-            }
-            // PARTIAL OVERLAP
-            int mid_point = (segment_left_bound + segment_right_bound) >> 1;
-            int left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
-            propagate(segment_idx, segment_left_bound, segment_right_bound);
-            stk.emplace(mid_point, segment_right_bound, right_segment_idx);
-            stk.emplace(segment_left_bound, mid_point, left_segment_idx);
+    int64 query(int left, int right) {
+        return query(0, 0, size, left, right);
+    }
+
+    int64 query(int segment_idx, int segment_left_bound, int segment_right_bound, int left, int right) {
+        // NO OVERLAP
+        if (right <= segment_left_bound || segment_right_bound <= left) return neutral;
+        // COMPLETE OVERLAP
+        if (left <= segment_left_bound && segment_right_bound <= right) {
+            return arr[segment_idx];
         }
-        return result;
+        // PARTIAL OVERLAP
+        push(segment_idx, segment_left_bound, segment_right_bound);
+        int mid_point = (segment_left_bound + segment_right_bound) >> 1;
+        int left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
+        int64 left_res = query(left_segment_idx, segment_left_bound, mid_point, left, right);
+        int64 right_res = query(right_segment_idx, mid_point, segment_right_bound, left, right);
+        return calc_op(left_res, right_res);
     }
 };
 ```

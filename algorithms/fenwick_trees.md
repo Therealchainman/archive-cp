@@ -4,6 +4,8 @@
 
 Fenwick trees are a data structure that can be used to efficiently calculate dynamic prefix sums in a table of numbers.
 
+Popularly also known as Binary Indexed Trees (BIT).
+
 ### IMPLEMENTED IN C++ PURQ
 
 The thing that I need to know about a fenwick tree datastructure is how to use it. It is useful for when you need to 
@@ -58,7 +60,47 @@ struct FenwickTree {
         return right >= left ? query(right) - query(left - 1) : T(0);
     }
 };
+```
 
+## 2D Fenwick Tree
+
+The 2-dimensional fenwick tree for dynamic rectangular sum queries
+
+supports point updates and rectangular sum queries in logarithmic time.
+
+1-indexed just like above but for rectangular sum queries r1, c1, r2, c2
+
+```cpp
+struct BIT2D {
+    int n;
+    vector<vector<int64>> bit;
+    BIT2D(int n) : n(n), bit(n + 1, vector<int64>(n + 1, 0)) {}
+
+    void add(int r, int c, int64 delta) {
+        for (int i = r; i <= n; i += i & -i) {
+            for (int j = c; j <= n; j += j & -j) {
+                bit[i][j] += delta;
+            }
+        }
+    }
+
+    int64 sum(int r, int c) const {
+        int64 res = 0;
+        for (int i = r; i > 0; i -= i & -i) {
+            for (int j = c; j > 0; j -= j & -j) {
+                res += bit[i][j];
+            }
+        }
+        return res;
+    }
+
+    int64 rect(int r1, int c1, int r2, int c2) const {
+        if (r1 > r2) swap(r1, r2);
+        if (c1 > c2) swap(c1, c2);
+        int64 res = sum(r2, c2) - sum(r1 - 1, c2) - sum(r2, c1 - 1) + sum(r1 - 1, c1 - 1);
+        return res;
+    }
+};
 ```
 
 ### IMPLEMENTED IN PYTHON + PURQ
@@ -116,5 +158,3 @@ assert fenwick.query_range(2, 2) == 1, "Wrong"
 ```
 
 Number of inversions is easy to calculate with Fenwick Trees
-
-
