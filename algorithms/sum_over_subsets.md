@@ -57,7 +57,7 @@ for (int i = 0; i < LOG; ++i) { // iterate over bits
 Given this 
 $$G(T) = \sum_{S \supseteq T} f(S)$$
 We want to calculate the following
-$$f(T) = G(T) - \sum_{S \supset T} f(S)$$ 
+$$f(T) = G(T) - \sum_{S \supset T} f(S)$$
 By subtracting off the contributions of all strict supersets S in G(T) isolates the one term with S = T. 
 
 This can also be calculated with bitmask dp approach. 

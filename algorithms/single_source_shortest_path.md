@@ -47,6 +47,29 @@ namespace Graph {
 Graph::dijkstra<int>(src, [](int cost, int w) { return cost + w; });
 ```
 
+I mean maybe this is simpler? 
+
+```cpp
+vector<int64> dijkstra(int src) {
+    priority_queue<pair<int64, int>, vector<pair<int64, int>>, greater<pair<int64, int>>> minheap;
+    vector<int64> dist(N, INF);
+    minheap.emplace(0, src);
+    dist[src] = 0;
+    while (!minheap.empty()) {
+        auto [cost, u] = minheap.top();
+        minheap.pop();
+        if (dist[u] < cost) continue;
+        for (auto [v, w] : adj[u]) {
+            int64 ncost = cost + w;
+            if (dist[v] <= ncost) continue;
+            dist[v] = ncost;
+            minheap.emplace(ncost, v);
+        }
+    }
+    return dist;
+}
+```
+
 ### C++ implementation for source to destination node
 
 ```cpp
@@ -67,7 +90,6 @@ int dijkstra(int src, int dst) {
     }
     return -1;
 }
-```
 ```
 
 ### Python implementation for source to destination node

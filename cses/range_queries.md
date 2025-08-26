@@ -1638,10 +1638,133 @@ signed main() {
 }
 ```
 
+## Range Interval Queries
+
+### Solution 1:  offline queries, fenwick tree, coordinate compression, sorting by x_i values
+
+Sweep a threshold T upward over the sorted values x. Keep a Fenwick tree over positions 1..n where an index i is “active” once x_i <= T, which you mark by adding 1 at position i. At any moment in the sweep, a BIT range query on [l, r] returns the number of active indices in that interval, which is exactly the number of elements in positions [l, r] whose value is <= T.
+Use T = d and T = c − 1 to get the two counts you subtract for each query.
+
+```cpp
+struct Query {
+    int l, r, i, sign;
+};
+
+template <typename T>
+struct FenwickTree {
+    vector<T> nodes;
+    T neutral;
+
+    FenwickTree() : neutral(T(0)) {}
+
+    void init(int n, T neutral_val = T(0)) {
+        neutral = neutral_val;
+        nodes.assign(n + 1, neutral);
+    }
+
+    void update(int idx, T val) {
+        while (idx < (int)nodes.size()) {
+            nodes[idx] += val;
+            idx += (idx & -idx);
+        }
+    }
+
+    T query(int idx) {
+        T result = neutral;
+        while (idx > 0) {
+            result += nodes[idx];
+            idx -= (idx & -idx);
+        }
+        return result;
+    }
+
+    T query(int left, int right) {
+        return right >= left ? query(right) - query(left - 1) : T(0);
+    }
+};
+
+int N, Q;
+vector<int> A;
+
+void solve() {
+    cin >> N >> Q;
+    vector<int> keys;
+    A.resize(N);
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+        keys.emplace_back(A[i]);
+    }
+    vector<pair<int, Query>> items;
+    vector<int> ans(Q);
+    for (int i = 0; i < Q; ++i) {
+        int a, b, c, d;
+        cin >> a >> b >> c >> d;
+        if (c > 1) {
+            items.emplace_back(c - 1, Query{a, b, i, -1});
+            keys.emplace_back(c - 1);
+        }
+        items.emplace_back(d, Query{a, b, i, 1});
+        keys.emplace_back(d);
+    }
+    sort(keys.begin(), keys.end());
+    keys.erase(unique(keys.begin(), keys.end()), keys.end());
+    int M = keys.size();
+    vector<vector<int>> values(M, vector<int>());
+    for (int i = 0; i < N; ++i) {
+        int idx = lower_bound(keys.begin(), keys.end(), A[i]) - keys.begin();
+        values[idx].emplace_back(i + 1);
+    }
+    vector<vector<Query>> queries(M, vector<Query>());
+    for (auto [x, q] : items) {
+        int idx = lower_bound(keys.begin(), keys.end(), x) - keys.begin();
+        queries[idx].emplace_back(q);
+    }
+    FenwickTree<int> ft;
+    ft.init(N);
+    for (int idx = 0; idx < M; ++idx) {
+
+        for (int i : values[idx]) {
+            ft.update(i, 1);
+        }
+        for (auto [l, r, i, sign] : queries[idx]) {
+            int cnt = ft.query(l, r);
+            ans[i] += sign * cnt;
+        }
+    }
+    for (int x : ans) {
+        cout << x << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
 ##
 
 ### Solution 1:
 
-```py
+```cpp
+
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
+##
+
+### Solution 1:
+
+```cpp
 
 ```

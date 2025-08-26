@@ -1420,12 +1420,95 @@ public:
 };
 ```
 
-##
+## 498. Diagonal Traverse
 
-### Solution 1: 
+### Solution 1:  diagonal, two pointers
+
+1. Just do the diagonal that moves from top right to bottom left corner. 
+2. reverse the diagonal for when it was suppose to be the opposite.
+3. User property of diagonal that the sum of the row and column are equal along the diagonal. 
 
 ```cpp
+class Solution {
+public:
+    vector<int> findDiagonalOrder(vector<vector<int>>& mat) {
+        int R = mat.size(), C = mat[0].size();
+        vector<int> ans;
+        for (int i = 0; i < R + C; ++i) {
+            int r = i < R ? 0 : i - R + 1;
+            int c = i < C ? i : C - 1;
+            vector<int> diagonal;
+            while (r < R && c >= 0) {
+                diagonal.emplace_back(mat[r++][c--]);
+            }
+            if (i % 2 == 0) reverse(diagonal.begin(), diagonal.end());
+            ans.insert(ans.end(), diagonal.begin(), diagonal.end());
+        }
+        return ans;
+    }
+};
+```
 
+## 1504. Count Submatrices With All Ones
+
+### Solution 1:  monotonic stack, prefix sum
+
+```cpp
+class Solution {
+public:
+    int numSubmat(vector<vector<int>>& mat) {
+        int R = mat.size(), C = mat[0].size();
+        for (int r = 1; r < R; ++r) {
+            for (int c = 0; c < C; ++c) {
+                if (mat[r - 1][c] && mat[r][c]) mat[r][c] += mat[r - 1][c];
+            }
+        }
+        int ans = 0;
+        for (int r = 0; r < R; ++r) {
+            int psum = 0;
+            stack<int> st;
+            for (int c = 0; c < C; ++c) {
+                int i = c;
+                while (!st.empty() && mat[r][c] < mat[r][st.top()]) {
+                    int j = st.top();
+                    int delta = (i - j) * (mat[r][j] - mat[r][c]);
+                    psum -= delta;
+                    i = j;
+                    st.pop();
+                }
+                st.emplace(i);
+                mat[r][i] = mat[r][c];
+                psum += mat[r][c];
+                ans += psum;
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## Find the Minimum Area to Cover All Ones I
+
+### Solution 1:  minimum, maximum, bounding box
+
+```cpp
+class Solution {
+public:
+    int minimumArea(vector<vector<int>>& grid) {
+        int R = grid.size(), C = grid[0].size();
+        int minR = R, maxR = 0, minC = C, maxC = 0;
+        for (int r = 0; r < R; ++r) {
+            for (int c = 0; c < C; ++c) {
+                if (!grid[r][c]) continue;
+                minR = min(minR, r);
+                maxR = max(maxR, r);
+                minC = min(minC, c);
+                maxC = max(maxC, c);
+            }
+        }
+        return (maxR - minR + 1) * (maxC - minC + 1);
+    }
+};
 ```
 
 ##

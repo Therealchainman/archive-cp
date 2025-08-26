@@ -70,6 +70,10 @@ supports point updates and rectangular sum queries in logarithmic time.
 
 1-indexed just like above but for rectangular sum queries r1, c1, r2, c2
 
+O(log^2(n)) for the queries
+
+But to 0 fill the bit it is O(N^2)
+
 ```cpp
 struct BIT2D {
     int n;

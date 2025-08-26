@@ -28,7 +28,7 @@ struct SegmentTree {
     void init(int num_nodes) {
         size = 1;
         while (size < num_nodes) size *= 2;
-        nodes.assign(size * 2, 0);
+        nodes.assign(size * 2, neutral);
     }
 
     int64 func(int64 x, int64 y) {
@@ -46,6 +46,81 @@ struct SegmentTree {
     void update(int segment_idx, int64 val) {
         segment_idx += size;
         nodes[segment_idx] = val; // += val if want addition, to track frequency
+        segment_idx >>= 1;
+        ascend(segment_idx);
+    }
+
+    int64 query(int left, int right) {
+        left += size, right += size;
+        int64 res = neutral;
+        while (left <= right) {
+           if (left & 1) {
+                // res on left
+                res = func(res, nodes[left]);
+                left++;
+            }
+            if (~right & 1) {
+                // res on right
+                res = func(nodes[right], res);
+                right--;
+            }
+            left >>= 1, right >>= 1;
+        }
+        return res;
+    }
+};
+```
+
+## Segment Tree for Many Values Per Index
+
+Segment tree that supports add and remove operation or insert/erase.  
+The difference from classic segment tree is that you will perform insert, erase of elements at an index. 
+Leaf node will maintain an order bag of elements (multiset) and the min/max.  
+
+0-indexed
+
+Inclusive queries [left, right].  
+
+Adjust this for something other than min range queries
+
+```cpp
+struct SegmentTree {
+    int size;
+    int64 neutral = INF;
+    vector<int64> nodes;
+    vector<multiset<int64>> leaves;
+
+    void init(int num_nodes) {
+        size = 1;
+        while (size < num_nodes) size *= 2;
+        nodes.assign(size * 2, neutral);
+        leaves.assign(size * 2, multiset<int64>());
+    }
+
+    int64 func(int64 x, int64 y) {
+        return min(x, y);
+    }
+
+    void ascend(int segment_idx) {
+        while (segment_idx > 0) {
+            int left_segment_idx = 2 * segment_idx, right_segment_idx = 2 * segment_idx + 1;
+            nodes[segment_idx] = func(nodes[left_segment_idx], nodes[right_segment_idx]);
+            segment_idx >>= 1;
+        }
+    }
+
+    void add(int segment_idx, int64 val) {
+        segment_idx += size;
+        leaves[segment_idx].insert(val);
+        nodes[segment_idx] = *leaves[segment_idx].begin(); // grab the min
+        segment_idx >>= 1;
+        ascend(segment_idx);
+    }
+
+    void remove(int segment_idx, int64 val) {
+        segment_idx += size;
+        leaves[segment_idx].erase(leaves[segment_idx].find(val));
+        nodes[segment_idx] = leaves[segment_idx].empty() ? neutral : *leaves[segment_idx].begin();
         segment_idx >>= 1;
         ascend(segment_idx);
     }
