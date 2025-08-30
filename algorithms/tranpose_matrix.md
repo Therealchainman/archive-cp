@@ -34,3 +34,18 @@ vector<vector<char>> transpose(const vector<vector<char>>& mat) {
     return ans;
 }
 ```
+
+## Rotate a matrix 90 degrees counterclockwise
+
+```cpp
+vector<vector<int>> rotate(const vector<vector<int>> &grid) {
+    int R = grid.size(), C = grid[0].size();
+    vector<vector<int>> ret(C, vector<int>(R));
+    for (int r = 0; r < R; ++r) {
+        for (int c = 0; c < C; ++c) {
+            ret[C - c - 1][r] = grid[r][c];
+        }
+    }
+    return ret;
+}
+```

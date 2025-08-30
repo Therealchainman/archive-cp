@@ -1511,6 +1511,111 @@ public:
 };
 ```
 
+## 3446. Sort Matrix by Diagonals
+
+### Solution 1:  diagonal, grid, pointers, sorting
+
+```cpp
+class Solution {
+public:
+    vector<vector<int>> sortMatrix(vector<vector<int>>& grid) {
+        int N = grid.size();
+        for (int r = 0; r < N; ++r) {
+            vector<int> diag;
+            for (int c = 0; r + c < N; ++c) {
+                diag.emplace_back(grid[r + c][c]);
+            }
+            sort(diag.rbegin(), diag.rend());
+            for (int c = 0; r + c < N; ++c) {
+                grid[r + c][c] = diag[c];
+            }
+        }
+        for (int c = 1; c < N; ++c) {
+            vector<int> diag;
+            for (int r = 0; r + c < N; ++r) {
+                diag.emplace_back(grid[r][r + c]);
+            }
+            sort(diag.begin(), diag.end());
+            for (int r = 0; r + c < N; ++r) {
+                grid[r][r + c] = diag[r];
+            }
+        }
+        return grid;
+    }
+};
+```
+
+## 3197. Find the Minimum Area to Cover All Ones II
+
+### Solution 1: partition into 3 rectangular regions
+
+1. There are really only 6 possible ways to partition with the non-overlapping constraint
+1. If you notice that each way has a rotationally similar way, so really only 3 unique ways to consider when using symmetry
+1. So you rotate the matrix and computation is the same.  So only 3 cases to solve for. 
+1. And just solve for smallest rectangle coverage for the 3 regions for the 3 cases. 
+
+```cpp
+const int INF = numeric_limits<int>::max();
+class Solution {
+private:
+    int minimumArea(const vector<vector<int>>& grid, int ri, int rj, int ci, int cj) {
+        int R = grid.size(), C = grid[0].size();
+        int minR = R, maxR = 0, minC = C, maxC = 0;
+        for (int r = ri; r <= rj; ++r) {
+            for (int c = ci; c <= cj; ++c) {
+                if (!grid[r][c]) continue;
+                minR = min(minR, r);
+                maxR = max(maxR, r);
+                minC = min(minC, c);
+                maxC = max(maxC, c);
+            }
+        }
+        if (minR > maxR) return INF;
+        return (maxR - minR + 1) * (maxC - minC + 1);
+    }
+    vector<vector<int>> rotate(const vector<vector<int>> &grid) {
+        int R = grid.size(), C = grid[0].size();
+        vector<vector<int>> ret(C, vector<int>(R));
+        for (int r = 0; r < R; ++r) {
+            for (int c = 0; c < C; ++c) {
+                ret[C - c - 1][r] = grid[r][c];
+            }
+        }
+        return ret;
+    }
+    int cut(const vector<vector<int>> &grid) {
+        int R = grid.size(), C = grid[0].size();
+        int ans = R * C;
+        for (int r = 0; r + 1 < R; ++r) {
+            for (int c = 0; c + 1 < C; ++c) {
+                int p1 = minimumArea(grid, 0, r, 0, c);
+                int p2 = minimumArea(grid, 0, r, c + 1, C - 1);
+                int p3 = minimumArea(grid, r + 1, R - 1, 0, C - 1);
+                if (p1 != INF && p2 != INF && p3 != INF) ans = min(ans, p1 + p2 + p3);
+                p1 = minimumArea(grid, 0, r, 0, C - 1);
+                p2 = minimumArea(grid, r + 1, R - 1, 0, c);
+                p3 = minimumArea(grid, r + 1, R - 1, c + 1, C - 1);
+                if (p1 != INF && p2 != INF && p3 != INF) ans = min(ans, p1 + p2 + p3);
+            }
+        }
+        for (int r1 = 0; r1 + 1 < R; ++r1) {
+            for (int r2 = r1 + 1; r2 + 1 < R; ++r2) {
+                int p1 = minimumArea(grid, 0, r1, 0, C - 1);
+                int p2 = minimumArea(grid, r1 + 1, r2, 0, C - 1);
+                int p3 = minimumArea(grid, r2 + 1, R - 1, 0, C - 1);
+                if (p1 != INF && p2 != INF && p3 != INF) ans = min(ans, p1 + p2 + p3);
+            }
+        }
+        return ans;
+    }
+public:
+    int minimumSum(vector<vector<int>>& grid) {
+        vector<vector<int>> rgrid = rotate(grid);
+        return min(cut(grid), cut(rgrid));
+    }
+};
+```
+
 ##
 
 ### Solution 1: 
