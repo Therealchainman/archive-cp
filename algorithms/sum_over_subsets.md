@@ -34,8 +34,18 @@ Note the group operation is xor addition, but it can be addition, multiplication
 
 ```cpp
 for (int i = 0; i < LOG; ++i) { // iterate over bits
-    for (int mask = 0; mask < endMask; ++mask) { // iterate over all masks
+    for (int mask = 0; mask <= endMask; ++mask) { // iterate over all masks
         if ((mask >> i) & 1) dp[mask] ^= dp[mask ^ (1 << i)]; // subset
+    }
+}
+```
+
+Can also be used for maximum over all subsets
+
+```cpp
+for (int i = 0; i < LOG; ++i) { // iterate over bits
+    for (int mask = 0; mask <= endMask; ++mask) { // iterate over all masks
+        if ((mask >> i) & 1) dp[mask] = max(dp[mask], dp[mask ^ (1 << i)]); // maximum subset
     }
 }
 ```
@@ -46,11 +56,12 @@ $$F(T) = \sum_{S \supseteq T} f(S)$$
 
 ```cpp
 for (int i = 0; i < LOG; ++i) { // iterate over bits
-    for (int mask = 0; mask < endMask; ++mask) { // iterate over all masks
+    for (int mask = 0; mask <= endMask; ++mask) { // iterate over all masks
         if ((mask >> i) & 1) dp[mask ^ (1 << i)] += dp[mask]; // superset
     }
 }
 ```
+
 
 ## superset mobius inversion or inverse of sum over supersets
 
@@ -64,7 +75,7 @@ This can also be calculated with bitmask dp approach.
 
 ```cpp
 for (int i = 0; i < LOG; ++i) { // iterate over
-    for (int mask = 0; mask < endMask; ++mask) { // iterate over all masks
+    for (int mask = 0; mask <= endMask; ++mask) { // iterate over all masks
         if ((mask >> i) & 1) dp[mask ^ (1 << i)] -= dp[mask]; // inverse superset
     }
 }

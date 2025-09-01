@@ -2092,6 +2092,247 @@ public:
 
 # Leetcode Biweekly Contest 163
 
+## 3649. Number of Perfect Pairs
+
+### Solution 1: fenwick tree, binary search, sorting, coordinate compression
+
+```cpp
+using int64 = int64_t;
+template <typename T>
+struct FenwickTree {
+    vector<T> nodes;
+    T neutral;
+
+    FenwickTree() : neutral(T(0)) {}
+
+    void init(int n, T neutral_val = T(0)) {
+        neutral = neutral_val;
+        nodes.assign(n + 1, neutral);
+    }
+
+    void update(int idx, T val) {
+        while (idx < (int)nodes.size()) {
+            nodes[idx] += val;
+            idx += (idx & -idx);
+        }
+    }
+
+    T query(int idx) {
+        T result = neutral;
+        while (idx > 0) {
+            result += nodes[idx];
+            idx -= (idx & -idx);
+        }
+        return result;
+    }
+
+    T query(int left, int right) {
+        return right >= left ? query(right) - query(left - 1) : T(0);
+    }
+};
+class Solution {
+public:
+    int64 perfectPairs(vector<int>& nums) {
+        int N = nums.size();
+        vector<int> values;
+        for (int x : nums) {
+            values.emplace_back(abs(x));
+        }
+        sort(values.begin(), values.end());
+        values.erase(unique(values.begin(), values.end()), values.end());
+        int M = values.size();
+        FenwickTree<int> ftp, ftn;
+        ftp.init(M + 1), ftn.init(M + 1);
+        int64 ans = 0;
+        for (int a : nums) {
+            int a_i = lower_bound(values.begin(), values.end(), abs(a)) - values.begin();
+            // find specific b within range a/2 and 2a
+            int lb = (abs(a) + 1) / 2, ub = 2 * abs(a);
+            int lb_i = lower_bound(values.begin(), values.end(), lb) - values.begin();
+            int ub_i = upper_bound(values.begin(), values.end(), ub) - values.begin() - 1;
+            ans += ftp.query(lb_i + 1, ub_i + 1) + ftn.query(lb_i + 1, ub_i + 1);
+            if (a >= 0) ftp.update(a_i + 1, 1);
+            else ftn.update(a_i + 1, 1);
+        }
+        return ans;
+    }
+};
+```
+
+## 3650. Minimum Cost Path with Edge Reversals
+
+### Solution 1: undirected graph, transpose undirected graph, min heap, dijsktra
+
+```cpp
+const int INF = numeric_limits<int>::max();
+class Solution {
+public:
+    int minCost(int n, vector<vector<int>>& edges) {
+        vector<int> dist(n, INF);
+        vector<vector<pair<int, int>>> adj(n, vector<pair<int, int>>()), tadj(n, vector<pair<int, int>>());
+        for (const auto &edge : edges) {
+            int u = edge[0], v = edge[1], w = edge[2];
+            adj[u].emplace_back(v, w);
+            adj[v].emplace_back(u, 2 * w);
+        }
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> minheap;
+        minheap.emplace(0, 0);
+        while (!minheap.empty()) {
+            auto [cost, u] = minheap.top();
+            minheap.pop();
+            if (u == n - 1) return cost;
+            if (cost > dist[u]) continue;
+            for (auto [v, w] : adj[u]) {
+                int ncost = cost + w;
+                if (ncost < dist[v]) {
+                    dist[v] = ncost;
+                    minheap.emplace(ncost, v);
+                }
+            }
+        }
+        return -1;
+    }
+};
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
+# Leetcode Biweekly Contest 164
+
+## 3664. Two-Letter Card Game
+
+### Solution 1: greedy, frequency, grouping
+
+```cpp
+class Solution {
+private:
+    char X;
+    int calc(vector<int> &freq, int doubles) {
+        freq[X - 'a'] = doubles;
+        int m = 0, total = 0;
+        for (int i = 0; i < 10; ++i) {
+            total += freq[i];
+            if (freq[i] > m) m = freq[i];
+        }
+        int rem = 2 * m > total ? 2 * m - total : total % 2;
+        int consumed = total - rem;
+        return consumed / 2;
+    }
+public:
+    int score(vector<string>& cards, char x) {
+        X = x;
+        int N = cards.size(), doubles = 0, ans = 0;
+        vector<int> cnt1(10, 0), cnt2(10, 0);
+        for (const string &s : cards) {
+            if (s[0] != x && s[1] != x) continue;
+            if (s[0] == x && s[1] == x) {
+                doubles++;
+                continue;
+            }
+            if (s[0] == x) cnt1[s[1] - 'a']++;
+            else cnt2[s[0] - 'a']++;
+        }
+        for (int i = 0; i <= doubles; ++i) {
+            int cand = calc(cnt1, i) + calc(cnt2, doubles - i);
+            ans = max(ans, cand);
+        }
+        return ans;
+    }
+};
+```
+
+## 3665. Twisted Mirror Path Count
+
+### Solution 1: dynamic programming
+
+```cpp
+using int64 = int64_t;
+const int MOD = 1e9 + 7;
+class Solution {
+public:
+    int uniquePaths(vector<vector<int>>& grid) {
+        int R = grid.size(), C = grid[0].size();
+        vector<vector<vector<int64>>> dp(R, vector<vector<int64>>(C, vector<int64>(2, 0)));
+        dp[0][0][0] = 1;
+        for (int r = 0; r < R; ++r) {
+            for (int c = 0; c < C; ++c) {
+                if (r > 0) {
+                    dp[r][c][1] = (dp[r][c][1] + dp[r - 1][c][0]) % MOD;
+                    if (!grid[r - 1][c]) dp[r][c][1] = (dp[r][c][1] + dp[r - 1][c][1]) % MOD;
+                }
+                if (c > 0) {
+                    dp[r][c][0] = (dp[r][c][0] + dp[r][c - 1][1]) % MOD;
+                    if (!grid[r][c - 1]) dp[r][c][0] = (dp[r][c][0] + dp[r][c - 1][0]) % MOD;
+                }
+            }
+        }
+        int ans = (dp[R - 1][C - 1][0] + dp[R - 1][C - 1][1]) % MOD;
+        return ans;
+    }
+};
+```
+
+## 3666. Minimum Operations to Equalize Binary String
+
+### Solution 1: bfs, queue, set, undirected graph, binary search
+
+```cpp
+const int INF = numeric_limits<int>::max();
+class Solution {
+public:
+    int minOperations(string s, int k) {
+        int N = s.size();
+        int z0 = 0;
+        set<int> neighbors[2];
+        for (int i = 0; i < N; ++i) {
+            if (s[i] == '0') z0++;
+            neighbors[i % 2].insert(i);
+        }
+        neighbors[N % 2].insert(N);
+        vector<int> dist(N + 1, INF);
+        dist[z0] = 0;
+        neighbors[z0 % 2].erase(z0);
+        queue<int> q;
+        q.emplace(z0);
+        while (!q.empty()) {
+            int z = q.front();
+            q.pop();
+            if (z == 0) return dist[z];
+            int lo = max(0, k - (N - z)); // min 0 to flip
+            int hi = min(z, k); // max 0 to flip
+            int l = z + k - 2 * hi;
+            int r = z + k - 2 * lo; // (z - i) + (k - i) decrease z by i, and flipped k - i 1s to 0
+            int p = (z + k) % 2;
+            auto it = neighbors[p].lower_bound(l);
+            for (auto it = neighbors[p].lower_bound(l); it != neighbors[p].end() && *it <= r;) {
+                int v = *it;
+                q.emplace(v);
+                dist[v] = dist[z] + 1;
+                ++it; // before erase else iterator is removed
+                neighbors[p].erase(v);
+            }
+        }
+        return -1;
+    }
+};
+```
+
+# Leetcode Biweekly Contest 165
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
 ## 
 
 ### Solution 1: 
