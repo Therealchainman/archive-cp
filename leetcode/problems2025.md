@@ -1616,6 +1616,33 @@ public:
 };
 ```
 
+## 3541. Find Most Frequent Vowel and Consonant
+
+### Solution 1: map, frequency, character
+
+```cpp
+class Solution {
+private:
+    bool isVowel(char ch) {
+        return ch == 'a' || ch == 'e' || ch == 'i' || ch == 'o' || ch == 'u';
+    }
+public:
+    int maxFreqSum(string s) {
+        unordered_map<char, int> freq;
+        for (char ch : s) freq[ch]++;
+        int maxConsonant = 0, maxVowel = 0;
+        for (char ch = 'a'; ch <= 'z'; ++ch) {
+            if (isVowel(ch)) {
+                maxVowel = max(maxVowel, freq[ch]);
+            } else {
+                maxConsonant = max(maxConsonant, freq[ch]);
+            }
+        }
+        return maxVowel + maxConsonant;
+    }
+};
+```
+
 ##
 
 ### Solution 1: 

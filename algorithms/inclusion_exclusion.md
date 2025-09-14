@@ -1,7 +1,148 @@
 # Principle of Inclusion Exclusion
 
+The Principle of Inclusion and Exclusion (PIE) is a fundamental counting tool in combinatorics and probability theory.
+
 |A U B| = |A| + |B| - |A ∩ B|
 size of union when size of intersection is known. 
+
+# Generalized inclusion–exclusion for “exactly M”
+
+## Goal
+Count objects where **exactly** \(M\) of a given family of properties hold.
+
+## Setup
+- Let \(E\) be a finite set of “properties” or “constraints.”
+- For each \($F \subseteq E$), let  
+  \(g(F)\) be the number of objects that satisfy **all** properties in \(F\)  
+  with **no** restriction on the other properties in \($E \setminus F$).
+- Let \(h(M)\) be the number of objects that satisfy **exactly** \(M\) properties from \(E\).
+
+## The formula
+For any integer ($M \ge 0$),
+$$h(M)
+= \sum_{F \subseteq E} g(F)\,\binom{|F|}{M}\,(-1)^{\,|F|-M}.$$
+
+This reduces to the usual inclusion–exclusion when (M=0):
+$$
+h(0) = \sum_{F \subseteq E} g(F)\,(-1)^{|F|}.
+$$
+
+## Why it works (proof sketch)
+Group subsets by size. Define
+$$
+B_k = \sum_{|F|=k} g(F).
+$$
+Each object that satisfies exactly \(i\) properties contributes \($\binom{i}{k}$) to \($B_k$), since it contains exactly \($\binom{i}{k}$) \(k\)-subsets of its satisfied property set. Hence
+$$
+B_k = \sum_{i \ge k} \binom{i}{k}\,h(i).
+$$
+This is a standard binomial inversion. Inverting gives
+$$
+h(M) = \sum_{k \ge M} \binom{k}{M}(-1)^{k-M} B_k
+= \sum_{F \subseteq E} g(F)\,\binom{|F|}{M}(-1)^{|F|-M}.
+$$
+
+## Worked example
+**Problem.** For a positive integer \(Y\) and a set of primes \($E=\{p_1,\dots,p_n\}$), count the integers \($1 \le x \le Y$) that are divisible by **exactly** \(M\) of the integers in \(E\).
+
+**Fit to the template.**
+- Properties are “divisible by \(p\)” for \($p \in E$).
+- For \($F \subseteq E$), the numbers divisible by all primes in \(F\) are the multiples of \($\mathrm{lcm}(F)$).  
+  So
+  $$
+  g(F) = \left\lfloor \frac{Y}{\mathrm{lcm}(F)} \right\rfloor,
+  \qquad g(\varnothing) = Y \text{ by convention, and } \mathrm{lcm}(\varnothing)=1.
+  $$
+- Plug into the formula to get \(h(M)\).
+
+**Concrete numbers.** Take \(Y=100\) and \(E=\{2,3,5\}\).
+
+\[
+\begin{aligned}
+g(\varnothing)&=100,\\
+g(\{2\})=50,\; g(\{3\})=33,\; g(\{5\})=20,\\
+g(\{2,3\})=16,\; g(\{2,5\})=10,\; g(\{3,5\})=6,\\
+g(\{2,3,5\})=3.
+\end{aligned}
+\]
+
+Then
+\[
+\begin{aligned}
+h(1)&=\sum_{F} g(F)\binom{|F|}{1}(-1)^{|F|-1}
+= 48,\\
+h(2)&=\sum_{F} g(F)\binom{|F|}{2}(-1)^{|F|-2}
+= 23,\\
+h(3)&=\sum_{F} g(F)\binom{|F|}{3}(-1)^{|F|-3}
+= 3.
+\end{aligned}
+\]
+
+You can also get \(h(0)=26\). The four values sum to \(100\) as a check.
+
+## When to use this
+- You can compute \(g(F)\) for every \($F \subseteq E$).
+- You want the count split **by exact number** of satisfied properties, not just “at least one.”
+
+## Common pitfalls
+- In “divisibility” problems, use \($\left\lfloor Y/\mathrm{lcm}(F)\right\rfloor), not (Y/\mathrm{lcm}(F)$).
+- Remember \($g(\varnothing)=$) total number of objects.
+- The binomial \($\binom{|F|}{M}$) is zero if \(|F|<M\), so you can sum over all \(F\) without special casing.
+
+## Template to copy
+- Define \(E\) and what it means to “satisfy” a property.
+- Prove or compute \(g(F)\) for all \($F \subseteq E$).
+- Choose the target \(M\).  
+- Evaluate
+  $$
+  h(M)=\sum_{F \subseteq E} g(F)\,\binom{|F|}{M}\,(-1)^{|F|-M}.
+  $$
+
+```cpp
+int64 N, M, Y;
+vector<int64> A;
+int64 C[MAXN][MAXN];
+
+void binomial_coefficients() {
+    for (int i = 0; i < MAXN; i++) {
+        C[i][0] = C[i][i] = 1;
+        for (int j = 1; j < i; j++) {
+            C[i][j] = C[i - 1][j - 1] + C[i - 1][j];
+        }
+    }
+}
+
+void solve() {
+    cin >> N >> M >> Y;
+    A.resize(N);
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+    }
+    binomial_coefficients();
+    int64 ans = 0;
+    for (int mask = 0; mask < (1 << N); ++mask) {
+        int sz = __builtin_popcount(mask);
+        int64 combs = C[sz][M];
+        // need to calculate the lcm
+        __int128 l = 1;
+        for (int i = 0; i < N; ++i) {
+            if ((mask >> i) & 1) {
+                l = lcm(l, A[i]);
+                if (l > Y) {
+                    l = Y + 1;
+                    break;
+                }
+            }
+        }
+        if (sz % 2 == M % 2) {
+            ans += (Y / l) * combs;
+        } else {
+            ans -= (Y / l) * combs;
+        }
+    }
+    cout << ans << endl;
+}
+```
 
 ## An example
 

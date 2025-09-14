@@ -54,13 +54,10 @@ const int MOD = 9998244353, MAXN = 61;
 int C[MAXN][MAXN];
 
 void binomial_coefficients() {
-    C[0][0] = 1;
     for (int i = 0; i < MAXN; i++) {
-        for (int j = 1; j <= i; j++) {
-            C[i + 1][j + 1] += C[i][j];
-            C[i + 1][j + 1] %= MOD;
-            C[i + 1][j] += C[i][j];
-            C[i + 1][j] %= MOD;
+        C[i][0] = C[i][i] = 1;
+        for (int j = 1; j < i; j++) {
+            C[i][j] = (C[i - 1][j - 1] + C[i - 1][j]) % MOD;
         }
     }
 }

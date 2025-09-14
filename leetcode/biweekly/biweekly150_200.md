@@ -2325,6 +2325,106 @@ public:
 
 # Leetcode Biweekly Contest 165
 
+## 3679. Minimum Discards to Balance Inventory
+
+### Solution 1: fixed size sliding window, window frequency, greedy
+
+```cpp
+class Solution {
+public:
+    int minArrivalsToDiscard(vector<int>& arrivals, int w, int m) {
+        int N = arrivals.size();
+        unordered_map<int, int> windowFreq;
+        int ans = 0;
+        for (int i = 0; i < N; ++i) {
+            if (windowFreq[arrivals[i]] == m) {
+                ++ans;
+                arrivals[i] = 0; // dummy value
+            }
+            windowFreq[arrivals[i]]++;
+            if (i >= w - 1) {
+                windowFreq[arrivals[i - w + 1]]--;
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## 3680. Generate Schedule
+
+### Solution 1: random algorithm, random shuffle of array, greedy corrections
+
+```cpp
+mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
+
+class Solution {
+private:
+    vector<vector<int>> games;
+    bool isValid(int i, int j) {
+        return games[i][0] != games[j][0] && games[i][0] != games[j][1] && games[i][1] != games[j][0] && games[i][1] != games[j][1];
+    }
+public:
+    vector<vector<int>> generateSchedule(int n) {
+        if (n < 5) return {};
+        games.clear();
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
+                if (i == j) continue;
+                games.push_back({i, j});
+            }
+        }
+        while (true) {
+            shuffle(games.begin(), games.end(), rng);
+            bool isGood = true;
+            for (int i = 1; i < n * (n - 1); ++i) {
+                int j = i;
+                while (j < n * (n - 1) && !isValid(i - 1, j)) ++j;
+                if (j == n * (n - 1)) {
+                    isGood = false;
+                    break;
+                }
+                swap(games[i], games[j]);
+            }
+            if (isGood) return games;
+        }
+        return {};
+    }
+};
+```
+
+## 3681. Maximum XOR of Subsequences
+
+### Solution 1: linear algebra, linear indepdendence, linear basis, xor operation
+
+```cpp
+class Solution {
+public:
+    int maxXorSubsequences(vector<int>& nums) {
+        int N = nums.size();
+        vector<int> basis;
+        for (int i = 0; i < N; ++i) {
+            for (int b : basis) {
+                nums[i] = min(nums[i], nums[i] ^ b);
+            }
+            if (!nums[i]) continue;
+            for (int &b : basis) {
+                b = min(b, b ^ nums[i]);
+            }
+            basis.emplace_back(nums[i]);
+        }
+        sort(basis.rbegin(), basis.rend());
+        int ans = 0;
+        for (int b : basis) {
+            if ((ans ^ b) > ans) ans ^= b;
+        }
+        return ans;
+    }
+};
+```
+
+# Leetcode Biweekly Contest 166
+
 ## 
 
 ### Solution 1: 

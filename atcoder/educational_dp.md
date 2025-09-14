@@ -71,7 +71,7 @@ if __name__ == '__main__':
 
 ## knapsack 1
 
-### Solution 1:  0/1 bounded knapsack dp
+### Solution 1:  0/1 knapsack dp
 
 ```cpp
 int N, W;

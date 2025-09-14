@@ -24,35 +24,82 @@ for i in range(x, k + 1):
 
 This is the 0/1 knapsack iterative dp approach
 
+You can use a single DP vector if you iterate capacity in descending order. That prevents reusing the same item more than once.
+
 ```cpp
 int N, W;
 vector<int> values, weights, dp, ndp;
 
 void solve() {
     cin >> N >> W;
-    values.resize(N);
     weights.resize(N);
-    for (int i = 0; i < N; i++) {
-        cin >> weights[i] >> values[i];
+    values.resize(N);
+    for (int i = 0; i < N; ++i) {
+        cin >> weights[i];
     }
-    dp.assign(W + 1, 0);
-    for (int i = 0; i < N; i++) {
-        ndp.assign(W + 1, 0);
-        for (int cap = 0; cap <= W; cap++) {
-            if (cap >= weights[i]) {
-                ndp[cap] = max(ndp[cap], dp[cap - weights[i]] + values[i]);
-            }
-            ndp[cap] = max(ndp[cap], dp[cap]);
+    for (int i = 0; i < N; ++i) {
+        cin >> values[i];
+    }
+    vector<int> dp(W + 1, 0);
+    for (int i = 0; i < N; ++i) {
+        for (int j = W; j >= weights[i]; --j) {
+            dp[j] = max(dp[j], dp[j - weights[i]] + values[i]);
         }
-        swap(dp, ndp);
     }
-    cout << dp[W] << endl;
+    int ans = *max_element(dp.begin(), dp.end());
+    cout << ans << endl;
 }
 ```
 
 ## Bounded Knapsack Problem
 
 This one is slightly different than above, you are given some fixed amount of each item, but I think you can treat it like 0/1 knapsack if you treat each item as an individual item. 
+
+This uses binary grouping optimization to basically convert it into 0/1 knapsack problem
+
+```cpp
+int N, W;
+vector<int> ow, ov, counts, weights, values;
+
+void solve() {
+    cin >> N >> W;
+    ow.resize(N);
+    ov.resize(N);
+    counts.resize(N);
+    for (int i = 0; i < N; ++i) {
+        cin >> ow[i];
+    }
+    for (int i = 0; i < N; ++i) {
+        cin >> ov[i];
+    }
+    for (int i = 0; i < N; ++i) {
+        cin >> counts[i];
+    }
+    for (int i = 0; i < N; ++i) {
+        int c = 1;
+        while (counts[i] > c) {
+            counts[i] -= c;
+            weights.emplace_back(c * ow[i]);
+            values.emplace_back(c * ov[i]);
+            c <<= 1;
+        }
+        // leftover
+        if (counts[i]) {
+            weights.emplace_back(counts[i] * ow[i]);
+            values.emplace_back(counts[i] * ov[i]);
+        }
+    }
+    int M = weights.size();
+    vector<int> dp(W + 1, 0);
+    for (int i = 0; i < M; ++i) {
+        for (int j = W; j >= weights[i]; --j) {
+            dp[j] = max(dp[j], dp[j - weights[i]] + values[i]);
+        }
+    }
+    int ans = *max_element(dp.begin(), dp.end());
+    cout << ans << endl;
+}
+```
 
 ## Unbounded Knapsack Problem
 
