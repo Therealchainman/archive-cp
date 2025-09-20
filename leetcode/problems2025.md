@@ -1643,6 +1643,128 @@ public:
 };
 ```
 
+## 3647. Maximum Weight in Two Bags
+
+### Solution 1: dynamic programming, knapsack related, 2D dp
+
+```cpp
+const int MAXW = 305;
+class Solution {
+public:
+    int maxWeight(vector<int>& weights, int w1, int w2) {
+        int N = weights.size();
+        vector<vector<int>> dp(w1 + 1, vector<int>(w2 + 1, 0)), ndp(w1 + 1, vector<int>(w2 + 1, 0));
+        dp[0][0] = 1;
+        for (int w : weights) {
+            ndp = dp;
+            for (int i = 0; i <= w1; ++i) {
+                for (int j = w2; j >= w; --j) {
+                    ndp[i][j] |= dp[i][j - w];
+                }
+            }
+            for (int i = w1; i >= w; --i) {
+                for (int j = 0; j <= w2; ++j) {
+                    ndp[i][j] |= dp[i - w][j];
+                }
+            }
+            swap(ndp, dp);
+        }
+        int ans = 0;
+        for (int i = 0; i <= w1; ++i) {
+            for (int j = 0; j <= w2; ++j) {
+                if (dp[i][j]) ans = max(ans, i + j);
+            }
+        }
+        return ans;
+    }
+};
+```
+
+### Solution 2: dynamic programming, knapsack related, bitset optimization
+
+```cpp
+const int MAXW = 305;
+class Solution {
+public:
+    int maxWeight(vector<int>& weights, int w1, int w2) {
+        int N = weights.size();
+        vector<bitset<MAXW>> dp(w1 + 1, 0), ndp(w1 + 1, 0);
+        dp[0][0] = 1;
+        for (int w : weights) {
+            ndp = dp;
+            for (int i = w1; i >= w; --i) {
+                ndp[i] |= dp[i - w];
+            }
+            for (int i = 0; i <= w1; ++i) {
+                ndp[i] |= (dp[i] << w);
+            }
+            swap(ndp, dp);
+        }
+        int ans = 0;
+        for (int i = 0; i <= w1; ++i) {
+            for (int j = w2; j >= 0; --j) {
+                if (dp[i].test(j)) {
+                    ans = max(ans, i + j);
+                    break;
+                }
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## 3484. Design Spreadsheet
+
+### Solution 1: grid, string parsing
+
+```cpp
+const int NUM_COLUMNS = 26;
+class Spreadsheet {
+private:
+    vector<vector<int>> grid;
+    pair<int, int> getCoords(string cell) {
+        int c = cell[0] - 'A';
+        int r = stoi(cell.substr(1));
+        return {r, c};
+    }
+    int calc(string cell) {
+        if (isdigit(cell[0])) return stoi(cell);
+        auto [r, c] = getCoords(cell);
+        return grid[r][c];
+    }
+public:
+    Spreadsheet(int rows) {
+        grid.assign(rows + 1, vector<int>(NUM_COLUMNS, 0));
+    }
+    
+    void setCell(string cell, int value) {
+        auto [r, c] = getCoords(cell);
+        grid[r][c] = value;
+    }
+    
+    void resetCell(string cell) {
+        auto [r, c] = getCoords(cell);
+        grid[r][c] = 0;
+    }
+    
+    int getValue(string formula) {
+        int pos = formula.find('+');
+        string x = formula.substr(1, pos - 1);
+        string y = formula.substr(pos + 1);
+        return calc(x) + calc(y);
+    }
+};
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
 ##
 
 ### Solution 1: 

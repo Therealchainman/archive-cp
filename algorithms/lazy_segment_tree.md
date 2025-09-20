@@ -2,7 +2,7 @@
 
 Lazy propagation lets you defer work: you record a pending update on a node that fully lies inside the update range, and you push it to children only when you need to go below that node.
 
-## Lazy Segment Tree for range queries and range updates
+## Lazy Segment Tree for range updates and (range or point) queries
 
 - range updates
 - range queries
@@ -14,33 +14,43 @@ This particular implementation is for range addition updates, but can easily mod
 
 range updates are [L, R) (exclusive for right end point)
 
+calc: how to combine two child segment answers into the parent
+
+apply: how a pending lazy value changes a node’s stored value (often needs the segment length)
+
+compose: how two lazy values stack when both are pending
+
+
+struct Configuration { ... } configuration; defines the class type Configuration and immediately defines an object named configuration of that type in the same statement. Informally people say “define a struct and an instance inline.”
+
 ```cpp
 struct LazySegmentTree {
     vector<int64> arr;
     vector<int64> lazyTag;
     int size;
-    int neutral = 0, noop = 0;
+
+    struct Configuration {
+        const int64 neutral; // neutral element for calc
+        const int noop; // identity element for lazy
+        function<int64(int64, int64)> calc; // combine two children
+        function<int64(int64, int64, int)> apply; // apply lazy tag to node value over length
+        function<int64(int64, int64)> compose; // merge two lazy tags
+    } config;
+
+    LazySegmentTree(int n, Configuration config) : config(config) { init(n); }
 
     void init(int n) {
         size = 1;
         while (size < n) size *= 2;
-        arr.assign(2 * size, neutral);
-        lazyTag.assign(2 * size, noop);
+        arr.assign(2 * size, config.neutral);
+        lazyTag.assign(2 * size, config.noop);
     }
 
     void build(const vector<int64>& inputArr) {
         copy(inputArr.begin(), inputArr.end(), arr.begin() + (size - 1));
         for (int i = size - 2; i >= 0; --i) {
-            arr[i] = arr[2 * i + 1] + arr[2 * i + 2];
+            arr[i] = config.calc(arr[2 * i + 1], arr[2 * i + 2]);
         }
-    }
-
-    int64 modify_op(int64 x, int64 y, int64 length = 1) {
-        return x + y * length;
-    }
-
-    int64 calc_op(int64 x, int64 y) {
-        return x + y;
     }
 
     bool is_leaf(int segment_right_bound, int segment_left_bound) {
@@ -48,16 +58,15 @@ struct LazySegmentTree {
     }
 
     void push(int segment_idx, int segment_left_bound, int segment_right_bound) {
-        bool pendingUpdate = lazyTag[segment_idx] != noop;
+        bool pendingUpdate = lazyTag[segment_idx] != config.noop;
         if (is_leaf(segment_right_bound, segment_left_bound) || !pendingUpdate) return;
         int left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
         int children_segment_len = (segment_right_bound - segment_left_bound) >> 1;
-        int mid_point = segment_left_bound + children_segment_len;
-        lazyTag[left_segment_idx] = modify_op(lazyTag[left_segment_idx], lazyTag[segment_idx]);
-        lazyTag[right_segment_idx] = modify_op(lazyTag[right_segment_idx], lazyTag[segment_idx]);
-        arr[left_segment_idx] = modify_op(arr[left_segment_idx], lazyTag[segment_idx], children_segment_len);
-        arr[right_segment_idx] = modify_op(arr[right_segment_idx], lazyTag[segment_idx], children_segment_len);
-        lazyTag[segment_idx] = noop;
+        lazyTag[left_segment_idx] = config.compose(lazyTag[left_segment_idx], lazyTag[segment_idx]);
+        lazyTag[right_segment_idx] = config.compose(lazyTag[right_segment_idx], lazyTag[segment_idx]);
+        arr[left_segment_idx] = config.apply(arr[left_segment_idx], lazyTag[segment_idx], children_segment_len);
+        arr[right_segment_idx] = config.apply(arr[right_segment_idx], lazyTag[segment_idx], children_segment_len);
+        lazyTag[segment_idx] = config.noop;
     }
 
     void update(int left, int right, int64 val) {
@@ -69,9 +78,10 @@ struct LazySegmentTree {
         if (right <= segment_left_bound || segment_right_bound <= left) return;
         // COMPLETE OVERLAP
         if (left <= segment_left_bound && segment_right_bound <= right) {
-            lazyTag[segment_idx] = modify_op(lazyTag[segment_idx], val);
+            auto composed = config.compose(lazyTag[segment_idx], val);
+            lazyTag[segment_idx] = composed;
             int segment_len = segment_right_bound - segment_left_bound;
-            arr[segment_idx] = modify_op(arr[segment_idx], val, segment_len);
+            arr[segment_idx] = config.apply(arr[segment_idx], composed, segment_len);
             return;
         }
         // PARTIAL OVERLAP;
@@ -81,16 +91,16 @@ struct LazySegmentTree {
         update(left_segment_idx, segment_left_bound, mid_point, left, right, val);
         update(right_segment_idx, mid_point, segment_right_bound, left, right, val);
         // pull
-        arr[segment_idx] = arr[left_segment_idx] + arr[right_segment_idx];
+        arr[segment_idx] = config.calc(arr[left_segment_idx], arr[right_segment_idx]);
     }
 
-    int64 query(int left, int right) {
-        return query(0, 0, size, left, right);
+    int64 range_query(int left, int right) {
+        return range_query(0, 0, size, left, right);
     }
 
-    int64 query(int segment_idx, int segment_left_bound, int segment_right_bound, int left, int right) {
+    int64 range_query(int segment_idx, int segment_left_bound, int segment_right_bound, int left, int right) {
         // NO OVERLAP
-        if (right <= segment_left_bound || segment_right_bound <= left) return neutral;
+        if (right <= segment_left_bound || segment_right_bound <= left) return config.neutral;
         // COMPLETE OVERLAP
         if (left <= segment_left_bound && segment_right_bound <= right) {
             return arr[segment_idx];
@@ -99,11 +109,90 @@ struct LazySegmentTree {
         push(segment_idx, segment_left_bound, segment_right_bound);
         int mid_point = (segment_left_bound + segment_right_bound) >> 1;
         int left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
-        int64 left_res = query(left_segment_idx, segment_left_bound, mid_point, left, right);
-        int64 right_res = query(right_segment_idx, mid_point, segment_right_bound, left, right);
-        return calc_op(left_res, right_res);
+        int64 left_res = range_query(left_segment_idx, segment_left_bound, mid_point, left, right);
+        int64 right_res = range_query(right_segment_idx, mid_point, segment_right_bound, left, right);
+        return config.calc(left_res, right_res);
+    }
+
+    int64 point_query(int i) { 
+        return point_query(0, 0, size, i); 
+    }
+
+    int64 point_query(int segment_idx, int l, int r, int i) {
+        if (r - l == 1) return arr[segment_idx];
+        push(segment_idx, l, r);// make children up to date
+        int m = (l + r) >> 1;
+        if (i < m) {
+            return point_query(2 * segment_idx + 1, l, m, i);
+        }
+        return point_query(2 * segment_idx + 2, m, r, i);
     }
 };
+
+const int64 INF = numeric_limits<int64>::max();
+const int NOOP = -1;
+int N, Q;
+
+
+// range assign, point min/max query
+LazySegmentTree::Configuration assignMinConfiguration{
+    INF, 
+    NOOP,
+    [](int64 x, int64 y) {
+        return min(x, y);
+    },
+    [](int64 nodeVal, int64 assignVal, int len) {
+        if (assignVal == NOOP) return nodeVal;
+        return min(nodeVal, assignVal);
+    },
+    [](int64 oldTag, int64 newTag) {
+        if (newTag == NOOP) return oldTag;
+        if (oldTag == NOOP) return newTag;
+        return min(oldTag, newTag);
+    }
+};
+LazySegmentTree::Configuration assignMaxConfiguration{
+    -INF, 
+    NOOP,
+    [](int64 x, int64 y) {
+        return max(x, y);
+    },
+    [](int64 nodeVal, int64 assignVal, int len) {
+        if (assignVal == NOOP) return nodeVal;
+        return max(nodeVal, assignVal);
+    },
+    [](int64 oldTag, int64 newTag) {
+        if (newTag == NOOP) return oldTag;
+        if (oldTag == NOOP) return newTag;
+        return max(oldTag, newTag);
+    }
+};
+```
+
+Other examples, that are not exactly, correct but can use as example to create them. 
+
+```cpp
+LazySegmentTree::Ops sumAddOps{
+    /*neutral*/ 0LL,
+    /*noop*/    0LL,
+    /*calc*/    [](long long a, long long b){ return a + b; },
+    /*apply*/   [](long long nodeVal, long long add, int len){ return nodeVal + add * 1LL * len; },
+    /*compose*/ [](long long oldTag, long long newTag){ return oldTag + newTag; } // first old, then new
+};
+LazySegmentTree st(n, sumAddOps);
+st.build(values);
+st.update(l, r, +5);       // add 5 on [l, r)
+auto ans = st.query(l, r); // sum
+
+const long long INF = (1LL<<60);
+LazySegmentTree::Ops minAddOps{
+    /*neutral*/ INF,
+    /*noop*/    0LL,
+    /*calc*/    [](long long a, long long b){ return std::min(a, b); },
+    /*apply*/   [](long long nodeVal, long long add, int /*len*/){ return nodeVal + add; },
+    /*compose*/ [](long long oldTag, long long newTag){ return oldTag + newTag; }
+};
+LazySegmentTree st(n, minAddOps);
 ```
 
 ## Lazy Segment Tree point queries and range updates

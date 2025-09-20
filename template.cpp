@@ -17,6 +17,7 @@
 #include <chrono>
 #include <sstream>
 #include <limits>
+#include <functional>
 using namespace std;
 #define endl '\n'
 #define LOCAL
