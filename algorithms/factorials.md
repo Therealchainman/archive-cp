@@ -114,6 +114,32 @@ Can count situations where you have balls of [2,2,2,3,5], so you have some ident
 
 N! / (a! * b! * c! * d! * e!), where a + b + c + d + e = N
 
+You can count how many sequences have these exact counts 
+\($c_0, c_1, \dots, c_{n-1}$) by choosing positions for each label:
+
+First choose $c_0$ positions out of the m for label 0:
+$$
+\binom{m}{c_0}.
+$$
+
+Then choose $c_1$ positions out of the remaining $m - c_0$ for label 1:
+$$
+\binom{m - c_0}{c_1}.
+$$
+
+Continue until all labels are placed.
+
+Multiplying gives
+$$
+\binom{m}{c_0}
+\binom{m - c_0}{c_1}
+\cdots
+\binom{m - c_0 - \cdots - c_{n-2}}{c_{n-1}}
+\;=\;
+\frac{m!}{c_0!\,c_1!\,\cdots\,c_{n-1}!}.
+$$
+
+
 ```cpp
 int multinomial(const vector<int> &items) {
     int cnt = accumulate(items.begin(), items.end(), 0LL);

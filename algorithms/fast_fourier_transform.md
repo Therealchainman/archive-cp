@@ -4,6 +4,8 @@ A fast Fourier transform (FFT) is an algorithm that computes the discrete Fourie
 
 ## Convolution of two polynomials
 
+Note this is over a finite field, that is it is modulo some prime number p
+
 This program performs polynomial multiplication using Number Theoretic Transform (NTT) to efficiently count certain properties of a given sequence. Let's analyze the components in detail.
 
 This namespace implements the Number Theoretic Transform (NTT), a modular Fast Fourier Transform (FFT).
@@ -365,6 +367,28 @@ fft(A, true);
 for (int i = 0; i < n + m - 1; i++) {
     cout << llround(A[i].real()) << " ";
 }
+```
+
+You can modify it to work with different sizes other than SIZE, but it needs to be a power of two.
+
+```cpp
+vector<cd> A = vector<cd>(poly1.begin(), poly1.end()), B = vector<cd>(poly2.begin(), poly2.end());
+int N = A.size(), M = B.size();
+int sz = 1;
+while (sz < N + M - 1) sz <<= 1;
+A.resize(sz, 0);
+B.resize(sz, 0);
+fft(A, false);
+fft(B, false);
+for (int i = 0; i < sz; ++i) {
+    A[i] *= B[i];
+}
+fft(A, true);
+vector<int64> ans(N + M - 1);
+for (int i = 0; i < N + M - 1; ++i) {
+    ans[i] = llround(A[i].real());
+}
+return ans;
 ```
 
 Explanation:

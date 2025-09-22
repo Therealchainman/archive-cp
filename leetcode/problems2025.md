@@ -1757,6 +1757,72 @@ public:
 };
 ```
 
+## 3549. Multiply Two Polynomials
+
+### Solution 1: Fast Fourier Transform (FFT), polynomial multiplication, complex numbers
+
+```cpp
+using int64 = long long;
+typedef complex<double> cd;
+const double PI = acos(-1);
+
+void fft(vector<cd> &a, bool invert) {
+    int n = a.size();
+
+    for (int i = 1, j = 0; i < n; i++) {
+        int bit = n >> 1;
+        for (; j & bit; bit >>= 1)
+            j ^= bit;
+        j ^= bit;
+
+        if (i < j)
+            swap(a[i], a[j]);
+    }
+
+    for (int len = 2; len <= n; len <<= 1) {
+        double ang = 2 * PI / len * (invert ? -1 : 1);
+        cd wlen(cos(ang), sin(ang));
+        for (int i = 0; i < n; i += len) {
+            cd w(1);
+            for (int j = 0; j < len / 2; j++) {
+                cd u = a[i+j], v = a[i+j+len/2] * w;
+                a[i+j] = u + v;
+                a[i+j+len/2] = u - v;
+                w *= wlen;
+            }
+        }
+    }
+
+    if (invert) {
+        for (cd & x : a)
+            x /= n;
+    }
+}
+
+class Solution {
+public:
+    vector<int64> multiply(vector<int>& poly1, vector<int>& poly2) {
+        vector<cd> A = vector<cd>(poly1.begin(), poly1.end()), B = vector<cd>(poly2.begin(), poly2.end());
+        int N = A.size(), M = B.size();
+        int sz = 1;
+        while (sz < N + M - 1) sz <<= 1;
+        A.resize(sz, 0);
+        B.resize(sz, 0);
+        fft(A, false);
+        fft(B, false);
+        for (int i = 0; i < sz; ++i) {
+            A[i] *= B[i];
+        }
+        fft(A, true);
+        vector<int64> ans(N + M - 1);
+        for (int i = 0; i < N + M - 1; ++i) {
+            ans[i] = llround(A[i].real());
+        }
+        return ans;
+    }
+};
+```
+
 ##
 
 ### Solution 1: 

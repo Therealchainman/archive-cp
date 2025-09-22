@@ -226,10 +226,65 @@ struct Trie {
             }
         }
     }
+    // add erase method sometime? trie can support erase
 };
 
 Trie trie;
 trie.init();
+```
+
+example where we need the index, and use multiset to store common prefix of some length above K. 
+
+This uses multiset, and erase
+
+```cpp
+int K;
+multiset<int, greater<int>> lengths; // max multiset, descending order
+struct Node {
+    int children[26];
+    int cnt;
+    void init() {
+        memset(children, 0, sizeof(children));
+        cnt = 0;
+    }
+};
+struct Trie {
+    vector<Node> trie;
+    void init() {
+        Node root;
+        root.init();
+        trie.emplace_back(root);
+    }
+    void insert(const string& s) {
+        int cur = 0;
+        for (int i = 0; i < s.size(); ++i) {
+            int cv = s[i] - 'a';
+            if (trie[cur].children[cv]==0) {
+                Node root;
+                root.init();
+                trie[cur].children[cv] = trie.size();
+                trie.emplace_back(root);
+            }
+            cur = trie[cur].children[cv];
+            trie[cur].cnt++;
+            if (trie[cur].cnt >= K) {
+                lengths.insert(i + 1);
+            }
+        }
+    }
+    void erase(const string& s) {
+        int cur = 0;
+        for (int i = 0; i < s.size(); ++i) {
+            int cv = s[i] - 'a';
+            cur = trie[cur].children[cv];
+            trie[cur].cnt--;
+            if (trie[cur].cnt == K - 1) {
+                auto it = lengths.find(i + 1);
+                lengths.erase(it);
+            }
+        }
+    }
+};
 ```
 
 ## bitwise trie data structure

@@ -11,6 +11,32 @@ Do this while V > 0
 
 you solve for the coefficients and then you want to reverse the order. 
 
+
+converting the base with long division method.  You keep dividing by b and getting the remainder.  The remainders are the coefficients, but you get them in reverse order.
+
+```cpp
+vector<int> convertBase(const string &num, int b) {
+    vector<int> ans;
+    string quotient = "0", prevQuotient = num;
+    while (quotient != "0") {
+        int rem = 0;
+        quotient = "0";
+        for (char ch : prevQuotient) {
+            rem = rem * 10 + (ch - '0');
+            quotient += (rem / b + '0');
+            rem %= b;
+        }
+        ans.emplace_back(rem);
+        int pos = quotient.find_first_not_of('0');
+        if (pos == string::npos) break;
+        quotient.erase(0, pos);
+        swap(quotient, prevQuotient);
+    }
+    reverse(ans.begin(), ans.end());
+    return ans;
+}
+```
+
 ## Example using b = 95 
 
 b = 95 allows you to use every single readable ascii character from [32, 126].  So yeah it is interesting representation.

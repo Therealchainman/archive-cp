@@ -338,12 +338,86 @@ class Solution:
 
 ```
 
-## 
+## 3485. Longest Common Prefix of K Strings After Removal
 
-### Solution 1: 
+### Solution 1: trie with multiset, trie with erase
+
+trie with multiset,
+store frequency of each prefix
+
+that is the count represents how many words have share that prefix, so we know the length just based on the index.  So if that count is >= k then add it to a multiset, so a specific prefix if it has count = k + 3, it will be added to multiset 4 times, so you'd have to remove 4 words to remove it you know.  
 
 ```cpp
-
+int K;
+multiset<int, greater<int>> lengths; // max multiset, descending order
+struct Node {
+    int children[26];
+    int cnt;
+    void init() {
+        memset(children, 0, sizeof(children));
+        cnt = 0;
+    }
+};
+struct Trie {
+    vector<Node> trie;
+    void init() {
+        Node root;
+        root.init();
+        trie.emplace_back(root);
+    }
+    void insert(const string& s) {
+        int cur = 0;
+        for (int i = 0; i < s.size(); ++i) {
+            int cv = s[i] - 'a';
+            if (trie[cur].children[cv]==0) {
+                Node root;
+                root.init();
+                trie[cur].children[cv] = trie.size();
+                trie.emplace_back(root);
+            }
+            cur = trie[cur].children[cv];
+            trie[cur].cnt++;
+            if (trie[cur].cnt >= K) {
+                lengths.insert(i + 1);
+            }
+        }
+    }
+    void erase(const string& s) {
+        int cur = 0;
+        for (int i = 0; i < s.size(); ++i) {
+            int cv = s[i] - 'a';
+            cur = trie[cur].children[cv];
+            trie[cur].cnt--;
+            if (trie[cur].cnt == K - 1) {
+                auto it = lengths.find(i + 1);
+                lengths.erase(it);
+            }
+        }
+    }
+};
+class Solution {
+public:
+    vector<int> longestCommonPrefix(vector<string>& words, int k) {
+        int N = words.size();
+        K = k;
+        Trie trie;
+        trie.init();
+        lengths.clear();
+        for (const string& s : words) {
+            trie.insert(s);
+        }
+        vector<int> ans(N, 0);
+        for (int i = 0; i < N; ++i) {
+            trie.erase(words[i]);
+            auto it = lengths.begin();
+            if (it != lengths.end()) {
+                ans[i] = *it;
+            }
+            trie.insert(words[i]);
+        }
+        return ans;
+    }
+};
 ```
 
 # Leetcode Biweekly Contest 153
@@ -1958,61 +2032,46 @@ public:
 
 ## 3635. Earliest Finish Time for Land and Water Rides II
 
-### Solution 1: sorting, sets
+### Solution 1: sorting, greedy, minheaps
 
-1. Treat the case that the previous ride can be completed before the start of this ride.
-2. Treat the case that another ride becomes available before the end of this ride, so take it right after this one ends. 
+1. just track minheap of min end time of any ride that can start after current ride. 
+1. And also track rides that start before and track minimum duration, any of these you can start directly after current ride.
+1. inverse the roles of land and water rides and take the minimum of the two, since either one can be first.
 
 ```cpp
 const int INF = numeric_limits<int>::max();
 class Solution {
-public:
-    int earliestFinishTime(vector<int>& sA, vector<int>& landDuration, vector<int>& sB, vector<int>& waterDuration) {
-        int N = sA.size(), M = sB.size();
-        vector<pair<int, int>> land, water;
-        set<int> setA, setB;
-        for (int i = 0; i < N; ++i) {
-            land.emplace_back(sA[i], landDuration[i]);
-            setA.insert(sA[i] + landDuration[i]);
-        }
+private:
+    int calc(const vector<int> &A, const vector<int> &B, const vector<int> &C, const vector<int> &D) {
+        int N = A.size(), M = C.size();
+        vector<bool> vis(M, false);
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> minheap, startheap;
         for (int i = 0; i < M; ++i) {
-            water.emplace_back(sB[i], waterDuration[i]);
-            setB.insert(sB[i] + waterDuration[i]);
+            minheap.emplace(C[i] + D[i], i);
+            startheap.emplace(C[i], i);
         }
-        sort(land.begin(), land.end());
-        sort(water.begin(), water.end());
-        int ans = INF;
+        int minD = INF, ans = INF;
+        vector<pair<int, int>> pool;
         for (int i = 0; i < N; ++i) {
-            int start = sA[i], end = sA[i] + landDuration[i];
-            auto it = setB.upper_bound(start);
-            if (it == setB.begin()) continue;
-            int cand = *prev(it);
-            if (cand <= start) ans = min(ans, end);
+            pool.emplace_back(A[i] + B[i], i);
         }
-        for (int i = 0; i < M; ++i) {
-            int start = sB[i], end = sB[i] + waterDuration[i];
-            auto it = setA.upper_bound(start);
-            if (it == setA.begin()) continue;
-            int cand = *prev(it);
-            if (cand <= start) ans = min(ans, end);
-        }
-        int minDuration = INF, i = 0;
-        for (int x : setA) { // land
-            while (i < M && water[i].first < x) {
-                minDuration = min(minDuration, water[i].second);
-                ++i;
+        sort(pool.begin(), pool.end());
+        for (auto [e, i] : pool) {
+            while (!startheap.empty() && startheap.top().first <= e) {
+                auto [v, idx] = startheap.top();
+                startheap.pop();
+                minD = min(minD, D[idx]);
+                vis[idx] = true;
             }
-            if (minDuration != INF) ans = min(ans, x + minDuration);
-        }
-        minDuration = INF, i = 0;
-        for (int x : setB) { // water
-            while (i < N && land[i].first < x) {
-                minDuration = min(minDuration, land[i].second);
-                ++i;
-            }
-            if (minDuration != INF) ans = min(ans, x + minDuration);
+            while (!minheap.empty() && vis[minheap.top().second]) minheap.pop();
+            if (minD != INF) ans = min(ans, e + minD);
+            if (!minheap.empty()) ans = min(ans, minheap.top().first);
         }
         return ans;
+    }
+public:
+    int earliestFinishTime(vector<int>& landStartTime, vector<int>& landDuration, vector<int>& waterStartTime, vector<int>& waterDuration) {
+        return min(calc(landStartTime, landDuration, waterStartTime, waterDuration), calc(waterStartTime, waterDuration, landStartTime, landDuration));
     }
 };
 ```
@@ -2195,12 +2254,55 @@ public:
 };
 ```
 
-## 
+## 3651. Minimum Cost Path with Teleportations
 
-### Solution 1: 
+### Solution 1: dynamic programming, grid, prefix min, bottom-up dp
 
 ```cpp
-
+const int INF = numeric_limits<int>::max();
+class Solution {
+public:
+    int minCost(vector<vector<int>>& grid, int k) {
+        int R = grid.size(), C = grid[0].size();
+        vector<vector<int>> dp(R, vector<int>(C, INF));
+        int maxVal = 0;
+        for (int r = 0; r < R; ++r) {
+            for (int c = 0; c < C; ++c) {
+                maxVal = max(maxVal, grid[r][c]);
+            }
+        }
+        vector<int> pref(maxVal + 1, INF);
+        for (int i = 0; i <= k; ++i) {
+            for (int r = R - 1; r >= 0; --r) {
+                for (int c = C - 1 ; c >= 0; --c) {
+                    if (r == R - 1 && c == C - 1) {
+                        dp[r][c] = 0;
+                        continue;
+                    }
+                    if (r + 1 < R) {
+                        dp[r][c] = min(dp[r][c], dp[r + 1][c] + grid[r + 1][c]);
+                    }
+                    if (c + 1 < C) {
+                        dp[r][c] = min(dp[r][c], dp[r][c + 1] + grid[r][c + 1]);
+                    }
+                    if (i > 0) { // teleportation
+                        dp[r][c] = min(dp[r][c], pref[grid[r][c]]);
+                    }
+                }
+            }
+            pref.assign(maxVal + 1, INF);
+            for (int r = 0; r < R; ++r) {
+                for (int c = 0; c < C; ++c) {
+                    pref[grid[r][c]] = min(pref[grid[r][c]], dp[r][c]);
+                }
+            }
+            for (int j = 1; j <= maxVal; ++j) {
+                pref[j] = min(pref[j], pref[j - 1]);
+            }
+        }
+        return dp[0][0];
+    }
+};
 ```
 
 # Leetcode Biweekly Contest 164

@@ -45,6 +45,32 @@ if __name__ == '__main__':
 
 For some problems you need to track if you have seen a nonzero digit up to this point.  
 
+Leading zeros are special in counting problems. The zero flag tracks whether the number has actually started.
+
+Typical reasons to keep this flag:
+- To let numbers have shorter “effective” length than arr.size(). By placing leading zeros while zero = 1, you model numbers with fewer digits without counting different zero pads as different numbers.
+
+Example: counting numbers with nondecreasing digits.
+
+It counts the number of base-base numbers that are:
+- not greater than an upper bound given as a digit array arr
+- nondecreasing from left to right
+- You enforce nondecreasing by remembering the last chosen digit and only allowing the next digit to be at least that value.
+
+```cpp
+int dfs(const vector<int>& arr, int i, int d, int tight, int zero) {
+    if (i == arr.size()) return 1;
+    if (dp[d][tight][zero][i] != -1) return dp[d][tight][zero][i];
+    int ans = 0;
+    for (int dig = d; dig < base; ++dig) {
+        if (tight && dig > arr[i]) break;
+        int term = dfs(arr, i + 1, dig, tight & (arr[i] == dig), zero & (dig == 0));
+        ans = (ans + term) % MOD;
+    }
+    return dp[d][tight][zero][i] = ans;
+}
+```
+
 ## Digit Sum Divisible
 
 For some problems you need to track if something is divisible by an integer value.  So instead of looping over every integer, you can us dynamic programming, where you keep track of the remainder modulo n.  So that can be anything.  For one problem it could be the digit sum. 
