@@ -73,6 +73,7 @@ supports point updates and rectangular sum queries in logarithmic time.
 O(log^2(n)) for the queries
 
 But to 0 fill the bit it is O(N^2)
+It is inclusive for the rectangle sum query
 
 ```cpp
 struct BIT2D {

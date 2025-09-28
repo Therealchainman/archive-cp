@@ -108,7 +108,9 @@ Then to compute N! / i => pprod[i - 1] * sprod[i + 1]
 
 ## Multinomial theorem 
 
-An implementation I can use for multionmial calculations
+Count the number of permutations of a multiset.
+
+An implementation I can use for multinomial calculations
 
 Can count situations where you have balls of [2,2,2,3,5], so you have some identical, to find the number of ways you can use the multinomial theorem to place in 10 boxes or something. 
 
@@ -139,6 +141,7 @@ $$
 \frac{m!}{c_0!\,c_1!\,\cdots\,c_{n-1}!}.
 $$
 
+ignore the division by 2, that must have been specific to problem it was used for.
 
 ```cpp
 int multinomial(const vector<int> &items) {
@@ -146,6 +149,34 @@ int multinomial(const vector<int> &items) {
     int ans = fact[cnt];
     for (int x : items) {
         ans = (ans * inv_fact[x / 2]) % MOD;
+    }
+    return ans;
+}
+```
+
+Another method when you can't necessarily use modular arithmetic to prevent integer overflow, instead use a threshold to stop early if it gets too large.
+
+```cpp
+const int MAXK = 1e6;
+//this is same as nCk formula 
+// we know nCk is n! / (k! * (n - k)!)
+// can be written as (n * (n - 1) * (n - 2) * ....... * (n - k + 1)) / (1 * 2 * 3 * ..... * k) 
+int64 binomial(int64 N, int64 K) {
+    if (K > N) return 0;
+    if (K > N - K) K = N - K;
+    int64 ans = 1;
+    for (int64 i = 1; i <= K; ++i) {
+        ans = ans * (N - i + 1) / i;
+        if (ans >= MAXK) return MAXK;
+    }
+    return ans;
+}
+int multinomial(const vector<int>& arr) {
+    int64 ans = 1, tot = 0;
+    for (int cnt : arr) {
+        tot += cnt;
+        ans *= binomial(tot, cnt);
+        if (ans >= MAXK) return MAXK;
     }
     return ans;
 }

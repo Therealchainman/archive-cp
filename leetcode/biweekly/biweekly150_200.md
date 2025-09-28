@@ -868,12 +868,28 @@ public:
 
 # Leetcode Biweekly Contest 156
 
-## 
+## 3542. Minimum Operations to Convert All Elements to Zero
 
-### Solution 1: 
+### Solution 1: monotonic stack, greedy
 
 ```cpp
-
+class Solution {
+public:
+    int minOperations(vector<int>& nums) {
+        stack<int> stk;
+        int ans = 0;
+        for (int x : nums) {
+            while (!stk.empty() && stk.top() >= x) {
+                int v = stk.top();
+                if (v > x) ans++;
+                stk.pop();
+            }
+            if (x) stk.emplace(x);
+        }
+        ans += stk.size();
+        return ans;
+    }
+};
 ```
 
 ## 
@@ -2526,6 +2542,149 @@ public:
 ```
 
 # Leetcode Biweekly Contest 166
+
+## 3693. Climbing Stairs II
+
+### Solution 1: dynamic programming
+
+```cpp
+const int INF = numeric_limits<int>::max();
+class Solution {
+public:
+    int climbStairs(int n, vector<int>& costs) {
+        costs.emplace(costs.begin(), 0);
+        vector<int> dp(n + 1, INF);
+        dp[0] = 0;
+        for (int i = 1; i <= n; ++i) {
+            for (int j = 1; j <= 3; ++j) {
+                if (i - j < 0) break;
+                dp[i] = min(dp[i], dp[i - j] + costs[i] + j * j);
+            }
+        }
+        return dp[n];
+    }
+};
+```
+
+## 3694. Distinct Points Reachable After Substring Removal
+
+### Solution 1: set, sliding window
+
+```cpp
+class Solution {
+private:
+    pair<int, int> getCoords(char ch) {
+        if (ch == 'U') return {0, 1};
+        if (ch == 'D') return {0, -1};
+        if (ch == 'L') return {-1, 0};
+        return {1, 0};
+    }
+public:
+    int distinctPoints(string s, int k) {
+        int N = s.size();
+        set<pair<int, int>> seen;
+        int x = 0, y = 0, dx, dy;
+        for (int i = k; i < N; ++i) {
+            tie(dx, dy) = getCoords(s[i]);
+            x += dx;
+            y += dy;
+        }
+        seen.emplace(x, y);
+        for (int i = 0; i < N - k; ++i) {
+            tie(dx, dy) = getCoords(s[i]);
+            x += dx; y += dy;
+            tie(dx, dy) = getCoords(s[i + k]);
+            x -= dx; y -= dy;
+            seen.emplace(x, y);
+        }
+        return seen.size();
+    }
+};
+```
+
+## 3695. Maximize Alternating Sum Using Swaps
+
+### Solution 1: union find, connected components, sorting, greedy, alternating sum
+
+```cpp
+using int64 = long long;
+struct UnionFind {
+    vector<int> parents, size;
+    UnionFind(int n) {
+        parents.resize(n);
+        iota(parents.begin(),parents.end(),0);
+        size.assign(n,1);
+    }
+
+    int find(int i) {
+        if (i==parents[i]) {
+            return i;
+        }
+        return parents[i]=find(parents[i]);
+    }
+
+    void unite(int i, int j) {
+        i = find(i), j = find(j);
+        if (i!=j) {
+            if (size[j]>size[i]) {
+                swap(i,j);
+            }
+            size[i]+=size[j];
+            parents[j]=i;
+        }
+    }
+
+    bool same(int i, int j) {
+        return find(i) == find(j);
+    }
+    
+    vector<vector<int>> groups() {
+        int n = parents.size();
+        unordered_map<int, vector<int>> group_map;
+        for (int i = 0; i < n; ++i) {
+            group_map[find(i)].emplace_back(i);
+        }
+        vector<vector<int>> res;
+        for (auto& [_, group] : group_map) {
+            res.emplace_back(move(group));
+        }
+        return res;
+    }
+};
+class Solution {
+public:
+    int64 maxAlternatingSum(vector<int>& nums, vector<vector<int>>& swaps) {
+        int N = nums.size();
+        UnionFind dsu(N);
+        for (const auto &pair : swaps) {
+            dsu.unite(pair[0], pair[1]);
+        }
+        vector<vector<int>> groups = dsu.groups();
+        vector<int> arr(N, 0);
+        for (auto &g : groups) {
+            vector<int> values;
+            sort(g.begin(), g.end(), [](const int x, const int y) {
+                return x % 2 > y % 2;
+            }); // odd is first x % 2 = 1 when odd 
+            for (int i : g) {
+                values.emplace_back(nums[i]);
+            }
+            sort(values.begin(), values.end());
+            for (int i = 0; i < g.size(); ++i) {
+                arr[g[i]] = values[i];
+            }
+        }
+        vector<int> indices(N);
+        iota(indices.begin(), indices.end(), 0);
+        int64 ans = accumulate(indices.begin(), indices.end(), 0LL, [&arr](const int64 total, const int64 i) {
+            return total + (i % 2 ? -arr[i] : arr[i]);
+        });
+        return ans;
+    }
+};
+```
+
+# Leetcode Biweekly Contest 167
 
 ## 
 

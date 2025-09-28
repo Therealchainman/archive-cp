@@ -1,5 +1,57 @@
 # Union Find
 
+## Best cpp implementation
+
+This is my favorite cpp implementation, it is rather simple.
+
+Intended for 0-indexed arrays
+
+```cpp
+struct UnionFind {
+    vector<int> parents, size;
+    UnionFind(int n) {
+        parents.resize(n);
+        iota(parents.begin(),parents.end(),0);
+        size.assign(n,1);
+    }
+
+    int find(int i) {
+        if (i==parents[i]) {
+            return i;
+        }
+        return parents[i]=find(parents[i]);
+    }
+
+    void unite(int i, int j) {
+        i = find(i), j = find(j);
+        if (i!=j) {
+            if (size[j]>size[i]) {
+                swap(i,j);
+            }
+            size[i]+=size[j];
+            parents[j]=i;
+        }
+    }
+
+    bool same(int i, int j) {
+        return find(i) == find(j);
+    }
+    
+    vector<vector<int>> groups() {
+        int n = parents.size();
+        unordered_map<int, vector<int>> group_map;
+        for (int i = 0; i < n; ++i) {
+            group_map[find(i)].emplace_back(i);
+        }
+        vector<vector<int>> res;
+        for (auto& [_, group] : group_map) {
+            res.emplace_back(move(group));
+        }
+        return res;
+    }
+};
+```
+
 ## Union Find Algorithm
 
 simple implementation using lists, and works if the nodes are integers labels from 0 to n or something.
@@ -81,58 +133,6 @@ class UnionFind:
 
     def __repr__(self) -> str:
         return f'parents: {[(i, parent) for i, parent in enumerate(self.parent)]}, sizes: {self.size}'
-```
-
-## Best cpp implementation
-
-This is my favorite cpp implementation, it is rather simple.
-
-Intended for 0-indexed arrays
-
-```cpp
-struct UnionFind {
-    vector<int> parents, size;
-    UnionFind(int n) {
-        parents.resize(n);
-        iota(parents.begin(),parents.end(),0);
-        size.assign(n,1);
-    }
-
-    int find(int i) {
-        if (i==parents[i]) {
-            return i;
-        }
-        return parents[i]=find(parents[i]);
-    }
-
-    void unite(int i, int j) {
-        i = find(i), j = find(j);
-        if (i!=j) {
-            if (size[j]>size[i]) {
-                swap(i,j);
-            }
-            size[i]+=size[j];
-            parents[j]=i;
-        }
-    }
-
-    bool same(int i, int j) {
-        return find(i) == find(j);
-    }
-    
-    vector<vector<int>> groups() {
-        int n = parents.size();
-        unordered_map<int, vector<int>> group_map;
-        for (int i = 0; i < n; ++i) {
-            group_map[find(i)].emplace_back(i);
-        }
-        vector<vector<int>> res;
-        for (auto& [_, group] : group_map) {
-            res.emplace_back(move(group));
-        }
-        return res;
-    }
-};
 ```
 
 ## Persistent Disjoint Union Set Data Structure

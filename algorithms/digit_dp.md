@@ -178,3 +178,25 @@ void solve() {
     cout << ans << endl;
 }
 ```
+
+### Binary Carry DP
+
+Use carry DP any time you are:
+Adding many nonnegative integer contributions across bit positions
+Caring about properties of the resulting binary sum such as total popcount, individual bits, parity constraints, leading zeros, or thresholds
+Working in base 2 by columns, where each column emits a bit and forwards a carry to the next column
+
+Typical inputs that fit this shape
+Sums of chosen counts or weights per item
+Convolution like problems where you aggregate counts then analyze the binary sum
+Counting or summing over combinatorial choices with constraints on the popcount of the final sum
+
+Core modeling idea
+Think of addition as a left to right conveyor of carries:
+At column i you have an incoming carry
+You add the contributions from your choices at column i
+You produce an output bit bit = (carry + column_sum) % 2
+You forward carry_next = (carry + column_sum) / 2 to the next column
+The DP walks columns, not decimal totals.
+
+

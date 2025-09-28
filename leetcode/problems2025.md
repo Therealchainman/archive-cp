@@ -1823,6 +1823,77 @@ public:
 };
 ```
 
+## 812. Largest Triangle Area
+
+### Solution 1: heron's formula, euclidean distance formula, geometry
+
+```cpp
+class Solution {
+private:
+    double heronsFormula(double a, double b, double c) {
+        double s = 0.5 * (a + b + c);
+        double area = sqrt(s * (s - a) * (s - b) * (s - c));
+        return area;
+    }
+    double distance(int x1, int y1, int x2, int y2) {
+        double ans = sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+        return ans;
+    }
+public:
+    double largestTriangleArea(vector<vector<int>>& points) {
+        int N = points.size();
+        double ans = 0.0;
+        for (int i = 0; i < N; ++i) {
+            for (int j = i + 1; j < N; ++j) {
+                for (int k = j + 1; k < N; ++k) {
+                    int x1 = points[i][0], y1 = points[i][1];
+                    int x2 = points[j][0], y2 = points[j][1];
+                    int x3 = points[k][0], y3 = points[k][1];
+                    double s1 = distance(x1, y1, x2, y2);
+                    double s2 = distance(x2, y2, x3, y3);
+                    double s3 = distance(x1, y1, x3, y3);
+                    ans = max(ans, heronsFormula(s1, s2, s3));
+                }
+            }
+        }
+        return ans;
+    }
+};
+```
+
+### Solution 2: cross product, determinant
+
+```cpp
+class Solution {
+public:
+    double largestTriangleArea(vector<vector<int>>& points) {
+        int N = points.size();
+        int ans = 0;
+        for (int i = 0; i < N; ++i) {
+            for (int j = i + 1; j < N; ++j) {
+                for (int k = j + 1; k < N; ++k) {
+                    int x1 = points[i][0] - points[j][0];
+                    int y1 = points[i][1] - points[j][1];
+                    int x2 = points[i][0] - points[k][0];
+                    int y2 = points[i][1] - points[k][1];
+                    int area = x1 * y2 - x2 * y1;
+                    ans = max(ans, abs(area));
+                }
+            }
+        }
+        return ans / 2.0;
+    }
+};
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
 ##
 
 ### Solution 1: 
