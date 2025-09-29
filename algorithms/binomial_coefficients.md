@@ -49,6 +49,8 @@ c[i+1][j]   += c[i][j]; // chose bit i to be 0
 time complexity is O(N^2), so it is not feasible for large N.
 Use modular arithmetic to reduce the size of the numbers.
 
+One of the benefits of this approach is you can use any modulus, not just prime moduli. 
+
 ```cpp
 const int MOD = 9998244353, MAXN = 61;
 int C[MAXN][MAXN];

@@ -1,5 +1,379 @@
 # Leetcode Biweekly Rounds 100-149
 
+# Leetcode BiWeekly Contest 126
+
+## 3081. Replace Question Marks in String to Minimize Its Value
+
+### Solution 1:  min heap, greedy, lexicographically smallest
+
+```py
+class Solution:
+    def minimizeStringValue(self, s: str) -> str:
+        n = len(s)
+        minheap = []
+        for ch in string.ascii_lowercase:
+            heappush(minheap, (s.count(ch), ch))
+        add = []
+        s = list(s)
+        for _ in range(s.count("?")):
+            x, ch = heappop(minheap)
+            add.append(ch)
+            heappush(minheap, (x + 1, ch))
+        add.sort(reverse = True)
+        for i in range(n):
+            if s[i] != "?": continue 
+            s[i] = add.pop()
+        return "".join(s)
+```
+
+## 3082. Find the Sum of the Power of All Subsequences
+
+### Solution 1:  combinatorics, dp, counting, subsequences
+
+```py
+class Solution:
+    def sumOfPower(self, nums: List[int], k: int) -> int:
+        n = len(nums)
+        freq = Counter({(1, 0): 1}) # (size, sum) -> freq
+        ans = 0
+        MOD = int(1e9) + 7
+        for num in nums:
+            nfreq = freq.copy()
+            for (sz, su), f in freq.items():
+                if su + num == k: ans = (ans + f * pow(2, n - sz, MOD)) % MOD
+                if su + num >= k: continue 
+                nfreq[(sz + 1, su + num)] += f
+            freq = nfreq
+        return ans
+```
+
+
+
+# Leetcode BiWeekly Contest 127
+
+## 3096. Minimum Levels to Gain More Points
+
+### Solution 1:  prefix sum, suffix sum
+
+```py
+class Solution:
+    def minimumLevels(self, arr: List[int]) -> int:
+        n = len(arr)
+        ssum = 0
+        for x in arr:
+            if x == 1: ssum += 1
+            else: ssum -= 1
+        psum = 0
+        for i in range(n - 1):
+            psum += 1 if arr[i] == 1 else -1
+            ssum -= 1 if arr[i] == 1 else -1
+            if psum > ssum: return i + 1
+        return -1
+```
+
+## 3097. Shortest Subarray With OR at Least K II
+
+### Solution 1:  bit manipulation, sliding window, frequency array
+
+```py
+class Solution:
+    def minimumSubarrayLength(self, nums: List[int], K: int) -> int:
+        n = len(nums)
+        ans = math.inf
+        cur = j = 0
+        freq = [0] * 30
+        for i in range(n):
+            for k in range(30):
+                if (nums[i] >> k) & 1:
+                    freq[k] += 1
+                    if freq[k] == 1: cur |= 1 << k
+            while cur >= K and j <= i:
+                ans = min(ans, i - j + 1)
+                for k in range(30):
+                    if (nums[j] >> k) & 1:
+                        freq[k] -= 1
+                        if freq[k] == 0: cur ^= 1 << k
+                j += 1
+        return ans if ans < math.inf else -1
+```
+
+## 3098. Find the Sum of Subsequence Powers
+
+### Solution 1:  sort, dp, countings
+
+```py
+class Solution:
+    def sumOfPowers(self, nums: List[int], k: int) -> int:
+        n = len(nums)
+        mod = int(1e9) + 7
+        nums.sort()
+        @cache
+        def dp(idx, sz, last, mind):
+            if idx == n:
+                if sz == k: return mind
+                return 0
+            ans = 0
+            # take
+            if sz < k:
+                ans = (ans + dp(idx + 1, sz + 1, nums[idx], min(mind, nums[idx] - last))) % mod
+            ans = (ans + dp(idx + 1, sz, last, mind)) % mod
+            return ans
+        return dp(0, 0, -math.inf, math.inf)
+```
+
+```py
+class Solution:
+    def sumOfPowers(self, nums: List[int], k: int) -> int:
+        n = len(nums)
+        mod = int(1e9) + 7
+        nums.sort()
+        dp = Counter({(0, -math.inf, math.inf): 1})
+        for x in nums:
+            ndp = Counter()
+            for (sz, last, mind), cnt in dp.items():
+                if sz < k:
+                    ndp[(sz + 1, x, min(mind, x - last))] += cnt
+                    ndp[(sz + 1, x, min(mind, x - last))] %= mod
+                ndp[(sz, last, mind)] += cnt 
+                ndp[(sz, last, mind)] %= mod
+            dp = ndp
+        ans = 0
+        for (sz, _, mind), cnt in dp.items():
+            if sz == k: ans = (ans + cnt * mind) % mod
+        return ans
+```
+
+Could use coordinate compression and remove the Counter.
+
+
+# Leetcode BiWeekly Contest 128
+
+## 3112. Minimum Time to Visit Disappearing Nodes
+
+### Solution 1:  dijkstra, shortest path, undirected graph
+
+```py
+def dijkstra(adj, src, dis):
+    N = len(adj)
+    min_heap = [(0, src)]
+    dist = [math.inf] * N
+    while min_heap:
+        cost, u = heapq.heappop(min_heap)
+        if cost >= dis[u]: continue
+        if cost >= dist[u]: continue
+        dist[u] = cost
+        for v, w in adj[u]:
+            if cost + w < dist[v]: heapq.heappush(min_heap, (cost + w, v))
+    return dist
+class Solution:
+    def minimumTime(self, n: int, edges: List[List[int]], disappear: List[int]) -> List[int]:
+        pedges = defaultdict(lambda: math.inf)
+        adj = [[] for _ in range(n)]
+        for u, v, w in edges:
+            pedges[(u, v)] = min(pedges[(u, v)], w)
+            pedges[(v, u)] = min(pedges[(v, u)], w)
+        for (u, v), w in pedges.items():
+            adj[u].append((v, w))
+        dist_arr = dijkstra(adj, 0, disappear)
+        ans = [-1] * n
+        for u in range(n):
+            if dist_arr[u] < disappear[u]: ans[u] = dist_arr[u]
+        return ans
+```
+
+## 3113. Find the Number of Subarrays Where Boundary Elements Are Maximum
+
+### Solution 1:  groups, sliding window, range maximum query sparse tables
+
+```py
+
+class Solution:
+    def numberOfSubarrays(self, nums: List[int]) -> int:
+        n = len(nums)
+        lg = [0] * (n + 1)
+        for i in range(2, n + 1):
+            lg[i] = lg[i // 2] + 1
+        LOG = lg[-1] + 1
+        st = [[math.inf] * n for _ in range(LOG)]
+        st[0] = nums[:]
+        for i in range(1, LOG):
+            j = 0
+            while (j + (1 << (i - 1))) < n:
+                st[i][j] = max(st[i - 1][j], st[i - 1][j + (1 << (i - 1))])
+                j += 1
+        def query(left, right):
+            length = right - left + 1
+            i = lg[length]
+            return max(st[i][left], st[i][right - (1 << i) + 1])
+        pos = defaultdict(list)
+        for i in range(n):
+            pos[nums[i]].append(i)
+        ans = 0
+        for val, arr in pos.items():
+            delta = 0
+            start = arr[0]
+            for end in arr:
+                if query(start, end) != val:
+                    start = end
+                    delta = 0
+                delta += 1
+                ans += delta
+        return ans
+```
+
+# Leetcode Biweekly Contest 129
+
+## 3129. Find All Possible Stable Binary Arrays I
+
+### Solution 1:  recursive dynamic programming, memoization, counting
+
+```cpp
+const int MOD = 1e9 + 7;
+class Solution {
+private:
+    int LIMIT;
+    vector<vector<vector<vector<int>>>> dp;
+    int64 dfs(int zero, int one, int last, int len) {
+        if (zero < 0 || one < 0) return 0;
+        if (len > LIMIT) return 0;
+        if (zero == 0 && one == 0) return 1;
+        if (dp[zero][one][last][len] != -1) return dp[zero][one][last][len];
+        int64 ans = dfs(zero - 1, one, 0, last == 0 ? len + 1 : 1);
+        ans += dfs(zero, one - 1, 1, last == 1 ? len + 1 : 1);
+        ans %= MOD;
+        return dp[zero][one][last][len] = ans;
+    }
+public:
+    int numberOfStableArrays(int zero, int one, int limit) {
+        LIMIT = limit;
+        dp.assign(zero + 1, vector<vector<vector<int>>>(one + 1, vector<vector<int>>(2, vector<int>(LIMIT + 1, -1))));
+        return dfs(zero, one, 0, 0);
+    }
+};
+```
+
+# Leetcode BiWeekly Contest 133
+
+## 3193. Count the Number of Inversions
+
+### Solution 1:  dynamic programming, pointer, window sum optimization, space optimization
+
+```cpp
+class Solution {
+public:
+    int numberOfPermutations(int n, vector<vector<int>>& requirements) {
+        sort(requirements.begin(), requirements.end());
+        int m = requirements.size();
+        const int COUNT = 400, MOD = 1e9 + 7;
+        vector<int> dp(COUNT + 1, 0), dp1(COUNT + 1);
+        dp[0] = 1;
+        for (int i = 0, j = 0; i < n; i++) {
+            int mark = -1, wsum = 0;
+            if (j < m && requirements[j][0] == i) {
+                mark = requirements[j][1];
+                j++;
+            }
+            for (int k = 0; k <= COUNT; k++) {
+                wsum = (wsum + dp[k]) % MOD;
+                dp1[k] = wsum;
+                if (mark != -1 && k != mark) dp1[k] = 0;
+                if (k >= i) wsum = (wsum - dp[k - i] + MOD) % MOD;
+            }
+            swap(dp, dp1);
+        }
+        return dp[requirements.end()[-1][1]];
+    }
+};
+```
+
+# Leetcode BiWeekly Contest 134
+
+## Alternating Groups II
+
+### Solution 1: two pointers
+
+```cpp
+class Solution {
+public:
+    int numberOfAlternatingGroups(vector<int>& colors, int k) {
+        int ans = 0, N = colors.size();
+        for (int i = 0, j = 0; i < N; j++) {
+            if (j > i && colors[(j - 1 + N) % N] == colors[j % N]) {
+                i = j;
+            }
+            if (j - i + 1 == k) {
+                ans++;
+                i++;
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## Number of Subarrays With AND Value of K
+
+### Solution 1:  sparse table, range AND queries, binary search
+
+```py
+class ST_And:
+    def __init__(self, nums):
+        self.nums = nums
+        self.n = len(nums)
+        self.LOG = 21 # 10^9
+        self.build()
+
+    def op(self, x, y):
+        return x & y
+
+    def build(self):
+        self.lg = [0] * (self.n + 1)
+        for i in range(2, self.n + 1):
+            self.lg[i] = self.lg[i // 2] + 1
+        self.st = [[0] * self.n for _ in range(self.LOG)]
+        for i in range(self.n): 
+            self.st[0][i] = self.nums[i]
+        # CONSTRUCT SPARSE TABLE
+        for i in range(1, self.LOG):
+            j = 0
+            while (j + (1 << (i - 1))) < self.n:
+                self.st[i][j] = self.op(self.st[i - 1][j], self.st[i - 1][j + (1 << (i - 1))])
+                j += 1
+
+    def query(self, l, r):
+        length = r - l + 1
+        i = self.lg[length]
+        return self.op(self.st[i][l], self.st[i][r - (1 << i) + 1])
+class Solution:
+    def countSubarrays(self, nums: List[int], k: int) -> int:
+        n = len(nums)
+        ans = 0
+        st = ST_And(nums)
+        def upper_bound(start):
+            lo, hi = start, n - 1
+            while lo < hi:
+                mid = (lo + hi + 1) >> 1
+                if st.query(start, mid) < k:
+                    hi = mid - 1
+                else:
+                    lo = mid
+            return lo
+        def lower_bound(start):
+            lo, hi = start, n - 1
+            while lo < hi:
+                mid = (lo + hi) >> 1
+                if st.query(start, mid) <= k:
+                    hi = mid
+                else:
+                    lo = mid + 1
+            return lo
+        for i in range(n):
+            l, r = lower_bound(i), upper_bound(i)
+            if r == l and st.query(i, l) != k: continue
+            ans += r - l + 1
+        return ans
+```
+
 # Leetcode Biweekly Contest 135
 
 ## Minimum Array Changes to Make Differences Equal

@@ -1886,19 +1886,56 @@ public:
 };
 ```
 
-##
+## 1039. Minimum Score Triangulation of Polygon
 
-### Solution 1: 
+### Solution 1: dynamic programming, memoization, recursion, subpolygon
 
 ```cpp
-
+const int INF = numeric_limits<int>::max();
+class Solution {
+private:
+    int dp[51][51];
+    vector<int> values;
+    int dfs(int i, int j) {
+        if (i + 2 > j) return 0;
+        if (i + 2 == j) return values[i] * values[i + 1] * values[i + 2];
+        if (dp[i][j] != -1) return dp[i][j];
+        int ans = INF;
+        for (int k = i + 1; k < j; ++k) {
+            ans = min(ans, dfs(i, k) + dfs(k, j) + values[i] * values[k] * values[j]);
+        }
+        return dp[i][j] = ans;
+    }
+public:
+    int minScoreTriangulation(vector<int>& A) {
+        fill(&dp[0][0], &dp[50][50] + 1, -1);
+        values = A;
+        int N = values.size();
+        return dfs(0, N - 1);
+    }
+};
 ```
 
-##
+## 1121. Divide Array Into Increasing Sequences
 
 ### Solution 1: 
 
 ```cpp
+class Solution {
+public:
+    bool canDivideIntoSubsequences(vector<int>& nums, int k) {
+        int N = nums.size();
+        int cnt = 0;
+        for (int i = 1; i < N; ++i) {
+            if (i > 0 && nums[i] != nums[i - 1]) {
+                cnt = 0;
+            }
+            cnt++;
+            if (N < cnt * k) return false;
+        }
+        return true;
+    }
+};
 
 ```
 
