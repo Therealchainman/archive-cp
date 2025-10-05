@@ -6,8 +6,14 @@ Ternary search is a divide-and-conquer algorithm that can be used to find the ma
 
 ## Algorithm
 
+Works on an integer domain. l, r, m1, m2 are ints.
+
+Seeks a maximum of a unimodal function on integers. Note the max in the tail scan and the if (f(m1) < f(m2)) update pattern which is for maximizing.
+
+Finishes with a brute force loop over the last few integers.
+
 ```cpp
-int64 ternarySearch(int l, int r) {
+int64 ternarySearchMax(int l, int r) {
     while (r - l > 3) {
         int m1 = l + (r - l) / 3;
         int m2 = r - (r - l) / 3;
@@ -20,6 +26,44 @@ int64 ternarySearch(int l, int r) {
     }
     return ans;
 }
+```
+
+## Ternary Search for Minimum
+
+Seeks a minimum of a unimodal function on integers. 
+
+```cpp
+// interesting example of unimodal function that is convex, with a global minimum
+int64 f(int64 x) {
+    int64 ans = max(0LL, ceil(h2, x) - a1) + max(0LL, a2 * x - h1 + 1);
+    return ans;
+}
+
+int64 ternarySearchMin(int64 l, int64 r) {
+    while (r - l > 3) {
+        int64 m1 = l + (r - l) / 3;
+        int64 m2 = r - (r - l) / 3;
+        if (f(m1) <= f(m2)) r = m2 - 1; // minimum lies in [l, m2 - 1]
+        else l = m1 + 1; // minimum lies in [m1 + 1, r]
+    }
+    int64 ans = INF;
+    for (int64 i = l; i <= r; ++i) {
+        ans = min(ans, f(i));
+    }
+    return ans;
+}
+```
+
+## Continuous domain version
+
+1. Works on a continuous domain. The parameter p is a real in [0, 1].
+2. Seeks a minimum. The update rule keeps the side with the smaller value.
+3. No tail brute force since the interval shrinks continuously. Fixed number of iterations controls precision.
+4. num_iterations = 60 might work
+5. Assumes the function is unimodal and convex (quadratic)
+
+```cpp
+
 ```
 
 ## Observations

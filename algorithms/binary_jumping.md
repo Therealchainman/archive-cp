@@ -8,18 +8,43 @@ Binary jumping is an algorithm that works for finding kth ancestor, LCA of trees
 
 Example code for using it to find the kth successor in a functional graph. 
 
-```py
-succ = [[0] * n for _ in range(LOG)]
-succ[0] = [s - 1 for s in successor]
-for i in range(1, LOG):
-    for j in range(n):
-        succ[i][j] = succ[i - 1][succ[i - 1][j]]
-for x, k in queries:
-    x -= 1
-    for i in range(LOG):
-        if (k >> i) & 1:
-            x = succ[i][x]
-    print(x + 1)
+```cpp
+vector<vector<int>> succ(LOG, vector<int>(n));
+for (int j = 0; j < n; ++j) succ[0][j] = successor[j] - 1;
+for (int i = 1; i < LOG; ++i) {
+    for (int j = 0; j < n; ++j) {
+        succ[i][j] = succ[i - 1][ succ[i - 1][j] ];
+    }
+}
+
+cin >> q;
+while (q--) {
+    int x;
+    long long k;
+    cin >> x >> k;
+    int v = x - 1;
+    for (int i = 0; i < LOG; ++i) {
+        if ((k >> i) & 1LL) v = succ[i][v];
+    }
+    cout << (v + 1) << '\n';
+}
+```
+
+## Reachability in jumps
+
+“is v on the forward orbit of u if I keep following next, and if yes how many steps does it take?”
+
+```cpp
+// where finding number of steps to reach j from i
+int steps = 0;
+for (int k = LOG - 1; k >= 0; k--) {
+    if (succ[k][i] < j) {
+        steps += (1 << k);
+        i = succ[k][i];
+    }
+}
+if (succ[0][i] < j) continue;
+ans[q] = i < j ? steps + 1 : steps;
 ```
 
 ## sum from node to kth successor in functional graph
@@ -559,6 +584,43 @@ It queries inclusive ranges [l, r], that are 0-indexed.
 
 query is O(1) (idempotent)
 precompute is (nlogn)
+
+```cpp
+struct SparseTableAnd {
+    int n;
+    int K;
+    vector<int> lg;
+    vector<vector<int>> st;
+
+    static inline int op(int x, int y) { return x & y; }
+
+    SparseTableAnd(const vector<int>& a) : n((int)a.size()) {
+        assert(n > 0);
+        lg.assign(n + 1, 0);
+        for (int i = 2; i <= n; ++i) lg[i] = lg[i / 2] + 1;
+
+        K = lg[n] + 1;
+        st.assign(K, vector<int>(n));
+        st[0] = a;
+
+        for (int k = 1; k < K; ++k) {
+            int len = 1 << k;
+            int half = len >> 1;
+            for (int i = 0; i + len <= n; ++i) {
+                st[k][i] = op(st[k - 1][i], st[k - 1][i + half]);
+            }
+        }
+    }
+
+    // AND on [l, r], inclusive, 0-indexed
+    int query(int l, int r) const {
+        if (l > r) swap(l, r);
+        int len = r - l + 1;
+        int k = lg[len];
+        return op(st[k][l], st[k][r - (1 << k) + 1]);
+    }
+};
+```
 
 ```py
 class ST_And:

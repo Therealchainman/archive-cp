@@ -21,3 +21,25 @@ int64 ceil(int64 x, int64 y) {
     return (x + y - 1) / y;
 }
 ```
+
+## Special case
+
+In some scenarios with I think really large integers or negatives and what not, you want to use these floor and ceil division functions. 
+
+Cause there is an issue with negative numbers and large numbers. 
+
+```cpp
+static inline int128 floor(int128 a, int128 b) {
+    // b must not be zero
+    int128 q = a / b;
+    int128 r = a % b;
+    if (r != 0 && ((r > 0) != (b > 0))) --q;
+    return q;
+}
+
+// ceil division that matches mathematical ceil for integers
+static inline int128 ceil(int128 a, int128 b) {
+    // b must not be zero
+    return -floor(-a, b);
+}
+```

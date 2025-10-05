@@ -24,6 +24,7 @@ using namespace std;
 
 using int64 = int64_t;
 using uint64 = unsigned long long;
+using int128 = __int128_t;
 
 #ifdef LOCAL
 #include "src/debug.h"

@@ -195,6 +195,14 @@ LazySegmentTree::Ops minAddOps{
 LazySegmentTree st(n, minAddOps);
 ```
 
+Love this question. You are poking at a powerful trick: “search on segment trees” with a monotone predicate. Let’s unpack it, then I will show two practical implementations you can reuse.
+
+The idea in plain terms
+
+You have a segment tree over some monoid (S, op, e) where op is associative and e is the identity. Define a predicate g: S -> bool that is monotone with respect to extending the segment to the right. In other words, if g(prod(l, r)) is true for some r, then it stays true for any smaller r' <= r and it can only flip from true to false once as you move r to the right.
+
+max_right(l, g) returns the largest r such that g(prod(l, r)) is true. If g fails immediately at r = l + 1, it returns l. If g never fails up to the end, it returns n.
+
 ## Lazy Segment Tree point queries and range updates
 
 - range updates
