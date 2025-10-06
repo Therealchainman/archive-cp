@@ -200,3 +200,55 @@ You forward carry_next = (carry + column_sum) / 2 to the next column
 The DP walks columns, not decimal totals.
 
 
+## Count No-Zero Pairs That Sum to N
+
+1. Direction and target
+It runs digit DP from least significant to most significant, matching each computed sum digit to the fixed digit of n at that position. There is no usual tight flag because the target at each position is already determined by n and the carry.
+2. Variable length via zero-absorbing flags
+za and zb act as on or off switches for A and B. While za is 1 you must pick da in 1..9. You can flip za to 0 at any step to say that all higher digits of A are zero from here on. Same for zb. This neatly models numbers of different lengths and enforces no zero digits without separate leading-zero handling.
+3. State and transitions
+The DP state is (pos, carry, za, zb) with pos up to 16. For each state you try digits da and db that respect za and zb, require (da + db + carry) % 10 to equal the target digit, and recurse with the new carry. You also branch on optionally turning off za and or zb. Total states are tiny and each explores at most 9 by 9 choices, so it is fast and simple to memoize.
+
+```cpp
+using int64 = long long;
+class Solution {
+private:
+    vector<int> digits, values = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    int N;
+    int64 dp[16][2][2][2];
+    int64 dfs(int pos, int carry, int za, int zb) {
+        if (pos == N) {
+            return !carry && !za && !zb ? 1 : 0;
+        }
+        if (dp[pos][carry][za][zb] != -1) return dp[pos][carry][za][zb];
+        int64 ans = 0;
+        for (int da = 0; da < 10; ++da) {
+            if (za && da == 0) continue;
+            if (!za && da != 0) continue;
+            for (int db = 0; db < 10; ++db) {
+                if (zb && db == 0) continue;
+                if (!zb && db != 0) continue;
+                int curSum = da + db + carry;
+                int dig = curSum % 10;
+                if (dig != digits[pos]) continue;
+                ans += dfs(pos + 1, curSum / 10, za, zb);
+                if (za) ans += dfs(pos + 1, curSum / 10, 0, zb);
+                if (zb) ans += dfs(pos + 1, curSum / 10, za, 0);
+                if (za && zb) ans += dfs(pos + 1, curSum / 10, 0, 0);
+            }
+        }
+        return dp[pos][carry][za][zb] = ans;
+    }
+public:
+    int64 countNoZeroPairs(int64 n) {
+        while (n > 0) {
+            digits.emplace_back(n % 10);
+            n /= 10;
+        }
+        N = digits.size();
+        fill(&dp[0][0][0][0], &dp[0][0][0][0] + 16 * 2 * 2 * 2, -1);
+        return dfs(0, 0, 1, 1);
+    }
+};
+```
+

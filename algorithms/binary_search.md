@@ -45,3 +45,19 @@ def lower_bound(start):
             lo = mid + 1
     return lo
 ```
+
+```cpp
+int search(int lo, int hi) {
+    while (lo < hi) {
+        int mid = lo + (hi - lo) / 2;
+        char res = query(mid);
+        if (res == '>') {
+            lo = mid + 1;
+        } else if (res == '<') {
+            hi = mid;
+        }
+    }
+    return -1;
+}
+
+```

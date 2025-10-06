@@ -62,8 +62,19 @@ int64 ternarySearchMin(int64 l, int64 r) {
 4. num_iterations = 60 might work
 5. Assumes the function is unimodal and convex (quadratic)
 
-```cpp
+Just need to have some implementation for the function f. 
 
+```cpp
+const int ITERATIONS = 60;
+
+long double ternarySearchMin(long double l, long double r) {
+    for (int i = 0; i < ITERATIONS; ++i) {
+        long double ml = (l * 2 + r) / 3;
+        long double mr = (l + r * 2) / 3;
+        if (f(ml) < f(mr)) r = mr;
+        else l = ml;
+    }
+}
 ```
 
 ## Observations
