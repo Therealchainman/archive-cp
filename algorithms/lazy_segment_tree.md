@@ -78,10 +78,9 @@ struct LazySegmentTree {
         if (right <= segment_left_bound || segment_right_bound <= left) return;
         // COMPLETE OVERLAP
         if (left <= segment_left_bound && segment_right_bound <= right) {
-            auto composed = config.compose(lazyTag[segment_idx], val);
-            lazyTag[segment_idx] = composed;
+            lazyTag[segment_idx] = config.compose(lazyTag[segment_idx], val);
             int segment_len = segment_right_bound - segment_left_bound;
-            arr[segment_idx] = config.apply(arr[segment_idx], composed, segment_len);
+            arr[segment_idx] = config.apply(arr[segment_idx], val, segment_len);
             return;
         }
         // PARTIAL OVERLAP;
@@ -127,8 +126,71 @@ struct LazySegmentTree {
         }
         return point_query(2 * segment_idx + 2, m, r, i);
     }
-};
 
+    // maxRight: largest r in [l, limit) such that pred(range_query(l, r)) is true.
+    // If limit < 0 it defaults to the whole array size.
+    // Precondition: pred(neutral) == true.
+    template<class Pred>
+    int maxRight(int l, Pred pred, int limit = -1) {
+        if (limit < 0 || limit > size) limit = size;
+        l = max(0, min(l, limit));
+        // must hold on identity
+        if (!pred(config.neutral)) return l; // or throw logic_error("pred(neutral) must be true");
+        int64 acc = config.neutral;
+        return maxRightDfs(0, 0, size, l, limit, acc, pred);
+    }
+    template<class Pred>
+    int maxRightDfs(int node, int nl, int nr, int ql, int limit, int64& acc, const Pred& pred) {
+        // Node entirely left of ql, or entirely beyond the search limit
+        if (nr <= ql || limit <= nl) return ql;
+
+        // If we can take this whole node, do it greedily
+        if (ql <= nl && nr <= limit) {
+            int64 combined = config.calc(acc, arr[node]);
+            if (pred(combined)) { // ok to take all of it
+                acc = combined;
+                return nr;
+            }
+        }
+
+
+        // If we cannot take it whole and it is a leaf, we stop here
+        if (nr - nl == 1) return nl;
+
+        // Otherwise we must split
+        push(node, nl, nr);
+        int mid = (nl + nr) >> 1;
+        int left_segment_idx = 2 * node + 1, right_segment_idx = 2 * node + 2;
+
+        // Try to take as much as possible from the left child
+        int res = maxRightDfs(left_segment_idx, nl, mid, ql, limit, acc, pred);
+
+        if (res < min(mid, limit)) return res; // boundary found inside left child
+        // Then continue into the right child
+        return maxRightDfs(right_segment_idx, mid, nr, res, limit, acc, pred);
+    }
+
+    void point_set(int i, int64 newVal) {
+        point_set(0, 0, size, i, newVal);
+    }
+    void point_set(int node, int nl, int nr, int i, int64 newVal) {
+        if (nr - nl == 1) {
+            arr[node] = newVal;
+            lazyTag[node] = config.noop; // leaf carries no pending work
+            return;
+        }
+        push(node, nl, nr);
+        int m = (nl + nr) >> 1;
+        if (i < m) point_set(2*node + 1, nl, m, i, newVal);
+        else       point_set(2*node + 2, m, nr, i, newVal);
+        arr[node] = config.calc(arr[2*node + 1], arr[2*node + 2]); // pull
+    }
+};
+```
+
+### Example: range assign, min/max query
+
+```cpp  
 const int64 INF = numeric_limits<int64>::max();
 const int NOOP = -1;
 int N, Q;
@@ -167,6 +229,27 @@ LazySegmentTree::Configuration assignMaxConfiguration{
         return max(oldTag, newTag);
     }
 };
+```
+
+### Example: range add, range min query
+
+```cpp
+const int64 INF = numeric_limits<int64>::max();
+const int NOOP = 0;
+LazySegmentTree::Configuration addMinConfiguration{
+    INF, 
+    NOOP,
+    [](int64 x, int64 y) {
+        return min(x, y);
+    },
+    [](int64 nodeVal, int64 val, int len) {
+        return nodeVal + val;
+    },
+    [](int64 oldTag, int64 newTag) {
+        return oldTag + newTag;
+    }
+};
+
 ```
 
 Other examples, that are not exactly, correct but can use as example to create them. 
