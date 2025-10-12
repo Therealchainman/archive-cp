@@ -9,6 +9,7 @@ query(ps, 1, 1, 3, 3)
 
 ```cpp
 int query(const vector<vector<int>> &ps, int r1, int c1, int r2, int c2) {
+    if (r1 > r2 || c1 > c2) return 0;
     return ps[r2 + 1][c2 + 1] - ps[r1][c2 + 1] - ps[r2 + 1][c1] + ps[r1][c1];
 }
 

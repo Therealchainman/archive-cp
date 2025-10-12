@@ -2686,6 +2686,136 @@ public:
 
 # Leetcode Biweekly Contest 167
 
+## 3708. Longest Fibonacci Subarray
+
+### Solution 1: fibonacci sequence
+
+```cpp
+class Solution {
+public:
+    int longestSubarray(vector<int>& nums) {
+        int ans = 2, cnt = 2, N = nums.size();
+        for (int i = 2; i < N; ++i) {
+            if (nums[i - 1] + nums[i - 2] != nums[i]) {
+                cnt = 1;
+            }
+            cnt++;
+            ans = max(ans, cnt);
+        }
+        return ans;
+    }
+};
+```
+
+## 3709. Design Exam Scores Tracker
+
+### Solution 1: prefix sum, binary search
+
+```cpp
+using int64 = long long;
+class ExamTracker {
+private:
+    vector<int> times;
+    vector<int64> psum;
+public:
+    ExamTracker() {
+        
+    }
+    
+    void record(int time, int score) {
+        times.emplace_back(time);
+        int64 cur = !psum.empty() ? psum.back() : 0;
+        psum.emplace_back(cur + score);
+    }
+    
+    int64 totalScore(int startTime, int endTime) {
+        int N = times.size();
+        int l = lower_bound(times.begin(), times.end(), startTime) - times.begin();
+        int r = upper_bound(times.begin(), times.end(), endTime) - times.begin() - 1;
+        if (r < l) return 0;
+        int64 ans = psum[r];
+        if (l > 0) ans -= psum[l - 1];
+        return ans;
+    }
+};
+
+```
+
+## 3710. Maximum Partition Factor
+
+### Solution 1: binary search, bipartite graph, manhattan distance, dfs, stack, 2-coloring
+
+1. binary search on the answer, for each mid value build a graph where an edge exists between two points if their manhattan distance is less than mid.
+2. basically all the points that have an edge need to belong to a different set
+
+```cpp
+class Solution {
+private:
+    vector<vector<int>> adj, A;
+    vector<int> colors;
+    bool bipartite(int source) {
+        stack<int> stk;
+        stk.push(source);
+        colors[source] = 1;
+        bool ans = true;
+        while (!stk.empty()) {
+            int u = stk.top();
+            stk.pop();
+            for (int v : adj[u]) {
+                if (colors[v] == 0) { // unvisited
+                    colors[v] = 3 - colors[u]; // needs to be different color of two possible values 1 and 2
+                    stk.push(v);
+                } else if (colors[u] == colors[v]) {
+                    ans = false;
+                }
+            }
+        }
+        return ans;
+    }
+    int manhattan(int x1, int y1, int x2, int y2) {
+        return abs(x1 - x2) + abs(y1 - y2);
+    }
+    bool possible(int target) {
+        int N = A.size();
+        adj.assign(N, vector<int>());
+        // BUILD GRAPH
+        for (int i = 0; i < N; ++i) {
+            for (int j = i + 1; j < N; ++j) {
+                int x1 = A[i][0], y1 = A[i][1];
+                int x2 = A[j][0], y2 = A[j][1];
+                int dist = manhattan(x1, y1, x2, y2);
+                if (dist < target) {
+                    adj[i].emplace_back(j);
+                    adj[j].emplace_back(i);
+                }
+            }
+        }
+        // BIPARTITE
+        colors.assign(N, 0);
+        for (int i = 0; i < N; ++i) {
+            if (colors[i]) continue;
+            if (!bipartite(i)) return false;
+        }
+        return true;
+    }
+public:
+    int maxPartitionFactor(vector<vector<int>>& points) {
+        int N = points.size();
+        if (N == 2) return 0;
+        A = points;
+        int lo = 0, hi = 1e9;
+        while (lo < hi) {
+            int mid = lo + (hi - lo + 1) / 2;
+            if (possible(mid)) lo = mid;
+            else hi = mid - 1;
+        }
+        return lo;
+    }
+};
+```
+
+# Leetcode Biweekly Contest 168
+
 ## 
 
 ### Solution 1: 

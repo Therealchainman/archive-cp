@@ -256,3 +256,31 @@ vector<bool> segmentedSieve(int64 l, int64 r) {
     return isPrime;
 }
 ```
+
+## Sieve over squares to compute square free part of every number
+
+This code is a sieve over squares that computes the square-free part of every number.
+dp[n] = n / g, where g is the largest perfect square dividing n.
+This value is called the square-free part, square-free kernel or core of n.
+
+Examples:
+n = 72 = 2^3 * 3^2 → largest square divisor is 36 → dp[72] = 72 / 36 = 2
+n = 12 = 2^2 * 3 → largest square divisor is 4 → dp[12] = 3
+If n is square-free, dp[n] = n
+If n is a perfect square, dp[n] = 1
+
+Why it is sieve-like
+Classic Eratosthenes crosses out multiples of i.
+Here you “cross out” square factors by iterating over multiples of i^2 and dividing them away.
+
+```cpp
+const int MAXN = 1e6 + 5;
+// sieve
+for (int i = 0; i < MAXN; ++i) dp[i] = i;
+for (int i = 2; 1LL * i * i < MAXN; ++i) {
+    int sq = 1LL * i * i;
+    for (int j = sq; j < MAXN; j += sq) {
+        while (dp[j] % sq == 0) dp[j] /= sq;
+    }
+}
+```
