@@ -1,7 +1,39 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <set>
+#include <map>
+#include <deque>
+#include <queue>
+#include <numeric>
+#include <stack>
+#include <cassert>
+#include <cstring>
+#include <cmath>
+#include <random>
+#include <unordered_map>
+#include <unordered_set>
+#include <iomanip>
+#include <chrono>
+#include <sstream>
+#include <limits>
+#include <functional>
+#include <filesystem>
+#include <fstream>
 using namespace std;
-#define int long long
 #define endl '\n'
+#define LOCAL
+
+using int64 = int64_t;
+using uint64 = unsigned long long;
+using int128 = __int128_t;
+
+#ifdef LOCAL
+#include "src/debug.h"
+#else
+#define debug(...) 42
+#endif
+
 
 namespace fs = std::filesystem;
 
@@ -57,8 +89,8 @@ You can output floats with using cout << fixed << setprecision(12) << p << endl;
 This is to avoid stack overflow error
 
 on linux:
-run the following command to prevent stack overflow problems in recursive function calls. 
-Needs to only be ran for each bash/shell 
+run the following command to prevent stack overflow problems in recursive function calls.
+Needs to only be ran for each bash/shell
 ulimit -s unlimited
 This is the compiler code that will add some optimizations with the -O2
 g++ -O2 main.cpp -o main

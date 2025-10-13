@@ -15,8 +15,8 @@ which is not an Eulerian circuit.
 
 ## Eulerian Circuit in Directed Graphs
 
-For an Eulerian circuit in each node belongs to the same strongly connected component 
-and the indegree equals the outdegree for each node. 
+For an Eulerian circuit in each node belongs to the same strongly connected component
+and the indegree equals the outdegree for each node.
 
 # HAMILTONIANS
 
@@ -38,7 +38,7 @@ a Hamiltonian path that visits the nodes of S and ends at node x. It is possible
 implement this solution in O(n*2^n) time
 
 This finds a hamiltonian path that happens to contain all the nodes, so it is a line graph.  But yeah it uses dp bitmask algorithm.
-This is trying to find the minimum maximum distance between any two nodes in the graph.  or in other words minimize the maximum edge weight between any 
+This is trying to find the minimum maximum distance between any two nodes in the graph.  or in other words minimize the maximum edge weight between any
 two nodes connected in the hamiltonian path.
 
 ```cpp
@@ -82,143 +82,4 @@ void solve() {
     int ans = *min_element(dp[endMask - 1].begin(), dp[endMask - 1].end());
     cout << (N > 2 ? 2 : 1) << " " << ans << endl;
 }
-```
-
-# EULERIAN CIRCUITS
-
-## EULERIAN CIRCUITS IN UNDIRECTED GRAPH USING HIERHOLZER'S ALGORITHM
-
-adj list is a python list with set of neighbor nodes.  That way can remove them from adjency list to to not reprocess edges.
-
-```py
-def eulerian_circuit(adj_list, degrees):
-    # start node is 1 in this instance
-    n = len(degrees)
-    start_node = 1
-    stack = [start_node]
-    vis = [0] * (n + 1)
-    vis[start_node] = 1
-    while stack:
-        node = stack.pop()
-        for nei in adj_list[node]:
-            if vis[nei]: continue
-            vis[nei] = 1
-            stack.append(nei)
-    for i in range(n):
-        if (degrees[i] & 1) or (degrees[i] > 0 and not vis[i]): return False
-    return True
-
-def hierholzers_undirected(adj_list):
-    start_node = 1
-    stack = [start_node]
-    circuit = []
-    while stack:
-        node = stack[-1]
-        if len(adj_list[node]) == 0:
-            circuit.append(stack.pop())
-        else:
-            nei = adj_list[node].pop()
-            adj_list[nei].remove(node)
-            stack.append(nei)
-    return circuit
-```
-
-## Eulerian Path in Directed Graphs
-
-In a directed graph, we focus on indegrees and outdegrees of the nodes. A
-directed graph contains an Eulerian path exactly when all the edges belong to
-the same connected component and
-• in each node, the indegree equals the outdegree, or
-• in one node, the indegree is one larger than the outdegree, in another node,
-the outdegree is one larger than the indegree, and in all other nodes, the
-indegree equals the outdegree.
-
-### Function checking if Eulerian Path exists
-
-Just to know this checks if there is an Eulerian path from the
-specified start node to the end node. 
-
-```py
-def is_eulerian_path(n, adj_list, indegrees, outdegrees):
-    # start node is 1 in this instance
-    start_node = 1
-    end_node = n
-    stack = [start_node]
-    vis = [0] * (n + 1)
-    vis[start_node] = 1
-    while stack:
-        node = stack.pop()
-        for nei in adj_list[node]:
-            if vis[nei]: continue
-            vis[nei] = 1
-            stack.append(nei)
-    if outdegrees[start_node] - indegrees[start_node] != 1 or indegrees[end_node] - outdegrees[end_node] != 1: return False
-    for i in range(1, n + 1):
-        if ((outdegrees[i] > 0 or indegrees[i] > 0) and not vis[i]): return False
-        if (indegrees[i] != outdegrees[i] and i not in (start_node, end_node)): return False
-    return True
-```
-
-### Finding the Eulerian Path in using Hierholzer's Algorithm
-
-This assumes you know the start and end node.  A trick is you can find the start and end node based on the following logic.
-if outdegree > indegree that will be the start node
-if outdegree < indegree that will be the end node
-
-```py
-def hierholzers_directed(n, adj_list):
-    start_node = 1
-    end_node = n
-    stack = [start_node]
-    euler_path = []
-    while stack:
-        node = stack[-1]
-        if len(adj_list[node]) == 0:
-            euler_path.append(stack.pop())
-        else:
-            nei = adj_list[node].pop()
-            stack.append(nei)
-    return euler_path[::-1]
-```
-
-This is a specific implementation that uses unordered_map because the node values are all over the place.
-It needs coordinate compression. 
-
-```cpp
-class Solution {
-private:
-    unordered_set<int> nodes;
-    unordered_map<int, int> outdeg, indeg;
-    unordered_map<int, vector<int>> adj;
-    vector<vector<int>> eulerPath;
-    void dfs(int u) {
-        while (outdeg[u]) {
-            outdeg[u]--;
-            int v = adj[u][outdeg[u]];
-            dfs(v);
-            eulerPath.push_back({u, v});
-        }
-    }
-public:
-    vector<vector<int>> validArrangement(vector<vector<int>>& pairs) {
-        for (const auto &edge : pairs) {
-            int u = edge[0], v = edge[1];
-            outdeg[u]++;
-            indeg[v]++;
-            adj[u].emplace_back(v);
-            nodes.insert(u);
-            nodes.insert(v);
-        }
-        int s = pairs[0][0];
-        for (int u : nodes) {
-            if (outdeg[u] - indeg[u] == 1) {
-                s = u;
-                break;
-            }
-        }
-        dfs(s);
-        reverse(eulerPath.begin(), eulerPath.end());
-        return eulerPath;
-    }
-};
 ```

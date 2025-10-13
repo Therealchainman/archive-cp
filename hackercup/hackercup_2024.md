@@ -48,7 +48,7 @@ signed main() {
 ### Solution 1:  math, probability
 
 1. Calculate the probability of having N - 1 correct lines, need to convert into decimal form and not percentage so that it is correct.
-2. Then that is the target probability with N lines, so just take the Nth root to get what is the necessary probability to multiple to it.  Cause you have to multiple by this value N times to get the target probability. 
+2. Then that is the target probability with N lines, so just take the Nth root to get what is the necessary probability to multiple to it.  Cause you have to multiple by this value N times to get the target probability.
 3. Then convert back to percentage and subtract the original percentage to get the difference.
 
 ```cpp
@@ -84,11 +84,11 @@ signed main() {
 
 ## Problem C: Fall in Line
 
-### Solution 1: 
+### Solution 1:
 
-1. It was probability problem. 
-1. If there were more than N / 2 points along the optimal path, it turns out the probability of picking two points at random and having them be on the optimal path is less than 1/4.  So the probability of picking two points no on optimal path is greater than 3/4.  So if you keep picking two points (3/4)^K, if you pick K times this is the probability that it fails K times.  The probability will get very low because the number is less than 1.  And therefore you will be guaranteed to have picked two points along the optimal path. 
-1. If the optimal path is under half it doesn't really matter you can just return N.  
+1. It was probability problem.
+1. If there were more than N / 2 points along the optimal path, it turns out the probability of picking two points at random and having them be on the optimal path is less than 1/4.  So the probability of picking two points no on optimal path is greater than 3/4.  So if you keep picking two points (3/4)^K, if you pick K times this is the probability that it fails K times.  The probability will get very low because the number is less than 1.  And therefore you will be guaranteed to have picked two points along the optimal path.
+1. If the optimal path is under half it doesn't really matter you can just return N.
 
 ```cpp
 string base = "fall_in_line";
@@ -111,7 +111,7 @@ int outer_product(const pair<int, int>& v1, const pair<int, int>& v2) {
     return v1.x * v2.y - v1.y * v2.x;
 }
 
-// calculate number of points non-collinear with points p1 and p2.  
+// calculate number of points non-collinear with points p1 and p2.
 int calc(const pair<int, int>& p1, const pair<int, int>& p2) {
     int ans = 0;
     for (int i = 0; i < N; i++) {
@@ -167,8 +167,8 @@ signed main() {
 2. So it is easy to find the closest it gets to the target from the left of the goal and the right of the goal.
 3. One of these is the answer, or both of them are.  But how do you find the index of the stone that is the closest to the goal?
 4. I observed that the index of the stones is sorted, that is the leftmost stone is the last thrown and the rightmost stone is the first thrown.
-5. So really if you just know how many stones are to at the given position, you know it is the N - count of stones at that position. 
-6. For example if you have N = 10, and count of stones = 3, that means it is 3rd from the last thrown stones, so that would be 8th stone thrown that reaches that position. 
+5. So really if you just know how many stones are to at the given position, you know it is the N - count of stones at that position.
+6. For example if you have N = 10, and count of stones = 3, that means it is 3rd from the last thrown stones, so that would be 8th stone thrown that reaches that position.
 
 ```cpp
 string base = "line_of_delivery_part_1";
@@ -264,14 +264,14 @@ signed main() {
 
 ## Problem D2: Line of Delivery (Part 2)
 
-### Solution 1: 
+### Solution 1:
 
-1. This one looks more challenging because now the stones have unit width, that is they take up spots, and you can have duplicate energies now.  This time a stone will stop at position just in front of the next it collides with and transfers it's energy. 
+1. This one looks more challenging because now the stones have unit width, that is they take up spots, and you can have duplicate energies now.  This time a stone will stop at position just in front of the next it collides with and transfers it's energy.
 2. It is a little more complex than part 1
 now if you have 2 balls before position 9, and you throw a ball with strength 9, it will send the last ball to position 11, because the balls take up space.  So that means it will go 9 + # of balls before it.
-But it is complicated because what of the other balls between.  
+But it is complicated because what of the other balls between.
 
-I get feeling it may involve stack. 
+I get feeling it may involve stack.
 
 ```cpp
 
@@ -281,7 +281,7 @@ I get feeling it may involve stack.
 
 ## Problem A: Subsonic Subway
 
-### Solution 1: 
+### Solution 1:
 
 ```cpp
 string base = "subsonic_subway";
@@ -332,7 +332,7 @@ signed main() {
 
 ## Problem B: Prime Subtractorization
 
-### Solution 1: 
+### Solution 1:
 
 ```cpp
 string base = "prime_subtractorization";
@@ -391,7 +391,7 @@ signed main() {
 
 ## Problem C: Substantial Losses
 
-### Solution 1: 
+### Solution 1:
 
 ```py
 
@@ -412,7 +412,7 @@ if __name__ == '__main__':
 
 ## Problem D: Substitution Cipher
 
-### Solution 1: 
+### Solution 1:
 
 ```cpp
 
@@ -486,7 +486,7 @@ signed main() {
 
 ### Solution 1:  digit dp, recursive
 
-1.  Appears you didn't need digit dp for this problem. 
+1.  Appears you didn't need digit dp for this problem.
 
 ```cpp
 string base = "cottontail_climb_part_2";
@@ -572,20 +572,216 @@ signed main() {
 }
 ```
 
-## Problem C: Bunny Hopscotch
+## Problem D: Four in a Burrow
 
-### Solution 1: 
-
-Suppose I want to perform a range query to count all the integers in a range that are equal to x?  
-
-given a grid, and a specific cell (r, c) in the grid.  I am calculating the distance from this cell to other cells to be the max(|r1 - r2|, |c1 - c2|), how can I quickly count for each distance the number of other cells that are that distance away, such as distance = 1, there might be at most 8 cells, for distance = 2, 16 cells, distance = 3, 24 cells.  Basically the maximum number of other cells within the boundary of the grid is going to be 4 * 2 * distance.  But some of the cells may be outside of the grid, how do I calculate with that consideration? 
-
-I think I can count how many cells there are at a distance 1 <= d <= 800 in about O(N^2) time complexity.  But this is not aware of cells that have the same owner.  How could I possibly calculate that quickly.  I'd have to know how many cells have the same owner at each distance.  
-
-I guess you can do this if you know which cells have same values.  
-
-I just don't know how to query what cells have same value as the current one fast enough.  So yeah I give up.  
+### Solution 1: dfs with backtracking, recursion, height state, memoization
 
 ```cpp
+int R = 6, C = 7;
+vector<string> board;
+vector<int> heights;
+map<vector<int>, char> memo;
 
+bool checkVertical(int col, const vector<int> &heights) {
+    int h = heights[col];
+    char p = board[h][col];
+    int cnt = 0;
+    for (int r = h; r >= 0; --r) {
+        if (board[r][col] != p) break;
+        cnt++;
+    }
+    return cnt >= 4;
+}
+
+bool checkHorizontal(int col, const vector<int> &heights) {
+    int h = heights[col];
+    char p = board[h][col];
+    int cnt = 1;
+    for (int c = col - 1; c >= 0; --c) {
+        if (heights[c] <= h) break;
+        if (board[h][c] != p) break;
+        cnt++;
+    }
+    for (int c = col + 1; c < C; ++c) {
+        if (heights[c] <= h) break;
+        if (board[h][c] != p) break;
+        cnt++;
+    }
+    return cnt >= 4;
+}
+
+bool checkDiagonal(int col, const vector<int> &heights) {
+    int h = heights[col];
+    char p = board[h][col];
+    int cnt = 1;
+    for (int r = h - 1, c = col - 1; r >= 0 && c >= 0; --r, --c) {
+        if (heights[c] <= r) break;
+        if (board[r][c] != p) break;
+        cnt++;
+    }
+    for (int r = h + 1, c = col + 1; r < R && c < C; ++r, ++c) {
+        if (heights[c] <= r) break;
+        if (board[r][c] != p) break;
+        cnt++;
+    }
+    if (cnt >= 4) return true;
+    cnt = 1;
+    for (int r = h - 1, c = col + 1; r >= 0 && c < C; --r, ++c) {
+        if (heights[c] <= r) break;
+        if (board[r][c] != p) break;
+        cnt++;
+    }
+    for (int r = h + 1, c = col - 1; r < R && c >= 0; ++r, --c) {
+        if (heights[c] <= r) break;
+        if (board[r][c] != p) break;
+        cnt++;
+    }
+    return cnt >= 4;
+}
+
+bool check(int idx, const vector<int> &heights) {
+    return checkHorizontal(idx, heights) || checkVertical(idx, heights) || checkDiagonal(idx, heights);
+}
+
+char dfs(int idx) {
+    if (idx == R * C) return '0';
+    if (memo.find(heights) != memo.end()) {
+        return memo[heights];
+    }
+    char turn = idx % 2 == 0 ? 'C' : 'F';
+    bool canReach = false, cwin = false, fwin = false;
+    for (int i = 0; i < C; ++i) {
+        if (heights[i] == R) continue;
+        if (board[heights[i]][i] != turn) continue;
+        heights[i]++;
+        char res = dfs(idx + 1);
+        heights[i]--;
+        bool canWin = check(i, heights);
+        if (canWin && res != 'D') {
+            if (turn == 'C') {
+                cwin = true;
+            } else {
+                fwin = true;
+            }
+            canReach = true;
+            continue;
+        }
+        if (res == 'C') {
+            cwin = true;
+        } else if (res == 'F') {
+            fwin = true;
+        } else if (res == '?') {
+            cwin = fwin = true;
+        }
+        if (res != 'D') {
+            canReach = true;
+        }
+    }
+    if (!canReach) return memo[heights] = 'D';
+    if (cwin && fwin) return memo[heights] = '?';
+    if (cwin) return memo[heights] = 'C';
+    if (fwin) return memo[heights] = 'F';
+    return memo[heights] = '0';
+}
+
+void solve() {
+    board.clear();
+    for (int i = 0; i < R; i++) {
+        string row;
+        cin >> row;
+        board.emplace_back(row);
+    }
+    reverse(board.begin(), board.end());
+    heights.assign(7, 0);
+    memo.clear();
+    char ans = dfs(0);
+    cout << ans << endl;
+}
+```
+
+## Problem C: Bunny Hopscotch
+
+### Solution 1: 2D BIT, binary search, map
+
+1. Query in rectangle to find the count of cells with same bunny, then take total size of rectangle minus that to get the cells you can jump to that have a different bunny within the distance.
+
+```cpp
+int R, C;
+int64 K;
+unordered_map<int, vector<pair<int, int>>> adj;
+
+struct BIT2D {
+    int n;
+    vector<vector<int64>> bit;
+    BIT2D(int n) : n(n), bit(n + 1, vector<int64>(n + 1, 0)) {}
+
+    void add(int r, int c, int64 delta) {
+        for (int i = r; i <= n; i += i & -i) {
+            for (int j = c; j <= n; j += j & -j) {
+                bit[i][j] += delta;
+            }
+        }
+    }
+
+    int64 sum(int r, int c) const {
+        int64 res = 0;
+        for (int i = r; i > 0; i -= i & -i) {
+            for (int j = c; j > 0; j -= j & -j) {
+                res += bit[i][j];
+            }
+        }
+        return res;
+    }
+
+    int64 rect(int r1, int c1, int r2, int c2) const {
+        if (r1 > r2) swap(r1, r2);
+        if (c1 > c2) swap(c1, c2);
+        int64 res = sum(r2, c2) - sum(r1 - 1, c2) - sum(r2, c1 - 1) + sum(r1 - 1, c1 - 1);
+        return res;
+    }
+};
+
+bool possible(BIT2D& bit, int target) {
+    int64 cnt = 0;
+    for (const auto &[_, coords] : adj) {
+        for (const auto &[r, c] : coords) {
+            bit.add(r + 1, c + 1, 1);
+        }
+        for (const auto &[r, c] : coords) {
+            int r1 = max(1, r - target + 1), r2 = min(r + target + 1, R);
+            int c1 = max(1, c - target + 1), c2 = min(c + target + 1, C);
+            int64 same = bit.rect(r1, c1, r2, c2);
+            int64 total = (r2 - r1 + 1) * (c2 - c1 + 1);
+            int64 delta = total - same;
+            cnt += delta;
+        }
+        for (const auto &[r, c] : coords) {
+            bit.add(r + 1, c + 1, -1);
+        }
+    }
+    return cnt < K;
+}
+
+void solve() {
+    cin >> R >> C >> K;
+    adj.clear();
+    for (int i = 0; i < R; i++) {
+        for (int j = 0; j < C; j++) {
+            int x;
+            cin >> x;
+            adj[x].emplace_back(i, j);
+        }
+    }
+    BIT2D bit(max(R, C) + 1);
+    int64 lo = 0, hi = 800;
+    while (lo < hi) {
+        int64 mid = lo + (hi - lo) / 2;
+        if (possible(bit, mid)) {
+            lo = mid + 1;
+        } else {
+            hi = mid;
+        }
+    }
+    cout << lo << endl;
+}
 ```
