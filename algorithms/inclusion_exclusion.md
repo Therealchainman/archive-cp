@@ -3,7 +3,7 @@
 The Principle of Inclusion and Exclusion (PIE) is a fundamental counting tool in combinatorics and probability theory.
 
 |A U B| = |A| + |B| - |A ∩ B|
-size of union when size of intersection is known. 
+size of union when size of intersection is known.
 
 # Generalized inclusion–exclusion for “exactly M”
 
@@ -12,8 +12,8 @@ Count objects where **exactly** \(M\) of a given family of properties hold.
 
 ## Setup
 - Let \(E\) be a finite set of “properties” or “constraints.”
-- For each \($F \subseteq E$), let  
-  \(g(F)\) be the number of objects that satisfy **all** properties in \(F\)  
+- For each \($F \subseteq E$), let
+  \(g(F)\) be the number of objects that satisfy **all** properties in \(F\)
   with **no** restriction on the other properties in \($E \setminus F$).
 - Let \(h(M)\) be the number of objects that satisfy **exactly** \(M\) properties from \(E\).
 
@@ -47,7 +47,7 @@ $$
 
 **Fit to the template.**
 - Properties are “divisible by \(p\)” for \($p \in E$).
-- For \($F \subseteq E$), the numbers divisible by all primes in \(F\) are the multiples of \($\mathrm{lcm}(F)$).  
+- For \($F \subseteq E$), the numbers divisible by all primes in \(F\) are the multiples of \($\mathrm{lcm}(F)$).
   So
   $$
   g(F) = \left\lfloor \frac{Y}{\mathrm{lcm}(F)} \right\rfloor,
@@ -92,7 +92,7 @@ You can also get \(h(0)=26\). The four values sum to \(100\) as a check.
 ## Template to copy
 - Define \(E\) and what it means to “satisfy” a property.
 - Prove or compute \(g(F)\) for all \($F \subseteq E$).
-- Choose the target \(M\).  
+- Choose the target \(M\).
 - Evaluate
   $$
   h(M)=\sum_{F \subseteq E} g(F)\,\binom{|F|}{M}\,(-1)^{|F|-M}.
@@ -147,13 +147,13 @@ void solve() {
 ## An example
 
 suppose you want to count the number of people with a cat or dog or fish as pet.  Suppose you have these elements, c, d, f, cd, cf, df, cdf.  Then if you split that into the sets of cat A_cat = {c, cd, cf, cdf}, and sets of dogs A_dog = {d, cd, df, cdf}, and sets containing fish A_fish = {f, cf, df, cdf}.  Then you want to use principle of inclusion and exclusion because the first time you can realize you are going to end up counting each group of elements, including intersections (yeah)
-(c, 1), (d, 1), (f, 1), (cd, 2), (cf, 2), (df, 2), (cdf, 3),  so you double counted the intersections of size 2 and triple counted the intersections of size 3.  So you correct for this by subtracting intersections of size 2.  and so on. 
+(c, 1), (d, 1), (f, 1), (cd, 2), (cf, 2), (df, 2), (cdf, 3),  so you double counted the intersections of size 2 and triple counted the intersections of size 3.  So you correct for this by subtracting intersections of size 2.  and so on.
 
 ## Counting the number of coprime integers
 
-This is an example problem you can use PIE. 
+This is an example problem you can use PIE.
 
-This counts the number of integers in the range [1, x] that are coprime with m.  Also you can easily calculate the inverse as well by switching the signs and everything.  That is you can calculate the number of integers in range [1, x] that are not coprime with integer m.  or just take x - num_coprimes(x, m) to get that. 
+This counts the number of integers in the range [1, x] that are coprime with m.  Also you can easily calculate the inverse as well by switching the signs and everything.  That is you can calculate the number of integers in range [1, x] that are not coprime with integer m.  or just take x - num_coprimes(x, m) to get that.
 
 ```cpp
 // count number of coprimes of x to m
@@ -180,7 +180,7 @@ int num_coprimes(int x, int m) {
 
 ## dynamic programming implementation of technique
 
-In this case you can use the inclusion and exclusion technique to remove duplicates coming in the form of if a factor is divisible by another factor such as x is divisibly by y, then x will contain duplicates from y.  
+In this case you can use the inclusion and exclusion technique to remove duplicates coming in the form of if a factor is divisible by another factor such as x is divisibly by y, then x will contain duplicates from y.
 
 ```py
 factors = []
@@ -207,4 +207,31 @@ for i in range(m):
     for j in range(i):
         if dp[i][j]:
             counts[i] -= counts[j]
+```
+
+The statement is “count objects with at least one feature from a list” or “avoid none of these features”.
+
+Direct counting double counts a lot, and intersections of features are easier to count than the union itself.
+
+You can test every intersection by enforcing several features at once and the structure simplifies.
+
+N is small enough to allow work, or intersections have a pattern that lets you compute them quickly by DP or transforms.
+
+
+## Downward DP for Inclusion-Exclusion
+
+Classic inclusion–exclusion uses alternating signs because you have overlapping sets and you need to fix overcounts. Here, the “overcount” at level d comes only from its multiples, and those groups are disjoint once you condition on the exact gcd. So you do not see alternating signs explicitly. Instead, you do a topological elimination over the divisibility graph:
+
+You have number of heights divisible by i freq[i].
+
+F[d] = number of K-size subsets whose elements are all divisible by d.
+
+K-sets whose gcd is a multiple of d.
+
+$G[d] = F[d] - \sum_{m \geq 2} G[d \cdot m]$ number of K-sets with gcd exactly d
+
+
+
+```cpp
+
 ```

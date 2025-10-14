@@ -418,6 +418,37 @@ if __name__ == '__main__':
 
 ```
 
+## Problem E: Wildcard Submissions
+
+### Solution 1:
+
+longest common prefix over subsets
+
+compute minimum pairwise value for all subsets
+
+It works because wildcard LCP is a pairwise bottleneck: the set’s first break is always witnessed by some pair, so the answer for S is the minimum over three buckets of pairs, which you get using {p1,p2}, S \ {p1}, and S \ {p2}.
+
+recurrence relation, just need three pairs
+
+You've calculated all these triplets by taking lcp of pairs, (1,2,3), (1,2,4),(1,3,4), (2,3,4) so then we can pick any two p1 and p2, such as (1, 3) then we have without p1, (2,3,4) and without p2, (1,2,4). Since I already agree that the lcp is corectly calculated in (2,3,4) and (1,2,4) triplets, then it only comes down the minimum of them, cause the 3 with the 2 and 4 might be 5, and 1 with 2 and 4 might be 6, so that means they are limited by the 3, but then the lcp(1,3) might be 4, so that limits it even further so the lcp of (1,2,3,4) is 4
+
+This graph analogy really helped me understand the lcp dp.
+
+1) Graph picture
+Calculating minimum edge over all subgraphs
+Think of each string as a node. Every unordered pair is an edge labeled with its pairwise LCP. For a subset S, LCP(S) is the smallest edge label in the subgraph induced by S. Pick p1 = 1 and p2 = 3 in S = {1,2,3,4}. The edges inside S split like this:
+- The single edge between the two chosen nodes: {1,3}.
+- All edges that do not touch node 1. Those are exactly the edges inside the induced subgraph on {2,3,4}.
+- All edges that do not touch node 3. Those are exactly the edges inside the induced subgraph on {1,2,4}.
+So the minimum edge in the whole S-induced subgraph equals
+min( label({1,3}), min edge in {2,3,4}, min edge in {1,2,4} ).
+
+Think of it as reusing the already known minimum inside smaller induced subgraphs to get the minimum for the bigger one.
+
+```cpp
+
+```
+
 # Round 2
 
 ## Problem A1: Cottontail Climb (Part 1)
@@ -785,3 +816,54 @@ void solve() {
     cout << lo << endl;
 }
 ```
+
+# Round 3
+
+## Problem A: Set, Cover
+
+### Solution 1:
+
+```cpp
+
+```
+
+## Problem B: Least Common Ancestor
+
+### Solution 1:
+
+```cpp
+
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
+## Problem E1: All Triplets Shortest Path (Part 1)
+
+### Solution 1:
+
+When the second node is larger than its neighbors.
+0 - 2 - 1 - 3
+1. That means the second node is larger than the first node.  I cannot rely on it as an intermediate to calculate the distance from the first to the fourth node.  Because it won't be calculated until later than the first node.
+dist(0, 3) from dist(2, 3) nope dist(2, 3) calculated at later i = 2 from i = 0
+2. I also cannot rely on the third node as the intermediate node, because the second node is larger than it so I will not have calculated the distance to it yet.
+dist(0,3) from dist(0, 1), not possible because
+that would require dist(0,1) to be calculated going through k = 2, but we haven't reached k = 2, we are trying to solve this with k = 1.
+
+When the third node is larger than its neighbors
+0 - 1 - 3 - 2
+1. That means the third node is larger larger than the fourth node, so taking it as an intermediate, will it is going to be larger, so it won't be calculated until later.
+dist(0, 2) from dist(0, 3)
+2. I also cannot rely on the second node as an intermediate, because that require me to have already calculated the distance from the second to the fourth node, but it must go through the third node that is larger.
+dist(0, 2) from dist(1, 2)
+
+```cpp
+
+```
+
+What is the intuition behind, this how might I reason to this solution?

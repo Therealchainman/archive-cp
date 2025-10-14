@@ -5,7 +5,7 @@ prime sieve to generate prime numbers
 primes holds the prime integers for the lim integer
 
 sieve holds the prime factors for each integer from 0, 1, 2, ..., lim
-So it gives you the prime factorization of all numbers in the range. 
+So it gives you the prime factorization of all numbers in the range.
 
 the time complexity is O(n log log n) most likely
 
@@ -49,7 +49,7 @@ void sieve(int n) {
 
 ## fast prime sieve for prime factorizations of each integer
 
-precomputes the prime factorization for each integer from 0 to upper_bound (inclusive).  This one is a bit worrisome, it may be too slow in actually.  A faster approach is below for how to get the prime factorization of integer queries. 
+precomputes the prime factorization for each integer from 0 to upper_bound (inclusive).  This one is a bit worrisome, it may be too slow in actually.  A faster approach is below for how to get the prime factorization of integer queries.
 
 Note: this does not get the multiplicity of each prime factor, just the prime factors themselves.
 
@@ -82,7 +82,7 @@ void sieve(int n) {
 
 If you calculate the smallest prime factor for each integer, you can use that to speed up prime factorization of each integer from O(sqrt(n)) to O(log(n)).  While the prime sieve here is really fast and just nlog(log(n))
 
-Just remember you want to call the sieve at the appropriate location, don't want to recompute it over and over it is a precomputation step that should only be done once. 
+Just remember you want to call the sieve at the appropriate location, don't want to recompute it over and over it is a precomputation step that should only be done once.
 
 ```py
 def sieve(n):
@@ -103,7 +103,7 @@ def factorize(x):
     return factors
 ```
 
-Full example of smallest prime factor being used to count divisors in C++. 
+Full example of smallest prime factor being used to count divisors in C++.
 
 ```cpp
 const int MAXN = 1e5 + 5;
@@ -165,7 +165,7 @@ signed main() {
 }
 ```
 
-You can also count the number of prime integers in the prime factorization of an integer, excluding 1, which is not prime anyways. 
+You can also count the number of prime integers in the prime factorization of an integer, excluding 1, which is not prime anyways.
 
 
 ```cpp
@@ -186,7 +186,7 @@ int count_primes(int x) {
 def prime_sieve(lim):
     multi_sum = [0] * lim
     for i in range(2, lim):
-        if multi_sum[i] > 0: continue 
+        if multi_sum[i] > 0: continue
         for j in range(i, lim, i):
             num = j
             while num % i == 0:
@@ -223,7 +223,7 @@ for(int i = 1; i<=n; i++)
 
 ## Segmented Sieve
 
-This segmented sieve is used to find all prime numbers in a range [l, r] where l and r can be very large, up to 10^12 or more.  the main requirement is that the range [l, r] should not be too large, ideally less than 10^7.  
+This segmented sieve is used to find all prime numbers in a range [l, r] where l and r can be very large, up to 10^12 or more.  the main requirement is that the range [l, r] should not be too large, ideally less than 10^7.
 
 time complexity is $\mathcal{O}\left((R - L + 1) \log\log R + \sqrt{R} \log\log \sqrt{R} \right)$
 
@@ -281,6 +281,24 @@ for (int i = 2; 1LL * i * i < MAXN; ++i) {
     int sq = 1LL * i * i;
     for (int j = sq; j < MAXN; j += sq) {
         while (dp[j] % sq == 0) dp[j] /= sq;
+    }
+}
+```
+
+## Sum over Multiplies sieve
+
+It builds, for every d, how many heights are divisible by d.
+
+What it computes
+- cnt[x] is how many times integer x appears in the input
+- The inner loop adds cnt[x] over all multiples x of d.
+- After it runs, freq[d] = sum_{x multiple of d} cnt[x] = #{ A_i : d divides A_i }.
+
+```cpp
+for (int d = 1; d <= Gmax; ++d) freq[d] = 0;
+for (int d = 1; d <= Gmax; ++d) {
+    for (int x = d; x <= Gmax; x += d) {
+        freq[d] += cnt[x];
     }
 }
 ```

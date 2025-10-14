@@ -24,9 +24,9 @@ for (int i = 1; i * i <= x; i++) {
 
 ## Euler Totient Theorem
 
-The euler totient function calculates the number of integers that are coprime with totient(i) from [1, i] 
+The euler totient function calculates the number of integers that are coprime with totient(i) from [1, i]
 
-precompute the euler totient function (phi) value from 1 to n in O(nlog(log(n))) time using the sieve of Eratosthenes algorithm.  You can also easily calculate the prefix sum, and also get the prime factorization of all the integers in this. 
+precompute the euler totient function (phi) value from 1 to n in O(nlog(log(n))) time using the sieve of Eratosthenes algorithm.  You can also easily calculate the prefix sum, and also get the prime factorization of all the integers in this.
 
 ```cpp
 int totient[MAXN], totient_sum[MAXN];
@@ -40,7 +40,7 @@ void sieve(int n) {
                 totient[j] -= totient[j] / i;
                 primes[j].emplace_back(i);
             }
-        }   
+        }
     }
     for (int i = 2; i < n; i++) {
         totient_sum[i] = totient_sum[i - 1] + totient[i];
@@ -132,11 +132,11 @@ Using Euler Totient Theorem and Chinese Remainder Theorem to solve power tower, 
 
 Using Euler Totient Theorem and Chinese Remainder Theorem to solve an infinite power tower of x, where x is a number and you want to find it modulo some number.
 
-Here is an example, if x = 10, you can solve this using the following code.  You have to find the prime factors of 10, which are 2 and 5.  Then you can solve it. 
+Here is an example, if x = 10, you can solve this using the following code.  You have to find the prime factors of 10, which are 2 and 5.  Then you can solve it.
 
-So whatever x is you find the prime factors and have it run chinese remainder theorem whenever you are taking a moduli n that is divisible by one of it's prime factors.  You split all the prime factors that divide it into one moduli and the rest in another. And recursively solve the other one. 
+So whatever x is you find the prime factors and have it run chinese remainder theorem whenever you are taking a moduli n that is divisible by one of it's prime factors.  You split all the prime factors that divide it into one moduli and the rest in another. And recursively solve the other one.
 
-It requires the other code from here and exponentiation, change out the 10 for whatever x is. 
+It requires the other code from here and exponentiation, change out the 10 for whatever x is.
 
 This could be written to be useable for any x, but for now it was used just for 10.
 
@@ -162,3 +162,9 @@ int inf_power(int n) {
     return res;
 }
 ```
+
+## Bezout's Identity
+
+It can apply to more than 2 integers, and it can be used to find the greatest common divisor of multiple numbers. The identity states that for any integers a, b, and c, there exist integers x and y such that ax + by = c, where c is the greatest common divisor of a and b.
+
+so ax+by=gcd(a,b), but really multiples of gcd(a,b) as well.
