@@ -9,6 +9,9 @@ If you take from 1 to 1,000,000 here are some useful facts:
 - The maximum number of total prime factors a number can have is 19.
 - The maximum number of divisors a number can have is 240, and it is number 720,720.
 
+for $10^{14}$
+- The maximum number of distinct prime factors a number can have is 12.
+- The maximum number of total prime factors a number can have is 46.
 
 ## Finding all divisors of a number in square root time complexity
 

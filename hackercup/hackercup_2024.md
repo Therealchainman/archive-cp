@@ -821,26 +821,227 @@ void solve() {
 
 ## Problem A: Set, Cover
 
-### Solution 1:
+### Solution 1: area on grid, row, case by case
+
+1. Problem concept
+You want the largest possible axis-aligned rectangle that must cover every definite 1 in an N×N grid, while you may convert up to K unknown cells into 1s to stretch that rectangle.
+1. Geometric intuition
+Think of two boxes. One is the tight box around all current 1s. The other captures where the unknowns sit, globally and by row. Turning an unknown into a 1 lets you “pull” the sides of the 1s box outward toward those unknown positions.
+1. Case-based expansion
+For each budget K, the algorithm chooses simple patterns that maximally tug the rectangle.
+K = 0 keeps the current 1s box.
+K = 1 tests adding a single unknown anywhere.
+K = 2 uses two rows to pull left and right while also extending up or down.
+K = 3 mixes a chosen row with global unknown extremes to pull to different corners.
+K ≥ 4 treats the unknown region as fully pullable and covers both boxes together.
+1. Outcome and efficiency
+It computes the maximum area achievable under the flip budget without brute force. Summaries of rows and global extremes let it evaluate only a small set of rectangle candidates, keeping the work near quadratic at worst rather than exponential.
 
 ```cpp
+int N, K;
+vector<vector<char>> grid;
 
+int area(int r1, int r2, int c1, int c2) {
+    return (r2 - r1 + 1) * (c2 - c1 + 1);
+}
+
+void solve() {
+    cin >> N >> K;
+    grid.assign(N, vector<char>(N));
+    int minRow = N, maxRow = 0, minCol = N, maxCol = 0;
+    int minQRow = N, maxQRow = 0, minQCol = N, maxQCol = 0;
+    vector<int> rowMinCol(N, N), rowMaxCol(N, -1);
+    for (int r = 0; r < N; ++r) {
+        string row;
+        cin >> row;
+        for (int c = 0; c < N; ++c) {
+            grid[r][c] = row[c];
+            if (grid[r][c] == '1') {
+                minRow = min(minRow, r);
+                maxRow = max(maxRow, r);
+                minCol = min(minCol, c);
+                maxCol = max(maxCol, c);
+            } else if (grid[r][c] == '?') {
+                minQRow = min(minQRow, r);
+                maxQRow = max(maxQRow, r);
+                minQCol = min(minQCol, c);
+                maxQCol = max(maxQCol, c);
+                rowMinCol[r] = min(rowMinCol[r], c);
+                rowMaxCol[r] = max(rowMaxCol[r], c);
+            }
+        }
+    }
+    int ans = max(0, (maxRow - minRow + 1)) * max(0, (maxCol - minCol + 1));
+    if (K == 0) {
+        int rowLength = maxRow - minRow + 1;
+        int colLength = maxCol - minCol + 1;
+        ans = max(ans, area(minRow, maxRow, minCol, maxCol));
+        cout << ans << endl;
+        return;
+    }
+    if (K == 1) {
+        for (int r = 0; r < N; ++r) {
+            for (int c = 0; c < N; ++c) {
+                if (grid[r][c] != '?') continue;
+                ans = max(ans, area(min(minRow, r), max(maxRow, r), min(minCol, c), max(maxCol, c)));
+            }
+        }
+        cout << ans << endl;
+        return;
+    }
+    if (K == 2) {
+        for (int r1 = 0; r1 < N; ++r1) {
+            for (int r2 = 0; r2 < N; ++r2) {
+                ans = max(ans, area(min({minRow, r1, r2}), max({maxRow, r1, r2}), min(minCol, rowMinCol[r1]), max(maxCol, rowMaxCol[r2])));
+            }
+        }
+        cout << ans << endl;
+        return;
+    }
+    if (K == 3) {
+        for (int r = 0; r < N; ++r) {
+            // upper left corner, bottom and right
+            ans = max(ans, area(min(minRow, r), max(maxRow, maxQRow), min(minCol, rowMinCol[r]), max(maxCol, maxQCol)));
+            // upper right corner, bottom and left
+            ans = max(ans, area(min(minRow, r), max(maxRow, maxQRow), min(minCol, minQCol), max(maxCol, rowMaxCol[r])));
+            // lower left corner, top and right
+            ans = max(ans, area(min(minRow, minQRow), max(maxRow, r), min(minCol, rowMinCol[r]), max(maxCol, maxQCol)));
+            // lower right corner, top and left
+            ans = max(ans, area(min(minRow, minQRow), max(maxRow, r), min(minCol, minQCol), max(maxCol, rowMaxCol[r])));
+        }
+        cout << ans << endl;
+        return;
+    }
+    ans = max(ans, area(min(minRow, minQRow), max(maxRow, maxQRow), min(minCol, minQCol), max(maxCol, maxQCol)));
+    cout << ans << endl;
+}
 ```
 
 ## Problem B: Least Common Ancestor
 
-### Solution 1:
+### Solution 1:  small-to-large tree merging, preorder traversal, stack, and postorder traversal, counts, and sets
+
+1. Goal and inputs
+Build a rooted tree from parent indices, compress node names to integers 0..M-1, then compute two values per node A[u] and D[u] and fold them into a single modular hash.
+1. Name compression
+Collect all names, sort and unique to form pool, then map each names[i] to idx using lower_bound. M is the number of distinct names. This gives stable, lexicographic indices.
+1. Path tracking (ancestors)
+ancestorCnts stores counts of name indices on the path from the root to the current node’s parent. ancestorData is a set of pairs (count, idx). It is kept consistent by removing the old pair before updating the count. Ordering is by count then idx.
+1. Meaning of A[u]
+If ancestorData is not empty, A[u] is set to the 1-based index of the smallest pair in ancestorData. That is the name with the minimum frequency along the path to the parent, breaking ties by smaller name index. If empty, A[u] stays 0.
+1. Subtree aggregation with small to large
+For each node u, dfs merges each child v’s set into u using the small to large trick: always merge the smaller child structure into the larger one. This keeps total complexity near O(N log N).
+1. Subtree tracking structures
+cnts[u] maps name index to its frequency in u’s processed subtree. treeData[u] is a set of pairs (count, idx) built from cnts[u]. Before increasing a count, the old pair is erased from the set, then the updated pair is inserted. After merging all children and before counting u itself, D[u] is set to the 1-based index at treeData[u].begin() if nonempty. Then u’s own name is added to cnts[u] and treeData[u].
+1. Backtracking discipline
+For ancestor structures, the code increments the current node’s name before visiting children and restores the path state after finishing u by decrementing and erasing if the count drops to zero. This ensures ancestor data reflects exactly the path to the current DFS node.
 
 ```cpp
+const int MOD = 998'244'353;
+int N, M;
+vector<vector<int>> adj;
+vector<string> names, pool;
+// map the names to index in pool
+// map node to name, then map that name to index in pool
+unordered_map<string, int> nameToIndex;
+vector<unordered_map<int, int>> cnts;
+vector<set<pair<int, int>>> treeData;
+unordered_map<int, int> ancestorCnts;
+set<pair<int, int>> ancestorData;
+vector<int> A, D;
 
-```
+void dfs(int u, int p = -1) {
+    int idx = nameToIndex[names[u]];
+    if (!ancestorData.empty()) {
+        auto [_, index] = *ancestorData.begin();
+        A[u] = index + 1;
+    }
+    if (ancestorCnts.count(idx)) {
+        int cur = ancestorCnts[idx];
+        auto it = ancestorData.find({cur, idx});
+        ancestorData.erase(it);
+    }
+    ancestorData.emplace(++ancestorCnts[idx], idx);
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        dfs(v, u);
+        if (treeData[u].size() < treeData[v].size()) {
+            swap(treeData[u], treeData[v]);
+            swap(cnts[u], cnts[v]);
+        }
+        // now add all tree data
+        for (auto [c, i] : treeData[v]) {
+            if (cnts[u].count(i)) {
+                int cur = cnts[u][i];
+                auto it = treeData[u].find({cur, i});
+                treeData[u].erase(it);
+            }
+            cnts[u][i] += c;
+            treeData[u].insert({cnts[u][i], i});
+        }
+    }
+    if (!treeData[u].empty()) {
+        auto [_, index] = *treeData[u].begin();
+        D[u] = index + 1;
+    }
+    if (cnts[u].count(idx)) {
+        int cur = cnts[u][idx];
+        auto it = treeData[u].find({cur, idx});
+        treeData[u].erase(it);
+    }
+    cnts[u][idx] += 1;
+    treeData[u].insert({cnts[u][idx], idx});
 
-##
+    if (ancestorCnts.count(idx)) {
+        int cur = ancestorCnts[idx];
+        auto it = ancestorData.find({cur, idx});
+        ancestorData.erase(it);
+    }
+    if (--ancestorCnts[idx]) {
+        ancestorData.emplace(ancestorCnts[idx], idx);
+    } else {
+        ancestorCnts.erase(idx);
+    }
+}
 
-### Solution 1:
-
-```cpp
-
+void solve() {
+    cin >> N;
+    adj.assign(N, vector<int>());
+    names.assign(N, "");
+    pool.clear();
+    treeData.assign(N, set<pair<int, int>>());
+    cnts.assign(N, unordered_map<int, int>());
+    ancestorCnts.clear();
+    ancestorData.clear();
+    nameToIndex.clear();
+    A.assign(N, 0);
+    D.assign(N, 0);
+    for (int i = 0; i < N; ++i) {
+        int p; string s;
+        cin >> p >> s;
+        names[i] = s;
+        pool.emplace_back(s);
+        if (p == -1) continue;
+        p--;
+        adj[p].emplace_back(i);
+        adj[i].emplace_back(p);
+    }
+    sort(pool.begin(), pool.end());
+    pool.erase(unique(pool.begin(), pool.end()), pool.end());
+    for (int i = 0; i < N; ++i) {
+        nameToIndex[names[i]] = lower_bound(pool.begin(), pool.end(), names[i]) - pool.begin();
+    }
+    M = pool.size();
+    dfs(0);
+    int64 ans = 0;
+    for (int i = 0; i < N; ++i) {
+        ans = ans * (M + 1) % MOD;
+        ans = (ans + A[i]) % MOD;
+        ans = ans * (M + 1) % MOD;
+        ans = (ans + D[i]) % MOD;
+    }
+    cout << ans << endl;
+}
 ```
 
 ## Problem E1: All Triplets Shortest Path (Part 1)
@@ -863,7 +1064,33 @@ dist(0, 2) from dist(0, 3)
 dist(0, 2) from dist(1, 2)
 
 ```cpp
+int N;
+vector<vector<int>> adj;
 
+void solve() {
+    cin >> N;
+    adj.assign(N, vector<int>());
+    for (int i = 1; i < N; ++i) {
+        int u, v;
+        cin >> u >> v;
+        u--, v--;
+        adj[u].emplace_back(v);
+        adj[v].emplace_back(u);
+    }
+    for (int i = 0; i < N; ++i) {
+        for (int j : adj[i]) {
+            if (j < i) continue;
+            for (int k : adj[j]) {
+                if (k == i) continue;
+                if (k < j && adj[k].size() > 1) {
+                    cout << "Wrong" << endl;
+                    return;
+                }
+            }
+        }
+    }
+    cout << "Lucky" << endl;
+}
 ```
 
 What is the intuition behind, this how might I reason to this solution?

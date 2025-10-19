@@ -281,12 +281,230 @@ void solve() {
 
 # Round 1
 
-##
+## Snake Scales (Part 1)
 
-### Solution 1:
+### Solution 1: max absolute difference
 
 ```cpp
+int N;
+vector<int> A;
 
+void solve() {
+    cin >> N;
+    A.assign(N, 0);
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+    }
+    int ans = 0;
+    for (int i = 1; i < N; ++i) {
+        ans = max(ans, abs(A[i] - A[i - 1]));
+    }
+    cout << ans << endl;
+}
+```
+
+## Snake Scales (Part 2)
+
+### Solution 1: greedy, binary search
+
+```cpp
+int N;
+vector<int> A;
+vector<bool> vis;
+
+bool possible(int target) {
+    vector<int> cands;
+    int cnt = 0;
+    vis.assign(N, false);
+    for (int i = 0; i < N; ++i) {
+        if (A[i] <= target) {
+            cands.emplace_back(i); // jump to these from platform
+            vis[i] = true;
+            cnt++;
+        }
+    }
+    for (int idx : cands) {
+        for (int i = idx - 1; i >= 0; --i) {
+            if (vis[i]) break;
+            if (abs(A[i] - A[i + 1]) > target) break;
+            vis[i] = true;
+            cnt++;
+        }
+        for (int i = idx + 1; i < N; ++i) {
+            if (vis[i]) break;
+            if (abs(A[i] - A[i - 1]) > target) break;
+            vis[i] = true;
+            cnt++;
+        }
+    }
+    return cnt == N;
+}
+
+void solve() {
+    cin >> N;
+    A.assign(N, 0);
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+    }
+    int lo = 0, hi = 2e9;
+    while (lo < hi) {
+        int mid = lo + (hi - lo) / 2;
+        if (possible(mid)) {
+            hi = mid;
+        } else {
+            lo = mid + 1;
+        }
+    }
+    cout << lo << endl;
+}
+```
+
+## Final Product (Part 1)
+
+### Solution 1: constructive
+
+```cpp
+int N, A, B;
+
+void solve() {
+    cin >> N >> A >> B;
+    int start = 1;
+    for (int i = 1; i <= A; ++i) {
+        if (B % i == 0) {
+            start = i;
+        }
+    }
+    cout << start << " ";
+    for (int i = 1; i < 2 * N - 1; ++i) {
+        cout << 1 << " ";
+    }
+    cout << B / start << endl;
+}
+```
+
+## Final Product (Part 2)
+
+### Solution 1: prime factorization, dfs with pruning, binomial coefficient, combinatorics, stars and bars method
+
+Want to find the number of ordered N-tuples that multiple to d
+
+```cpp
+const int MOD = 1e9 + 7, MAXN = 50;
+int64 N, A, B, ans, M, C[MAXN];
+vector<int64> factors;
+vector<int> expCounts;
+map<int64, int> factorCount;
+
+int64 inv(int i, int64 m) {
+  return i <= 1 ? i : m - (m / i) * inv(m % i, m) % m;
+}
+
+void precompute(int n, int64 m) {
+    memset(C, 0, sizeof(C));
+    C[0] = 1;
+    int64 cur = 1;
+    for (int i = 1; i < MAXN; ++i) {
+        int64 cand = static_cast<int128>(n + i - 1) * inv(i, m) % m;
+        cur = cur * cand % m;
+        C[i] = cur;
+    }
+}
+
+void primeFactors(int64 n) {
+    while (n % 2 == 0) {
+        factorCount[2]++;
+        n /= 2;
+    }
+    for (int64 i = 3; i * i <= n; i += 2) {
+        while (n % i == 0) {
+            factorCount[i]++;
+            n /= i;
+        }
+    }
+    if (n > 2) {
+        factorCount[n]++;
+    }
+}
+
+void dfs(int idx, int64 val, int64 ways) {
+    if (idx == M) {
+        ans = (ans + ways) % MOD;
+        return;
+    }
+    int64 factor = factors[idx];
+    int64 exp = expCounts[idx];
+    int128 cur = val;
+    dfs(idx + 1, val, ways * C[exp] % MOD);
+    for (int i = 1; i <= exp; ++i) {
+        cur *= factor;
+        if (cur > A) break;
+        int64 nways = ways * C[i] % MOD;
+        nways = nways * C[exp - i] % MOD;
+        dfs(idx + 1, cur, nways);
+    }
+}
+
+void solve() {
+    cin >> N >> A >> B;
+    precompute(N, MOD);
+    factorCount.clear();
+    primeFactors(B);
+    factors.clear();
+    expCounts.clear();
+    for (const auto &[factor, count] : factorCount) {
+        if (!count) continue;
+        factors.emplace_back(factor);
+        expCounts.emplace_back(count);
+    }
+    M = factors.size();
+    ans = 0;
+    dfs(0, 1, 1);
+    cout << ans << endl;
+}
+```
+
+## Narrowing Down
+
+### Solution 1: combinatorics, sum of lengths of all subarrays, combinatoric triplets, prefix xor,
+
+at most m - 1 operations needs so start from the back.
+
+sum of lengths of all subarrays
+
+Looking for range of xor that equal to 0
+
+```cpp
+int N;
+vector<int> A;
+
+int64 choose2(int64 n) {
+    return n * (n - 1) / 2;
+}
+
+int64 choose3(int64 n) {
+    return n * (n - 1) * (n - 2) / 6;
+}
+
+void solve() {
+    cin >> N;
+    A.assign(N, 0);
+    int pref = 0;
+    unordered_map<int, int> freq;
+    freq[0]++;
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+        pref ^= A[i];
+        freq[pref]++;
+    }
+    int64 ans = choose3(N + 2), pairs = 0, triplets = 0;
+    for (auto &[k, v] : freq) {
+        pairs += choose2(v);
+        triplets += choose3(v);
+    }
+    ans -= pairs;
+    ans -= triplets;
+    cout << ans << endl;
+}
 ```
 
 ##
@@ -297,21 +515,6 @@ void solve() {
 
 ```
 
-##
-
-### Solution 1:
-
-```cpp
-
-```
-
-##
-
-### Solution 1:
-
-```cpp
-
-```
 
 # Round 2
 

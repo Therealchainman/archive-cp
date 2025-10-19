@@ -29,7 +29,7 @@ void dfs(int i) {
 
 ## Permutations
 
-A permutation is an arrangement of items in a specific order. For example, the numbers 1, 2, and 3 can be arranged in six different ways: 123, 132, 213, 231, 312, and 321. These are all permutations of the set {1, 2, 3}. 
+A permutation is an arrangement of items in a specific order. For example, the numbers 1, 2, and 3 can be arranged in six different ways: 123, 132, 213, 231, 312, and 321. These are all permutations of the set {1, 2, 3}.
 
 - order matters
 
@@ -39,7 +39,7 @@ The number of derangements of $n$ numbers, expressed as $!n$, is the number of p
 
 ## Stars and Bars Method
 
-The stars and bars method is a popular combinatorial technique used to solve problems of distributing indistinguishable objects (stars) into distinguishable boxes (bars). 
+The stars and bars method is a popular combinatorial technique used to solve problems of distributing indistinguishable objects (stars) into distinguishable boxes (bars).
 
 ### Problem Statement
 
@@ -78,20 +78,33 @@ Thus, there are 21 ways to distribute 5 indistinguishable stars into 3 distingui
 
 ## Stars and Bars method and Fibonacci sequence
 
-If you are counting the number of binary strings with non-adjacent ones, you can compute with Fibonacci sequence. 
-$n = 0,1,2,3,4,5:\quad a_n = 1,2,3,5,8,13 \;=\; F_2, F_3, F_4, F_5, F_6, F_7$ 
+If you are counting the number of binary strings with non-adjacent ones, you can compute with Fibonacci sequence.
+$n = 0,1,2,3,4,5:\quad a_n = 1,2,3,5,8,13 \;=\; F_2, F_3, F_4, F_5, F_6, F_7$
 
-But this can also be calculated with stars and bars method, thus creating a connection between these two concepts. 
+But this can also be calculated with stars and bars method, thus creating a connection between these two concepts.
 
-Binomial formula for Fibonacci numbers.  Let's fix n and count strings with exaclty k ones (no two adjacent). Put the k ones down first; to keep them non-adjacnet you must place at least one zero between consecutive ones.  That uses up k - 1 zeros.  
+Binomial formula for Fibonacci numbers.  Let's fix n and count strings with exaclty k ones (no two adjacent). Put the k ones down first; to keep them non-adjacnet you must place at least one zero between consecutive ones.  That uses up k - 1 zeros.
 
-extra zeros = $n - k - (k - 1) = n - 2k + 1$ 
-These are to be distributed into the k + 1 gaps, distributing the indistinguishable items into k + 1 boxes is classic stars and bars. 
+extra zeros = $n - k - (k - 1) = n - 2k + 1$
+These are to be distributed into the k + 1 gaps, distributing the indistinguishable items into k + 1 boxes is classic stars and bars.
 
-$\binom{n - k + 1}{k}$ 
-valid for $ 0 \leq k \leq \left\lfloor \frac{n+1}{2} \right/rfloor$ 
-Summing over all feasible k, 
+$\binom{n - k + 1}{k}$
+valid for $ 0 \leq k \leq \left\lfloor \frac{n+1}{2} \right/rfloor$
+Summing over all feasible k,
 $$a_n = \sum_{k=0}^{\left\lfloor (n + 1) / 2 \right\rfloor} \binom{n - k + 1}{k}$$
-This sums satisfies Fibonacci recurrence $a_n=a_{n-1} + a_{n-2} and $a_n=F_{n+2}$ 
+This sums satisfies Fibonacci recurrence $a_n=a_{n-1} + a_{n-2} and $a_n=F_{n+2}$
 
 
+### Using it for calculating the sum of the lengths of all subarrays
+
+Start from the sum of lengths of all subarrays. That is a known formula
+sum of lengths = C(N + 2, 3).
+Why: imagine N+2 markers 0, 1, ..., N, N+1. Pick any triple L < M < R.
+That triple means subarray (L+1 .. R-1) and a chosen element M inside it.
+Each subarray of length m gets counted exactly m times. So the total count of triples is the sum of all subarray lengths.
+
+```cpp
+int64 choose3(int64 n) {
+    return n * (n - 1) * (n - 2) / 6;
+}
+```
