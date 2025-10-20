@@ -993,3 +993,48 @@ if __name__ == '__main__':
     for _ in range(T):
         print(main())
 ```
+
+## Counting Necklaces
+
+### Solution 1: burnside's lemma, polya's enumeration theorem, combinatorics, gcd
+
+```cpp
+const int MOD = 1e9 + 7;
+int N, M;
+vector<int64> powM;
+
+int64 inv(int i, int64 m) {
+  return i <= 1 ? i : m - (m / i) * inv(m % i, m) % m;
+}
+
+void solve() {
+    cin >> N >> M;
+    powM.assign(N + 1, 1);
+    for (int i = 1; i <= N; ++i) {
+        powM[i] = powM[i - 1] * M % MOD;
+    }
+    int64 ans = 0;
+    for (int i = 1; i <= N; ++i) {
+        int g = gcd(N, i);
+        ans = (ans + powM[g]) % MOD;
+    }
+    ans = ans * inv(N, MOD) % MOD;
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## Counting Grids
+
+### Solution 1: burnside's lemma, polya's enumeration theorem, combinatorics
+
+```cpp
+
+```

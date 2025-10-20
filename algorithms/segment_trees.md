@@ -71,6 +71,104 @@ struct SegmentTree {
 };
 ```
 
+## Segment Tree for finding rightmost index with given prefix sum
+
+1. prefix sum means you start from [0, r], and want the largest r such that it equals some target value.
+
+```cpp
+const int MAXN = 1e5 + 5, INF = 1e9;
+struct SegmentTree {
+    int n;
+    int size;
+    int neutral = 0;
+    vector<int64> nodes, mn, mx;
+
+    void init(int num_nodes) {
+        n = num_nodes;
+        size = 1;
+        while (size < num_nodes) size *= 2;
+        nodes.assign(size * 2, neutral);
+        mn.assign(size * 2, INF);
+        mx.assign(size * 2, -INF);
+        for (int i = 0; i < n; ++i) {
+            int segment_idx = size + i;
+            mn[segment_idx] = 0;
+            mx[segment_idx] = 0;
+        }
+        for (int segment_idx = size - 1; segment_idx >= 0; --segment_idx) {
+            int left_segment_idx = 2 * segment_idx, right_segment_idx = 2 * segment_idx + 1;
+            mn[segment_idx] = min(mn[left_segment_idx], mn[right_segment_idx]);
+            mx[segment_idx] = max(mx[left_segment_idx], mx[right_segment_idx]);
+        }
+    }
+
+    int64 func(int64 x, int64 y) {
+        return x + y;
+    }
+
+    void ascend(int segment_idx) {
+        while (segment_idx > 0) {
+            int left_segment_idx = 2 * segment_idx, right_segment_idx = 2 * segment_idx + 1;
+            nodes[segment_idx] = func(nodes[left_segment_idx], nodes[right_segment_idx]);
+            mn[segment_idx] = min(mn[left_segment_idx], nodes[left_segment_idx] + mn[right_segment_idx]);
+            mx[segment_idx] = max(mx[left_segment_idx], nodes[left_segment_idx] + mx[right_segment_idx]);
+            segment_idx >>= 1;
+        }
+    }
+    // this is for assign, for addition change to += val
+    void update(int segment_idx, int64 val) {
+        segment_idx += size;
+        nodes[segment_idx] = val; // += val if want addition, to track frequency
+        mn[segment_idx] = val;
+        mx[segment_idx] = val;
+        segment_idx >>= 1;
+        ascend(segment_idx);
+    }
+
+    int64 query(int left, int right) {
+        left += size, right += size;
+        int64 res = neutral;
+        while (left <= right) {
+           if (left & 1) {
+                // res on left
+                res = func(res, nodes[left]);
+                left++;
+            }
+            if (~right & 1) {
+                // res on right
+                res = func(nodes[right], res);
+                right--;
+            }
+            left >>= 1, right >>= 1;
+        }
+        return res;
+    }
+    // Find the rightmost index r in [0..n-1] such that prefixSum(0..r) == target.
+    // Returns -1 if no such index exists.
+    int rightmostEqualPrefix(int64 target) const {
+        if (target < mn[1] || target > mx[1]) return -1;
+        int segment_idx = 1;
+        int l = 0, r = size - 1;
+        while (l != r) {
+            int left_segment_idx = segment_idx << 1, right_segment_idx = left_segment_idx | 1;
+            int mid = (l + r) >> 1;
+            int64 tRight = target - nodes[left_segment_idx];
+
+            // try the right child first
+            if (mn[right_segment_idx] <= tRight && tRight <= mx[right_segment_idx]) {
+                segment_idx = right_segment_idx;
+                l = mid + 1;
+                target = tRight;
+            } else {
+                segment_idx = left_segment_idx;
+                r = mid;
+            }
+        }
+        return (l < n ? l : -1);
+    }
+};
+```
+
 ## Segment Tree for Many Values Per Index
 
 Segment tree that supports add and remove operation or insert/erase.  

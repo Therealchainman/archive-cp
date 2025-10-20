@@ -1939,6 +1939,61 @@ public:
 
 ```
 
+## 1625. Lexicographically Smallest String After Applying Operations
+
+### Solution 1: modular arithmetic, gcd, string rotation, brute force
+
+```cpp
+class Solution {
+public:
+    string findLexSmallestString(string s, int a, int b) {
+        int N = s.size();
+        int ta = 10 / gcd(a, 10), tb = N / gcd(b, N);
+        string ans = s;
+        for (int i = 0; i < ta; ++i) {
+            if (b % 2 == 0) { // b is even
+                string S = s;
+                for (int k = 1; k < N; k += 2) {
+                    int x = (S[k] - '0' + i * a) % 10;
+                    S[k] = x + '0';
+                }
+                // rotate in place
+                for (int j = 0; j < tb; ++j) {
+                    rotate(S.rbegin(), S.rbegin() + b, S.rend());
+                    ans = min(ans, S);
+                }
+                continue;
+            }
+            for (int j = 0; j < ta; ++j) {
+                string S = s;
+                for (int k = 0; k < N; ++k) {
+                    if (k & 1) {
+                        int x = (S[k] - '0' + i * a) % 10;
+                        S[k] = x + '0';
+                    } else {
+                        int x = (S[k] - '0' + j * a) % 10;
+                        S[k] = x + '0';
+                    }
+                }
+                for (int k = 0; k < tb; ++k) {
+                    rotate(S.rbegin(), S.rbegin() + b, S.rend());
+                    ans = min(ans, S);
+                }
+            }
+        }
+        return ans;
+    }
+};
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
 ##
 
 ### Solution 1: 

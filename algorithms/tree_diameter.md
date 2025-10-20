@@ -62,6 +62,50 @@ void solve() {
 }
 ```
 
+### Simple approach with twice BFS
+
+```cpp
+const int INF = numeric_limits<int>::max();
+int N;
+vector<vector<int>> adj;
+
+vector<int> bfs(int src) {
+    vector<int> dist(N, INF);
+    dist[src] = 0;
+    queue<int> q;
+    q.emplace(src);
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop();
+        for (int v : adj[u]) {
+            if (dist[v] == INF) {
+                dist[v] = dist[u] + 1;
+                q.emplace(v);
+            }
+        }
+    }
+    return dist;
+}
+
+vector<int> d0 = bfs(0);
+int u = -1, maxd = -1; // handles tie break by taking larger node index
+for (int i = N - 1; i >= 0; --i) {
+    if (d0[i] > maxd) {
+        maxd = d0[i];
+        u = i;
+    }
+}
+vector<int> du = bfs(u);
+int v = -1, maxd2 = -1;
+for (int i = N - 1; i >= 0; --i) {
+    if (du[i] > maxd2) {
+        maxd2 = du[i];
+        v = i;
+    }
+}
+// u and v are the endpoints of the diameter, maxd2 is the diameter length
+```
+
 ## Tree‐Diameter Decomposition Algorithm with twice DFS algorithm
 
 This routine takes an undirected tree on $N$ nodes (numbered 1…$N$) and repeatedly extracts the diameter of each remaining component until no nodes remain. Each extracted path is “deleted” from the tree, and its length and endpoints are recorded. Finally, all extracted diameters are output in descending order by length.
