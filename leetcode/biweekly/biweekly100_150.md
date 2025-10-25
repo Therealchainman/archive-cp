@@ -1014,20 +1014,60 @@ public:
 
 ```
 
-## 
+## 3346. Maximum Frequency of an Element After Performing Operations I
 
-### Solution 1: 
+### Solution 1:  sorting, binary search, frequency map
 
 ```cpp
-
+class Solution {
+public:
+    int maxFrequency(vector<int>& nums, int k, int numOperations) {
+        unordered_map<int, int> freq;
+        for (int x : nums) freq[x]++;
+        sort(nums.begin(), nums.end());
+        int N = nums.size(), ans = 0;
+        for (int i = nums.front(); i <= nums.back(); ++i) {
+            int l = lower_bound(nums.begin(), nums.end(), i - k) - nums.begin();
+            int r = upper_bound(nums.begin(), nums.end(), i + k) - nums.begin();
+            int cnt = freq[i], len = r - l;
+            ans = max(ans, min(numOperations + cnt, len));
+        }
+        return ans;
+    }
+};
 ```
 
-## 
+## 3347. Maximum Frequency of an Element After Performing Operations II
 
-### Solution 1: 
+### Solution 1:  sorting, binary search, frequency map, sparse modes
 
 ```cpp
-
+using int64 = long long;
+class Solution {
+public:
+    int maxFrequency(vector<int>& nums, int k, int numOperations) {
+        unordered_map<int, int> freq;
+        sort(nums.begin(), nums.end());
+        vector<int> modes;
+        for (int x : nums) {
+            modes.emplace_back(x - k);
+            modes.emplace_back(x);
+            modes.emplace_back(x + k);
+            freq[x]++;
+        }
+        sort(modes.begin(), modes.end());
+        modes.erase(unique(modes.begin(), modes.end()), modes.end());
+        int ans = 0;
+        for (int x : modes) {
+            // [l, r)
+            int l = lower_bound(nums.begin(), nums.end(), x - k) - nums.begin();
+            int r = upper_bound(nums.begin(), nums.end(), static_cast<int64>(x) + k) - nums.begin();
+            int len = r - l, cnt = freq[x];
+            ans = max(ans, min(len, numOperations + cnt));
+        }
+        return ans;
+    }
+};
 ```
 
 # Leetcode Biweekly Contest 144

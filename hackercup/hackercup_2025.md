@@ -399,7 +399,7 @@ int64 inv(int i, int64 m) {
   return i <= 1 ? i : m - (m / i) * inv(m % i, m) % m;
 }
 
-void precompute(int n, int64 m) {
+void precompute(int64 n, int64 m) {
     memset(C, 0, sizeof(C));
     C[0] = 1;
     int64 cur = 1;
