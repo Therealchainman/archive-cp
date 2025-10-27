@@ -168,6 +168,15 @@ int inf_power(int n) {
 
 ## Bezout's Identity
 
+Let g = gcd(a,b). Then there exist integers x,y such that ax + by = g.
+Moreover, g is the least such positive integer that can be written as ax + by; all integers of the form ax + by are multiples of g.
+
+If c is divisible by g then the given Diophantine equation has a solution.
+
 It can apply to more than 2 integers, and it can be used to find the greatest common divisor of multiple numbers. The identity states that for any integers a, b, and c, there exist integers x and y such that ax + by = c, where c is the greatest common divisor of a and b.
 
 so ax+by=gcd(a,b), but really multiples of gcd(a,b) as well.
+
+subtraction causes no problem if you have ax - by = g, you can basically ignore that negative sign.  signs don't matter for gcd calculation.
+
+

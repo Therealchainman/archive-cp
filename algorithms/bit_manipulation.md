@@ -31,6 +31,17 @@ def lowbit(x):
     return x & -x
 ```
 
+## Most significant bit
+
+```cpp
+int msb = 63 - __builtin_clzll(n);
+```
+
+## Bit width
+
+```cpp
+int msb = 64 - __builtin_clzll(n);
+```
 
 ## Important fact about binary representations
 

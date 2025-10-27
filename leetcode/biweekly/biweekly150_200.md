@@ -2816,6 +2816,83 @@ public:
 
 # Leetcode Biweekly Contest 168
 
+## 3723. Maximize Sum of Squares of Digits
+
+### Solution 1: greedy, take largest first
+
+```cpp
+class Solution {
+public:
+    string maxSumOfSquares(int num, int sum) {
+        string ans;
+        for (int i = 0; i < num; ++i) {
+            int dig = min(9, sum);
+            ans += dig + '0';
+            sum -= dig;
+        }
+        if (sum) return "";
+        return ans;
+    }
+};
+```
+
+## 3724. Minimum Operations to Transform Array
+
+### Solution 1: loop, math, ordering of elements
+
+```cpp
+using int64 = long long;
+class Solution {
+private:
+    int sign(int x) {
+        return x >= 0 ? 1 : -1;
+    }
+public:
+    int64 minOperations(vector<int>& nums1, vector<int>& nums2) {
+        int N = nums1.size();
+        int64 ans = 1;
+        int app = 1e9;
+        for (int i = 0; i < N; ++i) {
+            ans += abs(nums1[i] - nums2[i]);
+            int d1 = sign(nums2.back() - nums1[i]), d2 = sign(nums2.back() - nums2[i]);
+            if (d1 != d2) app = 0;
+            app = min({app, abs(nums1[i] - nums2.back()), abs(nums2[i] - nums2.back())});
+        }
+        ans += app;
+        return ans;
+    }
+};
+```
+
+## 3725. Count Ways to Choose Coprime Integers from Rows
+
+### Solution 1: gcd, dynamic programming, grid, counting
+
+```cpp
+const int MOD = 1e9 + 7, MAXN = 151;
+class Solution {
+public:
+    int countCoprime(vector<vector<int>>& mat) {
+        int R = mat.size(), C = mat[0].size();
+        vector<int> dp(MAXN, 0), ndp(MAXN, 0);
+        dp[0] = 1;
+        for (int r = 0; r < R; ++r) {
+            ndp.assign(MAXN, 0);
+            for (int c = 0; c < C; ++c) {
+                for (int g = 0; g < MAXN; ++g) {
+                    int ng = gcd(g, mat[r][c]);
+                    ndp[ng] = (ndp[ng] + dp[g]) % MOD;
+                }
+            }
+            swap(dp, ndp);
+        }
+        return dp[1];
+    }
+};
+```
+
+# Leetcode Biweekly Contest 169
+
 ## 
 
 ### Solution 1: 

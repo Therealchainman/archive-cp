@@ -218,7 +218,7 @@ You can test every intersection by enforcing several features at once and the st
 N is small enough to allow work, or intersections have a pattern that lets you compute them quickly by DP or transforms.
 
 
-## Downward DP for Inclusion-Exclusion
+## Downward Sieve DP for Inclusion-Exclusion
 
 Classic inclusion–exclusion uses alternating signs because you have overlapping sets and you need to fix overcounts. Here, the “overcount” at level d comes only from its multiples, and those groups are disjoint once you condition on the exact gcd. So you do not see alternating signs explicitly. Instead, you do a topological elimination over the divisibility graph:
 
@@ -230,8 +230,24 @@ K-sets whose gcd is a multiple of d.
 
 $G[d] = F[d] - \sum_{m \geq 2} G[d \cdot m]$ number of K-sets with gcd exactly d
 
+Always picture with example such as take gcd = 6, then you will be divisible by 1,2,3 as well.  so the same sequence is counted in b[1], b[2], b[3], b[6].  So you need to use inclusion exclusion to get the exact count of sequences with gcd exactly g.
 
+Which you can do because when you subtract b[6] from b[3], you removed all counts where the gcd was 6, so you are left with only those whose gcd is exactly 3. 
 
 ```cpp
-
+for (int x = 1; x < MAXN; ++x) {
+    int cnt = 0;
+    for (int y = x; y < MAXN; y += x) {
+        cnt += freq[y];
+    }
+    if (cnt >= K) {
+        dp[x] = fact[cnt] * inv_fact[cnt - K] % MOD;
+    }
+}
+for (int x = MAXN - 1; x >= 1; --x) {
+    for (int y = 2 * x; y < MAXN; y += x) {
+        dp[x] -= dp[y];
+        if (dp[x] < 0) dp[x] += MOD;
+    }
+}
 ```

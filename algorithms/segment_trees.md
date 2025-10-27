@@ -19,56 +19,95 @@ this is the best one right now for C++
 you can just get the value from seg.nodes[1] if you are querying the full range of the array.
 
 ```cpp
-
+template<class Node>
 struct SegmentTree {
-    int size;
-    int neutral = 0;
-    vector<int64> nodes;
+    struct Configuration {
+        const Node neutral;                           // identity for merge
+        function<Node(const Node&, const Node&)> merge;           // combine two nodes
+    } config;
+
+    int size = 0;
+    vector<Node> nodes;
+
+    SegmentTree(int n, Configuration config) : config(config) { init(n); }
 
     void init(int num_nodes) {
         size = 1;
         while (size < num_nodes) size *= 2;
-        nodes.assign(size * 2, neutral);
+        nodes.assign(size * 2, config.neutral);
     }
 
-    int64 func(int64 x, int64 y) {
-        return x + y;
-    }
-
-    void ascend(int segment_idx) {
-        while (segment_idx > 0) {
-            int left_segment_idx = 2 * segment_idx, right_segment_idx = 2 * segment_idx + 1;
-            nodes[segment_idx] = func(nodes[left_segment_idx], nodes[right_segment_idx]);
-            segment_idx >>= 1;
-        }
-    }
     // this is for assign, for addition change to += val
-    void update(int segment_idx, int64 val) {
+    void update(int segment_idx, const Node& val) {
         segment_idx += size;
         nodes[segment_idx] = val; // += val if want addition, to track frequency
-        segment_idx >>= 1;
-        ascend(segment_idx);
+        for (segment_idx >>= 1; segment_idx >= 1; segment_idx >>= 1) pull(segment_idx);
     }
 
-    int64 query(int left, int right) {
+    Node query(int left, int right) {
         left += size, right += size;
-        int64 res = neutral;
+        Node left_acc = config.neutral;
+        Node right_acc = config.neutral;
         while (left <= right) {
            if (left & 1) {
                 // res on left
-                res = func(res, nodes[left]);
-                left++;
+                left_acc = config.merge(left_acc, nodes[left++]);
             }
             if (~right & 1) {
                 // res on right
-                res = func(nodes[right], res);
-                right--;
+                right_acc = config.merge(nodes[right--], right_acc);
             }
             left >>= 1, right >>= 1;
         }
-        return res;
+        return config.merge(left_acc, right_acc);
+    }
+    private:
+        inline void pull(int segment_idx) { nodes[segment_idx] = config.merge(nodes[segment_idx << 1], nodes[segment_idx << 1 | 1]); }
+};
+```
+
+### Configuration examples
+
+```cpp
+using Matrix3 = array<array<int, 3>, 3>;
+
+const int INF = numeric_limits<int>::max();
+Matrix3 bases[9] = {
+    {{{0, 1, 2}, {1, 0, 1}, {2, 1, 0}}},
+    {{{INF, INF, INF}, {INF, 0, 1}, {INF, 1, 0}}},
+    {{{0, INF, INF}, {INF, INF, INF}, {INF, INF, 0}}},
+    {{{INF, INF, INF}, {INF, INF, INF}, {INF, INF, 0}}},
+    {{{0, 1, INF}, {1, 0, INF}, {INF, INF, INF}}},
+    {{{INF, INF, INF}, {INF, 0, INF}, {INF, INF, INF}}},
+    {{{0, INF, INF}, {INF, INF, INF}, {INF, INF, INF}}},
+    {{{INF, INF, INF}, {INF, INF, INF}, {INF, INF, INF}}},
+    {{{-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}}} // blocked
+};
+vector<int> colMasks;
+SegmentTree<Matrix3>::Configuration cfg{
+    /*neutral*/ bases[8],
+    /*merge*/   [](const Matrix3 &X, const Matrix3 &Y) {
+        Matrix3 Z;
+        if (X[0][0] == -1) return Y;
+        if (Y[0][0] == -1) return X;
+        for (int i = 0; i < 3; ++i) {
+            for (int j = 0; j < 3; ++j) {
+                Z[i][j] = INF;
+                for (int k = 0; k < 3; ++k) {
+                    if (X[i][k] != INF && Y[k][j] != INF)
+                        Z[i][j] = min(Z[i][j], X[i][k] + Y[k][j]);
+                }   
+            }
+        }
+        return Z;
     }
 };
+
+SegmentTree<Matrix3> seg(N, cfg);
+for (int i = 0; i < N; ++i) {
+    seg.update(i, bases[colMasks[i]]);
+}
+
 ```
 
 ## Segment Tree for finding rightmost index with given prefix sum

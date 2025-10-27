@@ -76,6 +76,12 @@ $$
 
 Thus, there are 21 ways to distribute 5 indistinguishable stars into 3 distinguishable boxes.
 
+## Other things to know about Stars and Bars method
+
+Indistinguishable things: the K stars. Each star represents one bin, and we treat bins as unlabeled because we store states canonically, for example as a sorted tuple or a histogram. Swapping two bins with the same or different loads is the same state, so the stars are indistinguishable.
+
+Distinguishable things: the T+1 buckets labeled by load values 0,1,...,T where T = N/K. These buckets are different because “load 0” is not the same as “load 1”, etc. In stars and bars terms the bars are identical separators, but their positions determine how many stars fall in each labeled bucket.
+
 ## Stars and Bars method and Fibonacci sequence
 
 If you are counting the number of binary strings with non-adjacent ones, you can compute with Fibonacci sequence.
@@ -95,7 +101,7 @@ $$a_n = \sum_{k=0}^{\left\lfloor (n + 1) / 2 \right\rfloor} \binom{n - k + 1}{k}
 This sums satisfies Fibonacci recurrence $a_n=a_{n-1} + a_{n-2} and $a_n=F_{n+2}$
 
 
-### Using it for calculating the sum of the lengths of all subarrays
+## Using combinatorics for calculating the sum of the lengths of all subarrays
 
 Start from the sum of lengths of all subarrays. That is a known formula
 sum of lengths = C(N + 2, 3).
