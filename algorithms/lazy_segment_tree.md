@@ -12,14 +12,15 @@ This particular implementation is for range addition updates, but can easily mod
 - range addition updates
 - range sum queries
 
+0-indexed segment tree
+
 range updates are [L, R) (exclusive for right end point)
 
 merge: how to combine two child segment answers into the parent
 
 apply: how a pending lazy value changes a node’s stored value (often needs the segment length)
 
-compose: how two lazy values stack when both are pending
-
+compose: how two lazy values stack when both are pending apply oldTag then newTag
 
 struct Configuration { ... } configuration; defines the class type Configuration and immediately defines an object named configuration of that type in the same statement. Informally people say “define a struct and an instance inline.”
 
@@ -30,7 +31,7 @@ struct LazySegmentTree {
     int size;
 
     struct Configuration {
-        const int64 neutral; // neutral element for merge
+        const int64 neutral; // identity element for merge
         const int noop; // identity element for lazy
         function<int64(int64, int64)> merge; // combine two children
         function<int64(int64, int64, int)> apply; // apply lazy tag to node value over length
@@ -295,10 +296,10 @@ struct LazySegmentTree {
     int size;
 
     struct Configuration {
-        const Node neutral; // neutral element for merge
+        const Node neutral; // identity element for merge
         const Tag noop; // identity element for lazy
         function<Node(const Node&, const Node&)> merge; // combine two children
-        function<Node(const Node&, Tag, int)> apply; // apply lazy tag to node value over length
+        function<Node(const Node&, Tag)> apply; // apply lazy tag to node value
         function<Tag(Tag, Tag)> compose; // merge two lazy tags
     } config;
 
@@ -326,26 +327,24 @@ struct LazySegmentTree {
         bool pendingUpdate = lazyTag[segment_idx] != config.noop;
         if (is_leaf(segment_right_bound, segment_left_bound) || !pendingUpdate) return;
         int left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
-        int children_segment_len = (segment_right_bound - segment_left_bound) >> 1;
         lazyTag[left_segment_idx] = config.compose(lazyTag[left_segment_idx], lazyTag[segment_idx]);
         lazyTag[right_segment_idx] = config.compose(lazyTag[right_segment_idx], lazyTag[segment_idx]);
-        arr[left_segment_idx] = config.apply(arr[left_segment_idx], lazyTag[segment_idx], children_segment_len);
-        arr[right_segment_idx] = config.apply(arr[right_segment_idx], lazyTag[segment_idx], children_segment_len);
+        arr[left_segment_idx] = config.apply(arr[left_segment_idx], lazyTag[segment_idx]);
+        arr[right_segment_idx] = config.apply(arr[right_segment_idx], lazyTag[segment_idx]);
         lazyTag[segment_idx] = config.noop;
     }
 
-    void update(int left, int right, int64 val) {
+    void update(int left, int right, Tag val) {
         update(0, 0, size, left, right, val);
     }
 
-    void update(int segment_idx, int segment_left_bound, int segment_right_bound, int left, int right, int64 val) {
+    void update(int segment_idx, int segment_left_bound, int segment_right_bound, int left, int right, Tag val) {
         // NO OVERLAP
         if (right <= segment_left_bound || segment_right_bound <= left) return;
         // COMPLETE OVERLAP
         if (left <= segment_left_bound && segment_right_bound <= right) {
             lazyTag[segment_idx] = config.compose(lazyTag[segment_idx], val);
-            int segment_len = segment_right_bound - segment_left_bound;
-            arr[segment_idx] = config.apply(arr[segment_idx], val, segment_len);
+            arr[segment_idx] = config.apply(arr[segment_idx], val);
             return;
         }
         // PARTIAL OVERLAP;
@@ -451,6 +450,43 @@ struct LazySegmentTree {
         arr[node] = config.merge(arr[2*node + 1], arr[2*node + 2]); // pull
     }
 };
+```
+
+### Example with min and max value for each segment, where you can flip the segment values by applying a boolean tag
+
+```cpp
+using Tag = bool;
+struct Node {
+    int64 minVal, maxVal;
+};
+
+Node NEUTRAL() { return Node{INF, -INF}; }
+
+LazySegmentTree::Configuration cfg{
+    NEUTRAL(),
+    0,
+    [](const Node& x, const Node& y) {
+        if (x.minVal == INF) return y;
+        if (y.minVal == INF) return x;
+        Node z;
+        z.minVal = min(x.minVal, y.minVal);
+        z.maxVal = max(x.maxVal, y.maxVal);
+        return z;
+    },
+    [](const Node& x, Tag t) {
+        if (!t) return x;
+        return Node{ MOD - x.maxVal, MOD - x.minVal };
+    },
+    [](Tag oldTag, Tag newTag) { return oldTag ^ newTag; }
+};
+
+// example of using a predicate to find rightmost element that satisfies a condition. TTTTFFF, similar to binary search
+seg.update(l, r + 1, true);
+int64 curMax = seg.range_query(0, N).maxVal;
+auto pred = [curMax](const Node& node) {
+    return node.maxVal < curMax;
+};
+int idx = seg.maxRight(0, pred, N) + 1;
 ```
 
 ### example with left and right align intervals that are sorted by width

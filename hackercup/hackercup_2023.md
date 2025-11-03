@@ -779,34 +779,349 @@ int32_t main() {
 
 ## Problem B: Sum 41 (Chapter 2)
 
-### Solution 1: 
+### Solution 1: recursion, backtracking
 
 ```cpp
+int p;
+vector<int> ans, cand;
 
+void dfs(int val, int sum) {
+    if (sum < 0 || val == 0) return;
+    if (val == 1) {
+        for (int i = 0; i < sum; ++i) {
+            cand.emplace_back(1);
+        }
+        if (ans.empty() || cand.size() < ans.size()) {
+            ans = cand;
+        }
+        for (int i = 0; i < sum; ++i) {
+            cand.pop_back();
+        }
+        return;
+    }
+    for (int i = 2; i <= sum; ++i) {
+        if (val % i != 0) continue;
+        cand.emplace_back(i);
+        dfs(val / i, sum - i);
+        cand.pop_back();
+    }
+}
+
+void solve() {
+    cin >> p;
+    cand.clear();
+    ans.clear();
+    dfs(p, 41);
+    if (ans.empty()) {
+        cout << -1 << endl;
+        return;
+    }
+    cout << ans.size() << " ";
+    for (int x : ans) {
+        cout << x << " ";
+    }
+    cout << endl;
+}
 ```
 
 ## Problem C: Back in Black (Chapter 1)
 
-### Solution 1: 
+### Solution 1: sieve algorithm, harmonic series time complexity
 
 ```cpp
+int N, Q;
+string S;
+vector<bool> A;
 
+void solve() {
+    cin >> N >> S >> Q;
+    S.insert(S.begin(), '0');
+    A.assign(N + 1, false);
+    while (Q--) {
+        int x;
+        cin >> x;
+        A[x] = !A[x];
+    }
+    for (int i = 1; i <= N; ++i) {
+        if (A[i]) {
+            for (int j = i; j <= N; j += i) {
+                S[j] = (S[j] == '0' ? '1' : '0');
+            }
+        }
+    }
+    int ans = 0;
+    for (int i = 1; i <= N; ++i) {
+        if (S[i] == '1') {
+            ans++;
+            for (int j = i; j <= N; j += i) {
+                S[j] = (S[j] == '0' ? '1' : '0');
+            }
+        }
+    }
+    cout << ans << endl;
+}
 ```
 
 ## Problem C: Back in Black (Chapter 1)
 
-### Solution 1: 
+### Solution 1: sieve algorithm
 
 ```cpp
+int N, Q;
+string S;
+vector<bool> A;
 
+void solve() {
+    cin >> N >> S >> Q;
+    S.insert(S.begin(), '0');
+    A.assign(N + 1, false);
+    int pressed = 0;
+    int64 ans = 0;
+    for (int i = 1; i <= N; ++i) {
+        if (S[i] == '1') {
+            A[i] = true;
+            pressed++;
+            for (int j = i; j <= N; j += i) {
+                S[j] = (S[j] == '0' ? '1' : '0');
+            }
+        }
+    }
+    while (Q--) {
+        int x;
+        cin >> x;
+        if (A[x]) pressed--;
+        else pressed++;
+        A[x] = !A[x];
+        ans += pressed;
+    }
+    cout << ans << endl;
+}
 ```
 
 ## Problem D: Today is Gonna be a Great Day
 
-### Solution 1: 
+### Solution 1: lazy segment tree, maxRight, descent with monotonic predicate
+
+1. Very easy to see how an update affects the min and max of a segment. just MOD - max, and MOD - min. 
 
 ```cpp
+const int64 INF = numeric_limits<int64>::max();
+const int MOD = 1e9 + 7;
+int N, Q;
+vector<int> A;
 
+using Tag = bool;
+struct Node {
+    int64 minVal, maxVal;
+};
+
+Node NEUTRAL() { return Node{INF, -INF}; }
+
+struct LazySegmentTree {
+    vector<Node> arr;
+    vector<Tag> lazyTag;
+    int size;
+
+    struct Configuration {
+        const Node neutral; // identity element for merge
+        const Tag noop; // identity element for lazy
+        function<Node(const Node&, const Node&)> merge; // combine two children
+        function<Node(const Node&, Tag)> apply; // apply lazy tag to node value
+        function<Tag(Tag, Tag)> compose; // merge two lazy tags
+    } config;
+
+    LazySegmentTree(int n, Configuration config) : config(config) { init(n); }
+
+    void init(int n) {
+        size = 1;
+        while (size < n) size *= 2;
+        arr.assign(2 * size, config.neutral);
+        lazyTag.assign(2 * size, config.noop);
+    }
+
+    void build(const vector<Node>& inputArr) {
+        copy(inputArr.begin(), inputArr.end(), arr.begin() + (size - 1));
+        for (int i = size - 2; i >= 0; --i) {
+            arr[i] = config.merge(arr[2 * i + 1], arr[2 * i + 2]);
+        }
+    }
+
+    bool is_leaf(int segment_right_bound, int segment_left_bound) {
+        return segment_right_bound - segment_left_bound == 1;
+    }
+
+    void push(int segment_idx, int segment_left_bound, int segment_right_bound) {
+        bool pendingUpdate = lazyTag[segment_idx] != config.noop;
+        if (is_leaf(segment_right_bound, segment_left_bound) || !pendingUpdate) return;
+        int left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
+        lazyTag[left_segment_idx] = config.compose(lazyTag[left_segment_idx], lazyTag[segment_idx]);
+        lazyTag[right_segment_idx] = config.compose(lazyTag[right_segment_idx], lazyTag[segment_idx]);
+        arr[left_segment_idx] = config.apply(arr[left_segment_idx], lazyTag[segment_idx]);
+        arr[right_segment_idx] = config.apply(arr[right_segment_idx], lazyTag[segment_idx]);
+        lazyTag[segment_idx] = config.noop;
+    }
+
+    void update(int left, int right, Tag val) {
+        update(0, 0, size, left, right, val);
+    }
+
+    void update(int segment_idx, int segment_left_bound, int segment_right_bound, int left, int right, Tag val) {
+        // NO OVERLAP
+        if (right <= segment_left_bound || segment_right_bound <= left) return;
+        // COMPLETE OVERLAP
+        if (left <= segment_left_bound && segment_right_bound <= right) {
+            lazyTag[segment_idx] = config.compose(lazyTag[segment_idx], val);
+            arr[segment_idx] = config.apply(arr[segment_idx], val);
+            return;
+        }
+        // PARTIAL OVERLAP;
+        push(segment_idx, segment_left_bound, segment_right_bound);
+        int mid_point = (segment_left_bound + segment_right_bound) >> 1;
+        int left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
+        update(left_segment_idx, segment_left_bound, mid_point, left, right, val);
+        update(right_segment_idx, mid_point, segment_right_bound, left, right, val);
+        // pull
+        arr[segment_idx] = config.merge(arr[left_segment_idx], arr[right_segment_idx]);
+    }
+
+    Node range_query(int left, int right) {
+        return range_query(0, 0, size, left, right);
+    }
+
+    Node range_query(int segment_idx, int segment_left_bound, int segment_right_bound, int left, int right) {
+        // NO OVERLAP
+        if (right <= segment_left_bound || segment_right_bound <= left) return config.neutral;
+        // COMPLETE OVERLAP
+        if (left <= segment_left_bound && segment_right_bound <= right) {
+            return arr[segment_idx];
+        }
+        // PARTIAL OVERLAP
+        push(segment_idx, segment_left_bound, segment_right_bound);
+        int mid_point = (segment_left_bound + segment_right_bound) >> 1;
+        int left_segment_idx = 2 * segment_idx + 1, right_segment_idx = 2 * segment_idx + 2;
+        Node left_res = range_query(left_segment_idx, segment_left_bound, mid_point, left, right);
+        Node right_res = range_query(right_segment_idx, mid_point, segment_right_bound, left, right);
+        return config.merge(left_res, right_res);
+    }
+
+    Node point_query(int i) { 
+        return point_query(0, 0, size, i); 
+    }
+
+    Node point_query(int segment_idx, int l, int r, int i) {
+        if (r - l == 1) return arr[segment_idx];
+        push(segment_idx, l, r);// make children up to date
+        int m = (l + r) >> 1;
+        if (i < m) {
+            return point_query(2 * segment_idx + 1, l, m, i);
+        }
+        return point_query(2 * segment_idx + 2, m, r, i);
+    }
+
+    // maxRight: largest r in [l, limit) such that pred(range_query(l, r)) is true.
+    // If limit < 0 it defaults to the whole array size.
+    // Precondition: pred(neutral) == true.
+    template<class Pred>
+    int maxRight(int l, Pred pred, int limit = -1) {
+        if (limit < 0 || limit > size) limit = size;
+        l = max(0, min(l, limit));
+        // must hold on identity
+        if (!pred(config.neutral)) return l; // or throw logic_error("pred(neutral) must be true");
+        Node acc = config.neutral;
+        return maxRightDfs(0, 0, size, l, limit, acc, pred);
+    }
+    template<class Pred>
+    int maxRightDfs(int node, int nl, int nr, int ql, int limit, Node& acc, const Pred& pred) {
+        // Node entirely left of ql, or entirely beyond the search limit
+        if (nr <= ql || limit <= nl) return ql;
+
+        // If we can take this whole node, do it greedily
+        if (ql <= nl && nr <= limit) {
+            Node combined = config.merge(acc, arr[node]);
+            if (pred(combined)) { // ok to take all of it
+                acc = combined;
+                return nr;
+            }
+        }
+
+
+        // If we cannot take it whole and it is a leaf, we stop here
+        if (nr - nl == 1) return nl;
+
+        // Otherwise we must split
+        push(node, nl, nr);
+        int mid = (nl + nr) >> 1;
+        int left_segment_idx = 2 * node + 1, right_segment_idx = 2 * node + 2;
+
+        // Try to take as much as possible from the left child
+        int res = maxRightDfs(left_segment_idx, nl, mid, ql, limit, acc, pred);
+
+        if (res < min(mid, limit)) return res; // boundary found inside left child
+        // Then continue into the right child
+        return maxRightDfs(right_segment_idx, mid, nr, res, limit, acc, pred);
+    }
+
+    void point_set(int i, Node newVal) {
+        point_set(0, 0, size, i, newVal);
+    }
+    void point_set(int node, int nl, int nr, int i, Node newVal) {
+        if (nr - nl == 1) {
+            arr[node] = newVal;
+            lazyTag[node] = config.noop; // leaf carries no pending work
+            return;
+        }
+        push(node, nl, nr);
+        int m = (nl + nr) >> 1;
+        if (i < m) point_set(2*node + 1, nl, m, i, newVal);
+        else       point_set(2*node + 2, m, nr, i, newVal);
+        arr[node] = config.merge(arr[2*node + 1], arr[2*node + 2]); // pull
+    }
+};
+
+LazySegmentTree::Configuration cfg{
+    NEUTRAL(),
+    0,
+    [](const Node& x, const Node& y) {
+        if (x.minVal == INF) return y;
+        if (y.minVal == INF) return x;
+        Node z;
+        z.minVal = min(x.minVal, y.minVal);
+        z.maxVal = max(x.maxVal, y.maxVal);
+        return z;
+    },
+    [](const Node& x, Tag t) {
+        if (!t) return x;
+        return Node{ MOD - x.maxVal, MOD - x.minVal };
+    },
+    [](Tag oldTag, Tag newTag) { return oldTag ^ newTag; }
+};
+
+void solve() {
+    cin >> N;
+    A.assign(N, 0);
+    vector<Node> leaves(N);
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+        leaves[i] = Node{A[i], A[i]};
+    }
+    int64 ans = 0;
+    LazySegmentTree seg(N, cfg);
+    seg.build(leaves);
+    cin >> Q;
+    while (Q--) {
+        int l, r;
+        cin >> l >> r;
+        l--; r--;
+        seg.update(l, r + 1, true);
+        int64 curMax = seg.range_query(0, N).maxVal;
+        auto pred = [curMax](const Node& node) {
+            return node.maxVal < curMax;
+        };
+        int idx = seg.maxRight(0, pred, N) + 1;
+       ans += idx;
+    }
+    cout << ans << endl;
+}
 ```
 
 ## Problem E: Bohemian Rap-sody
