@@ -42,13 +42,36 @@ fs::path create_path(const std::string& directory, const std::string& file_name)
     return fs::path(directory) / file_name;
 }
 
-string base = "sum_41_chapter_2";
-// string name = base + "_sample_input.txt";
-// string name = base + "_validation_input.txt";
-string name = base + "_input.txt";
+string name = "everybody_codes_e2025_q01_p1.txt";
+
+vector<string> process(const string& s, char delimiter = ' ') {
+    vector<string> ans;
+    istringstream iss(s);
+    string word;
+    while (getline(iss, word, delimiter)) ans.emplace_back(word);
+    return ans;
+}
 
 void solve() {
-    
+    string S1, S2;
+    getline(cin, S1);
+    getline(cin, S2);
+    getline(cin, S2);
+    vector<string> A = process(S1, ','), B = process(S2, ',');
+    int N = A.size();
+    for (const string& s : B) {
+        char dir = s[0];
+        int x = stoi(s.substr(1));
+        int j = 0;
+        if (dir == 'R') {
+            j = x % N;
+        } else {
+            j = -x;
+            while (j < 0) j += N;
+        }
+        swap(A[0], A[j]);
+    }
+    cout << A[0] << endl;
 }
 
 signed main() {
@@ -66,12 +89,7 @@ signed main() {
     }
     cin.rdbuf(input_file.rdbuf());
     cout.rdbuf(output_file.rdbuf());
-    int T;
-    cin >> T;
-    for (int i = 1; i <= T; i++) {
-        cout << "Case #" << i << ": ";
-        solve();
-    }
+    solve();
     cin.rdbuf(nullptr);
     cout.rdbuf(nullptr);
     return 0;
