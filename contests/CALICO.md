@@ -1176,3 +1176,71 @@ signed main() {
 ```cpp
 
 ```
+
+# CALICO Fall 2025
+
+## Problem 8: Put the Fries in the Bag
+
+### Solution 1: 
+
+1. Never count | more than once, so you recurse, and the | in the base L get pushed farther and farther in the layers. 
+1. There will always be a parentheses if there is a O because logically it could recurse infinitely. 
+1. You can do recursion and build out the number of depth you add for each recursion.  So treat each O as a seed point. 
+1. And start with (0, 0, 0) if you have 3 Os, then recurse out with a branching factor of 3 each time. and add whatever the depth is (number of open parentheses) for each branch. 
+1. But the problem with this approach is recursing 10^9 times is too slow.
+1. But if you were able to do this and calculate the count of each depth, then just loop over the S, and take the | and there base depth, and just add to that and check the depth is under N.
+
+```cpp
+
+```
+
+## Problem 10: “more broke than a. . . ”
+
+### Solution 1: 
+
+1. I think you are only sending how much you owe to a specific person.
+1. The uniform at random part is confusing at first, but ultimately you have to send out the total of how much you owe to each person, so you must somehow have an cash flow of that much into your node.
+1. With these patterns the key is to count how much is owed to you and how much you owe out.  Because I will need to see the difference between these two values. 
+1. so one thing to realize is any node that indegree 0, that means you have no incoming money, so you have to give this node how much money they owe everybody they owe.  so a sum over the owed amount to other nodes. 
+1. Then there is possible you do have some indegree > 0 and outdegree > 0.  In that case you need out(u) - in(u), so if you have to give out more that means will need some extra dollars. 
+1. There is one special edge case if you find an SCC, where the sum of out(u) - in(u) == 0, but there is at least one internal edge, and no incoming edges from other SCCs, then you need to inject 1 dollar to prime the cycle.
+
+```cpp
+
+```
+
+## Problem 11: New Tournament
+
+### Solution 1: 
+
+1. N is up to 2^15, this means there will be at most 15 rounds each tournament.
+1. The hard part is figuring out the starting position of everyone after possibly 10^5 rotations. 
+1. functional graph that maps each index to where they move to after one rotation, and then use this functional graph with binary jumping to find where each index ends up after K rotations.
+1. So this can be done for each player N in logK time, but the problem because you have 10^4 queries. 
+1. O(NQlogK) 
+1. player 1 and 2 are rather interesting, because in the final round the power of the last two players might be 1 and 2, not necessarily, but it will always be 1. 
+1. Given the current position of each player, You can run a recursive algorithm that halves at each step, and so runs 15 times. Where you take an array query for the smallest player in that range, and then determine if they are on the left or right half if you split that range. 
+1. Then you'd take the side they are not on and query for the smallest player in that side, and then continue the process. 
+1. This would take probably log(N)^2 time?
+
+After any match between a and b, the survivor’s power becomes min(a,b). Inductively, for any node of the fixed knockout bracket (size = power of two, aligned as (1,2), (3,4), ...), the survivor’s power is the minimum of that segment, and the side that advances to the next round is the side whose segment-minimum is larger.
+
+At the root, compare the minima of the left and right halves. The global minimum sits in exactly one half; the other half advances. Repeating this at each level means you always “dodge” the global minimum.
+
+So, going from the root down to the leaves, the champion always takes the opposite child compared to the child that holds m. In a complete binary tree over positions 0..N-1, choosing the opposite child at every one of the r splits is exactly “flip every one of the r bits” of m.
+
+For the full problem with shuffles P^K:
+
+Precompute permutation cycles of P and P^{-1} so you can map any player x to its position after S total shuffles in O(1) using cycle offsets.
+
+To answer a query with cumulative S:
+
+Start at the root. For the current node’s two equal halves, find each half’s minimum label after S shuffles. You can do this by checking labels in increasing order and stopping at the first one whose position at time S lands inside the half. With random inputs, the expected checks per half are constant and you only do this for log2 N levels.
+
+Walk to the child with larger minimum and repeat until a leaf.
+
+You now have the winner’s position; use the P^{-S} cycle to get which original player sits there and output that player.
+
+```cpp
+
+```

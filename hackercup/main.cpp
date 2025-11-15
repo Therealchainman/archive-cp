@@ -66,14 +66,18 @@ signed main() {
     }
     cin.rdbuf(input_file.rdbuf());
     cout.rdbuf(output_file.rdbuf());
+    auto t0 = std::chrono::steady_clock::now();
     int T;
     cin >> T;
     for (int i = 1; i <= T; i++) {
         cout << "Case #" << i << ": ";
         solve();
     }
+    auto t1 = std::chrono::steady_clock::now();
     cin.rdbuf(nullptr);
     cout.rdbuf(nullptr);
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
+    std::cerr << "Elapsed: " << ms << " ms" << endl;
     return 0;
 }
 

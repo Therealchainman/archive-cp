@@ -32,6 +32,20 @@ In a DFS, an edge from the current node back to a GREY node means you’ve found
 
 ### cycle detection with recursive dfs
 
+```cpp
+vector<bool> vis;
+
+bool dfs(int u, int p = -1) {
+    vis[u] = true;
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        if (vis[v]) return true;
+        if (dfs(v, u)) return true;
+    }
+    return false;
+}
+```
+
 ```py
 visited = set()
 in_path = set()

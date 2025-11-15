@@ -2897,6 +2897,31 @@ public:
 
 ### Solution 1: 
 
+1. LIS problem, dp with binary search patience algorithm
+1. that is it and add 1 to it, cause the missing element can be whatever and can extend the LIS by 1
+
+```cpp
+
+```
+
+## 
+
+### Solution 1: 
+
+1. map values to -1, +1 (if it is target)
+1. find the number of subarrays with positive sum, so using prefix sums just find for j > i, where pref[j] > pref[i].
+1. This can be done with fenwick tree to count number of prefix sums less than current prefix sum (range query)
+
+```cpp
+
+```
+
+# Leetcode Biweekly Contest 170
+
+## 
+
+### Solution 1: 
+
 ```cpp
 
 ```

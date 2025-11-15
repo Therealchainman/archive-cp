@@ -928,3 +928,11 @@ signed main() {
 }
 
 ```
+
+# Implicit Treap
+
+Inserting an element in the array in any location
+Removal of an arbitrary element
+Finding sum, minimum / maximum element etc. on an arbitrary interval
+Addition, painting on an arbitrary interval
+Reversing elements on an arbitrary interval

@@ -1,0 +1,59 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build-main",
+      "type": "shell",
+      "command": "g++",
+      "args": [
+        "-std=c++20",
+        "-O2",
+        "main.cpp",
+        "-o",
+        "main"
+      ],
+      "problemMatcher": ["$gcc"]
+    },
+    {
+      "label": "run-sample",
+      "type": "shell",
+      "command": "./main",
+      "args": [
+        "sample_input"
+      ],
+      "dependsOn": "build-main"
+    },
+    {
+      "label": "run-validation",
+      "type": "shell",
+      "command": "./main",
+      "args": [
+        "validation_input"
+      ],
+      "dependsOn": "build-main"
+    },
+    {
+      "label": "run-input",
+      "type": "shell",
+      "command": "./main",
+      "args": [
+        "input"
+      ],
+      "dependsOn": "build-main"
+    },
+
+    {
+      "label": "run-all",
+      "dependsOn": [
+        "run-sample",
+        "run-validation",
+        "run-input"
+      ],
+      "dependsOrder": "sequence",  // run them one after another
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}

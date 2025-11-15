@@ -47,9 +47,9 @@ def z_algorithm(s: str) -> list[int]:
 This is not battle tested very much
 
 ```cpp
-std::vector<int> z_algorithm(const std::string& s) {
+vector<int> z_algorithm(const string& s) {
     int n = s.length();
-    std::vector<int> z(n, 0);
+    vector<int> z(n, 0);
     int left = 0, right = 0;
     for (int i = 1; i < n; ++i) {
         if (i > right) {

@@ -42,36 +42,9 @@ fs::path create_path(const std::string& directory, const std::string& file_name)
     return fs::path(directory) / file_name;
 }
 
-string name = "everybody_codes_e2025_q01_p1.txt";
-
-vector<string> process(const string& s, char delimiter = ' ') {
-    vector<string> ans;
-    istringstream iss(s);
-    string word;
-    while (getline(iss, word, delimiter)) ans.emplace_back(word);
-    return ans;
-}
+string name = "a.txt";
 
 void solve() {
-    string S1, S2;
-    getline(cin, S1);
-    getline(cin, S2);
-    getline(cin, S2);
-    vector<string> A = process(S1, ','), B = process(S2, ',');
-    int N = A.size();
-    for (const string& s : B) {
-        char dir = s[0];
-        int x = stoi(s.substr(1));
-        int j = 0;
-        if (dir == 'R') {
-            j = x % N;
-        } else {
-            j = -x;
-            while (j < 0) j += N;
-        }
-        swap(A[0], A[j]);
-    }
-    cout << A[0] << endl;
 }
 
 signed main() {
@@ -89,9 +62,13 @@ signed main() {
     }
     cin.rdbuf(input_file.rdbuf());
     cout.rdbuf(output_file.rdbuf());
+    auto t0 = std::chrono::steady_clock::now();
     solve();
+    auto t1 = std::chrono::steady_clock::now();
     cin.rdbuf(nullptr);
     cout.rdbuf(nullptr);
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
+    std::cerr << "Elapsed: " << ms << " ms" << endl;
     return 0;
 }
 

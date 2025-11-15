@@ -226,11 +226,58 @@ struct Trie {
             }
         }
     }
+
     // add erase method sometime? trie can support erase
 };
 
 Trie trie;
 trie.init();
+```
+
+
+## A prefix tree with dfs and merging tries into one
+
+```cpp
+struct Node {
+    int children[26];
+    bool isLeaf;
+    int64 cnt;
+    void init() {
+        memset(children, 0, sizeof(children));
+        isLeaf = false;
+        cnt = 0;
+    }
+};
+struct Trie {
+    vector<Node> trie;
+    void init() {
+        Node root;
+        root.init();
+        trie.emplace_back(root);
+    }
+    void insert(const vector<vector<pair<int, char>>>& adj, int u = 0, int cur = 0) {
+        trie[cur].cnt++;
+        for (const auto& [v, c] : adj[u]) {
+            int idx = c - 'a';
+            if (trie[cur].children[idx] == 0) {
+                Node node;
+                node.init();
+                trie[cur].children[idx] = trie.size();
+                trie.emplace_back(node);
+            }
+            insert(adj, v, trie[cur].children[idx]);
+        }
+    }
+    int64 dfs(int cur) {
+        int64 ans = choose3(N) - choose3(N - trie[cur].cnt);
+        for (int i = 0; i < 26; ++i) {
+            if (trie[cur].children[i]) {
+                ans += dfs(trie[cur].children[i]);
+            }
+        }
+        return ans;
+    }
+};
 ```
 
 example where we need the index, and use multiset to store common prefix of some length above K. 
