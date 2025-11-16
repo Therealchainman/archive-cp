@@ -518,33 +518,210 @@ void solve() {
 
 # Round 2
 
-##
+## Problem A: Deciding Points
+
+### Solution 1: math, constructive, greedy
+
+```cpp
+int N, M;
+
+int ceil(int x, int y) {
+    return (x + y - 1) / y;
+}
+
+int floor(int x, int y) {
+    return x / y;
+}
+
+void solve() {
+    cin >> N >> M;
+    int p1 = max(M, ceil(N, 2));
+    int p2 = N - p1;
+    if (p1 == M && p1 - p2 >= 2 && p2 >= 0) {
+        cout << "YES" << endl;
+        return;
+    }
+    // you have to go above M, so you must win by exactly 2 points
+    if (p1 - p2 < 2) {
+        p1++;
+        p2--;
+    }
+    // always equals N probably
+    if (p1 - p2 == 2 && p2 >= 0) {
+        cout << "YES" << endl;
+        return;
+    }
+    cout << "NO" << endl;
+}
+
+```
+
+## Problem B: Defining Prizes
+
+### Solution 1: greedy, binary search, sorting, prefix sums
+
+1. at most 1 unit of each merch type
+1. So I think you have to choose a suffix and reward everyone in that, if you have it sorted by score, cause if you have someone rewarded with lower score than someone unrewarded that breaks one of the constraints.
+1. look at this in scores increasing
+1. sort merchandise
+1. binary search, and greedily assign the minimum amount of merchandize from left to right, and see if have enough merchandise to assign.
+1. and assign merchandize from those that have the most unit remaining. 
+
+1. layer is a one pass of giving exactly 1 unit of merch to a prefix of players.
+
+```cpp
+int N, M, K;
+vector<int> A, B, arr;
+
+bool possible(int target) {
+    int64 sum = 0, bal = 0;
+    for (int i = target; i < B.size(); ++i) {
+        bal += B[i];
+    }
+    for (int i = 0; i < target; ++i) {
+        sum += arr[i];
+        bal += B[target - i - 1];
+        bal -= sum;
+        if (bal < 0) return false;
+    }
+    return true;
+}
+
+void solve() {
+    cin >> N >> M;
+    A.assign(N, 0);
+    B.assign(M, 0);
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+    }
+    for (int j = 0; j < M; j++) {
+        cin >> B[j];
+    }
+    sort(A.rbegin(), A.rend());
+    sort(B.rbegin(), B.rend());
+    arr.clear();
+    int cnt = 0;
+    for (int i = 0; i < N; ++i, ++cnt) {
+        if (i > 0 && A[i] != A[i - 1]) {
+            arr.emplace_back(cnt);
+            cnt = 0;
+        }
+    }
+    if (cnt) arr.emplace_back(cnt);
+    K = arr.size();
+    while (B.size() < K) B.emplace_back(0);
+    int lo = 0, hi = K;
+    while (lo < hi) {
+        int mid = lo + (hi - lo + 1) / 2;
+        if (possible(mid)) lo = mid;
+        else hi = mid - 1;
+    }
+    int ans = accumulate(arr.begin(), arr.begin() + lo, 0);
+    cout << ans << endl;
+}
+```
+
+## Problem C: Designing Paths
+
+### Solution 1: set, map, bfs, queue, 
+
+1. bfs with data structures to optimize finding next nodes within k distance in a route.
+
+```cpp
+int N, K, M;
+
+struct Route {
+    vector<int> indexToNode;
+    set<int> indices;
+    map<int, int> nodeToIndex;
+    Route() {}
+    void erase(int x) {
+        indices.erase(nodeToIndex[x]);
+    }
+};
+
+void solve() {
+    cin >> N >> K >> M;
+    vector<Route> routes(M, Route());
+    vector<vector<int>> nodeToRoutes(N + 1, vector<int>());
+    for (int i = 0; i < M; ++i) {
+        int L;
+        cin >> L;
+        for (int j = 0; j < L; ++j) {
+            int x;
+            cin >> x;
+            routes[i].indices.insert(j);
+            routes[i].nodeToIndex[x] = j;
+            routes[i].indexToNode.emplace_back(x);
+            nodeToRoutes[x].emplace_back(i);
+        };
+    }
+    vector<bool> vis(N + 1, false);
+    int64 round = 0, ans = 0;
+    queue<int> q;
+    q.emplace(1);
+    for (int r : nodeToRoutes[1]) {
+        routes[r].erase(1);
+    }
+    while (!q.empty()) {
+        int sz = q.size();
+        set<int> nxtRound;
+        for (int i = 0; i < sz; ++i) {
+            int u = q.front();
+            q.pop();
+            vis[u] = true;
+            ans += round * u;
+            // these are important
+            for (int r : nodeToRoutes[u]) {
+                int s = routes[r].nodeToIndex[u]; // start index in the route for this node.
+                auto it = routes[r].indices.lower_bound(s);
+                vector<int> toErase;
+                while (it != routes[r].indices.end() && *it - s <= K) {
+                    int idx = *it;
+                    int v = routes[r].indexToNode[idx];
+                    toErase.emplace_back(v);
+                    ++it;
+                }
+                for (int v : toErase) {
+                    for (int rr : nodeToRoutes[v]) {
+                        routes[rr].erase(v);
+                    }
+                    nxtRound.insert(v);
+                }
+            }
+        }
+        round++;
+        for (int v : nxtRound) {
+            q.emplace(v);
+        }
+    }
+    for (int64 i = 1; i <= N; ++i) {
+        if (vis[i]) continue;
+        ans += -1LL * i;
+    }
+    cout << ans << endl;
+}
+```
+
+## Problem D: Dividing Passcodes
 
 ### Solution 1:
+
+1. 2000 digits
+1. Does the distinct parameter mess up a straightforward digit dp?
+1. substring part really messing me up on this one.
+1. 
 
 ```cpp
 
 ```
 
-##
+## Problem E: Descending Platforms
 
 ### Solution 1:
 
-```cpp
-
-```
-
-##
-
-### Solution 1:
-
-```cpp
-
-```
-
-##
-
-### Solution 1:
+1. kinda stuck on this one
+1. O(N^2) dp? 
 
 ```cpp
 
