@@ -1986,6 +1986,24 @@ public:
 };
 ```
 
+## 717. 1-bit and 2-bit Characters
+
+### Solution 1:  loop
+
+```cpp
+class Solution {
+public:
+    bool isOneBitCharacter(vector<int>& bits) {
+        int N = bits.size();
+        int i;
+        for (i = 0; i + 1 < N;) {
+            i += bits[i] + 1;
+        }
+        return i == N - 1;
+    }
+};
+```
+
 ##
 
 ### Solution 1: 
