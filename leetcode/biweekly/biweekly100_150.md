@@ -254,6 +254,22 @@ public:
 
 # Leetcode BiWeekly Contest 133
 
+## 3190
+
+### solution 1: modulo 3
+
+```cpp
+class Solution {
+public:
+    int minimumOperations(vector<int>& nums) {
+        int ans = accumulate(nums.begin(), nums.end(), 0, [](int accum, int x) {
+            return accum + (x % 3 != 0 ? 1 : 0);
+        });
+        return ans;
+    }
+};
+```
+
 ## 3193. Count the Number of Inversions
 
 ### Solution 1:  dynamic programming, pointer, window sum optimization, space optimization

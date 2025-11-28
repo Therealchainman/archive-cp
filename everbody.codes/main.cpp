@@ -21,6 +21,9 @@
 #include <functional>
 #include <filesystem>
 #include <fstream>
+#include <tuple>
+#include <regex>
+#include <utility>
 using namespace std;
 #define endl '\n'
 #define LOCAL

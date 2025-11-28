@@ -18,6 +18,7 @@
 #include <sstream>
 #include <limits>
 #include <functional>
+#include <tuple>
 using namespace std;
 #define endl '\n'
 #define LOCAL

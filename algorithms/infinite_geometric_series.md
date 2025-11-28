@@ -1,5 +1,9 @@
 # Infinite Geometric Series
 
+## The general formula
+
+$$S=\frac{a}{1-r}$$
+
 ## Example derivative of infinite geometric series
 
 This can be found by differentiating an infinite geometric series.  this may be unrelated but interesting result.

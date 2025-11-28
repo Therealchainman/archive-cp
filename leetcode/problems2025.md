@@ -2004,6 +2004,53 @@ public:
 };
 ```
 
+## 1262. Greatest Sum Divisible by Three
+
+### Solution 1: dynamic programming, modulo arithmetic
+
+```cpp
+const int INF = 1e9;
+class Solution {
+public:
+    int maxSumDivThree(vector<int>& nums) {
+        vector<int> dp(3, -INF), ndp(3, 0);
+        dp[0] = 0;
+        for (int x : nums) {
+            ndp.assign(3, -INF);
+            for (int i = 0; i < 3; ++i) {
+                if (dp[i] == -INF) continue;
+                int j = (i + x) % 3;
+                ndp[i] = max(ndp[i], dp[i]);
+                ndp[j] = max(ndp[j], dp[i] + x);
+            }
+            swap(ndp, dp);
+        }
+        return dp[0];
+    }
+};
+```
+
+## 1018. Binary Prefix Divisible By 5
+
+### Solution 1: prefix sum modulo, bit manipulation
+
+1. The main idea is you just need to know the prefix sum modulo 5 at each step. 
+
+```cpp
+class Solution {
+public:
+    vector<bool> prefixesDivBy5(vector<int>& nums) {
+        int N = nums.size(), pref = 0;
+        vector<bool> ans(N, false);
+        for (int i = 0; i < N; ++i) {
+            pref = ((pref << 1) + nums[i]) % 5;
+            ans[i] = pref == 0;
+        }
+        return ans;
+    }
+};
+```
+
 ##
 
 ### Solution 1: 

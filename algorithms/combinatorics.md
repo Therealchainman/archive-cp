@@ -114,3 +114,20 @@ int64 choose3(int64 n) {
     return n * (n - 1) * (n - 2) / 6;
 }
 ```
+
+## Vandermonde's Identity
+
+Vandermonde's identity states that for any non-negative integers m, n, and r, the following equation holds:
+$$
+\sum_{k=0}^{r} \binom{m}{k} \binom{n}{r-k} = \binom{m+n}{r}
+$$
+or reformulated with change of variables:
+$$
+\sum_{k_1 + k_2 = r} \binom{m}{k_1} \binom{n}{k_2} = \binom{m+n}{r}
+$$
+
+This means the product of binomial coefficients with the constraint the bottom part or elements being chosen sum to r is equal to the binomial coefficient of the sum of the top parts choosing r elements.
+
+good way to look at it is you come up with a single binomial coefficient on the right side that is the sum of the top and the bottom in the product. 
+
+
