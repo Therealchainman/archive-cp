@@ -5,7 +5,7 @@ This will be updated during the year as the season plays out with code for probl
 These are solved because they give real time practice with working with algorithms, data structures, 
 mathematics, and problem solving in a fun and relaxing environment.
 
-Can expect to find solutions written in the following programming languages, C++, python (legacy), and Rust (soon).
+Can expect to find solutions written in the following programming languages, C++, python (legacy).
 
 ### Setup python virtual environment
 
