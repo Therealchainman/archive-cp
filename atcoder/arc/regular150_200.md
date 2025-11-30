@@ -1,55 +1,3 @@
-# Atcoder Regular Contest 186
-
-## 
-
-### Solution 1: 
-
-```cpp
-
-```
-
-## 
-
-### Solution 1: 
-
-```cpp
-
-```
-
-## 
-
-### Solution 1: 
-
-```cpp
-
-```
-
-## 
-
-### Solution 1: 
-
-```cpp
-
-```
-
-# Atcoder Regular Contest 187
-
-## Add and Swap
-
-### Solution 1: 
-
-```cpp
-
-```
-
-## Sum of CC
-
-### Solution 1: 
-
-```cpp
-
-```
-
 # Atcoder Regular Contest 188
 
 ## Symmetric Painting
@@ -229,50 +177,6 @@ signed main() {
     solve();
     return 0;
 }
-```
-
-## XOR = MOD
-
-### Solution 1: 
-
-```cpp
-
-```
-
-# Atcoder Regular Contest 192
-
-## 
-
-### Solution 1: 
-
-```cpp
-
-```
-
-## 
-
-### Solution 1: 
-
-```cpp
-
-```
-
-# Atcoder Regular Contest 193
-
-## 
-
-### Solution 1: 
-
-```cpp
-
-```
-
-## 
-
-### Solution 1: 
-
-```cpp
-
 ```
 
 # Atcoder Regular Contest 194 Div 2
@@ -488,24 +392,6 @@ signed main() {
 }
 ```
 
-# Atcoder Regular Contest 195
-
-## 
-
-### Solution 1: 
-
-```cpp
-
-```
-
-## 
-
-### Solution 1: 
-
-```cpp
-
-```
-
 # Atcoder Regular Contest 196
 
 ## Adjacent Delete
@@ -611,22 +497,3 @@ signed main() {
     return 0;
 }
 ```
-
-# Atcoder Regular Contest 197
-
-## 
-
-### Solution 1: 
-
-```cpp
-
-```
-
-## 
-
-### Solution 1: 
-
-```cpp
-
-```
-

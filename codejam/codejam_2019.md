@@ -1,7 +1,5 @@
 # Google Code Jam 2019
 
-
-
 # Round 1C
 
 ## Bacterial Tactics
