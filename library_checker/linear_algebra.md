@@ -1,21 +1,5 @@
 # Linear Algebra
 
-##
-
-### Solution 1: 
-
-```cpp
-
-```
-
-##
-
-### Solution 1: 
-
-```cpp
-
-```
-
 ## Rank of Matrix
 
 ### Solution 1: gaussian elimination, row echelon form, pivots
@@ -277,14 +261,6 @@ signed main() {
 ```
 
 ## System of Linear Equations (Mod 2)
-
-### Solution 1: 
-
-```cpp
-
-```
-
-##
 
 ### Solution 1: 
 
