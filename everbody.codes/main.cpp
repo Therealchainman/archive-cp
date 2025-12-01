@@ -48,6 +48,7 @@ fs::path create_path(const std::string& directory, const std::string& file_name)
 string name = "a.txt";
 
 void solve() {
+    
 }
 
 signed main() {

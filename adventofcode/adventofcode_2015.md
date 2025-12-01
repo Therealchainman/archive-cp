@@ -32,8 +32,6 @@
 
 ```
 
-## Day 4:
-
 ### Part 2
 
 ```py
@@ -42,18 +40,84 @@
 
 ## Day 5: 
 
-### Part 1
+### Part 1: set, string, boolean
 
-```py
+```cpp
+unordered_set<string> banned = {
+    "ab", "cd", "pq", "xy"
+};
 
+bool isVowel(char c) {
+    return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u';
+}
+
+bool isBanned(char a, char b) {
+    string s = "";
+    s += a;
+    s += b;
+    return banned.find(s) != banned.end();
+}
+
+bool isNice(const string& s) {
+    int N = s.size();
+    int vowelCount = 0;
+    bool hasDouble = false, hasBanned = false;
+    for (int i = 0; i < N; ++i) {
+        if (isVowel(s[i])) vowelCount++;
+        if (i > 0 && s[i] == s[i - 1]) hasDouble = true;
+        if (i > 0 && isBanned(s[i - 1], s[i])) hasBanned = true;
+    }
+    return vowelCount >= 3 && hasDouble && !hasBanned;
+}
+
+void solve() {
+    int ans = 0;
+    string s;
+    while (getline(cin, s)) {
+        if (isNice(s)) ans++;
+    }
+    debug(ans, "\n");
+}
 ```
 
-## Day 5: 
+### Part 2: string, set, boolean
 
-### Part 2:  
+```cpp
+bool isXYX(char a, char b, char c) {
+    return a == c;
+}
 
-```py
+bool isNice(const string& s) {
+    int N = s.size();
+    bool hasXYX = false, hasPair = false;
+    set<string> pairs;
+    string lastPair = "";
+    for (int i = 0; i < N; ++i) {
+        if (i > 1 && isXYX(s[i - 2], s[i - 1], s[i])) {
+            hasXYX = true;
+        }
+        if (i > 0) {
+            string curPair = s.substr(i - 1, 2);
+            if (pairs.find(curPair) != pairs.end()) {
+                hasPair = true;
+            }
+            if (!lastPair.empty()) {
+                pairs.insert(lastPair);
+            }
+            lastPair = curPair;
+        }
+    }
+    return hasXYX && hasPair;
+}
 
+void solve() {
+    int ans = 0;
+    string s;
+    while (getline(cin, s)) {
+        if (isNice(s)) ans++;
+    }
+    debug(ans, "\n");
+}
 ```
 
 ## Day 6: 
@@ -635,10 +699,156 @@ with open("big.txt", "r") as f:
 
 ## Day 18: 
 
-### Solution 1: 
+### Part 1: 
 
-```py
+```cpp
+const int STEPS = 100;
+vector<vector<char>> grid;
+int N;
+const char ON = '#', OFF = '.';
 
+void print(const vector<vector<char>>& g) {
+    for (const auto& row : g) {
+        for (char c : row) {
+            cout << c;
+        }
+        cout << endl;
+    }
+}
+
+bool inBounds(int r, int c) {
+    return r >= 0 && r < N && c >= 0 && c < N;
+}
+
+vector<vector<char>> simulate() {
+    vector<vector<char>> ans(N, vector<char>(N, '.'));
+    for (int r = 0; r < N; ++r) {
+        for (int c = 0; c < N; ++c) {
+            int occupied = 0;
+            for (int dr = -1; dr <= 1; ++dr) {
+                for (int dc = -1; dc <= 1; ++dc) {
+                    if (dr == 0 && dc == 0) continue;
+                    int nr = r + dr, nc = c + dc;
+                    if (!inBounds(nr, nc)) continue;
+                    if (grid[nr][nc] == ON) occupied++;
+                }
+            }
+            if (occupied == 3) ans[r][c] = ON;
+            else if (occupied == 2) ans[r][c] = grid[r][c];
+            else ans[r][c] = OFF;
+        }
+    }
+    return ans;
+}
+
+int countOn() {
+    int ans = 0;
+    for (int r = 0; r < N; ++r) {
+        for (int c = 0; c < N; ++c) {
+            if (grid[r][c] == ON) {
+                ans++;
+            }
+        }
+    }
+    return ans;
+}
+
+void solve() {
+    string line;
+    while (getline(cin, line)) {
+        vector<char> row;
+        for (char c : line) {
+            row.emplace_back(c);
+        }
+        grid.emplace_back(row);
+    }
+    N = grid.size();
+    for (int i = 0; i < STEPS; ++i) {
+        vector<vector<char>> newGrid = simulate();
+        swap(newGrid, grid);
+    }
+    int ans = countOn();
+    debug(ans, "\n");
+}
+```
+
+### Part 2: 
+
+```cpp
+const int STEPS = 100;
+vector<vector<char>> grid;
+int N;
+const char ON = '#', OFF = '.';
+
+bool inBounds(int r, int c) {
+    return r >= 0 && r < N && c >= 0 && c < N;
+}
+
+bool isCorner(int r, int c) {
+    return (r == 0 && c == 0) || (r == 0 && c == N - 1) || (r == N - 1 && c == 0) || (r == N - 1 && c == N - 1);
+}
+
+vector<vector<char>> simulate() {
+    vector<vector<char>> ans(N, vector<char>(N, '.'));
+    for (int r = 0; r < N; ++r) {
+        for (int c = 0; c < N; ++c) {
+            if (isCorner(r, c)) {
+                ans[r][c] = ON;
+                continue;
+            }
+            int occupied = 0;
+            for (int dr = -1; dr <= 1; ++dr) {
+                for (int dc = -1; dc <= 1; ++dc) {
+                    if (dr == 0 && dc == 0) continue;
+                    int nr = r + dr, nc = c + dc;
+                    if (!inBounds(nr, nc)) continue;
+                    if (grid[nr][nc] == ON) occupied++;
+                }
+            }
+            if (occupied == 3) ans[r][c] = ON;
+            else if (occupied == 2) ans[r][c] = grid[r][c];
+            else ans[r][c] = OFF;
+        }
+    }
+    return ans;
+}
+
+int countOn() {
+    int ans = 0;
+    for (int r = 0; r < N; ++r) {
+        for (int c = 0; c < N; ++c) {
+            if (grid[r][c] == ON) {
+                ans++;
+            }
+        }
+    }
+    return ans;
+}
+
+void solve() {
+    string line;
+    while (getline(cin, line)) {
+        vector<char> row;
+        for (char c : line) {
+            row.emplace_back(c);
+        }
+        grid.emplace_back(row);
+    }
+    N = grid.size();
+    for (int r = 0; r < N; ++r) {
+        for (int c = 0; c < N; ++c) {
+            if (isCorner(r, c)) {
+                grid[r][c] = ON;
+            }
+        }
+    }
+    for (int i = 0; i < STEPS; ++i) {
+        vector<vector<char>> newGrid = simulate();
+        swap(newGrid, grid);
+    }
+    int ans = countOn();
+    debug(ans, "\n");
+}
 ```
 
 ## Day 19: 

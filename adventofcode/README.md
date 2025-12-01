@@ -1,3 +1,18 @@
+# C++
+
+Very helpful way to print to stdout the grid of char data type
+
+```cpp
+void print(const vector<vector<char>>& g) {
+    for (const auto& row : g) {
+        for (char c : row) {
+            cout << c;
+        }
+        cout << endl;
+    }
+}
+```
+
 # Python
 
 # Reading inputs in python
