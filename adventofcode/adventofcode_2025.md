@@ -40,12 +40,11 @@ void solve() {
         int step = stoi(line.substr(1));
         ans += step / MOD;
         int r = step % MOD;
-        int npos = pos + (line[0] == 'R' ? r : -r);
-        if ((npos <= 0 && pos > 0) || npos >= MOD) ans++;
-        pos = npos;
+        if (pos == 0 && line[0] == 'L') ans--; // edge case
+        pos += (line[0] == 'R' ? r : -r);
+        if (pos <= 0 || pos >= MOD) ans++;
         if (pos < 0) pos += MOD;
         if (pos >= MOD) pos -= MOD;
-        debug(pos, ans, "\n");
     }
     debug(ans, "\n");
 }

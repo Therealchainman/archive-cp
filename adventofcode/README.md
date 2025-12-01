@@ -13,6 +13,23 @@ void print(const vector<vector<char>>& g) {
 }
 ```
 
+How to get md5 from a C++ library
+
+One time installation via brew
+
+```sh
+brew install openssl@3
+```
+
+Do this in each shell session to use the library. 
+
+```sh
+export OPENSSL_PREFIX="$(brew --prefix openssl@3)"
+export CPPFLAGS="-I$OPENSSL_PREFIX/include$CPPFLAGS"
+export LDFLAGS="-L$OPENSSL_PREFIX/lib$LDFLAGS"
+g++ $CPPFLAGS main.cpp $LDFLAGS -lcrypto -o main  
+```
+
 # Python
 
 # Reading inputs in python

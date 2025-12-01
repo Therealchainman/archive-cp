@@ -28,14 +28,65 @@
 
 ### Part 1
 
-```py
+what you need to know
+1. 1 byte = 2 hex digits
+1. digest is 16 bytes or 32 hex digits
+1. byte = 8 bits, and you need 4 bits for a hex digit.
 
+digest[0] == 0 &&        // hex[0] and hex[1] are 0
+digest[1] == 0 &&        // hex[2] and hex[3] are 0
+(digest[2] & 0xF0) == 0  // hex[4] is 0
+
+0xF0 in binary is 1111 0000.
+0x prefix means writing in hexadecimal (base 16)
+So when you do & operations you are checking that the hex[4] all the bits are 0s. 
+
+why can't you do cout << digest[0], 
+
+digest[0] is an unsigned char, so cout treats it like a character, not a number.
+If the value is, say, 0x07 or 0xB3, that is not a printable ASCII character. You might see:
+Nothing
+Gibberish
+Terminal beeps or weird symbols
+
+```cpp
+const int MAXN = 1e7;
+
+void solve() {
+    unsigned char digest[MD5_DIGEST_LENGTH];
+    string s;
+    cin >> s;
+    for (int i = 0; i < MAXN; ++i) {
+        string cand = s + to_string(i);
+        MD5(reinterpret_cast<const unsigned char*>(cand.c_str()), cand.size(), digest);
+        if (digest[0] == 0 && digest[1] == 0 && (digest[2] & 0xF0) == 0) {
+            debug(i, "\n");
+            return;
+        }
+    }
+}
 ```
 
 ### Part 2
 
-```py
+1. find hex that starts with six zeros. 
 
+```cpp
+const int MAXN = 1e7;
+
+void solve() {
+    unsigned char digest[MD5_DIGEST_LENGTH];
+    string s;
+    cin >> s;
+    for (int i = 0; i < MAXN; ++i) {
+        string cand = s + to_string(i);
+        MD5(reinterpret_cast<const unsigned char*>(cand.c_str()), cand.size(), digest);
+        if (digest[0] == 0 && digest[1] == 0 && digest[2] == 0) {
+            debug(i, "\n");
+            return;
+        }
+    }
+}
 ```
 
 ## Day 5: 
