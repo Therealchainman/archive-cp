@@ -13,6 +13,12 @@ void print(const vector<vector<char>>& g) {
 }
 ```
 
+best way to convert a string to a vector<char>
+
+```cpp
+vector<char>(line.begin(), line.end())
+```
+
 How to get md5 from a C++ library
 
 One time installation via brew
