@@ -2051,10 +2051,16 @@ public:
 };
 ```
 
-##
+## 3432. Count Partitions with Even Sum Difference
 
-### Solution 1: 
+### Solution 1: accumulate, parity
 
 ```cpp
-
+class Solution {
+public:
+    int countPartitions(vector<int>& nums) {
+        int total = accumulate(nums.begin(), nums.end(), 0), N = nums.size();
+        return total % 2 == 0 ? N - 1 : 0;
+    }
+};
 ```

@@ -729,7 +729,17 @@ void solve() {
 
 # Round 3
 
-##
+## Problem B: Streetlamp Safety
+
+### Solution 1:
+
+1. 
+
+```cpp
+
+```
+
+## Problem D: Treehouse Telegram
 
 ### Solution 1:
 
@@ -737,23 +747,7 @@ void solve() {
 
 ```
 
-##
-
-### Solution 1:
-
-```cpp
-
-```
-
-##
-
-### Solution 1:
-
-```cpp
-
-```
-
-##
+## Problem E: Bitstring Botcheck
 
 ### Solution 1:
 
