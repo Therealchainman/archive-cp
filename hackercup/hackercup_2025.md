@@ -731,12 +731,58 @@ void solve() {
 
 ## Problem B: Streetlamp Safety
 
-### Solution 1:
+### Solution 1: prefix dp
 
-1. 
+1. The tricky part is that you
+1. monotonic in terms of for later index there is no purpose to ever create another consecutive segment of street lamps on that is smaller than earlier segments. 
+1. You will only ever add longer segments if you add any.
+1. prefix dp with last segment length state (run length dp), with a secondary dp that maintains prefix minima to allow faster transitions.
+1. dp1[i][j] = cheapest way to have selected a segment of length j that ends at i.
+1. dp2[i][j] = cheapest way to have selected some block of length j in the prefix 1...i 
+1. dp over a sequence where the state tracks the length of the last consecutive segment. 
+
 
 ```cpp
+const int64 INF = numeric_limits<int64>::max();
+int N;
+vector<int64> A, B;
+vector<vector<int64>> dp1, dp2;
 
+void solve() {
+    cin >> N;
+    A.assign(N + 1, 0);
+    B.assign(N + 1, 0);
+    for (int i = 1; i <= N; ++i) {
+        cin >> A[i];
+        A[i] += A[i - 1];
+    }
+    for (int i = 1; i <= N; ++i) {
+        cin >> B[i];
+    }
+    for (int i = 1; i <= N; ++i) {
+        B[i] = max(B[i], B[i - 1]); // prefix max condition, that is must be monotincally increasing
+    }
+    for (int i = N - 1; i >= 0; --i) {
+        B[i] = max(B[i], B[i + 1] - 1); // cannot jump by more than 1 each step backwards
+    }
+    dp1.assign(N + 1, vector<int64>(N + 1, INF)); // dp1[i][j] = min cost to have last segment of length j ending at i
+    dp2.assign(N + 1, vector<int64>(N + 1, INF)); // dp2[i][j] = min cost to have any segment of length j in prefix 0..i
+    dp1[0][0] = dp2[0][0] = 0;
+    for (int i = 1; i <= N; ++i) {
+        for (int j = 1; j <= i; ++j) {
+            if (dp1[i - 1][j - 1] != INF) dp1[i][j] = min(dp1[i][j], dp1[i - 1][j - 1] + A[i] - A[i - 1]);
+            if (dp2[i - 1][j] != INF) dp1[i][j] = min(dp1[i][j], dp2[i - 1][j] + A[i] - A[i - j]);
+        }
+        dp1[i][0] = 0;
+        for (int j = 0; j < B[i]; ++j) {
+            dp1[i][j] = INF;
+        }
+        for (int j = B[i]; j <= i; ++j) {
+            dp2[i][j] = min(dp2[i - 1][j], dp1[i][j]);
+        }
+    }
+    cout << dp2[N][B[N]] << endl;
+}
 ```
 
 ## Problem D: Treehouse Telegram

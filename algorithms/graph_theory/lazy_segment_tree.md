@@ -197,7 +197,7 @@ const int NOOP = -1;
 int N, Q;
 
 
-// range assign, point min/max query
+// range assign, range min/max query
 LazySegmentTree::Configuration assignMinConfiguration{
     INF, 
     NOOP,

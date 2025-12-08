@@ -2,7 +2,7 @@
 
 A fast Fourier transform (FFT) is an algorithm that computes the discrete Fourier transform (DFT) of a sequence, or its inverse (IDFT).
 
-## Convolution of two polynomials
+## Convolution of two integer polynomials (Number Theoretic Transform) (NTT)
 
 Note this is over a finite field, that is it is modulo some prime number p
 
@@ -36,6 +36,9 @@ Uses modular arithmetic with P = 998244353 for performance.
 Solves pair counting problems efficiently.
 
 This example is being used to count pairs of ordered triplets such that A + C = 2 * B, but think of it as A + C = k
+
+note to self: change int to int64 where needed
+note to self: change modulus when needed
 
 ```cpp
 namespace NTT{

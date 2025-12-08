@@ -68,6 +68,11 @@ Now extracting coefficient you can use the following rule.
 
 $$e^{ax} = \sum_{n=0}^{\infin} a^n \frac{x^n}{n!}$$
 
+There are two common ways to write coefficient extraction for EGFs.
+
+1. Suppose you have to extract $[x^n] A(x) = \frac{a_n}{n!}$ then it is true that $a_n = n! [x^n] A(x)$
+1. Suppose you have to extract $[\frac{x^n}{n!}] A(x) = a_n$ then it is true that $a_n = [\frac{x^n}{n!}] A(x)$
+
 ## Bivariate Generating Functions
 
 bivariate generating function is a formal power series in two variables, $
