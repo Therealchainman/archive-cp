@@ -45,39 +45,8 @@ fs::path create_path(const std::string& directory, const std::string& file_name)
     return fs::path(directory) / file_name;
 }
 
-bool isXYX(char a, char b, char c) {
-    return a == c;
-}
-
-bool isNice(const string& s) {
-    int N = s.size();
-    bool hasXYX = false, hasPair = false;
-    set<string> pairs;
-    string lastPair = "";
-    for (int i = 0; i < N; ++i) {
-        if (i > 1 && isXYX(s[i - 2], s[i - 1], s[i])) {
-            hasXYX = true;
-        }
-        if (i > 0) {
-            string curPair = s.substr(i - 1, 2);
-            if (pairs.find(curPair) != pairs.end()) {
-                hasPair = true;
-            }
-            if (!lastPair.empty()) {
-                pairs.insert(lastPair);
-            }
-            lastPair = curPair;
-        }
-    }
-    return hasXYX && hasPair;
-}
-
 void solve() {
     int ans = 0;
-    string s;
-    while (getline(cin, s)) {
-        if (isNice(s)) ans++;
-    }
     debug(ans, "\n");
 }
 

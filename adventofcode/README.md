@@ -19,6 +19,30 @@ best way to convert a string to a vector<char>
 vector<char>(line.begin(), line.end())
 ```
 
+How to create a 3d point structure with ostream operator overload for easy printing
+
+```cpp
+struct Point {
+    int x, y, z;
+    Point() {}
+    Point(int x, int y, int z) : x(x), y(y), z(z) {}
+
+    friend ostream& operator<<(ostream& os, const Point& p) {
+        return os << "(" << p.x << ", " << p.y << ", " << p.z << ")";
+    };
+};
+```
+
+```cpp
+regex freshRegex(R"((\d+),(\d+))");
+
+smatch match;
+if (regex_match(line, match, freshRegex)) {
+    int64 left = stoll(match[1]), right = stoll(match[2]);
+    R.emplace_back(left, right);
+} else {
+```
+
 How to get md5 from a C++ library
 
 One time installation via brew
@@ -197,4 +221,20 @@ output_path = dot.render(
     directory = "output",
     cleanup = True
 )
+```
+
+```cpp
+void dump_graphviz(const map<string, vector<string>>& adj) {
+    cout << "digraph G {\n";
+    cout << "  rankdir=LR;\n";
+
+    // Emit edges
+    for (const auto& [src, dests] : adj) {
+        for (const auto& dest : dests) {
+            cout << "  \"" << src << "\" -> \"" << dest << "\";\n";
+        }
+    }
+
+    cout << "}\n";
+}
 ```

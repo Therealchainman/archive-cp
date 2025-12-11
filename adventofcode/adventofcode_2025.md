@@ -506,6 +506,225 @@ void solve() {
 
 ## Day 8
 
+### Part 1: euclidean distance, sorting, dfs, undirected graph
+
+1. calculate the euclidean distance between all the points O(N^2)
+1. sort that to begin connecting points based on shortest distance
+
+```cpp
+struct Point {
+    int x, y, z;
+    Point() {}
+    Point(int x, int y, int z) : x(x), y(y), z(z) {}
+
+    friend ostream& operator<<(ostream& os, const Point& p) {
+        return os << "(" << p.x << ", " << p.y << ", " << p.z << ")";
+    };
+};
+
+Point getPoint(const string& s) {
+    string line;
+    istringstream iss(s);
+    vector<int> coords;
+    while (getline(iss, line, ',')) {
+        coords.emplace_back(stoi(line));
+    }
+    return Point(coords[0], coords[1], coords[2]);
+}
+
+int64 distance(const Point& a, const Point& b) {
+    return 1LL * (a.x - b.x) * (a.x - b.x) +
+           1LL * (a.y - b.y) * (a.y - b.y) +
+           1LL * (a.z - b.z) * (a.z - b.z);
+}
+
+const int NUM_ITERATIONS = 1000;
+int N;
+vector<Point> points;
+vector<vector<int>> adj;
+vector<bool> vis;
+
+int dfs(int u, int p = -1) {
+    if (vis[u]) return 0;
+    vis[u] = true;
+    int ans = 1;
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        ans += dfs(v, u);
+    }
+    return ans;
+}
+
+void solve() {
+    string line;
+    points.clear();
+    while (getline(cin, line)) {
+        points.emplace_back(getPoint(line));
+    }
+    N = points.size();
+    vector<tuple<int64, int, int>> dists;
+    for (int i = 0; i < N; ++i) {
+        for (int j = i + 1; j < N; ++j) {
+            dists.emplace_back(distance(points[i], points[j]), i, j);
+        }
+    }
+    sort(dists.begin(), dists.end());
+    adj.assign(N, vector<int>());
+    for (int i = 0; i < NUM_ITERATIONS; ++i) {
+        auto &[d, u, v] = dists[i];
+        adj[u].emplace_back(v);
+        adj[v].emplace_back(u);
+    }
+    vector<int> comps;
+    vis.assign(N, false);
+    for (int i = 0; i < N; ++i) {
+        if (vis[i]) continue;
+        int cnt = dfs(i);
+        comps.emplace_back(cnt);
+    }
+    sort(comps.rbegin(), comps.rend());
+    int64 ans = 1LL * comps[0] * comps[1] * comps[2];
+    debug(ans, "\n");
+}
+```
+
+### Part 2: union find, euclidean distance, sorting
+
+```cpp
+struct UnionFind {
+    vector<int> parents, size;
+    UnionFind(int n) {
+        parents.resize(n);
+        iota(parents.begin(),parents.end(),0);
+        size.assign(n,1);
+    }
+
+    int find(int i) {
+        if (i==parents[i]) {
+            return i;
+        }
+        return parents[i]=find(parents[i]);
+    }
+
+    void unite(int i, int j) {
+        i = find(i), j = find(j);
+        if (i!=j) {
+            if (size[j]>size[i]) {
+                swap(i,j);
+            }
+            size[i]+=size[j];
+            parents[j]=i;
+        }
+    }
+
+    bool same(int i, int j) {
+        return find(i) == find(j);
+    }
+};
+
+struct Point {
+    int x, y, z;
+    Point() {}
+    Point(int x, int y, int z) : x(x), y(y), z(z) {}
+
+    friend ostream& operator<<(ostream& os, const Point& p) {
+        return os << "(" << p.x << ", " << p.y << ", " << p.z << ")";
+    };
+};
+
+Point getPoint(const string& s) {
+    string line;
+    istringstream iss(s);
+    vector<int> coords;
+    while (getline(iss, line, ',')) {
+        coords.emplace_back(stoi(line));
+    }
+    return Point(coords[0], coords[1], coords[2]);
+}
+
+int64 distance(const Point& a, const Point& b) {
+    return 1LL * (a.x - b.x) * (a.x - b.x) +
+           1LL * (a.y - b.y) * (a.y - b.y) +
+           1LL * (a.z - b.z) * (a.z - b.z);
+}
+
+const int NUM_ITERATIONS = 1000;
+int N;
+vector<Point> points;
+vector<vector<int>> adj;
+
+void solve() {
+    string line;
+    points.clear();
+    while (getline(cin, line)) {
+        points.emplace_back(getPoint(line));
+    }
+    N = points.size();
+    vector<tuple<int64, int, int>> dists;
+    for (int i = 0; i < N; ++i) {
+        for (int j = i + 1; j < N; ++j) {
+            dists.emplace_back(distance(points[i], points[j]), i, j);
+        }
+    }
+    sort(dists.begin(), dists.end());
+    UnionFind dsu(N);
+
+    adj.assign(N, vector<int>());
+    for (int i = 0; i < dists.size(); ++i) {
+        auto &[d, u, v] = dists[i];
+        if (dsu.same(u, v)) continue;
+        dsu.unite(u, v);
+        if (dsu.size[dsu.find(u)] == N) {
+            int64 ans = 1LL * points[u].x * points[v].x;
+            debug(ans, "\n");
+            break;
+        }
+    }
+}
+```
+
+## Day 9
+
+### Part 1: points, rectangle area
+
+```cpp
+vector<pair<int, int>> points;
+
+regex pointRegex(R"((\d+),(\d+))");
+
+void solve() {
+    points.clear();
+    string line;
+    while (getline(cin, line)) {
+        smatch match;
+        if (regex_match(line, match, pointRegex)) {
+            int64 x = stoi(match[1]), y = stoi(match[2]);
+            points.emplace_back(x, y);
+        }
+    }
+    int N = points.size();
+    int64 ans = 0;
+    for (int i = 0; i < N; ++i) {
+        for (int j = i + 1; j < N; ++j) {
+            auto [x1, y1] = points[i];
+            auto [x2, y2] = points[j];
+            int xd = abs(x2 - x1) + 1, yd = abs(y2 - y1) + 1;
+            ans = max(ans, 1LL * xd * yd);
+        }
+    }
+    debug(ans, "\n");
+}
+```
+
+### Part 2: 
+
+```cpp
+
+```
+
+
+## Day 10
+
 ### Part 1: 
 
 ```cpp
@@ -517,4 +736,153 @@ void solve() {
 ```cpp
 
 ```
+
+
+## Day 11
+
+### Part 1: DAG, bfs, topological sort, counting paths
+
+```cpp
+vector<string> parse(const string& s) {
+    vector<string> ans;
+    string token;
+    istringstream iss(s);
+    while (iss >> token) {
+        ans.emplace_back(token);
+    }
+    return ans;
+}
+
+const string SOURCE = "you", DEST = "out";
+map<string, vector<string>> adj;
+map<string, int> ind;
+regex reg(R"(^([a-z]{3}):((?: [a-z]{3})+)$)");
+
+void bfs(const string& src, int mode ) {
+    map<string, int64> dp;
+    dp[src] = 1;
+    queue<string> q;
+    q.emplace(src);
+    while (!q.empty()) {
+        string u = q.front();
+        q.pop();
+        if (u == DEST) {
+            debug(dp[u], "\n");
+            return;
+        }
+        for (const string& v : adj[u]) {
+            if (mode == 1) dp[v] += dp[u];
+            ind[v]--;
+            if (ind[v] == 0 && v != SOURCE) {
+                q.emplace(v);
+            }
+        }
+    }
+}
+
+void solve() {
+    adj.clear();
+    ind.clear();
+    string line;
+    while (getline(cin, line)) {
+        smatch match;
+        if (regex_match(line, match, reg)) {
+            string src = match[1];
+            string rest = match[2].str().substr(1);
+            vector<string> dests = parse(rest);
+            for (const string& dest : dests) {
+                adj[src].emplace_back(dest);
+                ind[dest]++;
+            }
+        }
+    }
+    for (const auto &[node, _] : adj) {
+        if (ind.find(node) == ind.end()) {
+            bfs(node, 0);
+            break;
+        }
+    }
+    bfs(SOURCE, 1);
+}
+```
+
+### Part 2: dynamic programming, bfs, topological sort, DAG
+
+```cpp
+vector<string> parse(const string& s) {
+    vector<string> ans;
+    string token;
+    istringstream iss(s);
+    while (iss >> token) {
+        ans.emplace_back(token);
+    }
+    return ans;
+}
+
+const string SOURCE = "svr", DEST = "out";
+map<string, vector<string>> adj;
+map<string, int> ind;
+regex reg(R"(^([a-z]{3}):((?: [a-z]{3})+)$)");
+
+int64 bfs(const string& src ) {
+    map<string, int64> dp[3];
+    dp[0][src] = 1;
+    queue<string> q;
+    q.emplace(src);
+    while (!q.empty()) {
+        string u = q.front();
+        q.pop();
+        for (const string& v : adj[u]) {
+            for (int i = 0; i < 3; ++i) {
+                dp[i][v] += dp[i][u];
+            }
+            if (v == "fft") {
+                dp[1][v] += dp[0][u];
+            } else if (v == "dac") {
+                dp[2][v] += dp[1][u];
+            }
+            ind[v]--;
+            if (ind[v] == 0) {
+                q.emplace(v);
+            }
+        }
+    }
+    return dp[2][DEST];
+}
+
+void solve() {
+    adj.clear();
+    ind.clear();
+    string line;
+    while (getline(cin, line)) {
+        smatch match;
+        if (regex_match(line, match, reg)) {
+            string src = match[1];
+            string rest = match[2].str().substr(1);
+            vector<string> dests = parse(rest);
+            for (const string& dest : dests) {
+                adj[src].emplace_back(dest);
+                ind[dest]++;
+            }
+        }
+    }
+    int64 ans = bfs(SOURCE);
+    debug(ans, "\n");
+}
+```
+
+## Day 12
+
+### Part 1: 
+
+```cpp
+
+```
+
+### Part 2: 
+
+```cpp
+
+```
+
 

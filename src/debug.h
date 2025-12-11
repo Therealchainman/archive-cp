@@ -8,7 +8,6 @@
 using namespace std;
 #define endl '\n'
 
-// Helper trait to detect container types
 template <typename T, typename _ = void>
 struct is_container : std::false_type {};
 
@@ -16,13 +15,25 @@ template <typename T>
 struct is_container<T, std::void_t<decltype(std::declval<T>().begin()),
                                    decltype(std::declval<T>().end())>> : std::true_type {};
 
-// Base case: Debug single value (non-container types)
+// Forward declaration to handle nested containers
 template <typename T>
-typename std::enable_if<!std::is_same<T, std::string>::value && !std::is_class<T>::value>::type
+typename std::enable_if<is_container<T>::value && !std::is_same<T, std::string>::value>::type
+debug(const T &container);
+
+// Special case: std::string (treat as scalar, not container)
+void debug(const std::string &s) {
+    std::cerr << "\"" << s << "\"";
+}
+
+// Base Case: Primitives, Structs, Pairs (Non-containers)
+// We removed !std::is_class<T> so custom structs are allowed
+template <typename T>
+typename std::enable_if<!is_container<T>::value && !std::is_same<T, std::string>::value>::type
 debug(const T &x) {
     std::cerr << x;
 }
 
+// Special Case: Pairs
 template <typename T1, typename T2>
 void debug(const pair<T1, T2> &p) {
     cerr << "(";
@@ -32,6 +43,29 @@ void debug(const pair<T1, T2> &p) {
     cerr << ")";
 }
 
+// tuple support
+template <std::size_t I = 0, typename... Ts>
+std::enable_if_t<I == sizeof...(Ts)>
+debug_tuple_elements(const std::tuple<Ts...>&) {}
+
+template <std::size_t I = 0, typename... Ts>
+std::enable_if_t<I < sizeof...(Ts)>
+debug_tuple_elements(const std::tuple<Ts...>& t) {
+    if constexpr (I > 0) {
+        std::cerr << ", ";
+    }
+    debug(std::get<I>(t));
+    debug_tuple_elements<I + 1>(t);
+}
+
+template <typename... Ts>
+void debug(const std::tuple<Ts...>& t) {
+    std::cerr << "(";
+    debug_tuple_elements(t);
+    std::cerr << ")";
+}
+
+// Special Case: Vector<bool> (std quirk)
 void debug(const std::vector<bool> &vb) {
     std::cerr << "{";
     for (size_t i = 0; i < vb.size(); ++i) {
@@ -41,9 +75,9 @@ void debug(const std::vector<bool> &vb) {
     std::cerr << "}";
 }
 
-// Debug for containers (vector, set, map, etc.)
+// Container Logic
 template <typename T>
-typename std::enable_if<is_container<T>::value>::type
+typename std::enable_if<is_container<T>::value && !std::is_same<T, std::string>::value>::type
 debug(const T &container) {
     cerr << "{";
     bool first = true;
@@ -55,17 +89,12 @@ debug(const T &container) {
     cerr << "}";
 }
 
-// Variadic Debug to handle multiple arguments
+// Variadic Debug
 template <typename T, typename... Args>
 void debug(const T &first, const Args &...rest) {
     debug(first);
     cerr << " ";
     debug(rest...);
-}
-
-// Debug for `std::string` (special case to avoid treating it as a container)
-void debug(const std::string &s) {
-    std::cerr << "\"" << s << "\"";
 }
 
 // TreeNode definition
