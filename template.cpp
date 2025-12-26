@@ -20,6 +20,7 @@
 #include <functional>
 #include <tuple>
 #include <chrono>
+#include <bitset>
 using namespace std;
 #define endl '\n'
 #define LOCAL

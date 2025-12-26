@@ -432,6 +432,151 @@ signed main() {
 
 ```
 
+## Money Sums
+
+### Solution 1: dynamic programming, subset sum problem
+
+Let dp[i] = true if sum i can be formed using some subset of the given coins.
+
+Then for each coin x, iterate backwards through the dp array and set dp[i] = dp[i] || dp[i - x] for all i >= x.
+
+```cpp
+const int MAXN = 1e5 + 5;
+int N;
+vector<int> A;
+bool dp[MAXN];
+
+void solve() {
+    cin >> N;
+    A.resize(N);
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+    }
+    memset(dp, false, sizeof(dp));
+    dp[0] = true;
+    for (int x : A) {
+        for (int i = MAXN - 1; i >= x; --i) {
+            dp[i] |= dp[i - x];
+        }
+    }
+    int cnt = count(&dp[0], &dp[0] + MAXN, 1) - 1;
+    cout << cnt << endl;
+    for (int i = 1; i < MAXN; ++i) {
+        if (dp[i]) cout << i << " ";
+    }
+    cout << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+### Solution 2: bitset dynamic programming, subset sum problem, bit manipulation
+
+```cpp
+const int MAXN = 1e5 + 5;
+int N;
+vector<int> A;
+bitset<MAXN> dp;
+
+void solve() {
+    cin >> N;
+    A.resize(N);
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+    }
+    dp.set(0);
+    for (int x : A) {
+        dp |= (dp << x);
+    }
+    int cnt = dp.count() - 1;
+    cout << cnt << endl;
+    for (int i = 1; i < MAXN; ++i) {
+        if (dp.test(i)) cout << i << " ";
+    }
+    cout << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## Mountain Range
+
+### Solution 1: sorting, monotonic stack, dynamic programming O(n log n)
+
+Find the next greater and previous greater elements for each index using a monotonic stack.
+
+Iterate over the elements from smallest to largest, and for each element update the dp values of the next greater and previous greater elements.
+
+```cpp
+int N;
+vector<int> A, nxt, prv;
+
+void solve() {
+    cin >> N;
+    A.resize(N);
+    nxt.assign(N, -1);
+    prv.assign(N, -1);
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+    }
+    vector<int> seq(N, 0);
+    iota(seq.begin(), seq.end(), 0);
+    sort(seq.begin(), seq.end(), [&](int x, int y) {
+        return A[x] < A[y];
+    });
+    stack<int> stk;
+    for (int i = 0; i < N; ++i) {
+        while (!stk.empty() && A[stk.top()] <= A[i]) stk.pop();
+        if (!stk.empty()) prv[i] = stk.top();
+        stk.emplace(i);
+    }
+    stack<int> stk1;
+    for (int i = N - 1; i >= 0; --i) {
+        while (!stk1.empty() && A[stk1.top()] <= A[i]) stk1.pop();
+        if (!stk1.empty()) nxt[i] = stk1.top();
+        stk1.emplace(i);
+    }
+    vector<int> dp(N, 1);
+    for (int i : seq) {
+        int p = prv[i], n = nxt[i];
+        if (p != -1) dp[p] = max(dp[p], dp[i] + 1);
+        if (n != -1) dp[n] = max(dp[n], dp[i] + 1);
+    }
+    int ans = *max_element(dp.begin(), dp.end());
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## Counting Tilings
+
+### Solution 1: 
+
+little challening first time I attempted, couldn't get the dp states right away, will come back to this one.
+
+```cpp
+
+```
+
 ## Counting Numbers
 
 ### Solution 1: digit dp, recursive memoization
