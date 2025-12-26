@@ -424,10 +424,177 @@ signed main() {
 }
 ```
 
-##
+## 
 
 ### Solution 1: 
 
 ```cpp
 
+```
+
+## Counting Numbers
+
+### Solution 1: digit dp, recursive memoization
+
+```cpp
+int64 L, R;
+int64 dp[19][10][2][2];
+
+int64 dfs(const string &num, int i, int d, int z, int t) {
+    if (i == num.size()) return 1;
+    if (dp[i][d][z][t] != -1) return dp[i][d][z][t];
+    int c = num[i] - '0';
+    int64 ans = 0;
+    for (int v = 0; v < 10; ++v) {
+        if (!z && v == d) continue; // doesn't matter if just padding left with zero still
+        if (t && v > c) break;
+        ans += dfs(num, i + 1, v, int(v == 0) & z, int(v == c) & t);
+    }
+    return dp[i][d][z][t] = ans;
+}
+
+int64 f(const string &num) {
+    memset(dp, -1, sizeof(dp));
+    return dfs(num, 0, 0, 1, 1);
+}
+
+void solve() {
+    cin >> L >> R;
+    int64 right = f(to_string(R));
+    int64 left = L > 0 ? f(to_string(L - 1)) : 0;
+    int64 ans = right - left;
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## Increasing Subsequence
+
+### Solution 1: dynamic programming, greedy, binary search, patience sorting O(n log n)
+
+dp[i] = smallest ending value of an increasing subsequence of length i+1
+
+If you see a value which is larger than any prior then you can extend the longest increasing subsequence found so far by 1.
+
+If you see a value which is greater than current dp[i] you update it to dp[i] = x where x is the new value, because this may allow for longer increasing subsequences to be formed later.
+
+```cpp
+int N;
+vector<int> A;
+
+void solve() {
+    cin >> N;
+    A.resize(N);
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+    }
+    vector<int> values;
+    for (int x : A) {
+        int i = lower_bound(values.begin(), values.end(), x) - values.begin();
+        if (i < values.size()) {
+            values[i] = x;
+        } else {
+            values.emplace_back(x);
+        }
+    }
+    int ans = values.size();
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## Increasing Subsequence II
+
+### Solution 1: dynamic programming, counting, fenwick tree (binary indexed tree), coordinate compression
+
+dp[v] = number of increasing subsequences that ends with A[i]
+where v is the index in the compressed coordinates for A[i]
+
+transition states: dp[v] = sum(dp[u]) + 1 for all u < v
+
+Need a fenwick tree to quickly get the sum of dp[u] for all u < v, and also to support the point updates to the dp states.
+
+```cpp
+const int MOD = 1e9 + 7;
+int N;
+vector<int> A, values;
+
+template <typename T>
+struct FenwickTree {
+    vector<T> nodes;
+    T neutral;
+
+    FenwickTree() : neutral(T(0)) {}
+
+    void init(int n, T neutral_val = T(0)) {
+        neutral = neutral_val;
+        nodes.assign(n + 1, neutral);
+    }
+
+    void update(int idx, T val) {
+        while (idx < (int)nodes.size()) {
+            nodes[idx] = (nodes[idx] + val) % MOD;    
+            idx += (idx & -idx);
+        }
+    }
+
+    T query(int idx) {
+        T result = neutral;
+        while (idx > 0) {
+            result = (result + nodes[idx]) % MOD;
+            idx -= (idx & -idx);
+        }
+        return result;
+    }
+
+    T query(int left, int right) {
+        int ans = right >= left ? query(right) - query(left - 1) : T(0);
+        if (ans < 0) ans += MOD;
+        return ans;
+    }
+};
+
+void solve() {
+    cin >> N;
+    A.resize(N); values.resize(N);
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+        values[i] = A[i];
+    }
+    values.emplace_back(0);
+    sort(values.begin(), values.end());
+    values.erase(unique(values.begin(), values.end()), values.end());
+    int M = values.size();
+    FenwickTree<int> ft;
+    ft.init(M);
+    for (int x : A) {
+        int i = lower_bound(values.begin(), values.end(), x) - values.begin();
+        int res = ft.query(i) + 1; // add one for set with just {x}
+        ft.update(i + 1, res);
+    }
+    int ans = ft.query(M);
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```

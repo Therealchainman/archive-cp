@@ -2064,3 +2064,147 @@ public:
     }
 };
 ```
+
+## 3433. Count Mentions Per User
+
+### Solution 1: queue, sorting, line sweep, simulation, string parsing
+
+```cpp
+const string OFFLINE = "OFFLINE", MESSAGE = "MESSAGE";
+class Solution {
+public:
+    vector<int> countMentions(int numberOfUsers, vector<vector<string>>& events) {
+        int N = events.size();
+        sort(events.begin(), events.end(), [](const auto &x, const auto &y) {
+            return stoi(x[1]) < stoi(y[1]);
+        });
+        vector<int> timestamps;
+        for (const auto &event : events) {
+            timestamps.emplace_back(stoi(event[1]));
+            if (event[0] == OFFLINE) timestamps.emplace_back(stoi(event[1]) + 60);
+        }
+        sort(timestamps.begin(), timestamps.end());
+        timestamps.erase(unique(timestamps.begin(), timestamps.end()), timestamps.end());
+        queue<pair<int, int>> offlineQueue;
+        queue<int> messageQueue;
+        int total = 0, i = 0;
+        vector<int> ans(numberOfUsers, 0);
+        for (int t : timestamps) {
+            while (!messageQueue.empty() && messageQueue.front() < t) messageQueue.pop();
+            while (!offlineQueue.empty() && offlineQueue.front().first <= t) {
+                auto [_, u] = offlineQueue.front();
+                offlineQueue.pop();
+                ans[u] -= messageQueue.size();
+            }
+            while (i < N && stoi(events[i][1]) == t) {
+                if (events[i][0] == OFFLINE) {
+                    int ti = stoi(events[i][1]), u = stoi(events[i][2]);
+                    offlineQueue.emplace(ti + 60, u);
+                } else {
+                    int ti = stoi(events[i][1]);
+                    string mentions = events[i][2];
+                    if (mentions == "ALL") {
+                        total++;
+                    } else if (mentions == "HERE") {
+                        total++;
+                        messageQueue.emplace(ti + 60);
+                    } else {
+                        string x;
+                        istringstream iss(mentions);
+                        while (getline(iss, x, ' ')) {
+                            int v = stoi(x.substr(2));
+                            ans[v]++;
+                        }
+                    }
+                }
+                i++;
+            }
+        }
+        for (int i = 0; i < numberOfUsers; ++i) {
+            ans[i] += total;
+        }
+        return ans;
+    }
+};
+```
+
+## 3583. Count Special Triplets
+
+### Solution 1: map, prefix frequency, suffix frequency, counting
+
+```cpp
+const int MOD = 1e9 + 7;
+class Solution {
+public:
+    int specialTriplets(vector<int>& nums) {
+        unordered_map<int, int> pref, suff;
+        for (int x : nums) {
+            suff[x]++;
+        }
+        int ans = 0;
+        for (int x : nums) {
+            suff[x]--;
+            int val = 1LL * pref[2 * x] * suff[2 * x] % MOD;
+            ans = (ans + val) % MOD;
+            pref[x]++;
+        }
+        return ans;
+    }
+};
+```
+
+## 955. Delete Columns to Make Sorted II
+
+### Solution 1: map, string grouping, greedy
+
+```cpp
+class Solution {
+public:
+    int minDeletionSize(vector<string>& strs) {
+        int N = strs.size(), M = strs[0].size(), ans = 0;
+        map<string, vector<string>> mp;
+        for (const string &s : strs) mp[""].emplace_back(s);
+        for (int i = 0; i < M; ++i) {
+            bool isDeleted = false;
+            map<string, vector<string>> newMp;
+            for (const auto &[k, A] : mp) {
+                char cur = 'a';
+                for (const string& s : A) {
+                    string key = k + s[i];
+                    if (s[i] < cur) {
+                        isDeleted = true;
+                    }
+                    newMp[key].emplace_back(s);
+                    cur = s[i];
+                }
+            }
+            if (isDeleted) {
+                ans++;
+            } else {
+                swap(mp, newMp);
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## 3074. Apple Redistribution into Boxes
+
+### Solution 1: sorting, greedy, sum
+
+```cpp
+class Solution {
+public:
+    int minimumBoxes(vector<int>& apple, vector<int>& capacity) {
+        int M = capacity.size();
+        sort(capacity.rbegin(), capacity.rend());
+        int val = accumulate(apple.begin(), apple.end(), 0);
+        for (int i = 0; i < M; ++i) {
+            val -= capacity[i];
+            if (val <= 0) return i + 1;
+        }
+        return M;
+    }
+};
+```

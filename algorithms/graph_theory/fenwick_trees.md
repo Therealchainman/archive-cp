@@ -62,6 +62,46 @@ struct FenwickTree {
 };
 ```
 
+Another version of the data structure with modular arithmetic
+
+```cpp
+
+template <typename T>
+struct FenwickTree {
+    vector<T> nodes;
+    T neutral;
+
+    FenwickTree() : neutral(T(0)) {}
+
+    void init(int n, T neutral_val = T(0)) {
+        neutral = neutral_val;
+        nodes.assign(n + 1, neutral);
+    }
+
+    void update(int idx, T val) {
+        while (idx < (int)nodes.size()) {
+            nodes[idx] = (nodes[idx] + val) % MOD;    
+            idx += (idx & -idx);
+        }
+    }
+
+    T query(int idx) {
+        T result = neutral;
+        while (idx > 0) {
+            result = (result + nodes[idx]) % MOD;
+            idx -= (idx & -idx);
+        }
+        return result;
+    }
+
+    T query(int left, int right) {
+        int ans = right >= left ? query(right) - query(left - 1) : T(0);
+        if (ans < 0) ans += MOD;
+        return ans;
+    }
+};
+```
+
 ## 2D Fenwick Tree
 
 The 2-dimensional fenwick tree for dynamic rectangular sum queries

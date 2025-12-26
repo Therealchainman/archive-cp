@@ -42,14 +42,10 @@ signed main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
     cout.tie(0);
-    auto t0 = std::chrono::steady_clock::now();
     int T;
     cin >> T;
     while (T--) {
         solve();
     }
-    auto t1 = std::chrono::steady_clock::now();
-    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
-    debug("Elapsed: ", ms, " ms", "\n");
     return 0;
 }

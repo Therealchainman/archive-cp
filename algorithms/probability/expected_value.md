@@ -79,6 +79,10 @@ if __name__ == '__main__':
     main()
 ```
 
+## Expected Value change of variable
+
+Expected number of steps remaining from a given state
+
 ## Expected Value with Recurrence
 
 The expected value can also be computed using a recurrence relation. This is particularly useful in dynamic programming problems where the expected value of a state can be expressed in terms of the expected values of previous states.
