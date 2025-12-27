@@ -1,36 +1,82 @@
 # Dynamic Programming
 
-## At the top of each script
+## Dice Combinations
+
+### Solution 1: dynamic programming, counting number of ways to get sum x with dice rolls
+
+dp[i] = number of ways to get sum i
+
+transition states are dp[i] = sum(dp[i - j]) for j in 1 to 6
 
 ```cpp
-#include <bits/stdc++.h>
-using namespace std;
+const int MOD = 1e9 + 7; 
+int N;
 
-inline int read()
-{
-	int x = 0, y = 1; char c = getchar();
-	while (c < '0' || c > '9') {
-		if (c == '-') y = -1;
-		c = getchar();
-	}
-	while (c >= '0' && c <= '9') x = x * 10 + c - '0', c = getchar();
-	return x * y;
+void solve() {
+    cin >> N;
+    vector<int> dp(N + 1, 0);
+    dp[0] = 1;
+    for (int i = 1; i <= N; ++i) {
+        for (int d = 1; d <= 6; ++d) {
+            if (d > i) break;
+            dp[i] = (dp[i] + dp[i - d]) % MOD;
+        }
+    }
+    cout << dp[N] << endl;
 }
 
-inline long long readll() {
-	long long x = 0, y = 1; char c = getchar();
-	while (c < '0' || c > '9') {
-		if (c == '-') y = -1;
-		c = getchar();
-	}
-	while (c >= '0' && c <= '9') x = x * 10 + c - '0', c = getchar();
-	return x * y;
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## Minimizing Coins
+
+### Solution 1: unbounded knapsack, dynamic programming, minimize number of items
+
+dp[i] = the minimum number of coins needed to make sum i
+
+Unbounded integer knapsack (a.k.a. unbounded knapsack) with objective = minimize number of items, where each item has:
+
+```cpp
+const int INF = numeric_limits<int>::max();
+int N, X;
+vector<int> C;
+
+void solve() {
+    cin >> N >> X;
+    C.resize(N);
+    for (int i = 0; i < N; ++i) {
+        cin >> C[i];
+    }
+    vector<int> dp(X + 1, INF);
+    dp[0] = 0;
+    for (int c : C) {
+        for (int i = c; i <= X; ++i) {
+            if (dp[i - c] == INF) continue;
+            dp[i] = min(dp[i], dp[i - c] + 1);
+        }
+    }
+    int ans = dp[X] != INF ? dp[X] : -1;
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
 }
 ```
 
 ## Coin Combinations I
 
-### Solution 1:  iterative dp + order doesn't matter + Unordered Coin Change + O(nx) time
+### Solution 1: iterative dp + order doesn't matter + Unordered Coin Change + O(nx) time
 
 This can be solved by having two for loops in a particular order.
 
@@ -112,199 +158,92 @@ int main() {
 }
 ```
 
-##
+## Removing Digits
 
-### Solution 1: 
+### Solution 1: bfs, queue, memoization
 
-```py
-
-```
-
-## Counting Towers
-
-### Solution 1: 
-
-```py
-def main():
-    n = int(input())
-    mod = int(1e9) + 7
-    psum = 1
-    dp = 1
-    for i in range(1, n + 1):
-        psum += pow(2, 2 * i - 2, mod)
-        psum %= mod
-        print('psum', psum)
-        dp = psum
-        psum += dp
-        psum %= mod
-        # print(i, dp)
-    return dp
-
-
-if __name__ == '__main__':
-    # print(main())
-    T = int(input())
-    for _ in range(T):
-        print(main())
-```
-
-## Projects
-
-### Solution 1:  sort + iterative dynammic programming + coordinates compression
-
-```py
-def main():
-    n = int(input())
-    events = []
-    days = set()
-    for i in range(n):
-        a, b, p = map(int, input().split())
-        events.append((a, -p, 0))
-        events.append((b, p, a))
-        days.update([a, b])
-    compressed = {x: i + 1 for i, x in enumerate(sorted(days))}
-    events.sort()
-    dp = [0] * (len(compressed) + 1)
-    for day, p, start in events:
-        i = compressed[day]
-        if p < 0:
-            dp[i] = max(dp[i], dp[i - 1])
-        else:
-            dp[i] = max(dp[i], dp[i - 1], dp[compressed[start] - 1] + p)
-    return dp[-1]
-
-if __name__ == '__main__':
-    print(main())
-```
+shortest path problem on implicit graph where each node is a number and edges are transitions by removing one digit
 
 ```cpp
-int main() {
-    int n = read();
-    vector<tuple<int, int, int>> events;
-    set<int> days;
-    for (int i = 0; i < n; i++) {
-        int a = read(), b = read(), p = read();
-        events.push_back({a, -p, 0});
-        events.push_back({b, p, a});
-        days.insert(a);
-        days.insert(b);
-    }
-    map<int, int> compressed;
-    int i = 1;
-    for (auto day : days) {
-        compressed[day] = i++;
-    }
-    sort(events.begin(), events.end());
-    vector<long long> dp(i + 1);
-    for (auto [day, p, start] : events) {
-        i = compressed[day];
-        if (p < 0) {
-            dp[i] = max(dp[i], dp[i - 1]);
-        } else {
-            dp[i] = max(dp[i], dp[i - 1]);
-            dp[i] = max(dp[i], dp[compressed[start] - 1] + p);
+const int MAXN = 1e6 + 5;
+int N;
+bool vis[MAXN];
+
+void solve() {
+    cin >> N;
+    memset(vis, false, sizeof(vis));
+    queue<int> q;
+    q.emplace(N);
+    vis[N] = true;
+    int ans = 0;
+    while (!q.empty()) {
+        int sz = q.size();
+        for (int i = 0; i < sz; ++i) {
+            int u = q.front();
+            q.pop();
+            if (u == 0) {
+                cout << ans << endl;
+                return;
+            }
+            int curu = u;
+            while (curu) {
+                int d = curu % 10;
+                int v = u - d;
+                if (!vis[v]) {
+                    q.emplace(v);
+                    vis[v] = true;
+                }
+                curu /= 10;
+            }
         }
+        ans++;
     }
-    cout << dp[i] << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
 }
 ```
 
-## Removal Game
-
-### Solution 1:  dynammic programming + interval
-
-dp(i, j) = maximum score player can score compared to score of other player for the interval [i, j)
+### Solution 2: dynamic programming, topological order on implicit DAG, shortest path on implicit graph
 
 ```cpp
-int main() {
-    int n = read();
-    vector<long long> numbers(n);
-    for (int i = 0; i < n; i++) {
-        numbers[i] = readll();
-    }
-    vector<vector<long long>> dp(n + 1, vector<long long>(n + 1, LONG_LONG_MIN));
-    for (int i = 0; i <= n; i++) {
-        dp[i][i] = 0;
-    }
-    for (int len = 1; len <= n; len++) {
-        for (int i = 0; i + len <= n; i++) {
-            int j = i + len;
-            dp[i][j] = max(dp[i][j], numbers[i] - dp[i + 1][j]);
-            dp[i][j] = max(dp[i][j], numbers[j - 1] - dp[i][j - 1]);
+const int MAXN = 1e6 + 5, INF = numeric_limits<int>::max();
+int N;
+int dp[MAXN];
+
+void solve() {
+    cin >> N;
+    fill(&dp[0], &dp[0] + MAXN, INF);
+    dp[N] = 0;
+    for (int i = N; i > 0; --i) {
+        if (dp[i] == INF) continue;
+        int x = i;
+        while (x) {
+            int d = x % 10;
+            dp[i - d] = min(dp[i - d], dp[i] + 1);
+            x /= 10;
         }
     }
-    long long res = (dp[0][n] + accumulate(numbers.begin(), numbers.end(), 0LL)) / 2;
-    cout << res << endl;
+    cout << dp[0] << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
 }
 ```
 
-## Two Sets II
+## Grid Paths I
 
-### Solution 1:  0/1 knapsack dp problem
-
-dp[i][x] = count of ways for the subset of elements in 0...i with sum of x
-dp[i][x] = dp[i-1][x] + dp[i-1][x-i]
-Convert to 0/1 knapsack where you can either take the element or not take it.  It can be converted to this by realize that you just need to find the number of ways that the sum is equal to n*(n+1)/4, 
-
-cause the summation of the natural number is n*(n+1)/2, but you just need a set to reach half the sum, then the other elements must be in other set and the sum of each set is equal.  So just need to look for half, can quickly check if it is odd, then there is 0 solutions. 
-
-Then just iterate through all the possibilities with dynammic programming
-
-```cpp
-long long mod = int(1e9) + 7;
-
-int main() {
-    int n = read();
-    int target = n * (n + 1) / 2;
-    if (target & 1) {
-        cout << 0 << endl;
-        return 0;
-    }
-    target /= 2;
-    vector<vector<long long>> dp(n + 1, vector<long long>(target + 1, 0));
-    dp[0][0] = 1;
-    for (int i = 1; i < n; i++) {
-        for (int j = 0; j <= target; j++) {
-            dp[i][j] = dp[i - 1][j];
-            if (j - i >= 0) dp[i][j] = (dp[i][j] + dp[i - 1][j - i]) % mod;
-        }
-    }
-    cout << dp[n - 1][target] << endl;
-}
-```
-
-## Elevator Rides
-
-### Solution 1:  bitmask dp
-
-dp[mask] = minimum pair of number of rides and then weight on last ride.  
-So the best combination of these two values for taking a subset of weights is the best solution to subproblem, where subproblem is that of taking this subset of weights. 
-
-```py
-import math
-
-def main():
-    n, x = map(int, input().split())
-    weights = list(map(int, input().split()))
-    dp = [(math.inf, math.inf)] * (1 << n)
-    dp[0] = (1, 0) # number rides, weight on last ride
-    for mask in range(1, 1 << n):
-        for i in range(n):
-            if (mask >> i) & 1:
-                prev_mask = mask ^ (1 << i)
-                if dp[prev_mask][1] + weights[i] <= x:
-                    dp[mask] = min(dp[mask], (dp[prev_mask][0], dp[prev_mask][1] + weights[i]))
-                else:
-                    dp[mask] = min(dp[mask], (dp[prev_mask][0] + 1, weights[i]))
-    print(dp[-1][0])
-
-if __name__ == '__main__':
-    main()
-```
-
-## Grid Paths
-
-### Solution 1:  dynamic programming + grid + counting number of paths + O(n^2)
+### Solution 1: dynamic programming + grid + counting number of paths + O(n^2)
 
 ```py
 from itertools import product
@@ -365,53 +304,43 @@ signed main() {
 }
 ```
 
-## Book Shop II
+## Array Description
 
-### Solution 1: bounded knapsack dp, binary grouping or binary splitting optimization
+### Solution 1: dynamic programming, counting number of valid arrays with constraints
 
-1. You convert the multiple copies into single copies with some multiple of weight and value, such you can recover any possible number of copies you can take from it.
-1. Reduces it to the 0/1 knapsack problem
+This is a very standard dynamic programming pattern: a 1D DP over positions, with local transitions to neighboring values.
 
 ```cpp
-int N, W;
-vector<int> ow, ov, counts, weights, values;
+const int MOD = 1e9 + 7;
+int N, M;
+vector<int> A;
+vector<int64> dp, ndp;
 
 void solve() {
-    cin >> N >> W;
-    ow.resize(N);
-    ov.resize(N);
-    counts.resize(N);
+    cin >> N >> M;
+    A.resize(N);
     for (int i = 0; i < N; ++i) {
-        cin >> ow[i];
+        cin >> A[i];
     }
-    for (int i = 0; i < N; ++i) {
-        cin >> ov[i];
+    if (A[0] == 0) {
+        dp.assign(M + 2, 1);
+    } else {
+        dp.assign(M + 2, 0);
+        dp[A[0]] = 1;
     }
-    for (int i = 0; i < N; ++i) {
-        cin >> counts[i];
-    }
-    for (int i = 0; i < N; ++i) {
-        int c = 1;
-        while (counts[i] > c) {
-            counts[i] -= c;
-            weights.emplace_back(c * ow[i]);
-            values.emplace_back(c * ov[i]);
-            c <<= 1;
+    dp[0] = dp[M + 1] = 0; // padding
+    for (int i = 1; i < N; ++i) {
+        ndp.assign(M + 2, 0);
+        if (A[i] == 0) {
+            for (int i = 1; i <= M; ++i) {
+                ndp[i] = (dp[i - 1] + dp[i] + dp[i + 1]) % MOD;
+            }
+        } else {
+            ndp[A[i]] = (dp[A[i] - 1] + dp[A[i]] + dp[A[i] + 1]) % MOD;
         }
-        // leftover
-        if (counts[i]) {
-            weights.emplace_back(counts[i] * ow[i]);
-            values.emplace_back(counts[i] * ov[i]);
-        }
+        swap(dp, ndp);
     }
-    int M = weights.size();
-    vector<int> dp(W + 1, 0);
-    for (int i = 0; i < M; ++i) {
-        for (int j = W; j >= weights[i]; --j) {
-            dp[j] = max(dp[j], dp[j - weights[i]] + values[i]);
-        }
-    }
-    int ans = *max_element(dp.begin(), dp.end());
+    int ans = accumulate(dp.begin(), dp.end(), 0, [](int total, int x) { return (total + x) % MOD; });
     cout << ans << endl;
 }
 
@@ -424,7 +353,136 @@ signed main() {
 }
 ```
 
-## 
+## Counting Towers
+
+### Solution 1: 
+
+```py
+def main():
+    n = int(input())
+    mod = int(1e9) + 7
+    psum = 1
+    dp = 1
+    for i in range(1, n + 1):
+        psum += pow(2, 2 * i - 2, mod)
+        psum %= mod
+        print('psum', psum)
+        dp = psum
+        psum += dp
+        psum %= mod
+        # print(i, dp)
+    return dp
+
+
+if __name__ == '__main__':
+    # print(main())
+    T = int(input())
+    for _ in range(T):
+        print(main())
+```
+
+## Edit Distance
+
+### Solution 1: dynamic programming, string edit distance problem
+
+add or delete from one is like performing one operation and that transition can be modeled as dp[i][j] = dp[i-1][j] + 1 or dp[i][j-1] + 1
+
+replacing from one is like performing one operation and that transition can be modeled as dp[i][j] = dp[i-1][j-1] + 1, because you will replace with character that will match current so you can move on in both strings.
+
+```cpp
+const int INF = numeric_limits<int>::max();
+string S, T;
+vector<vector<int>> dp;
+
+void solve() {
+    cin >> S >> T;
+    int N = S.size(), M = T.size();
+    vector<vector<int>> dp(N + 1, vector<int>(M + 1, INF));
+    for (int i = 0; i <= N; ++i) {
+        dp[i][0] = i;
+    }
+    for (int j = 0; j <= M; ++j) {
+        dp[0][j] = j;
+    }
+    for (int i = 1; i <= N; ++i) {
+        for (int j = 1; j <= M; ++j) {
+            // add/delete from S
+            if (dp[i - 1][j] != INF) dp[i][j] = min(dp[i][j], dp[i - 1][j] + 1);
+            // add/delete from T
+            if (dp[i][j - 1] != INF) dp[i][j] = min(dp[i][j], dp[i][j - 1] + 1);
+            // replace from S or T
+            dp[i][j] = min(dp[i][j], dp[i - 1][j - 1] + 1);
+            // no operation
+            if (S[i - 1] == T[j - 1]) dp[i][j] = min(dp[i][j], dp[i - 1][j - 1]); 
+        }
+    }
+    cout << dp[N][M] << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## Longest Common Subsequence
+
+### Solution 1: dynamic programming, reconstructing solution, lcs problem
+
+```cpp
+int N, M;
+vector<int> A, B;
+
+void solve() {
+    cin >> N >> M;
+    A.resize(N);
+    B.resize(M);
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+    }
+    for (int i = 0; i < M; ++i) {
+        cin >> B[i];
+    }
+    vector<vector<int>> dp(N + 1, vector<int>(M + 1, 0));
+    for (int i = 1; i <= N; ++i) {
+        for (int j = 1; j <= M; ++j) {
+            dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
+            if (A[i - 1] == B[j - 1]) dp[i][j] = max(dp[i][j], dp[i - 1][j - 1] + 1);
+        }
+    }
+    cout << dp[N][M] << endl;
+    vector<int> res;
+    int i = N, j = M;
+    while (i > 0 && j > 0) {
+        if (A[i - 1] == B[j - 1]) {
+            res.emplace_back(A[i - 1]);
+            i--, j--;
+        } else if (dp[i - 1][j] >= dp[i][j - 1]) {
+            i--;
+        } else {
+            j--;
+        }
+    }
+    reverse(res.begin(), res.end());
+    for (int x : res) {
+        cout << x << " ";
+    }
+    cout << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## Rectangle Cutting
 
 ### Solution 1: 
 
@@ -432,9 +490,67 @@ signed main() {
 
 ```
 
+## Minimal Grid path
+
+### Solution 1: bfs, queue, memoization, shortest path on grid with lexicographical order, greedy
+
+```cpp
+int N;
+vector<string> grid;
+
+bool inBounds(int r, int c) {
+    return 0 <= r && r < N && c >= 0 && c < N;
+}
+
+void solve() {
+    cin >> N;
+    grid.resize(N);
+    for (int i = 0; i < N; ++i) {
+        cin >> grid[i];
+    }
+    vector<vector<bool>> vis(N, vector<bool>(N, false));
+    queue<pair<int, int>> q;
+    q.emplace(-1, 0);
+    string ans = "";
+    while (!q.empty()) {
+        int sz = q.size();
+        char cand = 'Z';
+        vector<pair<int, int>> cands;
+        for (int i = 0; i < sz; ++i) {
+            auto [r, c] = q.front();
+            q.pop();
+            for (int dr = 0; dr <= 1; ++dr) {
+                for (int dc = 0; dc <= 1; ++dc) {
+                    if (abs(dr) + abs(dc) != 1) continue;
+                    int nr = r + dr, nc = c + dc;
+                    if (!inBounds(nr, nc) || vis[nr][nc]) continue;
+                    cand = min(cand, grid[nr][nc]);
+                    vis[nr][nc] = true;
+                    cands.emplace_back(nr, nc);
+                }
+            }
+        }
+        ans += cand;
+        for (const auto &[r, c] : cands) {
+            if (grid[r][c] == cand) q.emplace(r, c);
+        }
+    }
+    ans.pop_back();
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
 ## Money Sums
 
-### Solution 1: dynamic programming, subset sum problem
+### Solution 1: dynamic programming, subset sum problem, 0/1 knapsack
 
 Let dp[i] = true if sum i can be formed using some subset of the given coins.
 
@@ -511,6 +627,70 @@ signed main() {
 }
 ```
 
+## Removal Game
+
+### Solution 1: dynammic programming + interval
+
+dp(i, j) = maximum score player can score compared to score of other player for the interval [i, j)
+
+```cpp
+int main() {
+    int n = read();
+    vector<long long> numbers(n);
+    for (int i = 0; i < n; i++) {
+        numbers[i] = readll();
+    }
+    vector<vector<long long>> dp(n + 1, vector<long long>(n + 1, LONG_LONG_MIN));
+    for (int i = 0; i <= n; i++) {
+        dp[i][i] = 0;
+    }
+    for (int len = 1; len <= n; len++) {
+        for (int i = 0; i + len <= n; i++) {
+            int j = i + len;
+            dp[i][j] = max(dp[i][j], numbers[i] - dp[i + 1][j]);
+            dp[i][j] = max(dp[i][j], numbers[j - 1] - dp[i][j - 1]);
+        }
+    }
+    long long res = (dp[0][n] + accumulate(numbers.begin(), numbers.end(), 0LL)) / 2;
+    cout << res << endl;
+}
+```
+
+## Two Sets II
+
+### Solution 1: 0/1 knapsack dp problem
+
+dp[i][x] = count of ways for the subset of elements in 0...i with sum of x
+dp[i][x] = dp[i-1][x] + dp[i-1][x-i]
+Convert to 0/1 knapsack where you can either take the element or not take it.  It can be converted to this by realize that you just need to find the number of ways that the sum is equal to n*(n+1)/4, 
+
+cause the summation of the natural number is n*(n+1)/2, but you just need a set to reach half the sum, then the other elements must be in other set and the sum of each set is equal.  So just need to look for half, can quickly check if it is odd, then there is 0 solutions. 
+
+Then just iterate through all the possibilities with dynammic programming
+
+```cpp
+long long mod = int(1e9) + 7;
+
+int main() {
+    int n = read();
+    int target = n * (n + 1) / 2;
+    if (target & 1) {
+        cout << 0 << endl;
+        return 0;
+    }
+    target /= 2;
+    vector<vector<long long>> dp(n + 1, vector<long long>(target + 1, 0));
+    dp[0][0] = 1;
+    for (int i = 1; i < n; i++) {
+        for (int j = 0; j <= target; j++) {
+            dp[i][j] = dp[i - 1][j];
+            if (j - i >= 0) dp[i][j] = (dp[i][j] + dp[i - 1][j - i]) % mod;
+        }
+    }
+    cout << dp[n - 1][target] << endl;
+}
+```
+
 ## Mountain Range
 
 ### Solution 1: sorting, monotonic stack, dynamic programming O(n log n)
@@ -567,6 +747,138 @@ signed main() {
 }
 ```
 
+## Increasing Subsequence
+
+### Solution 1: dynamic programming, greedy, binary search, patience sorting O(n log n)
+
+dp[i] = smallest ending value of an increasing subsequence of length i+1
+
+If you see a value which is larger than any prior then you can extend the longest increasing subsequence found so far by 1.
+
+If you see a value which is greater than current dp[i] you update it to dp[i] = x where x is the new value, because this may allow for longer increasing subsequences to be formed later.
+
+```cpp
+int N;
+vector<int> A;
+
+void solve() {
+    cin >> N;
+    A.resize(N);
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+    }
+    vector<int> values;
+    for (int x : A) {
+        int i = lower_bound(values.begin(), values.end(), x) - values.begin();
+        if (i < values.size()) {
+            values[i] = x;
+        } else {
+            values.emplace_back(x);
+        }
+    }
+    int ans = values.size();
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## Projects
+
+### Solution 1: sort + iterative dynammic programming + coordinates compression
+
+```py
+def main():
+    n = int(input())
+    events = []
+    days = set()
+    for i in range(n):
+        a, b, p = map(int, input().split())
+        events.append((a, -p, 0))
+        events.append((b, p, a))
+        days.update([a, b])
+    compressed = {x: i + 1 for i, x in enumerate(sorted(days))}
+    events.sort()
+    dp = [0] * (len(compressed) + 1)
+    for day, p, start in events:
+        i = compressed[day]
+        if p < 0:
+            dp[i] = max(dp[i], dp[i - 1])
+        else:
+            dp[i] = max(dp[i], dp[i - 1], dp[compressed[start] - 1] + p)
+    return dp[-1]
+
+if __name__ == '__main__':
+    print(main())
+```
+
+```cpp
+int main() {
+    int n = read();
+    vector<tuple<int, int, int>> events;
+    set<int> days;
+    for (int i = 0; i < n; i++) {
+        int a = read(), b = read(), p = read();
+        events.push_back({a, -p, 0});
+        events.push_back({b, p, a});
+        days.insert(a);
+        days.insert(b);
+    }
+    map<int, int> compressed;
+    int i = 1;
+    for (auto day : days) {
+        compressed[day] = i++;
+    }
+    sort(events.begin(), events.end());
+    vector<long long> dp(i + 1);
+    for (auto [day, p, start] : events) {
+        i = compressed[day];
+        if (p < 0) {
+            dp[i] = max(dp[i], dp[i - 1]);
+        } else {
+            dp[i] = max(dp[i], dp[i - 1]);
+            dp[i] = max(dp[i], dp[compressed[start] - 1] + p);
+        }
+    }
+    cout << dp[i] << endl;
+}
+```
+
+## Elevator Rides
+
+### Solution 1: bitmask dp
+
+dp[mask] = minimum pair of number of rides and then weight on last ride.  
+So the best combination of these two values for taking a subset of weights is the best solution to subproblem, where subproblem is that of taking this subset of weights. 
+
+```py
+import math
+
+def main():
+    n, x = map(int, input().split())
+    weights = list(map(int, input().split()))
+    dp = [(math.inf, math.inf)] * (1 << n)
+    dp[0] = (1, 0) # number rides, weight on last ride
+    for mask in range(1, 1 << n):
+        for i in range(n):
+            if (mask >> i) & 1:
+                prev_mask = mask ^ (1 << i)
+                if dp[prev_mask][1] + weights[i] <= x:
+                    dp[mask] = min(dp[mask], (dp[prev_mask][0], dp[prev_mask][1] + weights[i]))
+                else:
+                    dp[mask] = min(dp[mask], (dp[prev_mask][0] + 1, weights[i]))
+    print(dp[-1][0])
+
+if __name__ == '__main__':
+    main()
+```
+
 ## Counting Tilings
 
 ### Solution 1: 
@@ -608,48 +920,6 @@ void solve() {
     int64 right = f(to_string(R));
     int64 left = L > 0 ? f(to_string(L - 1)) : 0;
     int64 ans = right - left;
-    cout << ans << endl;
-}
-
-signed main() {
-    ios::sync_with_stdio(0);
-    cin.tie(0);
-    cout.tie(0);
-    solve();
-    return 0;
-}
-```
-
-## Increasing Subsequence
-
-### Solution 1: dynamic programming, greedy, binary search, patience sorting O(n log n)
-
-dp[i] = smallest ending value of an increasing subsequence of length i+1
-
-If you see a value which is larger than any prior then you can extend the longest increasing subsequence found so far by 1.
-
-If you see a value which is greater than current dp[i] you update it to dp[i] = x where x is the new value, because this may allow for longer increasing subsequences to be formed later.
-
-```cpp
-int N;
-vector<int> A;
-
-void solve() {
-    cin >> N;
-    A.resize(N);
-    for (int i = 0; i < N; ++i) {
-        cin >> A[i];
-    }
-    vector<int> values;
-    for (int x : A) {
-        int i = lower_bound(values.begin(), values.end(), x) - values.begin();
-        if (i < values.size()) {
-            values[i] = x;
-        } else {
-            values.emplace_back(x);
-        }
-    }
-    int ans = values.size();
     cout << ans << endl;
 }
 
