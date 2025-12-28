@@ -492,16 +492,105 @@ void solve() {
 
 ## Day 7
 
-### Part 1: 
+### Part 1: bfs, queue, grid
 
 ```cpp
+const char VISITED = '#', SPLITTER = '^';
 
+void solve() {
+    vector<string> grid;
+    string line;
+    while (getline(cin, line)) {
+        grid.emplace_back(line);
+    }
+    int R = grid.size(), C = grid[0].size();
+    queue<pair<int, int>> q;
+    for (int c = 0; c < C; ++c) {
+        if (grid[0][c] == 'S') {
+            q.emplace(0, c);
+            break;
+        }
+    }
+    int ans = 0;
+    while (!q.empty()) {
+        int sz = q.size();
+        for (int i = 0; i < sz; ++i) {
+            auto [r, c] = q.front();
+            q.pop();
+            int nr = r + 1;
+            if (nr == R) continue;
+            if (grid[nr][c] == SPLITTER) {
+                ans++;
+                for (int dc = -1; dc <= 1; ++dc) {
+                    if (abs(dc) != 1) continue;
+                    int nc = c + dc;
+                    if (nc < 0 || nc >= C) continue;
+                    if (grid[nr][nc] == VISITED) continue;
+                    grid[nr][nc] = VISITED;
+                    q.emplace(nr, nc);
+                }
+            } else if (grid[nr][c] != VISITED) {
+                grid[nr][c] = VISITED;
+                q.emplace(nr, c);
+            }
+        }
+    }
+    debug(ans, "\n");
+}
 ```
 
-### Part 2: 
+### Part 2: dynamic programming, counting, bfs, queue, grid
 
 ```cpp
+const char VISITED = '#', SPLITTER = '^';
 
+void solve() {
+    vector<string> grid;
+    string line;
+    while (getline(cin, line)) {
+        grid.emplace_back(line);
+    }
+    int R = grid.size(), C = grid[0].size();
+    queue<pair<int, int>> q;
+    vector<vector<int64>> dp(R, vector<int64>(C, 0));
+    for (int c = 0; c < C; ++c) {
+        if (grid[0][c] == 'S') {
+            q.emplace(0, c);
+            dp[0][c]++;
+            break;
+        }
+    }
+    while (!q.empty()) {
+        int sz = q.size();
+        for (int i = 0; i < sz; ++i) {
+            auto [r, c] = q.front();
+            q.pop();
+            int nr = r + 1;
+            if (nr == R) continue;
+            if (grid[nr][c] == SPLITTER) {
+                for (int dc = -1; dc <= 1; ++dc) {
+                    if (abs(dc) != 1) continue;
+                    int nc = c + dc;
+                    if (nc < 0 || nc >= C) continue;
+                    dp[nr][nc] += dp[r][c];
+                    if (grid[nr][nc] == VISITED) continue;
+                    grid[nr][nc] = VISITED;
+                    q.emplace(nr, nc);
+                }
+            } else {
+                dp[nr][c] += dp[r][c];
+                if (grid[nr][c] == VISITED) continue;
+                grid[nr][c] = VISITED;
+                q.emplace(nr, c);
+            }
+        }
+    }
+    int64 ans = 0;
+    for (int i = 0; i < C; ++i) {
+        ans += dp[R - 1][i];
+    }
+    debug(ans, "\n");
+}
 ```
 
 ## Day 8
