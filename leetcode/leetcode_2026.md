@@ -209,12 +209,37 @@ function promiseAllSettled(functions: Function[]): Promise<Obj[]> {
 };
 ```
 
-##
+## 2823. Deep Object Filter
 
-### Solution 1: 
+### Solution 1: recursion, Object.entries, Array.isArray, undefined, null
+
+the type of null is object
 
 ```ts
+type JSONValue = null | boolean | number | string | JSONValue[] | { [key: string]: JSONValue };
+type Obj = Record<string, JSONValue> | Array<JSONValue>
 
+function deepFilter(obj: Obj, fn: Function): Obj | undefined {
+    if (obj === null || (typeof obj !== 'object' && !Array.isArray(obj))) return fn(obj) ? obj : undefined;
+    if (Array.isArray(obj)) {
+        const arr = []
+        for (const x of obj) {
+            const v = deepFilter(x as Obj, fn);
+            if (v === undefined) continue;
+            if (Array.isArray(v) && v.length === 0) continue;
+            arr.push(v);
+        }
+        return arr.length > 0 ? arr : undefined;
+    }
+    const res = {}
+    for (const [key, val] of Object.entries(obj)) {
+        const v = deepFilter(val as Obj, fn);
+        if (v === undefined) continue;
+        if (typeof v === "object" && !Array.isArray(v) && v !== null && Object.keys(v).length === 0) continue;
+        res[key] = v;
+    }
+    return Object.keys(res).length > 0 ? res : undefined;
+};
 ```
 
 ##

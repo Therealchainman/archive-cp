@@ -8,12 +8,41 @@
 
 ```
 
-## 
+## Multiplication Table
 
-### Solution 1:  
+### Solution 1:  math, binary search, greedy
 
-```py
+```cpp
+const int64 INF = numeric_limits<int64>::max();
+int64 N;
 
+bool possible(int64 target) {
+    int64 cnt = 0;
+    for (int r = 1; r <= N; ++r) {
+        int64 c = min(target / r, N);
+        cnt += c;
+    }
+    return cnt <= N * N / 2;
+}
+
+void solve() {
+    cin >> N;
+    int64 lo = 1, hi = INF;
+    while (lo < hi) {
+        int64 mid = lo + (hi - lo) / 2;
+        if (possible(mid)) lo = mid + 1;
+        else hi = mid;
+    }
+    cout << lo << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ## Intersection Points
