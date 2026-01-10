@@ -168,8 +168,6 @@ You use the forEach because you aren't returning anything from it, just using it
 
 This is a way to ensure that you can run all the promises in parallel and collect their results (or errors) while maintaining the order of the original functions.
 
-
-
 ```ts
 type FulfilledObj = {
     status: 'fulfilled';
@@ -240,6 +238,189 @@ function deepFilter(obj: Obj, fn: Function): Obj | undefined {
     }
     return Object.keys(res).length > 0 ? res : undefined;
 };
+```
+
+## 2803. Factorial Generator
+
+### Solution 1: generator
+
+```ts
+function* factorial(n: number): Generator<number> {
+    if (n === 0) n++;
+    let ans = 1;
+    for (let x = 1; x <= n; ++x) {
+        ans *= x;
+        yield ans;
+    }
+};
+```
+
+## 2797. Partial Function with Placeholders
+
+### Solution 1: closure, rest parameters, placeholder replacement
+
+```ts
+type JSONValue = null | boolean | number | string | JSONValue[] | { [key: string]: JSONValue };
+type Fn = (...args: JSONValue[]) => JSONValue
+
+function partial(fn: Fn, args: JSONValue[]): Fn {
+    return function(...restArgs) {
+        let i = 0;
+        for (let j = 0; j < args.length; ++j) {
+            if (args[j] === '_') args[j] = restArgs[i++];
+        }
+        while (i < restArgs.length) {
+            args.push(restArgs[i++]);
+        }
+        return fn(...args);
+    }
+};
+```
+
+## 2796. Repeat String
+
+### Solution 1: recursion, String.prototype.valueOf
+
+```ts
+interface String {
+    replicate(times: number): string;
+}
+
+String.prototype.replicate = function(times): string {
+    return times > 0 ? this.valueOf() + this.replicate(times - 1) : "";
+}
+```
+
+## 2794. Create Object from Two Arrays
+
+### Solution 1: loop, javascript object
+
+```ts
+type JSONValue = null | boolean | number | string | JSONValue[] | { [key: string]: JSONValue };
+
+function createObject(keysArr: JSONValue[], valuesArr: JSONValue[]): Record<string, JSONValue> {
+    const res = {};
+    for (let i = 0; i < keysArr.length; ++i) {
+        const key = String(keysArr[i]);
+        if (res[key] !== undefined) continue;
+        res[key] = valuesArr[i];
+    }
+    return res;
+};
+```
+
+## 2822. Inversion of Object
+
+### Solution 1: javascript object, Object.entries, typeof
+
+```ts
+type JSONValue = null | boolean | number | string | JSONValue[] | { [key: string]: JSONValue };
+type Obj = Record<string, JSONValue> | Array<JSONValue>
+
+function invertObject(obj: Obj): Record<string, JSONValue> {
+    const res = {}
+    for (const [key, value] of Object.entries(obj)) {
+        const val = String(value)
+        const existing = res[val];
+        if (existing === undefined) {
+            res[val] = key;
+        } else if (typeof existing === 'string') {
+            res[val] = [existing, key];
+        } else {
+            res[val].push(key);
+        }
+    }
+    return res;
+};
+```
+
+## 2821. Delay the Resolution of Each Promise
+
+### Solution 1: promises, setTimeout, map
+
+```ts
+type Fn = () => Promise<any>
+
+function delayAll(functions: Fn[], ms: number): Fn[] {
+    return functions.map(fn => () => new Promise((resolve, reject) => setTimeout(() => fn().then(resolve).catch(reject), ms)));
+};
+```
+
+## 2775. Undefined to Null
+
+### Solution 1: undefined, null, recursion, Object.entries, Array.isArray
+
+in JSON.stringify undefined is omitted, while null is preserved.
+
+```ts
+type JSONValue = null | boolean | number | string | JSONValue[] | { [key: string]: JSONValue };
+type Value = undefined | null | boolean | number | string | Value[] | { [key: string]: Value };
+
+type Obj1 = Record<string, Value> | Array<Value>
+type Obj2 = Record<string, JSONValue> | Array<JSONValue>
+
+function undefinedToNull(obj: Obj1): Obj2 {
+    console.log(obj)
+    if (obj === undefined) return null;
+    if (obj === null || typeof obj !== 'object') return obj;
+    if (Array.isArray(obj)) return obj.map(item => undefinedToNull(item as Obj1));
+    const res = {};
+    for (const [key, value] of Object.entries(obj)) {
+        res[key] = undefinedToNull(value as Obj1);
+    }
+    return res;
+};
+```
+
+## 2776. Convert Callback Based Function to Promise Based Function
+
+### Solution 1: 
+
+not sure yet.
+
+```ts
+type CallbackFn = (
+    next: (data: number, error: string) => void, 
+    ...args: number[]
+) => void
+type Promisified = (...args: number[]) => Promise<number>
+
+function promisify(fn: CallbackFn): Promisified {
+    console.log(fn);
+    return async function(...args) {
+        console.log(args, fn(2, ""));
+        return new Promise(resolve => resolve(args.reduce((total, x) => total * x, 1)));
+    };
+};
+
+```
+
+## 2804. Array Prototype ForEach
+
+### Solution 1: bind, for loop, callback
+
+
+
+```ts
+type JSONValue = null | boolean | number | string | JSONValue[] | { [key: string]: JSONValue };
+type Callback = (currentValue: JSONValue, index: number, array: JSONValue[]) => any
+type Context = Record<string, JSONValue>
+
+Array.prototype.forEach = function(callback: Callback, context: Context): void {
+    const cb = callback.bind(context);
+    const arr = this;
+    for (let i = 0; i < arr.length; ++i) {
+        cb(arr[i], i, arr);
+    }
+}
+```
+
+## 2805. Custom Interval
+
+### Solution 1: 
+
+```ts
+
 ```
 
 ##
