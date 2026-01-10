@@ -1,56 +1,320 @@
 # Graph Algorithms
 
-## USED IN SUBMISSIONS
+## Counting Rooms
+
+### Solution 1:
+
+```cpp
+```
+
+## Labyrinth
+
+### Solution 1:
+
+```cpp
+```
+
+## Building Roads
+
+### Solution 1:
+
+```cpp
+```
+
+## Message Route
+
+### Solution 1:
+
+```cpp
+```
+
+## Building Teams
+
+### Solution: Check graph is bipartite with 2 colors
+
+```c++
+vector<int> colors;
+vector<vector<int>> graph;
+const string IMP = "IMPOSSIBLE";
+bool isBipartite(int n) {
+    queue<int> q;
+    for (int u = 1;u<=n;u++) {
+        if (colors[u]==-1) {
+            colors[u]=0;
+            q.push(u);
+            while (!q.empty()) {
+                int v = q.front();
+                q.pop();
+                for (int w : graph[v]) {
+                    if (colors[w]==-1) {
+                        colors[w] = colors[v]^1;
+                        q.push(w);
+                    } else {
+                        if (colors[w]==colors[v]) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
+int main() {
+    int n, m, a, b;
+    cin >> n >> m;
+    graph.resize(n+1);
+    for (int i = 0;i<m;i++) {
+        cin>>a>>b;
+        graph[a].push_back(b);
+        graph[b].push_back(a);
+    }
+    colors.assign(n+1,-1);
+    if (isBipartite(n)) {
+        for (int i = 1;i<=n;i++) {
+            cout << colors[i]+1 << " ";
+        }
+        cout<<endl;
+    } else {
+        cout << IMP << endl;
+    }
+
+}
+```
+
+## Round Trip
+
+### Solution 1:
+
+```cpp
+```
+
+## Monsters
+
+### Solution 1:
+
+```cpp
+```
+
+## Shortest Routes I
+
+### Solution 1:
+
+```cpp
+```
+
+## Shortest Routes II
+
+### Solution 1:
+
+```cpp
+```
+
+## High Score
+
+### Solution 1:
+
+```cpp
+```
+
+## Flight Discount
+
+### Solution 1:
+
+```cpp
+```
+
+## Cycle Finding
+
+### Solution 1:
+
+```cpp
+```
+
+## Flight Routes
+
+### Solution 1:
+
+```cpp
+```
+
+## Round Trip II
+
+### Solution 1:
+
+```cpp
+```
+
+## Course Schedule
+
+### Solution 1:
+
+```cpp
+```
+
+## Longest Flight Route
+
+### Solution 1:
+
+```cpp
+```
+
+## Game Routes
+
+### Solution 1:
+
+```cpp
+```
+
+## Investigation
+
+### Solution 1:
+
+```cpp
+```
+
+## Planets Queries I
+
+### Solution 1:  binary jumping + functional graph or successor graph + time complexity O(nlogk + qlogk)
+
+A functional graph means each node has an outdegree of 1, that is has one output. This means you will have islands but each island contains a cycle.  A cycle must always exist in a weakly connected component of a functional graph.  This is also a directed graph.  You can use binary jumping to find the power of twos successors from each node.  And you can convert any number to a summation of power of two jumps to calculate any possible jump.  Any jump can be composed of power of two jumps. 
 
 ```py
-import os,sys
-from io import BytesIO, IOBase
-from typing import *
-sys.setrecursionlimit(1_000_000)
-# only use pypyjit when needed, it usese more memory, but speeds up recursion in pypy
-import pypyjit
-pypyjit.set_param('max_unroll_recursion=-1')
+def main():
+    LOG = 31
+    n, q = map(int, input().split())
+    successor = list(map(int, input().split()))
+    queries = [tuple(map(int, input().split())) for _ in range(q)]
+    succ = [[0] * n for _ in range(LOG)]
+    succ[0] = [s - 1 for s in successor]
+    for i in range(1, LOG):
+        for j in range(n):
+            succ[i][j] = succ[i - 1][succ[i - 1][j]]
+    for x, k in queries:
+        x -= 1
+        for i in range(LOG):
+            if (k >> i) & 1:
+                x = succ[i][x]
+        print(x + 1)
 
-# Fast IO Region
-BUFSIZE = 8192
-class FastIO(IOBase):
-    newlines = 0
-    def __init__(self, file):
-        self._fd = file.fileno()
-        self.buffer = BytesIO()
-        self.writable = "x" in file.mode or "r" not in file.mode
-        self.write = self.buffer.write if self.writable else None
-    def read(self):
+if __name__ == '__main__':
+    main()
+```
+
+## Planets Queries II
+
+### Solution 1:  binary jumping + functional graph or successor graph + cycles + two cases
+
+binary jumping is being used to check if their is a node that is k distance away. 
+
+Needs to use a dfs to store cycle information and distance from a node belonging to a cycle. for non cycle nodes.
+Use a parent array and backtracking to reconstruct cycle path and update the distances.  
+
+```py
+def main():
+    n, q = map(int, input().split())
+    successors = [x - 1 for x in map(int, input().split())]
+    LOG = 19
+    succ = [[0] * n for _ in range(LOG)]
+    succ[0] = successors[:]
+    for i in range(1, LOG):
+        for j in range(n):
+            succ[i][j] = succ[i - 1][succ[i - 1][j]]
+    cycle_count = 0
+    cycle_ids = [-1] * n # map node -> cycle_id
+    cycle_indices = [-1] * n # map node -> cycle_index
+    cycle_lens = []
+    tree_dist = [0] * n # map node -> distance from root node or cycle node
+    vis = [False] * n
+    def dfs(u):
+        nonlocal cycle_count
+        parent = {u: None}
+        is_cycle = False
         while True:
-            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))
-            if not b:
+            v = successors[u]
+            if v in parent: 
+                is_cycle = True
                 break
-            ptr = self.buffer.tell()
-            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)
-        self.newlines = 0
-        return self.buffer.read()
-    def readline(self):
-        while self.newlines == 0:
-            b = os.read(self._fd, max(os.fstat(self._fd).st_size, BUFSIZE))
-            self.newlines = b.count(b"\n") + (not b)
-            ptr = self.buffer.tell()
-            self.buffer.seek(0, 2), self.buffer.write(b), self.buffer.seek(ptr)
-        self.newlines -= 1
-        return self.buffer.readline()
-    def flush(self):
-        if self.writable:
-            os.write(self._fd, self.buffer.getvalue())
-            self.buffer.truncate(0), self.buffer.seek(0)
-class IOWrapper(IOBase):
-    def __init__(self, file):
-        self.buffer = FastIO(file)
-        self.flush = self.buffer.flush
-        self.writable = self.buffer.writable
-        self.write = lambda s: self.buffer.write(s.encode("ascii"))
-        self.read = lambda: self.buffer.read().decode("ascii")
-        self.readline = lambda: self.buffer.readline().decode("ascii")
-sys.stdin, sys.stdout = IOWrapper(sys.stdin), IOWrapper(sys.stdout)
-input = lambda: sys.stdin.readline().rstrip("\r\n")
+            if vis[v]: break
+            parent[v] = u
+            u = v
+        if is_cycle:
+            crit_point = parent[successors[u]]
+            cycle_path = []
+            while u != crit_point:
+                cycle_ids[u] = cycle_count
+                cycle_path.append(u)
+                u = parent[u]
+            cycle_path = cycle_path[::-1]
+            cycle_lens.append(len(cycle_path))
+            for i, node in enumerate(cycle_path):
+                cycle_indices[node] = i
+                vis[node] = True
+            cycle_count += 1
+        while u is not None:
+            vis[u] = True
+            tree_dist[u] = tree_dist[successors[u]] + 1
+            u = parent[u]
+    for u in range(n):
+        if vis[u]: continue
+        vis[u] = True
+        dfs(u)
+    def cycle_distance(u, v):
+        if cycle_ids[u] != cycle_ids[v]: return -1
+        u_i, v_i = cycle_indices[u], cycle_indices[v]
+        cid = cycle_ids[u]
+        return v_i - u_i if v_i >= u_i else cycle_lens[cid] - (u_i - v_i)
+    for _ in range(q):
+        u, v = map(int, input().split())
+        u -= 1
+        v -= 1
+        if cycle_ids[u] != -1 and cycle_ids[v] != -1: # case 1: both nodes belong to cycles
+            res = cycle_distance(u, v)
+        else: # case 2: both nodes do not belong to cycles
+            k = tree_dist[u] - tree_dist[v]
+            if k < 0: res = -1
+            else:
+                w = u # dummy node
+                for i in range(LOG):
+                    if (k >> i) & 1:
+                        w = succ[i][w]
+                if v != w and cycle_ids[v] != -1 and cycle_ids[w] != -1: # became case 1
+                    res = cycle_distance(w, v)
+                    res = res + (k if res >= 0 else 0)
+                else:
+                    res = k if w == v else -1
+        print(res)
+
+if __name__ == '__main__':
+    main()
+```
+
+## Planets Cycles
+
+### Solution 1:
+
+```cpp
+```
+
+## Road Reparation
+
+### Solution 1:
+
+```cpp
+```
+
+## Road Construction
+
+### Solution 1:
+
+```cpp
+```
+
+## Flight Routes Check
+
+### Solution 1:
+
+```cpp
 ```
 
 ## Planets and Kingdoms
@@ -97,6 +361,77 @@ def main():
 
 if __name__ == '__main__':
     main()
+```
+
+## Giant Pizza
+
+### Solution 1:  2SAT, strongly connected components, Tarjan's algorithm, topological sort
+
+```cpp
+int N, M, timer, scc_count;
+vector<vector<int>> adj, cond_adj;
+vector<int> disc, low, comp;
+stack<int> stk;
+vector<bool> on_stack;
+ 
+void dfs(int u) {
+    disc[u] = low[u] = ++timer;
+    stk.push(u);
+    on_stack[u] = true;
+    for (int v : adj[u]) {
+        if (not disc[v]) dfs(v);
+        if (on_stack[v]) low[u] = min(low[u], low[v]);
+    }
+    if (disc[u] == low[u]) { // found scc
+        scc_count++;
+        while (!stk.empty()) {
+            int v = stk.top();
+            stk.pop();
+            on_stack[v] = false;
+            low[v] = low[u];
+            comp[v] = scc_count;
+            if (v == u) break;
+        }
+    }
+}
+ 
+signed main() {
+	cin >> M >> N;
+    adj.assign(2 * N, vector<int>());
+    disc.assign(2 * N, 0);
+    low.assign(2 * N, 0);
+    comp.assign(2 * N, -1);
+    on_stack.assign(2 * N, false);
+    scc_count = -1;
+    for (int i = 0; i < M; i++) {
+        char s1, s2;
+        int u, v;
+        cin >> s1 >> u >> s2 >> v;
+        u--; v--;
+        if (s1 == '-') u = N + u;
+        if (s2 == '-') v = N + v;
+        // implications
+        adj[(u + N) % (2 * N)].push_back(v);
+        adj[(v + N) % (2 * N)].push_back(u);
+    }
+    for (int i = 0; i < 2 * N; i++) {
+        if (not disc[i]) dfs(i);
+    }
+    for (int i = 0; i < N; i++) {
+        if (comp[i] == comp[i + N]) {
+            cout << "IMPOSSIBLE" << endl;
+            return 0;
+        }
+    }
+    vector<int> ans(N, 0);
+    for (int i = 0; i < N; i++) {
+        ans[i] = comp[i] < comp[i + N];
+    }
+    for (int i = 0; i < N; i++) {
+        cout << (ans[i] ? '+' : '-') << " ";
+    }
+    cout << endl;
+}
 ```
 
 ## Coin Collector
@@ -171,6 +506,185 @@ def main():
         
 if __name__ == '__main__':
     main() 
+```
+
+## Mail Delivery
+
+### Solution 1:  Eulerian circuit + hierholzer's algorithm + undirected graph
+
+```py
+def eulerian_circuit(adj_list, degrees):
+    # start node is 1 in this instance
+    n = len(degrees)
+    start_node = 1
+    stack = [start_node]
+    vis = [0] * (n + 1)
+    vis[start_node] = 1
+    while stack:
+        node = stack.pop()
+        for nei in adj_list[node]:
+            if vis[nei]: continue
+            vis[nei] = 1
+            stack.append(nei)
+    for i in range(n):
+        if (degrees[i] & 1) or (degrees[i] > 0 and not vis[i]): return False
+    return True
+
+def hierholzers_undirected(adj_list):
+    start_node = 1
+    stack = [start_node]
+    circuit = []
+    while stack:
+        node = stack[-1]
+        if len(adj_list[node]) == 0:
+            circuit.append(stack.pop())
+        else:
+            nei = adj_list[node].pop()
+            adj_list[nei].remove(node)
+            stack.append(nei)
+    return circuit
+
+def main():
+    n, m = map(int, input().split())
+    adj_list = [set() for _ in range(n + 1)]
+    degrees = [0] * (n + 1)
+    for _ in range(m):
+        u, v = map(int, input().split())
+        adj_list[u].add(v)
+        adj_list[v].add(u)
+        degrees[u] += 1
+        degrees[v] += 1
+    # all degrees are even and one connected component with edge (nonzero degrees)
+    if not eulerian_circuit(adj_list, degrees):
+        return "IMPOSSIBLE"
+    # hierholzer's algorithm to reconstruct the eulerian circuit
+    circuit = hierholzers_undirected(adj_list)
+    return ' '.join(map(str, circuit))
+
+if __name__ == '__main__':
+    print(main())
+```
+
+## De Bruijn Sequence
+
+### Solution 1:
+
+```cpp
+```
+
+## Teleporters Path
+
+### Solution 1:  Eulerian path + hierholzer's algorithm + directed graph
+
+```py
+def is_eulerian_path(n, adj_list, indegrees, outdegrees):
+    # start node is 1 in this instance
+    start_node = 1
+    end_node = n
+    stack = [start_node]
+    vis = [0] * (n + 1)
+    vis[start_node] = 1
+    while stack:
+        node = stack.pop()
+        for nei in adj_list[node]:
+            if vis[nei]: continue
+            vis[nei] = 1
+            stack.append(nei)
+    if outdegrees[start_node] - indegrees[start_node] != 1 or indegrees[end_node] - outdegrees[end_node] != 1: return False
+    for i in range(1, n + 1):
+        if ((outdegrees[i] > 0 or indegrees[i] > 0) and not vis[i]): return False
+        if (indegrees[i] != outdegrees[i] and i not in (start_node, end_node)): return False
+    return True
+
+def hierholzers_directed(n, adj_list):
+    start_node = 1
+    end_node = n
+    stack = [start_node]
+    euler_path = []
+    while stack:
+        node = stack[-1]
+        if len(adj_list[node]) == 0:
+            euler_path.append(stack.pop())
+        else:
+            nei = adj_list[node].pop()
+            stack.append(nei)
+    return euler_path[::-1]
+
+def main():
+    n, m = map(int, input().split())
+    adj_list = [set() for _ in range(n + 1)]
+    indegrees, outdegrees = [0] * (n + 1), [0] * (n + 1)
+    for _ in range(m):
+        u, v = map(int, input().split())
+        adj_list[u].add(v)
+        indegrees[v] += 1
+        outdegrees[u] += 1
+    # all degrees are even and one connected component with edge (nonzero degrees)
+    if not is_eulerian_path(n, adj_list, indegrees, outdegrees):
+        return "IMPOSSIBLE"
+    # hierholzer's algorithm to reconstruct the eulerian circuit
+    eulerian_path = hierholzers_directed(n, adj_list)
+    return ' '.join(map(str, eulerian_path))
+
+if __name__ == '__main__':
+    print(main())
+```
+
+## Hamiltonian Flights
+
+### Solution 1: directed graph, bitmask dp, O(N^2 * 2^N) time, traveling salesman problem variant
+
+Count number of hamiltonian paths from node 0 to node N-1 in a directed graph.
+
+Hamiltonian paths is a path that visits each vertex exactly once.
+
+```cpp
+const int MOD = 1e9 + 7;
+int N, M;
+vector<vector<int>> adj;
+
+void solve() {
+    cin >> N >> M;
+    adj.assign(N, vector<int>());
+    for (int i = 0; i < M; ++i) {
+        int u, v;
+        cin >> u >> v;
+        u--, v--;
+        adj[u].emplace_back(v);
+    }
+    vector<vector<int>> dp(1 << N, vector<int>(N, 0));
+    dp[1][0] = 1;
+    // N^2 * 2^N
+    for (int mask = 1; mask < (1 << N); ++mask) {
+        for (int u = 0; u < N; ++u) {
+            if (!((mask >> u) & 1)) continue; // u is not visited
+            if (!dp[mask][u]) continue; // not reachable
+            for (int v : adj[u]) {
+                if ((mask >> v) & 1) continue; // v already visited
+                // transition from u -> v
+                int nmask = mask | (1 << v);
+                dp[nmask][v] = (dp[nmask][v] + dp[mask][u]) % MOD;
+            }
+        }
+    }
+    int ans = dp[(1 << N) - 1][N - 1];
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## Knight's Tour
+
+### Solution 1:
+
+```cpp
 ```
 
 ## Download Speed
@@ -343,6 +857,57 @@ if __name__ == '__main__':
     print(main())
 ```
 
+## Police Chase
+
+### Solution 1:
+
+```cpp
+```
+
+## School Dance
+
+### Solution: Maximum Bipartite Matching with Kuhn's algorithm
+O(nm) time 
+
+```c++
+vector<bool> visited;
+vector<int> match;
+vector<vector<int>> graph;
+bool dfs(int u) {
+    if (visited[u]) return false;
+    visited[u] = true;
+    for (int& v : graph[u]) {
+        if (match[v] == -1 || dfs(match[v])) {
+            match[v] = u;
+            return true;
+        }
+    }
+    return false;
+}
+int main() {
+    int n, m, k, boy, girl;
+    } directed graph from boy nodes to girl nodes
+    for (int i = 0;i<k;i++) {
+        cin>>boy>>girl;
+        graph[boy].push_back(girl);
+    }
+    match.assign(m+1,-1);
+    for (int u=1;u<=n;u++) {
+        visited.assign(n+1, false);
+        dfs(u);
+    }
+    int cnt = accumulate(match.begin(), match.end(), 0, [](const auto& a, const auto& b) {
+        return a + (b!=-1);
+    });
+    cout<<cnt<<endl;
+    for (int i = 1;i<=m;i++) {
+        if (match[i]!=-1) {
+            printf("%d %d\n", match[i], i);
+        }
+    }
+}
+```
+
 ## Distinct Routes
 
 ### Solution 1: dinics algorithm + general path cover + edge disjoint paths
@@ -477,407 +1042,3 @@ def main():
 if __name__ == '__main__':
     main()
 ```
-
-## Mail Delivery
-
-### Solution 1:  Eulerian circuit + hierholzer's algorithm + undirected graph
-
-```py
-def eulerian_circuit(adj_list, degrees):
-    # start node is 1 in this instance
-    n = len(degrees)
-    start_node = 1
-    stack = [start_node]
-    vis = [0] * (n + 1)
-    vis[start_node] = 1
-    while stack:
-        node = stack.pop()
-        for nei in adj_list[node]:
-            if vis[nei]: continue
-            vis[nei] = 1
-            stack.append(nei)
-    for i in range(n):
-        if (degrees[i] & 1) or (degrees[i] > 0 and not vis[i]): return False
-    return True
-
-def hierholzers_undirected(adj_list):
-    start_node = 1
-    stack = [start_node]
-    circuit = []
-    while stack:
-        node = stack[-1]
-        if len(adj_list[node]) == 0:
-            circuit.append(stack.pop())
-        else:
-            nei = adj_list[node].pop()
-            adj_list[nei].remove(node)
-            stack.append(nei)
-    return circuit
-
-def main():
-    n, m = map(int, input().split())
-    adj_list = [set() for _ in range(n + 1)]
-    degrees = [0] * (n + 1)
-    for _ in range(m):
-        u, v = map(int, input().split())
-        adj_list[u].add(v)
-        adj_list[v].add(u)
-        degrees[u] += 1
-        degrees[v] += 1
-    # all degrees are even and one connected component with edge (nonzero degrees)
-    if not eulerian_circuit(adj_list, degrees):
-        return "IMPOSSIBLE"
-    # hierholzer's algorithm to reconstruct the eulerian circuit
-    circuit = hierholzers_undirected(adj_list)
-    return ' '.join(map(str, circuit))
-
-if __name__ == '__main__':
-    print(main())
-```
-
-## Teleporters Path
-
-### Solution 1:  Eulerian path + hierholzer's algorithm + directed graph
-
-```py
-def is_eulerian_path(n, adj_list, indegrees, outdegrees):
-    # start node is 1 in this instance
-    start_node = 1
-    end_node = n
-    stack = [start_node]
-    vis = [0] * (n + 1)
-    vis[start_node] = 1
-    while stack:
-        node = stack.pop()
-        for nei in adj_list[node]:
-            if vis[nei]: continue
-            vis[nei] = 1
-            stack.append(nei)
-    if outdegrees[start_node] - indegrees[start_node] != 1 or indegrees[end_node] - outdegrees[end_node] != 1: return False
-    for i in range(1, n + 1):
-        if ((outdegrees[i] > 0 or indegrees[i] > 0) and not vis[i]): return False
-        if (indegrees[i] != outdegrees[i] and i not in (start_node, end_node)): return False
-    return True
-
-def hierholzers_directed(n, adj_list):
-    start_node = 1
-    end_node = n
-    stack = [start_node]
-    euler_path = []
-    while stack:
-        node = stack[-1]
-        if len(adj_list[node]) == 0:
-            euler_path.append(stack.pop())
-        else:
-            nei = adj_list[node].pop()
-            stack.append(nei)
-    return euler_path[::-1]
-
-def main():
-    n, m = map(int, input().split())
-    adj_list = [set() for _ in range(n + 1)]
-    indegrees, outdegrees = [0] * (n + 1), [0] * (n + 1)
-    for _ in range(m):
-        u, v = map(int, input().split())
-        adj_list[u].add(v)
-        indegrees[v] += 1
-        outdegrees[u] += 1
-    # all degrees are even and one connected component with edge (nonzero degrees)
-    if not is_eulerian_path(n, adj_list, indegrees, outdegrees):
-        return "IMPOSSIBLE"
-    # hierholzer's algorithm to reconstruct the eulerian circuit
-    eulerian_path = hierholzers_directed(n, adj_list)
-    return ' '.join(map(str, eulerian_path))
-
-if __name__ == '__main__':
-    print(main())
-```
-
-## Planets Queries I
-
-### Solution 1:  binary jumping + functional graph or successor graph + time complexity O(nlogk + qlogk)
-
-A functional graph means each node has an outdegree of 1, that is has one output. This means you will have islands but each island contains a cycle.  A cycle must always exist in a weakly connected component of a functional graph.  This is also a directed graph.  You can use binary jumping to find the power of twos successors from each node.  And you can convert any number to a summation of power of two jumps to calculate any possible jump.  Any jump can be composed of power of two jumps. 
-
-```py
-def main():
-    LOG = 31
-    n, q = map(int, input().split())
-    successor = list(map(int, input().split()))
-    queries = [tuple(map(int, input().split())) for _ in range(q)]
-    succ = [[0] * n for _ in range(LOG)]
-    succ[0] = [s - 1 for s in successor]
-    for i in range(1, LOG):
-        for j in range(n):
-            succ[i][j] = succ[i - 1][succ[i - 1][j]]
-    for x, k in queries:
-        x -= 1
-        for i in range(LOG):
-            if (k >> i) & 1:
-                x = succ[i][x]
-        print(x + 1)
-
-if __name__ == '__main__':
-    main()
-```
-
-## Planets Queries II
-
-### Solution 1:  binary jumping + functional graph or successor graph + cycles + two cases
-
-binary jumping is being used to check if their is a node that is k distance away. 
-
-Needs to use a dfs to store cycle information and distance from a node belonging to a cycle. for non cycle nodes.
-Use a parent array and backtracking to reconstruct cycle path and update the distances.  
-
-```py
-def main():
-    n, q = map(int, input().split())
-    successors = [x - 1 for x in map(int, input().split())]
-    LOG = 19
-    succ = [[0] * n for _ in range(LOG)]
-    succ[0] = successors[:]
-    for i in range(1, LOG):
-        for j in range(n):
-            succ[i][j] = succ[i - 1][succ[i - 1][j]]
-    cycle_count = 0
-    cycle_ids = [-1] * n # map node -> cycle_id
-    cycle_indices = [-1] * n # map node -> cycle_index
-    cycle_lens = []
-    tree_dist = [0] * n # map node -> distance from root node or cycle node
-    vis = [False] * n
-    def dfs(u):
-        nonlocal cycle_count
-        parent = {u: None}
-        is_cycle = False
-        while True:
-            v = successors[u]
-            if v in parent: 
-                is_cycle = True
-                break
-            if vis[v]: break
-            parent[v] = u
-            u = v
-        if is_cycle:
-            crit_point = parent[successors[u]]
-            cycle_path = []
-            while u != crit_point:
-                cycle_ids[u] = cycle_count
-                cycle_path.append(u)
-                u = parent[u]
-            cycle_path = cycle_path[::-1]
-            cycle_lens.append(len(cycle_path))
-            for i, node in enumerate(cycle_path):
-                cycle_indices[node] = i
-                vis[node] = True
-            cycle_count += 1
-        while u is not None:
-            vis[u] = True
-            tree_dist[u] = tree_dist[successors[u]] + 1
-            u = parent[u]
-    for u in range(n):
-        if vis[u]: continue
-        vis[u] = True
-        dfs(u)
-    def cycle_distance(u, v):
-        if cycle_ids[u] != cycle_ids[v]: return -1
-        u_i, v_i = cycle_indices[u], cycle_indices[v]
-        cid = cycle_ids[u]
-        return v_i - u_i if v_i >= u_i else cycle_lens[cid] - (u_i - v_i)
-    for _ in range(q):
-        u, v = map(int, input().split())
-        u -= 1
-        v -= 1
-        if cycle_ids[u] != -1 and cycle_ids[v] != -1: # case 1: both nodes belong to cycles
-            res = cycle_distance(u, v)
-        else: # case 2: both nodes do not belong to cycles
-            k = tree_dist[u] - tree_dist[v]
-            if k < 0: res = -1
-            else:
-                w = u # dummy node
-                for i in range(LOG):
-                    if (k >> i) & 1:
-                        w = succ[i][w]
-                if v != w and cycle_ids[v] != -1 and cycle_ids[w] != -1: # became case 1
-                    res = cycle_distance(w, v)
-                    res = res + (k if res >= 0 else 0)
-                else:
-                    res = k if w == v else -1
-        print(res)
-
-if __name__ == '__main__':
-    main()
-```
-
-## Giant Pizza
-
-### Solution 1:  2SAT, strongly connected components, Tarjan's algorithm, topological sort
-
-```cpp
-int N, M, timer, scc_count;
-vector<vector<int>> adj, cond_adj;
-vector<int> disc, low, comp;
-stack<int> stk;
-vector<bool> on_stack;
- 
-void dfs(int u) {
-    disc[u] = low[u] = ++timer;
-    stk.push(u);
-    on_stack[u] = true;
-    for (int v : adj[u]) {
-        if (not disc[v]) dfs(v);
-        if (on_stack[v]) low[u] = min(low[u], low[v]);
-    }
-    if (disc[u] == low[u]) { // found scc
-        scc_count++;
-        while (!stk.empty()) {
-            int v = stk.top();
-            stk.pop();
-            on_stack[v] = false;
-            low[v] = low[u];
-            comp[v] = scc_count;
-            if (v == u) break;
-        }
-    }
-}
- 
-signed main() {
-	cin >> M >> N;
-    adj.assign(2 * N, vector<int>());
-    disc.assign(2 * N, 0);
-    low.assign(2 * N, 0);
-    comp.assign(2 * N, -1);
-    on_stack.assign(2 * N, false);
-    scc_count = -1;
-    for (int i = 0; i < M; i++) {
-        char s1, s2;
-        int u, v;
-        cin >> s1 >> u >> s2 >> v;
-        u--; v--;
-        if (s1 == '-') u = N + u;
-        if (s2 == '-') v = N + v;
-        // implications
-        adj[(u + N) % (2 * N)].push_back(v);
-        adj[(v + N) % (2 * N)].push_back(u);
-    }
-    for (int i = 0; i < 2 * N; i++) {
-        if (not disc[i]) dfs(i);
-    }
-    for (int i = 0; i < N; i++) {
-        if (comp[i] == comp[i + N]) {
-            cout << "IMPOSSIBLE" << endl;
-            return 0;
-        }
-    }
-    vector<int> ans(N, 0);
-    for (int i = 0; i < N; i++) {
-        ans[i] = comp[i] < comp[i + N];
-    }
-    for (int i = 0; i < N; i++) {
-        cout << (ans[i] ? '+' : '-') << " ";
-    }
-    cout << endl;
-}
-
-```
-
-# Graph Algorithms
-
-## Building Teams
-
-### Solution: Check graph is bipartite with 2 colors
-
-```c++
-vector<int> colors;
-vector<vector<int>> graph;
-const string IMP = "IMPOSSIBLE";
-bool isBipartite(int n) {
-    queue<int> q;
-    for (int u = 1;u<=n;u++) {
-        if (colors[u]==-1) {
-            colors[u]=0;
-            q.push(u);
-            while (!q.empty()) {
-                int v = q.front();
-                q.pop();
-                for (int w : graph[v]) {
-                    if (colors[w]==-1) {
-                        colors[w] = colors[v]^1;
-                        q.push(w);
-                    } else {
-                        if (colors[w]==colors[v]) {
-                            return false;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return true;
-}
-int main() {
-    int n, m, a, b;
-    cin >> n >> m;
-    graph.resize(n+1);
-    for (int i = 0;i<m;i++) {
-        cin>>a>>b;
-        graph[a].push_back(b);
-        graph[b].push_back(a);
-    }
-    colors.assign(n+1,-1);
-    if (isBipartite(n)) {
-        for (int i = 1;i<=n;i++) {
-            cout << colors[i]+1 << " ";
-        }
-        cout<<endl;
-    } else {
-        cout << IMP << endl;
-    }
-
-}
-```
-
-## School Dance
-
-### Solution: Maximum Bipartite Matching with Kuhn's algorithm
-O(nm) time 
-
-```c++
-vector<bool> visited;
-vector<int> match;
-vector<vector<int>> graph;
-bool dfs(int u) {
-    if (visited[u]) return false;
-    visited[u] = true;
-    for (int& v : graph[u]) {
-        if (match[v] == -1 || dfs(match[v])) {
-            match[v] = u;
-            return true;
-        }
-    }
-    return false;
-}
-int main() {
-    int n, m, k, boy, girl;
-    } directed graph from boy nodes to girl nodes
-    for (int i = 0;i<k;i++) {
-        cin>>boy>>girl;
-        graph[boy].push_back(girl);
-    }
-    match.assign(m+1,-1);
-    for (int u=1;u<=n;u++) {
-        visited.assign(n+1, false);
-        dfs(u);
-    }
-    int cnt = accumulate(match.begin(), match.end(), 0, [](const auto& a, const auto& b) {
-        return a + (b!=-1);
-    });
-    cout<<cnt<<endl;
-    for (int i = 1;i<=m;i++) {
-        if (match[i]!=-1) {
-            printf("%d %d\n", match[i], i);
-        }
-    }
-}
-```
-
