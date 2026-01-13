@@ -154,9 +154,74 @@ int main() {
 
 ## Longest Flight Route
 
-### Solution 1:
+### Solution 1: dynamic programming, DAG, topological sort, queue, longest path in directed acyclic graph
 
 ```cpp
+const int INF = numeric_limits<int>::max();
+int N, M;
+vector<vector<int>> adj, tadj;
+vector<int> ind;
+
+void solve() {
+    cin >> N >> M;
+    adj.assign(N, vector<int>());
+    tadj.assign(N, vector<int>());
+    ind.assign(N, 0);
+    for (int i = 0; i < M; ++i) {
+        int u, v;
+        cin >> u >> v;
+        u--, v--;
+        adj[u].emplace_back(v);
+        tadj[v].emplace_back(u);
+        ind[v]++;
+    }
+    queue<int> q;
+    for (int i = 0; i < N; ++i) {
+        if (ind[i]) continue;
+        q.emplace(i);
+    }
+    vector<int> dp(N, -INF);
+    dp[0] = 1;
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop();
+        for (int v : adj[u]) {
+            if (dp[u] != -INF) dp[v] = max(dp[v], dp[u] + 1);
+            if (--ind[v] == 0) {
+                q.emplace(v);
+            }
+        }
+    }
+    if (dp.back() == -INF) {
+        cout << "IMPOSSIBLE" << endl;
+        return;
+    }
+    cout << dp.back() << endl;
+    vector<int> ans;
+    for (int u = N - 1; u > 0; ) {
+        ans.emplace_back(u);
+        for (int v : tadj[u]) {
+            if (dp[v] + 1 == dp[u]) {
+                u = v;
+                break;
+            }
+        }
+    }
+    ans.emplace_back(0);
+    reverse(ans.begin(), ans.end());
+    for (int x : ans) {
+        cout << x + 1 << " ";
+    }
+    cout << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ## Game Routes
@@ -305,9 +370,64 @@ if __name__ == '__main__':
 
 ## Road Construction
 
-### Solution 1:
+### Solution 1: union find, connected components, undirected graph
 
 ```cpp
+int N, M;
+
+struct UnionFind {
+    vector<int> parents, size;
+    UnionFind(int n) {
+        parents.resize(n);
+        iota(parents.begin(),parents.end(),0);
+        size.assign(n,1);
+    }
+
+    int find(int i) {
+        if (i==parents[i]) {
+            return i;
+        }
+        return parents[i]=find(parents[i]);
+    }
+
+    void unite(int i, int j) {
+        i = find(i), j = find(j);
+        if (i!=j) {
+            if (size[j]>size[i]) {
+                swap(i,j);
+            }
+            size[i]+=size[j];
+            parents[j]=i;
+        }
+    }
+
+    bool same(int i, int j) {
+        return find(i) == find(j);
+    }
+};
+
+void solve() {
+    cin >> N >> M;
+    UnionFind dsu(N);
+    int cnt = N, sz = 1;
+    while (M--) {
+        int u, v;
+        cin >> u >> v;
+        u--, v--;
+        if (!dsu.same(u, v)) cnt--;
+        dsu.unite(u, v);
+        sz = max(sz, dsu.size[dsu.find(u)]);
+        cout << cnt << " " << sz << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ## Flight Routes Check
