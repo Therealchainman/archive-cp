@@ -6,30 +6,32 @@ This is my favorite cpp implementation, it is rather simple.
 
 Intended for 0-indexed arrays
 
+includes the optimizations path compression, and merging small to large
+
 ```cpp
 struct UnionFind {
-    vector<int> parents, size;
+    vector<int> parent, size;
     UnionFind(int n) {
-        parents.resize(n);
-        iota(parents.begin(),parents.end(),0);
+        parent.resize(n);
+        iota(parent.begin(),parent.end(),0);
         size.assign(n,1);
     }
 
     int find(int i) {
-        if (i==parents[i]) {
+        if (i == parent[i]) {
             return i;
         }
-        return parents[i]=find(parents[i]);
+        return parent[i] = find(parent[i]);
     }
 
     void unite(int i, int j) {
         i = find(i), j = find(j);
-        if (i!=j) {
-            if (size[j]>size[i]) {
-                swap(i,j);
+        if (i != j) {
+            if (size[j] > size[i]) {
+                swap(i, j);
             }
-            size[i]+=size[j];
-            parents[j]=i;
+            size[i] += size[j];
+            parent[j] = i;
         }
     }
 
@@ -48,6 +50,52 @@ struct UnionFind {
             res.emplace_back(move(group));
         }
         return res;
+    }
+};
+```
+
+## Union Find Algorithm without Path Compression, and small to large merging
+
+Sometimes you need to maintain the structure, and not have the path compression optimization
+
+Just replace the find with this. 
+
+Contains small to large merging to maintain all the elements within a set/component.  This way you can update everything over the component when an event occurs.
+
+```cpp
+struct UnionFind {
+    vector<int> parents, size;
+    vector<vector<int>> components;
+    UnionFind(int n) {
+        parents.resize(n);
+        iota(parents.begin(),parents.end(),0);
+        size.assign(n,1);
+        components.assign(n, vector<int>());
+        for (int i = 0; i < n; ++i) {
+            components[i].emplace_back(i);
+        }
+    }
+
+    int find(int i) {
+        return i == parents[i] ? i : find(parents[i]);
+    }
+
+    void unite(int i, int j) {
+        i = find(i), j = find(j);
+        if (i!=j) {
+            if (size[j]>size[i]) {
+                swap(i,j);
+            }
+            size[i]+=size[j];
+            parents[j]=i;
+            for (int v : components[j]) {
+                components[i].emplace_back(v);
+            }
+        }
+    }
+
+    bool same(int i, int j) {
+        return find(i) == find(j);
     }
 };
 ```
