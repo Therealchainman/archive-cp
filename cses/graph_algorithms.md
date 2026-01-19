@@ -432,55 +432,147 @@ signed main() {
 
 ## Flight Routes Check
 
-### Solution 1:
+### Solution 1: directed graph, dfs lowlink, strongly connected components
+
+General strategy is find all the strongly connected components.
+
+Yes if you find exactly one strongly connected component
+
+Otherwise No.
 
 ```cpp
+int N, M, numScc, cnt;
+vector<vector<int>> adj;
+vector<int> pre, low, comp;
+stack<int> stk;
+
+void dfs(int u, int p = -1) {
+    if (pre[u] != -1) {
+        return;
+    }
+    pre[u] = cnt;
+    low[u] = cnt++;
+    stk.emplace(u);
+    for (int v : adj[u]) {
+        dfs(v, u);
+        low[u] = min(low[u], low[v]);
+    }
+    if (pre[u] == low[u]) {
+        while (true) {
+            int v = stk.top();
+            stk.pop();
+            comp[v] = numScc;
+            low[v] = N;
+            if (v == u) break;
+        }
+        numScc++;
+    }
+}
+
+void solve() {
+    cin >> N >> M;
+    adj.assign(N, vector<int>());
+    for (int i = 0; i < M; ++i) {
+        int u, v;
+        cin >> u >> v;
+        u--, v--;
+        adj[u].emplace_back(v);
+    }
+    pre.assign(N, -1);
+    low.assign(N, N);
+    comp.assign(N, -1);
+    numScc = cnt = 0;
+    for (int i = 0; i < N; ++i) {
+        if (pre[i] != -1) continue;
+        dfs(i);
+    }
+    if (numScc == 1) {
+        cout << "YES" << endl;
+        return;
+    }
+    int u = -1, v = -1;
+    for (int i = 0; i < N; ++i) {
+        if (comp[i] == 0) {
+            u = i + 1;
+        } else if (comp[i] == 1) {
+            v = i + 1;
+        }
+    }
+    cout << "NO" << endl;
+    cout << u << " " << v << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ## Planets and Kingdoms
 
-### Solution 1:  Counting and finding strongly connected components + tarjan's algorithm + dfs
+### Solution 1:  directed graph, dfs lowlink, strongly connected components
 
-```py
-sys.setrecursionlimit(1_000_000)
+```cpp
+int N, M, numScc, cnt;
+vector<vector<int>> adj;
+vector<int> pre, comp, low;
+stack<int> stk;
 
-def main():
-    n, m = map(int, input().split())
-    adj_list = [[] for _ in range(n + 1)]
-    for _ in range(m):
-        a, b = map(int, input().split())
-        adj_list[a].append(b)
-    time = num_scc = 0
-    scc_ids = [0]*(n + 1)
-    disc, low, on_stack = [0]*(n + 1), [0]*(n + 1), [0]*(n + 1)
-    stack = []
-    def dfs(node):
-        nonlocal time, num_scc
-        time += 1
-        disc[node] = time
-        low[node] = disc[node]
-        on_stack[node] = 1
-        stack.append(node)
-        for nei in adj_list[node]:
-            if not disc[nei]: dfs(nei)
-            if on_stack[nei]: low[node] = min(low[node], low[nei])
-        # found scc
-        if disc[node] == low[node]:
-            num_scc += 1
-            while stack:
-                snode = stack.pop()
-                on_stack[snode] = 0
-                low[snode] = low[node]
-                scc_ids[snode] = num_scc
-                if snode == node: break
-    for i in range(1, n + 1):
-        if disc[i]: continue
-        dfs(i)
-    print(num_scc)
-    print(*scc_ids[1:])
+void dfs(int u) {
+    if (pre[u] != -1) return;
+    pre[u] = cnt;
+    low[u] = cnt++;
+    stk.emplace(u);
+    for (int v : adj[u]) {
+        dfs(v);
+        low[u] = min(low[u], low[v]);
+    }
+    if (pre[u] == low[u]) {
+        numScc++;
+        while (true) {
+            int v = stk.top();
+            stk.pop();
+            comp[v] = numScc;
+            low[v] = N;
+            if (u == v) break;
+        }
+    }
+}
 
-if __name__ == '__main__':
-    main()
+void solve() {
+    cin >> N >> M;
+    adj.assign(N, vector<int>());
+    for (int i = 0; i < M; ++i) {
+        int u, v;
+        cin >> u >> v;
+        u--, v--;
+        adj[u].emplace_back(v);
+    }
+    pre.assign(N, -1);
+    comp.resize(N);
+    low.resize(N);
+    numScc = cnt = 0;
+    for (int i = 0; i < N; ++i) {
+        if (pre[i] != -1) continue;
+        dfs(i);
+    }
+    cout << numScc << endl;
+    for (int x : comp) {
+        cout << x << " ";
+    }
+    cout << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ## Giant Pizza
@@ -562,70 +654,103 @@ You can collect all the coins in any strongly connected component because every 
 
 condensation graph is a contraction of each scc into a single vertex, and creates a dag.
 
-```py
-def main():
-    n, m = map(int, input().split())
-    coins = [0] + list(map(int, input().split()))
-    # PHASE 0: CONSTRUCT ADJACENCY LIST REPRESENTATION OF GRAPH
-    adj_list = [[] for _ in range(n + 1)]
-    for _ in range(m):
-        a, b = map(int, input().split())
-        adj_list[a].append(b)
-    # PHASE 1: FIND STRONGLY CONNECTED COMPONENTS
-    time = num_scc = 0
-    scc_ids = [0]*(n + 1)
-    disc, low, on_stack = [0]*(n + 1), [0]*(n + 1), [0]*(n + 1)
-    stack = []
-    def dfs(node):
-        nonlocal time, num_scc
-        time += 1
-        disc[node] = time
-        low[node] = disc[node]
-        on_stack[node] = 1
-        stack.append(node)
-        for nei in adj_list[node]:
-            if not disc[nei]: dfs(nei)
-            if on_stack[nei]: low[node] = min(low[node], low[nei])
-        # found scc
-        if disc[node] == low[node]:
-            num_scc += 1
-            while stack:
-                snode = stack.pop()
-                on_stack[snode] = 0
-                low[snode] = low[node]
-                scc_ids[snode] = num_scc
-                if snode == node: break
-    for i in range(1, n + 1):
-        if disc[i]: continue
-        dfs(i)
-    # PHASE 2: CONSTRUCT CONDENSATION GRAPH
-    scc_adj_list = [[] for _ in range(num_scc + 1)]
-    indegrees = [0]*(num_scc + 1)
-    # condensing the values of the coins into it's scc
-    val_scc = [0]*(num_scc + 1)
-    for i in range(1, n + 1):
-        val_scc[scc_ids[i]] += coins[i]
-        for nei in adj_list[i]:
-            if scc_ids[i] != scc_ids[nei]:
-                indegrees[scc_ids[nei]] += 1
-                scc_adj_list[scc_ids[i]].append(scc_ids[nei])
-    # PHASE 3: DO TOPOLOGICAL SORT ON CONDENSATION GRAPH WITH MEMOIZATION FOR MOST COINS COLLECTED IN EACH NODE IN CONDENSATION GRAPH
-    stack = []
-    memo = [0]*(num_scc + 1)
-    for i in range(1, num_scc + 1):
-        if indegrees[i] == 0:
-            stack.append(i)
-            memo[i] = val_scc[i]
-    while stack:
-        node = stack.pop()
-        for nei in scc_adj_list[node]:
-            indegrees[nei] -= 1
-            memo[nei] = max(memo[nei], memo[node] + val_scc[nei])
-            if indegrees[nei] == 0: stack.append(nei)
-    print(max(memo))
-        
-if __name__ == '__main__':
-    main() 
+```cpp
+int N, M, numScc, cnt;
+vector<int> A, pre, low, comp;
+stack<int> stk;
+vector<vector<int>> adj;
+
+void dfs(int u) {
+    if (pre[u] != -1) return;
+    pre[u] = cnt;
+    low[u] = cnt++;
+    stk.emplace(u);
+    for (int v : adj[u]) {
+        dfs(v);
+        low[u] = min(low[u], low[v]);
+    }
+    if (pre[u] == low[u]) {
+        while (true) {
+            int v = stk.top();
+            stk.pop();
+            comp[v] = numScc;
+            low[v] = N;
+            if (u == v) break;
+        }
+        numScc++;
+    }
+}
+
+void solve() {
+    cin >> N >> M;
+    A.resize(N);
+    adj.assign(N, vector<int>());
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+    }
+    for (int i = 0; i < M; ++i) {
+        int u, v;
+        cin >> u >> v;
+        u--, v--;
+        adj[u].emplace_back(v);
+    }
+    pre.assign(N, -1);
+    low.resize(N);
+    comp.resize(N);
+    numScc = cnt = 0;
+    for (int i = 0; i < N; ++i) {
+        if (pre[i] != -1) continue;
+        dfs(i);
+    }
+    vector<int64> coins(numScc, 0), dp(numScc, 0);
+    for (int i = 0; i < N; ++i) {
+        coins[comp[i]] += A[i];
+    }
+    vector<vector<int>> dag(numScc, vector<int>());
+    for (int u = 0; u < N; ++u) {
+        int cu = comp[u];
+        for (int v : adj[u]) {
+            int cv = comp[v];
+            if (cu == cv) continue;
+            dag[cu].emplace_back(cv);
+        }
+    }
+    vector<int> ind(numScc, 0);
+    for (int i = 0; i < numScc; ++i) {
+        sort(dag[i].begin(), dag[i].end());
+        dag[i].erase(unique(dag[i].begin(), dag[i].end()), dag[i].end());
+        for (int v : dag[i]) {
+            ind[v]++;
+        }
+    }
+    stack<int> st;
+    for (int i = 0; i < numScc; ++i) {
+        if (ind[i] == 0) {
+            dp[i] = coins[i];
+            st.emplace(i);
+        }
+    }
+    while (!st.empty()) {
+        int u = st.top();
+        st.pop();
+        for (int v : dag[u]) {
+            dp[v] = max(dp[v], dp[u] + coins[v]);
+            if (--ind[v] == 0) {
+                st.emplace(v);
+            }
+        }
+    }
+    int64 ans = *max_element(dp.begin(), dp.end());
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ## Mail Delivery

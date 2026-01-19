@@ -133,9 +133,83 @@ signed main() {
 
 ## Transfer Speeds Sum
 
-### Solution 1:
+### Solution 1: offline dsu, sorting, reverse order
+
+Take the largest weight edges to smallest and unite the nodes and track how much this weight contributes to the sum based on the size of the two connected components.
 
 ```cpp
+struct UnionFind {
+    vector<int> parent, size;
+    UnionFind(int n) {
+        parent.resize(n);
+        iota(parent.begin(),parent.end(),0);
+        size.assign(n,1);
+    }
+
+    int find(int i) {
+        if (i == parent[i]) {
+            return i;
+        }
+        return parent[i] = find(parent[i]);
+    }
+
+    void unite(int i, int j) {
+        i = find(i), j = find(j);
+        if (i != j) {
+            if (size[j] > size[i]) {
+                swap(i, j);
+            }
+            size[i] += size[j];
+            parent[j] = i;
+        }
+    }
+
+    bool same(int i, int j) {
+        return find(i) == find(j);
+    }
+};
+
+struct Edge {
+    int u, v, w;
+    Edge(int u, int v, int w) : u(u), v(v), w(w) {};
+    bool operator<(const Edge& other) const {
+        return w < other.w;
+    }
+    friend ostream& operator<<(ostream &os, const Edge &e) {
+        return os << "(" << e.u << "," << e.v << "," << e.w << ")";
+    }
+};
+
+int N;
+
+void solve() {
+    cin >> N;
+    vector<Edge> edges;
+    for (int i = 0; i < N - 1; ++i) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        u--, v--;
+        edges.emplace_back(u, v, w);
+    }
+    sort(edges.rbegin(), edges.rend());
+    UnionFind dsu(N);
+    int64 ans = 0;
+    for (const auto &[u, v, w] : edges) {
+        int ru = dsu.find(u), rv = dsu.find(v);
+        int64 val = 1LL * dsu.size[ru] * dsu.size[rv] * w;
+        ans += val;
+        dsu.unite(u, v);
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ## MST Edge Check
@@ -699,6 +773,8 @@ signed main() {
 
 ### Solution 1:
 
+Need to add edges so that the graph is 2-edge connected
+
 ```cpp
 ```
 
@@ -706,7 +782,13 @@ signed main() {
 
 ### Solution 1:
 
+Finding which nodes are cut vertices or articulation points
+Determining if c is in the simple path from a to b.
+
+If it is a cut vertex and c is in the simple path, the answer is NO, otherwise it is YES
+
 ```cpp
+
 ```
 
 ## Creating Offices
@@ -721,4 +803,5 @@ signed main() {
 ### Solution 1:
 
 ```cpp
+
 ```
