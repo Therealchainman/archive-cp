@@ -96,12 +96,74 @@ public:
 };
 ```
 
-##
+## 1292. Maximum Side Length of a Square with Sum Less than or Equal to Threshold
 
-### Solution 1: 
+### Solution 1: row and column prefix sums, three nested loops
 
 ```cpp
+class Solution {
+public:
+    int maxSideLength(vector<vector<int>>& mat, int threshold) {
+        int N = mat.size(), M = mat[0].size();
+        vector<vector<int>> colSums(N + 1, vector<int>(M, 0)), rowSums(N, vector<int>(M + 1, 0));
+        for (int i = 0; i < N; ++i) {
+            for (int j = 0; j < M; ++j) {
+                colSums[i + 1][j] += colSums[i][j] + mat[i][j];
+                rowSums[i][j + 1] += rowSums[i][j] + mat[i][j];
+            }
+        }
+        int ans = 0;
+        for (int i = 0; i < N; ++i) {
+            for (int j = 0; j < M; ++j) {
+                int cand = 0;
+                for (int k = 0; i + k < N && j + k < M; ++k) {
+                    int rsum = rowSums[i + k][j + k + 1] - rowSums[i + k][j];
+                    int csum = colSums[i + k + 1][j + k] - colSums[i][j + k];
+                    cand += rsum + csum - mat[i + k][j + k];
+                    if (cand > threshold) break;
+                    ans = max(ans, k + 1);
+                }
+            }
+        }
+        return ans;
+    }
+};
+```
 
+### Solution 2: 2d prefix sums
+
+Side length can only get better, so no reason to try values less than ans.
+
+```cpp
+class Solution {
+private:
+    int query(const vector<vector<int>> &ps, int r1, int c1, int r2, int c2) {
+        if (r1 > r2 || c1 > c2) return 0;
+        return ps[r2 + 1][c2 + 1] - ps[r1][c2 + 1] - ps[r2 + 1][c1] + ps[r1][c1];
+    }
+public:
+    int maxSideLength(vector<vector<int>>& mat, int threshold) {
+        int R = mat.size(), C = mat[0].size();
+        vector<vector<int>> ps(R + 1, vector<int>(C + 1, 0));
+        for (int r = 1; r <= R; r++) {
+            for (int c = 1; c <= C; c++) {
+                ps[r][c] = ps[r - 1][c] + ps[r][c - 1] - ps[r - 1][c - 1] + mat[r - 1][c - 1];
+            }
+        }
+        int ans = 0;
+        for (int i = 0; i < R; ++i) {
+            for (int j = 0; j < C; ++j) {
+                int cand = 0;
+                for (int k = ans; i + k < R && j + k < C; ++k) {
+                    int cand = query(ps, i, j, i + k, j + k);
+                    if (cand > threshold) break;
+                    ans = max(ans, k + 1);
+                }
+            }
+        }
+        return ans;
+    }
+};
 ```
 
 ## 2693. Call Function with Custom Context
