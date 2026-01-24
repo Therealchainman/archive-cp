@@ -485,6 +485,88 @@ Array.prototype.forEach = function(callback: Callback, context: Context): void {
 
 ```
 
+## 2758. Next Day
+
+### Solution 1: Date object, next day, ISOString
+
+Learned that setDate is in-place, and this is best way to increment by days.
+toISOString() is a good way to get the string in YYYY-MM-DD format.
+
+```ts
+Date.prototype.nextDay = function() {
+    this.setDate(this.getDate() + 1);
+    return this.toISOString().slice(0, 10);
+}
+```
+
+## 2774. Array Upper Bound
+
+### Solution 1: binary search
+
+```ts
+interface Array<T> {
+    upperBound(target: number): number;
+}
+
+function lowerBound(arr: number[], target: number) {
+    const N = arr.length;
+    let lo = 0, hi = N;
+    while (lo < hi) {
+        const mid = lo + Math.trunc((hi - lo) / 2);
+        if (arr[mid] < target) {
+            lo = mid + 1;
+        } else {
+            hi = mid;
+        }
+    }
+    return lo;
+}
+
+function upperBound(arr: number[], target: number) {
+    const N = arr.length;
+    let lo = 0, hi = N;
+    while (lo < hi) {
+        const mid = lo + Math.trunc((hi - lo) / 2);
+        if (arr[mid] <= target) {
+            lo = mid + 1;
+        } else {
+            hi = mid;
+        }
+    }
+    return lo;
+}
+
+Array.prototype.upperBound = function(target): number {
+    const i = lowerBound(this, target), j = upperBound(this, target);
+    return j > i ? j - 1 : -1;
+};
+```
+
+## 2618. Check if Object Instance of Class
+
+### Solution 1: contructor function, object, primitives, 
+
+constructor function is provided, and want to determine if the object is an instance of that class.
+
+primitives are not consider Object type, such as 5, "test", true, they are primitive data types.  And they are not going to be equal to Number or String or Boolean.
+
+for primitives that are not Object you can convert to Object, with Object(obj)
+
+```ts
+function checkIfInstanceOf(obj: any, classFunction: any): boolean {
+    if (typeof classFunction !== "function" || obj == null || classFunction == null) return false;
+    return Object(obj) instanceof classFunction;
+};
+```
+
+## 2759. Convert JSON String to Object
+
+### Solution 1: 
+
+```ts
+
+```
+
 ##
 
 ### Solution 1: 
