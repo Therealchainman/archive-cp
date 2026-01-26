@@ -461,8 +461,6 @@ function promisify(fn: CallbackFn): Promisified {
 
 ### Solution 1: bind, for loop, callback
 
-
-
 ```ts
 type JSONValue = null | boolean | number | string | JSONValue[] | { [key: string]: JSONValue };
 type Callback = (currentValue: JSONValue, index: number, array: JSONValue[]) => any
@@ -479,10 +477,38 @@ Array.prototype.forEach = function(callback: Callback, context: Context): void {
 
 ## 2805. Custom Interval
 
-### Solution 1: 
+### Solution 1: map, setTimeout, recursion, dynamic delay
 
 ```ts
+const customIntervalModule = (() => {
+    let intervalCounter = 0;
+    const timeoutMap = new Map<number, NodeJS.Timeout>();
+    function customInterval(fn: Function, delay: number, period: number): number {
+        const customId = intervalCounter++;
+        let count = 0;
+        const dfs = (() => {
+            const timeoutId = setTimeout(() => {
+                fn();
+                dfs();
+            }, delay + period * count);
+            count++;
+            timeoutMap.set(customId, timeoutId);
+        })
+        dfs();
+        return customId;
+    }
 
+    function customClearInterval(id: number): void {
+        clearTimeout(timeoutMap.get(id));
+    }
+    return {
+        customInterval,
+        customClearInterval
+    }
+})();
+
+const customInterval = customIntervalModule.customInterval;
+const customClearInterval = customIntervalModule.customClearInterval;
 ```
 
 ## 2758. Next Day
@@ -560,6 +586,63 @@ function checkIfInstanceOf(obj: any, classFunction: any): boolean {
 ```
 
 ## 2759. Convert JSON String to Object
+
+### Solution 1: 
+
+```ts
+
+```
+
+## 2624. Snail Traversal
+
+### Solution 1: 2d array, mapping 2d to 1d index
+
+```ts
+interface Array<T> {
+    snail(rowsCount: number, colsCount: number): number[][];
+}
+
+
+Array.prototype.snail = function(rowsCount: number, colsCount: number): number[][] {
+    const res: number[][] = Array.from({ length: rowsCount }, () => Array(colsCount));
+    if (rowsCount * colsCount !== this.length) return [];
+    for (let c = 0; c < colsCount; ++c) {
+        for (let i = 0; i < rowsCount; ++i) {
+            const r = c % 2 == 0 ? i : rowsCount - i - 1;
+            res[r][c] = this[rowsCount * c + i];
+        }
+    }
+    return res;
+}
+```
+
+## 2628. JSON Deep Equal
+
+### Solution 1: object, array, deeply equal, set
+
+```ts
+type JSONValue = null | boolean | number | string | JSONValue[] | { [key: string]: JSONValue };
+
+function areDeeplyEqual(o1: JSONValue, o2: JSONValue): boolean {
+    if (typeof o1 !== "object" || typeof o2 !== "object" || o1 == null || o2 == null) {
+        return o1 === o2;
+    }
+    if (Array.isArray(o1) || Array.isArray(o2)) {
+        if (!Array.isArray(o1) || !Array.isArray(o2)) return false;
+        if (o1.length != o2.length) return false;
+        for (let i = 0; i < o1.length; ++i) {
+            if (!areDeeplyEqual(o1[i], o2[i])) return false;
+        }
+    }
+    const keys = new Set([...Object.keys(o1), ...Object.keys(o2)]);
+    for (const k of keys) {
+        if (!areDeeplyEqual(o1[k], o2[k])) return false;
+    }
+    return true;
+};
+```
+
+##
 
 ### Solution 1: 
 
