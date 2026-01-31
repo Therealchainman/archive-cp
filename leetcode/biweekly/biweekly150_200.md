@@ -2967,3 +2967,123 @@ public:
 ```cpp
 
 ```
+
+# Leetcode Biweekly Contest 175
+
+## 3824. Minimum K to Reduce Array Within Limit
+
+### Solution 1: greedy binary search, monotonic array
+
+```cpp
+using int64 = long long;
+class Solution {
+private:
+    int ceil(int x, int y) {
+        return (x + y - 1) / y;
+    }
+    bool possible(const vector<int>& nums, int target) {
+        int64 cnt = accumulate(nums.begin(), nums.end(), 0LL, [&](int64 accum, int x) { return accum + ceil(x, target); });
+        return cnt <= 1LL * target * target;
+    }
+public:
+    int minimumK(vector<int>& nums) {
+        int lo = 1, hi = 1e9;
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (possible(nums, mid)) {
+                hi = mid;
+            } else {
+                lo = mid + 1;
+            }
+        }
+        return lo;
+    }
+};
+```
+
+## 3825. Longest Strictly Increasing Subsequence With Non-Zero Bitwise AND
+
+### Solution 1: longest increasing subsequence, consider each bit
+
+Perform the LIS algorithm for when each bit will be set, so if bit i is set, then only integers with that bit can be included in the LIS.
+
+```cpp
+class Solution {
+public:
+    int longestSubsequence(vector<int>& nums) {
+        int N = nums.size(), ans = 0;
+        for (int i = 0; i < 32; ++i) {
+            vector<int> pool;
+            for (int j = 0; j < N; ++j) {
+                if (!((nums[j] >> i) & 1)) continue;
+                int k = lower_bound(pool.begin(), pool.end(), nums[j]) - pool.begin();
+                if (k == pool.size()) {
+                    pool.emplace_back(nums[j]);
+                } else {
+                    pool[k] = nums[j];
+                }
+            }
+            ans = max(ans, static_cast<int>(pool.size()));
+        }
+        return ans;
+    }
+};
+```
+
+## 3826. Minimum Partition Score
+
+### Solution 1: dp, divide and conquer optimization
+
+It almost looks like a two pointer approach would work, but the problem is that there is no nice this next index j + 1 is better than j, and so on.  You could have an index j + 3 that is better and it just leads to O(KN^2) time complexity. 
+
+The observation that is key is the cost function is a quadratic function.  This means that if you have two points q < p, and say for an endpoint m that it is cheaper to take from the p index, so you have these sums of sum(q, m) and sum(p, m), it is obvious that sum(q, m) > sum(p, m).  And since the function is quadratic, if you extend to m + 1, if p was already better q cannot become better.  The main reason is that you are adding the same value to both of these sums, and since sum(q, m) > sum(p, m) and these are in a quadratic it will grow larger than p.  So the split point for any index greater than m will only take a split point greater than or equal to p. 
+
+This allows a divide and conquer to work cause you can split based on the best split point into two halves, and ultimately keep it at N per level, where there are log(N) levels in a divide and conquer binary tree.
+
+```cpp
+using int64 = long long;
+const int64 INF = numeric_limits<int64>::max();
+class Solution {
+private:
+    vector<int64> pre;
+    int64 f(int64 n) {
+        return n * (n + 1) / 2;
+    }
+    int64 cost(int l, int r) {
+        return f(pre[r] - pre[l - 1]);
+    }
+    void dfs(const vector<int64>& src, vector<int64>& tgt, int l, int r, int pl, int pr) {
+        if (l > r) return;
+        int m = l + (r - l) / 2;
+        int n = pl;
+        int64 best = INF;
+        for (int i = pl; i <= pr && i <= m; ++i) {
+            if (src[i - 1] == INF) continue;
+            int64 cand = src[i - 1] + cost(i, m);
+            if (cand <= best) {
+                best = cand;
+                n = i;
+            }
+        }
+        tgt[m] = best;
+        dfs(src, tgt, l, m - 1, pl, n);
+        dfs(src, tgt, m + 1, r, n, pr);
+    }
+public:
+    int64 minPartitionScore(vector<int>& nums, int k) {
+        int N = nums.size();
+        pre.assign(N + 1, 0);
+        for (int i = 0; i < N; ++i) {
+            pre[i + 1] = pre[i] + nums[i];
+        }
+        vector<int64> dp(N + 1, INF), ndp(N + 1, 0);
+        dp[0] = 0;
+        while (k--) {
+            ndp.assign(N + 1, INF);
+            dfs(dp, ndp, 1, N, 1, N);
+            swap(dp, ndp);
+        }
+        return dp[N];
+    }
+};
+```
