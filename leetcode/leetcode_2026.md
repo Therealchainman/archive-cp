@@ -166,6 +166,95 @@ public:
 };
 ```
 
+## 2977. Minimum Cost to Convert String II
+
+### Solution 1: polynomial rolling hash, weighted directed graph, dijkstra's algorithm, all pairs shortest path, dynamic programming
+
+```cpp
+using int64 = long long;
+const int64 INF = numeric_limits<int64>::max();
+const int64 p = 31, MOD1 = pow(2, 43) - 1;
+class Solution {
+private:
+    unordered_map<int64, int> nodes;
+    vector<vector<pair<int, int>>> adj;
+    int V;
+    vector<vector<int64>> dist;
+    int coefficient(char ch) {
+        return ch - 'a' + 1;
+    }
+    
+    void dijkstra(int src) {
+        priority_queue<pair<int64, int>, vector<pair<int64, int>>, greater<pair<int64, int>>> minheap;
+        minheap.emplace(0, src);
+        dist[src][src] = 0;
+        while (!minheap.empty()) {
+            auto [c, u] = minheap.top();
+            minheap.pop();
+            if (c > dist[src][u]) continue;
+            for (auto [v, w] : adj[u]) {
+                if (c + w < dist[src][v]) {
+                    dist[src][v] = c + w;
+                    minheap.emplace(c + w, v);
+                }
+            }
+        }
+    }
+    int64 stringHash(const string& s) {
+        int N = s.size();
+        int64 hash = 0;
+        for (int i = N - 1; i >= 0; --i) {
+            hash = (p * hash + coefficient(s[i])) % MOD1;
+        }
+        return hash;
+    }
+public:
+    int64 minimumCost(string source, string target, vector<string>& original, vector<string>& changed, vector<int>& cost) {
+        int N = source.size();
+        vector<int64> POW(N);
+        POW[0] = 1;
+        for (int i = 1; i < N; i++) {
+            POW[i] = (POW[i - 1] * p) % MOD1;
+        }
+        for (int i = 0; i < original.size(); ++i) {
+            int64 hu = stringHash(original[i]), hv = stringHash(changed[i]);
+            if (nodes.find(hu) == nodes.end()) {
+                adj.emplace_back(vector<pair<int, int>>());
+                nodes[hu] = nodes.size();
+            }
+            if (nodes.find(hv) == nodes.end()) {
+                adj.emplace_back(vector<pair<int, int>>());
+                nodes[hv] = nodes.size();
+            }
+            int u = nodes[hu], v = nodes[hv], w = cost[i];
+            adj[u].emplace_back(v, w);
+        }
+        V = nodes.size();
+        dist.assign(V, vector<int64>(V, INF));
+        for (int i = 0; i < V; ++i) {
+            dijkstra(i);
+        }
+        vector<int64> dp(N + 1, INF);
+        dp[0] = 0;
+        for (int i = 1; i <= N; ++i) {
+            int64 hs = 0, ht = 0;
+            for (int j = i; j > 0; --j) {
+                hs = (p * hs + coefficient(source[j - 1])) % MOD1;
+                ht = (p * ht + coefficient(target[j - 1])) % MOD1;
+                if (dp[j - 1] == INF) continue;
+                if (hs == ht) {
+                    dp[i] = min(dp[i], dp[j - 1]);
+                } else if (nodes.find(hs) != nodes.end() && nodes.find(ht) != nodes.end()) {
+                    int u = nodes[hs], v = nodes[ht];
+                    if (dist[u][v] != INF) dp[i] = min(dp[i], dp[j - 1] + dist[u][v]);
+                }
+            }
+        }
+        return dp[N] < INF ? dp[N] : -1;
+    }
+};
+```
+
 ## 2693. Call Function with Custom Context
 
 ### Solution 1: this.call, this context

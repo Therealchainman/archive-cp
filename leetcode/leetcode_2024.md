@@ -605,68 +605,6 @@ class Solution:
         return ans
 ```
 
-## 2977. Minimum Cost to Convert String II
-
-### Solution 1:  dijkstra, rolling hash, minimize dp
-
-TLE
-
-```py
-def dijkstra(adj, src, dst):
-    N = len(adj)
-    min_heap = [(0, src)]
-    vis = set()
-    while min_heap:
-        cost, u = heapq.heappop(min_heap)
-        if u == dst: return cost
-        if u in vis: continue
-        vis.add(u)
-        for v, w in adj[u]:
-            if v in vis: continue
-            heapq.heappush(min_heap, (cost + w, v))
-    return math.inf
-
-class Solution:
-    def minimumCost(self, source: str, target: str, original: List[str], changed: List[str], cost: List[int]) -> int:
-        p, MOD1, MOD2 = 31, int(1e9) + 7, int(1e9) + 9
-        coefficient = lambda x: ord(x) - ord('a') + 1
-        transformation = {}
-        add = lambda h, mod, ch: ((h * p) % mod + coefficient(ch)) % mod
-        n = len(source)
-        for l in range(n):
-            hash1 = hash2 = 0
-            for r in range(l, n):
-                hash1 = add(hash1, MOD1, source[r]) 
-                hash2 = add(hash2, MOD1, target[r])
-                transformation[hash1] = hash2
-        edges = defaultdict(lambda: math.inf)
-        for u, v, w in zip(original, changed, cost):
-            hash1 = hash2 = 0
-            for i in range(len(u)):
-                hash1 = add(hash1, MOD1, u[i]) 
-                hash2 = add(hash2, MOD1, v[i])
-            edges[(hash1, hash2)]
-            edges[(hash1, hash2)] = min(edges[(hash1, hash2)], w)
-        adj = defaultdict(list)
-        for (u, v), w in edges.items():
-            adj[u].append((v, w))
-        transitions = [[math.inf] * n for _ in range(n)]
-        for l in range(n):
-            hash1 = hash2 = 0
-            for r in range(l, n):
-                hash1 = add(hash1, MOD1, source[r]) 
-                hash2 = add(hash2, MOD1, target[r])
-                if hash1 == hash2: transitions[l][r] = 0
-                else: transitions[l][r] = dijkstra(adj, hash1, hash2)
-        dp = [math.inf] * n
-        for r in range(n):
-            for l in range(r + 1):
-                cur = transitions[l][r]
-                if l > 0: cur += dp[l - 1]
-                dp[r] = min(dp[r], cur)
-        return dp[-1] if dp[-1] < math.inf else -1
-```
-
 ## 3008. Find Beautiful Indices in the Given Array II
 
 ### Solution 1:  z algorithm, string matching, two pointers
