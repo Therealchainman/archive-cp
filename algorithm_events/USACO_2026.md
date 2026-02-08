@@ -203,3 +203,200 @@ signed main() {
     return 0;
 }
 ```
+
+# USACO 2026, Second Contest, Gold
+
+p1:
+ternary search to find the minimum in a bitonic array.
+
+
+p2:
+This is the easiest one, the rule to follow is quite simple.
+It is a weird bfs on undirected graph, where you have to follow the rule that you can only traverse edges at each level that are the cheapest edge weight, but also they have to be at least as cheap as any edge weight traversed in previous levels.
+
+p3: 
+I think it doesn't matter when bessie rests, and I can always just figure out how much she can rest starting from t = 0.
+consider bessie and the nearest farmer.
+
+lets say I know for every node, at what times it is occupied by a farmer.
+
+say the distance to the nearest farmer is 1, she can't rest, but is it guaranteed she is never caught. 
+It depends on the following is there ever going to be another farmer 1 distance in front of this farmer. 
+there is the single path, take the shortest distance to farmer on that path. and store that. 
+
+## Problem 1. Balancing the Barns
+
+### Solution 1: ternary search, binary search, greedy
+
+This might be on the right path, but it is not the correct solution. 
+
+I don't think you can ternary search on how how many decrements you perform on max(A)
+
+And then compute the new min of B given you decremented all those A.
+
+```cpp
+const int64 INF = numeric_limits<int64>::max();
+int N;
+int64 K;
+vector<int64> A, B, C;
+
+bool possible(int64 target, int64 rem) {
+    int64 cnt = 0;
+    for (int i = 0; i < N; ++i) {
+        cnt += max(int64(0), target - C[i]);
+        if (cnt > rem) return false;
+    }
+    return cnt <= rem;
+}
+
+int64 calc(int64 d) {
+    int64 a = *max_element(A.begin(), A.end()) - d;
+    int64 cntA = 0;
+    C.assign(N, 0);
+    for (int i = 0; i < N; i++) {
+        int64 cnt = max(int64(0), A[i] - a);
+        cntA += cnt;
+        if (cntA > K) return INF;
+        C[i] = B[i] + cnt;
+    }
+    int64 rem = K - cntA;
+    int64 bmin = *min_element(C.begin(), C.end());
+    int64 bmax = *max_element(C.begin(), C.end());
+    int64 lo = bmin, hi = bmax + rem + 1;
+    while (lo < hi) {
+        int64 mi = lo + (hi - lo) / 2;
+        if (possible(mi, rem)) {
+            lo = mi + 1;
+        } else {
+            hi = mi;
+        }
+    }
+    lo--;
+    return a - lo;
+}
+
+void solve() {
+    cin >> N >> K;
+    A.assign(N, 0);
+    B.assign(N, 0);
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+    }
+    for (int i = 0; i < N; i++) {
+        cin >> B[i];
+    }
+    // the number of decrements to A's max element is between 0 and K
+    // ternary search for the minimum
+    int64 lo = 0, hi = K + 1;
+    while (hi - lo > 3) {
+        int64 m1 = lo + (hi - lo) / 3;
+        int64 m2 = hi - (hi - lo) / 3;
+        if (calc(m1) <= calc(m2)) {
+            hi = m2 - 1;
+        } else {
+            lo = m1 + 1;
+        }
+    }
+    int64 ans = INF;
+    for (int64 i = lo; i <= hi; i++) {
+        ans = min(ans, calc(i));
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+
+```
+
+## Problem 2. Lexicographically Smallest Path
+
+### Solution 1: undirected graph, bfs, set
+
+```cpp
+const int INF = numeric_limits<int>::max();
+int N, M;
+vector<vector<pair<int, int>>> adj;
+
+int coefficient(const char& ch) {
+    return ch - 'a';
+}
+
+void solve() {
+    cin >> N >> M;
+    adj.assign(N, vector<pair<int, int>>());
+    for (int i = 0; i < M; ++i) {
+        int u, v;
+        char ch;
+        cin >> u >> v >> ch;
+        u--, v--;
+        int w = coefficient(ch);
+        adj[u].emplace_back(v, w);
+        adj[v].emplace_back(u, w);
+    }
+    vector<int> dist(N, INF);
+    queue<int> q;
+    set<int> nxt;
+    q.emplace(0);
+    int step = 0, cur = INF;
+    while (!q.empty()) {
+        int sz = q.size();
+        int best = INF;
+        nxt.clear();
+        for (int i = 0; i < sz; ++i) {
+            int u = q.front();
+            q.pop();
+            dist[u] = step;
+            for (auto [v, w] : adj[u]) {
+                if (w > cur) continue;
+                if (w < best) {
+                    best = w;
+                    nxt.clear();
+                }
+                if (w == best) nxt.emplace(v);
+            }
+        }
+        for (int v : nxt) {
+            if (dist[v] < INF) continue;
+            q.emplace(v);
+        }
+        cur = best;
+        step++;
+    }
+    for (int i = 0; i < N; ++i) {
+        cout << (dist[i] < INF ? dist[i] : -1) << (i + 1 < N ? " " : "");
+    }
+    cout << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+
+## 
+
+### Solution 1: 
+
+```cpp
+
+```
+
