@@ -40,7 +40,7 @@ struct UnionFind {
     }
     
     vector<vector<int>> groups() {
-        int n = parents.size();
+        int n = parent.size();
         unordered_map<int, vector<int>> group_map;
         for (int i = 0; i < n; ++i) {
             group_map[find(i)].emplace_back(i);

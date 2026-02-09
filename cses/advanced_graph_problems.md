@@ -2,16 +2,121 @@
 
 ## Nearest Shops
 
-### Solution 1:
+### Solution 1: bfs, undirected graph, multi source bfs, distance array
+
+The main trick is to track two distances, the first best and second best, and make sure they are from a different source node.
 
 ```cpp
+const int INF = numeric_limits<int>::max();
+int N, M, K;
+vector<int> A;
+vector<vector<int>> adj;
+ 
+void solve() {
+    cin >> N >> M >> K;
+    vector<bool> hasShop(N, false);
+    for (int i = 0; i < K; ++i) {
+        int x;
+        cin >> x;
+        x--;
+        hasShop[x] = true;
+    }
+    adj.assign(N, vector<int>());
+    for (int i = 0; i < M; ++i) {
+        int u, v;
+        cin >> u >> v;
+        u--, v--;
+        adj[u].emplace_back(v);
+        adj[v].emplace_back(u);
+    }
+    vector<int> ans(N, -1);
+    vector<int> d1(N, INF), d2(N, INF), s1(N, -1), s2(N, -1);
+    queue<pair<int, int>> q;
+    for (int i = 0; i < N; ++i) {
+        if (!hasShop[i]) continue;
+        q.emplace(i, i);
+        d1[i] = 0;
+        s1[i] = i;
+    }
+    int step = 0;
+    while (!q.empty()) {
+        int sz = q.size();
+        for (int i = 0; i < sz; ++i) {
+            auto [u, src] = q.front();
+            q.pop();
+            for (int v : adj[u]) {
+                if (s1[v] != src && step + 1 < d1[v]) {
+                    d1[v] = step + 1;
+                    s1[v] = src;
+                    q.emplace(v, src);
+                } else if (s1[v] != src && s2[v] != src && step + 1 < d2[v]) {
+                    d2[v] = step + 1;
+                    s2[v] = src;
+                    q.emplace(v, src);
+                }
+            }
+        }
+        step++;
+    }
+    for (int i = 0; i < N; ++i) {
+        int ans = hasShop[i] ? d2[i] : d1[i];
+        cout << (ans < INF ? ans : -1) << " ";
+    }
+    cout << endl;
+}
+ 
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ## Prüfer Code
 
-### Solution 1:
+### Solution 1: set, degree counting, undirected graph, tree
 
 ```cpp
+int N;
+vector<int> A, deg;
+
+void solve() {
+    cin >> N;
+    deg.assign(N + 1, 1);
+    A.resize(N - 2);
+    for (int i = 0; i + 2 < N; ++i) {
+        cin >> A[i];
+        deg[A[i]]++;
+    }
+    set<int> leaves;
+    for (int i = 1; i <= N; ++i) {
+        if (deg[i] > 1) continue;
+        leaves.emplace(i);
+    }
+    vector<pair<int, int>> edges;
+    for (int u : A) {
+        int v = *leaves.begin();
+        leaves.erase(leaves.begin());
+        edges.emplace_back(u, v);
+        if (--deg[u] == 1) {
+            leaves.emplace(u);
+        }
+    }
+    edges.emplace_back(*leaves.begin(), N);
+    for (auto &[u, v] : edges) {
+        cout << u << " " << v << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ## Tree Traversals
@@ -469,9 +574,99 @@ signed main() {
 
 ## Network Breakdown
 
-### Solution 1:
+### Solution 1: offline dsu, sorting, reverse order, undirected graph
+
+The general pattern it it is hard to compute number of components when you are removing edges.  But it is easy to track number of components as you add edges.  So this process of removing edges, is the same thing as adding edges in reverse order.
 
 ```cpp
+struct UnionFind {
+    vector<int> parent, size;
+    UnionFind(int n) {
+        parent.resize(n);
+        iota(parent.begin(),parent.end(),0);
+        size.assign(n,1);
+    }
+
+    int find(int i) {
+        if (i == parent[i]) {
+            return i;
+        }
+        return parent[i] = find(parent[i]);
+    }
+
+    void unite(int i, int j) {
+        i = find(i), j = find(j);
+        if (i != j) {
+            if (size[j] > size[i]) {
+                swap(i, j);
+            }
+            size[i] += size[j];
+            parent[j] = i;
+        }
+    }
+
+    bool same(int i, int j) {
+        return find(i) == find(j);
+    }
+};
+
+int N, M, K;
+
+void solve() {
+    cin >> N >> M >> K;
+    vector<pair<int, int>> edges;
+    for (int i = 0; i < M; ++i) {
+        int u, v;
+        cin >> u >> v;
+        u--, v--;
+        if (u > v) {
+            swap(u, v);
+        }
+        edges.emplace_back(u, v);
+    }
+    vector<pair<int, int>> queries;
+    set<pair<int, int>> queriesSet;
+    for (int i = 0; i < K; ++i) {
+        int u, v;
+        cin >> u >> v;
+        u--, v--;
+        if (u > v) {
+            swap(u, v);
+        }
+        queries.emplace_back(u, v);
+        queriesSet.emplace(u, v);
+    }
+    UnionFind dsu(N);
+    int cnt = N;
+    for (auto &[u, v] : edges) {
+        if (queriesSet.find({u, v}) != queriesSet.end()) continue;
+        if (!dsu.same(u, v)) {
+            dsu.unite(u, v);
+            cnt--;
+        }
+    }
+    vector<int> ans(K);
+    for (int i = K - 1; i >= 0; --i) {
+        ans[i] = cnt;
+        auto &[u, v] = queries[i];
+        if (!dsu.same(u, v)) {
+            dsu.unite(u, v);
+            cnt--;
+        }
+    }
+    for (int x : ans) {
+        cout << x << " ";
+    }
+    cout << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ## Tree Coin Collecting I
