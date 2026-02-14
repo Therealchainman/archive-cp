@@ -3087,3 +3087,225 @@ public:
     }
 };
 ```
+
+# Leetcode Biweekly Contest 176
+
+## Number of Prefix Connected Groups
+
+### Solution 1: map, substring, frequency
+
+Since the inputs allow it, use a simple map to count the frequency of each prefix of length k, using the substring function to get the prefix. 
+
+```cpp
+class Solution {
+public:
+    int prefixConnected(vector<string>& words, int k) {
+        int ans = 0;
+        map<string, int> freq;
+        for (const string& s : words) {
+            if (s.size() < k) continue;
+            string cand = s.substr(0, k);
+            if (++freq[cand] == 2) ans++;
+        }
+        return ans;
+    }
+};
+```
+
+## House Robber V
+
+### Solution 1: dynamic programming, maximize
+
+Dynamic programming with dp[i][j] = max score for robbing houses up to index i, where j is whether we robbed the current house or not. Then the transitions are not difficult, just need to consider the edge case if the current house has the same color as the previous house. 
+
+```cpp
+using int64 = long long;
+class Solution {
+public:
+    int64 rob(vector<int>& nums, vector<int>& colors) {
+        int N = nums.size();
+        vector<vector<int64>> dp(N + 1, vector<int64>(2, 0));
+        for (int i = 0; i < N; ++i) {
+            dp[i + 1][1] = nums[i];
+            if (i == 0) continue;
+            dp[i + 1][0] = max(dp[i][0], dp[i][1]);
+            dp[i + 1][1] = max(dp[i + 1][1], dp[i][0] + nums[i]);
+            if (colors[i] != colors[i - 1]) dp[i + 1][1] = max(dp[i + 1][1], dp[i][1] + nums[i]);
+        }
+        return max(dp[N][0], dp[N][1]);
+    }
+};
+```
+
+## Palindromic Path Queries in a Tree
+
+### Solution 1: path queries on a tree with updates, dynamic tree, heavy light decomposition, fenwick tree
+
+The only tricky part is you want 26 fenwick trees for counting each character independently, and so I can run queries on each character independently. 
+
+The property of palindromic is just two scenarios, if even length, need 0 odd letter counts, if odd length, need 1 odd letter count.  So for each query just need to count how many characters have odd counts and check if it is valid based on the length of the path.  Can do this with fenwick tree query using HLD to get the path and then query each fenwick tree for that path to get the count of each character on that path.
+
+```cpp
+vector<int> parent, depth, head, sz, heavy;
+int counter, neutral;
+vector<vector<int>> adj, index_map;
+
+template <typename T>
+struct FenwickTree {
+    vector<T> nodes;
+    T neutral;
+
+    FenwickTree() : neutral(T(0)) {}
+
+    void init(int n, T neutral_val = T(0)) {
+        neutral = neutral_val;
+        nodes.assign(n + 1, neutral);
+    }
+
+    void update(int idx, T val) {
+        while (idx < (int)nodes.size()) {
+            nodes[idx] += val;
+            idx += (idx & -idx);
+        }
+    }
+
+    T query(int idx) const {
+        T result = neutral;
+        while (idx > 0) {
+            result += nodes[idx];
+            idx -= (idx & -idx);
+        }
+        return result;
+    }
+
+    T query(int left, int right) const {
+        return right >= left ? query(right) - query(left - 1) : T(0);
+    }
+};
+
+int heavy_dfs(int u) {
+    sz[u] = 1;
+    int heavy_size = 0;
+    for (int v : adj[u]) {
+        if (v == parent[u]) continue;
+        parent[v] = u;
+        depth[v] = depth[u] + 1;
+        int s = heavy_dfs(v);
+        sz[u] += s;
+        if (s > heavy_size) {
+            heavy_size = s;
+            heavy[u] = v;
+        }
+    }
+    return sz[u];
+}
+
+void decompose(int u, int h, FenwickTree<int>& seg, const string& s, const char& target, vector<int>& index) {
+    index[u] = ++counter;
+    if (s[u] == target) seg.update(index[u], 1);
+    head[u] = h;
+    for (int v : adj[u]) {
+        if (v == heavy[u]) {
+            decompose(v, h, seg, s, target, index);
+        }
+    }
+    for (int v : adj[u]) {
+        if (v == heavy[u] || v == parent[u]) continue;
+        decompose(v, v, seg, s, target, index);
+    }
+}
+
+int query(int u, int v, const FenwickTree<int>& seg, vector<int>& index) {
+    int res = neutral;
+    while (true) {
+        if (depth[u] > depth[v]) {
+            swap(u, v);
+        }
+        int x = head[u];
+        int y = head[v];
+        if (x == y) {
+            int left = index[u];
+            int right = index[v];
+            res += seg.query(left, right);
+            break;
+        } else if (depth[x] > depth[y]) {
+            int left = index[x];
+            int right = index[u];
+            res += seg.query(left, right);
+            u = parent[x];
+        } else {
+            int left = index[y];
+            int right = index[v];
+            res += seg.query(left, right);
+            v = parent[y];
+        }
+    }
+    return res;
+}
+
+vector<string> tokenize(const string& s, char delimiter = ' ') {
+    vector<string> ans;
+    istringstream iss(s);
+    string word;
+    while (getline(iss, word, delimiter)) ans.emplace_back(word);
+    return ans;
+}
+
+class Solution {
+public:
+    vector<bool> palindromePath(int n, vector<vector<int>>& edges, string s, vector<string>& queries) {
+        adj.assign(n, vector<int>());
+        for (const auto &edge : edges) {
+            int u = edge[0], v = edge[1];
+            adj[u].emplace_back(v);
+            adj[v].emplace_back(u);
+        }
+        neutral = 0;
+        parent.assign(n, -1);
+        depth.assign(n, 0);
+        heavy.assign(n, -1);
+        head.assign(n, 0);
+        sz.assign(n, 0);
+        for (int i = 0; i < n; ++i) heavy[i] = i;
+        heavy_dfs(0);
+        index_map.assign(26, vector<int>());
+        vector<FenwickTree<int>> segs(26);
+        for (int i = 0; i < 26; ++i) {
+            counter = 0;
+            index_map[i].assign(n, 0);
+            segs[i].init(n);
+            char ch = 'a' + i;
+            decompose(0, 0, segs[i], s, ch, index_map[i]);
+        }
+        vector<bool> ans;
+        for (const string& queryString : queries) {
+            vector<string> tokens = tokenize(queryString);
+            if (tokens[0] == "update") {
+                int u = stoi(tokens[1]);
+                // erase
+                int i = s[u] - 'a';
+                segs[i].update(index_map[i][u], -1);
+                // add
+                char ch = tokens[2][0];
+                s[u] = ch;
+                i = s[u] - 'a';
+                segs[i].update(index_map[i][u], 1);
+            } else {
+                int u = stoi(tokens[1]), v = stoi(tokens[2]);
+                int oddCount = 0, len = 0;
+                for (int i = 0; i < 26; ++i) {
+                    int cnt = query(u, v, segs[i], index_map[i]);
+                    len += cnt;
+                    if (cnt & 1) oddCount++;
+                }
+                if (len % 2 == 0) {
+                    ans.emplace_back(oddCount == 0);
+                } else {
+                    ans.emplace_back(oddCount == 1);
+                }
+            }
+        }
+        return ans;
+    }
+};
+```
