@@ -297,3 +297,216 @@ signed main() {
     return 0;
 }
 ```
+
+# Codeforces Round 1080 (Div. 3)
+
+## B. Heapify 1
+
+### Solution 1: connected components, looping, sorting
+
+Find connected components by looping over all multiples of 2, sort the values in each component, and check if the resulting array is strictly increasing.
+
+```cpp
+int N;
+vector<int> A;
+vector<bool> vis;
+vector<vector<int>> adj, values;
+
+void solve() {
+    cin >> N;
+    A.assign(N, 0);
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+    }
+    adj.assign(N, vector<int>());
+    values.assign(N, vector<int>());
+    vis.assign(N, false);
+    for (int i = 1; i <= N / 2; ++i) {
+        if (vis[i - 1]) continue;
+        for (int j = i; j <= N; j <<= 1) {
+            vis[j - 1] = true;
+            adj[i - 1].emplace_back(j - 1);
+            values[i - 1].emplace_back(A[j - 1]);
+        }
+    }
+    for (int i = 0; i < N; ++i) {
+        if (adj[i].empty()) continue;
+        sort(values[i].begin(), values[i].end());
+        for (int j = 0; j < adj[i].size(); ++j) {
+            A[adj[i][j]] = values[i][j];
+        }
+    }
+    for (int i = 1; i < N; ++i) {
+        if (A[i] < A[i - 1]) {
+            cout << "NO" << endl;
+            return;
+        }
+    }
+    cout << "YES" << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## C. Dice Roll Sequence
+
+### Solution 1: grouping, counting
+
+You count the size of consecutive elements that cannot be adjacent, and the answer is the sum of half of each group size.
+
+```cpp
+int N;
+vector<int> A;
+
+void solve() {
+    cin >> N;
+    A.assign(N, 0);
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+    }
+    int ans = 0, cur = 1;
+    for (int i = 1; i < N; ++i) {
+        if (7 - A[i] == A[i - 1] || A[i] == A[i - 1]) cur++;
+        else {
+            ans += cur / 2;
+            cur = 1;
+        }
+    }
+    ans += cur / 2;
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## D. Absolute Cinema
+
+### Solution 1: 
+
+This one was all about figuring out how to perform math on neighboring functions such as take f(i - 1), f(i) and f(i + 1) and can you solve for a_i with some how combining these so they cancel all the other terms.  But you kind of have to see that or think of it.
+
+And that will leave only a1 and an unsolved, but you can solve those now by using the solution for the rest of the a values. 
+
+```cpp
+int N;
+vector<int64> F;
+
+void solve() {
+    cin >> N;
+    F.assign(N, 0);
+    for (int i = 0; i < N; ++i) {
+        cin >> F[i];
+    }
+    vector<int> ans(N, 0);
+    for (int i = 1; i + 1 < N; ++i) {
+        ans[i] = ((F[i + 1] - F[i]) - (F[i] - F[i - 1])) / 2;
+    }
+    ans[N - 1] = F[0];
+    ans[0] = F[N - 1];
+    for (int i = 1; i + 1 < N; ++i) {
+        ans[N - 1] -= i * ans[i];
+    }
+    ans[N - 1] /= (N - 1);
+    for (int i = 1; i + 1 < N; ++i) {
+        ans[0] -= (N - i - 1) * ans[i];
+    }
+    ans[0] /= (N - 1);
+    for (int x : ans) {
+        cout << x << ' ';
+    }
+    cout << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## E. Idiot First Search
+
+### Solution 1: binary tree, dfs, dp on tree, postorder traversal, preorder traversal
+
+You can use a postorder traversal to compute the dp values, and then a preorder traversal to compute the answer for each node. The dp value of a node is the sum of dp values of its children plus 2 for each child, (because you will travel down and back up to get to back to this node u) and the answer for a node is the sum of its dp value plus 1 and the answer for its parent (because you will still have to perform all the operations from its parent)
+
+```cpp
+const int MOD = 1e9 + 7;
+int N;
+vector<vector<int>> adj;
+vector<int64> dp, ans;
+
+void dfs(int u) {
+    for (int v : adj[u]) {
+        dfs(v);
+        dp[u] += dp[v] + 2;
+    }
+}
+
+void dfs1(int u, int64 val) {
+    int64 nval = (val + dp[u] + 1) % MOD;
+    ans[u] = nval;
+    for (int v : adj[u]) {
+        dfs1(v, nval);
+    }
+}
+
+void solve() {
+    cin >> N;
+    adj.assign(N, vector<int>());
+    for (int i = 0; i < N; ++i) {
+        int u, v;
+        cin >> u >> v;
+        if (!u && !v) continue;
+        --u, --v;
+        adj[i].emplace_back(u);
+        adj[i].emplace_back(v);
+    }
+    dp.assign(N, 0);
+    ans.assign(N, 0);
+    dfs(0);
+    dfs1(0, 0);
+    for (int x : ans) {
+        cout << x << ' ';
+    }
+    cout << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```

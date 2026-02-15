@@ -3,6 +3,8 @@
 
 ## Gaussian Elimination used to solve system of linear equations
 
+O(NM^2) time complexity.
+
 Use forward elimination algorithm and back substitution to find the solution fo the system of linear equations.  The forward elimination transforms the matrix into row echelon form. 
 
 ```cpp
