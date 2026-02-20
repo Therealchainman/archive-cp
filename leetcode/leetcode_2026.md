@@ -731,26 +731,33 @@ function areDeeplyEqual(o1: JSONValue, o2: JSONValue): boolean {
 };
 ```
 
-##
+## 761. Special Binary String
 
-### Solution 1: 
+### Solution 1: recursion, string manipulation, balancing
 
-```ts
-
-```
-
-##
-
-### Solution 1: 
-
-```ts
-
-```
-
-##
-
-### Solution 1: 
-
-```ts
-
+```cpp
+class Solution {
+public:
+    string makeLargestSpecial(string s) {
+        int N = s.size();
+        if (N == 2) return s;
+        vector<string> specialArr;
+        int bal = 0;
+        for (int i = 0, j = 0; i < N; ++i) {
+            if (s[i] == '1') bal++;
+            else bal--;
+            if (bal == 0) {
+                string inner = s.substr(j + 1, i - j - 1);
+                specialArr.emplace_back('1' + makeLargestSpecial(inner) + '0');
+                j = i + 1;
+            }
+        }
+        sort(specialArr.rbegin(), specialArr.rend());
+        string ans = "";
+        for (const string& s : specialArr) {
+            ans += s;
+        }
+        return ans;
+    }
+};
 ```
