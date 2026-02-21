@@ -746,9 +746,9 @@ public:
         for (int i = 0, j = 0; i < N; ++i) {
             if (s[i] == '1') bal++;
             else bal--;
-            if (bal == 0) {
+            if (bal == 0) {`
                 string inner = s.substr(j + 1, i - j - 1);
-                specialArr.emplace_back('1' + makeLargestSpecial(inner) + '0');
+                specialArr.emplace_back('1' + makeLargestSpecial(inner) + '`0');
                 j = i + 1;
             }
         }
@@ -756,6 +756,25 @@ public:
         string ans = "";
         for (const string& s : specialArr) {
             ans += s;
+        }
+        return ans;
+    }
+};
+```
+
+## 762. Prime Number of Set Bits in Binary Representation
+
+### Solution 1: bit manipulation, prime numbers
+
+This just uses fact that 665772 is a bitmask with bits set at prime indices, so we can check if the number of set bits is prime by checking if the corresponding bit in 665772 is set.
+
+```cpp
+class Solution {
+public:
+    int countPrimeSetBits(int left, int right) {
+        int ans = 0;
+        while (left <= right) {
+            ans += (665772 >> __builtin_popcount(left++)) & 1; 
         }
         return ans;
     }
