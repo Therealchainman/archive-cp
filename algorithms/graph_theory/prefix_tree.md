@@ -342,37 +342,41 @@ The simplest for finding the largest xor sum subarray
 const int BITS = 30;
 struct Node {
     int children[2];
-    int last;
-    void init() {
+    int cnt;
+    Node() {
         memset(children, 0, sizeof(children));
-        last = -1;
+        cnt = 0;
     }
 };
 struct Trie {
     vector<Node> trie;
-    void init() {
-        Node root;
-        root.init();
-        trie.emplace_back(root);
+    Trie() {
+        trie.emplace_back(Node());
     }
     void add(int mask) {
         int cur = 0;
         for (int i = BITS - 1; i >= 0; i--) {
             int bit = (mask >> i) & 1;
             if (trie[cur].children[bit] == 0) {
-                Node root;
-                root.init();
                 trie[cur].children[bit] = trie.size();
-                trie.emplace_back(root);
+                trie.emplace_back(Node());
             }
             cur = trie[cur].children[bit];
+            trie[cur].cnt++;
+        }
+    }
+    void erase(int mask) {
+        for (int i = BITS - 1, cur = 0; i >= 0; --i) {
+            int bit = (mask >> i) & 1;
+            cur = trie[cur].children[bit];
+            trie[cur].cnt--;
         }
     }
     int find(int val) {
         int cur = 0, ans = 0;
         for (int i = BITS - 1; i >= 0; i--) {
             int valBit = (val >> i) & 1;
-            if (trie[cur].children[valBit ^ 1] != 0) { // best result with xor is always with opposite bit
+            if (trie[cur].children[valBit ^ 1] != 0 && trie[trie[cur].children[valBit ^ 1]].cnt > 0) { // best result with xor is always with opposite bit
                 ans |= (1 << i);
                 cur = trie[cur].children[valBit ^ 1];
             } else {
