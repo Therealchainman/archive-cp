@@ -152,6 +152,8 @@ undirected edge is a bridge if removing it disconnects the graph.
 
 2-edge connected means graph is connected and has no bridges.
 
+The solution is impossible if the graph is not 2-edge connected, otherwise we can orient the edges in any way and it will be strongly connected.
+
 ```cpp
 ```
 

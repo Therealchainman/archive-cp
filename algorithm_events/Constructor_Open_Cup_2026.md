@@ -241,12 +241,116 @@ signed main() {
 ```
 ## K. The Alarm
 
-### Solution 1: 
+### Solution 1: directed graph, strongly connected components, condensation, counting sources in the condensed graph, dag, combinatorics, counting subsets, modular arithmetic
 
 I was being dumb it was just SCC condensation and counting number of nodes with indegree equal to 0, because only these can reach all nodes downstream from it. 
 
 ```cpp
+struct Tower {
+    int x, y, p;
+    Tower(int x, int y, int p) : x(x), y(y), p(p) {}
+};
 
+const int MOD = 998244353;
+int N, numScc, cnt;
+int64 val;
+vector<vector<int>> adj;
+vector<int> ind, pre, comp, low;
+vector<bool> vis;
+stack<int> stk;
+
+bool isEdge(const Tower& a, const Tower& b, int p) {
+    int dx = a.x - b.x;
+    int dy = a.y - b.y;
+    return dx * dx + dy * dy <= p * p;
+}
+
+void dfs(int u) {
+    if (pre[u] != -1) return;
+    pre[u] = cnt;
+    low[u] = cnt++;
+    stk.emplace(u);
+    for (int v : adj[u]) {
+        dfs(v);
+        low[u] = min(low[u], low[v]);
+    }
+    if (pre[u] == low[u]) {
+        while (true) {
+            int v = stk.top();
+            stk.pop();
+            comp[v] = numScc;
+            low[v] = N;
+            if (u == v) break;
+        }
+        numScc++;
+    }
+}
+
+void solve() {
+    cin >> N;
+    vector<Tower> towers;
+    for (int i = 0; i < N; ++i) {
+        int x, y, p;
+        cin >> x >> y >> p;
+        towers.emplace_back(x, y, p);
+    }
+    vector<int64> pow2(N + 1, 1);
+    for (int i = 1; i <= N; ++i) {
+        pow2[i] = pow2[i - 1] * 2 % MOD;
+    }
+    adj.assign(N, vector<int>());
+    for (int i = 0; i < N; ++i) {
+        for (int j = 0; j < N; ++j) {
+            if (i == j) continue;
+            if (isEdge(towers[i], towers[j], towers[i].p)) {
+                adj[i].emplace_back(j);
+            }
+        }
+    }
+    vis.assign(N, false);
+    pre.assign(N, -1);
+    low.assign(N, -1);
+    comp.assign(N, -1);
+    int64 ans = 1;
+    for (int i = 0; i < N; ++i) {
+        dfs(i);
+    }
+    vector<int> sz(numScc, 0);
+    vector<vector<int>> dag(numScc, vector<int>());
+    for (int u = 0; u < N; ++u) {
+        int cu = comp[u];
+        sz[cu]++;
+        for (int v : adj[u]) {
+            int cv = comp[v];
+            if (cu != cv) {
+                dag[cu].emplace_back(cv);
+            }
+        }
+    }
+    ind.assign(numScc, 0);
+    for (int i = 0; i < numScc; ++i) {
+        sort(dag[i].begin(), dag[i].end());
+        dag[i].erase(unique(dag[i].begin(), dag[i].end()), dag[i].end());
+        for (int v : dag[i]) {
+            ind[v]++;
+        }
+    }
+    for (int i = 0; i < numScc; ++i) {
+        int64 cand = pow2[sz[i]];
+        if (ind[i] == 0) cand--;
+        if (cand < 0) cand += MOD;
+        ans = ans * cand % MOD;
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ## L. Extended Fibonacci
@@ -670,27 +774,82 @@ signed main() {
 }
 ```
 
-##
+## J. Another Road Reform
 
-### Solution 1: 
+### Solution 1: undirected graph, 2-edge connected components, finding bridges, bridge trees
 
-```cpp
+If the graph is 2-edge connected, you don't need to add any edges. 
+But the problem reduces to how can I add the minimum number of edges to make the graph 2-edge connected. 
+I just don't know how to solve such a problem.
 
-```
+A bridge is an edge that if you remove it, the graph becomes disconnected.  So you want to add edges to make sure there are no bridges.
 
-##
+If you construct a bridge tree with just the edges that are bridges, then you get a forest of trees, where each tree you have all edges are bridges.  Then any adjacent bridges can both be fixed by adding one edge.  So the answer is just the number of edges of each bridge tree divided by 2, rounded up.
 
-### Solution 1: 
-
-```cpp
-
-```
-
-##
-
-### Solution 1: 
+A trivial case, any bridge tree that consists of two nodes and one edge, is obviously have to be fixed by creating one edge. 
 
 ```cpp
+int N, M, cnt;
+vector<int> pre, low;
+vector<vector<int>> adj, badj;
+vector<bool> vis;
 
+void dfs(int u, int p = -1) {
+    if (pre[u] != -1) return;
+    pre[u] = cnt;
+    low[u] = cnt++;
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        dfs(v, u);
+        low[u] = min(low[u], low[v]);
+        if (pre[u] < low[v]) {
+            badj[u].emplace_back(v);
+            badj[v].emplace_back(u);
+        }
+    }
+}
+
+int dfs1(int u, int p = -1) {
+    if (vis[u]) return 0;
+    vis[u] = true;
+    int res = 1;
+    for (int v : badj[u]) {
+        if (v == p) continue;
+        res += dfs1(v, u);
+    }
+    return res;
+}
+
+void solve() {
+    cin >> N >> M;
+    adj.assign(N, vector<int>());
+    badj.assign(N, vector<int>());
+    for (int i = 0; i < M; ++i) {
+        int u, v;
+        cin >> u >> v;
+        --u, --v;
+        adj[u].emplace_back(v);
+        adj[v].emplace_back(u);
+    }
+    pre.assign(N, -1);
+    low.assign(N, -1);
+    cnt = 0;
+    dfs(0);
+    int ans = 0;
+    vis.assign(N, false);
+    for (int i = 0; i < N; ++i) {
+        if (vis[i]) continue;
+        int sz = dfs1(i);
+        ans += sz / 2;
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
-

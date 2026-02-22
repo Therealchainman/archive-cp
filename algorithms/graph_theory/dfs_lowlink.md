@@ -57,6 +57,26 @@ Run DFS, compute pre, low, and mark all bridges using low[v] > pre[u].
 
 Build components by doing a DFS/BFS on the original graph but never crossing a bridge. Each traversal gives one 2-edge connected component. 
 
+This is the algorithm for undirected graph to find all the bridge edges.
+
+```cpp
+int N, M, cnt, ans;
+vector<int> pre, low;
+vector<vector<int>> adj;
+
+void dfs(int u, int p = -1) {
+    if (pre[u] != -1) return;
+    pre[u] = cnt;
+    low[u] = cnt++;
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        dfs(v, u);
+        low[u] = min(low[u], low[v]);
+        if (pre[u] < low[v]) ans++;
+    }
+}
+```
+
 ## Directed graphs
 
 lowlink never passes the root
@@ -81,7 +101,6 @@ void dfs(int u) {
         low[u] = min(low[u], low[v]);
     }
     if (pre[u] == low[u]) {
-        numScc++;
         while (true) {
             int v = stk.top();
             stk.pop();
@@ -89,6 +108,7 @@ void dfs(int u) {
             low[v] = N;
             if (u == v) break;
         }
+        numScc++;
     }
 }
 ```

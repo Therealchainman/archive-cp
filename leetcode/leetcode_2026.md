@@ -780,3 +780,153 @@ public:
     }
 };
 ```
+
+## 868. Binary Gap
+
+### Solution 1: bit manipulation
+
+```cpp
+class Solution {
+public:
+    int binaryGap(int n) {
+        bool found = false;
+        int ans = 0, cur = 0;
+        while (n > 0) {
+            if (n & 1) {
+                if (found) ans = max(ans, cur);
+                found = true;
+                cur = 0;
+            }
+            cur++;
+            n >>= 1;
+        }
+        return ans;
+    }
+};
+```
+
+# Leetcode Weekly Contest 490
+
+Q1: Follow the rules, toggling a boolean variable to determine whether to add or subtract the current number. 
+Q2: brute force permutations of the digits, and precompute the factorial of digits.
+Q3: Greedily place as many 1s as possible in locations where s has 0s, prioritizing leftmost locations, and then fill in the remaining 1s from the right.
+Q4: sparse dynamic programming with a map to store the count of sequences that give a specific pair of numerator and denominator to represent rational numbers.
+
+## Find the Score Difference in a Game
+
+### Solution 1: bit logic, toggling, remainder, parity
+
+```cpp
+class Solution {
+public:
+    int scoreDifference(vector<int>& nums) {
+        int ans = 0, N = nums.size();
+        bool active = true;
+        for (int i = 0; i < N; ++i) {
+            if (nums[i] & 1) active ^= true;
+            if ((i + 1) % 6 == 0) active ^= true;
+            if (active) ans += nums[i];
+            else ans -= nums[i];
+        }
+        return ans;
+    }
+};
+```
+
+## Check Digitorial Permutation
+
+### Solution 1: permutations, factorial, string manipulation
+
+```cpp
+class Solution {
+private:
+    vector<int> fact;
+    bool isDigitorial(const string& num) {
+        if (num[0] == '0') return false;
+        int val = accumulate(num.begin(), num.end(), 0, [&](int accum, char x) { return accum + fact[x - '0']; });
+        return val == stoi(num);
+    }
+public:
+    bool isDigitorialPermutation(int n) {
+        fact.assign(10, 1);
+        for (int i = 2; i < 10; ++i) {
+            for (int j = 2; j <= i; ++j) {
+                fact[i] *= j;
+            }
+        }
+        string num = to_string(n);
+        sort(num.begin(), num.end());
+        do {
+            if (isDigitorial(num)) return true;
+        } while (next_permutation(num.begin(), num.end()));
+        return false;
+    }
+};
+```
+
+## Maximum Bitwise XOR After Rearrangement
+
+### Solution 1: string manipulation, bitwise XOR, greedy
+
+```cpp
+class Solution {
+public:
+    string maximumXor(string s, string t) {
+        int N = s.size();
+        string u = string(N, '0');
+        int rem = count_if(t.begin(), t.end(), [](const char& ch) { return ch == '1'; });
+        for (int i = 0; i < N && rem > 0; ++i) {
+            if (s[i] == '0') {
+                u[i] = '1';
+                --rem;
+            }
+        }
+        for (int i = N - 1; i >= 0 && rem > 0; --i) {
+            if (u[i] == '0') {
+                u[i] = '1';
+                --rem;
+            }
+        }
+        string ans = string(N, '0');
+        for (int i = 0; i < N; ++i) {
+            if (s[i] != u[i]) ans[i] = '1';
+        }
+        return ans;
+    }
+};
+```
+
+## Count Sequences to K
+
+### Solution 1: dynamic programming, map, pair of products, counting sequences
+
+```cpp
+using int64 = long long;
+class Solution {
+public:
+    int countSequences(vector<int>& nums, int64 k) {
+        map<pair<int64, int64>, int> dp, ndp;
+        dp[{1, 1}] = 1;
+        int N = nums.size();
+        int64 x, y;
+        for (int i = 0; i < N; ++i) {
+            ndp.clear();
+            for (const auto &[p, v] : dp) {
+                tie(x, y) = p;
+                // multiply
+                ndp[{x * nums[i], y}] += v;
+                // divide
+                ndp[{x, y * nums[i]}] += v;
+                // unchanged
+                ndp[{x, y}] += v;
+            }
+            swap(dp, ndp);
+        }
+        int ans = 0;
+        for (const auto &[p, v] : dp) {
+            if (p.first % p.second == 0 && p.first / p.second == k) ans += v;
+        }
+        return ans;
+    }
+};
+```
