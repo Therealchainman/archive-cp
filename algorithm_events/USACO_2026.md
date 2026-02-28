@@ -400,5 +400,147 @@ signed main() {
 
 ```
 
+# USACO 2026, Third Contest, Gold
 
+P1: 
+Create a sequence that is doubled of the original, so you take S + S and with this new sequence you can represent a fixed size window of length N, and calculate the number of inversions for each of those windows using the fenwick tree, and making sure to update, then you can know the number of swaps or inversions for each cyclic shift in O(1) time if you precompute number of swaps in O(NlogN) time.
+
+P2:
+forward and backward dp on the dag to count maximum, and then take dp1[u] + dp2[u] == K, that is it takes all the flowers. then that nodes u will work.
+The dag is constructed based on the bfs, that is you travel to next nodes that are shortest distance from the start, and the backward on dp is just reversing the edges of the dag and doing the same thing, but starting from the end nodes.
+
+P3:
+
+## P1: Good Cyclic Shifts
+
+### Solution 1: number of inversions, fenwick tree, fixed size window, cyclic shifts, line sweep events
+
+```cpp
+template <typename T>
+struct FenwickTree {
+    vector<T> nodes;
+    T neutral;
+
+    FenwickTree() : neutral(T(0)) {}
+
+    void init(int n, T neutral_val = T(0)) {
+        neutral = neutral_val;
+        nodes.assign(n + 1, neutral);
+    }
+
+    void update(int idx, T val) {
+        while (idx < (int)nodes.size()) {
+            nodes[idx] += val;
+            idx += (idx & -idx);
+        }
+    }
+
+    T query(int idx) {
+        T result = neutral;
+        while (idx > 0) {
+            result += nodes[idx];
+            idx -= (idx & -idx);
+        }
+        return result;
+    }
+
+    T query(int left, int right) {
+        return right >= left ? query(right) - query(left - 1) : T(0);
+    }
+};
+
+int N;
+vector<int> A;
+
+void solve() {
+    cin >> N;
+    A.assign(N + 1, 0);
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+    }
+    int64 g = 0;
+    int addCnt = 0, subCnt = 0;
+    for (int i = 0; i < N; ++i) {
+        if (A[i] >= i + 1) addCnt++;
+        else subCnt++;
+        g += abs(A[i] - i - 1);
+    }
+    vector<int> addEvent;
+    for (int i = 0; i < N; ++i) {
+        if (A[i] < i + 1) {
+            addEvent.emplace_back(i - A[i]);
+        } else if (A[i] > i + 1) {
+            addEvent.emplace_back(i + N - A[i]);
+        }
+    }
+    sort(addEvent.begin(), addEvent.end());
+    int M = addEvent.size();
+    vector<int64> F(N, 0);
+    F[0] = g / 2;
+    for (int i = 0, j = 0; i + 1 < N; ++i) {
+        g += addCnt - subCnt;
+        int v = A[i];
+        int delta = N - 2 * v;
+        g += delta;
+        F[i + 1] = g / 2;
+        addCnt--;
+        subCnt++;
+        while (j < M && addEvent[j] == i) {
+            addCnt++;
+            subCnt--;
+            j++;
+        }
+    }
+    FenwickTree<int> seg;
+    seg.init(N);
+    int64 inversions = 0;
+    for (int i = 0; i < N; ++i) {
+        inversions += seg.query(A[i] + 1, N);
+        seg.update(A[i], 1);
+    }
+    vector<int> ans;
+    for (int i = 0; i < N; ++i) {
+        if (inversions <= F[i]) {
+            ans.emplace_back((N - i) % N);
+        }
+        inversions += N - A[i];
+        inversions -= A[i] - 1;
+    }
+    sort(ans.begin(), ans.end());
+    cout << ans.size() << endl;
+    for (int i = 0; i < ans.size(); ++i) {
+        cout << ans[i];
+        if (i + 1 < ans.size()) cout << " ";
+    }
+    cout << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## P2. Picking Flowers
+
+### Solution 1: forward and backward dp on the dag, bfs, reversing edges
+
+```cpp
+
+```
+
+## P3. Random Tree Generation
+
+### Solution 1: 
+
+```cpp
+
+```
 
