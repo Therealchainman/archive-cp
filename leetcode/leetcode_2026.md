@@ -930,3 +930,133 @@ public:
     }
 };
 ```
+
+# Leetcode Biweekly Contest 177
+
+## 3853. Merge Close Characters
+
+### Solution 1: two pointers, greedy
+
+```cpp
+class Solution {
+public:
+    string mergeCharacters(string s, int k) {
+        vector<int> last(26, -1000);
+        string ans;
+        int N = s.size();
+        for (int i = 0, j = 0; i < N; ++i) {
+            int idx = s[i] - 'a';
+            if (j - last[idx] > k) {
+                ans += s[i];
+                last[idx] = j;
+                ++j;
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## 3854. Minimum Operations to Make Array Parity Alternating
+
+### Solution 1: feasibility check, combinations
+
+Just try all possible combinations for min and max value, cause there are only like 4 of them. cause you can only increase or decrease the min and max by one value.
+
+```cpp
+const int INF = numeric_limits<int>::max();
+class Solution {
+private:
+    vector<int> calc1(vector<int> nums, int tmin, int tmax) {
+        int minVal = *min_element(nums.begin(), nums.end()) + tmin;
+        int maxVal = *max_element(nums.begin(), nums.end()) + tmax;
+        int N = nums.size();
+        vector<int> ans(2, 0);
+        for (int i = 0; i < N; ++i) {
+            if (i % 2 == 0 && nums[i] & 1) {
+                ans[0]++;
+                if (nums[i] <= minVal) nums[i]++;
+                else nums[i]--;
+            } else if (i & 1 && nums[i] % 2 == 0) {
+                ans[0]++;
+                if (nums[i] <= minVal) nums[i]++;
+                else nums[i]--;
+            }
+        }
+        ans[1] = *max_element(nums.begin(), nums.end()) - *min_element(nums.begin(), nums.end());
+        return ans;
+    }
+    vector<int> calc2(vector<int> nums, int tmin, int tmax) {
+        int minVal = *min_element(nums.begin(), nums.end()) + tmin;
+        int maxVal = *max_element(nums.begin(), nums.end()) + tmax;
+        int N = nums.size();
+        vector<int> ans(2, 0);
+        for (int i = 0; i < N; ++i) {
+            if (i & 1 && nums[i] & 1) {
+                ans[0]++;
+                if (nums[i] <= minVal) nums[i]++;
+                else nums[i]--;
+            } else if (i % 2 == 0 && nums[i] % 2 == 0) {
+                ans[0]++;
+                if (nums[i] <= minVal) nums[i]++;
+                else nums[i]--;
+            }
+        }
+        ans[1] = *max_element(nums.begin(), nums.end()) - *min_element(nums.begin(), nums.end());
+        return ans;
+    }
+public:
+    vector<int> makeParityAlternating(vector<int>& nums) {
+        vector<int> ans = {INF, INF};
+        for (int i = -1; i <= 1; ++i) {
+            for (int j = -1; j <= 1; ++j) {
+                ans = min({ans, calc1(nums, i, j), calc2(nums, i, j)});
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## 3855. Sum of K-Digit Numbers in a Range
+
+### Solution 1: binary exponentiation, mathematics, combinatorics
+
+The main part I was stuck on was how to calculate the sum of 10^i from 0 to k - 1, which there is a trick to just take 10^k - 1 and divide by 9, which is the sum of a geometric series.
+
+```cpp
+using int64 = long long;
+const int MOD = 1e9 + 7;
+class Solution {
+private:
+    int64 inv(int i, int64 m) {
+        return i <= 1 ? i : m - (m / i) * inv(m % i, m) % m;
+    }
+    int64 exponentiation(int64 b, int64 p, int64 m) {
+        int64 res = 1;
+        while (p > 0) {
+            if (p & 1) res = (res * b) % m;
+            b = (b * b) % m;
+            p >>= 1;
+        }
+        return res;
+    }
+    int sum(int l, int r) {
+        int ans = 0;
+        for (int i = l; i <= r; ++i) {
+            ans += i;
+        }
+        return ans;
+    }
+public:
+    int sumOfNumbers(int l, int r, int k) {
+        int64 ans = sum(l, r);
+        ans = ans * exponentiation(r - l + 1, k - 1, MOD) % MOD;
+        int64 term = exponentiation(10, k, MOD) - 1;
+        term = term * inv(9, MOD) % MOD;
+        if (term < 0) term += MOD;
+        ans = ans * term % MOD;
+        return ans;
+    }
+};
+```
