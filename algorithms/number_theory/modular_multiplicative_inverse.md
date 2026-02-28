@@ -1,5 +1,10 @@
 # Modular Multiplicative Inverse
 
+The modular multiplicative inverse of an integer is the number that undoes multiplication under modulo m.
+In other words a multiplied by the modular multiplicative inverse of a under modulo m is congruent to 1 modulo m.
+
+When does the multiplicative inverse exist? It exists if and only if a and m are coprime, i.e., gcd(a, m) = 1.
+
 Simple approach to find the modular multiplicative inverse of a number in python.
 
 ```py

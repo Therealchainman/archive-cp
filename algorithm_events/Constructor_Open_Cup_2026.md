@@ -357,10 +357,74 @@ signed main() {
 
 ### Solution 1: 
 
-Finishing it up, it is linear diophantine equation. 
+Something I learned from this, for the Fibonacci sequence, the gcd of two consecutive Fibonacci numbers is 1, so adjacent integers in the sequence are coprime.  That is a fascinating property.
+
+A, B, A+B,A+2B,2A+3B,3A+5B,5A+8B,8A+13B,13A+21B
+Wait that is the Fibonacci sequence as coefficients for these terms,
+So we have F(i - 2)A + F(i - 1)B = x for each if
+i = 4
+F(2)A+F(3)B = A+2B = x
+1,1,2,3,5,8,13,21,...
+1-indexed
+F(1)=1,F(2)=1, and so on.
+
+Question?
+at which index i does F(i) > 10^9, which is the largest possible x. it is i = 45, so F(45) is out of range.
+
+check from i = 3 to i = 45 inclusive is all you need
+That is 43 iterations.
+
+Now you just need to solve each of the linear diophantine equations up to 44 of them. But all you want is to calculate the number of solutions. 
+
+This is the general algorithm for that process.
+given ax + by = c, and to find positive integer solutions, x > 0 and y > 0, you can do the following steps:
+1. calculate g = gcd(a, b)
+2. if c % g != 0, then there are no solutions
+3. calculate a' = a / g, b' = b / g, c' = c / g
+4. solve a'x = c' (mod b') using multiplicative inverse, so you just need x0 = c' * (a')^-1 (mod b'), this will give you the smallest positive solution for x.
+5. then you require that c - ax >= b, which gives x <= (c - b) / a, so x >= 1 and x <= (c - b) / a, so that is your X_max = (c - b) / a.
+6. The number of positive integer solutions is if x0 > X_max, then it is 0. otherwise it is 1 + (X_max - x0) / b'.
+
+when x0 = 0 from inverse, you need to set x0 = b' because we want positive integer solutions, and the smallest positive solution for x would be b' in that case.
 
 ```cpp
+const int MAXN = 43;
+int64 c;
 
+int64 inv(int i, int64 m) {
+    return i <= 1 ? i : m - (m / i) * inv(m % i, m) % m;
+}
+
+void solve() {
+    cin >> c;
+    int64 a = 1, b = 1;
+    int64 ans = 0;
+    for (int i = 0; i < MAXN; ++i) {
+        // ax+by=c, since gcd(a,b) = 1, there must be a solution
+        int64 x0 = c * inv(a, b) % b;
+        if (x0 == 0) x0 = b;
+        int64 xmax = (c - b) / a;
+        if (x0 <= xmax) {
+            ans += 1 + (xmax - x0) / b;
+        }
+        int64 nextA = b;
+        b += a;
+        a = nextA;
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
 ```
 
 # Final Round
