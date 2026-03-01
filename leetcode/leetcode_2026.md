@@ -1060,3 +1060,124 @@ public:
     }
 };
 ```
+
+# Leetcode Weekly Contest 491
+
+Q1: pop characters from back until reach non-vowel character
+Q2: The cost is to always split off 1 and n - 1, recursively, so the answer is just sum of 1 + 2 + 3 ... + n - 1, which is n * (n - 1) / 2.
+Q3: Greedily block bits from the highest bit to the lowest bit, and check if blocking that bit is needed by checking if there is a row that has all 1s in that bit. If it is needed, then we keep that bit in the answer, otherwise we can block that bit by setting it to 0 in the grid.
+Q4: Two sliding windows, one to maintain at most k distinct integers, and another to maintain k distinct integers with at least m frequency, and count the number of valid subarrays.  Used two frequency maps to maintain the couunts of both windows. The overlap between the windows for each endpoint i gives the number of valid subarrays ending at i.
+
+## Q1. Trim Trailing Vowels
+
+### Solution 1: string manipulation, string find, string pop_back
+
+```cpp
+class Solution {
+public:
+    string trimTrailingVowels(string s) {
+        string vowels = "aeiou";
+        int N = s.size();
+        while (!s.empty() && vowels.find(s.back()) != string::npos) {
+            s.pop_back();
+        }
+        return s;
+    }
+};
+```
+
+## Q2. Minimum Cost to Split into Ones
+
+### Solution 1: counting
+
+```cpp
+class Solution {
+public:
+    int minCost(int n) {
+        return n * (n - 1) / 2;
+    }
+};
+```
+
+## Q3. Minimum Bitwise OR From Grid
+
+### Solution 1: greedy, bit manipulation, in-place modification
+
+```cpp
+class Solution {
+public:
+    int minimumOR(vector<vector<int>>& grid) {
+        int R = grid.size(), C = grid[0].size();
+        int ans = 0;
+        for (int i = 20; i >= 0; --i) {
+            bool needed = false;
+            for (int r = 0; r < R; ++r) {
+                int total = 0, cnt = 0;
+                for (int c = 0; c < C; ++c) {
+                    if ((grid[r][c] >> i) & 1) {
+                        cnt++;
+                    }
+                    if (grid[r][c]) total++;
+                }
+                if (cnt == total) {
+                    needed = true;
+                    break;
+                }
+            }
+            if (needed) {
+                ans |= (1 << i);
+                continue;
+            }
+            for (int r = 0; r < R; ++r) {
+                for (int c = 0; c < C; ++c) {
+                    if ((grid[r][c] >> i) & 1) {
+                        grid[r][c] = 0; // can block
+                    }
+                }
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## Q4. Count Subarrays With K Distinct Integers
+
+### Solution 1: sliding window, two pointers, map, counting distinct integers, counting integers with frequency m
+
+```cpp
+using int64 = long long;
+class Solution {
+public:
+    int64 countSubarrays(vector<int>& nums, int k, int m) {
+        int N = nums.size();
+        map<int, int> freq, f2;
+        int cntK = 0, cntM = 0;
+        int64 ans = 0;
+        for (int i = 0, l = 0, r = 0; i < N; ++i) {
+            freq[nums[i]]++;
+            f2[nums[i]]++;
+            if (freq[nums[i]] == 1) {
+                cntK++;
+            }
+            if (f2[nums[i]] == m) {
+                cntM++;
+            }
+            while (cntK > k) {
+                freq[nums[l]]--;
+                if (freq[nums[l]] == 0) cntK--;
+                l++;
+            }
+            while (r < l || cntM > k  || (cntM == k && f2[nums[r]] > m)) {
+                f2[nums[r]]--;
+                if (f2[nums[r]] == m - 1) cntM--;
+                r++;
+            }
+            if (cntK == k && cntM == k) {
+                ans += r - l + 1;
+            }
+        }
+        return ans;
+    }
+};
+```

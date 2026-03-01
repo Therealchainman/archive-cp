@@ -4,12 +4,127 @@
 
 ## Problem 1: COW Traversals    
 
-### Solution 1: 
+### Solution 1: offline dsu, line sweep events, reversing queries
+
+Follows pattern it is hard to split into two separate components, and easier to add components, so work in reverse. 
 
 similar problem reachable pairs january contest 2025, gold
 
 ```cpp
+int N, M;
+vector<int> A, nxt, queries;
+vector<bool> vis;
 
+void answer(const vector<int> &ans) {
+    int N = ans.size();
+    for (int i = 0; i < N; ++i) {
+        cout << ans[i];
+        if (i + 1 < N) cout << ' ';
+    }
+    cout << endl;
+}
+
+int get(char c) {
+    if (c == 'C') return 0;
+    if (c == 'O') return 1;
+    return 2; // 'W'
+}
+
+struct UnionFind {
+    vector<int> parent, size;
+    UnionFind(int n) {
+        parent.resize(n);
+        iota(parent.begin(),parent.end(),0);
+        size.assign(n,1);
+    }
+
+    int find(int i) {
+        if (i == parent[i]) {
+            return i;
+        }
+        return parent[i] = find(parent[i]);
+    }
+    // i is root
+    void unite(int i, int j) {
+        i = find(i), j = find(j);
+        if (i != j) {
+            size[i] += size[j];
+            parent[j] = i;
+        }
+    }
+
+    bool same(int i, int j) {
+        return find(i) == find(j);
+    }
+};
+
+void dfs(int u) {
+    if (vis[u] || nxt[u] == -1) return;
+    vis[u] = true;
+    dfs(nxt[u]);
+}
+
+void solve() {
+    cin >> N;
+    A.resize(N);
+    nxt.assign(N, -1);
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+        A[i]--;
+        nxt[i] = A[i];
+    }
+    cin >> M;
+    vector<vector<int>> last(N, vector<int>());
+    for (int i = 0; i < M; ++i) {
+        int cow;
+        char type;
+        cin >> cow >> type;
+        cow--;
+        queries.emplace_back(cow);
+        last[cow].emplace_back(get(type));
+        nxt[cow] = -1;
+    }
+    vis.assign(N, false);
+    UnionFind dsu(N);
+    for (int i = 0; i < N; ++i) {
+        if (nxt[i] != -1) {
+            dsu.unite(nxt[i], i);
+        }
+        if (vis[i]) continue;
+        dfs(i);
+    }
+    vector<int> ans(3, 0);
+    for (int i = 0; i < N; ++i) {
+        if (last[i].empty()) continue;
+        ans[last[i].back()] += dsu.size[i];
+    }
+    vector<vector<int>> res;
+    reverse(queries.begin(), queries.end());
+    for (int u : queries) {
+        res.emplace_back(ans);
+        ans[last[u].back()] -= dsu.size[u];
+        last[u].pop_back();
+        if (last[u].empty()) {
+            dsu.unite(A[u], u);
+            int r = dsu.find(u);
+            if (!last[r].empty()) ans[last[r].back()] += dsu.size[u];
+        } else {
+            ans[last[u].back()] += dsu.size[u];
+        }
+    }
+    reverse(res.begin(), res.end());
+    for (int i = 0; i < M; ++i) {
+        answer(res[i]);
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ## Problem 2: Milk Buckets
@@ -33,7 +148,82 @@ This works because the number of swaps of each element is independent, that is w
 There is one thing I'm not considering which is elements of equal values, need to consider that carefully.
 
 ```cpp
+int N;
+vector<int> A;
 
+template <typename T>
+struct FenwickTree {
+    vector<T> nodes;
+    T neutral;
+
+    FenwickTree() : neutral(T(0)) {}
+
+    void init(int n, T neutral_val = T(0)) {
+        neutral = neutral_val;
+        nodes.assign(n + 1, neutral);
+    }
+
+    void update(int idx, T val) {
+        while (idx < (int)nodes.size()) {
+            nodes[idx] += val;
+            idx += (idx & -idx);
+        }
+    }
+
+    T query(int idx) {
+        T result = neutral;
+        while (idx > 0) {
+            result += nodes[idx];
+            idx -= (idx & -idx);
+        }
+        return result;
+    }
+
+    T query(int left, int right) {
+        return right >= left ? query(right) - query(left - 1) : T(0);
+    }
+};
+
+
+void solve() {
+    cin >> N;
+    A.assign(N, 0);
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+    };
+    vector<int> sA(A.begin(), A.end());
+    sort(sA.begin(), sA.end());
+    sA.erase(unique(sA.begin(), sA.end()), sA.end());
+    int M = sA.size();
+    FenwickTree<int> seg1, seg2;
+    seg1.init(M); seg2.init(M);
+    for (int x : A) {
+        int idx = lower_bound(sA.begin(), sA.end(), x) - sA.begin() + 1;
+        seg2.update(idx, 1);
+    }
+    int64 ans = 0;
+    for (int i = 0; i < N; ++i) {
+        int idx = lower_bound(sA.begin(), sA.end(), A[i]) - sA.begin() + 1;
+        int x = seg1.query(idx - 1);
+        int y = seg2.query(idx - 1);
+        ans += min(x, y);
+        seg1.update(idx, 1);
+        seg2.update(idx, -1);
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
 ```
 
 ## Problem 3: Supervision
