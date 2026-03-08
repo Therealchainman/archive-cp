@@ -581,13 +581,97 @@ signed main() {
 }
 ```
 
+## Problem 3. The Chase
 
-## 
-
-### Solution 1: 
+### Solution 1: functional graph, detecting cycles, normalization of events on cycle, dfs, 
 
 ```cpp
+const int INF = numeric_limits<int>::max(); 
+int N, F;
+vector<int> nxt, dist, vis, cycle;
+vector<bool> safe;
+vector<vector<int>> tadj;
+vector<pair<int, int>> events;
 
+void dfs(int i, int u, int d = 0) {
+    int csz = cycle.size();
+    int pos = (i - d % csz + csz) % csz;
+    vis[u] = 1;
+    events.emplace_back(u, pos);
+    if (dist[u] == 0) {
+        safe[pos] = false;
+    }
+    for (int v : tadj[u]) {
+        if (u == cycle[i] && v == cycle[(i - 1 + csz) % csz]) continue;
+        dfs(i, v, d + 1);
+        if (dist[v] == INF) continue;
+        dist[u] = min(dist[u], dist[v] + 1);
+    }
+}
+
+void solve() {
+    cin >> N >> F;
+    nxt.resize(N);
+    tadj.assign(N, vector<int>());
+    for (int i = 0; i < N; ++i) {
+        cin >> nxt[i];
+        nxt[i]--;
+        tadj[nxt[i]].emplace_back(i);
+    }
+    dist.assign(N, INF);
+    for (int i = 0; i < F; ++i) {
+        int x;
+        cin >> x;
+        x--;
+        dist[x] = 0;
+    }
+    vector<int> ans(N);
+    vis.assign(N, 0);
+    for (int i = 0; i < N; ++i) {
+        if (vis[i]) continue;
+        cycle.clear();
+        int u = i;
+        while (vis[u] != 2) {
+            if (++vis[u] == 2) cycle.emplace_back(u);
+            u = nxt[u];
+        }
+        events.clear();
+        int csz = cycle.size();
+        safe.assign(csz, true);
+        for (int j = 0; j < csz; ++j) {
+            dfs(j, cycle[j]);
+        }
+        vector<int> shifts(csz, 1e6);
+        for (int j = 2 * csz - 1; j >= 0; --j) {
+            shifts[j % csz] = !safe[j % csz] ? shifts[(j + 1) % csz] + 1 : 0;
+        }
+        for (int i = 0; i < 2 * csz; ++i) {
+            int u = cycle[i % csz], v = cycle[(i - 1 + csz) % csz];
+            if (dist[v] == INF) continue;
+            dist[u] = min(dist[u], dist[v] + 1);
+        }
+        for (auto [u, pos] : events) {
+            if (dist[u] == INF) {
+                ans[u] = -2;
+                continue;
+            }
+            int normalizedPos = (pos - dist[u] % csz + csz + 1) % csz;
+            ans[u] = dist[u] - 1 - shifts[normalizedPos];
+            if (ans[u] < 0) ans[u] = -1;
+        }
+    }
+    for (int i = 0; i < N; ++i) {
+        cout << ans[i] << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 # USACO 2026, Third Contest, Gold

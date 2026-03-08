@@ -1181,3 +1181,110 @@ public:
     }
 };
 ```
+
+# Leetcode Weekly Contest 492
+
+Q1: greedy, find smallest index with smallest best capacity that can fit the item, and return that index.
+Q2: prefix sum and suffix product, check if equal at any index
+Q3: Always best to take the substring that will only be missing either the first or last character, so perform analysis based on if the first and last character is going to move when sorting, cause that has implications for number of operations needed.
+Q4: Divide and Conquer recursion, Calculate the minimum cost for any segment, and if it is better to break into two pieces then use that for that segment.
+
+##
+
+### Solution 1: greedy
+
+```cpp
+const int INF = numeric_limits<int>::max();
+class Solution {
+public:
+    int minimumIndex(vector<int>& capacity, int itemSize) {
+        int N = capacity.size();
+        int best = INF, idx = -1;
+        for (int i = 0; i < N; ++i) {
+            if (capacity[i] < itemSize) continue;
+            if (capacity[i] < best) {
+                best = capacity[i];
+                idx = i;
+            }
+        }
+        return idx;
+    }
+};
+```
+
+##
+
+### Solution 1: prefix sum, suffix product, check for equality
+
+```cpp
+using int64 = long long;
+const int64 INF = 1e15;
+class Solution {
+public:
+    int smallestBalancedIndex(vector<int>& nums) {
+        int ans = -1, N = nums.size();
+        __int128 suf = 1;
+        int64 pref = accumulate(nums.begin(), nums.end(), 0LL);
+        for (int i = N - 1; i >= 0; --i) {
+            pref -= nums[i];
+            if (pref == suf) ans = i;
+            suf *= nums[i];
+            if (suf > INF) break;
+        }
+        return ans;
+    }
+};
+```
+
+##
+
+### Solution 1: edge cases, string manipulation, sorting, counting operations
+
+```cpp
+class Solution {
+public:
+    int minOperations(string s) {
+        int N = s.size();
+        char minc = *min_element(s.begin(), s.end());
+        char maxc = *max_element(s.begin(), s.end());
+        int cntmin = count_if(s.begin(), s.end(), [&](char ch) { return ch == minc; });
+        int cntmax = count_if(s.begin(), s.end(), [&](char ch) { return ch == maxc; });
+        string ss = s;
+        sort(ss.begin(), ss.end());
+        if (s == ss) return 0;
+        if (N == 2) return -1;
+        if (s[0] == maxc && s.back() == minc && cntmin == 1 && cntmax == 1) return 3;
+        if (s[0] == minc || s.back() == maxc) return 1;
+        return 2;
+    }
+};
+```
+
+##
+
+### Solution 1: divide and conquer, recursion, minimize, optimization
+
+```cpp
+using int64 = long long;
+class Solution {
+private:
+    int64 dfs(int i, int j, const string &s, int encCost, int flatCost) {
+        int N = j - i + 1;
+        int X = 0;
+        for (int k = i; k <= j; ++k) {
+            if (s[k] == '1') X++;
+        }
+        int64 ans = X == 0 ? flatCost : 1LL * N * X * encCost;
+        if (N & 1) return ans;
+        int m = i + (j - i) / 2;
+        int64 x1 = dfs(i, m, s, encCost, flatCost);
+        int64 x2 = dfs(m + 1, j, s, encCost, flatCost);
+        return min(ans, x1 + x2);
+    }
+public:
+    int64 minCost(string s, int encCost, int flatCost) {
+        int N = s.size();
+        return dfs(0, N - 1, s, encCost, flatCost);   
+    }
+};
+```

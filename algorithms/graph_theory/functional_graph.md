@@ -79,3 +79,12 @@ void search(int u) {
     }
 }
 ```
+
+This is another technique for finding cycles. 
+
+```cpp
+        while (vis[u] != 2) {
+            if (++vis[u] == 2) cycle.emplace_back(u);
+            u = nxt[u];
+        }
+```
