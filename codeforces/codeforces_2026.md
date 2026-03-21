@@ -510,3 +510,285 @@ signed main() {
     return 0;
 }
 ```
+
+# Codeforces Round 1087 (Div. 2)
+
+## A. Flip Flops
+
+### Solution 1: sorting, greedy
+
+```cpp
+int64 N, C, K;
+vector<int> A;
+
+void solve() {
+    cin >> N >> C >> K;
+    A.assign(N, 0);
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+    }
+    sort(A.begin(), A.end());
+    for (int x : A) {
+        if (x > C) break;
+        int64 delta = C - x;
+        int64 take = min(delta, K);
+        C += take + x;
+        K -= take;
+    }
+    cout << C << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## B. Array
+
+### Solution 1: fenwick tree, coordinate compression, counting smaller and greater elements
+
+```cpp
+int N;
+vector<int> A, C;
+
+template <typename T>
+struct FenwickTree {
+    vector<T> nodes;
+    T neutral;
+
+    FenwickTree() : neutral(T(0)) {}
+
+    void init(int n, T neutral_val = T(0)) {
+        neutral = neutral_val;
+        nodes.assign(n + 1, neutral);
+    }
+
+    void update(int idx, T val) {
+        while (idx < (int)nodes.size()) {
+            nodes[idx] += val;
+            idx += (idx & -idx);
+        }
+    }
+
+    T query(int idx) {
+        T result = neutral;
+        while (idx > 0) {
+            result += nodes[idx];
+            idx -= (idx & -idx);
+        }
+        return result;
+    }
+
+    T query(int left, int right) {
+        return right >= left ? query(right) - query(left - 1) : T(0);
+    }
+};
+
+void solve() {
+    cin >> N;
+    A.assign(N, 0);
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+        C.emplace_back(A[i]);
+    }
+    sort(C.begin(), C.end());
+    C.erase(unique(C.begin(), C.end()), C.end());
+    int M = C.size();
+    FenwickTree<int> seg;
+    seg.init(M);
+    vector<int> ans(N, 0);
+    for (int i = N - 1; i >= 0; --i) {
+        int idx = lower_bound(C.begin(), C.end(), A[i]) - C.begin() + 1;
+        ans[i] = max(seg.query(idx - 1), seg.query(idx + 1, M));
+        seg.update(idx, 1);
+    }
+    for (int x : ans) {
+        cout << x << " ";
+    }
+    cout << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## C. Find the Zero
+
+### Solution 1: logic, process of elimination
+
+if you run n queries, for each adjacent pair (1, 2), and so on. If you do not get a 0 anywhere, that means for each query there must have been a nonzero and zero.  So for any of the queries, one of them must be the zero. take (1, 2), and now how do you determine which one is the zero with just a single query? You do n - 1 queries, and leave (1, 2) unqueried. 
+
+Now it will take at most 2 more queries to determine which one is zero
+the first pair must be any of these possibilities.
+(0, 0)
+(x, 0)
+(0, x)
+So if you query(1, 3) and query(1, 4) and one returns 1, then you know a1 is zero, else it must be the case (x, 0) and a2 is zero.
+
+
+```cpp
+int N;
+
+int query(int i, int j) {
+    cout << "?" << " " << i << " " << j << endl;
+    cout.flush();
+    int resp;
+    cin >> resp;
+    return resp;
+}
+
+void answer(int x) {
+    cout << "!" << " " << x << endl;
+    cout.flush();
+}
+
+void solve() {
+    cin >> N;
+    for (int i = 4; i <= 2 * N; i += 2) {
+        int resp = query(i - 1, i);
+        if (resp == -1) exit(0);
+        if (resp == 1) {
+            answer(i);
+            return;
+        }
+    }
+    int resp1 = query(1, 3);
+    int resp2 = query(1, 4);
+    if (resp1 == 1 || resp2 == 1) {
+        answer(1);
+    } else {
+        answer(2);
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## D. Ghostfires
+
+### Solution 1: greedy, constructive
+
+It's hard to get the gist of this one, but just know the best way is to pair up greedily into pairs RG, RB, GB.  And then try adding a singleton in front, and that will then uniquely determine a path of arranging all the RG, RB, GB pairs, which you can still arrange all of them.
+
+```cpp
+int r, g, b;
+string ans;
+
+void solve() {
+    cin >> r >> g >> b;
+    ans.clear();
+    int rg = 0, rb = 0, gb = 0;
+    while ((r > 0) + (g > 0) + (b > 0) > 1) {
+        if (r <= g && r <= b) {
+            gb++, g--, b--;
+        } else if (g <= r && g <= b) {
+            rb++, r--, b--;
+        } else {
+            rg++, r--, g--;
+        }
+    }
+    if (r > 0) {
+        ans += 'R';
+        while (rg > 0) {
+            ans += "GR";
+            rg--;
+        }
+        bool flag = false;
+        while (rb > 0) {
+            ans += "BR";
+            rb--;
+            flag = true;
+        }
+        while (gb > 0) {
+            if (flag) {
+                ans += "BG";
+            } else {
+                ans += "GB";
+            }
+            gb--;
+        }
+    } else if (b > 0) {
+        ans += 'B';
+        while (rb > 0) {
+            ans += "RB";
+            rb--;
+        }
+        bool flag = false;
+        while (gb > 0) {
+            ans += "GB";
+            gb--;
+            flag = true;
+        }
+        while (rg > 0) {
+            if (flag) {
+                ans += "GR";
+            } else {
+                ans += "RG";
+            }
+            rg--;
+        }
+    } else {
+        if (g > 0) {
+            ans += 'G';
+        }
+        while (rg > 0) {
+            ans += "RG";
+            rg--;
+        }
+        bool flag = false;
+        while (gb > 0) {
+            ans += "BG";
+            gb--;
+            flag = true;
+        }
+        while (rb > 0) {
+            if (flag) {
+                ans += "BR";
+            } else {
+                ans += "RB";
+            }
+            rb--;
+        }
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```

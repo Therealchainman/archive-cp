@@ -1,5 +1,38 @@
 # Introductory Problems
 
+## Tower of Hanoi
+
+### Solution 1: recursion
+
+```cpp
+int N;
+vector<pair<int, int>> ans;
+
+void dfs(int n, int from, int to, int aux) {
+    if (n == 0) return;
+    dfs(n - 1, from, aux, to);
+    ans.emplace_back(from, to);
+    dfs(n - 1, aux, to, from);
+}
+
+void solve() {
+    cin >> N;
+    dfs(N, 0, 2, 1);
+    cout << ans.size() << endl;
+    for (auto &[x, y] : ans) {
+        cout << x + 1 << ' ' << y + 1 << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
 ## Raab Game I
 
 ### Solution 1: constructive algorithm, greedy

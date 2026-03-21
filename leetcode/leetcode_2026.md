@@ -1288,3 +1288,373 @@ public:
     }
 };
 ```
+
+## 1622. Fancy Sequence
+
+### Solution 1: distributive property, order of operations, math, arithmetic, modular inverse, solving algebraic equations
+
+Draw the array, and think about how can I solve for the a in this interval, given if I know a at the idx and the current endpoint
+And same of the other value which is b, b stores the cumulative addition and multiplication that are together. 
+
+And the other stores just the cumulative multiplication, which is all you need. 
+
+```cpp
+using int64 = long long;
+const int MOD = 1e9 + 7;
+int64 inv(int i, int64 m) {
+    return i <= 1 ? i : m - (m / i) * inv(m % i, m) % m;
+}
+class Fancy {
+private:
+    vector<int> arr, vals, mult;
+public:
+    Fancy() {
+        vals.emplace_back(0);
+        mult.emplace_back(1);
+    }
+    
+    void append(int val) {
+        arr.emplace_back(val);
+        vals.emplace_back(vals.back());
+        mult.emplace_back(mult.back());
+    }
+    
+    void addAll(int inc) {
+        vals.back() += inc;
+        vals.back() %= MOD;
+    }
+    
+    void multAll(int m) {
+        vals.back() = 1LL * vals.back() * m % MOD;
+        mult.back() = 1LL * mult.back() * m % MOD;
+    }
+    
+    int getIndex(int idx) {
+        if (idx >= arr.size()) {
+            return -1;
+        }
+        int a = 1LL * mult.back() * inv(mult[idx], MOD) % MOD;
+        int b = (vals.back() - 1LL * a * vals[idx] % MOD + MOD) % MOD;
+        int ans = (b + 1LL * arr[idx] * a % MOD) % MOD; 
+        return ans;
+    }
+};
+```
+
+# Leetcode Biweekly Contest 178
+
+## Q1. First Unique Even Element
+
+### Solution 1: map, frequency counting, iteration
+
+```cpp
+class Solution {
+public:
+    int firstUniqueEven(vector<int>& nums) {
+        map<int, int> freq;
+        for (int x : nums) freq[x]++;
+        for (int x : nums) {
+            if (freq[x] > 1) continue;
+            if (x % 2 == 0) return x;
+        }
+        return -1;
+    }
+};
+```
+
+## Q2. Sum of GCD of Formed Pairs
+
+### Solution 1: prefix max, sorting, gcd
+
+```cpp
+using int64 = long long;
+class Solution {
+public:
+    int64 gcdSum(vector<int>& nums) {
+        int N = nums.size();
+        vector<int> pref(N, 0);
+        int pmax = 0;
+        for (int i = 0; i < N; ++i) {
+            pmax = max(pmax, nums[i]);
+            pref[i] = gcd(nums[i], pmax);
+        }
+        sort(pref.begin(), pref.end());
+        int64 ans = 0;
+        for (int i = 0, j = N - 1; i < j; ++i, --j) {
+            ans += gcd(pref[i], pref[j]);
+        }
+        return ans;
+    }
+};
+```
+
+## Q3. Minimum Cost to Equalize Arrays Using Swaps
+
+### Solution 1: set, map, frequency counting, greedy
+
+```cpp
+class Solution {
+public:
+    int minCost(vector<int>& nums1, vector<int>& nums2) {
+        int N = nums1.size();
+        unordered_set<int> nums;
+        unordered_map<int, int> freq1, freq2;
+        for (int x : nums1) {
+            nums.emplace(x);
+            freq1[x]++;
+        }
+        for (int x : nums2) {
+            nums.emplace(x);
+            freq2[x]++;
+        }
+        for (int x : nums) {
+            int tot = freq1[x] + freq2[x];
+            if (tot & 1) return -1;
+        }
+        int ans = 0;
+        for (const auto &[k, v] : freq1) {
+            int tot = v + freq2[k];
+            ans += max(0, v - tot / 2);
+        }
+        return ans;
+    }
+};
+```
+
+## Q4. Count Fancy Numbers in a Range
+
+### Solution 1: digit dp
+
+```cpp
+using int64 = long long;
+class Solution {
+private:
+    int64 dp[16][140][10][4][2][2];
+    bool isIncreasing(int x) {
+        int prv = -1;
+        while (x > 0) {
+            int d = x % 10;
+            if (d <= prv) return false;
+            prv = d;
+            x /= 10;
+        }
+        return true;
+    }
+    bool isDecreasing(int x) {
+        int prv = 10;
+        while (x > 0) {
+            int d = x % 10;
+            if (d >= prv) return false;
+            prv = d;
+            x /= 10;
+        }
+        return true;
+    }
+    bool isGood(int x) {
+        return isDecreasing(x) || isIncreasing(x);
+    }
+    int64 dfs(const string& s, int idx, int sumOfDig, int lastDig, int status, int tight, int zero) {
+        int N = s.size();
+        if (idx == N) {
+            if (zero) return 0;
+            if (status != 3) return 1;
+            if (isGood(sumOfDig)) return 1;
+            return 0;
+        }
+        if (dp[idx][sumOfDig][lastDig][status][tight][zero] != -1) return dp[idx][sumOfDig][lastDig][status][tight][zero];
+        int64 ans = 0;
+        int curDig = s[idx] - '0';
+        for (int dig = 0; dig < 10; ++dig) {
+            if (tight && dig > curDig) break;
+            if (zero) {
+                ans += dfs(s, idx + 1, sumOfDig + dig, dig, status, tight && curDig == dig, zero && dig == 0);
+            } else if (status == 0) {
+                ans += dfs(s, idx + 1, sumOfDig + dig, dig, dig == lastDig ? 3 : dig < lastDig ? 1 : 2, tight && curDig == dig, zero && dig == 0);
+            } else if (status == 1) {
+                ans += dfs(s, idx + 1, sumOfDig + dig, dig, dig < lastDig ? status : 3, tight && curDig == dig, zero && dig == 0);
+            } else if (status == 2) {
+                ans += dfs(s, idx + 1, sumOfDig + dig, dig, dig > lastDig ? status : 3, tight && curDig == dig, zero && dig == 0);
+            } else if (status == 3) {
+                ans += dfs(s, idx + 1, sumOfDig + dig, dig, status, tight && curDig == dig, zero && dig == 0);
+            }
+        }
+        return dp[idx][sumOfDig][lastDig][status][tight][zero] = ans;
+    }
+    int64 calc(int64 x) {
+        fill(&dp[0][0][0][0][0][0], &dp[0][0][0][0][0][0] + 16 * 140 * 10 * 4 * 2 * 2, -1LL);
+        return dfs(to_string(x), 0, 0, 0, 0, 1, 1);
+    }
+public:
+    int64 countFancy(int64 l, int64 r) {
+        return calc(r) - calc(l - 1);
+    }
+};
+```
+
+# Leetcode Weekly Contest 493
+
+## 3871. Count Commas in Range II
+
+### Solution 1:
+
+```cpp
+using int64 = long long;
+class Solution {
+public:
+    int64 countCommas(int64 n) {
+        int64 base = 1e3, ans = 0;
+        while (base <= n) {
+            ans += n - base + 1;
+            base *= 1e3;
+        }
+        return ans;
+    }
+};
+```
+
+## 3872. Longest Arithmetic Sequence After Changing At Most One Element
+
+### Solution 1: prefix and suffix runs of arithmetic sequences, difference array, casework with longest runs of arithmetic sequences.
+
+```cpp
+class Solution {
+public:
+    int longestArithmetic(vector<int>& nums) {
+        int N = nums.size();
+        int M = N - 1;
+        vector<int> diff(M, 0), pref(N, 1), suf(N, 1);
+        for (int i = 1; i < N; ++i) {
+            diff[i - 1] = nums[i] - nums[i - 1];
+        }
+        for (int i = 1; i < M; ++i) {
+            if (diff[i - 1] == diff[i]) pref[i] = pref[i - 1] + 1;
+        }
+        for (int i = M - 2; i >= 0; --i) {
+            if (diff[i] == diff[i + 1]) suf[i] = suf[i + 1] + 1;
+        }
+        int ans = max(*max_element(pref.begin(), pref.end()), *max_element(suf.begin(), suf.end())) + 1;
+        if (ans < N) ans++;
+        for (int i = 1; i + 1 < N; ++i) {
+            if ((nums[i + 1] - nums[i - 1]) % 2 != 0) continue;
+            int delta = (nums[i + 1] - nums[i - 1]) / 2;
+            int leftRun = 0;
+            if (i - 2 >= 0 && diff[i - 2] == delta) {
+                leftRun = pref[i - 2];
+            }
+            int rightRun = 0;
+            if (i + 1 < M && diff[i + 1] == delta) {
+                rightRun = suf[i + 1];
+            }
+            ans = max(ans, leftRun + rightRun + 3);
+        }
+        return ans;
+    }
+};
+```
+
+## 3873. Maximum Points Activated with One Addition
+
+### Solution 1: union find, map, grouping, counting, sorting
+
+```cpp
+struct UnionFind {
+    vector<int> parent, size;
+    UnionFind(int n) {
+        parent.resize(n);
+        iota(parent.begin(),parent.end(),0);
+        size.assign(n,1);
+    }
+
+    int find(int i) {
+        if (i == parent[i]) {
+            return i;
+        }
+        return parent[i] = find(parent[i]);
+    }
+
+    void unite(int i, int j) {
+        i = find(i), j = find(j);
+        if (i != j) {
+            if (size[j] > size[i]) {
+                swap(i, j);
+            }
+            size[i] += size[j];
+            parent[j] = i;
+        }
+    }
+
+    bool same(int i, int j) {
+        return find(i) == find(j);
+    }
+
+    vector<int> groups() {
+        int n = parent.size();
+        unordered_map<int, int> group_map;
+        for (int i = 0; i < n; ++i) {
+            group_map[find(i)]++;
+        }
+        vector<int> res;
+        for (const auto &[k, v] : group_map) {
+            res.emplace_back(v);
+        }
+        return res;
+    }
+};
+class Solution {
+public:
+    int maxActivated(vector<vector<int>>& points) {
+        int N = points.size();
+        UnionFind dsu(N);
+        map<int, vector<int>> xcoord, ycoord;
+        for (int i = 0; i < N; ++i) {
+            int x = points[i][0], y = points[i][1];
+            xcoord[x].emplace_back(i);
+            ycoord[y].emplace_back(i);
+        }
+        for (const auto &[k, vals] : xcoord) {
+            for (int i = 1; i < vals.size(); ++i) {
+                dsu.unite(vals[i - 1], vals[i]);
+            }
+        }
+        for (const auto &[k, vals] : ycoord) {
+            for (int i = 1; i < vals.size(); ++i) {
+                dsu.unite(vals[i - 1], vals[i]);
+            }
+        }
+        vector<int> g = dsu.groups();
+        sort(g.begin(), g.end());
+        int ans = g.back() + 1;
+        if (g.size() > 1) ans = max(ans, g.end()[-1] + g.end()[-2] + 1);
+        return ans;
+    }
+};
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
+##
+
+### Solution 1:
+
+```cpp
+
+```
+
+
+
+
