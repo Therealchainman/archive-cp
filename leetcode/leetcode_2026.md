@@ -1493,7 +1493,7 @@ public:
 
 # Leetcode Weekly Contest 493
 
-## 3871. Count Commas in Range II
+## Q2. Count Commas in Range II
 
 ### Solution 1:
 
@@ -1512,7 +1512,7 @@ public:
 };
 ```
 
-## 3872. Longest Arithmetic Sequence After Changing At Most One Element
+## Q3. Longest Arithmetic Sequence After Changing At Most One Element
 
 ### Solution 1: prefix and suffix runs of arithmetic sequences, difference array, casework with longest runs of arithmetic sequences.
 
@@ -1552,7 +1552,7 @@ public:
 };
 ```
 
-## 3873. Maximum Points Activated with One Addition
+## Q4. Maximum Points Activated with One Addition
 
 ### Solution 1: union find, map, grouping, counting, sorting
 
@@ -1630,12 +1630,46 @@ public:
 };
 ```
 
-##
+## 3130. Find All Possible Stable Binary Arrays II
 
-### Solution 1:
+### Solution 1: dynamic programming, counting, combinatorics, prefix sums for optimization
 
 ```cpp
-
+const int MOD = 1e9 + 7;
+class Solution {
+public:
+    int numberOfStableArrays(int zero, int one, int limit) {
+        vector<vector<vector<int>>> dp(zero + 1, vector<vector<int>>(one + 1, vector<int>(2, 0)));
+        for (int i = 0; i <= zero; ++i) {
+            for (int j = 0; j <= one; ++j) {
+                for (int k = 0; k <= 1; ++k) {
+                    if (i == 0) { // no zero, adding 1, if j is less than limit, then you can do it one way
+                        if (k == 1 && j <= limit) {
+                            dp[i][j][k] = 1;
+                        }
+                    } else if (j == 0) {
+                        if (k == 0 && i <= limit) {
+                            dp[i][j][k] = 1;
+                        }
+                    } else if (k == 0) {
+                        dp[i][j][k] = (dp[i - 1][j][0] + dp[i - 1][j][1]) % MOD;
+                        if (i > limit) {
+                            dp[i][j][k] -= dp[i - limit - 1][j][1];
+                        }
+                    } else { // k = 1
+                        dp[i][j][k] = (dp[i][j - 1][0] + dp[i][j - 1][1]) % MOD;
+                        if (j > limit) {
+                            dp[i][j][k] -= dp[i][j - limit - 1][0];
+                        }
+                    }
+                    if (dp[i][j][k] < 0) dp[i][j][k] += MOD;
+                }
+            }
+        }
+        int ans = (dp[zero][one][0] + dp[zero][one][1]) % MOD;
+        return ans;
+    }
+};
 ```
 
 
