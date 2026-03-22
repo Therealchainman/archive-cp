@@ -1672,13 +1672,110 @@ public:
 };
 ```
 
+# Leetcode Weekly Contest 494
 
-##
+## Q2. Construct Uniform Parity Array II
 
-### Solution 1:
+### Solution 1: min element, parity
+
+if the smallest element is odd it is always possible, otherwise all elements must be even to be able to make them all the same parity.
 
 ```cpp
+class Solution {
+public:
+    bool uniformArray(vector<int>& nums1) {
+        int a = *min_element(nums1.begin(), nums1.end());
+        if (a & 1) return true;
+        return all_of(nums1.begin(), nums1.end(), [&](int x) { return x % 2 == 0; });
+    }
+};
+```
 
+## Q3. Minimum Removals to Achieve Target XOR
+
+### Solution 1: subset sum with bitmasks, subset sum with xor operator, minimize the size of the subset that equals a target
+
+Use the algebraic properties of xor operationn to compute the follownig
+XOR(nums) ^ XOR(subset) = target
+XOR(subset) = XOR(nums) ^ target
+So yeah just solve for that new target, and find the subset that xors to it. 
+
+```cpp
+const int BIT = 14, INF = numeric_limits<int>::max();
+class Solution {
+public:
+    int minRemovals(vector<int>& nums, int target) {
+        int val = accumulate(nums.begin(), nums.end(), 0, [](int accum, int x) { return accum ^ x; });
+        target ^= val;
+        int endMask = 1 << BIT;
+        vector<int> dp(endMask, INF), ndp(endMask, INF);
+        dp[0] = 0;
+        for (int x : nums) {
+            for (int mask = 0; mask < endMask; ++mask) {
+                ndp[mask] = dp[mask];
+                int pmask = mask ^ x;
+                if (pmask >= endMask) continue;
+                if (dp[pmask] == INF) continue;
+                ndp[mask] = min(ndp[mask], dp[pmask] + 1);
+            }
+            swap(dp, ndp);
+        }
+        int ans = dp[target];
+        return ans < INF ? ans : -1;
+    }
+};
+```
+
+## Q4. Count Good Subarrays
+
+### Solution 1: monotonic stack, counting subarrays, bit manipulation, combinatorics
+
+You want to track the with monotonic stack the last index so that the current element is the largest element in that interval. 
+And you also need to compute the lastBit, cause you need check for each bit that is 0 in current bit string, where it was last a 1, cause you have to clip your left or right endpoint based on that, and you want to take the max of all those last bits, cause you need to satisfy all of them.
+Then the computation is easy by taking the number of ways to choose the left and right endpoint based on those constraints, and sum that for all i.
+
+```cpp
+using int64 = long long;
+const int B = 31;
+class Solution {
+public:
+    int64 countGoodSubarrays(vector<int>& nums) {
+        int N = nums.size();
+        vector<int> L(N, 0), R(N, N - 1), lastBit(B, -1);
+        stack<int> stk, stk1;
+        for (int i = 0; i < N; ++i) {
+            while (!stk.empty() && nums[stk.top()] <= nums[i]) stk.pop();
+            if (!stk.empty()) L[i] = stk.top() + 1;
+            stk.emplace(i);
+            for (int b = 0; b < 31; ++b) {
+                if ((nums[i] >> b) & 1) {
+                    lastBit[b] = i;
+                    continue;
+                };
+                L[i] = max(L[i], lastBit[b] + 1);
+            }
+        }
+        lastBit.assign(B, N);
+        for (int i = N - 1; i >= 0; --i) {
+            while (!stk1.empty() && nums[stk1.top()] < nums[i]) stk1.pop();
+            if (!stk1.empty()) R[i] = stk1.top() - 1;
+            stk1.emplace(i);
+            for (int b = 0; b < 31; ++b) {
+                if ((nums[i] >> b) & 1) {
+                    lastBit[b] = i;
+                    continue;
+                }
+                R[i] = min(R[i], lastBit[b] - 1);
+            }
+        }
+        int64 ans = 0;
+        for (int i = 0; i < N; ++i) {
+            int l = L[i], r = R[i];
+            ans += 1LL * (i - l + 1) * (r - i + 1);
+        }
+        return ans;
+    }
+};
 ```
 
 ##
