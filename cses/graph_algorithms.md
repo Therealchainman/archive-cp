@@ -112,9 +112,91 @@ int main() {
 
 ## High Score
 
-### Solution 1:
+### Solution 1: bellman ford, reachability, directed graph, negative cycle detection, queue, bfs
+
+Negate every edge weight. Then maximizing the total score from room 1 to room n becomes minimizing the total path weight from 1 to n. So the problem reduces to a shortest path problem with possibly negative edge weights, which can be solved with Bellman-Ford in O(nm).
+
+However, we must also detect whether the answer is unbounded. In the original graph, this happens if there is a positive cycle that can be used on some walk from 1 to n. After negation, such a cycle becomes a negative cycle. Therefore, if there exists a negative cycle that is reachable from room 1 and from which room n is reachable, then the shortest path is unbounded below, and the correct answer is -1.
+
+Otherwise, Bellman-Ford computes the minimum distance from 1 to n in the negated graph, and the maximum score in the original graph is the negation of that value.
 
 ```cpp
+const int64 INF = numeric_limits<int64>::max();
+int N, M;
+vector<vector<int>> edges, tadj, adj;
+vector<bool> start, end_;
+
+int64 bellmanFord(int src) {
+    vector<int64> dist(N, INF);
+    dist[src] = 0;
+    // Relax up to n-1 times, early exit if no change
+    for (int i = 0; i < N - 1; i++) {
+        bool any_relaxed = false;
+        for (const auto& e : edges) {
+            int u = e[0], v = e[1], w = e[2];
+            if (dist[u] == INF) continue; // Skip unreachable vertices
+            if (dist[u] + w < dist[v]) {
+                dist[v] = dist[u] + w;
+                any_relaxed = true;
+            }
+        }
+        if (!any_relaxed) break;
+    }
+    // Check for negative cycles
+    for (const auto& e : edges) {
+        int u = e[0], v = e[1], w = e[2];
+        if (dist[u] == INF) continue; // Skip unreachable vertices
+        if (dist[u] + w < dist[v] && start[u] && end_[v]) {
+            // Negative cycle detected
+            return -1;
+        }
+    }
+    return -dist[N - 1];
+}
+
+void bfs(int src, const vector<vector<int>>& graph, vector<bool>& visited) {
+    queue<int> q;
+    q.emplace(src);
+    visited[src] = true;
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop();
+        for (int v : graph[u]) {
+            if (visited[v]) continue;
+            q.emplace(v);
+            visited[v] = true;
+        }
+    }
+}
+
+void solve() {
+    cin >> N >> M;
+    edges.resize(M);
+    tadj.assign(N, vector<int>());
+    adj.assign(N, vector<int>());
+    start.assign(N, false);
+    end_.assign(N, false);
+    for (int i = 0; i < M; ++i) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        --u, --v;
+        edges[i] = {u , v, -w}; // Negate weights for max score
+        tadj[v].emplace_back(u);
+        adj[u].emplace_back(v);
+    }
+    bfs(N - 1, tadj, end_);
+    bfs(0, adj, start);
+    int64 res = bellmanFord(0);
+    cout << res << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ## Flight Discount

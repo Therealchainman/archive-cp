@@ -2,6 +2,8 @@
 
 A graph algorithm
 
+Is this intended for directed or undirected graphs? Bellman Ford is typically used for directed graphs, but it can be applied to undirected graphs as well by treating each undirected edge as two directed edges.
+
 ## Bellman ford algorithm for single source shortest path problem
 
 - works for negative edge weights
@@ -34,6 +36,7 @@ vector<int64> bellmanFord(int src) {
         bool any_relaxed = false;
         for (const auto& e : edges) {
             int u = e[0], v = e[1], w = e[2];
+            if (dist[u] == INF) continue; // Skip unreachable vertices
             if (dist[u] + w < dist[v]) {
                 dist[v] = dist[u] + w;
                 any_relaxed = true;
@@ -44,6 +47,7 @@ vector<int64> bellmanFord(int src) {
     // Check for negative cycles
     for (const auto& e : edges) {
         int u = e[0], v = e[1], w = e[2];
+        if (dist[u] == INF) continue; // Skip unreachable vertices
         if (dist[u] + w < dist[v]) {
             // Negative cycle detected
             return {};
