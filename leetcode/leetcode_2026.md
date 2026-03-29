@@ -1818,34 +1818,224 @@ public:
 
 # Leetcode Biweekly Contest 179
 
-
-
-## 
+## Q1.
 
 ### Solution 1: 
 
 ```cpp
 ```
 
-## 
+## Q2.
 
 ### Solution 1: 
 
 ```cpp
 ```
 
-## 
+## Q3.
 
 ### Solution 1: 
 
 ```cpp
 ```
 
-## 
+## Q4.
 
 ### Solution 1: 
 
 ```cpp
+
 ```
+
+# Leetcode Weekly Contest 495
+
+## Q1. First Matching Character From Both Ends
+
+### Solution 1: loop
+
+For each index `i`, compare the character at `i` with its mirrored character at `N - 1 - i`.
+The first place where they match is the answer, because the problem asks for the smallest such index.
+
+```cpp
+class Solution {
+public:
+    int firstMatchingIndex(string s) {
+        int N = s.size();
+        for (int i = 0; i < N; ++i) {
+            if (s[i] == s[N - i - 1]) return i;
+        }
+        return -1;
+    }
+};
+```
+
+## Q2. Design Event Manager
+
+### Solution 1: set, struct with custom comparator, map, online queries
+
+Store the current priority of each event in a map, and also keep all active events in a set ordered by
+highest priority first and then smallest event id. That makes both operations easy:
+`updatePriority` removes the old pair and inserts the new one, and `pollHighest` just takes the first element of the set.
+
+```cpp
+struct Event {
+    int event, priority;
+    Event(int event, int priority) : event(event), priority(priority) {}
+    bool operator<(const Event& other) const {
+        if (priority != other.priority) return priority > other.priority;
+        return event < other.event;
+    }
+};
+class EventManager {
+private:
+    map<int, int> P;
+    set<Event> S;
+public:
+    EventManager(vector<vector<int>>& events) {
+        for (const auto &event : events) {
+            int x = event[0], y = event[1];
+            P[x] = y;
+            S.emplace(x, y); // decreasing y, increasing x
+        }
+    }
+    
+    void updatePriority(int eventId, int newPriority) {
+        int oldPriority = P[eventId];
+        S.erase(Event(eventId, oldPriority));
+        S.emplace(eventId, newPriority);
+        P[eventId] = newPriority;
+    }
+    
+    int pollHighest() {
+        if (S.empty()) return -1;
+        Event ev = *S.begin();
+        S.erase(ev);
+        return ev.event;
+    }
+};
+```
+
+## Q3. Sum of Sortable Integers
+
+### Solution 1: finding divisors, array cycle, sorting
+
+Only divisors of `N` can work, since the array is split into equal blocks of size `k`.
+For a fixed `k`, each block must already be a cyclic shift of the block it should become in the fully sorted array.
+So for every divisor, check each block independently, and add `k` to the answer if all blocks are feasible.
+
+```cpp
+class Solution {
+private:
+    bool feasible(int k, const vector<int> &nums, const vector<int> &target) {
+        int N = nums.size();
+        for (int i = 0; i < N; i += k) {
+            // block from i to i + k - 1
+            int pivot = i;
+            for (int j = i + 1; j < i + k; ++j) {
+                if (nums[j] < nums[j - 1]) {
+                    if (pivot != i) return false;
+                    pivot = j;
+                }
+            }
+            vector<int> block;
+            for (int j = pivot; j < i + k; ++j) {
+                block.emplace_back(nums[j]);
+            }
+            for (int j = i; j < pivot; ++j) {
+                block.emplace_back(nums[j]);
+            }
+            for (int j = i; j < i + k; ++j) {
+                if (block[j - i] != target[j]) return false;
+            }
+        }
+        return true;
+    }
+public:
+    int sortableIntegers(vector<int>& nums) {
+        int N = nums.size(), ans = 0;
+        vector<int> divisors;
+        for (int i = 1; 1LL * i * i <= N; ++i) {
+            if (N % i == 0) {
+                divisors.emplace_back(i);
+                if (i != N / i) {
+                    divisors.emplace_back(N / i);
+                }
+            }
+        }
+        vector<int> sortedNums = nums;
+        sort(sortedNums.begin(), sortedNums.end());
+        for (int d : divisors) {
+            if (feasible(d, nums, sortedNums)) ans += d;
+        }
+        return ans;
+    }
+};
+```
+
+## Q4. Incremental Even-Weighted Cycle Queries
+
+### Solution 1: union find, parity, undirected graph, xor
+
+Use union find with an extra `parity` value that stores the xor/parity from a node to its component root.
+If an edge connects two different components, merge them and set the new root relationship so the edge constraint is satisfied.
+If the endpoints are already connected, then the edge is valid only when the xor between the two nodes matches the new edge weight.
+
+```cpp
+struct UnionFind {
+    vector<int> parent, size, parity;
+    UnionFind(int n) {
+        parent.resize(n);
+        iota(parent.begin(),parent.end(),0);
+        size.assign(n,1);
+        parity.assign(n, 0);
+    }
+
+    pair<int, int> find(int i) {
+        if (i == parent[i]) {
+            return {i, 0};
+        }
+        auto [p, x] = find(parent[i]);
+        parent[i] = p;
+        parity[i] ^= x;
+        return {parent[i], parity[i]};
+    }
+
+    void unite(int i, int j, int w) {
+        int ru, rv;
+        tie(i, ru) = find(i);
+        tie(j, rv) = find(j);
+        if (i != j) {
+            if (size[j] > size[i]) {
+                swap(i, j);
+            }
+            size[i] += size[j];
+            parent[j] = i;
+            parity[j] ^= ru ^ rv ^ w;
+        }
+    }
+
+    bool same(int i, int j) {
+        return find(i).first == find(j).first;
+    }
+};
+class Solution {
+public:
+    int numberOfEdgesAdded(int n, vector<vector<int>>& edges) {
+        UnionFind dsu(n);
+        int ans = 0;
+        for (const auto& edge : edges) {
+            int u = edge[0], v = edge[1], w = edge[2];
+            if (dsu.same(u, v)) {
+                if ((dsu.parity[u] ^ dsu.parity[v]) == w) ans++;
+            } else {
+                dsu.unite(u, v, w);
+                ans++;
+            }
+        }
+        return ans;
+    }
+};
+```
+
 
 
