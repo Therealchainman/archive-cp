@@ -793,70 +793,442 @@ signed main() {
 }
 ```
 
-# Codeforces Round XXX
+# Codeforces Round 1088 (Div. 1 + Div. 2)
 
-B.
+## A. Antimedian Deletion
 
-C2. 
-3 1 4 2 2 - 3
-2 4 1 3 1 - 2
+### Solution 1: clever trick
 
-the 2 is disappearing so you need to replace it
+This is basically a trick problem.
 
-x
-x 
-and both of these are leaving the window, then you don't care.
+The actual values of the array never matter, so the code does not even store them.
+The only thing that matters is that we can always answer with the same small deletion size for every position.
 
-x
-y
-then you need to replace the y that is leaving, you need another element in b that is y. 
-and also you are losing x so you need another element in a that is x. 
+Using `2` everywhere is enough, and if `N = 1` then we use `1`.
+So every answer is simply
 
+$$
+\min(2, N).
+$$
 
-I need more information to solve this one, or to come to a conclusion. 
-
-I think it is all about repeating blocks of size k and that is what is required. 
-
-D. 
-You know from K = N, that all elements in A will have that bitmask.
-
-
-##
-
-### Solution 1: 
+That is why the whole solution is just reading the array and printing the same value `N` times.
 
 ```cpp
+int N;
 
+void solve() {
+    cin >> N;
+    for (int i = 0; i < N; ++i) {
+        int x;
+        cin >> x;
+    }
+    for (int i = 0; i < N; ++i) {
+        cout << min(2, N) << " ";
+    }
+    cout << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
 ```
 
-##
+## B. Mickey Mouse Constructive
 
-### Solution 1: 
+### Solution 1: count divisors
+
+The key quantity is the total imbalance of the array:
+
+$$
+\Delta = |x - y|.
+$$
+
+Whatever parameter the statement counts as "good", it can only come from a divisor of this total imbalance, so the answer can never be larger than the number of divisors of $\Delta$.
+
+The nice part is that the very simple construction
+
+- first `x` values equal to `1`
+- last `y` values equal to `-1`
+
+already reaches that upper bound.
+
+So the constructive part is trivial, and the real work is only counting the divisors of $\Delta$ in
+
+$$
+O(\sqrt{\Delta}).
+$$
+
+If `x = y`, then $\Delta = 0`, so the divisor counting argument degenerates, but we still have at least one valid construction, which is why the code prints `max(1, ans)`.
 
 ```cpp
+int x, y;
+void solve() {
+    cin >> x >> y;
+    int ans = 0;
+    int delta = abs(x - y);
+    for (int x = 1; 1LL * x * x <= delta; ++x) {
+        if (delta % x == 0) {
+            ans++;
+            if (1LL * x * x != delta) ans++;
+        }
+    }
+    ans = max(1, ans);
+    cout << ans << endl;
+    for (int i = 0; i < x + y; ++i) {
+        if (i < x) cout << 1 << ' ';
+        else cout << -1 << ' ';
+    }
+    cout << endl;
+}
 
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
 ```
 
-##
+## C1. Equal Multisets (Easy Version)
 
-### Solution 1: 
+### Solution 1: frequency, array, edge cases
+
+In the easy version, the only positions that can really move are the overlap of the first `K` positions and the last `K` positions:
+
+$$
+[N-K,\, K-1].
+$$
+
+Everything outside that interval is forced, because it does not belong to the always-rearrangeable part.
+
+So there are two checks:
+
+1. Any specified `B[i]` outside the overlap must already equal `A[i]`.
+2. Inside the overlap, only the multiset matters.
+
+The first `freq` array also catches an immediate bad case: if some fixed value appears twice in `B`, then it is impossible.
+
+After that, we just count frequencies inside the overlap:
+
+- `fa[v]` = how many times value `v` appears in `A`
+- `fb[v]` = how many times value `v` is already required by fixed entries of `B`
+
+If for some value `v` we need more than we have, meaning
+
+$$
+fb[v] > fa[v],
+$$
+
+then the answer is `NO`.
+Otherwise we can fill the remaining `-1` positions and make it work.
 
 ```cpp
+int N, K;
+vector<int> A, B, freq;
 
+void solve() {
+    cin >> N >> K;
+    A.assign(N, 0);
+    B.assign(N, 0);
+    freq.assign(N + 1, 0);
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+    }
+    for (int i = 0; i < N; ++i) {
+        cin >> B[i];
+        if (B[i] == -1) continue;
+        freq[B[i]]++;
+    }
+    if (any_of(freq.begin(), freq.end(), [](int x) { return x > 1; })) {
+        cout << "NO" << endl;
+        return;
+    }
+    int l = N - K, r = K - 1;
+    for (int i = 0; i < N; ++i) {
+        if (B[i] == -1) continue;
+        if (i >= l && i <= r) continue; // these are the ones we always rearrange
+        if (A[i] != B[i]) {
+            cout << "NO" << endl;
+            return;
+        }
+    }
+    vector<int> fa(N + 1, 0), fb(N + 1, 0);
+    for (int i = l; i <= r; ++i) {
+        fa[A[i]]++;
+        if (B[i] != -1) fb[B[i]]++;
+    }
+    for (int i = 0; i <= N; ++i) {
+        if (fb[i] > fa[i]) {
+            cout << "NO" << endl;
+            return;
+        }
+    }
+    cout << "YES" << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
 ```
 
-##
+## C2. Equal Multisets (Hard Version)
 
-### Solution 1: 
+### Solution 1: frequency, multisets, positions, residue modulo
+
+The hard version has the same idea, but the movable part is no longer one contiguous interval.
+Instead, positions split into residue classes modulo `K`:
+
+$$
+i,\ i+K,\ i+2K,\ \dots
+$$
+
+Handle each residue class independently.
+
+If the values of `A` on one residue class are not all the same, then that class is rigid.
+So every specified value in `B` on that class must already match `A`, otherwise it is impossible immediately.
+
+If a residue class of `A` is constant, then that whole class behaves like one movable token labeled by that value.
+The array `cnt` counts how many such flexible classes we have for each value.
+
+Now inspect the fixed values of `B` on the same class:
+
+- if they are all `-1`, the class is still free
+- if there is exactly one distinct non-`-1` value `v`, then this class demands one token of value `v`
+- if there are multiple distinct fixed values, then this class is no longer flexible, and every fixed position must already match `A`
+
+The array `cnt2` stores these demands.
+In the end, for every value `v`, we need enough flexible classes carrying `v`:
+
+$$
+cnt[v] \ge cnt2[v].
+$$
+
+If this holds for all values, the answer is `YES`; otherwise it is `NO`.
 
 ```cpp
+int N, K;
+vector<int> A, B;
 
+void solve() {
+    cin >> N >> K;
+    A.assign(N, 0);
+    B.assign(N, 0);
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+    }
+    for (int i = 0; i < N; i++) {
+        cin >> B[i];
+    }
+    vector<int> cnt(N + 1, 0), pos(K, -1);
+    for (int i = 0; i < K; ++i) {
+        pos[i] = A[i];
+        for (int j = i; j < N; j += K) {
+            if (A[j] != pos[i]) pos[i] = -1;
+        }
+        if (pos[i] != -1) {
+            cnt[pos[i]]++;
+            continue;
+        }
+        for (int j = i; j < N; j += K) {
+            if (B[j] != -1 && B[j] != A[j]) {
+                cout << "NO" << endl;
+                return;
+            }
+        }
+    }
+    vector<int> cnt2(N + 1, 0);
+    for (int i = 0; i < K; ++i) {
+        if (pos[i] == -1) continue;
+        set<int> values;
+        for (int j = i; j < N; j += K) {
+            values.emplace(B[j]);
+        }
+        values.erase(-1);
+        if (values.size() == 1) {
+            cnt2[*values.begin()]++;
+        }
+        if (values.size() < 2) continue;
+        for (int j = i; j < N; j += K) {
+            if (B[j] != -1 && A[j] != B[j]) {
+                cout << "NO" << endl;
+                return;
+            }
+        }
+    }
+    for (int i = 0; i <= N; ++i) {
+        if (cnt[i] < cnt2[i]) {
+            cout << "NO" << endl;
+            return;
+        }
+    }
+    cout << "YES" << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
 ```
 
-##
+## D. AND Array
 
-### Solution 1: 
+### Solution 1: factorials, combinatorics, backwards calculating, frequency of bitmasks
+
+Think about each bit independently.
+
+If some bit appears in exactly $x$ elements of the answer array, then for any chosen subset of size $k$, that bit survives in the bitwise AND iff all $k$ chosen elements come from those $x$ positions.
+
+So that one bit contributes
+
+$$
+\binom{x}{k}
+$$
+
+to the total value $B_{k-1}$.
+
+Let $S_x$ be the number of bit positions that appear in exactly $x$ elements of the final array.
+Then for every $k \in [1, N]$ we get
+
+$$
+B_{k-1} = \sum_{x = k}^{N} S_x \binom{x}{k}.
+$$
+
+This is an upper-triangular binomial transform, so we can recover the values $S_x$ from right to left.
+
+When we are computing $S_{i+1}$, all values $S_j$ with $j > i + 1$ are already known, so
+
+$$
+S_{i+1}
+=
+B_i - \sum_{j = i + 2}^{N} S_j \binom{j}{i+1}.
+$$
+
+That is exactly what the loop is doing:
+
+- start from `val = B[i]`
+- subtract every already-known contribution $S_j \binom{j}{i+1}$
+- whatever remains must be $S_{i+1}$
+
+The factorial and inverse factorial precomputation is only there so that each
+
+$$
+\binom{j}{i+1}
+$$
+
+can be computed in $O(1)$ modulo $10^9 + 7$.
+
+After we know all frequencies $S_x$, we still need to build one valid array.
+The clean way to think about it is as columns:
+
+- each bit counted in $S_x$ becomes a column of height $x$
+- put that bit into the first $x$ elements of the array
+
+Then the number of bits in the $(i+1)$-th element is exactly the number of columns whose height is at least $i+1$, which is
+
+$$
+A_i = \sum_{x = i + 1}^{N} S_x.
+$$
+
+So the final array is just the suffix sums of $S$.
+
+This also explains the last loop in the code: once the exact frequencies are known, accumulating a suffix reconstructs the answer array directly.
 
 ```cpp
+const int MOD = 1e9 + 7, MAXN = 1e5 + 5;
+int N;
+vector<int> B;
 
+int64 inv(int i, int64 m) {
+  return i <= 1 ? i : m - (m / i) * inv(m % i, m) % m;
+}
+
+vector<int64> fact, inv_fact;
+
+void factorials(int n, int64 m) {
+    fact.assign(n + 1, 1);
+    inv_fact.assign(n + 1, 0);
+    for (int i = 2; i <= n; i++) {
+        fact[i] = (fact[i - 1] * i) % m;
+    }
+    inv_fact.end()[-1] = inv(fact.end()[-1], m);
+    for (int i = n - 1; i >= 0; i--) {
+        inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % m;
+    }
+}
+
+int64 choose(int n, int r, int64 m) {
+    if (n < r) return 0;
+    return (fact[n] * inv_fact[r] % m) * inv_fact[n - r] % m;
+}
+
+void solve() {
+    cin >> N;
+    B.assign(N, 0);
+    for (int i = 0; i < N; ++i) {
+        cin >> B[i];
+    }
+    vector<int> S(N + 1, 0); // the frequency of the ith bitmask in the array A;
+    vector<int> nonzero; // indices of nonzero elements in S;
+    for (int i = N - 1; i >= 0; --i) {
+        int val = B[i];
+        for (int j : nonzero) {
+            int cur = 1LL * S[j] * choose(j, i + 1, MOD) % MOD;
+            val -= cur;
+            if (val < 0) val += MOD;
+        }
+        S[i + 1] = val;
+        if (S[i + 1]) nonzero.emplace_back(i + 1);
+    }
+    vector<int> ans(N, 0);
+    int suf = 0;
+    for (int i = N - 1; i >= 0; --i) {
+        suf += S[i + 1];
+        ans[i] = suf;
+    }
+    for (int x : ans) {
+        cout << x << ' ';
+    }
+    cout << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    factorials(MAXN, MOD);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
 ```
