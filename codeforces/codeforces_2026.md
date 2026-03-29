@@ -792,3 +792,71 @@ signed main() {
     return 0;
 }
 ```
+
+# Codeforces Round XXX
+
+B.
+
+C2. 
+3 1 4 2 2 - 3
+2 4 1 3 1 - 2
+
+the 2 is disappearing so you need to replace it
+
+x
+x 
+and both of these are leaving the window, then you don't care.
+
+x
+y
+then you need to replace the y that is leaving, you need another element in b that is y. 
+and also you are losing x so you need another element in a that is x. 
+
+
+I need more information to solve this one, or to come to a conclusion. 
+
+I think it is all about repeating blocks of size k and that is what is required. 
+
+D. 
+You know from K = N, that all elements in A will have that bitmask.
+
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```

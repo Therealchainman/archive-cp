@@ -1778,14 +1778,74 @@ public:
 };
 ```
 
-##
+## 2573. Find the String with LCP
 
-### Solution 1:
+### Solution 1: greedy, backtracking to check validity of lcp
 
 ```cpp
-
+class Solution {
+public:
+    string findTheString(vector<vector<int>>& lcp) {
+        int N = lcp.size();
+        string ans(N, '#');
+        char cur = 'a';
+        for (int i = 0; i < N && cur; ++i) {
+            if (ans[i] != '#') continue;
+            if (cur > 'z') return "";
+            ans[i] = cur;
+            for (int j = i + 1; j < N; ++j) {
+                if (lcp[i][j] > 0) {
+                    ans[j] = ans[i];
+                }
+            }
+            cur++;
+        }
+        for (int i = N - 1; i >= 0; --i) {
+            for (int j = N - 1; j >= 0; --j) {
+                if (ans[i] == ans[j]) {
+                    if (i == N - 1 || j == N - 1) {
+                        if (lcp[i][j] != 1) return "";
+                    } else if (lcp[i][j] != lcp[i + 1][j + 1] + 1) return "";
+                } else {
+                    if (lcp[i][j] > 0) return "";
+                }
+            }
+        }
+        return ans;
+    }
+};
 ```
 
+# Leetcode Biweekly Contest 179
 
+
+
+## 
+
+### Solution 1: 
+
+```cpp
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+```
+
+## 
+
+### Solution 1: 
+
+```cpp
+```
 
 
