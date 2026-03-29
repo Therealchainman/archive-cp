@@ -1818,33 +1818,149 @@ public:
 
 # Leetcode Biweekly Contest 179
 
-## Q1.
+## Q1. Minimum Absolute Difference Between Two Values
 
-### Solution 1: 
+### Solution 1: last seen
 
 ```cpp
+const int INF = numeric_limits<int>::max();
+class Solution {
+public:
+    int minAbsoluteDifference(vector<int>& nums) {
+        int ans = INF, N = nums.size(), lastOne = -1, lastTwo = -1;
+        for (int i = 0; i < N; ++i) {
+            if (nums[i] == 1) {
+                if (lastTwo != -1) ans = min(ans, i - lastTwo);
+                lastOne = i;
+            } else if (nums[i] == 2) {
+                if (lastOne != -1) ans = min(ans, i - lastOne);
+                lastTwo = i;
+            }
+        }
+        return ans < INF ? ans : -1;
+    }
+};
 ```
 
-## Q2.
+## Q2. Direction Assignments with Exactly K Visible People
 
-### Solution 1: 
+### Solution 1: combinatorics
 
 ```cpp
+using int64 = long long;
+const int MOD = 1e9 + 7;
+
+int64 inv(int i, int64 m) {
+  return i <= 1 ? i : m - (m / i) * inv(m % i, m) % m;
+}
+
+vector<int64> fact, inv_fact;
+
+void factorials(int n, int64 m) {
+    fact.assign(n + 1, 1);
+    inv_fact.assign(n + 1, 0);
+    for (int i = 2; i <= n; i++) {
+        fact[i] = (fact[i - 1] * i) % m;
+    }
+    inv_fact.end()[-1] = inv(fact.end()[-1], m);
+    for (int i = n - 1; i >= 0; i--) {
+        inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % m;
+    }
+}
+
+int64 choose(int n, int r, int64 m) {
+    if (n < r) return 0;
+    return (fact[n] * inv_fact[r] % m) * inv_fact[n - r] % m;
+}
+
+class Solution {
+public:
+    int countVisiblePeople(int n, int pos, int k) {
+        factorials(n, MOD);
+        int L = pos, R = n - pos - 1, ans = 0;
+        for (int i = 0; i <= min(L, k); ++i) {
+            int j = k - i; // number picking on right side
+            if (R < j) continue;
+            ans += 2LL * choose(L, i, MOD) * choose(R, j, MOD) % MOD;
+            ans %= MOD;
+        }
+        return ans;
+    }
+};
 ```
 
-## Q3.
+## Q3. Minimum XOR Path in a Grid
 
-### Solution 1: 
+### Solution 1: dynamic programming over xor states
 
 ```cpp
+const int B = 10;
+class Solution {
+public:
+    int minCost(vector<vector<int>>& grid) {
+        int R = grid.size(), C = grid[0].size();
+        vector<vector<vector<bool>>> dp(R, vector<vector<bool>>(C, vector<bool>(1 << B, false)));
+        dp[0][0][grid[0][0]] = true;
+        for (int r = 0; r < R; ++r) {
+            for (int c = 0; c < C; ++c) {
+                for (int m = 0; m < (1 << B); ++m) {
+                    if (r > 0) dp[r][c][m] = dp[r][c][m] || dp[r - 1][c][m ^ grid[r][c]];
+                    if (c > 0) dp[r][c][m] = dp[r][c][m] || dp[r][c - 1][m ^ grid[r][c]];
+                }
+            }
+        }
+        for (int m = 0; m < (1 << B); ++m) {
+            if (dp[R - 1][C - 1][m]) return m;
+        }
+        return -1;
+    }
+};
 ```
 
-## Q4.
+## Q4. Count Non Decreasing Arrays With Given Digit Sums
 
-### Solution 1: 
+### Solution 1: dynamic programming, grouping, candidates, prefix sum
 
 ```cpp
-
+const int MAXN = 5e3 + 1, MAXD = 51, MOD = 1e9 + 7;
+class Solution {
+private:
+    int getDigitSum(int x) {
+        int ans = 0;
+        while (x > 0) {
+            ans += x % 10;
+            x /= 10;
+        }
+        return ans;
+    }
+public:
+    int countArrays(vector<int>& digitSum) {
+        int N = digitSum.size();
+        vector<vector<int>> candidates(MAXD, vector<int>());
+        for (int i = 0; i < MAXN; ++i) {
+            int dsum = getDigitSum(i);
+            candidates[dsum].emplace_back(i);
+        }
+        vector<int> dp(MAXN, 0), ndp(MAXN, 0), psum(MAXN, 1), npsum(MAXN, 0);
+        dp[0] = 1;
+        for (int d : digitSum) {
+            ndp.assign(MAXN, 0);
+            npsum.assign(MAXN, 0);
+            for (int x : candidates[d]) {
+                ndp[x] = psum[x];
+            }
+            for (int i = 0; i < MAXN; ++i) {
+                npsum[i] = ndp[i];
+                if (i > 0) npsum[i] += npsum[i - 1];
+                npsum[i] %= MOD;
+            }
+            swap(ndp, dp);
+            swap(npsum, psum);
+        }
+        int ans = accumulate(dp.begin(), dp.end(), 0, [](int accum, int x) { return (accum + x) % MOD; });
+        return ans;
+    }
+};
 ```
 
 # Leetcode Weekly Contest 495
