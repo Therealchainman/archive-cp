@@ -1,5 +1,8 @@
 # suffix array
 
+Suffix array = sorted list of suffix starting positions
+LCP array = for each neighboring pair in that sorted list, the length of their common prefix
+
 ## Simplest implementation O(nlog^2(n)) time and O(n) space
 
 "$" is smaller than any other character
@@ -110,10 +113,32 @@ def suffix_array(s: str) -> List[int]:
 ### C++ implementation of suffix array
 
 ```cpp
-vector<int> bucket_size, bucket_pos, leaderboard, update_leaderboard, equivalence_class, update_equivalence_class;
+vector<int> lcp_construction(const string& s, const vector<int>& p) {
+    int n = s.size();
+    vector<int> rank(n, 0);
+    for (int i = 0; i < n; i++)
+        rank[p[i]] = i;
 
-void radix_sort() {
+    int k = 0;
+    vector<int> lcp(n-1, 0);
+    for (int i = 0; i < n; i++) {
+        if (rank[i] == n - 1) {
+            k = 0;
+            continue;
+        }
+        int j = p[rank[i] + 1];
+        while (i + k < n && j + k < n && s[i+k] == s[j+k])
+            k++;
+        lcp[rank[i]] = k;
+        if (k)
+            k--;
+    }
+    return lcp;
+}
+
+void radix_sort(const vector<int>& equivalence_class, vector<int>& leaderboard, vector<int>& update_leaderboard) {
     int n = leaderboard.size();
+    vector<int> bucket_size(n, 0), bucket_pos(n, 0);
     bucket_size.assign(n, 0);
     for (int eq_class : equivalence_class) {
         bucket_size[eq_class]++;
@@ -131,15 +156,14 @@ void radix_sort() {
     }
 }
 
-void suffix_array(string& s) {
+vector<int> suffix_array(string& s) {
     int n = s.size();
     vector<pair<char, int>> arr(n);
     for (int i = 0; i < n; i++) {
         arr[i] = {s[i], i};
     }
     sort(arr.begin(), arr.end());
-    leaderboard.assign(n, 0);
-    equivalence_class.assign(n, 0);
+    vector<int> leaderboard(n, 0), equivalence_class(n, 0);
     for (int i = 0; i < n; i++) {
         leaderboard[i] = arr[i].second;
     }
@@ -151,11 +175,12 @@ void suffix_array(string& s) {
     }
     bool is_finished = false;
     int k = 1;
+    vector<int> update_equivalence_class(n, 0), update_leaderboard(n, 0);
     while (k < n && !is_finished) {
         for (int i = 0; i < n; i++) {
             leaderboard[i] = (leaderboard[i] - k + n) % n; // create left segment, keeps sort of the right segment
         }
-        radix_sort(); // radix sort for the left segment
+        radix_sort(equivalence_class, leaderboard, update_leaderboard); // radix sort for the left segment
         swap(leaderboard, update_leaderboard);
         update_equivalence_class.assign(n, 0);
         update_equivalence_class[leaderboard[0]] = 0;
@@ -168,12 +193,15 @@ void suffix_array(string& s) {
         k <<= 1;
         swap(equivalence_class, update_equivalence_class);
     }
+    return leaderboard;
 }
 
 /*
 how to call suffix array, then use the leaderboard
 string S + "$";
 suffix_array(S);
+and if you using lcp, make sure to remove the last
+character in the suffix array and the lcp array, because they are for the "$" character, which is not part of the original string.
 */
 ```
 

@@ -37,6 +37,39 @@ def lowbit(x):
 int msb = 63 - __builtin_clzll(n);
 ```
 
+## Least significant bit position
+
+`__builtin_ctz(x)` counts trailing zeros in the binary representation, so for nonzero `x` it gives the position of the least significant set bit.
+
+Useful forms:
+
+```cpp
+int lsb = __builtin_ctz(n);      // for int
+int lsb = __builtin_ctzll(n);    // for long long
+```
+
+Example:
+
+- `n = 40 = 101000b`
+- `__builtin_ctz(40) = 3`
+- because the lowest set bit is at index `3`
+
+So this is the `lsb` analogue of `__builtin_clz` for `msb`.
+
+If you want the value of the lowest set bit instead of its position:
+
+```cpp
+long long low = 1LL << __builtin_ctzll(n);
+```
+
+This matches:
+
+```cpp
+long long low = n & -n;
+```
+
+Important: `__builtin_ctz(0)` and `__builtin_ctzll(0)` are undefined, so only use them when the number is guaranteed to be nonzero.
+
 ## Bit width
 
 ```cpp

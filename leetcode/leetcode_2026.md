@@ -805,6 +805,223 @@ public:
 };
 ```
 
+# Leetcode Weekly Contest 483
+
+## Q1. Largest Even Number
+
+### Solution 1: greedy suffix trimming
+
+This implementation keeps deleting characters from the end until the last character is `'2'`, then returns the remaining prefix.
+
+```cpp
+class Solution {
+public:
+    string largestEven(string s) {
+        while (!s.empty() && s.back() != '2') s.pop_back();
+        return s;
+    }
+};
+```
+
+## Q2. Word Squares II
+
+### Solution 1: brute force over 4-tuples, direct corner validation
+
+The code sorts the words, then tries every ordered choice of four distinct words to play the roles:
+
+- top
+- left
+- right
+- bottom
+
+For each quadruple, `isValid` checks the four corner constraints of the square:
+
+- top-left must match between `top` and `left`
+- top-right must match between `top` and `right`
+- bottom-left must match between `bottom` and `left`
+- bottom-right must match between `bottom` and `right`
+
+If all four corner characters match, that quadruple is added to the answer.
+
+So this is a straightforward exhaustive search with `O(N^4)` combinations, with only `O(1)` work to validate each candidate.
+
+```cpp
+class Solution {
+private:
+    bool isValid(const string& top, const string& left, const string& right, const string& bot) {
+        return top[0] == left[0] && top[3] == right[0] && bot[0] == left[3] && bot[3] == right[3];
+    }
+public:
+    vector<vector<string>> wordSquares(vector<string>& words) {
+        int N = words.size();
+        sort(words.begin(), words.end());
+        vector<vector<string>> ans;
+        for (int i = 0; i < N; ++i) {
+            for (int j = 0; j < N; ++j) {
+                if (i == j) continue;
+                for (int k = 0; k < N; ++k) {
+                    if (k == j || k == i) continue;
+                    for (int l = 0; l < N; ++l) {
+                        if (l == k || l == j || l == i) continue;
+                        if (isValid(words[i], words[j], words[k], words[l])) {
+                            vector<string> cur = {words[i], words[j], words[k], words[l]};
+                            ans.emplace_back(cur);
+                        }
+                    }
+                }
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## Q3. Minimum Cost to Make Two Binary Strings Equal
+
+### Solution 1: count mismatches by type, then greedily trade flips for paired operations
+
+The first observation is that only mismatched positions matter. The code splits them into two buckets:
+
+- `zero`: positions where `s[i] = 0` and `t[i] = 1`
+- `one`: positions where `s[i] = 1` and `t[i] = 0`
+
+If we fix every mismatch independently, the starting cost is just
+
+`flipCost * (zero + one)`.
+
+From there, the loop repeatedly replaces two individual flips with a possibly cheaper paired operation:
+
+- if we have one mismatch of each type, a swap can fix both together, so we consume one from each bucket and add `swapCost`
+- otherwise we take two mismatches of the same type, pay `crossCost + swapCost`, and again remove two pending flips
+
+Since replacing two flips removes cost `2 * flipCost`, the running total is updated by adding the paired-operation cost and subtracting those two flips. The answer is the minimum value seen during this process.
+
+So the algorithm is a greedy sweep over how many pairs we decide to resolve using swap-style operations instead of plain flips.
+
+```cpp
+using int64 = long long;
+const int64 INF = numeric_limits<int64>::max();
+class Solution {
+public:
+    int64 minimumCost(string s, string t, int flipCost, int swapCost, int crossCost) {
+        int64 ans = INF;
+        int zero = 0, one = 0, N = s.size();
+        for (int i = 0; i < N; ++i) {
+            if (s[i] != t[i]) {
+                if (s[i] == '0') zero++;
+                else one++;
+            }
+        }
+        // start with most flips
+        int64 cur = 1LL * flipCost * (zero + one);
+        ans = min(ans, cur);
+        while (one + zero > 1) {
+            if (zero > 0 && one > 0) {
+                zero--;
+                one--;
+                cur += swapCost;
+            } else {
+                if (one > 0) one -= 2;
+                else zero -= 2;
+                cur += crossCost;
+                cur += swapCost;
+            }
+            cur -= 2LL * flipCost;
+            ans = min(ans, cur);
+        }
+        return ans;
+    }
+};
+```
+
+## Q4. Minimum Cost to Merge Sorted Lists
+
+### Solution 1: subset DP, precompute merged list statistics for every mask
+
+This solution treats each subset of lists as one state.
+
+For every bitmask `mask`, it precomputes:
+
+- `arr[mask]`: the fully merged sorted list of all lists in that subset
+- `len[mask]`: the size of that merged list
+- `med[mask]`: the median of that merged list
+
+Those values are built incrementally by removing the least significant set bit and merging the previously built subset with one more list.
+
+Once that preprocessing is done, `dp[mask]` means the minimum cost to merge all lists inside `mask` into one list. The transition enumerates every non-empty proper submask:
+
+- split `mask` into `submask` and `mask ^ submask`
+- optimally merge both halves first
+- then pay the final combine cost
+
+That final cost is
+
+`len[left] + len[right] + abs(med[left] - med[right])`.
+
+So this is a classic subset DP over all partitions of each mask. It is exponential, but it matches the structure of the recurrence very directly.
+
+```cpp
+using int64 = long long;
+const int64 INF = numeric_limits<int64>::max();
+class Solution {
+private:
+    int median(const vector<int>& arr) {
+        int N = arr.size();
+        int m = (N - 1) / 2;
+        return arr[m];
+    }
+    vector<int> merge(const vector<int>& A, const vector<int>& B) {
+        int N = A.size(), M = B.size();
+        vector<int> arr;
+        arr.reserve(N + M);
+        for (int i = 0, j = 0; i < N || j < M;) {
+            if (i == N) {
+                arr.emplace_back(B[j++]);
+            } else if (j == M) {
+                arr.emplace_back(A[i++]);
+            } else if (A[i] <= B[j]) {
+                arr.emplace_back(A[i++]);
+            } else {
+                arr.emplace_back(B[j++]);
+            }
+        }
+        return arr;
+    }
+public:
+    int64 minMergeCost(vector<vector<int>>& lists) {
+        int N = lists.size();
+        int endMask = 1 << N;
+        vector<int> len(endMask, 0), med(endMask, 0);
+        vector<vector<int>> arr(endMask, vector<int>());
+        for (int mask = 1; mask < endMask; ++mask) {
+            int lsb = __builtin_ctz(mask);
+            if ((mask & (mask - 1)) == 0) { // singular
+                arr[mask] = lists[lsb];
+            } else {
+                arr[mask] = merge(arr[mask ^ (1 << lsb)], lists[lsb]);
+            }
+            // find smallest set bit
+            med[mask] = median(arr[mask]);
+            len[mask] = arr[mask].size();
+        }
+        vector<int64> dp(endMask, INF);
+        dp[0] = 0;
+        for (int mask = 1; mask < endMask; ++mask) {
+            if ((mask & (mask - 1)) == 0) {
+                dp[mask] = 0;
+                continue;
+            }
+            for (int submask = mask - 1; submask > 0; submask = (submask - 1) & mask) {
+                int submask2 = mask ^ submask;
+                int64 cost = dp[submask] + dp[submask2] + len[submask] + len[submask2] + abs(med[submask] - med[submask2]);
+                dp[mask] = min(dp[mask], cost);
+            }
+        }
+        return dp.back();
+    }
+};
+```
+
 # Leetcode Weekly Contest 490
 
 Q1: Follow the rules, toggling a boolean variable to determine whether to add or subtract the current number. 
@@ -1495,7 +1712,17 @@ public:
 
 ## Q2. Count Commas in Range II
 
-### Solution 1:
+### Solution 1: place value counting, powers of 1000
+
+Every number contributes one comma for each comma boundary it passes in standard formatting:
+
+- numbers in `[1,000, 999,999]` contribute at least 1 comma
+- numbers in `[1,000,000, 999,999,999]` contribute at least 2 commas
+- and so on
+
+So instead of formatting every number from `1` to `n`, we count how many numbers are at least `10^3`, how many are at least `10^6`, how many are at least `10^9`, etc.
+
+If `base = 1000^k`, then exactly `n - base + 1` numbers in `[1, n]` contribute their `k`-th comma. Summing this over all valid comma positions gives the answer in `O(log_1000 n)` time.
 
 ```cpp
 using int64 = long long;
@@ -1515,6 +1742,23 @@ public:
 ## Q3. Longest Arithmetic Sequence After Changing At Most One Element
 
 ### Solution 1: prefix and suffix runs of arithmetic sequences, difference array, casework with longest runs of arithmetic sequences.
+
+For an arithmetic subarray, the adjacent differences must all be equal, so the first step is to build the difference array `diff[i] = nums[i + 1] - nums[i]`.
+
+Then:
+
+- `pref[i]` stores the length of the longest run of equal differences ending at `diff[i]`
+- `suf[i]` stores the length of the longest run of equal differences starting at `diff[i]`
+
+This immediately gives the best answer without changing anything. Since we are allowed to modify at most one element, we can also extend an existing arithmetic run by one more position, which is why the code does `if (ans < N) ans++`.
+
+The interesting case is changing some middle element `nums[i]`. To make `nums[i - 1], nums[i], nums[i + 1]` arithmetic, the new middle value must be the average of its neighbors, so `nums[i + 1] - nums[i - 1]` must be even. If that works, the common difference is
+
+`delta = (nums[i + 1] - nums[i - 1]) / 2`.
+
+Now we check how far an arithmetic run with difference `delta` already extends to the left and right using `pref` and `suf`, and merge them through the changed middle element. That gives a candidate length of `leftRun + rightRun + 3`.
+
+Overall this is linear time after building the difference array.
 
 ```cpp
 class Solution {
@@ -1555,6 +1799,22 @@ public:
 ## Q4. Maximum Points Activated with One Addition
 
 ### Solution 1: union find, map, grouping, counting, sorting
+
+Treat each point as a node in a graph. Two points belong to the same connected component if they share an `x` coordinate or a `y` coordinate, either directly or through a chain of such connections.
+
+The DSU builds these components efficiently:
+
+- group indices by `x`, and union adjacent indices inside each `x` bucket
+- group indices by `y`, and union adjacent indices inside each `y` bucket
+
+After that, `groups()` returns the size of every connected component.
+
+When we add one new point `(x, y)`, it can connect to all existing points on row `y` and all existing points on column `x`. Because points sharing the same row are already in one component, and points sharing the same column are already in one component, one added point can merge at most two existing components:
+
+- it may attach to only one component, giving `largest + 1`
+- or it may bridge two different components, giving `largest + secondLargest + 1`
+
+So once the component sizes are known, the answer is just the better of those two cases.
 
 ```cpp
 struct UnionFind {
@@ -1633,6 +1893,23 @@ public:
 ## 3130. Find All Possible Stable Binary Arrays II
 
 ### Solution 1: dynamic programming, counting, combinatorics, prefix sums for optimization
+
+Let `dp[i][j][k]` be the number of stable arrays that use exactly `i` zeros and `j` ones and end with digit `k`.
+
+The natural recurrence is:
+
+- to end with `0`, append a block of zeros to a valid array that previously ended with `1`
+- to end with `1`, append a block of ones to a valid array that previously ended with `0`
+
+The stability rule says no block can have length greater than `limit`. A direct transition would try every possible last block length from `1` to `limit`, but that would be too slow.
+
+The code rewrites that sum into a sliding-window style recurrence:
+
+- `dp[i][j][0]` starts from all arrays obtained by appending one more `0`
+- if that creates runs longer than `limit`, subtract the states that would force an illegal block
+- do the symmetric transition for `dp[i][j][1]`
+
+That subtraction is the optimization that removes the extra `limit` factor, so the DP runs in `O(zero * one)` time instead of `O(zero * one * limit)`.
 
 ```cpp
 const int MOD = 1e9 + 7;
@@ -2152,6 +2429,4 @@ public:
     }
 };
 ```
-
-
 

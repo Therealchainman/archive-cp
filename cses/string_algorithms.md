@@ -274,3 +274,118 @@ signed main() {
 }
 ```
 
+## Distinct Substrings
+
+### Solution 1: lcp, suffix array, 
+
+lcp is calculating between suffixes in sorted order.
+
+```cpp
+string S;
+
+vector<int> lcp_construction(const string& s, const vector<int>& p) {
+    int n = s.size();
+    vector<int> rank(n, 0);
+    for (int i = 0; i < n; i++)
+        rank[p[i]] = i;
+
+    int k = 0;
+    vector<int> lcp(n-1, 0);
+    for (int i = 0; i < n; i++) {
+        if (rank[i] == n - 1) {
+            k = 0;
+            continue;
+        }
+        int j = p[rank[i] + 1];
+        while (i + k < n && j + k < n && s[i+k] == s[j+k])
+            k++;
+        lcp[rank[i]] = k;
+        if (k)
+            k--;
+    }
+    return lcp;
+}
+
+void radix_sort(const vector<int>& equivalence_class, vector<int>& leaderboard, vector<int>& update_leaderboard) {
+    int n = leaderboard.size();
+    vector<int> bucket_size(n, 0), bucket_pos(n, 0);
+    bucket_size.assign(n, 0);
+    for (int eq_class : equivalence_class) {
+        bucket_size[eq_class]++;
+    }
+    bucket_pos.assign(n, 0);
+    for (int i = 1; i < n; i++) {
+        bucket_pos[i] = bucket_pos[i - 1] + bucket_size[i - 1];
+    }
+    update_leaderboard.assign(n, 0);
+    for (int i = 0; i < n; i++) {
+        int eq_class = equivalence_class[leaderboard[i]];
+        int pos = bucket_pos[eq_class];
+        update_leaderboard[pos] = leaderboard[i];
+        bucket_pos[eq_class]++;
+    }
+}
+
+vector<int> suffix_array(string& s) {
+    int n = s.size();
+    vector<pair<char, int>> arr(n);
+    for (int i = 0; i < n; i++) {
+        arr[i] = {s[i], i};
+    }
+    sort(arr.begin(), arr.end());
+    vector<int> leaderboard(n, 0), equivalence_class(n, 0);
+    for (int i = 0; i < n; i++) {
+        leaderboard[i] = arr[i].second;
+    }
+    equivalence_class[leaderboard[0]] = 0;
+    for (int i = 1; i < n; i++) {
+        int left_segment = arr[i - 1].first;
+        int right_segment = arr[i].first;
+        equivalence_class[leaderboard[i]] = equivalence_class[leaderboard[i - 1]] + (left_segment != right_segment);
+    }
+    bool is_finished = false;
+    int k = 1;
+    vector<int> update_equivalence_class(n, 0), update_leaderboard(n, 0);
+    while (k < n && !is_finished) {
+        for (int i = 0; i < n; i++) {
+            leaderboard[i] = (leaderboard[i] - k + n) % n; // create left segment, keeps sort of the right segment
+        }
+        radix_sort(equivalence_class, leaderboard, update_leaderboard); // radix sort for the left segment
+        swap(leaderboard, update_leaderboard);
+        update_equivalence_class.assign(n, 0);
+        update_equivalence_class[leaderboard[0]] = 0;
+        for (int i = 1; i < n; i++) {
+            pair<int, int> left_segment = {equivalence_class[leaderboard[i - 1]], equivalence_class[(leaderboard[i - 1] + k) % n]};
+            pair<int, int> right_segment = {equivalence_class[leaderboard[i]], equivalence_class[(leaderboard[i] + k) % n]};
+            update_equivalence_class[leaderboard[i]] = update_equivalence_class[leaderboard[i - 1]] + (left_segment != right_segment);
+            is_finished &= (update_equivalence_class[leaderboard[i]] != update_equivalence_class[leaderboard[i - 1]]);
+        }
+        k <<= 1;
+        swap(equivalence_class, update_equivalence_class);
+    }
+    return leaderboard;
+}
+
+void solve() {
+    cin >> S;
+    int N = S.size();
+    S += '$';
+    vector<int> suffixArr = suffix_array(S);
+    suffixArr.erase(suffixArr.begin()); // remove the suffix starting with '$'
+    S.pop_back(); // remove the '$' character
+    vector<int> lcp = lcp_construction(S, suffixArr);
+    int64 ans = 0;
+    for (int i = 0; i < N; ++i) {
+        ans += N - suffixArr[i] - (i > 0 ? lcp[i - 1] : 0);
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
