@@ -805,6 +805,175 @@ public:
 };
 ```
 
+# Leetcode Biweekly Contest 173
+
+## Q1. Reverse String Prefix
+
+### Solution 1: string manipulation, reverse prefix
+
+This is just split, reverse, and glue back together.
+
+Take the first `k` characters, reverse that substring, then append the untouched suffix starting at `k`. Since the code never touches characters after the prefix, it matches the operation directly.
+
+```cpp
+class Solution {
+public:
+    string reversePrefix(string s, int k) {
+        string t = s.substr(0, k);
+        reverse(t.begin(), t.end());
+        string ans = t + s.substr(k);
+        return ans;
+    }
+};
+```
+
+## Q2. Minimum Subarray Length With Distinct Sum At Least K
+
+### Solution 1: sliding window, frequency map, distinct-sum sum
+
+The window keeps two pieces of information:
+
+- `freq[x]`: how many times `x` appears in the current window
+- `wsum`: sum of the distinct values currently present in the window
+
+When `nums[r]` enters the window, it only increases `wsum` if it is the first copy. Then we greedily shrink from the left while either:
+
+- `nums[l]` is duplicated, so removing it does not change the distinct-value sum
+- or removing `nums[l]` still leaves the distinct sum at least `k`
+
+After that loop, the window is the shortest valid window ending at `r`, so if `wsum >= k` we can update the answer with `r - l + 1`.
+
+```cpp
+const int INF = numeric_limits<int>::max();
+class Solution {
+public:
+    int minLength(vector<int>& nums, int k) {
+        int N = nums.size();
+        int ans = INF, wsum = 0;
+        unordered_map<int, int> freq;
+        for (int l = 0, r = 0; r < N; ++r) {
+            freq[nums[r]]++;
+            if (freq[nums[r]] == 1) wsum += nums[r];
+            while (freq[nums[l]] > 1 || wsum - nums[l] >= k) {
+                freq[nums[l]]--;
+                if (freq[nums[l]] == 0) wsum -= nums[l];
+                l++;
+            }
+            if (wsum >= k) {
+                ans = min(ans, r - l + 1);
+            }
+        }
+        return ans < INF ? ans : -1;
+    }
+};
+```
+
+## Q3. Find Maximum Value in a Constrained Sequence
+
+### Solution 1: two passes, propagate upper bounds from both sides
+
+Each restriction says position `i` cannot exceed some value `x`, and adjacent positions can only change according to `diff`.
+
+So for every index we compute the best upper bound coming from the left and from the right:
+
+- `pref[i]`: tightest value allowed at `i` after propagating constraints left to right
+- `suf[i]`: tightest value allowed at `i` after propagating constraints right to left
+
+`pref[0] = 0` fixes the starting value. During the left-to-right pass, position `i + 1` cannot be more than `pref[i] + diff[i]`. The right-to-left pass does the symmetric update with `suf[i + 1] + diff[i]`.
+
+In the final array, a position must satisfy both directions, so its maximum feasible value is `min(pref[i], suf[i])`. Taking the maximum of that over all indices gives the answer.
+
+```cpp
+const int INF = numeric_limits<int>::max();
+class Solution {
+public:
+    int findMaxVal(int n, vector<vector<int>>& restrictions, vector<int>& diff) {
+        vector<int> pref(n, INF), suf(n, INF);
+        int ans = 0;
+        pref[0] = 0;
+        for (const auto &vec : restrictions) {
+            int i = vec[0], x = vec[1];
+            pref[i] = suf[i] = x;
+        }
+        for (int i = 0; i + 1 < n; ++i) {
+            pref[i + 1] = min(pref[i + 1], pref[i] + diff[i]);
+        }
+        for (int i = n - 2; i >= 0; --i) {
+            if (suf[i + 1] == INF) continue;
+            suf[i] = min(suf[i], suf[i + 1] + diff[i]);
+        }
+        for (int i = 0; i < n; ++i) {
+            ans = max(ans, min(pref[i], suf[i]));
+        }
+        return ans;
+    }
+};
+```
+
+## Q4. Count Routes to Climb a Rectangular Grid
+
+### Solution 1: dynamic programming by rows, prefix sums for range transitions
+
+This DP goes from the bottom row upward.
+
+For each row, there are two kinds of transitions:
+
+- come from the row below
+- move to another hold in the same row
+
+If we move between adjacent rows, the vertical distance is `1`, so the largest allowed horizontal shift is `floor(sqrt(d * d - 1))`. That is what `delta` stores. So the first pass on a row computes how many ways each open cell can be reached from the row below, using a prefix-sum array to query every valid column interval in `O(1)`.
+
+After that, the second pass adds routes that make one extra move inside the same row. For that transition the full distance budget is horizontal, so the reachable interval is `[c - d, c + d]`. The code subtracts the single-cell range at `c` so we do not count staying on the same hold.
+
+Both passes store row values as prefix sums, which makes each interval query constant time. Processing all rows this way gives an `O(RC)` solution.
+
+```cpp
+const int MOD = 1e9 + 7;
+class Solution {
+private:
+    int rangeSum(const vector<int>& psum, int l, int r) {
+        int ans = psum[r];
+        if (l > 0) ans -= psum[l - 1];
+        if (ans < 0) ans += MOD;
+        return ans;
+    }
+public:
+    int numberOfRoutes(vector<string>& grid, int d) {
+        int R = grid.size(), C = grid[0].size();
+        vector<int> dp(C, 0), ndp(C, 0);
+        int delta = sqrt(d * d - 1);
+        for (int r = R - 1; r >= 0; --r) {
+            ndp.assign(C, 0);
+            for (int c = 0; c < C; ++c) {
+                if (grid[r][c] == '.') {
+                    if (r == R - 1) {
+                        ndp[c] = 1;
+                    } else {
+                        ndp[c] = rangeSum(dp, max(0, c - delta), min(C - 1, c + delta));
+                    }
+                    if (ndp[c] < 0) ndp[c] += MOD;
+                }
+                if (c > 0) ndp[c] += ndp[c - 1];
+                ndp[c] %= MOD;
+            }
+            swap(ndp, dp);
+            ndp.assign(C, 0);
+            for (int c = 0; c < C; ++c) {
+                if (grid[r][c] == '.') ndp[c] = rangeSum(dp, max(0, c - d), min(C - 1, c + d)) - rangeSum(dp, c, c);
+                if (ndp[c] < 0) ndp[c] += MOD;
+                if (c > 0) ndp[c] += ndp[c - 1];
+                ndp[c] %= MOD;
+            }
+            for (int c = 0; c < C; ++c) {
+                dp[c] += ndp[c];
+                dp[c] %= MOD;
+            }
+        }
+        return dp.back();
+    }
+};
+```
+
 # Leetcode Weekly Contest 483
 
 ## Q1. Largest Even Number
@@ -2429,4 +2598,3 @@ public:
     }
 };
 ```
-
