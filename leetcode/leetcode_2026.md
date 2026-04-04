@@ -974,6 +974,148 @@ public:
 };
 ```
 
+# Leetcode Biweekly Contest 174
+
+## Q1. Best Reachable Tower
+
+### Solution 1: greedy scan, manhattan distance, lexicographic tie-break
+
+We only need to inspect each tower once. A tower is a candidate exactly when its Manhattan distance from `center` is at most `radius`, and among those candidates we want the one with maximum quality.
+
+So the scan keeps the best reachable tower seen so far. The `q < best` check skips towers that cannot improve the answer, and when `q == best` the vector comparison enforces the lexicographically smallest coordinate. If no tower passes the distance check, the initial `[-1, -1]` remains.
+
+```cpp
+class Solution {
+private:
+    int manhattanDistance(int x1, int y1, int x2, int y2) {
+        return abs(x1 - x2) + abs(y1 - y2);
+    }
+public:
+    vector<int> bestTower(vector<vector<int>>& towers, vector<int>& center, int radius) {
+        int best = -1;
+        vector<int> ans = {-1, -1};
+        int cx = center[0], cy = center[1];
+        for (const auto &tower : towers) {
+            int x = tower[0], y = tower[1], q = tower[2]; 
+            if (q < best) continue;
+            vector<int> cand = {x, y};
+            if (q == best && cand > ans) continue;
+            if (manhattanDistance(x, y, cx, cy) <= radius) {
+                best = q;
+                ans = cand;
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## Q2. Minimum Operations to Reach Target Array
+
+### Solution 1: hash set, distinct mismatching values
+
+The key observation is that one operation is tied to a value from `nums`, not to an individual index. If some value `x` appears in several maximal segments, choosing `x` fixes all of those mismatching `x`-segments at once by replacing them with the corresponding values from `target`.
+
+That means every value that appears at a mismatching position must be chosen at least once, and choosing it once is already enough. So the answer is exactly the number of distinct `nums[i]` values with `nums[i] != target[i]`, which is what the `unordered_set` stores.
+
+```cpp
+class Solution {
+public:
+    int minOperations(vector<int>& nums, vector<int>& target) {
+        int N = nums.size();
+        unordered_set<int> ans;
+        for (int i = 0; i < N; ++i) {
+            if (nums[i] != target[i]) ans.emplace(nums[i]);
+        }
+        return ans.size();
+    }
+};
+```
+
+## Q3. Number of Alternating XOR Partitions
+
+### Solution 1: prefix xor, dynamic programming, hash map
+
+Let `pref` be the xor of the prefix processed so far. If the last block of a partition ends here and must have xor `target1`, then after cutting at some earlier prefix xor `p` we need `p ^ pref = target1`, so `p = pref ^ target1`. The same idea gives `pref ^ target2` when the last block should be `target2`.
+
+The maps store exactly those counts:
+
+- `dp1[x]`: number of valid partitions of a processed prefix whose total prefix xor is `x` and whose last block xor is `target1`
+- `dp2[x]`: the same, but the last block xor is `target2`
+
+So `ans1 = dp2[pref ^ target1]` counts ways to append a `target1` block after a partition that previously ended with `target2`, and `ans2 = dp1[pref ^ target2]` does the symmetric transition. Seeding `dp2[0] = 1` treats the empty prefix as a virtual `target2` state, which lets the first real block start with `target1` as required.
+
+```cpp
+const int MOD = 1e9 + 7;
+class Solution {
+public:
+    int alternatingXOR(vector<int>& nums, int target1, int target2) {
+        int N = nums.size();
+        map<int, int> dp1, dp2;
+        dp2[0] = 1;
+        int pref = 0, ans1 = 0, ans2 = 0;
+        for (int val : nums) {
+            pref ^= val;
+            int x = pref ^ target1, y = pref ^ target2;
+            ans1 = dp2[x], ans2 = dp1[y];
+            dp1[pref] = (dp1[pref] + ans1) % MOD;
+            dp2[pref] = (dp2[pref] + ans2) % MOD;
+        }
+        return (ans1 + ans2) % MOD;
+    }
+};
+```
+
+## Q4. Minimum Edge Toggles on a Tree
+
+### Solution 1: tree DFS, postorder greedy, parity
+
+Process the tree bottom-up. After we finish a child subtree, every node below that child is already settled, so if node `v` still has `s[v] != t[v]`, the only remaining edge that can fix `v` is the edge from `v` to its parent.
+
+That makes the greedy choice forced: toggle that parent edge immediately. It flips `v` into the correct state and also flips the parent, which is fine because the parent has not been finalized yet. This is why a postorder DFS is the natural order.
+
+In the code, `dfs(v)` first solves all descendants of `v`. If `s[v] != t[v]` afterward, we record the edge index, flip both endpoints with `s[v] ^= 1` and `s[u] ^= 1`, and continue upward. If the root still mismatches at the end, there is no parent edge left to fix it, so the answer is impossible.
+
+```cpp
+class Solution {
+private:
+    vector<vector<pair<int, int>>> adj;
+    vector<int> ans, s, t;
+    void dfs(int u, int p = -1) {
+        for (const auto &[v, i] : adj[u]) {
+            if (v == p) continue;
+            dfs(v, u);
+            if (s[v] != t[v]) {
+                ans.emplace_back(i);
+                s[v] ^= 1;
+                s[u] ^= 1;
+            }
+        }
+    }
+public:
+    vector<int> minimumFlips(int n, vector<vector<int>>& edges, string start, string target) {
+        adj.assign(n, vector<pair<int, int>>());
+        for (int i = 0; i + 1 < n; ++i) {
+            int u = edges[i][0], v = edges[i][1];
+            adj[u].emplace_back(v, i);
+            adj[v].emplace_back(u, i);
+        }
+        s.assign(n, 0);
+        t.assign(n, 0);
+        for (int i = 0; i < n; ++i) {
+            s[i] = start[i] - '0';
+            t[i] = target[i] - '0';
+        }
+        dfs(0);
+        for (int i = 0; i < n; ++i) {
+            if (s[i] != t[i]) return {-1};
+        }
+        sort(ans.begin(), ans.end());
+        return ans;
+    }
+};
+```
+
 # Leetcode Weekly Contest 483
 
 ## Q1. Largest Even Number
