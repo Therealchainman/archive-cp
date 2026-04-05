@@ -40,6 +40,96 @@ if __name__ == '__main__':
     print(main())
 ```
 
+## Dynamic Range Minimum Queries
+
+### Solution 1: segment tree, point updates, range queries
+
+```cpp
+const int INF = numeric_limits<int>::max();
+
+template<class Node>
+struct SegmentTree {
+    struct Configuration {
+        const Node neutral;                           // identity for merge
+        function<Node(const Node&, const Node&)> merge;           // combine two nodes
+    } config;
+
+    int size = 0;
+    vector<Node> nodes;
+
+    SegmentTree(int n, Configuration config) : config(config) { init(n); }
+
+    void init(int num_nodes) {
+        size = 1;
+        while (size < num_nodes) size *= 2;
+        nodes.assign(size * 2, config.neutral);
+    }
+
+    // this is for assign, for addition change to += val
+    void update(int segment_idx, const Node& val) {
+        segment_idx += size;
+        nodes[segment_idx] = val; // += val if want addition, to track frequency
+        for (segment_idx >>= 1; segment_idx >= 1; segment_idx >>= 1) pull(segment_idx);
+    }
+
+    Node query(int left, int right) {
+        left += size, right += size;
+        Node left_acc = config.neutral;
+        Node right_acc = config.neutral;
+        while (left <= right) {
+           if (left & 1) {
+                // res on left
+                left_acc = config.merge(left_acc, nodes[left++]);
+            }
+            if (~right & 1) {
+                // res on right
+                right_acc = config.merge(nodes[right--], right_acc);
+            }
+            left >>= 1, right >>= 1;
+        }
+        return config.merge(left_acc, right_acc);
+    }
+    private:
+        inline void pull(int segment_idx) { nodes[segment_idx] = config.merge(nodes[segment_idx << 1], nodes[segment_idx << 1 | 1]); }
+};
+
+SegmentTree<int>::Configuration cfg{
+    INF,
+    [](const int &x, const int &y) {
+        return min(x, y);
+    }
+};
+
+int N, Q;
+
+void solve() {
+    cin >> N >> Q;
+    SegmentTree<int> seg(N, cfg);
+    for (int i = 0; i < N; ++i) {
+        int x;
+        cin >> x;
+        seg.update(i, x);
+    }
+    for (int i = 0; i < Q; ++i) {
+        int t, a, b;
+        cin >> t >> a >> b;
+        if (t == 1) {
+            seg.update(a - 1, b);
+        } else {
+            cout << seg.query(a - 1, b - 1) << endl;
+        }
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
 ## Hotel Queries
 
 ### Solution 1:  segment tree + point updates + range query + first element greater than x

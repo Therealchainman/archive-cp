@@ -110,6 +110,17 @@ for (int i = 0; i < N; ++i) {
 
 ```
 
+
+```cpp
+SegmentTree<int>::Configuration cfg{
+    INF,
+    [](const int &x, const int &y) {
+        return min(x, y);
+    }
+};
+SegmentTree<int> seg(N, cfg);
+```
+
 ## Segment Tree for finding rightmost index with given prefix sum
 
 1. prefix sum means you start from [0, r], and want the largest r such that it equals some target value.

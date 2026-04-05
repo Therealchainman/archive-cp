@@ -2740,3 +2740,161 @@ public:
     }
 };
 ```
+
+# Leetcode Weekly Contest 496
+
+## Q1. Mirror Frequency Distance
+
+### Solution 1: frequency counting, mirrored pairs
+
+Each letter or digit only interacts with its mirror partner, so the answer can be computed pair by pair.
+For letters, the relevant pairs are `('a','z')`, `('b','y')`, ..., and for digits they are `('0','9')`, `('1','8')`, ....
+
+If one side of a mirrored pair appears more often than the other, those extra copies are exactly the contribution of that pair, so we add `abs(freq[a] - freq[b])`.
+After counting frequencies once, summing these independent contributions gives the total distance.
+
+```cpp
+class Solution {
+public:
+    int mirrorFrequency(string s) {
+        map<char, int> freq;
+        for (const char &ch : s) {
+            freq[ch]++;
+        }
+        int ans = 0;
+        for (int i = 0; i < 13; ++i) {
+            char a = 'a' + i, b = 'a' + 25 - i;
+            ans += abs(freq[a] - freq[b]);
+        }
+        for (int i = 0; i < 5; ++i) {
+            char a = '0' + i, b = '0' + 9 - i;
+            ans += abs(freq[a] - freq[b]);
+        }
+        return ans;
+    }
+};
+```
+
+## Q2. Integers With Multiple Sum of Two Cubes
+
+### Solution 1: brute force over cube pairs, counting representations
+
+Enumerate every unordered pair `(a, b)` with `1 <= a <= b` and check the value `a^3 + b^3`.
+Using `a <= b` is the key detail because it counts each representation once instead of double-counting `(a, b)` and `(b, a)`.
+
+`freq[x]` stores how many different cube pairs produce `x`.
+At the end, every integer with `freq[x] >= 2` has at least two distinct representations as a sum of two positive cubes, so those are the values we return in sorted order.
+
+```cpp
+using int64 = long long;
+class Solution {
+public:
+    vector<int> findGoodIntegers(int n) {
+        unordered_map<int, int> freq;
+        vector<int> ans;
+        for (int b = 1; 1LL * b * b * b <= n; ++b) {
+            for (int a = 1; a <= b; ++a) {
+                int64 cand = 1LL * a * a * a + 1LL * b * b * b;
+                if (cand > n) break;
+                freq[cand]++;
+            }
+        }
+        for (const auto &[k, v] : freq) {
+            if (v < 2) continue;
+            ans.emplace_back(k);
+        }
+        sort(ans.begin(), ans.end());
+        return ans;
+    }
+};
+```
+
+## Q3. Minimum Increase to Maximize Special Indices
+
+### Solution 1: alternating peaks, prefix/suffix cost
+
+To maximize the number of special indices, the chosen positions must alternate, because two adjacent indices cannot both be strict peaks.
+For any interior index `i`, the minimum cost to make it a peak is independent of the other non-adjacent choices:
+raise `nums[i]` to `max(nums[i - 1], nums[i + 1]) + 1` if it is not already there.
+
+`pref[i]` accumulates that cost for the odd indices up to `i`, which handles the only pattern when `N` is odd.
+When `N` is even, the optimal maximum pattern can switch parity once, so we try every split: odd peaks on the left from `pref`, even peaks on the right from `suf`, and take the minimum total increase.
+
+```cpp
+using int64 = long long;
+class Solution {
+public:
+    int64 minIncrease(vector<int>& nums) {
+        int N = nums.size();
+        vector<int64> pref(N, 0);
+        for (int i = 1; i < N; ++i) {
+            pref[i] = pref[i - 1];
+            if (i % 2 == 0) continue;
+            if (i + 1 >= N) continue;
+            pref[i] += max(0, max(nums[i - 1], nums[i + 1]) + 1 - nums[i]);
+        }
+        int64 ans = pref.back();
+        if (N & 1) return ans;
+        int64 suf = 0;
+        for (int i = N - 2; i >= 0; --i) {
+            if (i & 1) continue;
+            int64 cand = pref[i] + suf;
+            ans = min(ans, cand);
+            if (i > 0) suf += max(0, max(nums[i - 1], nums[i + 1]) + 1 - nums[i]);
+        }
+        return ans;
+    }
+};
+```
+
+## Q4. Minimum Operations to Achieve At Least K Peaks
+
+### Solution 1: weighted independent set on a cycle, dynamic programming
+
+Making index `i` a peak is cheapest if we only raise `nums[i]`, so its standalone cost is
+`max(0, max(leftNeighbor, rightNeighbor) + 1 - nums[i])`.
+After that, the real constraint is combinatorial: chosen peaks cannot be adjacent on the circular array.
+
+That turns the problem into choosing `k` non-adjacent vertices on a cycle with minimum total weight.
+The usual cycle trick is to split into two path cases: take index `0` and forbid its neighbors, or skip index `0`.
+Inside `calc`, `dp[i][j]` is the minimum cost to process the first `i` positions of the path while choosing exactly `j` peaks, with transitions for skipping the current index or taking it from `i - 2`.
+
+`cost[i]` stores the weight of choosing position `i`, and the final answer is the better of the two cycle-breaking cases.
+
+```cpp
+const int INF = numeric_limits<int>::max();
+class Solution {
+private:
+    vector<int> cost;
+    int calc(int l, int r, int k, const vector<int>& nums) {
+        if (l > r) return 0;
+        if (k <= 0) return 0;
+        int N = r - l + 1;
+        vector<vector<int>> dp(N + 1, vector<int>(k + 1, INF));
+        dp[0][0] = 0;
+        if (k > 0) dp[1][1] = cost[l];
+        for (int i = 1; i <= N; ++i) {
+            for (int j = 0; j <= k; ++j) {
+                // take this one as peak
+                if (i > 1 && j > 0 && dp[i - 2][j - 1] != INF) {
+                    dp[i][j] = min(dp[i][j], dp[i - 2][j - 1] + cost[l + i - 1]);
+                }
+                // skip this one as peak.
+                dp[i][j] = min(dp[i][j], dp[i - 1][j]);
+            }
+        }
+        return dp[N][k] < INF ? dp[N][k] : 0;
+    }
+public:
+    int minOperations(vector<int>& nums, int k) {
+        int N = nums.size();
+        if (k > N / 2) return -1;
+        cost.assign(N, 0);
+        for (int i = 0; i < N; ++i) {
+            cost[i] = max(0, max(nums[(i - 1 + N) % N], nums[(i + 1) % N]) + 1 - nums[i]);
+        }
+        int ans = min(cost[0] + calc(2, N - 2, k - 1, nums), calc(1, N - 1, k, nums));
+        return ans;
+    }
+};
+```

@@ -1232,3 +1232,256 @@ signed main() {
     return 0;
 }
 ```
+
+# Codeforces Round 1090 (Div. 4)
+
+## D. The 67th OEIS Problem
+
+### Solution 1: constructive, primes, pairwise gcd pattern
+
+The key observation is that products of consecutive primes give a very clean overlap structure. If we build
+
+$$
+1,\ p_1p_2,\ p_2p_3,\ p_3p_4,\ \dots
+$$
+
+then every nontrivial element shares exactly one prime factor with its immediate neighbors, and shares no prime factor with elements farther away.
+
+That is why the construction in the code is so short: precompute primes with a sieve, print `1` first, and then print `P[i-1] * P[i]` for each remaining position. Using distinct consecutive primes keeps the factorization unique, so the required gcd behavior is automatic and there is no need for any search or casework.
+
+The sieve fills `P` once, and each test case just outputs the first `N` constructed values.
+
+```cpp
+const int MAXN = 2e5 + 5;
+int N;
+bool primes[MAXN];
+vector<int> P;
+
+void sieve(int n) {
+    fill(primes, primes + n, true);
+    primes[0] = primes[1] = false;
+    P.emplace_back(1);
+    int p = 2;
+    for (int p = 2; p * p <= n; p++) {
+        if (primes[p]) {
+            for (int i = p * p; i < n; i += p) {
+                primes[i] = false;;
+            }
+        }
+    }
+    for (int i = 0; i < n; ++i) {
+        if (primes[i]) {
+            P.emplace_back(i);
+        }
+    }
+}
+
+void solve() {
+    cin >> N;
+    int cnt = 0;
+    vector<int64> ans;
+    ans.emplace_back(1);
+    for (int i = 1; i < N; ++i) {
+        ans.emplace_back(1LL * P[i - 1] * P[i]);
+    }
+    for (int64 x : ans) {
+        cout << x << ' ';
+    }
+    cout << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    sieve(MAXN);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## E. The 67th XOR Problem
+
+### Solution 1: brute force, xor over all pairs
+
+This one is small enough that we can check every pair directly. The answer only depends on choosing two positions, so the simplest correct approach is to try all
+
+$$
+(i, j),\quad i < j
+$$
+
+and keep the maximum value of `A[i] ^ A[j]`.
+
+The nested loops do exactly that. `ans` stores the best xor seen so far, and every unordered pair is examined once, so nothing can be missed. The implementation is only `O(N^2)`, but for the intended constraints that is already fast enough.
+
+```cpp
+int N;
+vector<int> A;
+
+void solve() {
+    cin >> N;
+    A.assign(N, 0);
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+    }
+    int ans = 0;
+    for (int i = 0; i < N; ++i) {
+        for (int j = i + 1; j < N; ++j) {
+            ans = max(ans, A[i] ^ A[j]);
+        }
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## F. The 67th Tree Problem
+
+### Solution 1: constructive, root-centered gadgets
+
+The construction treats node `1` as the center and builds the tree out of two simple pieces:
+
+- a length-2 arm `1 - u - (u+1)`, which consumes one unit from both counters
+- a direct leaf `1 - u`, which consumes one unit only from the second counter
+
+So the natural greedy move is to use as many length-2 arms as possible first, because that is the only way to spend one unit from both groups at the same time. After that, any leftover amount from the second group can be finished by attaching plain leaves to the root.
+
+The only subtlety is that the root itself already belongs to one of the two required groups, and which group that is depends on the parity of the final tree size. That is why the code subtracts `1` from `X` when `X + Y` is even, and from `Y` otherwise, before building the remaining gadgets.
+
+The vector `edges` stores exactly this construction. If at some point one counter would need to go negative, then no such tree exists and the code prints `No`; otherwise the produced edges give a valid tree immediately.
+
+```cpp
+int X, Y;
+vector<pair<int, int>> edges;
+
+void solve() {
+    cin >> X >> Y;
+    int N = X + Y, u = 2;
+    edges.clear();
+    if (N % 2 == 0) {
+        X--;
+    } else {
+        Y--;
+    }
+    while (X > 0) {
+        edges.emplace_back(1, u);
+        edges.emplace_back(u, u + 1);
+        X--;
+        Y--;
+        u += 2;
+    }
+    if (Y < 0 || X < 0) {
+        cout << "No" << endl;
+        return;
+    }
+    while (Y > 0) {
+        edges.emplace_back(1, u++);
+        Y--;
+    }
+    cout << "Yes" << endl;
+    for (const auto &[u, v] : edges) {
+        cout << u << " " << v << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## G. The 67th Iteration of Counting is Fun
+
+### Solution 1: counting, process values in increasing order, prefix frequencies
+
+Process the values layer by layer from `0` up to `M - 1`. By the time we handle value `i`, all smaller values are already fixed, so every position with `B[j] = i` must connect to something smaller right next to it. If both neighbors are at least `i`, then there is no way to place this `i`, so the answer is immediately `0`.
+
+After that, there are two cases for a position `j` with value `i`:
+
+- if its best smaller neighbor is exactly `i - 1`, then any previously processed value smaller than `i` can serve, which gives `pref[i - 1]` choices
+- if the best smaller neighbor is below `i - 1`, then the newest layer `i - 1` is forced, so the number of choices is exactly the count of value `i - 1`, which is `pref[i - 1] - pref[i - 2]`
+
+The array `pref` stores how many positions have value at most each threshold, and `bucket[i]` stores all indices whose value is exactly `i`. For each layer we multiply the contributions of all positions in that bucket, then multiply that into the global answer modulo `676767677`.
+
+```cpp
+const int MOD = 676767677;
+int N, M;
+vector<int> B;
+
+const int INF = numeric_limits<int>::max();
+
+void solve() {
+    cin >> N >> M;
+    B.assign(N, 0);
+    vector<int> pref(M, 0);
+    for (int i = 0; i < N; ++i) {
+        cin >> B[i];
+        pref[B[i]]++;
+    }
+    for (int i = 1; i < M; ++i) {
+        pref[i] += pref[i - 1];
+    }
+    vector<vector<int>> bucket(M, vector<int>());
+    for (int i = 0; i < N; ++i) {
+        bucket[B[i]].emplace_back(i);
+    }
+    int ans = 1;
+    for (int i = 1; i < M; ++i) {
+        int cur = 1;
+        for (int j : bucket[i]) {
+            int neigh = INF;
+            if (j > 0) {
+                neigh = min(neigh, B[j - 1]);
+            }
+            if (j + 1 < N) {
+                neigh = min(neigh, B[j + 1]);
+            }
+            if (neigh >= i) {
+                cout << 0 << endl;
+                return;
+            }
+            if (neigh == i - 1) {
+                cur = 1LL * cur * pref[i - 1] % MOD;
+            } else {
+                cur = 1LL * cur * (pref[i - 1] - pref[i - 2]) % MOD;
+            }
+        }
+        ans = 1LL * ans * cur % MOD;
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
