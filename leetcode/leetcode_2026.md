@@ -2898,3 +2898,117 @@ public:
     }
 };
 ```
+
+# Leetcode Biweekly Contest 180
+
+## Q3. Minimum Operations to Transform Array into Alternating Prime
+
+### Solution 1: sieve + greedy by position
+
+The array positions are independent, because each operation only increments one element and the requirement is purely local: even indices must end up prime, and odd indices must end up non-prime. So for each index, the cheapest choice is simply the first valid number at or above the current value.
+
+For even indices, we want the smallest prime >= nums[i]. After precomputing all primes with a sieve, we can binary search in the prime list P and jump directly to that next prime. The number of operations contributed by this position is exactly nextPrime - nums[i], and this is optimal because any smaller target is invalid and any larger target would cost more.
+
+For odd indices, we want the smallest non-prime >= nums[i]. Since the valid target might be the current value already, the code just increments while nums[i] is prime. The moment it reaches a non-prime, that is the minimum possible number of increments for this position.
+
+```cpp
+const int MAXN = 1e5 + 5;
+class Solution {
+private:
+    static bool precomputed;
+    static bool primes[MAXN];
+    static vector<int> P;
+    void sieve(int n) {
+        if (precomputed) return;
+        precomputed = true;
+        fill(primes, primes + n, true);
+        primes[0] = primes[1] = false;
+        int p = 2;
+        for (int p = 2; p * p <= n; p++) {
+            if (primes[p]) {
+                for (int i = p * p; i < n; i += p) {
+                    primes[i] = false;;
+                }
+            }
+        }
+        for (int i = 2; i < n; ++i) {
+            if (primes[i]) {
+                P.emplace_back(i);
+            }
+        }
+    }
+public:
+    int minOperations(vector<int>& nums) {
+        sieve(MAXN);
+        int ans = 0, N = nums.size();
+        for (int i = 0; i < N; ++i) {
+            if (i % 2 == 0) {
+                int j = lower_bound(P.begin(), P.end(), nums[i]) - P.begin();
+                int cand = P[j] - nums[i];
+                ans += cand;
+            } else {
+                while (primes[nums[i]]) {
+                    ans++;
+                    nums[i]++;
+                }
+            }
+        }
+        return ans;
+    }
+};
+
+bool Solution::precomputed = false;
+vector<int> Solution::P;
+bool Solution::primes[MAXN];
+```
+
+## Q4. Maximum Value of Concatenated Binary Segments
+
+### Solution 1: greedy sorting by concatenation order
+
+Each pair (nums1[i], nums0[i]) defines a binary segment consisting of nums1[i] ones followed by nums0[i] zeros. The only freedom is how to order these segments before concatenating them into one big binary number. This is the same kind of greedy ordering used in problems like forming the largest concatenated number: for two segments A and B, we should decide their relative order by comparing A + B against B + A.
+
+The key observation is that if placing A before B makes the combined binary string larger than placing B before A, then in an optimal arrangement A must appear before B. So sorting all segments with this pairwise comparator gives a globally optimal order. The comparator in the code does this without actually building the concatenated vectors: it compares the virtual sequences p1 + p2 and p2 + p1 element by element.
+
+One subtle detail is the direction of the final value construction. The loop that computes ans processes the segments from least significant bit upward: within each segment it walks from right to left, and earlier segments in arr end up contributing lower bits. Because of that, the sort is written in the ascending version of the comparator, so the “better” segments are pushed later and become more significant in the final binary value.
+
+```cpp
+const int MOD = 1e9 + 7;
+class Solution {
+public:
+    int maxValue(vector<int>& nums1, vector<int>& nums0) {
+        int N = nums1.size();
+        vector<vector<int>> arr;
+        for (int i = 0; i < N; ++i) {
+            vector<int> A;
+            while (nums1[i]--) {
+                A.emplace_back(1);
+            }
+            while (nums0[i]--) {
+                A.emplace_back(0);
+            }
+            arr.emplace_back(A);
+        }
+        // sorted in ascending order
+        sort(arr.begin(), arr.end(), [](const auto &p1, const auto &p2) {
+            // propose the following that it is p1 + p2 > p2 + p1
+            int n = p1.size(), m = p2.size();
+            for (int i = 0; i < n + m; ++i) {
+                int a = i < n ? p1[i] : p2[i - n];
+                int b = i < m ? p2[i] : p1[i - m];
+                if (a != b) return a < b;
+            }
+            return false;
+        });
+        int ans = 0, p = 1;
+        for (const auto &vec : arr) {
+            int M = vec.size();
+            for (int i = M - 1; i >= 0; --i) {
+                if (vec[i]) ans = (ans + p) % MOD;
+                p = 2LL * p % MOD;
+            }
+        }
+        return ans;
+    }
+};
+```

@@ -2208,3 +2208,154 @@ public:
     }
 };
 ```
+
+# Leetcode Weekly Contest 482
+
+## Q1. Maximum Score of a Split
+
+### Solution 1: prefix sums + suffix minimum
+
+```cpp
+using int64 = long long;
+const int64 INF = numeric_limits<int64>::max();
+class Solution {
+public:
+    int64 maximumScore(vector<int>& nums) {
+        int N = nums.size();
+        vector<int64> pref(N + 1, 0);
+        for (int i = 0; i < N; ++i) {
+            pref[i + 1] = pref[i] + nums[i];
+        }
+        int64 ans = -INF, smin = INF;
+        for (int i = N - 1; i > 0; --i) {
+            smin = min(smin, 1LL * nums[i]);
+            ans = max(ans, pref[i] - smin);
+        }
+        return ans;
+    }
+};
+```
+
+## Q2. Minimum Cost to Acquire Required Items
+
+### Solution 1: greedy using the bundled item first
+
+The first observation is that buying the bundle should never cost more than buying the two items separately, so we can safely replace:
+
+costBoth = min(costBoth, cost1 + cost2)
+
+After that, it is always optimal to use the bundle for as many paired needs as possible, namely min(need1, need2). Each such purchase helps both requirements at once, so it is the most efficient way to cover overlapping demand.
+
+Once the shared portion is handled, only one type may still be needed. For those leftover units, we can either:
+
+buy the single item directly, or
+buy the bundle and ignore the extra item
+
+So the remaining cost for type 1 is min(costBoth, cost1), and similarly for type 2.
+
+```cpp
+using int64 = long long;
+const int64 INF = numeric_limits<int64>::max();
+class Solution {
+public:
+    int64 minimumCost(int cost1, int cost2, int costBoth, int need1, int need2) {
+        costBoth = min(costBoth, cost1 + cost2);
+        int together = min(need1, need2);
+        int64 ans = 1LL * costBoth * together;
+        need1 -= together;
+        need2 -= together;
+        ans += 1LL * min(costBoth, cost1) * need1 + 1LL * min(costBoth, cost2) * need2;
+        return ans;
+    }
+};
+```
+
+## Q3. Smallest All-Ones Multiple
+
+### Solution 1: remainder simulation + cycle detection
+
+We never need to build the full number of repeated 1s. Instead, we only care about its remainder modulo k.
+
+If the current number has remainder r, then appending one more digit 1 gives the new remainder:
+
+(r * 10 + 1) % k
+
+So the problem becomes: starting from "1", keep appending 1 and track remainders until either:
+
+the remainder becomes 0, meaning the current all-ones number is divisible by k
+a remainder repeats, meaning we are in a cycle and will never reach 0
+
+That is exactly what the set vis checks. Since there are only k possible remainders, once one repeats the process will loop forever.
+
+```cpp
+class Solution {
+public:
+    int minAllOneMultiple(int k) {
+        unordered_set<int> vis;
+        int rem = 1, ans = 1;
+        while (rem != 0) {
+            while (rem < k) {
+                rem = 10 * rem + 1;
+                ans++;
+            }
+            rem %= k;
+            if (vis.find(rem) != vis.end()) return -1;
+            vis.emplace(rem);
+        }
+        return ans;
+    }
+};
+```
+
+## Q4. Number of Balanced Integers in a Range
+
+### Solution 1: Digit DP on odd-even digit sum difference
+
+We want to count integers in a range whose sum of digits at odd positions equals the sum of digits at even positions, where positions are counted from the left.
+
+This is a standard digit DP. Define delta as the current difference between the two sums. While scanning digits from left to right:
+
+if the current position is odd, add the digit to delta
+if the current position is even, subtract the digit from delta
+
+At the end, the number is balanced exactly when the final difference is zero.
+
+The DP state is:
+
+idx: current digit position
+delta: current shifted difference
+zero: whether all digits so far are leading zeros
+tight: whether the built prefix is still equal to the upper bound
+
+Since delta can become negative, the code shifts it by MID = 135, so every valid difference maps into a nonnegative array index. The maximum absolute difference is at most 9 * 15 = 135, which is why the DP width is 271.
+
+```cpp
+using int64 = long long;
+const int A = 16, B = 271, C = 2, D = 2, MID = 135;
+class Solution {
+private:
+    int64 dp[A][B][C][D];
+    int64 dfs(const string &num, int idx, int delta, int zero, int tight) {
+        int N = num.size();
+        if (idx == N) {
+            return delta == MID;
+        }
+        if (dp[idx][delta][zero][tight] != -1) return dp[idx][delta][zero][tight];
+        int64 ans = 0;
+        for (int dig = 0; dig < 10; ++dig) {
+            if (tight && dig > num[idx] - '0') break;
+            int ndelta = idx % 2 == 0 ? delta + dig : delta - dig;
+            ans += dfs(num, idx + 1, ndelta, zero && dig == 0, tight && dig == num[idx] - '0');
+        }
+        return dp[idx][delta][zero][tight] = ans;
+    }
+public:
+    int64 countBalanced(int64 low, int64 high) {
+        fill(&dp[0][0][0][0], &dp[0][0][0][0] + A * B * C * D, -1);
+        int64 vlow = dfs(to_string(low - 1), 0, MID, 1, 1);
+        fill(&dp[0][0][0][0], &dp[0][0][0][0] + A * B * C * D, -1);
+        int64 vhigh = dfs(to_string(high), 0, MID, 1, 1);
+        return vhigh - vlow;
+    }
+};
+```
