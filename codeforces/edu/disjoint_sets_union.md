@@ -429,3 +429,284 @@ signed main() {
     return 0;
 }
 ```
+
+# Step 2
+
+## A. People are leaving
+
+### Solution 1: 
+
+```cpp
+int N, M;
+
+struct UnionFind {
+    vector<int> parent, size, mx;
+    UnionFind(int n) {
+        parent.resize(n);
+        iota(parent.begin(),parent.end(),0);
+        size.assign(n,1);
+        mx.resize(n);
+        iota(mx.begin(),mx.end(),0);
+    }
+
+    int find(int i) {
+        if (i == parent[i]) {
+            return i;
+        }
+        return parent[i] = find(parent[i]);
+    }
+
+    void unite(int i, int j) {
+        i = find(i), j = find(j);
+        if (i != j) {
+            if (size[j] > size[i]) {
+                swap(i, j);
+            }
+            size[i] += size[j];
+            parent[j] = i;
+            mx[i] = max(mx[i], mx[j]);
+        }
+    }
+
+    bool same(int i, int j) {
+        return find(i) == find(j);
+    }
+};
+
+void solve() {
+    cin >> N >> M;
+    UnionFind dsu(N);
+    bool last = false;
+    while (M--) {
+        char c;
+        int x;
+        cin >> c >> x;
+        x--;
+        if (c == '-') {
+            if (x == N - 1) {
+                last = true;
+                continue;
+            }
+            dsu.unite(x, x + 1);
+        } else {
+            int y = dsu.mx[dsu.find(x)];
+            if (y == N - 1 && last) {
+                cout << -1 << endl;
+            } else {
+                cout << y + 1 << endl;
+            }
+        }
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## B. Parking
+
+### Solution 1: 
+
+```cpp
+int N;
+
+struct UnionFind {
+    vector<int> parent, size, mx;
+    UnionFind(int n) {
+        parent.resize(n);
+        iota(parent.begin(),parent.end(),0);
+        size.assign(n,1);
+        mx.resize(n);
+        iota(mx.begin(),mx.end(),0);
+    }
+
+    int find(int i) {
+        if (i == parent[i]) {
+            return i;
+        }
+        return parent[i] = find(parent[i]);
+    }
+
+    void unite(int i, int j) {
+        i = find(i), j = find(j);
+        if (i != j) {
+            if (size[j] > size[i]) {
+                swap(i, j);
+            }
+            size[i] += size[j];
+            parent[j] = i;
+            mx[i] = max(mx[i], mx[j]);
+        }
+    }
+
+    bool same(int i, int j) {
+        return find(i) == find(j);
+    }
+};
+
+void solve() {
+    cin >> N;
+    bool last = false;
+    UnionFind dsu(N + 1);
+    for (int i = 0; i < N; ++i) {
+        int x;
+        cin >> x;
+        x--;
+        int j = dsu.mx[dsu.find(x)];
+        if (j == N) {
+            j = dsu.mx[dsu.find(0)];
+            cout << j + 1 << " ";
+        } else {
+            cout << j + 1 << " ";
+        }
+        dsu.unite(j, j + 1);
+    }
+    cout << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## C. Restructuring Company
+
+### Solution 1: 
+
+```cpp
+int N, Q;
+
+struct UnionFind {
+    vector<int> parent, size, mx;
+    UnionFind(int n) {
+        parent.resize(n);
+        iota(parent.begin(),parent.end(),0);
+        size.assign(n,1);
+        mx.resize(n);
+        iota(mx.begin(),mx.end(),0);
+    }
+
+    int find(int i) {
+        if (i == parent[i]) {
+            return i;
+        }
+        return parent[i] = find(parent[i]);
+    }
+
+    void unite(int i, int j) {
+        i = find(i), j = find(j);
+        if (i != j) {
+            if (size[j] > size[i]) {
+                swap(i, j);
+            }
+            size[i] += size[j];
+            parent[j] = i;
+            mx[i] = max(mx[i], mx[j]);
+        }
+    }
+
+    bool same(int i, int j) {
+        return find(i) == find(j);
+    }
+};
+
+void solve() {
+    cin >> N >> Q;
+    UnionFind dsu(N), dsu1(N);
+    while (Q--) {
+        int t, x, y;
+        cin >> t >> x >> y;
+        x--, y--;
+        if (t == 1) {
+            dsu.unite(x, y);
+        } else if (t == 2) {
+            // merge from x to y
+            for (int i = x + 1; i <= y;) {
+                int j = dsu1.mx[dsu1.find(i)];
+                dsu1.unite(x, j);
+                dsu.unite(x, j);
+                i = j + 1;
+            }
+        } else {
+            if (dsu.same(x, y)) {
+                cout << "YES" << endl;
+            } else {
+                cout << "NO" << endl;
+            }
+        }
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```

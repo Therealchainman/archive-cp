@@ -3012,3 +3012,268 @@ public:
     }
 };
 ```
+
+# Leetcode Weekly Contest 497
+
+## Q2. Angles of a Triangle
+
+### Solution 1: geometry, math, implementation
+
+Categories: triangle inequality, law of cosines, floating point math, sorting
+
+Algorithm idea:
+Sort the three side lengths so they are in increasing order. First check whether they can form a valid triangle using the triangle inequality a + b > c. If not, return an empty array. Otherwise, use the Law of Cosines to compute each of the three interior angles, convert from radians to degrees, then sort the angles before returning them.
+
+```cpp
+class Solution {
+public:
+    vector<double> internalAngles(vector<int>& sides) {
+        sort(sides.begin(), sides.end());
+        double a = sides[0], b = sides[1], c = sides[2];
+        if (a + b <= c) return {};
+        double pi = numbers::pi;
+        double A = acos((b * b + c * c - a * a) / (2 * b * c)) * 180.0 / pi;
+        double B = acos((a * a + c * c - b * b) / (2 * a * c)) * 180.0 / pi;
+        double C = acos((a * a + b * b - c * c) / (2 * a * b)) * 180.0 / pi;
+        vector<double> ans = {A, B, C};
+        sort(ans.begin(), ans.end());
+        return ans;
+    }
+};
+```
+
+## Q3. Longest Balanced Substring After One Swap
+
+### Solution 1: strings, prefix sums, case analysis
+
+Categories: prefix sum, hashmap or map, binary search, balanced substring, one modification
+
+Algorithm idea:
+Treat '0' as -1 and '1' as +1, so a balanced substring becomes a subarray whose sum is 0. The prefix sum lets you detect such substrings quickly. The map stores all earlier positions for each prefix value. Then the solution checks three cases while scanning from left to right:
+
+a substring already balanced with no swap needed,
+a substring that could be fixed by changing the balance by +2,
+a substring that could be fixed by changing the balance by -2.
+
+The stored first and last positions of 0 and 1, together with binary search on earlier prefix positions, are used to verify whether one swap can make that substring balanced and maximize its length.
+
+```cpp
+class Solution {
+public:
+    int longestBalanced(string s) {
+        int N = s.size();
+        int p0 = N, p1 = N, s0 = -1, s1 = -1;
+        vector<int> pref(N, 0);
+        for (int i = 0; i < N; ++i) {
+            if (s[i] == '0') {
+                if (p0 == N) p0 = i;
+                s0 = i;
+                pref[i] = -1;
+            } else {
+                if (p1 == N) p1 = i;
+                s1 = i;
+                pref[i] = 1;
+            }
+            if (i > 0) {
+                pref[i] += pref[i - 1];
+            }
+        }
+        int ans = 0;
+        map<int, vector<int>> indexMap;
+        indexMap[0].emplace_back(-1);
+        for (int r = 0; r < N; ++r) {
+            if (indexMap.find(pref[r]) != indexMap.end()) {
+                int l = indexMap[pref[r]][0];
+                ans = max(ans, r - l);
+            }
+            if (indexMap.find(pref[r] - 2) != indexMap.end()) {
+                // pref[r] - pref[l] = 2, need 0
+                const vector<int> &arr = indexMap[pref[r] - 2];
+                if (s0 > r) {
+                    int l = arr[0];
+                    ans = max(ans, r - l);
+                } else {
+                    auto it = upper_bound(arr.begin(), arr.end(), p0);
+                    if (it != arr.end()) {
+                        int l = *it;
+                        ans = max(ans, r - l);
+                    }
+                }
+            }
+            if (indexMap.find(pref[r] + 2) != indexMap.end()) {
+                // need 1
+                const vector<int> &arr = indexMap[pref[r] + 2];
+                if (s1 > r) {
+                    int l = arr[0];
+                    ans = max(ans, r - l);
+                } else {
+                    auto it = upper_bound(arr.begin(), arr.end(), p1);
+                    if (it != arr.end()) {
+                        int l = *it;
+                        ans = max(ans, r - l);
+                    }
+                }
+            }
+            indexMap[pref[r]].emplace_back(r);
+        }
+        return ans;
+    }
+};
+```
+
+## Q4. Good Subsequence Queries
+
+### Solution 1: segment tree, range query, dynamic updates, number theory
+
+Categories: segment tree, gcd, point updates, query processing, divisibility
+
+Algorithm idea:
+Build a segment tree where each node stores the gcd of its segment, but only values divisible by p are kept; otherwise the leaf stores 0. Since gcd(x, 0) = x, this lets the segment tree effectively track the gcd of only the relevant values. After each update query, update one position in the segment tree and inspect the overall gcd at the root.
+
+If the root gcd is exactly p, then the current array may contain a good subsequence. For very small N, the code does an extra brute force check by temporarily removing each element one at a time to see whether some subsequence still gives gcd p. For larger N, it accepts the root gcd check directly.
+
+When every number is divisible by p and the gcd of all numbers is p, could it happen that you are forced to use all of them?
+
+What that situation would mean
+
+If removing b_i breaks things, then all the other numbers must share some prime factor.
+
+So for each index i, there must be a prime q_i such that:
+
+q_i divides every number except b_i
+q_i does not divide b_i
+
+That means each element is the unique one “missing” some prime.
+
+For 6 numbers, this is possible.
+
+Example for p = 1:
+
+[15015, 10010, 6006, 4290, 2730, 2310]
+
+These are built from the 6 primes:
+
+2, 3, 5, 7, 11, 13
+
+Each number is missing exactly one of them.
+
+So:
+
+gcd of all 6 numbers is 1
+but if you remove any one number, the remaining 5 all share the prime that was missing from that number
+so every proper subset has gcd bigger than 1
+
+So with 6 numbers, you really can be forced to take all of them.
+
+Why this becomes impossible with more than 6 numbers
+
+Suppose you had 7 such numbers.
+
+Then you would need 7 distinct primes, say:
+
+2, 3, 5, 7, 11, 13, 17
+
+And each number would have to be divisible by all but one of those primes.
+
+In particular, the number that is “missing 2” would have to be divisible by:
+
+3⋅5⋅7⋅11⋅13⋅17=255255
+
+But the problem says every number is at most 50000.
+
+That is impossible.
+
+So the bad pattern cannot exist for 7 numbers.
+
+And if it cannot exist for 7, it also cannot exist for 8, 9, and so on.
+
+The only way you are forced to take all elements is this special “each element is uniquely missing one prime” pattern.
+That pattern can exist for at most 6 relevant numbers under the <= 50000 limit.
+
+```cpp
+int P;
+template<class Node>
+struct SegmentTree {
+    struct Configuration {
+        const Node neutral;                           // identity for merge
+        function<Node(const Node&, const Node&)> merge;           // combine two nodes
+    } config;
+
+    int size = 0;
+    vector<Node> nodes;
+
+    SegmentTree(int n, Configuration config) : config(config) { init(n); }
+
+    void init(int num_nodes) {
+        size = 1;
+        while (size < num_nodes) size *= 2;
+        nodes.assign(size * 2, config.neutral);
+    }
+
+    // this is for assign, for addition change to += val
+    void update(int segment_idx, const Node& val) {
+        segment_idx += size;
+        if (val % P == 0) nodes[segment_idx] = val;
+        else nodes[segment_idx] = 0;
+        for (segment_idx >>= 1; segment_idx >= 1; segment_idx >>= 1) pull(segment_idx);
+    }
+
+    Node query(int left, int right) {
+        left += size, right += size;
+        Node left_acc = config.neutral;
+        Node right_acc = config.neutral;
+        while (left <= right) {
+           if (left & 1) {
+                // res on left
+                left_acc = config.merge(left_acc, nodes[left++]);
+            }
+            if (~right & 1) {
+                // res on right
+                right_acc = config.merge(nodes[right--], right_acc);
+            }
+            left >>= 1, right >>= 1;
+        }
+        return config.merge(left_acc, right_acc);
+    }
+    private:
+        inline void pull(int segment_idx) { nodes[segment_idx] = config.merge(nodes[segment_idx << 1], nodes[segment_idx << 1 | 1]); }
+};
+
+class Solution {
+public:
+    int countGoodSubseq(vector<int>& nums, int p, vector<vector<int>>& queries) {
+        P = p;
+        int N = nums.size(), M = queries.size();
+        SegmentTree<int>::Configuration cfg{
+            0,
+            [](const int &x, const int &y) {
+                return gcd(x, y);
+            }
+        };
+        SegmentTree<int> seg(N, cfg);
+        for (int i = 0; i < N; ++i) {
+            seg.update(i, nums[i]);
+        }
+        int ans = 0;
+        for (const auto &query : queries) {
+            int idx = query[0], val = query[1];
+            nums[idx] = val;
+            seg.update(idx, val);
+            if (N < 7 && seg.nodes[1] == p) {
+                bool found = false;
+                for (int i = 0; i < N; ++i) {
+                    seg.update(i, 0);
+                    if (seg.nodes[1] == p) {
+                        found = true;
+                    }
+                    seg.update(i, nums[i]);
+                }
+                ans += found;
+            } else if (seg.nodes[1] == p) {
+                ans++;
+            }
+        }
+        return ans;
+    }
+};
+```
