@@ -3277,3 +3277,141 @@ public:
     }
 };
 ```
+
+# Leetcode Weekly Contest 498
+
+## Q2. Smallest Stable Index II
+
+### Solution 1: prefix max, suffix min, linear scan
+
+For each index i, the code wants to know:
+
+the maximum value in nums[0..i]
+the minimum value in nums[i..N-1]
+
+So it precomputes smin[i] = min(nums[i..N-1]) using a suffix pass. Then it scans left to right while maintaining pmax = max(nums[0..i]). If at some index i we have:
+
+pmax - smin[i] <= k
+
+then i is stable, and since we scan from left to right, it is the smallest such index.
+
+```cpp
+class Solution {
+public:
+    int firstStableIndex(vector<int>& nums, int k) {
+        int N = nums.size();
+        vector<int> smin(N, 0);
+        for (int i = N - 1; i >= 0; --i) {
+            smin[i] = nums[i];
+            if (i + 1 < N) smin[i] = min(smin[i], smin[i + 1]);
+        }
+        int pmax = 0;
+        for (int i = 0; i < N; ++i) {
+            pmax = max(pmax, nums[i]);
+            if (pmax - smin[i] <= k) return i;
+        }
+        return -1;
+    }
+};
+```
+
+## Q3. Multi Source Flood Fill
+
+### Solution 1: grid, multi-source bfs, sorting by color, queue
+
+All source cells are inserted into the queue initially. That means the flood fill expands outward from every source at the same time. When an uncolored neighboring cell is first reached, it gets assigned the color of the source wave that reached it first.
+
+The sources are sorted by descending color before being pushed into the queue. Since BFS processes equal-distance expansions in queue order, this gives priority to larger colors when multiple sources could reach a cell at the same distance.
+
+```cpp
+class Solution {
+public:
+    vector<vector<int>> colorGrid(int n, int m, vector<vector<int>>& sources) {
+        vector<vector<int>> grid(n, vector<int>(m, 0));
+        sort(sources.begin(), sources.end(), [](const auto &p1, const auto &p2) {
+            return p1[2] > p2[2];
+        });
+        queue<pair<int, int>> q;
+        for (const auto &p : sources) {
+            int r = p[0], c = p[1], color = p[2];
+            grid[r][c] = color;
+            q.emplace(r, c);
+        }
+        while (!q.empty()) {
+            auto [r, c] = q.front();
+            q.pop();
+            for (int dr = -1; dr <= 1; ++dr) {
+                for (int dc = -1; dc <= 1; ++dc) {
+                    if (abs(dr) + abs(dc) != 1) continue;
+                    int nr = r + dr, nc = c + dc;
+                    if (nr < 0 || nr >= n || nc < 0 || nc >= m) continue;
+                    if (grid[nr][nc]) continue;
+                    q.emplace(nr, nc);
+                    grid[nr][nc] = grid[r][c];
+                }
+            }
+        }
+        return grid;
+    }
+};
+```
+
+## Q4. Count Good Integers on a Grid Path
+
+### Solution 1: digit dp
+
+The problem counts how many integers in the range [l, r] satisfy a digit constraint determined by a path on a grid.
+
+The number is treated as a 16-digit zero-padded string. The path determines certain digit positions that must satisfy an ordering relationship. The vector indices stores the important positions along that path.
+
+Then the code uses digit DP:
+
+idx = current digit position
+tight = whether we are still forced by the upper bound
+other DP states track previous/path-related digit information needed to enforce the constraint
+
+The function dfs(...) counts how many valid numbers can be formed from the current state up to the bound string.
+
+As usual in digit DP, the final range answer is:
+
+count(<= r) - count(<= l-1)
+
+```cpp
+using int64 = long long;
+class Solution {
+private:
+    int64 dp[16][10][10][2][2];
+    int64 dfs(const vector<int>& indices, const string& num, int idx, int lastDig, int prv, int tight, int zero) {
+        int N = num.size();
+        if (idx == N) {
+            return 1;
+        }
+        if (dp[idx][lastDig][prv][tight][zero] != -1) return dp[idx][lastDig][prv][tight][zero];
+        int64 ans = 0;
+        bool found = find(indices.begin(), indices.end(), idx) != indices.end();
+        for (int dig = found ? prv : 0; dig < 10; ++dig) {
+            if (tight && dig > num[idx] - '0') break;
+            ans += dfs(indices, num, idx + 1, dig, found ? dig : prv, dig == num[idx] - '0' && tight, dig == 0 && zero);
+        }
+        return dp[idx][lastDig][prv][tight][zero] = ans;
+    }
+public:
+    int64 countGoodIntegersOnPath(int64 l, int64 r, string directions) {
+        vector<int> indices;
+        for (int i = 0, j = 0; i < 6; ++i) {
+            indices.emplace_back(j);
+            if (directions[i] == 'D') j += 4;
+            else j++;
+        }
+        indices.emplace_back(15);
+        string small = to_string(l - 1), large = to_string(r);
+        small = string(max(0, 16 - static_cast<int>(small.size())), '0') + small;
+        large = string(max(0, 16 - static_cast<int>(large.size())), '0') + large;
+        fill(&dp[0][0][0][0][0], &dp[0][0][0][0][0] + 16 * 10 * 10 * 2 * 2, -1);
+        int64 lb = dfs(indices, small, 0, 0, 0, 1, 1);
+        fill(&dp[0][0][0][0][0], &dp[0][0][0][0][0] + 16 * 10 * 10 * 2 * 2, -1);
+        int64 ub = dfs(indices, large, 0, 0, 0, 1, 1);
+        return ub - lb;
+    }
+};
+```

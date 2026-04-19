@@ -2209,6 +2209,180 @@ public:
 };
 ```
 
+# Leetcode Weekly Contest 480
+
+## Q2. Reverse Words With Same Vowel Count
+
+### Solution 1: parsing, tokenization, string manipulation
+
+The string is split into words. First, count how many vowels are in the first word. Then for every later word, count its vowels too. If its vowel count matches the first word’s count, reverse that word. Finally, join all words back together.
+
+```cpp
+class Solution {
+public:
+    string reverseWords(string s) {
+        unordered_set<char> vowels = {'a', 'e', 'i', 'o', 'u'};
+        vector<string> arr;
+        stringstream ss(s);
+        string word;
+        while (getline(ss, word, ' ')) {
+            arr.emplace_back(word);
+        }
+        int cnt = 0;
+        for (char ch : arr[0]) {
+            if (vowels.find(ch) != vowels.end()) cnt++;
+        }
+        int N = arr.size();
+        for (int i = 1; i < N; ++i) {
+            int cur = accumulate(arr[i].begin(), arr[i].end(), 0, [&](int acc, char ch) {
+                return acc + int(vowels.find(ch) != vowels.end());
+            });
+            if (cur == cnt) {
+                reverse(arr[i].begin(), arr[i].end());
+            }
+        }
+        string ans;
+        for (const string &word : arr) {
+            ans += word;
+            ans += ' ';
+        }
+        ans.pop_back();
+        return ans;
+    }
+};
+```
+
+## Q3. Minimum Moves to Balance Circular Array
+
+### Solution 1: greedy, circular array, two pointers
+
+Since the problem guarantees at most one negative position, the algorithm first finds that index. Then it expands outward distance by distance on both sides of the circle, pulling as much balance as possible from the closest available positions into the negative one. Each transferred unit costs its circular distance, so taking from nearer positions first is the greedy idea.
+
+```cpp
+using int64 = long long;
+class Solution {
+public:
+    int64 minMoves(vector<int>& balance) {
+        int N = balance.size();
+        int64 total = accumulate(balance.begin(), balance.end(), 0LL);
+        if (total < 0) return -1;
+        int idx = -1;
+        for (int i = 0; i < N; ++i) {
+            if (balance[i] < 0) {
+                idx = i;
+                break;
+            }
+        }
+        if (idx == -1) return 0;
+        int d = 1;
+        int64 ans = 0;
+        while (balance[idx] < 0) {
+            int l = idx - d;
+            if (l < 0) l += N;
+            int r = (idx + d) % N;
+            int take = max(0, min(balance[l], abs(balance[idx])));
+            ans += 1LL * d * take;
+            balance[idx] += take;
+            balance[l] -= take;
+            take = max(0, min(balance[r], abs(balance[idx])));
+            ans += 1LL * d * take;
+            balance[idx] += take;
+            balance[r] -= take;
+            d++;
+        }
+        return ans;
+    }
+};
+```
+
+## Q4. Minimum Deletions to Make Alternating Substring
+
+### Solution 1: fenwick tree, string adjacency tracking
+
+A substring is alternating if no two neighboring characters are equal. So instead of tracking the whole substring directly, the algorithm tracks every position i where s[i-1] == s[i]. Each such pair is a “bad edge.”
+
+For an update, only the pairs touching the flipped index can change:
+
+pair (i-1, i)
+pair (i, i+1)
+
+Those are updated in the Fenwick tree.
+
+For a range query [l, r], the minimum deletions needed equals the number of bad adjacent pairs inside that substring, which is exactly the count of positions in [l+1, r] where s[j-1] == s[j].
+
+```cpp
+template <typename T>
+struct FenwickTree {
+    vector<T> nodes;
+    T neutral;
+
+    FenwickTree() : neutral(T(0)) {}
+
+    void init(int n, T neutral_val = T(0)) {
+        neutral = neutral_val;
+        nodes.assign(n + 1, neutral);
+    }
+
+    void update(int idx, T val) {
+        while (idx < (int)nodes.size()) {
+            nodes[idx] += val;
+            idx += (idx & -idx);
+        }
+    }
+
+    T query(int idx) {
+        T result = neutral;
+        while (idx > 0) {
+            result += nodes[idx];
+            idx -= (idx & -idx);
+        }
+        return result;
+    }
+
+    T query(int left, int right) {
+        return right >= left ? query(right) - query(left - 1) : T(0);
+    }
+};
+
+class Solution {
+public:
+    vector<int> minDeletions(string s, vector<vector<int>>& queries) {
+        int N = s.size(), M = queries.size();
+        vector<int> ans;
+        FenwickTree<int> seg;
+        seg.init(N);
+        for (int i = 1; i < N; ++i) {
+            if (s[i - 1] == s[i]) {
+                seg.update(i, 1);
+            }
+        }
+        for (const vector<int> &query : queries) {
+            int t = query[0];
+            if (t == 1) {
+                int i = query[1];
+                if (s[i] == 'A') s[i] = 'B';
+                else s[i] = 'A';
+                if (i > 0 && s[i - 1] == s[i]) {
+                    seg.update(i, 1);
+                } else if (i > 0 && s[i - 1] != s[i]) {
+                    seg.update(i, -1);
+                }
+                if (i + 1 < N && s[i] == s[i + 1]) {
+                    seg.update(i + 1, 1);
+                } else if (i + 1 < N && s[i] != s[i + 1]) {
+                    seg.update(i + 1, -1);
+                }
+            } else {
+                int l = query[1], r = query[2];
+                int cost = seg.query(l + 1, r);
+                ans.emplace_back(cost);
+            }
+        }
+        return ans;
+    }
+};
+```
+
 # Leetcode Weekly Contest 482
 
 ## Q1. Maximum Score of a Split
