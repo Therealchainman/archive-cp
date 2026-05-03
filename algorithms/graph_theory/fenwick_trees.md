@@ -59,6 +59,28 @@ struct FenwickTree {
     T query(int left, int right) {
         return right >= left ? query(right) - query(left - 1) : T(0);
     }
+
+    // Returns the index of the k-th element in the fenwick tree, where k is 1-indexed.
+    int kth(int k) const {
+        int n = nodes.size() - 1;
+        int idx = 0;
+
+        int step = 1;
+        while ((step << 1) <= n) step <<= 1;
+
+        while (step > 0) {
+            int next = idx + step;
+
+            if (next <= n && nodes[next] < k) {
+                idx = next;
+                k -= nodes[next];
+            }
+
+            step >>= 1;
+        }
+
+        return idx + 1;
+    }
 };
 ```
 

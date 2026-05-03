@@ -1,11 +1,186 @@
 # Educational DP
 
-##
+## A. Frog 1
 
-### Solution 1: 
+### Solution 1: rolling dp
+
+You are trying to reach stone N - 1 with minimum total cost. From each stone, the frog can jump either 1 step or 2 steps.
 
 ```cpp
+int N;
+vector<int> A;
 
+void solve() {
+    cin >> N;
+    A.resize(N);
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+    }
+    int dp1 = 0, dp2 = abs(A[1] - A[0]);
+    for (int i = 2; i < N; ++i) {
+        int ndp1 = dp2;
+        int ndp2 = min(dp2 + abs(A[i] - A[i - 1]), dp1 + abs(A[i] - A[i - 2]));
+        dp1 = ndp1;
+        dp2 = ndp2;
+    }
+    cout << dp2 << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## B. Frog 2
+
+### Solution 1: 1D dp
+
+This is a generalization of Frog 1. Instead of jumping only 1 or 2 stones, the frog can jump up to K stones.
+
+```cpp
+const int INF = numeric_limits<int>::max();
+int N, K;
+vector<int> A;
+
+void solve() {
+    cin >> N >> K;
+    A.resize(N);
+    for (int i = 0; i < N; i++) {
+        cin >> A[i];
+    }
+    vector<int> dp(N, INF);
+    dp[0] = 0;
+    for (int i = 1; i < N; ++i) {
+        for (int j = i - 1; j >= max(0, i - K); --j) {
+            dp[i] = min(dp[i], dp[j] + abs(A[i] - A[j]));
+        }
+    }
+    cout << dp[N - 1] << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## C. Vacation
+
+### Solution 1: state dp, rolling dp
+
+For each day, you can choose one of three activities: A, B, or C. The constraint is that you cannot choose the same activity on two consecutive days.
+
+```cpp
+int N;
+
+void solve() {
+    cin >> N;
+    int da = 0, db = 0, dc = 0;
+    for (int i = 0; i < N; ++i) {
+        int a, b, c;
+        cin >> a >> b >> c;
+        int na = max(db, dc) + a;
+        int nb = max(da, dc) + b;
+        int nc = max(da, db) + c;
+        da = na;
+        db = nb;
+        dc = nc;
+    }
+    cout << max({da, db, dc}) << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## D. knapsack 1
+
+### Solution 1:  0/1 knapsack dp
+
+```cpp
+int N, W;
+vector<int> values, weights, dp, ndp;
+
+void solve() {
+    cin >> N >> W;
+    values.resize(N);
+    weights.resize(N);
+    for (int i = 0; i < N; i++) {
+        cin >> weights[i] >> values[i];
+    }
+    dp.assign(W + 1, 0);
+    for (int i = 0; i < N; i++) {
+        ndp.assign(W + 1, 0);
+        for (int cap = 0; cap <= W; cap++) {
+            if (cap >= weights[i]) {
+                ndp[cap] = max(ndp[cap], dp[cap - weights[i]] + values[i]);
+            }
+            ndp[cap] = max(ndp[cap], dp[cap]);
+        }
+        swap(dp, ndp);
+    }
+    cout << dp[W] << endl;
+}
+
+signed main() {
+    solve();
+    return 0;
+}
+```
+
+## E. knapsack 2
+
+### Solution 1:  0/1 min cost knapsack dp
+
+```cpp
+const int INF = 1e18;
+int N, W;
+vector<int> values, weights, dp, ndp;
+
+void solve() {
+    cin >> N >> W;
+    int V = 0;
+    values.resize(N);
+    weights.resize(N);
+    for (int i = 0; i < N; i++) {
+        cin >> weights[i] >> values[i];
+        V += values[i];
+    }
+    dp.assign(V + 1, INF);
+    dp[0] = 0;
+    for (int i = 0; i < N; i++) {
+        ndp.assign(V + 1, INF);
+        for (int v = 0; v <= V; v++) {
+            ndp[v] = min(ndp[v], dp[v]);
+            if (values[i] <= v) {
+                ndp[v] = min(ndp[v], dp[v - values[i]] + weights[i]);
+            }
+        }
+        swap(dp, ndp);
+    }
+    int ans = 0;
+    for (int v = 0; v <= V; v++) {
+        if (dp[v] <= W) ans = v;
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    solve();
+    return 0;
+}
 ```
 
 ## F - LCS
@@ -578,80 +753,3 @@ if __name__ == '__main__':
     main()
 ```
 
-## knapsack 1
-
-### Solution 1:  0/1 knapsack dp
-
-```cpp
-int N, W;
-vector<int> values, weights, dp, ndp;
-
-void solve() {
-    cin >> N >> W;
-    values.resize(N);
-    weights.resize(N);
-    for (int i = 0; i < N; i++) {
-        cin >> weights[i] >> values[i];
-    }
-    dp.assign(W + 1, 0);
-    for (int i = 0; i < N; i++) {
-        ndp.assign(W + 1, 0);
-        for (int cap = 0; cap <= W; cap++) {
-            if (cap >= weights[i]) {
-                ndp[cap] = max(ndp[cap], dp[cap - weights[i]] + values[i]);
-            }
-            ndp[cap] = max(ndp[cap], dp[cap]);
-        }
-        swap(dp, ndp);
-    }
-    cout << dp[W] << endl;
-}
-
-signed main() {
-    solve();
-    return 0;
-}
-```
-
-## knapsack 2
-
-### Solution 1:  0/1 min cost knapsack dp
-
-```cpp
-const int INF = 1e18;
-int N, W;
-vector<int> values, weights, dp, ndp;
-
-void solve() {
-    cin >> N >> W;
-    int V = 0;
-    values.resize(N);
-    weights.resize(N);
-    for (int i = 0; i < N; i++) {
-        cin >> weights[i] >> values[i];
-        V += values[i];
-    }
-    dp.assign(V + 1, INF);
-    dp[0] = 0;
-    for (int i = 0; i < N; i++) {
-        ndp.assign(V + 1, INF);
-        for (int v = 0; v <= V; v++) {
-            ndp[v] = min(ndp[v], dp[v]);
-            if (values[i] <= v) {
-                ndp[v] = min(ndp[v], dp[v - values[i]] + weights[i]);
-            }
-        }
-        swap(dp, ndp);
-    }
-    int ans = 0;
-    for (int v = 0; v <= V; v++) {
-        if (dp[v] <= W) ans = v;
-    }
-    cout << ans << endl;
-}
-
-signed main() {
-    solve();
-    return 0;
-}
-```

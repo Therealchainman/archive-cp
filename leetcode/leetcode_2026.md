@@ -3415,3 +3415,313 @@ public:
     }
 };
 ```
+
+## 1559. Detect Cycles in 2D Grid
+
+### Solution 1: dfs, grid, visited array, cycle detection
+
+```cpp
+class Solution {
+private:
+    vector<vector<bool>> vis;
+    int R, C;
+    vector<vector<char>> grid;
+    bool inBounds(int r, int c) {
+        return r >= 0 && r < R && c >= 0 && c < C;
+    }
+    bool dfs(int pr, int pc, int r, int c, int len = 1) {
+        if (vis[r][c]) {
+            return len >= 4;
+        }
+        vis[r][c] = true;
+        for (int dr = -1; dr <= 1; ++dr) {
+            for (int dc = -1; dc <= 1; ++dc) {
+                if (abs(dr) + abs(dc) != 1) continue;
+                int nr = r + dr, nc = c + dc;
+                if (!inBounds(nr, nc)) continue;
+                if (grid[nr][nc] != grid[r][c]) continue;
+                if (nr == pr && nc == pc) continue;
+                if (dfs(r, c, nr, nc, len + 1)) return true;
+            }
+        }
+        return false;
+    }
+public:
+    bool containsCycle(vector<vector<char>>& G) {
+        grid = G;
+        R = grid.size();C = grid[0].size();
+        vis.assign(R, vector<bool>(C, false));
+        for (int r = 0; r < R; ++r) {
+            for (int c = 0; c < C; ++c) {
+                if (vis[r][c]) continue;
+                if (dfs(r, c, r, c)) return true;
+            }
+        }
+        return false;
+    }
+};
+```
+
+# Leetcode Weekly Contest 499
+
+## Q1. Valid Elements in an Array
+
+### Solution 1: prefix max, suffix max, linear scan
+
+An element is valid if it is a new record high from either direction.
+
+```cpp
+class Solution {
+public:
+    vector<int> findValidElements(vector<int>& nums) {
+        int N = nums.size();
+        vector<bool> ans(N, false);
+        int pmax = 0;
+        for (int i = 0; i < N; ++i) {
+            if (nums[i] > pmax) ans[i] = true;
+            pmax = max(pmax, nums[i]);
+        }
+        int smax = 0;
+        for (int i = N - 1; i >= 0; --i) {
+            if (nums[i] > smax) ans[i] = true;
+            smax = max(smax, nums[i]);
+        }
+        vector<int> res;
+        for (int i = 0; i < N; ++i) {
+            if (ans[i]) res.emplace_back(nums[i]);
+        }
+        return res;
+    }
+};
+```
+
+## Q3. Minimum Operations to Make Array Non Decreasing
+
+### Solution 1: greedy
+
+Every local drop contributes exactly the amount needed to fix it.
+
+```cpp
+using int64 = long long;
+class Solution {
+public:
+    int64 minOperations(vector<int>& nums) {
+        int N = nums.size();
+        int64 ans = 0;
+        for (int i = 1; i < N; ++i) {
+            ans += max(0, nums[i - 1] - nums[i]);
+        }
+        return ans;
+    }
+};
+```
+
+## Q4. Maximum Sum of Alternating Subsequence With Distance at Least K
+
+### Solution 1: dp, segment tree optimization, coordinate compression
+
+Use DP for alternating subsequences, and use segment trees to quickly find the best previous compatible value that is at least k indices away.
+
+```cpp
+using int64 = long long;
+const int64 INF = numeric_limits<int64>::max();
+template<class Node>
+struct SegmentTree {
+    struct Configuration {
+        const Node neutral;                           // identity for merge
+        function<Node(const Node&, const Node&)> merge;           // combine two nodes
+    } config;
+
+    int size = 0;
+    vector<Node> nodes;
+
+    SegmentTree(int n, Configuration config) : config(config) { init(n); }
+
+    void init(int num_nodes) {
+        size = 1;
+        while (size < num_nodes) size *= 2;
+        nodes.assign(size * 2, config.neutral);
+    }
+
+    // this is for assign, for addition change to += val
+    void update(int segment_idx, const Node& val) {
+        segment_idx += size;
+        nodes[segment_idx] = val; // += val if want addition, to track frequency
+        for (segment_idx >>= 1; segment_idx >= 1; segment_idx >>= 1) pull(segment_idx);
+    }
+
+    Node query(int left, int right) {
+        left += size, right += size;
+        Node left_acc = config.neutral;
+        Node right_acc = config.neutral;
+        while (left <= right) {
+           if (left & 1) {
+                // res on left
+                left_acc = config.merge(left_acc, nodes[left++]);
+            }
+            if (~right & 1) {
+                // res on right
+                right_acc = config.merge(nodes[right--], right_acc);
+            }
+            left >>= 1, right >>= 1;
+        }
+        return config.merge(left_acc, right_acc);
+    }
+    private:
+        inline void pull(int segment_idx) { nodes[segment_idx] = config.merge(nodes[segment_idx << 1], nodes[segment_idx << 1 | 1]); }
+};
+
+SegmentTree<int64>::Configuration cfg{
+    -INF,
+    [](const int64 &x, const int64 &y) {
+        return max(x, y);
+    }
+};
+class Solution {
+public:
+    int64 maxAlternatingSum(vector<int>& nums, int k) {
+        int N = nums.size();
+        vector<int64> up(N, 0), down(N, 0);
+        vector<int> vals(nums.begin(), nums.end());
+        sort(vals.begin(), vals.end());
+        vals.erase(unique(vals.begin(), vals.end()), vals.end());
+        int M = vals.size();
+        vector<int> comp(N, 0);
+        for (int i = 0; i < N; ++i) {
+            int idx = lower_bound(vals.begin(), vals.end(), nums[i]) - vals.begin();
+            comp[i] = idx;
+        }
+        SegmentTree<int64> segDown(N, cfg), segUp(N, cfg);
+        for (int i = 0; i < N; ++i) {
+            if (i - k >= 0) {
+                // let's add it into the segment tree now. 
+                int j = i - k;
+                segDown.update(comp[j], max(1LL * nums[j], down[j]));
+                segUp.update(comp[j], max(1LL * nums[j], up[j]));
+            }
+            // transitions
+            // up comes from down, ans smaller value
+            up[i] = max(1LL * nums[i], segDown.query(0, comp[i] - 1) + nums[i]);
+            down[i] = max(1LL * nums[i], segUp.query(comp[i] + 1, M - 1) + nums[i]);
+        }
+        int64 ans = max(*max_element(up.begin(), up.end()), *max_element(down.begin(), down.end()));
+        return ans;
+    }
+};
+```
+
+# Leetcode Weekly Contest 500
+
+## Q2. Sum of Primes Between Number and Its Reverse
+
+### Solution 1: prime in square root, string, reverse string
+
+This solution reverses the number by converting it to a string, reversing the string, and converting it back to an integer.
+
+```cpp
+class Solution {
+private:
+    bool isPrime(int n) {
+        if (n <= 1) return false;
+        if (n <= 3) return true;
+        if (n % 2 == 0 || n % 3 == 0) return false;
+        int limit = static_cast<int>(sqrt(n));
+        for (int i = 5; i <= limit; i += 2) {
+            if (n % i == 0) return false;
+        }
+        return true;
+    }
+public:
+    int sumOfPrimesInRange(int n) {
+        string s = to_string(n);
+        reverse(s.begin(), s.end());
+        int r = stoi(s);
+        int ans = 0;
+        for (int v = min(n, r); v <= max(n, r); ++v) {
+            if (isPrime(v)) ans += v;
+        }
+        return ans;
+    }
+};
+```
+
+## Q3. Minimum Cost to Move Between Indices
+
+### Solution 1: prefix sums, suffix sums, greedy, implementation
+
+The direct cost across a range is the sum of adjacent gaps. Whenever the closest-index move goes in the needed direction, replace that edge cost with 1.
+
+```cpp
+const int INF = numeric_limits<int>::max();
+class Solution {
+public:
+    vector<int> minCost(vector<int>& nums, vector<vector<int>>& queries) {
+        int N = nums.size(), M = queries.size();
+        vector<int> C(N);
+        for (int i = 0; i < N; ++i) {
+            int best = INF;
+            if (i > 0 && nums[i] - nums[i - 1] < best) {
+                best = nums[i] - nums[i - 1];
+                C[i] = i - 1;
+            }
+            if (i + 1 < N && nums[i + 1] - nums[i] < best) {
+                best = nums[i + 1] - nums[i];
+                C[i] = i + 1;
+            }
+        }
+        vector<int> pref(N + 1, 0), suf(N + 1, 0);
+        for (int i = 0; i < N; ++i) {
+            if (i + 1 < N && C[i] == i + 1) {
+                pref[i + 1] = nums[i + 1] - nums[i] - 1;
+            }
+            pref[i + 1] += pref[i];
+        }
+        for (int i = N - 1; i >= 0; --i) {
+            if (i > 0 && C[i] == i - 1) {
+                suf[i] = nums[i] - nums[i - 1] - 1;
+            }
+            suf[i] += suf[i + 1];
+        }
+        vector<int> ans(M);
+        for (int i = 0; i < M; ++i) {
+            int l = queries[i][0], r = queries[i][1];
+            if (r >= l) {
+                int delta = nums[r] - nums[l] - pref[r] + pref[l];
+                ans[i] = delta;
+            } else {
+                int delta = nums[l] - nums[r] - suf[r + 1] + suf[l + 1];
+                ans[i] = delta;
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## Q4. Maximize Fixed Points After Deletions
+
+### Solution 1: longest increasing subsequence, greedy, sorting
+
+Convert each usable element into a candidate fixed point, sort by deletion requirement, and find the longest compatible increasing sequence.
+
+```cpp
+class Solution {
+public:
+    int maxFixedPoints(vector<int>& nums) {
+        int N = nums.size();
+        vector<pair<int, int>> arr;
+        for (int i = 0; i < N; ++i) {
+            if (nums[i] > i) continue;
+            arr.emplace_back(i - nums[i], nums[i]);
+        }
+        sort(arr.begin(), arr.end());
+        vector<int> lis;
+        for (const auto &[_, v] : arr) {
+            int j = lower_bound(lis.begin(), lis.end(), v) - lis.begin();
+            if (j == lis.size()) lis.emplace_back(v);
+            lis[j] = v;
+        }
+        return lis.size();
+    }
+};
+```

@@ -175,3 +175,36 @@ struct MedianBalancer {
     }
 };
 ```
+
+## Rolling median
+
+This is simple way to calculate the median as you add elements. 
+
+```cpp
+multiset<int> low, high;
+
+void add(int x) {
+    if (low.empty() || x <= *low.rbegin()) {
+        low.emplace(x);
+    } else {
+        high.emplace(x);
+    }
+
+    // low cannot be too large
+    if (low.size() > high.size() + 1) {
+        auto it = prev(low.end());
+        high.emplace(*it);
+        low.erase(it);
+    }
+    // high cannot be larger than low
+    if (high.size() > low.size()) {
+        auto it = high.begin();
+        low.emplace(*it);
+        high.erase(it);
+    }
+}
+
+int median() {
+    return *low.rbegin();
+}
+```

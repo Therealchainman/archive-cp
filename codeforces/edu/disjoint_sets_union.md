@@ -655,44 +655,387 @@ signed main() {
 }
 ```
 
-##
+## D. Bosses
 
 ### Solution 1: 
 
 ```cpp
+struct UnionFind {
+    vector<int> parent, dist;
+    UnionFind(int n) {
+        parent.resize(n);
+        iota(parent.begin(),parent.end(),0);
+        dist.assign(n,0);
+    }
 
+    int find(int i) {
+        if (i == parent[i]) {
+            return i;
+        }
+        int oldParent = parent[i];
+        int root = find(oldParent);
+        dist[i] += dist[oldParent];
+        return parent[i] = root;
+    }
+
+    // j -> i
+    void unite(int i, int j) {
+        i = find(i), j = find(j);
+        if (i != j) {
+            parent[j] = i;
+            dist[j] = 1;
+        }
+    }
+
+    bool same(int i, int j) {
+        return find(i) == find(j);
+    }
+};
+
+int N, M;
+  
+void solve() {
+    cin >> N >> M;
+    UnionFind dsu(N);
+    while (M--) {
+        int t, u;
+        cin >> t >> u;
+        u--;
+        if (t == 1) {
+            int v;
+            cin >> v;
+            v--;
+            // u -> v
+            dsu.unite(v, u);
+        } else {
+            dsu.find(u);
+            int ans = dsu.dist[u];
+            cout << ans << endl;
+        }
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
-##
+## E. Spanning Tree
 
 ### Solution 1: 
 
 ```cpp
+struct UnionFind {
+    vector<int> parent, size;
+    UnionFind(int n) {
+        parent.resize(n);
+        iota(parent.begin(),parent.end(),0);
+        size.assign(n,1);
+    }
 
+    int find(int i) {
+        if (i == parent[i]) {
+            return i;
+        }
+        return parent[i] = find(parent[i]);
+    }
+
+    void unite(int i, int j) {
+        i = find(i), j = find(j);
+        if (i != j) {
+            if (size[j] > size[i]) {
+                swap(i, j);
+            }
+            size[i] += size[j];
+            parent[j] = i;
+        }
+    }
+
+    bool same(int i, int j) {
+        return find(i) == find(j);
+    }
+
+};
+
+int N, M;
+
+void solve() {
+    cin >> N >> M;
+    vector<tuple<int, int, int>> edges;
+    for (int i = 0; i < M; i++) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        u--, v--;
+        edges.emplace_back(w, u, v);
+    }
+    sort(edges.begin(), edges.end());
+    UnionFind dsu(N);
+    int64 ans = 0;
+    for (auto [w, u, v] : edges) {
+        if (dsu.same(u, v)) continue;
+        ans += w;
+        dsu.unite(u, v);
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
-##
+## F. Dense Spanning Tree
 
 ### Solution 1: 
 
 ```cpp
+struct UnionFind {
+    vector<int> parent, size;
+    UnionFind(int n) {
+        parent.resize(n);
+        iota(parent.begin(),parent.end(),0);
+        size.assign(n,1);
+    }
 
+    int find(int i) {
+        if (i == parent[i]) {
+            return i;
+        }
+        return parent[i] = find(parent[i]);
+    }
+
+    void unite(int i, int j) {
+        i = find(i), j = find(j);
+        if (i != j) {
+            if (size[j] > size[i]) {
+                swap(i, j);
+            }
+            size[i] += size[j];
+            parent[j] = i;
+        }
+    }
+
+    bool same(int i, int j) {
+        return find(i) == find(j);
+    }
+
+};
+
+const int INF = numeric_limits<int>::max();
+int N, M;
+
+void solve() {
+    cin >> N >> M;
+    vector<tuple<int, int, int>> edges;
+    for (int i = 0; i < M; i++) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        u--, v--;
+        edges.emplace_back(w, u, v);
+    }
+    sort(edges.begin(), edges.end());
+    int ans = INF;
+    for (int i = 0; i < M; ++i) {
+        UnionFind dsu(N);
+        int cnt = 0;
+        for (int j = i; j < M; ++j) {
+            auto [w, u, v] = edges[j];
+            if (!dsu.same(u, v)) {
+                dsu.unite(u, v);
+                cnt++;
+            }
+            if (cnt == N - 1) {
+                ans = min(ans, w - get<0>(edges[i]));
+                break;
+            };
+        }
+    }
+    if (ans == INF) {
+        cout << "NO" << endl;
+        return;
+    }
+    cout << "YES" << endl;
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
-##
+## G. No Refuel
 
 ### Solution 1: 
 
 ```cpp
+struct UnionFind {
+    vector<int> parent, size;
+    UnionFind(int n) {
+        parent.resize(n);
+        iota(parent.begin(),parent.end(),0);
+        size.assign(n,1);
+    }
 
+    int find(int i) {
+        if (i == parent[i]) {
+            return i;
+        }
+        return parent[i] = find(parent[i]);
+    }
+
+    void unite(int i, int j) {
+        i = find(i), j = find(j);
+        if (i != j) {
+            if (size[j] > size[i]) {
+                swap(i, j);
+            }
+            size[i] += size[j];
+            parent[j] = i;
+        }
+    }
+
+    bool same(int i, int j) {
+        return find(i) == find(j);
+    }
+
+};
+
+int N, M;
+
+void solve() {
+    cin >> N >> M;
+    vector<tuple<int, int, int>> edges;
+    for (int i = 0; i < M; i++) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        u--, v--;
+        edges.emplace_back(w, u, v);
+    }
+    sort(edges.begin(), edges.end());
+    UnionFind dsu(N);
+    int64 ans = 0;
+    for (auto [w, u, v] : edges) {
+        if (dsu.same(u, v)) continue;
+        ans = w;
+        dsu.unite(u, v);
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
-##
+## H. Oil Business
 
 ### Solution 1: 
 
 ```cpp
+struct UnionFind
+{
+    vector<int> parent, size;
+    UnionFind(int n)
+    {
+        parent.resize(n);
+        iota(parent.begin(), parent.end(), 0);
+        size.assign(n, 1);
+    }
 
+    int find(int i)
+    {
+        if (i == parent[i])
+        {
+            return i;
+        }
+        return parent[i] = find(parent[i]);
+    }
+
+    void unite(int i, int j)
+    {
+        i = find(i), j = find(j);
+        if (i != j)
+        {
+            if (size[j] > size[i])
+            {
+                swap(i, j);
+            }
+            size[i] += size[j];
+            parent[j] = i;
+        }
+    }
+
+    bool same(int i, int j)
+    {
+        return find(i) == find(j);
+    }
+};
+
+int N, M;
+int64 S;
+
+void solve()
+{
+    cin >> N >> M >> S;
+    UnionFind dsu(N);
+    vector<tuple<int, int, int, int>> edges;
+    vector<int> weights(M);
+    for (int i = 0; i < M; i++)
+    {
+        int u, v, w;
+        cin >> u >> v >> w;
+        u--, v--;
+        edges.emplace_back(w, u, v, i);
+        weights[i] = w;
+    }
+    sort(edges.rbegin(), edges.rend());
+    vector<int> arr;
+    for (auto [w, u, v, i] : edges) {
+        if (dsu.same(u, v)) {
+            arr.emplace_back(i);
+        } else {
+            dsu.unite(u, v);
+        }
+    }
+    reverse(arr.begin(), arr.end());
+    vector<int> ans;
+    int64 cost = 0;
+    for (int i : arr) {
+        cost += weights[i];
+        if (cost > S) break;
+        ans.emplace_back(i);
+    }
+    cout << ans.size() << endl;
+    for (int i : ans) {
+        cout << i + 1 << ' ';
+    }
+    cout << endl;
+}
+
+signed main()
+{
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ##

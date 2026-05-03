@@ -1485,3 +1485,346 @@ signed main() {
     return 0;
 }
 ```
+
+# Spectral::Cup 2026 Round 1 (Codeforces Round 1094, Div. 1 + Div. 2)
+
+## A. A wonderful Contest
+
+### Solution 1: linear scan
+
+The whole problem reduces to checking whether the array contains the value 100.
+
+```cpp
+int N;
+vector<int> A;
+
+void solve() {
+    cin >> N;
+    A.assign(N, 0);
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+    }
+    if (any_of(A.begin(), A.end(), [](int x) { return x == 100; })) {
+        cout << "Yes" << endl;
+        return;
+    }
+    cout << "No" << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## B. Artistic Balance Tree
+
+### Solution 1: parity invariant, greedy, sorting
+
+A symmetric reversal around some center swaps positions:
+
+u - i  <->  u + i
+
+The two indices u - i and u + i always have the same parity.
+
+So an element that starts on an even index can only ever move to an even index.
+An element that starts on an odd index can only ever move to an odd index.
+
+That means the problem separates into two independent groups:
+
+even-index elements
+odd-index elements
+
+The marked positions also split by parity. If there are evenCnt marked even positions, then we can choose up to evenCnt elements from the even group to become marked. Same for odd.
+
+```cpp
+int N, M;
+vector<int> A, B;
+
+void solve() {
+    cin >> N >> M;
+    A.assign(N, 0);
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+    }
+    B.assign(M, 0);
+    for (int i = 0; i < M; ++i) {
+        cin >> B[i];
+        B[i]--;
+    }
+    vector<int> odd, even;
+    for (int i = 0; i < N; ++i) {
+        if (i % 2 == 0) {
+            even.emplace_back(A[i]);
+        } else {
+            odd.emplace_back(A[i]);
+        }
+    }
+    sort(odd.begin(), odd.end());
+    sort(even.begin(), even.end());
+    int oddCnt = 0, evenCnt = 0;
+    for (int i = 0; i < M; ++i) {
+        if (B[i] % 2 == 0) {
+            evenCnt++;
+        } else {
+            oddCnt++;
+        }
+    }
+    while (evenCnt-- && !even.empty()) {
+        even.pop_back();
+        if (!even.empty() && even.back() <= 0) break;
+    }
+    while (oddCnt-- && !odd.empty()) {
+        odd.pop_back();
+        if (!odd.empty() && odd.back() <= 0) break;
+    }
+    int64 ans = accumulate(odd.begin(), odd.end(), 0LL) + accumulate(even.begin(), even.end(), 0LL);
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## C. Median Partition
+
+### Solution 1: dp, fenwick tree, coordinate compression, kth order statistic
+
+The algorithm considers partitions of the first i elements.
+
+dp[i][med]
+
+roughly means:
+
+The best number of valid segments using the prefix A[0..i-1], where the last segment has median med.
+
+For every ending position i, the code tries every possible starting position j:
+
+for (int j = i; j > 0; --j)
+
+So the current segment is:
+
+A[j - 1], A[j], ..., A[i - 1]
+
+Only odd-length segments matter, because the median is well-defined as the middle element.
+
+Why coordinate compression is used
+
+The actual array values may be large, negative, or sparse.
+
+So values are compressed:
+
+actual value -> rank among sorted distinct values
+
+This allows the Fenwick tree to count frequencies over ranks from 1 to M.
+
+What the Fenwick tree does
+
+As j moves backward, the segment grows by one element.
+
+The Fenwick tree stores the frequency of values currently inside the segment.
+
+Then this line finds the median rank:
+
+int med = seg.kth((len + 1) / 2);
+
+For an odd-length segment, the median is the (len + 1) / 2-th smallest element.
+
+The Fenwick kth(k) function returns the smallest index whose prefix count is at least k.
+
+In other words, it answers:
+
+What value rank is the kth smallest element in the current segment?
+
+DP transition
+dp[i][med] = max(dp[i][med], dp[j - 1][med] + 1);
+
+This means:
+
+If the prefix ending before this segment can be valid with this same median, then append the current segment and increase the segment count by 1.
+
+```cpp
+const int INF = numeric_limits<int>::max();
+int N;
+vector<int> A;
+
+template <typename T>
+struct FenwickTree {
+    vector<T> nodes;
+    T neutral;
+
+    FenwickTree() : neutral(T(0)) {}
+
+    void init(int n, T neutral_val = T(0)) {
+        neutral = neutral_val;
+        nodes.assign(n + 1, neutral);
+    }
+
+    void update(int idx, T val) {
+        while (idx < (int)nodes.size()) {
+            nodes[idx] += val;
+            idx += (idx & -idx);
+        }
+    }
+
+    int kth(int k) const {
+        int n = nodes.size() - 1;
+        int idx = 0;
+
+        int step = 1;
+        while ((step << 1) <= n) step <<= 1;
+
+        while (step > 0) {
+            int next = idx + step;
+
+            if (next <= n && nodes[next] < k) {
+                idx = next;
+                k -= nodes[next];
+            }
+
+            step >>= 1;
+        }
+
+        return idx + 1;
+    }
+};
+
+void solve() {
+    cin >> N;
+    A.assign(N, 0);
+    vector<int> vals;
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+        vals.emplace_back(A[i]);
+    }
+    sort(vals.begin(), vals.end());
+    vals.erase(unique(vals.begin(), vals.end()), vals.end());
+    vector<int> compressed(N);
+    for (int i = 0; i < N; ++i) {
+        compressed[i] = lower_bound(vals.begin(), vals.end(), A[i]) - vals.begin();
+    }
+    int M = vals.size();
+    vector<vector<int>> dp(N + 1, vector<int>(M + 1, -INF));
+    for (int i = 0; i <= M; ++i) {
+        dp[0][i] = 0;
+    }
+    for (int i = 1; i <= N; ++i) {
+        FenwickTree<int> seg;
+        seg.init(M);
+        for (int j = i; j > 0; --j) {
+            seg.update(compressed[j - 1] + 1, 1);
+            int len = i - j + 1;
+            if (len % 2 == 0) continue;
+            int med = seg.kth((len + 1) / 2);
+            if (dp[j - 1][med] == -INF) continue;
+            dp[i][med] = max(dp[i][med], dp[j - 1][med] + 1);
+        }
+    }
+    int ans = *max_element(dp[N].begin(), dp[N].end());
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## D. Permutation Construction
+
+### Solution 1: prefix sum, sorting, greedy
+
+The value of an inversion (i, j) is:
+
+a[i] + a[i + 1] + ... + a[j - 1]
+
+Using prefix sums:
+
+prefix[0] = 0
+prefix[k] = a[0] + a[1] + ... + a[k - 1]
+
+Then:
+
+a[i] + ... + a[j - 1] = prefix[j] - prefix[i]
+
+So every inversion contributes:
+
+prefix[j] - prefix[i]
+
+An inversion happens when:
+
+p[i] > p[j]
+
+To maximize total beauty, we want inversions to happen mostly when:
+
+prefix[j] - prefix[i] is positive
+
+That is:
+
+prefix[j] > prefix[i]
+
+So when prefix[i] is smaller, position i should get a larger permutation value.
+When prefix[i] is larger, position i should get a smaller permutation value.
+
+```cpp
+int N;
+vector<int> A;
+
+void solve() {
+    cin >> N;
+    A.assign(N, 0);
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+    }
+    vector<pair<int64, int>> pref;
+    int64 psum = 0;
+    for (int i = 0; i < N; ++i) {
+        pref.emplace_back(psum, i);
+        psum += A[i];
+    }
+    sort(pref.begin(), pref.end());
+    vector<int> ans(N);
+    for (int i = 0; i < N; ++i) {
+        ans[pref[i].second] = N - i;
+    }
+    for (int x : ans) {
+        cout << x << ' ';
+    }
+    cout << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
