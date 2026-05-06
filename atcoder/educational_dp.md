@@ -366,7 +366,7 @@ signed main() {
 
 ## J - Sushi
 
-### Solution 1: 
+### Solution 1: Expected value DP over compressed states
 
 If you think carefully, you don’t actually need to know “which plate has how many.” You only need to know “how many plates have 1 piece, how many have 2 pieces, and how many have 3 pieces.” The expected value is determined solely by those counts.
 
@@ -376,8 +376,67 @@ Just need to know the expected number of steps from a state (i, j, k) where i is
 
 So for a transition just add 1 operation 
 
-```cpp
+But for expected rolls remaining from (i,j,k), you need successor states, meaning where you can go after one roll from the current state:
 
+A pitfall you can fall into is to try to do predecessor states, meaning what states can lead to me, but that is not how expectation recurrence works.
+
+The problem with the predecessor version is that it asks:
+
+What states could have led to me?
+
+But expectation recurrence needs:
+
+What happens next from me?
+
+dp(i,j,k)
+=
+[N
++ i * dp(i-1,j,k)
++ j * dp(i+1,j-1,k)
++ k * dp(i,j+1,k-1)]
+/ (i+j+k)
+
+```cpp
+const int MAXN = 301;
+int N;
+vector<int> A;
+long double dp[MAXN][MAXN][MAXN];
+bool vis[MAXN][MAXN][MAXN];
+
+long double dfs(int i, int j, int k) {
+    if (i < 0 || j < 0 || k < 0 || i + j + k == 0) {
+        return 0;
+    }
+    if (vis[i][j][k]) return dp[i][j][k];
+    vis[i][j][k] = true;
+    long double res = N;
+    res += i * dfs(i - 1, j, k);
+    res += j * dfs(i + 1, j - 1, k);
+    res += k * dfs(i, j + 1, k - 1);
+    res /= (i + j + k);
+    return dp[i][j][k] = res;
+}
+
+void solve() {
+    cin >> N;
+    A.resize(N);
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+    }
+    vector<int> cnt(3);
+    for (int i = 0; i < N; ++i) {
+        cnt[A[i] - 1]++;
+    }
+    cout << fixed << setprecision(10) << dfs(cnt[0], cnt[1], cnt[2]) << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ## K - Stones
