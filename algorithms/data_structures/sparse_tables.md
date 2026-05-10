@@ -62,24 +62,58 @@ struct SparseTable {
 
 // ----- Plug-in ops (examples) -----
 
+template <class T>
 struct MinOp {
-    static int combine(int a, int b) { return std::min(a, b); }
-};
+    static T identity() {
+        return numeric_limits<T>::max();
+    }
 
+    static T combine(T a, T b) {
+        return min(a, b);
+    }
+};
+template <class T>
 struct MaxOp {
-    static int combine(int a, int b) { return std::max(a, b); }
+    static T identity() {
+        return numeric_limits<T>::lowest();
+    }
+
+    static T combine(T a, T b) {
+        return max(a, b);
+    }
 };
 
+template <class T>
 struct GcdOp {
-    static int combine(int a, int b) { return std::gcd(a, b); }
+    static T identity() {
+        return T(0);
+    }
+
+    static T combine(T a, T b) {
+        return gcd(a, b);
+    }
 };
 
+template <class T>
 struct BitOrOp {
-    static int combine(int a, int b) { return a | b; }
+    static T identity() {
+        return T(0);
+    }
+
+    static T combine(T a, T b) {
+        return a | b;
+    }
 };
 
+template <class T>
 struct BitAndOp {
-    static int combine(int a, int b) { return a & b; }
+    static T identity() {
+        return ~T(0);
+    }
+
+    static T combine(T a, T b) {
+        return a & b;
+    }
 };
 ```
 

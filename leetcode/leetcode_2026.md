@@ -3725,3 +3725,346 @@ public:
     }
 };
 ```
+
+# Leetcode Biweekly Contest 182
+
+## Q2. Minimum Flips to Make Binary String Coherent
+
+### Solution 1: greedy, case analysis
+
+The solution counts the number of 0s and 1s in the string, then compares a few possible coherent forms. Instead of trying every flip pattern, it uses the structure of the target string to derive the minimum number of flips from simple counts.
+
+The key idea is that the answer can be found by considering limited cases, such as keeping mostly 1s with at most one exception, flipping all 0s, or handling edge 1s separately. This makes the solution linear in the length of the string.
+
+```cpp
+class Solution {
+public:
+    int minFlips(string s) {
+        int cnt0 = 0, cnt1 = 0, N = s.size();
+        for (char c : s) {
+            if (c == '0') cnt0++;
+            else cnt1++;
+        }
+        int ans = min(max(0, cnt1 - 1), cnt0);
+        int cand = cnt1;
+        if (s[0] == '1') cand--;
+        if (N > 1 && s.back() == '1') cand--;
+        ans = min(ans, cand);
+        return ans;
+    }
+};
+```
+
+## Q3. Minimum Generations to Target Point
+
+### Solution 1: simulation, bfs generation
+
+The solution starts with the given set of 3D points. In each generation, it considers every pair of existing points and creates a new point using the coordinate-wise average:
+
+x = (x1 + x2) / 2
+y = (y1 + y2) / 2
+z = (z1 + z2) / 2
+
+Each newly generated point is added only if it has not been seen before. After every generation, the algorithm checks whether the target point has appeared.
+
+This behaves like breadth-first expansion over possible generated points. Since the coordinates are bounded by the problem constraints, the number of possible states is finite.
+
+```cpp
+class Solution {
+public:
+    int minGenerations(vector<vector<int>>& points, vector<int>& target) {
+        set<vector<int>> seen;
+        for (const auto &point : points) {
+            seen.emplace(point);
+        }
+        for (int k = 0; ; k++) {
+            if (seen.find(target) != seen.end()) {
+                return k;
+            }
+            vector<vector<int>> nxt;
+            int N = points.size();
+            for (int i = 0; i < N; ++i) {
+                for (int j = i + 1; j < N; ++j) {
+                    int x1 = points[i][0], y1 = points[i][1], z1 = points[i][2];
+                    int x2 = points[j][0], y2 = points[j][1], z2 = points[j][2];
+                    int x = (x1 + x2) / 2, y = (y1 + y2) / 2, z = (z1 + z2) / 2;
+                    vector<int> point = {x, y, z};
+                    if (seen.find(point) == seen.end()) {
+                        nxt.emplace_back(point);
+                        seen.emplace(point);
+                    }
+                }
+            }
+            if (nxt.empty()) break;
+            points.insert(points.end(), nxt.begin(), nxt.end());
+        }
+        return -1;
+    }
+};
+```
+
+## Q4. Minimum Threshold Path With Limited Heavy Edges
+
+### Solution 1: binary search, 0-1 bfs, shortest path, undirected graph
+
+The goal is to find the minimum threshold value such that there exists a path from source to target using at most k heavy edges.
+
+For a guessed threshold target, every edge is treated as either:
+
+0 cost if w <= target
+1 cost if w > target
+
+Then the algorithm runs 0-1 BFS to find the minimum number of heavy edges needed to reach the destination.
+
+Because the condition is monotonic, binary search is used:
+
+If a threshold works, try a smaller one.
+If it does not work, try a larger one.
+
+```cpp
+const int INF = numeric_limits<int>::max();
+class Solution {
+private:
+    int N;
+    vector<vector<pair<int, int>>> adj;
+    int bfs(int s, int t, int target) {
+        vector<int> dp(N, INF);
+        deque<int> dq;
+        dq.emplace_back(s);
+        dp[s] = 0;
+        while (!dq.empty()) {
+            int u = dq.front();
+            dq.pop_front();
+            if (u == t) {
+                return dp[t];
+            }
+            for (const auto &[v, w] : adj[u]) {
+                if (w > target && dp[u] + 1 < dp[v]) {
+                    dq.emplace_back(v);
+                    dp[v] = dp[u] + 1;
+                } else if (w <= target && dp[u] < dp[v]) {
+                    dq.emplace_front(v);
+                    dp[v] = dp[u];
+                }
+            }
+        }
+        return dp[t];
+    }
+public:
+    int minimumThreshold(int n, vector<vector<int>>& edges, int source, int target, int k) {
+        adj.assign(n, vector<pair<int, int>>());
+        N = n;
+        for (const auto &edge : edges) {
+            int u = edge[0], v = edge[1], w = edge[2];
+            adj[u].emplace_back(v, w);
+            adj[v].emplace_back(u, w);
+        }
+        int lo = 0, hi = 1e9 + 5;
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (bfs(source, target, mid) <= k) {
+                hi = mid;
+            } else {
+                lo = mid + 1;
+            }
+        }
+        return bfs(source, target, lo) <= k ? lo : -1;
+    }
+};
+```
+
+# Leetcode Weekly Contest 501
+
+## Q2. Count Valid Word Occurrences
+
+### Solution 1: string parsing, map counting
+
+The solution first concatenates all chunks into one string. Then it scans the string and extracts valid words according to the problem's rules.
+
+A word may include lowercase letters and valid hyphens, but a hyphen only belongs to a word if it is surrounded by letters. Invalid separators, whitespace, and invalid hyphen patterns terminate the current word.
+
+Each extracted word is counted in a map. Then each query is answered by looking up the word frequency.
+
+```cpp
+class Solution {
+public:
+    vector<int> countWordOccurrences(vector<string>& chunks, vector<string>& queries) {
+        string S;
+        for (const string& chunk : chunks) {
+            S += chunk;
+        }
+        int N = S.size();
+        map<string, int> words;
+        for (int i = 0; i < N; ) {
+            while (i < N) {
+                if (!isalpha(S[i])) {
+                    i++;
+                } else {
+                    break;
+                }
+            }
+            int start = i;
+            while (i < N) {
+                if (isspace(S[i])) {
+                    break;
+                } else if (i + 1 < N && S[i] == '-' && !isalpha(S[i + 1])) {
+                    break;
+                } else if (i + 1 == N && S[i] == '-') {
+                    break;
+                }
+                i++;
+            }
+            string cand = S.substr(start, i - start);
+            words[cand]++;
+        }
+        vector<int> ans;
+        for (const string &sq : queries) {
+            ans.emplace_back(words[sq]);
+        }
+        return ans;
+    }
+};
+```
+
+## Q3. Minimize Array Sum Using Divisible Replacements
+
+### Solution 1: greedy, number theory, counting frequencies, harmonic series
+
+The solution counts how many times each number appears. Then it iterates from small numbers to large numbers.
+
+For every number i, it absorbs the frequency of all multiples of i. This represents replacing divisible larger values with a smaller divisor whenever possible. Since smaller values reduce the total sum, processing numbers in increasing order greedily gives the minimized sum.
+
+```cpp
+using int64 = long long;
+class Solution {
+public:
+    int64 minArraySum(vector<int>& nums) {
+        unordered_map<int, int> freq;
+        for (int x : nums) {
+            freq[x]++;
+        }
+        int N = *max_element(nums.begin(), nums.end());
+        for (int i = 1; i < N; ++i) {
+            if (!freq[i]) continue;
+            for (int j = 2 * i; j <= N; j += i) {
+                if (!freq[j]) continue;
+                freq[i] += freq[j];
+                freq[j] = 0;
+            }
+        }
+        int64 ans = 0;
+        for (const auto &[x, y] : freq) {
+            ans += 1LL * x * y;
+        }
+        return ans;
+    }
+};
+```
+
+## Q4. Minimum Cost to Buy Apples II
+
+### Solution 1: all pairs shortest paths, undirected graph, dijkstra
+
+For each city, the goal is to either buy an apple there or travel to another city, buy an apple, and pay both travel cost and tax cost.
+
+The solution builds two graphs:
+
+A graph weighted by normal travel cost.
+A graph weighted by tax-adjusted travel cost.
+
+It then runs Dijkstra from every city on both graphs to compute all-pairs shortest paths.
+
+For every starting city i, it tries every possible buying city j:
+
+candidate = prices[j] + costDist[i][j] + taxDist[i][j]
+
+The minimum candidate becomes the answer for city i.
+
+```cpp
+using int64 = long long;
+template <class Weight>
+constexpr Weight INF_VALUE()
+{
+    return numeric_limits<Weight>::max();
+}
+
+template <class Weight>
+vector<Weight> dijkstra(int n, int src, const vector<vector<pair<int, Weight>>> &adj)
+{
+    const Weight INF = INF_VALUE<Weight>();
+    vector<Weight> dist(n, INF);
+    dist[src] = 0;
+    priority_queue<pair<Weight, int>, vector<pair<Weight, int>>, greater<pair<Weight, int>>> minheap;
+    minheap.emplace(0, src);
+
+    while (!minheap.empty())
+    {
+        auto [d, u] = minheap.top();
+        minheap.pop();
+
+        if (d != dist[u])
+            continue;
+
+        for (const auto &[v, w] : adj[u])
+        {
+            if (dist[u] + w < dist[v])
+            {
+                dist[v] = dist[u] + w;
+                minheap.emplace(dist[v], v);
+            }
+        }
+    }
+    return dist;
+}
+
+template <class Weight>
+vector<vector<Weight>> shortestPaths(int n, const vector<array<Weight, 3>> &edges)
+{
+    vector<vector<pair<int, Weight>>> adj(n);
+    for (const auto &e : edges)
+    {
+        int u = e[0], v = e[1];
+        Weight w = e[2];
+        adj[u].emplace_back(v, w);
+        adj[v].emplace_back(u, w);
+    }
+    vector<vector<Weight>> dist(n);
+    for (int src = 0; src < n; src++)
+    {
+        dist[src] = dijkstra<Weight>(n, src, adj);
+    }
+    return dist;
+}
+
+class Solution
+{
+public:
+    vector<int> minCost(int n, vector<int> &prices, vector<vector<int>> &roads)
+    {
+        int M = roads.size();
+        vector<array<int64, 3>> costEdges(M), taxEdges(M);
+        for (int i = 0; i < M; ++i)
+        {
+            int u = roads[i][0], v = roads[i][1], c = roads[i][2], t = roads[i][3];
+            costEdges[i] = {u, v, c};
+            taxEdges[i] = {u, v, 1LL * c * t};
+        }
+        vector<vector<int64>> costDist = shortestPaths<int64>(n, costEdges);
+        vector<vector<int64>> taxDist = shortestPaths<int64>(n, taxEdges);
+        vector<int> ans(prices.begin(), prices.end());
+        for (int i = 0; i < n; ++i)
+        {
+            for (int j = 0; j < n; ++j)
+            {
+                if (i == j)
+                    continue;
+                if (costDist[i][j] == INF_VALUE<int64>() || taxDist[i][j] == INF_VALUE<int64>())
+                    continue;
+                int64 cand = prices[j] + costDist[i][j] + taxDist[i][j];
+                ans[i] = min<int64>(ans[i], cand);
+            }
+        }
+        return ans;
+    }
+};
+```

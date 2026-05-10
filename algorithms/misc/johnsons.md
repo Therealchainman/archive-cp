@@ -1,62 +1,130 @@
 # Johnsons Algorithm
 
-A graph algorithm for solving the all-pairs shortest path problem
+## Weighted Directed Graphs, Negative Edge Weights, No Negative Cycles
 
-```py
-from typing import List
-import math
-import heapq
-from itertools import product
+Purpose:
+    Computes shortest path distances between every ordered pair of vertices
+    in a weighted directed graph.
 
-def bellmanFord(n: int, src: int, edges: List[List[int]]) -> List[int]:
-    dist = [math.inf]*n
-    dist[src] = 0
-    for _ in range(n-1):
-        any_relaxed = False
-        for u, v, w in edges:
-            if dist[u] + w < dist[v]:
-                any_relaxed = True
-                dist[v] = dist[u] + w
-        if not any_relaxed: break
-    # check for any negative cycles
-    for u, v, w in edges:
-        if dist[v] > dist[u] + w: return []
-    return dist
+    In other words, for every source vertex u and every target vertex v,
+    it computes the minimum total edge weight of any path from u to v.
 
-def dijkstra(n: int, src: int, adj_list: List[List[int]]) -> List[int]:
-    dist = [math.inf]*n
-    dist[src] = 0
-    pq = [(0, src)]
-    while pq:
-        d, u = heapq.heappop(pq)
-        if d > dist[u]: continue
-        for v, w in adj_list[u]:
-            if dist[u] + w < dist[v]:
-                dist[v] = dist[u] + w
-                heapq.heappush(pq, (dist[v], v))
-    return dist
+Use this when:
+    - You need all-pairs shortest paths.
+    - The graph may contain negative edge weights.
+    - The graph does NOT contain a negative-weight cycle.
+    - The graph is sparse enough that running Dijkstra from every node is
+      better than using Floyd-Warshall.
 
-def johnsons(n: int, edges: List[List[int]]) -> List[List[int]]:
-    # create a new vertex that is connected to all other vertices with weight 0
-    # new vertex that will be the source for bellman fourd is going to be n
-    # run bellman ford to find shortest paths from the new vertex to all other vertices
-    dist = bellmanFord(n+1, n, edges + [[n, i, 0] for i in range(n)])
-    if not dist: return [] # if it has negative cycle
-    # reweight the edges
-    for i in range(len(edges)):
-        u, v, w = edges[i]
-        edges[i][2] = w + dist[u] - dist[v]
-    # run dijkstra for each vertex
-    adj_list = [[] for _ in range(n)]
-    for u, v, w in edges:
-        adj_list[u].append((v, w))
-    shortest_paths = [dijkstra(n, i, adj_list) for i in range(n)]
-    # undo the reweighting
-    for u, v in product(range(n), repeat = 2):
-        if shortest_paths == math.inf: continue
-        shortest_paths[u][v] = shortest_paths[u][v] + dist[v] - dist[u]
-    return shortest_paths
-```
+Do NOT use this when:
+    - The graph has a negative-weight cycle.
+      In that case, shortest paths are not well-defined.
+    - The graph is small and dense.
+      Floyd-Warshall is simpler and may be fine.
+    - All edge weights are already non-negative.
+      Then just run Dijkstra from every vertex directly.
+    - You only need shortest paths from one source.
+      Use Bellman-Ford if negative edges exist, otherwise Dijkstra.
+
+High-level idea:
+    Johnson's algorithm converts a graph with possible negative edge weights
+    into an equivalent graph with only non-negative edge weights.
+
+    It does this by computing a potential value h[v] for every vertex v using
+    Bellman-Ford. Then every edge (u -> v) with weight w is reweighted as:
+
+        w'(u, v) = w(u, v) + h[u] - h[v]
+
+    This reweighting has two important properties:
+
+        1. Every new edge weight w' is non-negative.
+           That makes Dijkstra valid.
+
+        2. Shortest paths are preserved.
+           The actual numeric distance changes, but the best path from u to v
+           remains the same.
+
+    After running Dijkstra on the reweighted graph, the original distance is
+    restored using:
+
+        dist_original(u, v) = dist_reweighted(u, v) + h[v] - h[u]
+
+What it returns:
+    A matrix dist where:
+
+        dist[i][j] = shortest path distance from i to j
+
+    If j is unreachable from i, dist[i][j] stays INF.
+
+    If the graph contains a negative cycle, the algorithm returns an empty
+    matrix.
+
+Time complexity:
+    Let V = number of vertices and E = number of edges.
+
+    Bellman-Ford:
+        O(VE)
+
+    Dijkstra from every vertex:
+        O(V * (E log V))
+
+    Total:
+        O(VE + V * E log V)
+
+    This is usually good for sparse graphs.
+
+Space complexity:
+    O(V^2 + E)
+
+    The output matrix itself takes O(V^2).
+
+Important implementation detail:
+    A correct Johnson implementation adds one extra "super source" vertex s
+    with zero-weight edges to every original vertex:
+
+        s -> 0 with weight 0
+        s -> 1 with weight 0
+        ...
+        s -> n - 1 with weight 0
+
+    Then Bellman-Ford is run from that super source.
+
+    This guarantees Bellman-Ford can reach every vertex and compute a valid
+    potential h[v] for all vertices.
+
+    If you do not add this super source, the algorithm is incomplete because
+    some vertices may be unreachable from the Bellman-Ford source, causing
+    their h[v] values to remain INF.
+
+Negative cycles:
+    Bellman-Ford is used only to detect negative cycles and compute the
+    potential array h.
+
+    If Bellman-Ford detects a negative cycle, Johnson's algorithm cannot
+    continue, because shortest paths may be undefined.
+
+Why the reweighting works:
+    For any path:
+
+        u -> a -> b -> ... -> v
+
+    The reweighted path cost becomes:
+
+        original_path_cost + h[u] - h[v]
+
+    All intermediate h values cancel out.
+
+    So every path from u to v gets shifted by the same amount h[u] - h[v].
+    Because all paths between the same endpoints are shifted equally, the
+    shortest path stays the shortest path.
+
+Common pitfalls:
+    1. Forgetting the super source.
+    2. Mutating the input edge weights in-place.
+    3. Using int when distances can overflow.
+    4. Using INT_MAX and then doing dist[u] + w without guarding overflow.
+    5. Running Dijkstra on edges that are still negative.
+    6. Forgetting to convert Dijkstra distances back to original weights.
 
 ```cpp
 vector<int> bellmanFord(int n, int src, vector<vector<int>>& edges) {
@@ -114,7 +182,7 @@ vector<vector<int>> johnsons(int n, vector<vector<int>>& edges) {
     vector<vector<pair<int, int>>> adj(n);
     for (auto& e : edges) {
         int u = e[0], v = e[1], w = e[2];
-        adj[u].push_back({v, w});
+        adj[u].emplace_back(v, w);
     }
     vector<vector<int>> dist(n);
     for (int i = 0; i < n; i++) {
