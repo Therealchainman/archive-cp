@@ -282,18 +282,336 @@ signed main() {
 }
 ```
 
-## 
+## F. Second Gap
 
-### Solution 1: 
+### Solution 1: counting dp, reduce states, global lazy multiplier, modular inverse
+
+The second largest position b is only needed to know the current top-two distance.
+
+But that distance is already fixed by the input D[i+1], because the suffix P[i+1..N] was already required to be valid.
+
+So storing b would be redundant.
+
+The DP state:
+
+dp[i][a]
+
+means:
+
+number of valid suffixes P[i..N]
+where the largest value is at position a
+
+The phrase valid suffixes is doing important work. It means the second largest is somewhere that already satisfies the required distance for that suffix. We do not need to know exactly where.
+
+dp[i][a] = number of ways to build suffix P[i..N]
+           where the largest value in the suffix is at position a
+
+1. Track only the suffix maximum position.
+2. The second maximum position can be ignored.
+3. The distance D[i] forces old_max_pos = i + D[i].
+4. The unchanged-top-two case is only valid when D[i] == D[i+1].
+5. Bulk DP multiplication can be optimized with a global lazy coefficient.
+6. When adding new values after updating the lazy coefficient, divide by the new factor so the stored representation remains correct.
 
 ```cpp
+const int MOD = 998244353;
+int N;
+vector<int> A;
 
+int64 inv(int i, int64 m) {
+    return i <= 1 ? i : m - (m / i) * inv(m % i, m) % m;
+}
+
+void solve() {
+    cin >> N;
+    A.resize(N - 1);
+    for (int i = 0; i < N - 1; ++i) {
+        cin >> A[i];
+    }
+    map<int, int64> dp;
+    int64 coef = 1;
+    dp[N - 1] = 1;
+    dp[N - 2] = 1;
+    for (int i = N - 3; i >= 0; --i) {
+        int j = i + A[i];
+        int64 val = 0;
+        if (dp.find(j) != dp.end()) {
+            val = dp[j];
+        }
+        if (A[i] == A[i + 1]) {
+            int64 c = N - i - 2;
+            coef = coef * c % MOD;
+            int64 add = val * inv(c, MOD) % MOD;
+            dp[j] += add;
+            dp[j] %= MOD;
+            dp[i] += add;
+            dp[i] %= MOD;
+        } else {
+            dp.clear();
+            dp[j] = val;
+            dp[i] = val;
+        }
+    }
+    int64 ans = 0;
+    for (const auto &[pos, ways] : dp) {
+        ans += ways;
+        ans %= MOD;
+    }
+    ans = ans * coef % MOD;
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
-## 
+## G. Catch All Apples
 
-### Solution 1: 
+### Solution 1: minimum path cover in a DAG, maximum matching, coordinate transformation, longest increasing subsequence, 2D partial order, Dilworth's theorem
+
+Which robot should take this apple so that the future remains possible?
+
+The cleanest name is:
+
+Minimum path cover in a DAG
+
+More specifically:
+
+Minimum vertex-disjoint path cover in a directed acyclic graph
+
+minimum path cover = N - maximum matching
+
+
+So the shape is:
+
+Sort events by time.
+Build reachability edges between events.
+Run bipartite matching.
+Answer is:
+N - maxMatching
+
+The matching represents “this apple can be immediately followed by that apple using the same robot.”
+
+But there is a better approach with faster time complexity cause maximum bipartite matching is like O(VE) and that can be bad for dense graphs.
+
+# Coordinate Transformation for the Robot Problem
+
+Each apple event is represented as `(T, X)`, where:
+
+- `T` is the time the apple appears.
+- `X` is the coordinate where the apple appears.
+
+A robot can move at speed at most `1`.
+
+So a robot can collect apple `i`, then apple `j`, only if:
+
+$$
+|X_i - X_j| \le T_j - T_i
+$$
+
+assuming:
+
+$$
+T_i \le T_j
+$$
+
+## Step 1: Split the absolute value
+
+The condition:
+
+$$
+|X_i - X_j| \le T_j - T_i
+$$
+
+is equivalent to these two inequalities:
+
+$$
+X_i - X_j \le T_j - T_i
+$$
+
+and
+
+$$
+X_j - X_i \le T_j - T_i
+$$
+
+## Step 2: Rearrange the first inequality
+
+Start with:
+
+$$
+X_i - X_j \le T_j - T_i
+$$
+
+Rearrange:
+
+$$
+T_i + X_i \le T_j + X_j
+$$
+
+Define:
+
+$$
+U = T + X
+$$
+
+Then:
+
+$$
+U_i \le U_j
+$$
+
+## Step 3: Rearrange the second inequality
+
+Start with:
+
+$$
+X_j - X_i \le T_j - T_i
+$$
+
+Rearrange:
+
+$$
+T_i - X_i \le T_j - X_j
+$$
+
+Define:
+
+$$
+V = T - X
+$$
+
+Then:
+
+$$
+V_i \le V_j
+$$
+
+## Final transformed condition
+
+For each event `(T, X)`, define:
+
+$$
+U = T + X
+$$
+
+$$
+V = T - X
+$$
+
+Then:
+
+$$
+|X_i - X_j| \le T_j - T_i
+$$
+
+is equivalent to:
+
+$$
+U_i \le U_j
+$$
+
+and
+
+$$
+V_i \le V_j
+$$
+
+So:
+
+$$
+i \text{ can come before } j
+\iff
+U_i \le U_j \text{ and } V_i \le V_j
+$$
+
+## Why this helps
+
+The original reachability condition has an absolute value:
+
+$$
+|X_i - X_j| \le T_j - T_i
+$$
+
+After the transformation, it becomes a simple 2D ordering condition:
+
+$$
+(U_i, V_i) \le (U_j, V_j)
+$$
+
+where both coordinates must be nondecreasing.
+
+So a robot path becomes a chain:
+
+$$
+U_1 \le U_2 \le U_3 \le \cdots
+$$
+
+and
+
+$$
+V_1 \le V_2 \le V_3 \le \cdots
+$$
+
+This turns the robot scheduling problem into a partial order problem.
+
+Why sorting helps
+
+If you sort all apples by u, then u is already nondecreasing.
+
+Now the only thing left to check is v.
+
+So after sorting by u, a robot path is just a subsequence where:
+
+v is nondecreasing
+
+And an antichain is a subsequence where:
+
+v is decreasing
+
+That is why the problem collapses from “2D poset” to something LIS-like.
+
+Find the antichain of maximum size, which is the longest decreasing subsequence in v after sorting by u.
+
+Then the answer is:
 
 ```cpp
+int N;
+vector<pair<int, int>> A;
 
+void solve() {
+    cin >> N;
+    A.resize(N);
+    for (int i = 0; i < N; ++i) {
+        int t, x;
+        cin >> t >> x;
+        A[i] = {t + x, t - x};
+    }
+    sort(A.begin(), A.end());
+    vector<int> lis;
+    for (auto [u, v] : A) {
+        int x = -v; // turn into longest non-decreasing subsequence
+        int i = lower_bound(lis.begin(), lis.end(), x) - lis.begin();
+        if (i < lis.size()) {
+            lis[i] = x;
+        } else {
+            lis.emplace_back(x);
+        }
+    }
+    int ans = lis.size();
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
