@@ -4090,3 +4090,226 @@ public:
     }
 };
 ```
+
+# Leetcode Weekly Contest 502
+
+## Q2. Count K-th Roots in a Range
+
+### Solution 1: numnber theory, brute force, implementation
+
+```cpp
+using int64 = long long;
+class Solution {
+public:
+    int countKthRoots(int l, int r, int k) {
+        if (k == 1) return r - l + 1;
+        int ans = 0;
+        for (int i = 0; 1LL * i * i <= r; ++i) {
+            int64 cand = 1;
+            for (int j = 0; j < k; ++j) {
+                cand *= i;
+                if (cand > r) break;
+            }
+            if (cand < l || cand > r) continue;
+            ans++;
+        }
+        return ans;
+    }
+};
+```
+
+## Q3. Largest Local Values in a Matrix II
+
+### Solution 1: grid, 2d prefix sum, value enumeration
+
+So the main idea is:
+
+Fix a possible value x.
+Build a prefix sum of cells greater than x.
+For every cell equal to x, quickly ask: “Is there anything bigger nearby?”
+If no, count it.
+
+```cpp
+class Solution {
+private:
+    int query(const vector<vector<int>> &ps, int r1, int c1, int r2, int c2) {
+        if (r1 > r2 || c1 > c2) return 0;
+        return ps[r2 + 1][c2 + 1] - ps[r1][c2 + 1] - ps[r2 + 1][c1] + ps[r1][c1];
+    }
+public:
+    int countLocalMaximums(vector<vector<int>>& matrix) {
+        int R = matrix.size(), C = matrix[0].size();
+        int ans = 0;
+        for (int x = 1; x <= 200; ++x) {
+            vector<vector<int>> ps(R + 1, vector<int>(C + 1, 0));
+            for (int r = 1; r <= R; r++) {
+                for (int c = 1; c <= C; c++) {
+                    int val = int(matrix[r - 1][c - 1] > x);
+                    ps[r][c] = ps[r - 1][c] + ps[r][c - 1] - ps[r - 1][c - 1] + val;
+                }
+            }
+             for (int r = 0; r < R; ++r) {
+                for (int c = 0; c < C; ++c) {
+                    if (matrix[r][c] != x) continue;
+                    int r1 = max(0, r - x);
+                    int r2 = min(R - 1, r + x);
+                    int c1 = max(0, c - x);
+                    int c2 = min(C - 1, c + x);
+                    int cnt = query(ps, r1, c1, r2, c2);
+                    // need to remove the corners
+                    vector<pair<int, int>> corners = {
+                        {r - x, c - x},
+                        {r - x, c + x},
+                        {r + x, c - x},
+                        {r + x, c + x}
+                    };
+                    for (const auto &[nr, nc] : corners) {
+                        if (nr >= 0 && nr < R && nc >= 0 && nc < C && matrix[nr][nc] > x) {
+                            cnt--;
+                        }
+                    }
+                    if (cnt == 0) ans++;
+                }
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## Q4. Smallest Unique Subarray
+
+### Solution 1: suffix array, longest common prefix
+
+You want the shortest subarray that appears exactly once. A subarray is the same as a prefix of some suffix. So the problem becomes:
+- For every suffix of the array, what is the shortest prefix of that suffix that is different from every other suffix?
+That is exactly what suffix arrays and LCP arrays are good at.
+
+Suffix arrays are powerful here because they transform a hard global duplicate-subarray problem into a local neighbor comparison problem.
+
+Without suffix array, checking whether every subarray appears elsewhere can be expensive.
+
+With suffix array:
+
+1. Every suffix is sorted.
+2. Similar suffixes become adjacent.
+3. The LCP array tells us how much overlap adjacent suffixes have.
+4. For each suffix, the shortest unique prefix is determined only by neighboring LCP values.
+
+So the core formula is:
+shortest unique prefix length=1+max(LCP with previous suffix,LCP with next suffix)
+Then take the minimum over all suffixes.
+
+How short of a prefix can I take so that no other suffix has the same prefix?
+For suffix sa[i], its biggest conflict with another suffix comes from its closest sorted neighbors:
+
+so in other words you find for each suffix the longest possible prefix that exists elsewhere in the sequence, then just add one more to that to get the smallest possible prefix that appears exactly once. and minimize over all the suffixes considered.
+
+smallest unique subarray: find the smallest prefix that escapes appearing elsewhere
+
+```cpp
+class Solution {
+private:
+    template <typename Seq>
+    vector<int> lcp_construction(const Seq& s, const vector<int>& p) {
+        int n = s.size();
+        vector<int> rank(n, 0);
+        for (int i = 0; i < n; i++)
+            rank[p[i]] = i;
+    
+        int k = 0;
+        vector<int> lcp(n-1, 0);
+        for (int i = 0; i < n; i++) {
+            if (rank[i] == n - 1) {
+                k = 0;
+                continue;
+            }
+            int j = p[rank[i] + 1];
+            while (i + k < n && j + k < n && s[i+k] == s[j+k])
+                k++;
+            lcp[rank[i]] = k;
+            if (k)
+                k--;
+        }
+        return lcp;
+    }
+    
+    void radix_sort(const vector<int>& equivalence_class, vector<int>& leaderboard, vector<int>& update_leaderboard) {
+        int n = leaderboard.size();
+        vector<int> bucket_size(n, 0), bucket_pos(n, 0);
+        bucket_size.assign(n, 0);
+        for (int eq_class : equivalence_class) {
+            bucket_size[eq_class]++;
+        }
+        bucket_pos.assign(n, 0);
+        for (int i = 1; i < n; i++) {
+            bucket_pos[i] = bucket_pos[i - 1] + bucket_size[i - 1];
+        }
+        update_leaderboard.assign(n, 0);
+        for (int i = 0; i < n; i++) {
+            int eq_class = equivalence_class[leaderboard[i]];
+            int pos = bucket_pos[eq_class];
+            update_leaderboard[pos] = leaderboard[i];
+            bucket_pos[eq_class]++;
+        }
+    }
+    template <typename Seq>
+    vector<int> suffix_array(const Seq& s) {
+        int n = s.size();
+        using T = typename Seq::value_type;
+        vector<pair<T, int>> arr(n);
+        for (int i = 0; i < n; i++) {
+            arr[i] = {s[i], i};
+        }
+        sort(arr.begin(), arr.end());
+        vector<int> leaderboard(n, 0), equivalence_class(n, 0);
+        for (int i = 0; i < n; i++) {
+            leaderboard[i] = arr[i].second;
+        }
+        equivalence_class[leaderboard[0]] = 0;
+        for (int i = 1; i < n; i++) {
+            T left_segment = arr[i - 1].first;
+            T right_segment = arr[i].first;
+            equivalence_class[leaderboard[i]] = equivalence_class[leaderboard[i - 1]] + (left_segment != right_segment);
+        }
+        int k = 1;
+        vector<int> update_equivalence_class(n, 0), update_leaderboard(n, 0);
+        while (k < n) {
+            for (int i = 0; i < n; i++) {
+                leaderboard[i] = (leaderboard[i] - k + n) % n; // create left segment, keeps sort of the right segment
+            }
+            radix_sort(equivalence_class, leaderboard, update_leaderboard); // radix sort for the left segment
+            swap(leaderboard, update_leaderboard);
+            update_equivalence_class.assign(n, 0);
+            update_equivalence_class[leaderboard[0]] = 0;
+            for (int i = 1; i < n; i++) {
+                pair<int, int> left_segment = {equivalence_class[leaderboard[i - 1]], equivalence_class[(leaderboard[i - 1] + k) % n]};
+                pair<int, int> right_segment = {equivalence_class[leaderboard[i]], equivalence_class[(leaderboard[i] + k) % n]};
+                update_equivalence_class[leaderboard[i]] = update_equivalence_class[leaderboard[i - 1]] + (left_segment != right_segment);
+            }
+            k <<= 1;
+            swap(equivalence_class, update_equivalence_class);
+        }
+        return leaderboard;
+    }
+public:
+    int smallestUniqueSubarray(vector<int>& nums) {
+        int N = nums.size();
+        nums.emplace_back(0); // sentinel node
+        vector<int> sa = suffix_array(nums);
+        vector<int> lcp = lcp_construction(nums, sa);
+        int ans = N;
+        for (int i = 0; i <= N; ++i) {
+            int idx = sa[i];
+            if (idx == N) continue; // sentinel node
+            int prefixMax = 0;
+            if (i > 0) prefixMax = max(prefixMax, lcp[i - 1]);
+            if (i < N) prefixMax = max(prefixMax, lcp[i]);
+            int cand = prefixMax + 1;
+            if (cand > N - idx) continue;
+            ans = min(ans, cand);
+        }
+        return ans;
+    }
+};
+```

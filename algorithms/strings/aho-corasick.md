@@ -1,5 +1,62 @@
 # Aho-Corasick Algorithm and Data Structure
 
+## General
+
+```cpp
+const int MOD = 998244353, ALPHABET_SIZE = 26;
+int N, K;
+
+// why don't I need output link?
+struct Vertex {
+    bool is_leaf = false;
+    bool bad = false;
+    int suffix_link = 0;
+    int depth = 0;
+    int transition[ALPHABET_SIZE];
+    void init() {
+        fill(begin(transition), end(transition), 0);
+    }
+};
+vector<Vertex> trie;
+void add_string(const string& s) {
+    int cur = 0, depth = 0;
+    for (char ch : s) {
+        int c = ch - 'a';
+        depth++;
+        if (trie[cur].transition[c] == 0) {
+            trie[cur].transition[c] = trie.size();
+            Vertex v;
+            v.init();
+            v.depth = depth;
+            trie.push_back(v);
+        }
+        cur = trie[cur].transition[c];
+    }
+    trie[cur].is_leaf = true;
+}
+void push_links() {
+    int queue[trie.size()];
+    queue[0] = 0;
+    for (int state = 0, next_state = 0; state < trie.size(); state++) {
+        int v = queue[state];
+        int u = trie[v].suffix_link;
+        if (v == 0) {
+            trie[v].bad = trie[v].is_leaf;
+        } else {
+            trie[v].bad = trie[v].is_leaf || trie[u].bad;
+        }
+        for (int c = 0; c < ALPHABET_SIZE; c++) {
+            int nxt = trie[v].transition[c];
+            if (nxt != 0) {
+                trie[nxt].suffix_link = v ? trie[u].transition[c] : 0;
+                queue[++next_state] = nxt;
+            } else {
+                trie[v].transition[c] = trie[u].transition[c];
+            }
+        }
+    }
+}
+```
 
 ## Implementation for solving dynamic programming
 
@@ -10,11 +67,7 @@ Aho-Corasick data structure is similar to a trie, but it has transitions, suffix
 The transitions are the edges that go from one vertex to another, and they are the edges that represent the characters in the string, but are also like the transition in an automaton.  The suffix_link is the edge that goes to the longest suffix of the current vertex that is also in the trie.  The output_link is the edge that goes to the longest suffix of the current vertex that is also a leaf in the trie.
 
 
-
-
 This solution works because it follows the output links to find all possible suffixes that are in the dictionary for the current prefix.  Cause you precompute every prefix as you move through the text.  And it minimizes the total cost to reach the current prefix. 
-
-
 
 ```cpp
 const int INF = 1e9, K = 26;

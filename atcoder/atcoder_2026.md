@@ -615,3 +615,501 @@ signed main() {
     return 0;
 }
 ```
+
+# Atcoder Beginner Contest 458
+
+## D. Chalkboard Median
+
+### Solution 1: multisets, balanced binary search tree, rolling median
+
+```cpp
+int X, Q;
+
+multiset<int> low, high;
+
+void add(int x) {
+    if (low.empty() || x <= *low.rbegin()) {
+        low.emplace(x);
+    } else {
+        high.emplace(x);
+    }
+
+    // low cannot be too large
+    if (low.size() > high.size() + 1) {
+        auto it = prev(low.end());
+        high.emplace(*it);
+        low.erase(it);
+    }
+    // high cannot be larger than low
+    if (high.size() > low.size()) {
+        auto it = high.begin();
+        low.emplace(*it);
+        high.erase(it);
+    }
+}
+
+int median() {
+    return *low.rbegin();
+}
+
+void solve() {
+    cin >> X >> Q;
+    add(X);
+    while (Q--) {
+        int x, y;
+        cin >> x >> y;
+        add(x);
+        add(y);
+        cout << median() << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## E. Count 123
+
+### Solution 1: combinatorial counting, stars and bars, gap method
+
+2s create gaps.
+Pick the gaps that contain 1s.
+Split the 1s into those gaps.
+Put all 3s into the remaining gaps.
+
+counts the number of valid sequences where the 1s occupy exactly k of the gaps created by the 2s.
+
+For a fixed $$k$$, let
+
+$$
+k = \text{the number of gaps that contain at least one } 1.
+$$
+
+First, place all $$X_2$$ twos:
+
+$$
+\_\,2\,\_\,2\,\_\,\cdots\,2\,\_
+$$
+
+This creates
+
+$$
+X_2 + 1
+$$
+
+gaps.
+
+For each fixed $$k$$, we count valid sequences in three steps.
+
+### 1. Choose the gaps that contain ones
+
+$$
+\binom{X_2+1}{k}
+$$
+
+There are $$X_2+1$$ total gaps, and we choose $$k$$ of them to contain the $$1$$'s.
+
+### 2. Split the ones into those selected gaps
+
+$$
+\binom{X_1-1}{k-1}
+$$
+
+Each selected gap must contain at least one $$1$$. This counts the number of ways to split $$X_1$$ identical ones into $$k$$ nonempty groups.
+
+### 3. Distribute the threes into the remaining gaps
+
+After choosing $$k$$ gaps for the $$1$$'s, there are
+
+$$
+X_2+1-k
+$$
+
+remaining gaps for the $$3$$'s.
+
+The $$3$$'s may be distributed among these remaining gaps, and some gaps may be empty. By stars and bars, this gives
+
+$$
+\binom{X_3 + (X_2+1-k) - 1}{(X_2+1-k)-1}
+=
+\binom{X_3+X_2-k}{X_2-k}.
+$$
+
+Therefore, for a fixed $$k$$, the number of valid sequences is
+
+$$
+\binom{X_2+1}{k}
+\binom{X_1-1}{k-1}
+\binom{X_3+X_2-k}{X_2-k}.
+$$
+
+Finally, we sum over all possible values of $$k$$:
+
+$$
+\boxed{
+\sum_{k=1}^{\min(X_1,X_2)}
+\binom{X_2+1}{k}
+\binom{X_1-1}{k-1}
+\binom{X_3+X_2-k}{X_2-k}
+}
+$$
+
+In words: choose which gaps contain $$1$$'s, split the $$1$$'s into those gaps, then distribute all $$3$$'s among the remaining gaps.
+
+```cpp
+const int MOD = 998244353;
+int X1, X2, X3;
+
+int64 inv(int i, int64 m) {
+  return i <= 1 ? i : m - (m / i) * inv(m % i, m) % m;
+}
+
+vector<int64> fact, inv_fact;
+
+void factorials(int n, int64 m) {
+    fact.assign(n + 1, 1);
+    inv_fact.assign(n + 1, 0);
+    for (int i = 2; i <= n; i++) {
+        fact[i] = (fact[i - 1] * i) % m;
+    }
+    inv_fact.end()[-1] = inv(fact.end()[-1], m);
+    for (int i = n - 1; i >= 0; i--) {
+        inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % m;
+    }
+}
+
+int64 choose(int n, int r, int64 m) {
+    if (n < r) return 0;
+    return (fact[n] * inv_fact[r] % m) * inv_fact[n - r] % m;
+}
+
+void solve() {
+    cin >> X1 >> X2 >> X3;
+    int N = X1 + X2 + X3;
+    factorials(N, MOD);
+    int64 ans = 0;
+    for (int k = 1; k <= min(X1, X2); ++k) {
+        int64 ways = 1;
+        ways = ways * choose(X2 + 1, k, MOD) % MOD;
+        ways = ways * choose(X1 - 1, k - 1, MOD) % MOD;
+        ways = ways * choose(X3 + X2 - k, X2 - k, MOD) % MOD;
+        ans = (ans + ways) % MOD;
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## F. Critical Misread
+
+### Solution 1: Aho-Corasick automaton, matrix exponentiation, counting paths in a graph
+
+Count strings of length N that do not contain any banned word.
+
+1. Build an Aho-Corasick automaton from the forbidden strings.
+2. Mark every state as “bad” if reaching that state means some forbidden pattern has appeared.
+3. Build a transition matrix between non-bad states.
+4. Compute matrix^N.
+5. Start from root state 0.
+6. Sum all reachable safe states after N characters.
+
+how many strings of the current length end in each Aho-Corasick automaton state, without ever having matched a forbidden string.
+
+If I am currently in state, and I append character c, what state do I end in?
+
+That state represents the longest suffix of the new string that is also a prefix of one of the forbidden strings.
+
+In an Aho-Corasick trie, each inserted character can create at most one new node.
+Since you can have at most 100 characters, the total number of states is 100, so the transition matrix is at most 100x100, and it works for matrix multiplication as well. 
+
+This is just intermediate solution without matrix exponentiation, but it is the same idea.
+
+```cpp
+const int MOD = 998244353, ALPHABET_SIZE = 26;
+int N, K;
+
+// why don't I need output link?
+struct Vertex {
+    bool is_leaf = false;
+    bool bad = false;
+    int suffix_link = 0;
+    int depth = 0;
+    int transition[ALPHABET_SIZE];
+    void init() {
+        fill(begin(transition), end(transition), 0);
+    }
+};
+vector<Vertex> trie;
+void add_string(const string& s) {
+    int cur = 0, depth = 0;
+    for (char ch : s) {
+        int c = ch - 'a';
+        depth++;
+        if (trie[cur].transition[c] == 0) {
+            trie[cur].transition[c] = trie.size();
+            Vertex v;
+            v.init();
+            v.depth = depth;
+            trie.push_back(v);
+        }
+        cur = trie[cur].transition[c];
+    }
+    trie[cur].is_leaf = true;
+}
+void push_links() {
+    int queue[trie.size()];
+    queue[0] = 0;
+    for (int state = 0, next_state = 0; state < trie.size(); state++) {
+        int v = queue[state];
+        int u = trie[v].suffix_link;
+        if (v == 0) {
+            trie[v].bad = trie[v].is_leaf;
+        } else {
+            trie[v].bad = trie[v].is_leaf || trie[u].bad;
+        }
+        for (int c = 0; c < ALPHABET_SIZE; c++) {
+            int nxt = trie[v].transition[c];
+            if (nxt != 0) {
+                trie[nxt].suffix_link = v ? trie[u].transition[c] : 0;
+                queue[++next_state] = nxt;
+            } else {
+                trie[v].transition[c] = trie[u].transition[c];
+            }
+        }
+    }
+}
+
+void solve() {
+    cin >> N >> K;
+    trie.resize(1);
+    trie[0].init();
+    for (int i = 0; i < K; ++i) {
+        string s;
+        cin >> s;
+        add_string(s);
+    }
+    push_links();
+    int states = trie.size();
+    vector<int64> dp(states, 0);
+    dp[0] = 1;
+    for (int len = 0; len < N; ++len) {
+        vector<int64> ndp(states, 0);
+        for (int state = 0; state < states; ++state) {
+            if (dp[state] == 0) continue;
+            if (trie[state].bad) continue;
+            for (int c = 0; c < ALPHABET_SIZE; ++c) {
+                int nxt = trie[state].transition[c];
+                if (trie[nxt].bad) continue;
+                ndp[nxt] += dp[state];
+                ndp[nxt] %= MOD;
+            }
+        }
+        swap(dp, ndp);
+    }
+    int64 ans = 0;
+    for (int state = 0; state < states; ++state) {
+        if (!trie[state].bad) {
+            ans += dp[state];
+            ans %= MOD;
+        }
+    }
+    cout << ans << '\n';
+}
+
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+```cpp
+const int MOD = 998244353, ALPHABET_SIZE = 26;
+int N, K;
+
+// why don't I need output link?
+struct Vertex {
+    bool is_leaf = false;
+    bool bad = false;
+    int suffix_link = 0;
+    int depth = 0;
+    int transition[ALPHABET_SIZE];
+    void init() {
+        fill(begin(transition), end(transition), 0);
+    }
+};
+vector<Vertex> trie;
+void add_string(const string& s) {
+    int cur = 0, depth = 0;
+    for (char ch : s) {
+        int c = ch - 'a';
+        depth++;
+        if (trie[cur].transition[c] == 0) {
+            trie[cur].transition[c] = trie.size();
+            Vertex v;
+            v.init();
+            v.depth = depth;
+            trie.push_back(v);
+        }
+        cur = trie[cur].transition[c];
+    }
+    trie[cur].is_leaf = true;
+}
+void push_links() {
+    int queue[trie.size()];
+    queue[0] = 0;
+    for (int state = 0, next_state = 0; state < trie.size(); state++) {
+        int v = queue[state];
+        int u = trie[v].suffix_link;
+        if (v == 0) {
+            trie[v].bad = trie[v].is_leaf;
+        } else {
+            trie[v].bad = trie[v].is_leaf || trie[u].bad;
+        }
+        for (int c = 0; c < ALPHABET_SIZE; c++) {
+            int nxt = trie[v].transition[c];
+            if (nxt != 0) {
+                trie[nxt].suffix_link = v ? trie[u].transition[c] : 0;
+                queue[++next_state] = nxt;
+            } else {
+                trie[v].transition[c] = trie[u].transition[c];
+            }
+        }
+    }
+}
+
+template <int M>
+struct Matrix {
+    int rows, cols;
+    vector<vector<int64>> a;
+
+    Matrix() : rows(0), cols(0) {}
+
+    Matrix(int rows, int cols, int64 value = 0)
+        : rows(rows), cols(cols), a(rows, vector<int64>(cols, value % M)) {}
+
+    vector<int64>& operator[](int i) {
+        return a[i];
+    }
+
+    const vector<int64>& operator[](int i) const {
+        return a[i];
+    }
+
+    static Matrix identity(int n) {
+        Matrix I(n, n);
+
+        for (int i = 0; i < n; i++) {
+            I[i][i] = 1;
+        }
+
+        return I;
+    }
+
+    Matrix operator*(const Matrix& other) const {
+        assert(cols == other.rows);
+
+        Matrix result(rows, other.cols);
+
+        for (int i = 0; i < rows; i++) {
+            for (int k = 0; k < cols; k++) {
+                if (a[i][k] == 0) continue;
+
+                for (int j = 0; j < other.cols; j++) {
+                    result[i][j] += a[i][k] * other[k][j] % M;
+
+                    if (result[i][j] >= M) {
+                        result[i][j] -= M;
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    Matrix pow(int64 exponent) const {
+        assert(rows == cols);
+
+        Matrix base = *this;
+        Matrix result = Matrix::identity(rows);
+
+        while (exponent > 0) {
+            if (exponent & 1) {
+                result = result * base;
+            }
+
+            base = base * base;
+            exponent >>= 1;
+        }
+
+        return result;
+    }
+};
+
+void solve() {
+    cin >> N >> K;
+    trie.resize(1);
+    trie[0].init();
+    for (int i = 0; i < K; ++i) {
+        string s;
+        cin >> s;
+        add_string(s);
+    }
+    push_links();
+    int states = trie.size();
+    Matrix<MOD> transition(states, states, 0);
+    for (int state = 0; state < states; ++state) {
+        if (trie[state].bad) continue;
+        for (int c = 0; c < ALPHABET_SIZE; ++c) {
+            int nxt = trie[state].transition[c];
+            if (trie[nxt].bad) continue;
+            transition[nxt][state]++;
+            transition[nxt][state] %= MOD;
+        }
+    }
+    Matrix<MOD> base(states, 1, 0);
+    base[0][0] = 1;
+    Matrix<MOD> sol = transition.pow(N) * base;
+    int64 ans = 0;
+    for (int state = 0; state < states; ++state) {
+        if (!trie[state].bad) {
+            ans += sol[state][0];
+            ans %= MOD;
+        }
+    }
+    cout << ans << endl;
+}
+
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## G. Children Yearn for the Evil Kindergarten
+
+### Solution 1: 
+
+```cpp
+
+```
