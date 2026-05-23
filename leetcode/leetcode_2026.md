@@ -4313,3 +4313,202 @@ public:
     }
 };
 ```
+
+# Leetcode Biweekly Contest 183
+
+## Q2. Minimum Operations to Make Array Modulo Alternating I
+
+### Solution 1: modular arithmetic, greedy
+
+Try every alternating modulo pattern and choose the cheapest one.
+
+```cpp
+const int INF = numeric_limits<int>::max();
+class Solution {
+private:
+    int cost(int k, int val, int x) {
+        int cand = INF;
+        // increase
+        if (val <= x) cand = min(cand, x - val);
+        else cand = min(cand, k - (val - x));
+        // decrease
+        if (val >= x) cand = min(cand, val - x);
+        else cand = min(cand, k - (x - val));
+        return cand;
+    }
+public:
+    int minOperations(vector<int>& nums, int k) {
+        int N = nums.size();
+        int ans = INF;
+        for (int x = 0; x < k; ++x) {
+            for (int y = 0; y < k; ++y) {
+                if (x == y) continue;
+                int cur = 0;
+                for (int i = 0; i < N; ++i) {
+                    int val = nums[i] % k;
+                    if (i % 2 == 0) {
+                        cur += cost(k, val, x);
+                    } else {
+                        cur += cost(k, val, y);
+                    }
+                }
+                ans = min(ans, cur);
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## Q3. Maximum Path Intersection Sum in a Grid
+
+### Solution 1: prefix sums, grid, kadane variation
+
+The algorithm checks three possible kinds of valid intersections or paths:
+
+Horizontal segments
+For each row, it scans left to right using prefix sums.
+It keeps the smallest previous prefix sum seen so far.
+The best subarray ending at the current column is:
+currentPrefix - minimumPreviousPrefix
+Vertical segments
+It does the same thing for each column, scanning top to bottom.
+This finds the maximum vertical contiguous segment.
+Single interior cells
+It separately considers cells that are not on the border.
+This handles cases where the best “intersection” is just one internal cell.
+
+Core idea:
+Reduce each row and column to a maximum subarray problem using prefix sums.
+
+```cpp
+const int INF = numeric_limits<int>::max();
+class Solution {
+public:
+    int maxScore(vector<vector<int>>& grid) {
+        int R = grid.size(), C = grid[0].size();
+        int ans = -INF;
+        // think about it, length 1 is impossible? 
+        for (int r = 0; r < R; ++r) {
+            int psum = 0, minSum = INF;
+            for (int c = 0; c < C; ++c) {
+                int ppsum = psum;
+                psum += grid[r][c];
+                if (c > 0) ans = max(ans, psum - minSum);
+                minSum = min(minSum, ppsum);
+            }
+        }
+        for (int c = 0; c < C; ++c) {
+            int psum = 0, minSum = INF;
+            for (int r = 0; r < R; ++r) {
+                int ppsum = psum;
+                psum += grid[r][c];
+                if (r > 0) ans = max(ans, psum - minSum);
+                minSum = min(minSum, ppsum);
+            }
+        }
+        for (int r = 1; r + 1 < R; ++r) {
+            for (int c = 1; c + 1 < C; ++c) {
+                ans = max(ans, grid[r][c]);
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## Q4. Count Non Adjacent Subsets in a Rooted Tree
+
+### Solution 1: tree dp, postorder dfs, combinatorics, knapsack like merging, modular sum counting
+
+The problem counts subsets of tree nodes such that:
+
+No two selected nodes are adjacent.
+The sum of selected values is divisible by k.
+
+The solution uses two DP states for every node u:
+
+dp0[u][r] = number of valid subsets in subtree u
+            where u is NOT selected
+            and subset sum % k == r
+
+dp1[u][r] = number of valid subsets in subtree u
+            where u IS selected
+            and subset sum % k == r
+
+Initialization:
+
+dp0[u][0] = 1
+dp1[u][nums[u] % k] = 1
+
+Then during DFS, each child subtree is merged into the current node.
+
+If u is selected, then its child v cannot be selected:
+
+dp1[u] combines only with dp0[v]
+
+If u is not selected, then child v may either be selected or not selected:
+
+dp0[u] combines with dp0[v] + dp1[v]
+
+The modulo remainder is updated like:
+
+newRemainder = (i + j) % k
+
+Finally, the answer is:
+
+dp0[0][0] + dp1[0][0] - 1
+
+The -1 removes the empty subset.
+
+```cpp
+const int MOD = 1e9 + 7;
+class Solution {
+private:
+    int K, N;
+    vector<int> ndp0, ndp1, arr;
+    vector<vector<int>> dp0, dp1, adj;
+    void dfs(int u, int p = -1) {
+        dp0[u][0] = 1;
+        dp1[u][arr[u]] = 1;
+        for (int v : adj[u]) {
+            if (v == p) continue;
+            dfs(v, u);
+            ndp0.assign(K, 0);
+            ndp1.assign(K, 0);
+            // take 1
+            for (int i = 0; i < K; ++i) {
+                for (int j = 0; j < K; ++j) {
+                    int val = (i + j) % K;
+                    ndp1[val] = (ndp1[val] + (1LL * dp1[u][i] * dp0[v][j]) % MOD) % MOD;
+                    int cnt = (dp0[v][j] + dp1[v][j]) % MOD;
+                    ndp0[val] = (ndp0[val] + (1LL * dp0[u][i] * cnt) % MOD) % MOD;
+                }
+            }
+            swap(dp1[u], ndp1);
+            swap(dp0[u], ndp0);
+        }
+    }
+public:
+    int countValidSubsets(vector<int>& parent, vector<int>& nums, int k) {
+        N = parent.size();
+        K = k;
+        for (int &x : nums) {
+            x %= k;
+        }
+        arr = nums;
+        adj.assign(N, vector<int>());
+        for (int i = 1; i < N; ++i) {
+            adj[i].emplace_back(parent[i]);
+            adj[parent[i]].emplace_back(i);
+        }
+        dp0.assign(N, vector<int>(K, 0));
+        dp1.assign(N, vector<int>(K, 0));
+        dfs(0);
+        int ans = (dp0[0][0] + dp1[0][0]) % MOD;
+        ans--;
+        if (ans < 0) ans += MOD;
+        return ans;
+    }
+};
+```
