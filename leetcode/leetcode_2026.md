@@ -4419,7 +4419,7 @@ public:
 
 ## Q4. Count Non Adjacent Subsets in a Rooted Tree
 
-### Solution 1: tree dp, postorder dfs, combinatorics, knapsack like merging, modular sum counting
+### Solution 1: tree dp, postorder dfs, combinatorics, knapsack like merging, modular sum counting, convolution
 
 The problem counts subsets of tree nodes such that:
 
@@ -4460,6 +4460,35 @@ Finally, the answer is:
 dp0[0][0] + dp1[0][0] - 1
 
 The -1 removes the empty subset.
+
+$$C[r] = \sum_{\substack{0 \le i < K \\ 0 \le j < K \\ (i + j) \bmod K = r}} A[i] \cdot B[j]$$
+
+Convolution is a way to merge two sequences into a new sequence where each output position collects contributions from pairs of input positions.
+
+In your DP, the two sequences are:
+
+A[i] = number of ways from the already-processed part of u's subtree with remainder i
+B[j] = number of ways from child v's subtree with remainder j
+
+The merged sequence is:
+
+C[r] = number of ways after combining them with remainder r
+
+For each node u, build a remainder-count sequence for its subtree by starting with the choice at u, then sequentially convolving in each child subtree’s remainder-count sequence, while respecting whether the child root may be selected.
+
+Why is it multiplication? 
+
+Because each side represents a number of choices, and when two choices can be combined freely, you use the product rule.
+
+multiply = combine independent compatible choices
+
+They are dependent computationally, but independent combinatorially.
+
+Computationally:
+
+dp after v2 depends on dp after v1
+
+because you are accumulating counts.
 
 ```cpp
 const int MOD = 1e9 + 7;
@@ -4509,6 +4538,377 @@ public:
         ans--;
         if (ans < 0) ans += MOD;
         return ans;
+    }
+};
+```
+
+# Leetcode Weekly Contest 503
+
+## Q2. Password Strength
+
+### Solution 1: string parsing, set, simulation
+
+```cpp
+class Solution {
+public:
+    int passwordStrength(string password) {
+        int ans = 0;
+        unordered_set<char> seen;
+        for (char c : password) {
+            if (seen.find(c) != seen.end()) continue;
+            seen.emplace(c);
+            if (c >= 'a' && c <= 'z') {
+                ans++;                
+            } else if (c >= 'A' && c <= 'Z') {
+                ans += 2;
+            } else if (c >= '0' && c <= '9') {
+                ans += 3;
+            } else {
+                ans += 5;
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## Q3. Minimum Operations to Sort a Permutation
+
+### Solution 1: greedy, case analysis, permuation
+
+The goal is to determine whether the permutation can become sorted using rotations and optionally one reverse operation.
+
+The helper function calc(arr) finds where 0 is located. Since the sorted permutation is:
+
+0, 1, 2, 3, ...
+
+after rotation, the array must look like sorted order starting from 0.
+
+So calc checks whether:
+
+arr[(i + pivot) % N] == i
+
+for every i.
+
+If true, then the array can be sorted by rotating left pivot times.
+
+The main function checks several cases:
+
+Case 1: No reverse
+
+Check whether the original array is a rotated sorted array.
+
+x = calc(nums)
+
+If yes, answer can be x.
+
+Case 2: Rotate the other direction
+
+If the array can be sorted by left rotations, then it can also be viewed through right rotations, but the code adds extra operations based on the problem’s operation rules:
+
+(N - x) % N + 2
+Case 3: Reverse first
+
+Reverse the array first, then check if the reversed array can be sorted by rotations.
+
+reverse(nums1.begin(), nums1.end());
+cand = calc(nums1);
+ans = min(ans, cand + 1);
+
+The +1 is for the reverse operation.
+
+Case 4: Reverse last
+
+If the reversed version is rotatable into sorted order, that also corresponds to doing rotations first and then reversing at the end:
+
+(N - cand) % N + 1
+
+Why this works:
+A permutation that can be sorted with these operations must be either:
+
+already a rotation of sorted order, or
+a rotation of reversed sorted order.
+
+So checking the original and reversed array covers the possible structures.
+
+```cpp
+const int INF = numeric_limits<int>::max();
+class Solution {
+private:
+    int calc(const vector<int> &arr) {
+        int N = arr.size();
+        int pivot = 0;
+        for (int i = 0; i < N; ++i) {
+            if (arr[i] == 0) {
+                pivot = i;
+                break;
+            }
+        }
+        // because permutation of 0,1,2,...,N
+        for (int i = 0; i < N; ++i) {
+            if (arr[(i + pivot) % N] != i) return INF;
+        }
+        return pivot;
+    }
+public:
+    int minOperations(vector<int>& nums) {
+        int ans = INF, N = nums.size();
+        // case 1, no reverse
+        int x = calc(nums);
+        if (x < INF) {
+             ans = min(ans, x);
+            // case 2, right rotations
+            ans = min(ans, (N - x) % N + 2);
+        }
+        // case 2, reverse first
+        vector<int> nums1(nums.begin(), nums.end());
+        reverse(nums1.begin(), nums1.end());
+        int cand = calc(nums1);
+        if (cand < INF) ans = min(ans, cand + 1);
+        // case 3, reverse last
+        if (cand < INF) {
+            ans = min(ans, (N - cand) % N + 1);
+        }
+        return ans < INF ? ans : -1;
+    }
+};
+```
+
+## Q4. Number of Pairs After Increment
+
+### Solution 1: square root decomposition, lazy propagation, frequency counting, map, range add update
+
+Square root decomposition idea
+
+Split nums2 into blocks of size about sqrt(n).
+
+For each block, store:
+
+unordered_map<int64, int> freq;
+
+This map counts how many raw values exist inside that block.
+
+Also store:
+
+lazy[b]
+
+which means every value in block b should be treated as having lazy[b] added to it.
+
+Range update
+
+For partial blocks, push the lazy value into the actual array, update elements directly, then rebuild the frequency map.
+
+For full blocks, do not touch individual elements. Just do:
+
+lazy[b] += val;
+Query
+
+To count values equal to target, each block checks:
+
+rawTarget = target - lazy[b]
+
+because the actual visible value is:
+
+arr[i] + lazy[b]
+
+So if we want:
+
+arr[i] + lazy[b] == target
+
+then:
+
+arr[i] == target - lazy[b]
+
+The frequency map gives that count quickly.
+
+Why this works:
+Lazy values allow full block range updates in O(1) per block, while frequency maps allow fast counting by value.
+
+```cpp
+using int64 = long long;
+struct SqrtDecomp {
+    int N, B, numBlocks;
+    vector<int64> arr;
+    vector<int64> lazy;
+    vector<unordered_map<int64, int>> freq;
+
+    SqrtDecomp(vector<int>& nums) {
+        N = nums.size();
+        B = sqrt(N) + 1;
+        numBlocks = (N + B - 1) / B;
+
+        arr.assign(nums.begin(), nums.end());
+        lazy.assign(numBlocks, 0);
+        freq.assign(numBlocks, unordered_map<int64, int>());
+
+        build();
+    }
+
+    int block(int i) {
+        return i / B;
+    }
+
+    int start(int b) {
+        return b * B;
+    }
+
+    int end(int b) {
+        return min(N - 1, (b + 1) * B - 1);
+    }
+
+    void build() {
+        for (int b = 0; b < numBlocks; b++) {
+            rebuild(b);
+        }
+    }
+
+    void rebuild(int b) {
+        freq[b].clear();
+
+        for (int i = start(b); i <= end(b); i++) {
+            freq[b][arr[i]]++;
+        }
+    }
+
+    void push(int b) {
+        if (lazy[b] == 0) return;
+
+        for (int i = start(b); i <= end(b); i++) {
+            arr[i] += lazy[b];
+        }
+
+        lazy[b] = 0;
+        rebuild(b);
+    }
+
+    void updateRange(int l, int r, int val) {
+        int bl = block(l);
+        int br = block(r);
+
+        if (bl == br) {
+            push(bl);
+
+            for (int i = l; i <= r; i++) {
+                arr[i] += val;
+            }
+
+            rebuild(bl);
+            return;
+        }
+
+        // Left partial block
+        push(bl);
+        for (int i = l; i <= end(bl); i++) {
+            arr[i] += val;
+        }
+        rebuild(bl);
+
+        // Full middle blocks
+        for (int b = bl + 1; b <= br - 1; b++) {
+            lazy[b] += val;
+        }
+
+        // Right partial block
+        push(br);
+        for (int i = start(br); i <= r; i++) {
+            arr[i] += val;
+        }
+        rebuild(br);
+    }
+
+    int query(int64 target) {
+        int ans = 0;
+
+        for (int b = 0; b < numBlocks; b++) {
+            int64 rawTarget = target - lazy[b];
+
+            auto it = freq[b].find(rawTarget);
+            if (it != freq[b].end()) {
+                ans += it->second;
+            }
+        }
+
+        return ans;
+    }
+};
+class Solution {
+private:
+public:
+    vector<int> numberOfPairs(vector<int>& nums1, vector<int>& nums2, vector<vector<int>>& queries) {
+        SqrtDecomp A(nums2);
+        vector<int> ans;
+        for (const auto &query : queries) {
+            int t = query[0];
+            if (t == 1) {
+                // update
+                int x = query[1], y = query[2], val = query[3];
+                A.updateRange(x, y, val);
+            } else {
+                // answer
+                int tot = query[1], res = 0;
+                for (int x : nums1) {
+                    int target = tot - x;
+                    res += A.query(target);
+                }
+                ans.emplace_back(res);
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## 1340. Jump Game V
+
+### Solution 1: dp, sorting, longest path in dag
+
+You can jump from index i to index j only if:
+
+arr[j] < arr[i]
+
+and every element between them does not block the jump. You can jump left or right up to distance d, but you must stop scanning when you hit an element greater than or equal to arr[i].
+
+The code sorts indices by decreasing value:
+
+sort(idx.begin(), idx.end(), [&](int x, int y) {
+    return arr[x] > arr[y];
+});
+
+Then it processes larger values first.
+
+For each index i, it tries jumping to smaller reachable values on the right and left:
+
+dp[i + j] = max(dp[i + j], dp[i] + 1);
+dp[i - j] = max(dp[i - j], dp[i] + 1);
+
+Here, dp[x] means the maximum number of visited indices in a valid jump sequence ending at index x.
+
+Why sorting works:
+All jumps go from a higher value to a lower value. That means the graph has no cycles. Sorting by decreasing height guarantees that when processing a node, its outgoing transitions go to lower-value nodes that should be updated after it.
+
+Alternative view:
+This is like longest path in a DAG, where each index is a node and valid jumps are directed edges from higher values to lower values.
+
+```cpp
+class Solution {
+public:
+    int maxJumps(vector<int>& arr, int d) {
+        int N = arr.size();
+        vector<int> dp(N, 1);
+        vector<int> idx(N);
+        iota(idx.begin(), idx.end(), 0);
+        sort(idx.begin(), idx.end(), [&](int x, int y) { return arr[x] > arr[y]; });
+        for (int i : idx) {
+            for (int j = 1; j <= d && i + j < N; ++j) {
+                if (arr[i + j] >= arr[i]) break;
+                dp[i + j] = max(dp[i + j], dp[i] + 1);
+            }
+            for (int j = 1; j <= d && i - j >= 0; ++j) {
+                if (arr[i - j] >= arr[i]) break;
+                dp[i - j] = max(dp[i - j], dp[i] + 1);
+            }
+        }
+        return *max_element(dp.begin(), dp.end());
     }
 };
 ```
