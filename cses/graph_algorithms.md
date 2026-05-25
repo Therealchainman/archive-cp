@@ -1196,7 +1196,7 @@ if __name__ == '__main__':
 ### Solution: Maximum Bipartite Matching with Kuhn's algorithm
 O(nm) time 
 
-```c++
+```cpp
 vector<bool> visited;
 vector<int> match;
 vector<vector<int>> graph;

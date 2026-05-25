@@ -2,20 +2,113 @@
 
 ## Solutions
 
-## 
+## Subordinates
 
-### Solution 1:
+### Solution 1: postorder dfs, subtree size, subtree dp
 
-```py
+```cpp
+int N;
+vector<vector<int>> adj;
+vector<int> dp;
 
+void dfs(int u, int p = -1) {
+    dp[u] = 1;
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        dfs(v, u);
+        dp[u] += dp[v];
+    }
+}
+
+void solve() {
+    cin >> N;
+    adj.assign(N, vector<int>());
+    for (int u = 1; u < N; ++u) {
+        int v;
+        cin >> v;
+        --v;
+        adj[u].emplace_back(v);
+        adj[v].emplace_back(u);
+    }
+    dp.assign(N, 0);
+    dfs(0);
+    for (int x : dp) {
+        cout << x - 1 << ' ';
+    }
+    cout << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
-## 
+## Tree Matching
 
-### Solution 1:
+### Solution 1: tree dp, maximum bipartite matching on tree
 
-```py
+or each node:
+    First assume it does not match any child.
+    Let every child subtree do its best.
 
+    Then try matching this node with exactly one child.
+    If we match u with child v:
+        v cannot match downward anymore,
+        so replace v's best state with dp0[v],
+        and add 1 for edge u-v.
+
+So the core idea is:
+
+Tree matching = choose edges, but once a node is used, it cannot be used again.
+
+```cpp
+int N;
+vector<vector<int>> adj;
+vector<int> dp0, dp1;
+
+void dfs(int u, int p = -1) {
+int sum = 0;
+for (int v : adj[u]) {
+    if (v == p) continue;
+    dfs(v, u);
+    int cand = max(dp0[v], dp1[v]);
+    sum += cand;
+}
+dp0[u] = sum;
+for (int v : adj[u]) {
+    if (v == p) continue;
+    dp1[u] = max(dp1[u], sum - max(dp0[v], dp1[v]) + dp0[v] + 1);
+}
+}
+
+void solve() {
+cin >> N;
+adj.assign(N, vector<int>());
+for (int i = 0; i < N - 1; ++i) {
+    int u, v;
+    cin >> u >> v;
+    --u, --v;
+    adj[u].emplace_back(v);
+    adj[v].emplace_back(u);
+}
+dp0.assign(N, 0);
+dp1.assign(N, 0);
+dfs(0);
+int ans = max(dp0[0], dp1[0]);
+cout << ans << endl;
+}
+
+signed main() {
+ios::sync_with_stdio(0);
+cin.tie(0);
+cout.tie(0);
+solve();
+return 0;
+}
 ```
 
 ## Tree Diameter
@@ -1466,10 +1559,60 @@ signed main() {
 
 ## Finding a Centroid
 
-### Solution 1:
+### Solution 1: recursion, dfs, centroid
 
 ```cpp
+int N, K;
+vector<vector<int>> adj;
 
+struct CentroidDecomposition {
+    int n;
+    vector<int> subSize;
+    CentroidDecomposition(int n) : n(n) {
+        subSize.assign(n, 0);
+    }
+    int getSize(int u, int p = -1) {
+        subSize[u] = 1;
+        for (int v : adj[u]) {
+            if (v == p) continue;
+            subSize[u] += getSize(v, u);
+        }
+        return subSize[u];
+    }
+    int getCentroid(int u, int p, int totalSize) {
+        for (int v : adj[u]) {
+            if (v == p) continue;
+            if (subSize[v] > totalSize / 2) {
+                return getCentroid(v, u, totalSize);
+            }
+        }
+        return u;
+    }
+};
+
+void solve() {
+    cin >> N;
+    adj.assign(N, vector<int>());
+    for (int i = 0; i < N - 1; ++i) {
+        int u, v;
+        cin >> u >> v;
+        --u, --v;
+        adj[u].emplace_back(v);
+        adj[v].emplace_back(u);
+    }
+    CentroidDecomposition cd(N);
+    int totalSize = cd.getSize(0);
+    int ans = cd.getCentroid(0, -1, totalSize) + 1;
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ## Fixed Length Paths I
@@ -1660,8 +1803,305 @@ signed main() {
 
 ## Fixed Length Paths II
 
-### Solution 1:
+### Solution 1: centroid decomposition, fenwick tree
+
+Bad solution: 
+for each centroid:
+    for each child subtree:
+        add child depths into cnt[]
+
+        rebuild prefix[0..K2] from scratch
+        query using prefix
+
+A path in a tree has a unique “highest” centroid decomposition level where it gets counted. At a centroid c, you count all paths whose route passes through c. Then you recursively solve the remaining disconnected child components after removing c.
+
+For each centroid, the algorithm counts pairs of nodes (a, b) such that:
+
+K1 <= dist(a, c) + dist(b, c) <= K2
+
+because if the path between a and b passes through centroid c, then:
+
+dist(a, b) = dist(a, c) + dist(b, c)
 
 ```cpp
+int N, K1, K2;
+vector<vector<int>> adj;
+vector<bool> removed;
 
+template <typename T>
+struct FenwickTree {
+    vector<T> nodes;
+    T neutral;
+
+    FenwickTree() : neutral(T(0)) {}
+
+    void init(int n, T neutral_val = T(0)) {
+        neutral = neutral_val;
+        nodes.assign(n + 1, neutral);
+    }
+
+    void update(int idx, T val) {
+        while (idx < (int)nodes.size()) {
+            nodes[idx] += val;
+            idx += (idx & -idx);
+        }
+    }
+
+    T query(int idx) {
+        T result = neutral;
+        while (idx > 0) {
+            result += nodes[idx];
+            idx -= (idx & -idx);
+        }
+        return result;
+    }
+
+
+    T query(int left, int right) {
+        return right >= left ? query(right) - query(left - 1) : T(0);
+    }
+};
+
+struct CentroidDecomposition {
+    int n;
+    vector<int> subSize;
+    CentroidDecomposition(int n) : n(n) {
+        subSize.assign(n, 0);
+    }
+    int getSize(int u, int p) {
+        subSize[u] = 1;
+        for (int v : adj[u]) {
+            if (v == p || removed[v]) continue;
+            subSize[u] += getSize(v, u);
+        }
+        return subSize[u];
+    }
+    int getCentroid(int u, int p, int totalSize) {
+        for (int v : adj[u]) {
+            if (v == p || removed[v]) continue;
+            if (2 * subSize[v] > totalSize) {
+                return getCentroid(v, u, totalSize);
+            }
+        }
+        return u;
+    }
+    template<class ProcessCentroid>
+    void decompose(int u, ProcessCentroid processCentroid) {
+        int totalSize = getSize(u, -1);
+        int c = getCentroid(u, -1, totalSize);
+        processCentroid(c);
+        removed[c] = true;
+        for (int v : adj[c]) {
+            if (removed[v]) continue;
+            decompose(v, processCentroid);
+        }
+    }
+};
+
+struct CountPaths {
+    int k1, k2;
+    int64 ans = 0;
+    FenwickTree<int> seg;
+    vector<int> cnt;
+    int deepest;
+    CountPaths(int k1, int k2) : k1(k1), k2(k2) {
+        seg.init(k2 + 2);
+        cnt.assign(k2 + 1, 0);
+    }
+    void collectDistances(int u, int p, int depth, vector<int>& distances) {
+        if (depth > k2) return;
+        deepest = max(deepest, depth);
+        distances.emplace_back(depth);
+        for (int v : adj[u]) {
+            if (v == p || removed[v]) continue;
+            collectDistances(v, u, depth + 1, distances);
+        }
+    }
+    void operator()(int c) {
+        vector<int> touched;
+        seg.update(1, 1);
+        cnt[0]++;
+        deepest = 0;
+        for (int v : adj[c]) {
+            if (removed[v]) continue;
+            vector<int> distances;
+            collectDistances(v, c, 1, distances);
+            for (int d : distances) {
+                ans += seg.query(k1 - d + 1, k2 - d + 1);
+            }
+            for (int d : distances) {
+                seg.update(d + 1, 1);
+                cnt[d]++;
+            }
+        }
+        for (int i = 0; i <= deepest; ++i) {
+            seg.update(i + 1, -cnt[i]);
+            cnt[i] = 0;
+        }
+    }
+};
+
+void solve() {
+    cin >> N >> K1 >> K2;
+    adj.assign(N, vector<int>());
+    for (int i = 0; i < N - 1; ++i) {
+        int u, v;
+        cin >> u >> v;
+        --u, --v;
+        adj[u].emplace_back(v);
+        adj[v].emplace_back(u);
+    }
+    removed.assign(N, false);
+    CentroidDecomposition cd(N);
+    CountPaths counter(K1, K2);
+    cd.decompose(0, ref(counter));
+    cout << counter.ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+### Solution 2: centroid decomposition, fixed size sliding window sum
+
+This is the same centroid decomposition idea, but with a faster two-pointer / sliding-window over depths instead of doing a Fenwick range query for every depth.
+
+psum stores the sum inside a fixed-size window over previous-depth counts. Each time current depth increases, the valid previous-depth window slides one step left, so we update it with one addition and one removal.
+
+cnt[d]
+means:
+How many nodes in the current child subtree are distance d from centroid c.
+
+And:
+totalCnt[d]
+means:
+How many nodes in the previously processed child subtrees are distance d from centroid c.
+
+But you must not count paths where both endpoints are inside the same child subtree, because those paths do not necessarily pass through c.
+
+That is why the algorithm does this:
+
+1. collect distances in the current child subtree into cnt
+2. count pairs between cnt and totalCnt
+3. only after counting, merge cnt into totalCnt
+
+This prevents same-subtree pairs from being counted at this centroid.
+
+prevSum is a sliding window sum. At the start, before looking at depth d = 1, it should represent previous nodes with depth x such that:
+
+```cpp
+const int MAXN = 2e5 + 5;
+int N, K1, K2;
+vector<vector<int>> adj;
+vector<bool> removed;
+int cnt[MAXN], totalCnt[MAXN];
+
+struct CentroidDecomposition {
+    int n;
+    vector<int> subSize;
+    CentroidDecomposition(int n) : n(n) {
+        subSize.assign(n, 0);
+    }
+    int getSize(int u, int p) {
+        subSize[u] = 1;
+        for (int v : adj[u]) {
+            if (v == p || removed[v]) continue;
+            subSize[u] += getSize(v, u);
+        }
+        return subSize[u];
+    }
+    int getCentroid(int u, int p, int totalSize) {
+        for (int v : adj[u]) {
+            if (v == p || removed[v]) continue;
+            if (2 * subSize[v] > totalSize) {
+                return getCentroid(v, u, totalSize);
+            }
+        }
+        return u;
+    }
+    template<class ProcessCentroid>
+    void decompose(int u, ProcessCentroid processCentroid) {
+        int totalSize = getSize(u, -1);
+        int c = getCentroid(u, -1, totalSize);
+        processCentroid(c);
+        removed[c] = true;
+        for (int v : adj[c]) {
+            if (removed[v]) continue;
+            decompose(v, processCentroid);
+        }
+    }
+};
+
+struct CountPaths {
+    int k1, k2;
+    int64 ans = 0;
+    int subtreeDepth;
+    CountPaths(int k1, int k2) : k1(k1), k2(k2) {};
+    void collectDistances(int u, int p, int depth) {
+        if (depth > k2) return;
+        subtreeDepth = max(subtreeDepth, depth);
+        cnt[depth]++;
+        for (int v : adj[u]) {
+            if (v == p || removed[v]) continue;
+            collectDistances(v, u, depth + 1);
+        }
+    }
+    void operator()(int c) {
+        int maxDepth = 0;
+        totalCnt[0] = 1;
+        int64 prevSum = K1 == 1 ? 1 : 0;
+        for (int v : adj[c]) {
+            if (removed[v]) continue;
+            subtreeDepth = 0;
+            collectDistances(v, c, 1);
+            int64 psum = prevSum;
+            for (int d = 1; d <= subtreeDepth; ++d) {
+                ans += cnt[d] * psum;
+                // sliding window updates
+                int l = K1 - d - 1, r = K2 - d;
+                if (l >= 0) psum += totalCnt[l];
+                if (r >= 0) psum -= totalCnt[r];
+            }
+            for (int i = K1 - 1; i <= min(K2 - 1, subtreeDepth); ++i) {
+                prevSum += cnt[i];
+            }
+            for (int d = 1; d <= subtreeDepth; ++d) {
+                totalCnt[d] += cnt[d];
+            }
+            fill(cnt, cnt + subtreeDepth + 1, 0);
+            maxDepth = max(maxDepth, subtreeDepth);
+        }
+        fill(totalCnt, totalCnt + maxDepth + 1, 0);
+    }
+};
+
+void solve() {
+    cin >> N >> K1 >> K2;
+    adj.assign(N, vector<int>());
+    for (int i = 0; i < N - 1; ++i) {
+        int u, v;
+        cin >> u >> v;
+        --u, --v;
+        adj[u].emplace_back(v);
+        adj[v].emplace_back(u);
+    }
+    removed.assign(N, false);
+    CentroidDecomposition cd(N);
+    CountPaths counter(K1, K2);
+    cd.decompose(0, ref(counter));
+    cout << counter.ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
