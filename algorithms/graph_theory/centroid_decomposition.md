@@ -67,3 +67,13 @@ calcSums(1);
 cdRoot = findCentroid(1, n);
 centroidDecomposition(cdRoot, 0);
 ```
+
+
+## A great explanation of time complexity
+
+After removing the centroid, every remaining component has size at most n / 2. 
+
+so the recursion depth is at most O(logn)
+because a node can only belong to components of sizes like: n, n/2, n/4, n/8,... until it reaches size 1. So each node participates in at most O(logn) decomposition levels. 
+Therefore n nodes * log n levels = O(nlogn)
+The important thing is that even though you recurse into multiple components, those components are disjoint.  So at one decomposition level, the total number of nodes processed across all recursive calls is still at most n. 

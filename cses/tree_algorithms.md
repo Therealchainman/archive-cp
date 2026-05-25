@@ -1464,7 +1464,7 @@ signed main() {
 }
 ```
 
-## 
+## Finding a Centroid
 
 ### Solution 1:
 
@@ -1472,31 +1472,193 @@ signed main() {
 
 ```
 
-## 
+## Fixed Length Paths I
 
 ### Solution 1:
 
-```cpp
+The standard strategy is centroid decomposition.
 
+You want to count pairs of nodes (u, v) such that:
+
+distance(u, v) = k
+
+Because every path in a tree is uniquely determined by its two endpoints.
+
+Core idea
+
+Pick a node c as a centroid of the current tree/subtree.
+
+Now count all paths of length k that pass through c.
+
+A path through c looks like:
+
+u ... c ... v
+
+So:
+
+dist(u, c) + dist(v, c) = k
+
+Then recursively solve the remaining components after removing c.
+
+Why centroid decomposition helps
+
+If you simply root the tree and try every node, it can become too slow.
+
+Centroid decomposition guarantees that after removing the centroid, every remaining component has size at most half of the current subtree. So each node participates in only about O(log n) centroid levels.
+
+Total complexity becomes roughly:
+
+O(n log n)
+
+which works for n <= 2 * 10^5.
+
+Counting paths through one centroid
+
+Suppose centroid is c.
+
+Maintain an array:
+
+cnt[d] = number of nodes already seen at distance d from c
+
+Initially:
+
+cnt[0] = 1
+
+because the centroid itself is distance 0 from itself.
+
+Then process each child subtree of c one by one.
+
+For every node x in that child subtree:
+
+dist = distance(c, x)
+
+You need another node already seen with distance:
+
+k - dist
+
+So add:
+
+answer += cnt[k - dist];
+
+After querying all nodes in that child subtree, add their distances into cnt.
+
+Important: you query before inserting the current child subtree. This prevents counting paths where both endpoints are inside the same child subtree, because those paths do not pass through the centroid.
+
+
+Every path has a “highest” centroid decomposition level where both endpoints are still in the same active component.
+
+At that level, either:
+
+The path passes through the centroid, so it gets counted there.
+It does not pass through the centroid, so both endpoints remain in the same child component and it will be counted later recursively.
+
+Once the centroid is removed, paths crossing between different components cannot appear again. So no double counting.
+
+```cpp
+int N, K;
+vector<vector<int>> adj;
+vector<bool> removed;
+
+struct CentroidDecomposition {
+    int n;
+    vector<int> subSize;
+    CentroidDecomposition(int n) : n(n) {
+        subSize.assign(n, 0);
+    }
+    int getSize(int u, int p) {
+        subSize[u] = 1;
+        for (int v : adj[u]) {
+            if (v == p || removed[v]) continue;
+            subSize[u] += getSize(v, u);
+        }
+        return subSize[u];
+    }
+    int getCentroid(int u, int p, int totalSize) {
+        for (int v : adj[u]) {
+            if (v == p || removed[v]) continue;
+            if (subSize[v] > totalSize / 2) {
+                return getCentroid(v, u, totalSize);
+            }
+        }
+        return u;
+    }
+    template<class ProcessCentroid>
+    void decompose(int u, ProcessCentroid processCentroid) {
+        int totalSize = getSize(u, -1);
+        int c = getCentroid(u, -1, totalSize);
+        processCentroid(c);
+        removed[c] = true;
+        for (int v : adj[c]) {
+            if (removed[v]) continue;
+            decompose(v, processCentroid);
+        }
+    }
+};
+
+struct CountPathsExactlyK {
+    int k;
+    int64 ans = 0;
+    vector<int> cnt;
+    CountPathsExactlyK(int k) : k(k) {
+        cnt.assign(k + 1, 0);
+    }
+    void collectDistances(int u, int p, int depth, vector<int>& distances) {
+        if (depth > k) return;
+        distances.emplace_back(depth);
+        for (int v : adj[u]) {
+            if (v == p || removed[v]) continue;
+            collectDistances(v, u, depth + 1, distances);
+        }
+    }
+    void operator()(int c) {
+        vector<int> touched;
+        cnt[0] = 1;
+        touched.emplace_back(0);
+        for (int v : adj[c]) {
+            if (removed[v]) continue;
+            vector<int> distances;
+            collectDistances(v, c, 1, distances);
+            for (int d : distances) {
+                ans += cnt[k - d];
+            }
+            for (int d : distances) {
+                cnt[d]++;
+                touched.emplace_back(d);
+            }
+        }
+        for (int d : touched) {
+            cnt[d] = 0;
+        }
+    }
+};
+
+void solve() {
+    cin >> N >> K;
+    adj.assign(N, vector<int>());
+    for (int i = 0; i < N - 1; ++i) {
+        int u, v;
+        cin >> u >> v;
+        --u, --v;
+        adj[u].emplace_back(v);
+        adj[v].emplace_back(u);
+    }
+    removed.assign(N, false);
+    CentroidDecomposition cd(N);
+    CountPathsExactlyK counter(K);
+    cd.decompose(0, ref(counter));
+    cout << counter.ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
-## 
-
-### Solution 1:
-
-```cpp
-
-```
-
-## 
-
-### Solution 1:
-
-```cpp
-
-```
-
-## 
+## Fixed Length Paths II
 
 ### Solution 1:
 

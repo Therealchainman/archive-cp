@@ -424,9 +424,84 @@ if __name__ == '__main__':
 
 ## Permutation Order
 
-### Solution 1:
+### Solution 1: permutation unranking/ranking, combinatorics, factorial number system
+
+The first task is basically given n and k find the permutation which is n elements and kth permutation. 
+
+I think this is that algorithm where you pick a number at each step, and you can compute how many permutations there are with that number at the position.  And you have to pick so that it is less than k, and then you decrease k by that and continue the hunt at deciding each number with the same algorithm at each step. 
+
+It is called an unranking algorithm, so let's think about the first task which is unranking. 
+
+The second task is obviously kind of the inverse, where it is ranking algorithm, that is finding the rank of a given permutation.  So you can do the same thing, but instead of skipping blocks, you just add the size of the blocks that you skip.
 
 ```cpp
+int t, n;
+int64 k;
+vector<int> P;
+vector<int64> fact;
+
+vector<int> unrank(int N, int64 K) {
+    vector<int> ans;
+    vector<int> arr(N);
+    iota(arr.begin(), arr.end(), 1);
+    for (int i = 0; i < N; ++i) {
+        int64 f = fact[N - i - 1];
+        int idx = K / f;
+        ans.emplace_back(arr[idx]);
+        arr.erase(arr.begin() + idx);
+        K -= idx * f;
+    }
+    return ans;
+}
+
+int64 rank_(const vector<int>& P) {
+    int N = P.size();
+    int64 ans = 0;
+    vector<int> arr(N);
+    iota(arr.begin(), arr.end(), 1);
+    for (int i = 0; i < N; ++i) {
+        int idx = lower_bound(arr.begin(), arr.end(), P[i]) - arr.begin();
+        ans += idx * fact[N - i - 1];
+        arr.erase(arr.begin() + idx);
+    }
+    return ans + 1;
+}
+
+void solve() {
+    cin >> t >> n;
+    if (t == 1) {
+        cin >> k;
+        k--;
+        vector<int> ans = unrank(n, k);
+        for (int x : ans) {
+            cout << x << ' ';
+        }
+        cout << endl;
+    } else {
+        P.assign(n, 0);
+        for (int i = 0; i < n; ++i) {
+            cin >> P[i];
+        }
+        int64 ans = rank_(P);
+        cout << ans << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    fact.assign(20, 1);
+    for (int i = 1; i < 20; ++i) {
+        fact[i] = fact[i - 1] * i;
+    }
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
 ```
 
 ## Permutation Rounds
