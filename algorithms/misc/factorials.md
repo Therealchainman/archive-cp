@@ -49,6 +49,21 @@ int64 choose(int n, int r, int64 m) {
 }
 ```
 
+n is too large to precompute factorials up to n
+k is small, or the sum of all k values is small
+MOD is prime, so modular inverses are easy
+
+```cpp
+int64 chooseLargeN(int64 n, int r, int64 m) {
+    if (n < r) return 0;
+    int64 numerator = 1;
+    for (int i = 0; i < r; i++) {
+        numerator = (numerator * ((n - i) % m)) % m;
+    }
+    return (numerator * inv_fact[r]) % m;
+}
+```
+
 ## binomial coefficient or combinations
 
 combinations pick r from n elements

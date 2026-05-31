@@ -4912,3 +4912,215 @@ public:
     }
 };
 ```
+
+# Leetcode Weekly Contest 504
+
+## Q2. Maximum Number of Items From Sale I
+
+### Solution 1: dp, 0/1 knapsack, divisor counting, sieve
+
+Each item has:
+
+a factor f
+a price p
+
+Buying an item gives value equal to the number of items whose factor is divisible by f.
+
+So first, compute:
+
+freq[f] = number of items with factor divisible by f
+
+This is done with a multiples sieve:
+
+for (int i = 1; i <= MAXN; ++i)
+    for (int j = 2*i; j <= MAXN; j += i)
+        freq[i] += freq[j];
+
+After that, the problem becomes:
+
+Pick some items under the budget to maximize total free-item value.
+
+That is a classic 0/1 knapsack:
+
+dp[b] = maximum sale value achievable using exactly or at most b budget
+
+For each item:
+
+dp[b] = max(dp[b], dp[b - p] + freq[f]);
+
+Then after spending i budget in the DP, the remaining budget can always buy regular cheapest items at price base:
+
+dp[i] + (budget - i) / base
+
+So the final answer is:
+
+max over all spent i:
+    sale_items_from_dp + leftover_regular_items
+Key idea
+
+Use DP to decide which discount-triggering items are worth buying, then greedily spend leftover money on the cheapest normal item.
+
+```cpp
+const int MAXN = 1'505;
+class Solution {
+public:
+    int maximumSaleItems(vector<vector<int>>& items, int budget) {
+        int N = items.size();
+        vector<int> freq(MAXN + 1, 0);
+        int base = 1e9;
+        for (const auto &item : items) {
+            freq[item[0]]++;
+            base = min(base, item[1]);
+        }
+        for (int i = 1; i <= MAXN; ++i) {
+            for (int j = i + i; j <= MAXN; j += i) {
+                freq[i] += freq[j];
+            }
+        }
+        vector<int> dp(budget + 1, 0);
+        for (const auto &item : items) {
+            int f = item[0], p = item[1];
+            for (int b = budget; b >= p; --b) {
+                dp[b] = max(dp[b], dp[b - p] + freq[f]);
+            }
+        }
+        int ans = budget / base;
+        for (int i = 0; i <= budget; ++i) {
+            ans = max(ans, dp[i] + (budget - i) / base);
+        }
+        return ans;
+    }
+};
+```
+
+## Q3. Maximum Number of Items From Sale II
+
+### Solution 1: sorting, divisor counting, greedy, sieve
+
+Again, compute:
+
+freq[f] = number of items whose factor is divisible by f
+
+So buying an item with factor f can unlock freq[f] related items.
+
+Then sort items by price increasing.
+
+Let:
+
+base = cheapest item price
+
+Normally, spending p money on regular cheapest items buys:
+
+p / base
+
+items approximately.
+
+A sale item is only worth considering if it gives better value than buying cheapest items directly.
+
+Since buying one sale item effectively gives itself plus some free related items, the code treats useful sale choices as worth roughly 2 items for price p.
+
+So it only considers items where:
+
+p < 2 * base
+
+Because once:
+
+p >= 2 * base
+
+then buying this sale item is no better than using the same money to buy two cheapest items.
+
+For each useful item:
+
+cnt = freq[f] - 1
+
+The -1 is because the purchased item itself should not be counted as a free duplicate.
+
+Then:
+
+take = min(budget / p, cnt)
+
+Meaning:
+
+cannot buy more than budget allows
+cannot benefit from more copies than the number of eligible free items
+
+Each taken item contributes:
+
+2 * take
+
+Then spend the remaining budget on cheapest items:
+
+ans += budget / base;
+Key idea
+
+Buy only sale-triggering items that are strictly better than buying cheapest items normally. Once prices reach 2 * base, stop, because the sale is no longer profitable.
+
+```cpp
+class Solution {
+public:
+    int maximumSaleItems(vector<vector<int>>& items, int budget) {
+        int N = items.size();
+        vector<int> freq(N + 1, 0);
+        for (const auto &item : items) {
+            freq[item[0]]++;
+        }
+        for (int i = 1; i <= N; ++i) {
+            for (int j = i + i; j <= N; j += i) {
+                freq[i] += freq[j];
+            }
+        }
+        // weakly increasing price
+        sort(items.begin(), items.end(), [](const auto &x, const auto &y) {
+            return x[1] < y[1];
+        });
+        int base = items[0][1], ans = 0;
+        for (const auto &item : items) {
+            int f = item[0], p = item[1];
+            if (p >= 2 * base) break;
+            int cnt = freq[f] - 1; // can'ta take iteself. 
+            int threshold = budget / p;
+            int take = min(threshold, cnt);
+            ans += 2 * take;
+            budget -= take * p;
+        }
+        ans += budget / base;
+        return ans;
+    }
+};
+```
+
+## Q4. Lexicographically Maximum MEX Array
+
+### Solution 1: mex, greedy, binary search, map, interval expansion
+
+At each segment start, greedily create the shortest segment that achieves the largest possible MEX. This maximizes the current answer value while leaving as much array as possible for later segments.
+
+```cpp
+class Solution {
+public:
+    vector<int> maximumMEX(vector<int>& nums) {
+        int N = nums.size();
+        unordered_map<int, vector<int>> A;
+        for (int i = 0; i < N; ++i) {
+            A[nums[i]].emplace_back(i);
+        }
+        vector<int> ans;
+        for (int l = 0; l < N;) {
+            int r = l + 1;
+            int mex = 0;
+            while (true) {
+                vector<int> &arr = A[mex];
+                int j = lower_bound(arr.begin(), arr.end(), l) - arr.begin();
+                if (j == arr.size()) {
+                    break;
+                }
+                mex++;
+                r = max(r, arr[j] + 1);
+            }
+            ans.emplace_back(mex);
+            l = r;
+        }
+        return ans;
+    }
+};
+```

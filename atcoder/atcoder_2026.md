@@ -1116,13 +1116,240 @@ signed main() {
 
 # Atcoder Beginner Contest 459
 
-##
+## C. Drop Blocks
+
+### Solution 1: 
+
+```cpp
+
+int N, Q;
+
+template <typename T>
+struct FenwickTree {
+    vector<T> nodes;
+    T neutral;
+
+    FenwickTree() : neutral(T(0)) {}
+
+    void init(int n, T neutral_val = T(0)) {
+        neutral = neutral_val;
+        nodes.assign(n + 1, neutral);
+    }
+
+    void update(int idx, T val) {
+        while (idx < (int)nodes.size()) {
+            nodes[idx] += val;
+            idx += (idx & -idx);
+        }
+    }
+
+    T query(int idx) {
+        T result = neutral;
+        while (idx > 0) {
+            result += nodes[idx];
+            idx -= (idx & -idx);
+        }
+        return result;
+    }
+
+    T query(int left, int right) {
+        return right >= left ? query(right) - query(left - 1) : T(0);
+    }
+};
+
+void solve() {
+    cin >> N >> Q;
+    FenwickTree<int> seg;
+    int base = 0;
+    vector<int> A(N + 1, 1);
+    seg.init(Q + 1);
+    seg.update(1, N);
+    for (int i = 0; i < Q; ++i) {
+        int t, x;
+        cin >> t >> x;
+        if (t == 1) {
+            seg.update(A[x], -1);
+            if (seg.query(A[x]) == 0) {
+                base++;
+            }
+            seg.update(++A[x], 1);
+        } else {
+            int ans = seg.query(x + base + 1, Q);
+            cout << ans << endl;
+        }
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+
+```
+
+## D. Adjacent Distinct String
+
+### Solution 1: 
+
+```cpp
+string S;
+
+void solve() {
+    cin >> S;
+    int N = S.size();
+    vector<int> freq(26);
+    for (char c : S) {
+        freq[c - 'a']++;
+    }
+    if (any_of(freq.begin(), freq.end(), [&](int x) { return x > (N + 1)/ 2; })) {
+        cout << "No" << endl;
+        return;
+    }
+    vector<pair<int, char>> chars;
+    for (int i = 0; i < 26; i++) {
+        if (freq[i] > 0) {
+            chars.emplace_back(freq[i], 'a' + i);
+        }
+    }
+    sort(chars.rbegin(), chars.rend());
+    string ans(N, '-');
+    int idx = 0;
+    for (int i = 0; i < N; i += 2) {
+        ans[i] = chars[idx].second;
+        chars[idx].first--;
+        if (chars[idx].first == 0) {
+            idx++;
+        }
+    }
+    for (int i = 1; i < N; i += 2) {
+        ans[i] = chars[idx].second;
+        chars[idx].first--;
+        if (chars[idx].first == 0) {
+            idx++;
+        }
+    }
+    cout << "Yes" << endl;
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
+```
+
+## E. Select from Subtrees
+
+### Solution 1: 
+
+```cpp
+const int MOD = 998244353, MAXN = 1e6 + 5;
+int N;
+vector<vector<int>> adj;
+vector<int64> cnt, dp;
+vector<int> C, D;
+
+int64 inv(int i, int64 m) {
+  return i <= 1 ? i : m - (m / i) * inv(m % i, m) % m;
+}
+
+vector<int64> fact, inv_fact;
+
+void factorials(int n, int64 m) {
+    fact.assign(n + 1, 1);
+    inv_fact.assign(n + 1, 0);
+    for (int i = 2; i <= n; i++) {
+        fact[i] = (fact[i - 1] * i) % m;
+    }
+    inv_fact.end()[-1] = inv(fact.end()[-1], m);
+    for (int i = n - 1; i >= 0; i--) {
+        inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % m;
+    }
+}
+
+int64 chooseLargeN(int64 n, int r, int64 m) {
+    if (n < r) return 0;
+    int64 numerator = 1;
+    for (int i = 0; i < r; i++) {
+        numerator = (numerator * ((n - i) % m)) % m;
+    }
+    return (numerator * inv_fact[r]) % m;
+}
+
+void dfs(int u, int p = -1) {
+    cnt[u] = C[u];
+    dp[u] = 1;
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        dfs(v, u);
+        cnt[u] += cnt[v];
+        dp[u] = dp[u] * dp[v] % MOD;
+    }
+    dp[u] = dp[u] * chooseLargeN(cnt[u], D[u], MOD) % MOD;
+    cnt[u] -= D[u]; // take D[u] from subtree u
+}
+
+void solve() {
+    cin >> N;
+    C.resize(N);
+    D.resize(N);
+    adj.assign(N, vector<int>());
+    for (int i = 1; i < N; ++i) {
+        int p;
+        cin >> p;
+        p--;
+        adj[p].emplace_back(i);
+        adj[i].emplace_back(p);
+    }
+    for (int i = 0; i < N; ++i) {
+        cin >> C[i];
+    }
+    for (int i = 0; i < N; ++i) {
+        cin >> D[i];
+    }
+    cnt.assign(N, 0);
+    dp.assign(N, 0);
+    dfs(0);
+    cout << dp[0] << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    factorials(MAXN, MOD);
+    solve();
+    return 0;
+}
+```
+
+## -1, +1
 
 ### Solution 1: 
 
 ```cpp
 
 ```
+
+## G. golf 2
+
+### Solution 1: 
+
+```cpp
+
+```
+
+# Atcoder Beginner Contest 460s
 
 ##
 
