@@ -31,23 +31,28 @@ The euler totient function calculates the number of integers that are coprime wi
 
 precompute the euler totient function (phi) value from 1 to n in O(nlog(log(n))) time using the sieve of Eratosthenes algorithm.  You can also easily calculate the prefix sum, and also get the prime factorization of all the integers in this.
 
+This is the sieve of Eratosthenes algorithm, but instead of marking the multiples of each prime as composite, we update the phi values for those multiples.
+
 ```cpp
-int totient[MAXN], totient_sum[MAXN];
-vector<int> primes[MAXN];
-void sieve(int n) {
-    iota(totient, totient + n, 0LL);
-    memset(totient_sum, 0, sizeof(totient_sum));
+const int MAXN = 1e5 + 5;
+int phi[MAXN];
+
+void precompute_phi(int n) {
+    memset(phi, 0, sizeof(phi));
+    for (int i = 0; i < n; i++) {
+        phi[i] = i;
+    }
     for (int i = 2; i < n; i++) {
-        if (totient[i] == i) { // i is prime integer
+        if (phi[i] == i) { // i is prime
             for (int j = i; j < n; j += i) {
-                totient[j] -= totient[j] / i;
-                primes[j].emplace_back(i);
+                phi[j] -= phi[j] / i;
             }
         }
     }
-    for (int i = 2; i < n; i++) {
-        totient_sum[i] = totient_sum[i - 1] + totient[i];
-    }
+}
+
+signed main() {
+    precompute_phi(MAXN);
 }
 ```
 
@@ -68,6 +73,12 @@ int phi(int n) {
     return result;
 }
 ```
+
+## Euler totient divisor-sum identity
+
+The Euler totient divisor-sum identity states that for any positive integer n, the sum of the Euler totient function φ(d) over all positive divisors d of n is equal to n. Mathematically, this can be expressed as:
+
+$$\sum_{d|n} \phi(d) = n$$
 
 ## Chinese Remainder Theorem
 

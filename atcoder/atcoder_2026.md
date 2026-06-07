@@ -1349,7 +1349,7 @@ signed main() {
 
 ```
 
-# Atcoder Beginner Contest 460s
+# Atcoder Beginner Contest 460
 
 ##
 
@@ -1378,6 +1378,8 @@ signed main() {
 ##
 
 ### Solution 1: 
+
+So after every query, you need the diameter of the subgraph induced by the black vertices, but distance is still measured in the original tree.
 
 ```cpp
 

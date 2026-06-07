@@ -560,3 +560,90 @@ void solve() {
     }
 }
 ```
+
+
+## Height-based heavy path decomposition
+
+How this differs from well-known Heavy-Light Decomposition
+
+Standard Heavy-Light Decomposition is usually used for problems like:
+
+path sum queries
+path max queries
+subtree updates
+path updates
+LCA-style decomposition
+
+The usual HLD has this structure:
+
+heavy[u] = child with largest subtree size
+
+Then it flattens the tree into an array and uses a segment tree or Fenwick tree over that flattened order.
+
+The goal is usually:
+
+Any root-to-node path crosses only O(log N) light edges.
+
+That property comes from choosing the child with the largest subtree size.
+
+```cpp
+int N;
+vector<vector<int>> adj;
+vector<int> parent, depth, head, height, chain_len, index_map, heavy;
+
+int heavy_dfs(int u) {
+    height[u] = 1;
+    heavy[u] = -1;
+    int best_height = 0;
+    for (int v : adj[u]) {
+        if (v == parent[u]) continue;
+        parent[v] = u;
+        depth[v] = depth[u] + 1;
+        int child_height = heavy_dfs(v);
+        if (child_height > best_height) {
+            best_height = child_height;
+            heavy[u] = v;
+        }
+    }
+
+    height[u] = 1 + best_height;
+    return height[u];
+}
+
+void decompose(int u, int h) {
+    head[u] = h;
+    if (u == h) {
+        chain_len.emplace_back(0);
+    }
+    chain_len.back()++;
+    if (heavy[u] != -1) {
+        decompose(heavy[u], h);
+    }
+    for (int v : adj[u]) {
+        if (v == parent[u]) continue;
+        if (v == heavy[u]) continue;
+        decompose(v, v);
+    }
+}
+
+void solve() {
+    cin >> N;
+    adj.assign(N, vector<int>());
+    for (int i = 1; i < N; ++i) {
+        int p;
+        cin >> p;
+        p--;
+        adj[p].emplace_back(i);
+        adj[i].emplace_back(p);
+    }
+    parent.assign(N, -1);
+    depth.assign(N, 0);
+    head.assign(N, 0);
+    height.assign(N, 0);
+    chain_len.clear();
+    index_map.assign(N, 0);
+    heavy.assign(N, -1);
+    heavy_dfs(0);
+    decompose(0, 0);
+}
+```

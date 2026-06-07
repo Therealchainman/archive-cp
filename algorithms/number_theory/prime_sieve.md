@@ -84,6 +84,8 @@ If you calculate the smallest prime factor for each integer, you can use that to
 
 Just remember you want to call the sieve at the appropriate location, don't want to recompute it over and over it is a precomputation step that should only be done once.
 
+This gives the list of prime factors with multiplicity.
+
 ```py
 def sieve(n):
     spf = [i for i in range(n + 1)]
@@ -162,6 +164,23 @@ signed main() {
         cout << count_divisors(x) << endl;
     }
     return 0;
+}
+```
+
+For distinct prime factors.
+
+```cpp
+vector<int> factorize_distinct(int x) {
+    vector<int> factors;
+    while (x > 1) {
+        int p = spf[x];
+        factors.push_back(p);
+
+        while (x % p == 0) {
+            x /= p;
+        }
+    }
+    return factors;
 }
 ```
 

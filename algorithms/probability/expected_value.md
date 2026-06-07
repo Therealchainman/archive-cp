@@ -125,3 +125,13 @@ If the recurrence depends on higher-indexed states (e.g., E[x]), solve in revers
 E[x] depends on E[y] for y>x), solve in reverse order.
 
 Otherwise, forward or topological order may work.
+
+## Expected value over a uniform random choices
+
+Normally expected value is calculated as the sum of all possible outcomes multiplied by their probabilities. However, if the random variable is uniformly distributed over a finite set of outcomes, the expected value can be calculated as the average of those outcomes.
+
+The difference is every outcome has the same probability, so you can just sum them up and divide by the number of outcomes, instead of multiplying each outcome by its probability.
+
+E[X] = average value of X over all outcomes
+or E[X] = (sum of all possible X values) / (number of outcomes)
+
