@@ -5124,3 +5124,348 @@ public:
     }
 };
 ```
+
+# Leetcode Biweekly Contest 184
+
+## Q2. Minimum Energy to Maintain Brightness
+
+### Solution 1: line sweep, sorting
+
+Compute union length of intervals and multiply by energy per covered index
+
+```cpp
+using int64 = long long;
+class Solution {
+public:
+    int64 minEnergy(int n, int brightness, vector<vector<int>>& intervals) {
+        int x = (brightness + 2) / 3;
+        vector<pair<int, int>> events;
+        int64 ans = 0;
+        for (const auto &interv : intervals) {
+            int l = interv[0], r = interv[1];
+            events.emplace_back(l, 1);
+            events.emplace_back(r + 1, -1);
+        }
+        sort(events.begin(), events.end());
+        int cnt = 0, start = -1;
+        for (const auto &[t, c] : events) {
+            if (cnt == 0) {
+                start = t;
+            }
+            cnt += c;
+            if (cnt == 0) {
+                ans += 1LL * x * (t - start);
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## Q3. Maximum Total Value of Covered Indices
+
+### Solution 1: greedy, subarray minimum
+
+Start with all 1s, then greedily improve each block using previous 0 and minimum value
+
+```cpp
+using int64 = long long;
+const int INF = numeric_limits<int>::max();
+class Solution {
+public:
+    int64 maxTotal(vector<int>& nums, string s) {
+        int N = nums.size();
+        int last = -1;
+        int64 ans = 0;
+        for (int i = 0; i < N; ++i) {
+            if (s[i] == '1') ans += nums[i];
+        }
+        s += '0'; // padding
+        int mn = INF;
+        for (int i = 0; i < N; ++i) {
+            if (s[i] == '0') {
+                last = i;
+                mn = nums[i];
+            } else {
+                mn = min(mn, nums[i]);
+            }
+            if (s[i] == '1' && s[i + 1] == '0') {
+                if (last != -1) {
+                    ans += max(0, nums[last] - mn);
+                }
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## Q4. Maximum Score with Co-Prime Element
+ 
+### Solution 1: smallest prime factor sieve, inclusion-exclusion, divisor sieve, frequency counting
+
+For each candidate value, count numbers sharing prime factors using inclusion-exclusion
+
+```cpp
+using int64 = long long;
+const int MAXN = 1e5 + 5, INF = numeric_limits<int>::max();
+class Solution {
+private:
+    int spf[MAXN], freq[MAXN], div[MAXN];
+
+    // nloglog(n)
+    void sieve(int n) {
+        for (int i = 0; i < n; i++) {
+            spf[i] = i;
+        }
+        for (int64 i = 2; i < n; i++) {
+            if (spf[i] != i) continue;
+            for (int64 j = i * i; j < n; j += i) {
+                if (spf[j] != j) continue;
+                spf[j] = i;
+            }
+        }
+    }
+
+    vector<int> factorize(int x) {
+        vector<int> factors;
+        while (x > 1) {
+            int p = spf[x];
+            factors.emplace_back(p);
+            while (x % p == 0) x /= p;
+        }
+        return factors;
+    }
+public:
+    int maxScore(vector<int>& nums, int maxVal) {
+        int ans = -INF;
+        int N = nums.size();
+        int maxV = maxVal;
+        for (int x : nums) {
+            maxV = max(maxV, x);
+            freq[x]++;
+        }
+        for (int i = 1; i <= maxV; ++i) {
+            for (int j = i; j <= maxV; j += i) {
+                div[i] += freq[j];
+            }
+        }
+        sieve(maxV + 1);
+        for (int i = 1; i <= maxV; ++i) {
+            if (i > maxVal && freq[i] == 0) continue;
+            vector<int> primes = factorize(i);
+            int sz = primes.size();
+            int endMask = 1 << sz, cost = 0;
+            for (int mask = 1; mask < endMask; ++mask) {
+                int cnt = 0, cand = 1;
+                for (int j = 0; j < sz; ++j) {
+                    if ((mask >> j) & 1) {
+                        cnt++;
+                        cand *= primes[j];
+                    }
+                }
+                if (cnt % 2 == 0) {
+                    cost -= div[cand];
+                } else {
+                    cost += div[cand];
+                }
+            }
+            if (freq[i] == 0) {
+                cost = max(1, cost);
+            } else if (i == 1) {
+                cost = 0;
+            } else {
+                cost--;
+            }
+            ans = max(ans, i - cost);
+        }
+        return ans;
+    }
+};
+```
+
+# Leetcode Weekly Contest 505
+
+## Q2. Valid Binary Strings With Cost Limit
+
+### Solution 1: recursive backtracking, pruning, string generation
+
+Generate strings recursively while stopping branches whose cost exceeds K
+
+```cpp
+class Solution {
+private:
+    int N, cost, K;
+    vector<string> ans;
+    string cur;
+    void dfs() {
+        if (cost > K) return;
+        if (cur.size() == N) {
+            if (cost <= K) ans.emplace_back(cur);
+            return;
+        }
+        // 0
+        cur += '0';
+        dfs();
+        cur.pop_back();
+        // 1
+        if (!cur.empty() && cur.back() == '1') return;
+        cost += cur.size();
+        cur += '1';
+        dfs();
+        cur.pop_back();
+        cost -= cur.size();
+    }
+public:
+    vector<string> generateValidStrings(int n, int k) {
+        N = n, K = k, cost = 0;
+        dfs();
+        return ans;
+    }
+};
+```
+
+## Q3. Maximum Sum of M Non-Overlapping Subarrays I
+
+### Solution 1: prefix sum, dp, monotonic deque
+
+Use dp[k][i] and optimize valid subarray starts with a deque
+
+```cpp
+using int64 = long long;
+const int64 INF = numeric_limits<int64>::max();
+class Solution {
+public:
+    int64 maximumSum(vector<int>& nums, int m, int l, int r) {
+        int N = nums.size();
+        int64 ans = -INF;
+        vector<int64> pref(N + 1, 0);
+        for (int i = 0; i < N; ++i) {
+            pref[i + 1] += pref[i] + nums[i];
+        }
+        vector<vector<int64>> dp(m + 1, vector<int64>(N + 1, -INF));
+        for (int i = 0; i <= N; ++i) {
+            dp[0][i] = 0;
+        }
+        for (int k = 1; k <= m; ++k) {
+            deque<int> dq;
+            for (int i = 1; i <= N; ++i) {
+                dp[k][i] = dp[k][i - 1]; // take nothing
+                int j = i - l;
+                if (j >= 0 && dp[k - 1][j] != -INF) {
+                    int64 cand = dp[k - 1][j] - pref[j];
+                    while (!dq.empty() && cand >= dp[k - 1][dq.back()] - pref[dq.back()]) {
+                        dq.pop_back();
+                    }
+                    dq.emplace_back(j);
+                }
+                // remove those that are no longer valid from front of dq
+                while (!dq.empty() && dq.front() < i - r) {
+                    dq.pop_front();
+                }
+                if (!dq.empty()) { // choose subarray ending at i - 1
+                    int j = dq.front();
+                    dp[k][i] = max(dp[k][i], pref[i] + dp[k - 1][j] - pref[j]);
+                }
+            }
+            ans = max(ans, dp[k][N]);
+        }
+        return ans;
+    }
+};
+```
+
+## Q4. Maximum Sum of M Non-Overlapping Subarrays II
+
+### Solution 1: Lagrangian Relaxation, Alien's Trick, binary search, monotonic deque, 
+
+Penalize each chosen subarray, binary search penalty, recover exact-m answer
+
+Important subtlety
+
+Even if the returned cnt is less than m, this technique can still recover the exact constrained answer under the usual convexity/monotonicity conditions of WQS binary search.
+
+The binary search finds a supporting penalty value where the penalized objective encodes the best exact-m value. The + lambda * m operation evaluates the corresponding line at m.
+
+This is the part that makes it feel unintuitive: the returned solution of the penalized problem does not always literally choose exactly m, but the transformed value can still expose the exact-m optimum.
+
+Key technique
+
+This is:
+
+DP + monotonic deque + Lagrangian relaxation + binary search on penalty
+
+Also known as:
+
+Aliens trick
+WQS binary search
+
+```cpp
+using int64 = long long;
+const int64 INF = numeric_limits<int64>::max();
+class Solution {
+private:
+    vector<int64> pref;
+    pair<int64, int> solve_penalty(int l, int r, int64 lambda) {
+        int N = pref.size() - 1;
+        vector<int64> dp(N + 1, -INF);
+        vector<int> cnt(N + 1, 0);
+        deque<tuple<int, int64, int>> dq;
+        for (int i = 1; i <= N; ++i) {
+            dp[i] = dp[i - 1];
+            cnt[i] = cnt[i - 1];
+            int j = i - l;
+            if (j >= 0) {
+                int64 cand = dp[j];
+                int count = cnt[j];
+                if (cand < 0) {
+                    cand = 0;
+                    count = 0;
+                }
+                cand -= pref[j];
+                while (!dq.empty()) {
+                    auto [x, y, z] = dq.back();
+                    if (make_pair(cand, -count) < make_pair(y, -z)) break;
+                    dq.pop_back();
+                }
+                dq.emplace_back(j, cand, count);
+            }
+            // remove those that are no longer valid from front of dq
+            while (!dq.empty() && get<0>(dq.front()) < i - r) {
+                dq.pop_front();
+            }
+            if (!dq.empty()) { // choose subarray ending at i - 1
+                auto [j, ncost, ncount] = dq.front();
+                ncost += pref[i] - lambda;
+                ncount++;
+                if (ncost > dp[i] || (ncost == dp[i] && ncount < cnt[i])) {
+                    dp[i] = ncost;
+                    cnt[i] = ncount;
+                }
+            }
+        }
+        return {dp[N], cnt[N]};
+    }
+public:
+    int64 maximumSum(vector<int>& nums, int m, int l, int r) {
+        int N = nums.size();
+        pref.assign(N + 1, 0);
+        for (int i = 0; i < N; ++i) {
+            pref[i + 1] += pref[i] + nums[i];
+        }
+        int64 lo = 0, hi = 1e18;
+        while (lo < hi) {
+            int64 mid = lo + (hi - lo) / 2;
+            auto [penalizedCost, cnt] = solve_penalty(l, r, mid);
+            if (cnt > m) {
+                lo = mid + 1;
+            } else {
+                hi = mid;
+            }
+        }
+        auto [penalizedCost, cnt] = solve_penalty(l, r, lo);
+        int64 ans = penalizedCost + 1LL * lo * m;
+        return ans;
+    }
+};
+```
