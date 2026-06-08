@@ -2,7 +2,17 @@
 
 ## Here are a bunch of 0/1 knapsack problems
 
+Knapsack problems are a family of optimization problems where you have:
+
+a limited resource, usually called capacity
+a set of choices/items
+each item has some cost/weight
+each item gives some value/profit
+the goal is to choose items to maximize value without exceeding capacity
+
 0/1 just means you can either take the item or not,  but it removes the possibility of taking fractions of an item or something. This is more given the set, and you are selecting a subset that optimizes on some constraint. 
+
+dp[state] = best/count/possible result after some choices
 
 ## reversible counting knapsack algorithm
 
@@ -200,3 +210,9 @@ def countSubsetSums(nums: List[int], k: int) -> int:
     # count of subsets for when considered all items and capacity is k
     return dp[n][k]
 ```
+
+## Product variation
+
+How many ways are there to make sum S using exactly K items?
+
+0/1 subset product counting problem

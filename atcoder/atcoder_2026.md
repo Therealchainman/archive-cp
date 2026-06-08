@@ -1392,3 +1392,309 @@ So after every query, you need the diameter of the subgraph induced by the black
 ```cpp
 
 ```
+
+# Atcoder Beginner Contest 461
+
+## C. Variety
+
+### Solution 1: greedy, sorting
+
+```cpp
+int N, K, M;
+
+void solve() {
+    cin >> N >> K >> M;
+    vector<pair<int, int>> gems;
+    for (int i = 0; i < N; ++i) {
+        int c, v;
+        cin >> c >> v;
+        gems.emplace_back(v, c);
+    }
+    sort(gems.rbegin(), gems.rend());
+    vector<bool> seen(N + 1, false);
+    int64 ans = 0;
+    for (int i = 0, j = 0, k = 0; i < N && k < K; ++i) {
+        auto [v, c] = gems[i];
+        if (j < M && !seen[c]) {
+            seen[c] = true;
+            ans += v;
+            j++;
+        } else if (k < K - M) {
+            ans += v;
+            k++;
+        }
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## D. Count Subgrid Sum K
+
+### Solution 1: 2D subarray counting to 1D sliding window counting, prefix sums, inclusion-exclusion / cumulative counting technique
+
+```cpp
+int R, C, K;
+vector<vector<int>> grid;
+
+int64 count_at_most(const vector<int> &arr, int K) {
+    if (K < 0) return 0;
+    int N = arr.size();
+    int64 ans = 0;
+    int l = 0, sum = 0;
+    for (int r = 0; r < N; ++r) {
+        sum += arr[r];
+        while (sum > K) {
+            sum -= arr[l];
+            ++l;
+        }
+        ans += r - l + 1;
+    }
+    return ans;
+}
+
+void solve() {
+    cin >> R >> C >> K;
+    grid.resize(R, vector<int>(C));
+    for (int i = 0; i < R; ++i) {
+        string s;
+        cin >> s;
+        for (int j = 0; j < C; ++j) {
+            grid[i][j] = s[j] - '0';
+        }
+    }
+    int64 ans = 0;
+    for (int r1 = 0; r1 < R; ++r1) {
+        vector<int> arr(C);
+        for (int r2 = r1; r2 < R; ++r2) {
+            for (int c = 0; c < C; ++c) {
+                arr[c] += grid[r2][c];
+            }
+            ans += count_at_most(arr, K) - count_at_most(arr, K - 1);
+        }
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## E. E Liter
+
+### Solution 1: online queries, last occurrence tracking, fenwick tree over time
+
+Online queries
+
+You process each operation in order and print the answer after each query.
+
+Last occurrence tracking
+
+For every row and column, the code stores the last time it was updated:
+
+lastRow[x]
+lastCol[x]
+
+This matters because when the same row or column is painted again, its previous contribution must be removed or adjusted.
+
+Fenwick tree over time
+
+The Fenwick trees track which rows and columns are currently “active” by their most recent update time.
+
+segRow: active rows by last update time
+segCol: active columns by last update time
+
+This allows queries like:
+
+how many active columns were updated after this row's previous update?
+how many active rows were updated after this column's previous update?
+
+```cpp
+int N, Q;
+
+template <typename T>
+struct FenwickTree {
+    vector<T> nodes;
+    T neutral;
+
+    FenwickTree() : neutral(T(0)) {}
+
+    void init(int n, T neutral_val = T(0)) {
+        neutral = neutral_val;
+        nodes.assign(n + 1, neutral);
+    }
+
+    void update(int idx, T val) {
+        while (idx < (int)nodes.size()) {
+            nodes[idx] += val;
+            idx += (idx & -idx);
+        }
+    }
+
+    T query(int idx) {
+        T result = neutral;
+        while (idx > 0) {
+            result += nodes[idx];
+            idx -= (idx & -idx);
+        }
+        return result;
+    }
+
+    T query(int left, int right) {
+        return right >= left ? query(right) - query(left - 1) : T(0);
+    }
+};
+
+void solve() {
+    cin >> N >> Q;
+    vector<int> lastRow(N + 1, -1), lastCol(N + 1, -1);
+    FenwickTree<int> segCol, segRow;
+    segCol.init(Q + 1);
+    segRow.init(Q + 1);
+    int64 ans = 0;
+    for (int i = 1; i <= Q; ++i) {
+        int t, x;
+        cin >> t >> x;
+        if (t == 1) {
+            if (lastRow[x] == -1) {
+                ans += N;
+            } else {
+                ans += segCol.query(lastRow[x], i);
+                segRow.update(lastRow[x], -1);
+            }
+            segRow.update(i, 1);
+            lastRow[x] = i;
+        } else {
+            if (lastCol[x] == -1) {
+                ans -= segRow.query(1, i);
+            } else {
+                ans -= segRow.query(lastCol[x], i);
+                segCol.update(lastCol[x], -1);
+            }
+            segCol.update(i, 1);
+            lastCol[x] = i;
+        }
+        cout << ans << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## F. Total Product is N
+
+### Solution 1: number theory, divisors, 0/1 knapsack product variation, combinatorial counting, dynamic programming
+
+1. Every element in a good sequence must be a divisor of N.
+2. We first count unordered distinct sets of divisors.
+3. Product states are represented only by divisors of N.
+4. dp[product][count] counts how many sets form that product.
+5. score[product][count] stores the total sum of element-scores for those sets.
+6. We include divisor 1 because it is a valid positive integer.
+7. We iterate backwards so each divisor is used at most once.
+8. Finally, each set of size b gives b! ordered sequences.
+
+This is a product version of 0/1 knapsack. In normal sum knapsack, you might do:
+dp[sum] = number of ways to form this sum
+Here, we do:
+dp[product][count] = number of ways to form this product using count selected divisors
+We also need the score, so we keep another DP table:
+score[product][count] = sum of scores over all selected sets
+The count dimension is important because at the end, each unordered selected set of size count can be ordered in:
+count! ways.
+Since the score is just the sum of elements, every ordering of the same set has the same score.
+So a selected set of size b contributes:
+score_of_set * b! to the final answer.
+
+Why iterate backwards?
+Each divisor can be used at most once.
+So when processing a divisor x, we must not allow the DP update using x to feed into another update using the same x.
+That is why we iterate backwards over product states and backwards over count states.
+This is the same reason 0/1 knapsack does:
+for (sum = target; sum >= x; sum--)
+instead of going forward.
+Here, the product version is:
+for each x:
+    for product states backwards:
+        for count backwards:
+            transition by multiplying by x
+The backwards count loop is especially important when x = 1, because multiplying by 1 does not change the product. Without the count dimension and backwards count iteration, 1 could accidentally be reused
+
+```cpp
+const int MOD = 998244353, B = 16;
+int64 N;
+
+void solve() {
+    cin >> N;
+    vector<int64> divisors;
+    for (int64 i = 1; i * i <= N; ++i) {
+        if (N % i) continue;
+        divisors.emplace_back(i);
+        if (i * i != N) divisors.emplace_back(N / i);
+    }
+    sort(divisors.begin(), divisors.end());
+    int M = divisors.size();
+    unordered_map<int64, int> id;
+    for (int i = 0; i < M; i++) {
+        id[divisors[i]] = i;
+    }
+    vector<int64> fact(B, 1);
+    for (int i = 1; i < B; ++i) {
+        fact[i] = fact[i - 1] * i % MOD;
+    }
+    vector<vector<int64>> dp(M, vector<int64>(B, 0)), score(M, vector<int64>(B, 0));
+    dp[0][0] = 1;
+    for (int i = 0; i < M; ++i) {
+        for (int j = M - 1; j >= 0; --j) {
+            for (int b = B - 1; b > 0; --b) {
+                int64 x = divisors[i], prod = divisors[j];
+                if (prod > N / x) continue;
+                int64 new_prod = prod * x;
+                if (N % new_prod) continue;
+                int k = id[new_prod];
+                dp[k][b] = (dp[k][b] + dp[j][b - 1]) % MOD;
+                score[k][b] = (score[k][b] + score[j][b - 1] + dp[j][b - 1] * x) % MOD;
+            }
+        }
+    }
+    int64 ans = 0;
+    for (int b = 0; b < B; ++b) {
+        ans = (ans + score[M - 1][b] * fact[b]) % MOD;
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## G. Graph Problem 2026
+
+### Solution 1: 
+
+```cpp
+
+```
