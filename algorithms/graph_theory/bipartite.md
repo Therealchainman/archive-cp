@@ -78,9 +78,86 @@ int main() {
 }
 ```
 
+### Hopcroft-Karp algorithms
+
+The time complexity is O(E*sqrt(V)), which is much better than Kuhn's algorithm for dense graphs.
+
+[Hopcroft-Karp Algorithm](hopcroft_karp_algorithm.md)
+
+```cpp
+int N, M;
+vector<vector<int>> adj;
+vector<int> matchL, matchR, dist;
+
+bool bfs() {
+    queue<int> q;
+    for (int l = 0; l < N; l++) {
+        if (matchL[l] == -1) {
+            dist[l] = 0;
+            q.emplace(l);
+        } else {
+            dist[l] = -1;
+        }
+    }
+    bool foundAugmentingPath = false;
+    while (!q.empty()) {
+        int l = q.front();
+        q.pop();
+        for (int r : adj[l]) {
+            int nextL = matchR[r];
+
+            if (nextL == -1) {
+                foundAugmentingPath = true;
+            } else if (dist[nextL] == -1) {
+                dist[nextL] = dist[l] + 1;
+                q.emplace(nextL);
+            }
+        }
+    }
+    return foundAugmentingPath;
+}
+
+bool dfs(int l) {
+    for (int r : adj[l]) {
+        int nextL = matchR[r];
+        if (nextL == -1 || (dist[nextL] == dist[l] + 1 && dfs(nextL))) {
+            matchL[l] = r;
+            matchR[r] = l;
+            return true;
+        }
+    }
+    dist[l] = -1;
+    return false;
+}
+
+void solve() {
+    cin >> N >> M;
+    adj.assign(N, vector<int>());
+    matchL.assign(N, -1);
+    matchR.assign(N, -1);
+    dist.assign(N, -1);
+    for (int i = 0; i < M; ++i) {
+        int u, v;
+        cin >> u >> v;
+        --u, --v;
+        adj[u].emplace_back(v);
+        adj[v].emplace_back(u);
+    }
+    int matching = 0;
+    while (bfs()) {
+        for (int l = 0; l < N; l++) {
+            if (matchL[l] == -1 && dfs(l)) {
+                matching++;
+            }
+        }
+    }
+    int maxIndependentSetSize = 2 * N - matching;
+    int64 ans = 1013LL * maxIndependentSetSize;
+    cout << ans << endl;
+}
+```
+
 ## Maximum Bipartite Matching on tree in linear time with DP on tree.
-
-
 
 ```cpp
 

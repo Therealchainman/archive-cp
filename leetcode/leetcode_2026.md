@@ -5469,3 +5469,94 @@ public:
     }
 };
 ```
+
+## 3691. Maximum Total Subarray Value II
+
+### Solution 1: maxheap, two pointer
+
+```cpp
+using int64 = long long;
+
+template <class T, class Op>
+struct SparseTable {
+    vector<int> lg;          // floor(log2(i))
+    vector<vector<T>> st;    // st[k][i] = combine over [i, i + 2^k)
+
+    SparseTable() = default;
+    explicit SparseTable(const vector<T>& a) { build(a); }
+
+    void build(const vector<T>& a) {
+        int n = a.size();
+        lg.assign(n + 1, 0);
+        for (int i = 2; i <= n; ++i) lg[i] = lg[i / 2] + 1;
+
+        int K = (n == 0) ? 0 : (lg[n] + 1);
+        st.assign(K, vector<T>(n));
+        if (n == 0) return;
+
+        st[0] = a;
+        for (int k = 1; k < K; ++k) {
+            int len = 1 << k;
+            int half = len >> 1;
+            for (int i = 0; i + len <= n; ++i) {
+                st[k][i] = Op::combine(st[k - 1][i], st[k - 1][i + half]);
+            }
+        }
+    }
+
+    // Query on half-closed interval [l, r]
+    // Precondition: 0 <= l <= r <= n
+    T query(int l, int r) const {
+        int len = r - l + 1;
+        int k = lg[len];
+        // Two blocks cover [l,r], potentially overlapping: OK only if idempotent.
+        return Op::combine(st[k][l], st[k][r - (1 << k) + 1]);
+    }
+};
+
+// ----- Plug-in ops (examples) -----
+
+template <class T>
+struct MinOp {
+    static T identity() {
+        return numeric_limits<T>::max();
+    }
+
+    static T combine(T a, T b) {
+        return min(a, b);
+    }
+};
+template <class T>
+struct MaxOp {
+    static T identity() {
+        return numeric_limits<T>::lowest();
+    }
+
+    static T combine(T a, T b) {
+        return max(a, b);
+    }
+};
+class Solution {
+public:
+    int64 maxTotalValue(vector<int>& nums, int k) {
+        int N = nums.size();
+        SparseTable<int, MinOp<int>> stmin(nums);
+        SparseTable<int, MaxOp<int>> stmax(nums);
+        int64 ans = 0;
+        priority_queue<tuple<int, int, int>> maxheap;
+        for (int i = 0; i < N; ++i) {
+            int val = stmax.query(i, N - 1) - stmin.query(i, N - 1);
+            maxheap.emplace(val, i, N - 1);
+        }
+        while (k--) {
+            auto [val, l, r] = maxheap.top();
+            maxheap.pop();
+            ans += val;
+            if (l == r) continue;
+            int nextVal = stmax.query(l, r - 1) - stmin.query(l, r - 1);
+            maxheap.emplace(nextVal, l, r - 1);
+        }
+        return ans;
+    }
+};
+```
