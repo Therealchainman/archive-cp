@@ -44,7 +44,7 @@ void factorials(int n, int64 m) {
 }
 
 int64 choose(int n, int r, int64 m) {
-    if (n < r) return 0;
+    if (n < 0 || r < 0 || n < r) return 0;
     return (fact[n] * inv_fact[r] % m) * inv_fact[n - r] % m;
 }
 ```

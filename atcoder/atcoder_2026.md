@@ -1693,7 +1693,144 @@ signed main() {
 
 ## G. Graph Problem 2026
 
+### Solution 1: maximum independent set in undirected graph, maximum bipartite matching, Hopcroft-Karp algorithm
+
+```cpp
+int N, M;
+vector<vector<int>> adj;
+vector<int> matchL, matchR, dist;
+
+bool bfs() {
+    queue<int> q;
+    for (int l = 0; l < N; l++) {
+        if (matchL[l] == -1) {
+            dist[l] = 0;
+            q.emplace(l);
+        } else {
+            dist[l] = -1;
+        }
+    }
+    bool foundAugmentingPath = false;
+    while (!q.empty()) {
+        int l = q.front();
+        q.pop();
+        for (int r : adj[l]) {
+            int nextL = matchR[r];
+
+            if (nextL == -1) {
+                foundAugmentingPath = true;
+            } else if (dist[nextL] == -1) {
+                dist[nextL] = dist[l] + 1;
+                q.emplace(nextL);
+            }
+        }
+    }
+    return foundAugmentingPath;
+}
+
+bool dfs(int l) {
+    for (int r : adj[l]) {
+        int nextL = matchR[r];
+        if (nextL == -1 || (dist[nextL] == dist[l] + 1 && dfs(nextL))) {
+            matchL[l] = r;
+            matchR[r] = l;
+            return true;
+        }
+    }
+    dist[l] = -1;
+    return false;
+}
+
+void solve() {
+    cin >> N >> M;
+    adj.assign(N, vector<int>());
+    matchL.assign(N, -1);
+    matchR.assign(N, -1);
+    dist.assign(N, -1);
+    for (int i = 0; i < M; ++i) {
+        int u, v;
+        cin >> u >> v;
+        --u, --v;
+        adj[u].emplace_back(v);
+        adj[v].emplace_back(u);
+    }
+    int matching = 0;
+    while (bfs()) {
+        for (int l = 0; l < N; l++) {
+            if (matchL[l] == -1 && dfs(l)) {
+                matching++;
+            }
+        }
+    }
+    int maxIndependentSetSize = 2 * N - matching;
+    int64 ans = 1013LL * maxIndependentSetSize;
+    cout << ans << endl;
+}
+```
+
+# Atcoder Beginner Contest 462
+
+##
+
 ### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+##
+
+### Solution 1: 
+
+```cpp
+
+```
+
+## G. Completely Wrong
+
+### Solution 1: 
+
+A full random process can be represented as a complete ordered sequence of selected balls or colors.
+
+If your permutation is a permutation of balls, then the set is not:
+
+P_i = G_i
+
+It is:
+C_{P_i} = G_i
+
+Because P_i is the ball number drawn at operation i, while G_i is a color.
+
+So if I know all the sets for each index i that are valid, then I ultimately want to compute the intersection of all those sets. 
+
+So that is kind of our set up 
+
+
+S_i is a set of permutations that satisfy the condition at index i. We want to compute the size of the intersection of all S_i.
 
 
 

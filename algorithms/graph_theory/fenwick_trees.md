@@ -225,3 +225,109 @@ assert fenwick.query_range(2, 2) == 1, "Wrong"
 ```
 
 Number of inversions is easy to calculate with Fenwick Trees
+
+## A special form of fenwick tree
+
+This is a compressed fenwick tree that can be used for counting and summing values, and also finding the k-th smallest and largest values, and also finding the sum of the k smallest and largest values.  It is useful for when you need to maintain a dynamic multiset of values, and you need to be able to query the k-th smallest or largest value, or the sum of the k smallest or largest values.
+
+```cpp
+template <typename T>
+struct FenwickTree {
+    int N;
+    vector<T> values;      // compressed index -> actual value
+    vector<T> countNodes;  // Fenwick tree of counts
+    vector<T> sumNodes;    // Fenwick tree of sums
+    T neutral;
+
+    FenwickTree() : neutral(T(0)) {}
+
+    void init(const vector<T>& nums) {
+        values.assign(nums.begin(), nums.end());
+        N = values.size();
+        countNodes.assign(N + 1, T(0));
+        sumNodes.assign(N + 1, T(0));
+    }
+
+    void update(int idx, T val) {
+        int64 sumDelta = val * values[idx];
+        for (int i = idx + 1; i <= N; i += i & -i) {
+            countNodes[i] += val;
+            sumNodes[i] += sumDelta;
+        }
+    }
+
+    T countPrefix(int idx) const {
+        // count of indices [0..idx]
+        if (idx < 0) return 0;
+
+        T res = 0;
+        for (int i = idx + 1; i > 0; i -= i & -i) {
+            res += countNodes[i];
+        }
+        return res;
+    }
+
+    T sumPrefix(int idx) const {
+        // sum of values at indices [0..idx]
+        if (idx < 0) return 0;
+
+        T res = 0;
+        for (int i = idx + 1; i > 0; i -= i & -i) {
+            res += sumNodes[i];
+        }
+        return res;
+    }
+
+    T totalCount() const {
+        return countPrefix(N - 1);
+    }
+
+    T totalSum() const {
+        return sumPrefix(N - 1);
+    }
+
+    // Returns the index of the k-th element in the fenwick tree, where k is 1-indexed.
+    int kth(int k) const {
+        int idx = 0;
+        int step = 1;
+        while ((step << 1) <= N) {
+            step <<= 1;
+        }
+        for (; step > 0; step >>= 1) {
+            int next = idx + step;
+            if (next <= N && countNodes[next] < k) {
+                idx = next;
+                k -= countNodes[next];
+            }
+        }
+        // idx is the number of compressed positions strictly before answer.
+        // Therefore it is already the 0-based compressed index.
+        return idx;
+    }
+
+    T kthSmallestValue(T k) const {
+        int idx = kth(k);
+        return values[idx];
+    }
+
+    T kthLargestValue(T k) const {
+        T c = totalCount();
+        return kthSmallestValue(c - k + 1);
+    }
+
+    T sumSmallest(T k) const {
+        if (k <= 0) return 0;
+        int idx = kth(k);
+        T beforeCnt = countPrefix(idx - 1);
+        T beforeSum = sumPrefix(idx - 1);
+        T need = k - beforeCnt;
+        return beforeSum + need * values[idx];
+    }
+
+    T sumLargest(T k) const {
+        if (k <= 0) return 0;
+        T c = totalCount();
+        return totalSum() - sumSmallest(c - k);
+    }
+};
+```

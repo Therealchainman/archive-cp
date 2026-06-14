@@ -5560,3 +5560,272 @@ public:
     }
 };
 ```
+
+# Leetcode Weekly Contest 506
+
+## Q2. Frequency Balance Subarray
+
+### Solution 1: map, frequency counting
+
+```cpp
+class Solution {
+public:
+    int getLength(vector<int>& nums) {
+        int N = nums.size();
+        int ans = 0;
+        for (int i = 0; i < N; ++i) {
+            unordered_map<int, int> freq, freq1;
+            for (int j = i; j < N; ++j) {
+                int x = nums[j];
+                if (freq.find(x) != freq.end()) {
+                    freq1[freq[x]]--;
+                    if (freq1[freq[x]] == 0) {
+                        freq1.erase(freq[x]);
+                    }
+                }
+                freq[x]++;
+                freq1[freq[x]]++;
+                if (freq.size() == 1) {
+                    ans = max(ans, j - i + 1);
+                    continue;
+                }
+                if (freq1.size() != 2) continue;
+                auto it = freq1.begin();
+                int f1 = it->first;
+                it++;
+                int f2 = it->first;
+                int small = min(f1, f2), large = max(f1, f2);
+                if (large == 2 * small) {
+                    ans = max(ans, j - i + 1);
+                }
+            }
+        }
+        return ans;   
+    }
+};
+```
+
+## Q3. Maximize Sum of Device Ratings
+
+### Solution 1: greedy, sorting
+
+For each row, sort the ratings. The solution initially chooses the second-smallest value from every row:
+
+pref += units[i][1]
+
+It also tracks the smallest value across all rows:
+
+small = min(small, units[i][0])
+
+Then it tries each row as the special row where its chosen value is replaced by the global minimum. For every row i, it computes:
+
+pref - units[i][1] + small
+
+and keeps the maximum result.
+
+The greedy idea is that after sorting each row, the second-smallest value is the best stable contribution from each row, while one row can be adjusted using the globally smallest value.
+
+Complexity:
+
+```cpp
+using int64 = long long;
+class Solution {
+public:
+    int64 maxRatings(vector<vector<int>>& units) {
+        int N = units.size(), M = units[0].size();
+        if (M == 1) {
+            return accumulate(units.begin(), units.end(), 0LL, [](int64 accum, const auto &arr) {
+                return accum + arr[0];
+            });
+        }
+        int64 pref = 0;
+        int small = 1e9;
+        for (int i = 0; i < N; ++i) {
+            sort(units[i].begin(), units[i].end());
+            pref += units[i][1];
+            small = min(small, units[i][0]);
+        }
+        int64 ans = 0;
+        for (int i = 0; i < N; ++i) {
+            pref = pref - units[i][1] + small;
+            ans = max(ans, pref);
+            pref = pref + units[i][1] - small;
+        }
+        return ans;
+    }
+};
+```
+
+## Q4. Maximum Subarray Sum After at Most K Swaps
+
+### Solution 1: fenwick tree, coordinate compression, greedy swaps, binary search, kth element queries, binary lifting in fenwick tree
+
+Main patterns used:
+
+Coordinate compression:
+Compress values so Fenwick tree indices are small.
+
+Fenwick tree with counts:
+Find kth smallest or kth largest value.
+
+Fenwick tree with sums:
+Get sum of smallest k or largest k values.
+
+Binary search:
+Find the maximum number of profitable swaps.
+
+Greedy:
+The best swap always pairs small inside values with large outside values.
+
+```cpp
+using int64 = long long;
+
+template <typename T>
+struct FenwickTree {
+    int N;
+    vector<T> values;      // compressed index -> actual value
+    vector<T> countNodes;  // Fenwick tree of counts
+    vector<T> sumNodes;    // Fenwick tree of sums
+    T neutral;
+
+    FenwickTree() : neutral(T(0)) {}
+
+    void init(const vector<T>& nums) {
+        values.assign(nums.begin(), nums.end());
+        N = values.size();
+        countNodes.assign(N + 1, T(0));
+        sumNodes.assign(N + 1, T(0));
+    }
+
+    void update(int idx, T val) {
+        int64 sumDelta = val * values[idx];
+        for (int i = idx + 1; i <= N; i += i & -i) {
+            countNodes[i] += val;
+            sumNodes[i] += sumDelta;
+        }
+    }
+
+    T countPrefix(int idx) const {
+        // count of indices [0..idx]
+        if (idx < 0) return 0;
+
+        T res = 0;
+        for (int i = idx + 1; i > 0; i -= i & -i) {
+            res += countNodes[i];
+        }
+        return res;
+    }
+
+    T sumPrefix(int idx) const {
+        // sum of values at indices [0..idx]
+        if (idx < 0) return 0;
+
+        T res = 0;
+        for (int i = idx + 1; i > 0; i -= i & -i) {
+            res += sumNodes[i];
+        }
+        return res;
+    }
+
+    T totalCount() const {
+        return countPrefix(N - 1);
+    }
+
+    T totalSum() const {
+        return sumPrefix(N - 1);
+    }
+
+    // Returns the index of the k-th element in the fenwick tree, where k is 1-indexed.
+    int kth(int k) const {
+        int idx = 0;
+        int step = 1;
+        while ((step << 1) <= N) {
+            step <<= 1;
+        }
+        for (; step > 0; step >>= 1) {
+            int next = idx + step;
+            if (next <= N && countNodes[next] < k) {
+                idx = next;
+                k -= countNodes[next];
+            }
+        }
+        // idx is the number of compressed positions strictly before answer.
+        // Therefore it is already the 0-based compressed index.
+        return idx;
+    }
+
+    T kthSmallestValue(T k) const {
+        int idx = kth(k);
+        return values[idx];
+    }
+
+    T kthLargestValue(T k) const {
+        T c = totalCount();
+        return kthSmallestValue(c - k + 1);
+    }
+
+    T sumSmallest(T k) const {
+        if (k <= 0) return 0;
+        int idx = kth(k);
+        T beforeCnt = countPrefix(idx - 1);
+        T beforeSum = sumPrefix(idx - 1);
+        T need = k - beforeCnt;
+        return beforeSum + need * values[idx];
+    }
+
+    T sumLargest(T k) const {
+        if (k <= 0) return 0;
+        T c = totalCount();
+        return totalSum() - sumSmallest(c - k);
+    }
+};
+class Solution {
+public:
+    int64 maxSum(vector<int>& nums, int k) {
+        int N = nums.size();
+        int64 ans = *max_element(nums.begin(), nums.end());
+        if (ans <= 0) return ans;
+        vector<int64> values(nums.begin(), nums.end());
+        sort(values.begin(), values.end());
+        values.erase(unique(values.begin(), values.end()), values.end());
+        int M = values.size();
+        unordered_map<int, int> id;
+        for (int i = 0; i < M; ++i) {
+            id[values[i]] = i;
+        }
+        for (int i = 0; i < N; ++i) {
+            FenwickTree<int64> inside, outside;
+            inside.init(values);
+            outside.init(values);
+            for (int x : nums) {
+                int idx = id[x];
+                outside.update(idx, 1);
+            }
+            int64 base = 0;
+            int insideCount = 0, outsideCount = N;
+            for (int j = i; j < N; ++j) {
+                int idx = id[nums[j]];
+                base += nums[j];
+                outside.update(idx, -1);
+                inside.update(idx, 1);
+                insideCount++, outsideCount--;
+                int limit = min({k, insideCount, outsideCount});
+                int lo = 0, hi = limit;
+                while (lo < hi) {
+                    int mid = lo + (hi - lo + 1) / 2;
+                    int64 smallestInside = inside.kthSmallestValue(mid);
+                    int64 largestOutside = outside.kthLargestValue(mid);
+                    if (smallestInside < largestOutside) {
+                        lo = mid;
+                    } else {
+                        hi = mid - 1;
+                    }
+                }
+                int64 cand = base + outside.sumLargest(lo) - inside.sumSmallest(lo);
+                ans = max(ans, cand);
+            }
+        }
+        return ans;
+    }
+};
+```
