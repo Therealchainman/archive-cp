@@ -1615,7 +1615,7 @@ signed main() {
 }
 ```
 
-## Fixed Length Paths I
+## Fixed-Length Paths I
 
 ### Solution 1:
 
@@ -1801,7 +1801,7 @@ signed main() {
 }
 ```
 
-## Fixed Length Paths II
+## Fixed-Length Paths II
 
 ### Solution 1: centroid decomposition, fenwick tree
 

@@ -112,10 +112,48 @@ signed main() {
 
 ## Advertisement
 
-### Solution 1:
+### Solution 1: monotonic stack, max rectangle in histogram
+
+largest rectangle in histogram problem.
+
+As you iterate through the array, if you encounter a bar that is shorter than the one at the top of your stack, it means the rectangle for the taller bar cannot extend any further to the right.
+
+You pop the taller bar off the stack, calculate its rectangle's area using the current index and the new top of the stack as boundaries, and update your maximum area.
 
 ```cpp
+int N;
+vector<int> A;
 
+void solve() {
+    cin >> N;
+    A.resize(N);
+    for (int i = 0; i < N; ++i) {
+        cin >> A[i];
+    }
+    A.insert(A.begin(), 0);
+    A.emplace_back(0);
+    stack<int> stk;
+    stk.emplace(0);
+    int64 ans = 0;
+    for (int i = 1; i < N + 2; ++i) {
+        while (!stk.empty() && A[i] < A[stk.top()]) {
+            int h = A[stk.top()];
+            stk.pop();
+            int w = i - stk.top() - 1;
+            ans = max<int64>(ans, 1LL * w * h);
+        }
+        stk.emplace(i);
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ## Special Substrings
@@ -310,10 +348,62 @@ signed main() {
 
 ## Maximum Building I
 
-### Solution 1:
+### Solution 1: monotonic stack, maximum area of rectangle in histogram
+
+largest rectangle in histogram problem in disguise.
+
+As you iterate through the array, if you encounter a bar that is shorter than the one at the top of your stack, it means the rectangle for the taller bar cannot extend any further to the right.
+
+You pop the taller bar off the stack, calculate its rectangle's area using the current index and the new top of the stack as boundaries, and update your maximum area.
 
 ```cpp
+int N, M;
 
+void solve() {
+    cin >> N >> M;
+    vector<queue<int>> cols(M);
+    for (int i = 0; i < N; ++i) {
+        string row;
+        cin >> row;
+        for (int j = 0; j < M; ++j) {
+            if (row[j] == '*') {
+                cols[j].emplace(i);
+            }
+        }
+    }
+    for (int i = 0; i < M; ++i) {
+        cols[i].emplace(N); // tree at bottom of the column
+    }
+    int ans = 0;
+    for (int i = 0; i < N; ++i) {
+        vector<int> heights(M + 2, 0);
+        for (int j = 0; j < M; ++j) {
+            if (cols[j].front() < i) {
+                cols[j].pop(); // only look at trees below or at current row.
+            }
+            heights[j + 1] = cols[j].front() - i; // height of the building at current row and column j is the distance to the next tree below it.
+        }
+        stack<int> stk;
+        stk.emplace(0); // sentinel
+        for (int j = 1; j < M + 2; ++j) {
+            while (!stk.empty() && heights[j] < heights[stk.top()]) {
+                int idx = stk.top();
+                stk.pop();
+                ans = max(ans, heights[idx] * (j - stk.top() - 1)); // calculate area of rectangle with height heights[idx] and width (j - stk.top() - 1)
+            }
+            stk.emplace(j);
+        }
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 ## Sorting Methods
