@@ -2043,7 +2043,7 @@ signed main() {
 
 ## F - Senshuraku
 
-### Solution 1:
+### Solution 1: combinatorics, probability, binomial coefficients, uniform tie-breaking, grouping, casework
 
 The clean way to understand the equations is: first decide the final winning score, then count how many players tie at that score, then multiply by 1 / number_of_candidates.
 
@@ -2079,14 +2079,922 @@ The power of 2 in the denominator counts how many fair coin-flip match outcomes 
 
 The 1/w is the final uniform tie-break among w candidates.
 
-```cpp
+## 3. Match Groups
 
+Every match falls into one of six groups:
+
+\[
+m_0 = (W, W)
+\]
+
+\[
+m_1 = (W, W-1)
+\]
+
+\[
+m_2 = (W, 0)
+\]
+
+\[
+m_3 = (W-1, W-1)
+\]
+
+\[
+m_4 = (W-1, 0)
+\]
+
+\[
+m_5 = (0, 0)
+\]
+
+These groups are the core compression. Instead of calculating probabilities for each player directly, we calculate probabilities for each group and role.
+
+Players in the same group and same role have identical probability.
+
+---
+
+## 4. General Probability Formula
+
+For a fixed candidate count \(w\), the probability that a player wins is:
+
+\[
+P(\text{player wins})
+=
+P(\text{player is candidate and total candidates} = w)
+\cdot
+\frac{1}{w}
+\]
+
+The factor:
+
+\[
+\frac{1}{w}
+\]
+
+comes from uniform tie-breaking among the \(w\) players tied for maximum score.
+
+So the algorithm sums:
+
+\[
+\sum_w P(\text{player is candidate and total candidates} = w)
+\cdot
+\frac{1}{w}
+\]
+
+---
+
+## 5. Case 1: Champion Score is \(W+1\)
+
+A player can finish with \(W+1\) only if they started with \(W\) and won their final match.
+
+### Group behavior for score \(W+1\)
+
+| Group | Match Type | Contribution to \(W+1\) candidates |
+|---|---|---|
+| \(m_0\) | \((W, W)\) | Always creates exactly \(1\) candidate |
+| \(m_1\) | \((W, W-1)\) | Creates \(1\) candidate with probability \(\frac{1}{2}\) |
+| \(m_2\) | \((W, 0)\) | Creates \(1\) candidate with probability \(\frac{1}{2}\) |
+| \(m_3\) | \((W-1, W-1)\) | Creates \(0\) candidates |
+| \(m_4\) | \((W-1, 0)\) | Creates \(0\) candidates |
+| \(m_5\) | \((0, 0)\) | Creates \(0\) candidates |
+
+Define:
+
+\[
+x = m_1 + m_2
+\]
+
+These are the flexible matches that may or may not create a \(W+1\) candidate.
+
+The candidate count is:
+
+\[
+w = m_0 + r
+\]
+
+where \(r\) is the number of successful flexible matches.
+
+Therefore:
+
+\[
+w \in [m_0, m_0 + m_1 + m_2]
+\]
+
+but we only consider:
+
+\[
+w \ge 1
+\]
+
+because a champion-score case must have at least one candidate.
+
+---
+
+### 5.1 Contribution from \(m_0 = (W, W)\)
+
+In a \((W, W)\) match, one of the two players always wins and reaches \(W+1\).
+
+For a specific player in this group:
+
+\[
+P(\text{this player reaches } W+1) = \frac{1}{2}
+\]
+
+To get total candidate count \(w\), we need:
+
+\[
+w - m_0
+\]
+
+successful flexible matches among the \(x\) matches.
+
+The probability of that is:
+
+\[
+\binom{x}{w - m_0} \cdot \frac{1}{2^x}
+\]
+
+Therefore, the contribution for a specific player in \(m_0\) is:
+
+\[
+\boxed{
+\text{contribution}_{m_0}
+=
+\frac{1}{2}
+\cdot
+\frac{\binom{x}{w - m_0}}{2^x}
+\cdot
+\frac{1}{w}
+}
+\]
+
+Both players in \(m_0\) get the same contribution.
+
+---
+
+### 5.2 Contribution from \(m_1 = (W, W-1)\)
+
+Only the \(W\) player can reach \(W+1\).
+
+For that specific \(W\) player to be a candidate, they must win their own match.
+
+Their match is one of the \(x\) flexible matches.
+
+So one successful flexible match is already fixed. We now need:
+
+\[
+w - m_0 - 1
+\]
+
+more successful flexible matches from the remaining:
+
+\[
+x - 1
+\]
+
+matches.
+
+Thus:
+
+\[
+P(\text{this player is candidate and total candidates } = w)
+=
+\binom{x-1}{w - m_0 - 1}
+\cdot
+\frac{1}{2^x}
+\]
+
+The denominator is \(2^x\) because all \(x\) flexible matches are still random, including this player's own match.
+
+So the contribution is:
+
+\[
+\boxed{
+\text{contribution}_{m_1,W}
+=
+\frac{\binom{x-1}{w - m_0 - 1}}{2^x}
+\cdot
+\frac{1}{w}
+}
+\]
+
+The \(W-1\) player in \(m_1\) cannot reach \(W+1\), so they get no contribution in this case.
+
+---
+
+### 5.3 Contribution from \(m_2 = (W, 0)\)
+
+This is almost identical to \(m_1\).
+
+Only the \(W\) player can reach \(W+1\).
+
+So:
+
+\[
+\boxed{
+\text{contribution}_{m_2,W}
+=
+\frac{\binom{x-1}{w - m_0 - 1}}{2^x}
+\cdot
+\frac{1}{w}
+}
+\]
+
+The \(0\) player cannot reach \(W+1\).
+
+---
+
+### 5.4 Groups \(m_3, m_4, m_5\)
+
+These groups cannot create \(W+1\) candidates.
+
+So their contribution in the \(W+1\) case is:
+
+\[
+0
+\]
+
+---
+
+## 6. Case 2: Champion Score is \(W\)
+
+This case is possible only if:
+
+\[
+m_0 = 0
+\]
+
+because if there is a \((W, W)\) match, one of those two players must win and reach \(W+1\).
+
+So when:
+
+\[
+m_0 > 0
+\]
+
+the \(W\) case is impossible.
+
+---
+
+### Group behavior for score \(W\)
+
+For the champion score to be exactly \(W\), no player can reach \(W+1\). Therefore, every \(W\) player must lose their final match.
+
+| Group | Match Type | Contribution to \(W\) candidates |
+|---|---|---|
+| \(m_1\) | \((W, W-1)\) | If \(W\) loses, both players finish at \(W\), so \(2\) candidates |
+| \(m_2\) | \((W, 0)\) | If \(W\) loses, the \(W\) player stays at \(W\), so \(1\) candidate |
+| \(m_3\) | \((W-1, W-1)\) | Exactly one player wins and reaches \(W\), so \(1\) candidate |
+| \(m_4\) | \((W-1, 0)\) | Creates \(1\) candidate with probability \(\frac{1}{2}\) |
+| \(m_5\) | \((0, 0)\) | Creates \(0\) candidates |
+
+Define the forced number of candidates:
+
+\[
+K = 2m_1 + m_2 + m_3
+\]
+
+These candidates are forced once all \(W\) players lose.
+
+The group \(m_4\) is flexible. Each \((W-1,0)\) match creates one candidate if the \(W-1\) player wins.
+
+So:
+
+\[
+w = K + r
+\]
+
+where \(r\) is the number of successful \(m_4\) matches.
+
+Therefore:
+
+\[
+w \in [K, K + m_4]
+\]
+
+---
+
+### Shared probability denominator
+
+To make champion score exactly \(W\):
+
+- In every \(m_1\) match, the \(W\) player must lose.
+- In every \(m_2\) match, the \(W\) player must lose.
+- In \(m_4\), some number of \(W-1\) players may win.
+
+The total number of relevant fair coin flips is:
+
+\[
+m_1 + m_2 + m_4
+\]
+
+So the shared denominator is:
+
+\[
+2^{m_1 + m_2 + m_4}
+\]
+
+For a fixed \(w\), we need:
+
+\[
+w - K
+\]
+
+successful \(m_4\) matches.
+
+The base probability is:
+
+\[
+\frac{\binom{m_4}{w-K}}{2^{m_1 + m_2 + m_4}}
+\]
+
+Then we multiply by:
+
+\[
+\frac{1}{w}
+\]
+
+for tie-breaking.
+
+So define:
+
+\[
+\text{base}(w)
+=
+\frac{\binom{m_4}{w-K}}{2^{m_1 + m_2 + m_4}}
+\cdot
+\frac{1}{w}
+\]
+
+---
+
+### 6.1 Contribution from \(m_1 = (W, W-1)\)
+
+In this group, the \(W\) player must lose to avoid creating a \(W+1\) champion.
+
+If the \(W\) player loses:
+
+\[
+W \rightarrow W
+\]
+
+and:
+
+\[
+W-1 \rightarrow W
+\]
+
+So both players become \(W\)-candidates.
+
+Therefore, both players in \(m_1\) receive:
+
+\[
+\boxed{
+\text{contribution}_{m_1}
+=
+\frac{\binom{m_4}{w-K}}{2^{m_1 + m_2 + m_4}}
+\cdot
+\frac{1}{w}
+}
+\]
+
+---
+
+### 6.2 Contribution from \(m_2 = (W, 0)\)
+
+The \(W\) player must lose to avoid creating \(W+1\).
+
+If the \(W\) player loses, they still remain at score \(W\), so they are a candidate.
+
+The \(0\) player cannot reach \(W\).
+
+So only the \(W\) player receives:
+
+\[
+\boxed{
+\text{contribution}_{m_2,W}
+=
+\frac{\binom{m_4}{w-K}}{2^{m_1 + m_2 + m_4}}
+\cdot
+\frac{1}{w}
+}
+\]
+
+The \(0\) player receives:
+
+\[
+0
+\]
+
+---
+
+### 6.3 Contribution from \(m_3 = (W-1, W-1)\)
+
+In a \((W-1,W-1)\) match, exactly one of the two players wins and reaches \(W\).
+
+So the match always contributes exactly one \(W\)-candidate, but a specific player is that candidate with probability:
+
+\[
+\frac{1}{2}
+\]
+
+Therefore, each player in \(m_3\) receives:
+
+\[
+\boxed{
+\text{contribution}_{m_3}
+=
+\frac{1}{2}
+\cdot
+\frac{\binom{m_4}{w-K}}{2^{m_1 + m_2 + m_4}}
+\cdot
+\frac{1}{w}
+}
+\]
+
+---
+
+### 6.4 Contribution from \(m_4 = (W-1, 0)\)
+
+Only the \(W-1\) player can become a \(W\)-candidate.
+
+For a specific \(W-1\) player in \(m_4\), their own match must be one of the successful \(m_4\) matches.
+
+So one success is fixed.
+
+Among the remaining:
+
+\[
+m_4 - 1
+\]
+
+matches, we need:
+
+\[
+w - K - 1
+\]
+
+more successful matches.
+
+Thus:
+
+\[
+\boxed{
+\text{contribution}_{m_4,W-1}
+=
+\frac{\binom{m_4 - 1}{w-K-1}}{2^{m_1 + m_2 + m_4}}
+\cdot
+\frac{1}{w}
+}
+\]
+
+The \(0\) player receives:
+
+\[
+0
+\]
+
+---
+
+### 6.5 Contribution from \(m_5 = (0,0)\)
+
+Neither player can reach \(W\) or \(W+1\), so both receive:
+
+\[
+0
+\]
+
+---
+
+## 7. Algorithm Summary
+
+### Step 1: Find \(W\)
+
+\[
+W = \max_i A_i
+\]
+
+### Step 2: Classify each match
+
+For each match, compress both players into one of:
+
+\[
+W,\quad W-1,\quad 0
+\]
+
+Then count how many matches belong to:
+
+\[
+m_0,m_1,m_2,m_3,m_4,m_5
+\]
+
+Also remember which group and role each player belongs to.
+
+### Step 3: Precompute combinations
+
+Use factorials and inverse factorials to compute:
+
+\[
+\binom{n}{r}
+\]
+
+in \(O(1)\).
+
+Also precompute powers of two and modular inverses.
+
+### Step 4: Process the \(W+1\) case
+
+Let:
+
+\[
+x = m_1 + m_2
+\]
+
+Loop over:
+
+\[
+w = \max(1,m_0), \max(1,m_0)+1, \dots, m_0+x
+\]
+
+For each \(w\), update:
+
+\[
+m_0
+\]
+
+\[
+m_1 \text{ W-side}
+\]
+
+\[
+m_2 \text{ W-side}
+\]
+
+using the formulas above.
+
+### Step 5: Process the \(W\) case
+
+Only if:
+
+\[
+m_0 = 0
+\]
+
+Define:
+
+\[
+K = 2m_1 + m_2 + m_3
+\]
+
+Loop over:
+
+\[
+w = K, K+1, \dots, K+m_4
+\]
+
+For each \(w\), update:
+
+\[
+m_1 \text{ both sides}
+\]
+
+\[
+m_2 \text{ W-side}
+\]
+
+\[
+m_3 \text{ both sides}
+\]
+
+\[
+m_4 \text{ W-1 side}
+\]
+
+### Step 6: Assign answers to players
+
+After the group probabilities are computed, each player gets the probability associated with their group and role.
+
+If a player is in group \(g\) and role \(s\), then:
+
+\[
+ans_i = prob[g][s]
+\]
+
+This is what makes the algorithm fast.
+
+```cpp
+const int MOD = 998244353, MAXN = 4e5 + 5;
+int N, W;
+vector<int> A;
+vector<int64> pow2;
+
+int64 inv(int i, int64 m) {
+  return i <= 1 ? i : m - (m / i) * inv(m % i, m) % m;
+}
+
+vector<int64> fact, inv_fact;
+
+void factorials(int n, int64 m) {
+    fact.assign(n + 1, 1);
+    inv_fact.assign(n + 1, 0);
+    for (int i = 2; i <= n; i++) {
+        fact[i] = (fact[i - 1] * i) % m;
+    }
+    inv_fact.end()[-1] = inv(fact.end()[-1], m);
+    for (int i = n - 1; i >= 0; i--) {
+        inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % m;
+    }
+}
+
+int64 choose(int n, int r, int64 m) {
+    if (n < 0 || r < 0 || n < r) return 0;
+    return (fact[n] * inv_fact[r] % m) * inv_fact[n - r] % m;
+}
+
+// 2 represents W, 1 represents W - 1, 0 represents less than W - 1
+
+int groupId(int x, int y) {
+    if (x > y) swap(x, y);
+    if (x == W && y == W) return 0;
+    if (x == W - 1 && y == W) return 1;
+    if (x < W - 1 && y == W) return 2;
+    if (x == W - 1 && y == W - 1) return 3;
+    if (x < W - 1 && y == W - 1) return 4;
+    return 5;
+}
+
+void solve() {
+    cin >> N;
+    int M = 2 * N;
+    A.resize(M);
+    for (int i = 0; i < N; ++i) {
+        cin >> A[2 * i] >> A[2 * i + 1];
+    }
+    W = *max_element(A.begin(), A.end());
+    vector<int64> freq(6, 0);
+    vector<pair<int64, int64>> prob(6);
+    for (int i = 0; i < N; ++i) {
+        int g = groupId(A[2 * i], A[2 * i + 1]);
+        freq[g]++;
+    }
+    // W + 1 is the champion score
+    for (int i = freq[0]; i <= freq[0] + freq[1] + freq[2]; ++i) {
+        int x = freq[1] + freq[2];
+        // contribution of m0
+        int64 P = inv(2, MOD) * choose(x, i - freq[0], MOD) % MOD;
+        P = P * inv(pow2[x], MOD) % MOD;
+        P = P * inv(i, MOD) % MOD;
+        prob[0].first = (prob[0].first + P) % MOD;
+        prob[0].second = (prob[0].second + P) % MOD;
+        // contribution of m1 or m2
+        if (!x) continue;
+        P = inv(2, MOD) * choose(x - 1, i - freq[0] - 1, MOD) % MOD;
+        P = P * inv(pow2[x - 1], MOD) % MOD;
+        P = P * inv(i, MOD) % MOD;
+        prob[1].second = (prob[1].second + P) % MOD;
+        prob[2].second = (prob[2].second + P) % MOD;
+    }
+    if (freq[0] == 0) {
+        // W is the champion score
+        int k = 2 * freq[1] + freq[2] + freq[3];
+        for (int i = k; i <= k + freq[4]; ++i) {
+            // contribution of m1 (W - 1, W)
+            int64 x = inv(pow2[freq[1] + freq[2] + freq[4]], MOD);
+            int64 P = choose(freq[4], i - k, MOD) * x % MOD;
+            P = P * inv(i, MOD) % MOD;
+            prob[1].first = (prob[1].first + P) % MOD;
+            prob[1].second = (prob[1].second + P) % MOD;
+            // contribution of m2 (0, W)
+            P = choose(freq[4], i - k, MOD) * x % MOD;
+            P = P * inv(i, MOD) % MOD;
+            prob[2].second = (prob[2].second + P) % MOD;
+            // contribution of m3 (W - 1, W - 1)
+            P = choose(freq[4], i - k, MOD) * x % MOD;
+            P = P * inv(i, MOD) % MOD;
+            P = P * inv(2, MOD) % MOD;
+            prob[3].first = (prob[3].first + P) % MOD;
+            prob[3].second = (prob[3].second + P) % MOD;
+            // contribution of m4 (0, W - 1)
+            if (!freq[4]) continue;
+            P = choose(freq[4] - 1, i - k - 1, MOD) * x % MOD;
+            P = P * inv(i, MOD) % MOD;
+            prob[4].second = (prob[4].second + P) % MOD;
+        }
+    }
+    vector<int64> ans(M);
+    for (int i = 0; i < N; ++i) {
+        int x = 2 * i, y = 2 * i + 1;
+        int g = groupId(A[x], A[y]);
+        if (A[x] > A[y]) swap(x, y);
+        ans[x] = prob[g].first;
+        ans[y] = prob[g].second;
+    }
+    for (int64 x : ans) {
+        cout << x << " ";
+    }
+    cout << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    factorials(MAXN, MOD);
+    pow2.resize(MAXN);
+    pow2[0] = 1;
+    for (int i = 1; i < MAXN; ++i) {
+        pow2[i] = pow2[i - 1] * 2 % MOD;
+    }
+    solve();
+    return 0;
+}
 ```
 
 ## G - Random Walk Distance
 
-### Solution 1: 
+### Solution 1: 1D random walk, binomial distribution, prefix sums, Mo’s algorithm
+
+After N steps, only the number of +1 moves matters.
+Final position is 2i−N.
+The final position distribution is binomial.
+Absolute value can be split at X.
+The expectation reduces to binomial prefix sums.
+Mo’s algorithm lets you maintain those prefix sums while moving between queries.
+
+The real “why” behind the solution is:
+
+The random part becomes binomial, and the absolute value turns into prefix binomial sums.
+
+Then the constraints force the final optimization:
+
+Answer all prefix-binomial queries offline with cheap transitions.
 
 ```cpp
 
+const int MOD = 998244353, MAXV = 2e5 + 5;
+int T;
+// s0 = f(curN, curM)
+// s1 = g(curN, curM)
+int64 s0, s1;
+vector<int> N, X, M;
+vector<int64> pow2;
+
+int64 mul(int64 a, int64 b) {
+    return (a * b) % MOD;
+}
+
+int block_size, curN, curM;
+
+int64 inv(int64 a, int64 m) {
+    return a <= 1 ? a : m - (m / a) * inv(m % a, m) % m;
+}
+
+vector<int64> fact, inv_fact;
+
+void factorials(int n, int64 m) {
+    fact.assign(n + 1, 1);
+    inv_fact.assign(n + 1, 1);
+
+    for (int i = 2; i <= n; i++) {
+        fact[i] = fact[i - 1] * i % m;
+    }
+
+    inv_fact[n] = inv(fact[n], m);
+
+    for (int i = n - 1; i >= 0; i--) {
+        inv_fact[i] = inv_fact[i + 1] * (i + 1) % m;
+    }
+}
+
+int64 choose(int n, int r, int64 m = MOD) {
+    if (n < 0 || r < 0 || n < r) return 0;
+    return fact[n] * inv_fact[r] % m * inv_fact[n - r] % m;
+}
+
+struct Query {
+    int l, r, idx;
+    Query(int l, int r, int idx) : l(l), r(r), idx(idx) {}
+
+    bool operator<(const Query &other) const {
+        int b1 = l / block_size, b2 = other.l / block_size;
+        if (b1 != b2) return b1 < b2;
+        if (b1 & 1) return r > other.r;
+        return r < other.r;
+    }
+};
+
+void addN() {
+    // Move from N to N + 1.
+    //
+    // f(N + 1, M) = 2f(N, M) - C(N, M - 1)
+    // g(N + 1, M) = 2g(N, M) + f(N, M) - M C(N, M - 1)
+
+    int64 boundary = choose(curN, curM - 1);
+    int64 oldS0 = s0;
+    int64 oldS1 = s1;
+    s0 = (2LL * oldS0 - boundary + MOD) % MOD;
+    s1 = (mul(2, oldS1) + oldS0 - mul(curM, boundary) + MOD) % MOD;
+    curN++;
+}
+
+void addM() {
+    // Move from M to M + 1.
+    //
+    // Add the term with index M:
+    // f(N, M + 1) = f(N, M) + C(N, M)
+    // g(N, M + 1) = g(N, M) + M C(N, M)
+
+    int64 c = choose(curN, curM);
+    s0 = (s0 + c) % MOD;
+    s1 = (s1 + mul(curM, c)) % MOD;
+    curM++;
+}
+
+void removeN() {
+    // Move from N to N - 1.
+    //
+    // This reverses addN().
+    //
+    // f(N, M) = (f(N + 1, M) + C(N, M - 1)) / 2
+    // g(N, M) = (g(N + 1, M) - f(N, M) + M C(N, M - 1)) / 2
+
+    curN--;
+    int64 boundary = choose(curN, curM - 1);
+    s0 = mul(s0 + boundary, inv(2, MOD));
+    s1 = mul(s1 - s0 + mul(curM, boundary), inv(2, MOD));
+}
+
+void removeM() {
+    // Move from M to M - 1.
+    //
+    // Remove the term with index M - 1.
+    // f(N, M - 1) = f(N, M) - C(N, M - 1)
+    // g(N, M - 1) = g(N, M) - (M - 1) C(N, M - 1)
+
+    curM--;
+    int64 c = choose(curN, curM);
+    s0 = (s0 - c + MOD) % MOD;
+    s1 = (s1 - mul(curM, c) + MOD) % MOD;
+}
+
+pair<int64, int64> getAnswer() {
+    return {s0, s1};
+}
+
+vector<pair<int64, int64>> mo_s_algorithm(vector<Query> queries) {
+    int Q = queries.size();
+    block_size = max<int>(1, MAXV / max(1.0, sqrt((double)Q)));
+    vector<pair<int64, int64>> answers(Q);
+    sort(queries.begin(), queries.end());
+
+    curN = 0, curM = 0;
+    s0 = 0, s1 = 0;
+    for (const Query& q : queries) {
+        while (curN < q.l) addN();
+        while (curN > q.l) removeN();
+
+        while (curM < q.r) addM();
+        while (curM > q.r) removeM();
+        answers[q.idx] = getAnswer();
+    }
+    return answers;
+}
+
+void solve() {
+    cin >> T;
+    N.resize(T);
+    X.resize(T);
+    M.resize(T);
+    vector<Query> queries;
+    for (int i = 0; i < T; ++i) {
+        cin >> N[i] >> X[i];
+        M[i] = clamp((N[i] + X[i] + 1) / 2, 0, N[i]);
+        queries.emplace_back(N[i], M[i], i);
+    }
+    vector<pair<int64, int64>> answers = mo_s_algorithm(queries);
+    for (int i = 0; i < T; ++i) {
+        int64 ans = 0;
+        if (abs(X[i]) >= N[i]) {
+            ans = abs(X[i]);
+        } else {
+            auto [f, g] = answers[i];
+            int64 inside = (mul(N[i] + X[i], f) - mul(2, g) + MOD) % MOD;
+            ans = (mul(inv(pow2[N[i] - 1], MOD), inside) - X[i] + MOD) % MOD;
+        }
+        cout << ans << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    factorials(MAXV, MOD);
+    pow2.resize(MAXV + 1, 1);
+    for (int i = 0; i < MAXV; ++i) {
+        pow2[i + 1] = mul(pow2[i], 2);
+    }
+    solve();
+    return 0;
+}
 ```
