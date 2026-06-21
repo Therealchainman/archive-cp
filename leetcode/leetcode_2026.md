@@ -5829,3 +5829,328 @@ public:
     }
 };
 ```
+
+# Leetcode Biweekly Contest 185
+
+## Q2. Minimum Lights to Illuminate a Road
+
+### Solution 1: greedy coverage, interval coverage, gap filling
+
+Mark all existing illuminated positions, then greedily cover each remaining dark segment with the minimum number of new lights.
+
+```cpp
+class Solution {
+public:
+    int minLights(vector<int>& lights) {
+        int N = lights.size();
+        vector<bool> A(N, false);
+        for (int i = N - 1, cnt = 0; i >= 0; --i, --cnt) {
+            if (lights[i]) lights[i]++;
+            cnt = max(cnt, lights[i]);
+            if (cnt) A[i] = true;
+        }
+        for (int i = 0, cnt = 0; i < N; ++i, --cnt) {
+            cnt = max(cnt, lights[i]);
+            if (cnt) A[i] = true;
+        }
+        A.emplace_back(true); // sentinel
+        int ans = 0, sz = 0;
+        for (int i = 0; i <= N; ++i) {
+             if (A[i]) {
+                 ans += (sz + 2) / 3;
+                 sz = 0;
+             } else {
+                 sz++;
+             }
+        }
+        return ans;
+    }
+};
+```
+
+## Q3. Finish Time of Tasks I
+
+### Solution 1: tree dp, dfs, post-order traversal
+
+Each node’s finish time depends only on the computed finish times of its children. Since children must be solved before their parent, this is a postorder tree DP.
+
+```cpp
+using int64 = long long;
+const int64 INF = numeric_limits<int64>::max();
+class Solution {
+private:
+    vector<vector<int>> adj;
+    vector<int64> minimum, maximum, ans;
+    vector<int> A;
+    void dfs(int u, int p = -1) {
+        minimum[u] = INF;
+        maximum[u] = -INF;
+        ans[u] = A[u];
+        for (int v : adj[u]) {
+            if (v == p) continue;
+            dfs(v, u);
+            minimum[u] = min(minimum[u], ans[v]);
+            maximum[u] = max(maximum[u], ans[v]);
+        }
+        if (minimum[u] == INF) return;
+        ans[u] += (maximum[u] << 1) - minimum[u];
+    }
+public:
+    int64 finishTime(int n, vector<vector<int>>& edges, vector<int>& baseTime) {
+        adj.assign(n, vector<int>());
+        minimum.resize(n);
+        maximum.resize(n);
+        ans.resize(n);
+        A = baseTime;
+        for (const auto &edge : edges) {
+            int u = edge[0], v = edge[1];
+            adj[u].emplace_back(v);
+            adj[v].emplace_back(u);
+        }
+        dfs(0);
+        return ans[0];
+    }
+};
+```
+
+## Q4. Count Good Integers in a Range
+
+### Solution 1: digit dp, memoized dfs
+
+Count valid numbers up to a bound using digit DP, then subtract to get the count inside the range.
+
+```cpp
+using int64 = long long;
+class Solution {
+private:
+    int K;
+    int64 dp[16][10][2][2];
+    int64 dfs(const string& num, int i, int last, int tight, int zero) {
+        int N = num.size();
+        if (i == N) {
+            return 1;
+        }
+        if (dp[i][last][tight][zero] != -1) return dp[i][last][tight][zero];
+        int64 ans = 0;
+        int cd = num[i] - '0';
+        for (int d = 0; d < 10; ++d) {
+            if (tight && d > cd) break;
+            if (!zero && abs(last - d) > K) continue;
+            ans += dfs(num, i + 1, d, tight && d == cd, zero && d == 0);
+        }
+        return dp[i][last][tight][zero] = ans;
+    }
+public:
+    int64 goodIntegers(int64 l, int64 r, int k) {
+        K = k;
+        fill(&dp[0][0][0][0], &dp[0][0][0][0] + 16 * 10 * 2 * 2, -1);
+        int64 upper = dfs(to_string(r), 0, 0, 1, 1);
+        fill(&dp[0][0][0][0], &dp[0][0][0][0] + 16 * 10 * 2 * 2, -1);
+        int64 lower = dfs(to_string(l - 1), 0, 0, 1, 1);
+        int64 ans = upper - lower;
+        return ans;
+    }
+};
+```
+
+## Leetcode Weekly Contest 507
+
+## Q2. Valid Subarrays With Matching Sum Digits I
+
+### Solution 1: subarray enumeration, prefix sums, digit extraction
+
+```cpp
+using int64 = long long;
+class Solution {
+public:
+    int countValidSubarrays(vector<int>& nums, int x) {
+        int N = nums.size(), ans = 0;
+        for (int i = 0; i < N; ++i) {
+            int64 sum = 0, pow10 = 1;
+            for (int j = i; j < N; ++j) {
+                sum += nums[j];
+                while (pow10 * 10 <= sum) {
+                    pow10 *= 10;
+                }
+                int last = sum % 10;
+                int first = sum / pow10;
+                if (last == x && first == x) {
+                    ans++;
+                }
+            }
+        }
+        return ans;
+    }
+};
+```
+
+## Q3. Shortest Path With At Most K Consecutive Identical Characters
+
+### Solution 1: shortest path, dijkstra, state expansion, 2D distance array
+
+Why this works
+This turns the original constrained shortest path problem into a normal shortest path problem over a larger graph of states.
+Instead of asking:
+What is the shortest way to reach node u?
+It asks:
+What is the shortest way to reach node u while ending with label last repeated cnt times?
+That extra state is exactly what is needed to enforce the k consecutive label constraint.
+
+```cpp
+const int INF = numeric_limits<int>::max();
+class Solution {
+private:
+    vector<vector<pair<int, int>>> adj;
+    vector<vector<int>> dijkstra(int n, int k, int src, const string& labels) {
+        priority_queue<tuple<int, int, int>, vector<tuple<int, int, int>>, greater<tuple<int, int, int>>> minheap;
+        vector<vector<int>> dist(n, vector<int>(k + 1, INF));
+        minheap.emplace(0, 1, src);
+        dist[src][1] = 0;
+        while (!minheap.empty()) {
+            auto [cost, cnt, u] = minheap.top();
+            int last = labels[u] - 'a';
+            minheap.pop();
+            if (dist[u][cnt] < cost) continue;
+            for (auto [v, w] : adj[u]) {
+                int label = labels[v] - 'a';
+                int ncost = cost + w;
+                int ncnt = label == last ? cnt + 1 : 1;
+                if (ncnt > k) continue;
+                if (dist[v][ncnt] <= ncost) continue;
+                dist[v][ncnt] = ncost;
+                minheap.emplace(ncost, ncnt, v);
+            }
+        }
+        return dist;
+    }
+public:
+    int shortestPath(int n, vector<vector<int>>& edges, string labels, int k) {
+        adj.assign(n, vector<pair<int, int>>());
+        for (const auto &edge : edges) {
+            int u = edge[0], v = edge[1], w = edge[2];
+            adj[u].emplace_back(v, w);
+        }
+        vector<vector<int>> dist = dijkstra(n, k, 0, labels);
+        int ans = *min_element(dist[n - 1].begin(), dist[n - 1].end());
+        return ans < INF ? ans : -1;
+    }
+};
+```
+
+## Q4. Maximum Total Value
+
+### Solution 1: arithmetic decay sequences, binary search, math, greedy counting, thresholding
+
+Binary search the boundary value, then use arithmetic progression formulas to sum everything above the boundary in bulk.
+
+You want the largest m positive numbers across all these sequences.
+A heap would work logically, but m can be 1e9, so simulation is too slow.
+
+The better idea is:
+
+Binary search the value of the cutoff gain.
+Count how many selectable gains are >= cutoff.
+Once we know the cutoff, sum everything strictly greater than it.
+Fill the remaining picks using the cutoff value.
+
+```cpp
+using int64 = long long;
+const int64 MOD = 1e9 + 7;
+class Solution {
+private:
+    int M;
+    bool possible(const vector<int> &V, const vector<int> &D, int target) {
+        int N = V.size();
+        int64 cnt = 0;
+        for (int i = 0; i < N; ++i) {
+            if (V[i] < target) continue;
+            int take = (V[i] - target) / D[i] + 1;
+            cnt += take;
+            if (cnt >= M) return true;
+        }
+        return cnt >= M;
+    }
+    int64 naturalSum(int n) {
+        return 1LL * n * (n - 1) / 2;
+    }
+public:
+    int maxTotalValue(vector<int>& value, vector<int>& decay, int m) {
+        int N = value.size();
+        M = m;
+        int lo = 0, hi = 1e9;
+        while (lo < hi) {
+            int mid = lo + (hi - lo + 1) / 2;
+            if (possible(value, decay, mid)) {
+                lo = mid;
+            } else {
+                hi = mid - 1;
+            }
+        }
+        int64 ans = 0;
+        for (int i = 0; i < N; ++i) {
+            if (value[i] < lo + 1) continue;
+            int take = (value[i] - lo - 1) / decay[i] + 1;
+            M -= take;
+            ans = (ans + 1LL * take * value[i] % MOD) % MOD;
+            int64 cand = naturalSum(take) % MOD;
+            int64 sub = cand * decay[i] % MOD;
+            ans = (ans - sub + MOD) % MOD;
+        }
+        ans = (ans + 1LL * M * lo % MOD) % MOD;
+        return ans;
+    }
+};
+```
+
+## 1840. Maximum Building Height
+
+### Solution 1: greedy, sorting, two pass constraint propagation, interval peak maximization
+
+So a restriction does not only affect its own building. It also limits nearby buildings.
+
+The current restricted building cannot be taller than the previous restricted building plus the distance between them.
+
+The core trick is realizing this is not really about simulating every building. It is about turning sparse restrictions into valid global height limits, then finding the tallest possible “mountain peak” between neighboring restrictions.
+
+You do not need to assign heights to every building. You only need to normalize the restricted buildings, because the maximum height between two neighboring restrictions can be computed directly.
+
+An interesting rule:
+
+If hL == hR:
+    peak is centered
+
+If hL < hR:
+    peak shifts toward the right side
+
+If hL > hR:
+    peak shifts toward the left side
+
+Or even simpler:
+
+The peak shifts toward the higher endpoint.
+
+```cpp
+const int INF = numeric_limits<int>::max();
+class Solution {
+public:
+    int maxBuilding(int n, vector<vector<int>>& R) {
+        R.push_back({1, 0});
+        sort(R.begin(), R.end());
+        if (R.back()[0] < n) R.push_back({n, n - 1});
+        int M = R.size();
+        for (int i = 1; i < M; ++i) {
+            R[i][1] = min(R[i][1], R[i - 1][1] + (R[i][0] - R[i - 1][0]));
+        }
+        for (int i = M - 2; i >= 0; --i) {
+            R[i][1] = min(R[i][1], R[i + 1][1] + (R[i + 1][0] - R[i][0]));
+        }
+        int ans = 0;
+        for (int i = 1; i < M; ++i) {
+            // max height of buildings between two restrictions?
+            int cand = (R[i][0] - R[i - 1][0] + R[i - 1][1] + R[i][1]) / 2;
+            ans = max(ans, cand);
+        }
+        return ans;
+    }
+};
+```

@@ -1837,3 +1837,256 @@ S_i is a set of permutations that satisfy the condition at index i. We want to c
 ```cpp
 
 ```
+
+# Atcoder Beginner Contest 463
+
+## C - Tallest at the Moment
+
+### Solution 1: 
+
+```cpp
+int N, Q;
+vector<int> ans;
+vector<pair<int, int>> heights, queries;
+
+void solve() {
+    cin >> N;
+    for (int i = 0; i < N; ++i) {
+        int h, l;
+        cin >> h >> l;
+        heights.emplace_back(h, l);
+    }
+    cin >> Q;
+    ans.resize(Q);
+    for (int i = 0; i < Q; ++i) {
+        int t;
+        cin >> t;
+        queries.emplace_back(t, i);
+    }
+    sort(queries.rbegin(), queries.rend());
+    int smax = 0;
+    for (const auto &[t, i] : queries) {
+        while (!heights.empty() && heights.back().second > t) {
+            smax = max(smax, heights.back().first);
+            heights.pop_back();
+        }
+        ans[i] = smax;
+    }
+    for (int x : ans) {
+        cout << x << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## D - Maximize the Gap
+
+### Solution 1: 
+
+```cpp
+int N, K, M;
+vector<int> dp, values, leftEndpoint;
+unordered_map<int, int> id;
+
+bool possible(int target) {
+    dp.assign(M + 1, 0);
+    for (int i = 0; i < M; ++i) {
+        dp[i + 1] = dp[i];
+        int d = leftEndpoint[i] - target;
+        int j = upper_bound(values.begin(), values.end(), d) - values.begin();
+        dp[i + 1] = max(dp[i + 1], dp[j] + 1);
+    }
+    return dp[M] >= K;
+}
+
+void solve() {
+    cin >> N >> K;
+    vector<pair<int, int>> intervals;
+    for (int i = 0; i < N; ++i) {
+        int l, r;
+        cin >> l >> r;
+        intervals.emplace_back(l, r);
+        values.emplace_back(r);
+    }
+    sort(values.begin(), values.end());
+    values.erase(unique(values.begin(), values.end()), values.end());
+    M = values.size();
+    for (int i = 0; i < M; ++i) {
+        id[values[i]] = i;
+    }
+    leftEndpoint.assign(M, -1);
+    for (const auto &[l, r] : intervals) {
+        leftEndpoint[id[r]] = max(leftEndpoint[id[r]], l);
+    }
+    int lo = 0, hi = 1e9;
+    while (lo < hi) {
+        int mid = lo + (hi - lo + 1) / 2;
+        if (possible(mid)) {
+            lo = mid;
+        } else {
+            hi = mid - 1;
+        }
+    }
+    if (!lo) {
+        cout << -1 << endl;
+        return;
+    }
+    cout << lo << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## E - Roads and Gates
+
+### Solution 1: 
+
+A plain Dijkstra approach works here because all edge weights are positive.
+
+However, explicitly adding every warp edge is infeasible: each city can warp to every other city, so there are $N^2$ warp edges. With $N = 2 \times 10^5$, this is far too large.
+
+The fix is to compress warp transitions using virtual nodes.
+
+Key idea:
+
+Warping from city $i$ to city $j$ costs
+
+$$
+X_i + Y + X_j.
+$$
+
+Model this with two virtual nodes, `warp_in` and `warp_out`:
+
+- city $i \to$ `warp_in` with cost $X_i$
+- `warp_in \to warp_out` with cost $Y$
+- `warp_out \to$ city $j$ with cost $X_j$
+
+So instead of adding $N^2$ warp edges, we add only $2N + 1$ extra edges.
+
+```cpp
+int N, M, Y;
+vector<vector<pair<int, int>>> adj;
+vector<int> X;
+
+namespace Graph {
+    template<typename CostType, typename Transition>
+    vector<CostType> dijkstra(int src, Transition transitionFunction) {
+        priority_queue<pair<CostType, int>, vector<pair<CostType, int>>, greater<pair<CostType, int>>> minheap;
+        vector<CostType> dist(N + 2, numeric_limits<CostType>::max());
+        minheap.emplace(0, src);
+        dist[src] = 0;
+        while (!minheap.empty()) {
+            auto [cost, u] = minheap.top();
+            minheap.pop();
+            if (dist[u] < cost) continue;
+            for (auto [v, w] : adj[u]) {
+                CostType ncost = transitionFunction(cost, w);
+                if (dist[v] <= ncost) continue;
+                dist[v] = ncost;
+                minheap.emplace(ncost, v);
+            }
+        }
+        return dist;
+    }
+}
+
+void solve() {
+    cin >> N >> M >> Y;
+    adj.assign(N + 2, vector<pair<int, int>>());
+    for (int i = 0; i < M; ++i) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        --u, --v;
+        adj[u].emplace_back(v, w);
+        adj[v].emplace_back(u, w);
+    }
+    X.resize(N);
+    for (int i = 0; i < N; ++i) {
+        cin >> X[i];
+    }
+    adj[N].emplace_back(N + 1, Y);
+    adj[N + 1].emplace_back(N, Y);
+    for (int i = 0; i < N; ++i) {
+        adj[i].emplace_back(N, X[i]);
+        adj[N + 1].emplace_back(i, X[i]);
+    }
+    vector<int64> dist = Graph::dijkstra<int64>(0, [](int64 cost, int w) {
+        return cost + w;
+    });
+    for (int i = 1; i < N; ++i) {
+        cout << dist[i] << ' ';
+    }
+    cout << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
+```
+
+## F - Senshuraku
+
+### Solution 1:
+
+The clean way to understand the equations is: first decide the final winning score, then count how many players tie at that score, then multiply by 1 / number_of_candidates.
+
+Yes, there are only two cases:
+
+Final champion score = W + 1
+Final champion score = W
+
+For any fixed player, the answer is:
+
+sum over possible final top scores:
+    probability this player is tied for first
+    *
+    probability they are selected among the tied players
+
+If there are w champion candidates, and this player is one of them, then the chance this player is chosen is:
+
+1 / w
+
+So the core formula is:
+
+answer[player] += P(player is a candidate and total candidates = w) * 1/w
+
+Compact summary
+
+For every possible w:
+
+answer += P(player is candidate AND total candidates = w) * 1/w
+
+The binomial coefficient counts how many other flexible matches produce candidates.
+
+The power of 2 in the denominator counts how many fair coin-flip match outcomes must line up.
+
+The 1/w is the final uniform tie-break among w candidates.
+
+```cpp
+
+```
+
+## G - Random Walk Distance
+
+### Solution 1: 
+
+```cpp
+
+```
