@@ -1770,49 +1770,243 @@ void solve() {
 
 # Atcoder Beginner Contest 462
 
-##
+## C - Not Covered Points
 
 ### Solution 1: 
 
 ```cpp
+int N;
+vector<int> X;
 
+void solve() {
+    cin >> N;
+    X.resize(N + 1);
+    for (int i = 0; i < N; ++i) {
+        int x, y;
+        cin >> x >> y;
+        X[x] = y;
+    }
+    int pmin = N + 1, ans = 0;
+    for (int x = 1; x <= N; ++x) {
+        int y = X[x];
+        if (y < pmin) ans++;
+        pmin = min(pmin, y);
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
-##
+## D - Accomplice
 
-### Solution 1: 
+### Solution 1: difference array, prefix sum, counting pairs, line sweep
 
 ```cpp
+const int MAXN = 1e6 + 5;
+int N, D;
+int A[MAXN];
 
+int64 calc(int n) {
+    if (n < 2) return 0;
+    return 1LL * n * (n - 1) / 2;
+}
+
+void solve() {
+    cin >> N >> D;
+    for (int i = 0; i < N; ++i) {
+        int s, t;
+        cin >> s >> t;
+        if (t - s < D) continue;
+        A[s]++;
+        A[t - D + 1]--;
+    }
+    int64 ans = 0;
+    for (int i = 1; i < MAXN; ++i) {
+        A[i] += A[i - 1];
+        ans += calc(A[i]);
+    }
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
-##
+## E - Alternating Costs
 
-### Solution 1: 
+### Solution 1: parity, math, casework, greedy
 
 ```cpp
+int A, B, X, Y;
 
+int64 calc(int x, int y) {
+    int delta = abs(x - y);
+    int chosen = min(A, B);
+    int64 t0 = 2LL * min(x, y) * chosen;
+    int64 t1 = min(1LL * delta / 2 * (A + B), 2LL * delta * chosen);
+    return t0 + t1;
+}
+
+void solve() {
+    cin >> A >> B >> X >> Y;
+    X = abs(X), Y = abs(Y);
+    if (X % 2 == Y % 2) {
+        int64 ans = calc(X, Y);
+        cout << ans << endl;
+    } else {
+        int64 t0 = calc(X - 1, Y) + A;
+        int64 t1 = calc(X, Y - 1) + B;
+        cout << min(t0, t1) << endl;
+    }
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
 ```
 
-##
+## F - More ABC
 
-### Solution 1: 
+### Solution 1: Langrangian Relaxation, binary search on lambda, Alien's trick, dynamic programming, counting
 
-```cpp
-
-```
-
-##
-
-### Solution 1: 
+exactly K of something with dp, probably Alien's trick.
 
 ```cpp
+const int64 INF = (int64)4e18;
+int N, K;
+string S;
 
+// A DP value: the penalized cost and the number of "ABC" formed on that path.
+struct St {
+    int64 cost;
+    int64 cnt;
+};
+
+// Pick the better of two states: minimize cost; on ties keep the LARGER count.
+// Tracking the max count per tie makes count a monotonic function of lambda,
+// which is what the binary search in solve() relies on.
+static inline St better(const St& a, const St& b) {
+    if (a.cost != b.cost) return a.cost < b.cost ? a : b;
+    return a.cnt >= b.cnt ? a : b;
+}
+
+// Automaton states for matching "ABC": 0 = "", 1 = "A", 2 = "AB".
+//   0 --A--> 1,   anything else --> 0
+//   1 --B--> 2,   --A--> 1,   anything else --> 0
+//   2 --C--> 0 (+1 ABC, reward lambda),   --A--> 1,   anything else --> 0
+// At each position we may keep S[i] (cost 0) or replace it (cost 1).
+pair<int64, int64> solve_penalty(int64 lambda) {
+    St dp[3] = {{0, 0}, {INF, 0}, {INF, 0}};
+    for (int i = 0; i < N; ++i) {
+        St ndp[3] = {{INF, 0}, {INF, 0}, {INF, 0}};
+        int64 cA = S[i] == 'A' ? 0 : 1;
+        int64 cB = S[i] == 'B' ? 0 : 1;
+        int64 cC = S[i] == 'C' ? 0 : 1;
+        // cost to turn S[i] into any letter that is none of A/B/C (resets to "")
+        int64 cO = (S[i] == 'A' || S[i] == 'B' || S[i] == 'C') ? 1 : 0;
+        for (int s = 0; s < 3; ++s) {
+            if (dp[s].cost == INF) continue;
+            St cur = dp[s];
+            // assign 'A' -> state 1 (from any state)
+            ndp[1] = better(ndp[1], {cur.cost + cA, cur.cnt});
+            if (s == 1) {
+                // assign 'B' -> state 2 (advance the match)
+                ndp[2] = better(ndp[2], {cur.cost + cB, cur.cnt});
+            } else {
+                // 'B' from state 0/2 breaks back to ""
+                ndp[0] = better(ndp[0], {cur.cost + cB, cur.cnt});
+            }
+            if (s == 2) {
+                // assign 'C' -> completes "ABC": +1 count, reward lambda
+                ndp[0] = better(ndp[0], {cur.cost + cC - lambda, cur.cnt + 1});
+            } else {
+                // 'C' from state 0/1 just breaks back to ""
+                ndp[0] = better(ndp[0], {cur.cost + cC, cur.cnt});
+            }
+            // assign some other letter -> state ""
+            ndp[0] = better(ndp[0], {cur.cost + cO, cur.cnt});
+        }
+        dp[0] = ndp[0];
+        dp[1] = ndp[1];
+        dp[2] = ndp[2];
+    }
+    // The match may end in any state (a trailing "A"/"AB" is fine).
+    St res = better(better(dp[0], dp[1]), dp[2]);
+    return {res.cost, res.cnt};
+}
+
+void solve() {
+    cin >> S >> K;
+    N = S.size();
+    for (int i = 2; i < N; ++i) {
+        if (S[i - 2] == 'A' && S[i - 1] == 'B' && S[i] == 'C') {
+            K++;
+        }
+    }
+    // Target K is the desired total number of "ABC" occurrences.
+    // At most floor(N/3) disjoint "ABC" can exist, so anything beyond is impossible.
+    if (K > N / 3) {
+        cout << -1 << endl;
+        return;
+    }
+    // count(lambda) is non-decreasing; find the smallest lambda with count >= K.
+    // A marginal replacement cost is at most N, so lambda never needs to exceed N.
+    // what is up here, well as the penalty lambda increases
+    // it will decrease for each "ABC" we formed, and since we are minimizing the dp cost
+    // it will be more likely to form more "ABC" to get that minimum cost.
+    // so when it is forming too many ABC, we need decrease the lambda
+    // and when it is forming too few ABC, we need to increase the lambda.
+    int64 lo = 0, hi = N + 1;
+    while (lo < hi) {
+        int64 mid = lo + (hi - lo) / 2;
+        auto [penalizedCost, cnt] = solve_penalty(mid);
+        if (cnt >= K) {
+            hi = mid;
+        } else {
+            lo = mid + 1;
+        }
+    }
+    auto [penalizedCost, cnt] = solve_penalty(lo);
+    int64 ans = penalizedCost + lo * K;
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    int T;
+    cin >> T;
+    while (T--) {
+        solve();
+    }
+    return 0;
+}
 ```
 
 ## G. Completely Wrong
 
-### Solution 1: 
+### Solution 1: combinatorics, principle of inclusion-exclusion, polynomial multiplication, number theoretic transform, counting permutations with forbidden positions, set theory, smallest to largest merging of polynomials
 
 A full random process can be represented as a complete ordered sequence of selected balls or colors.
 
@@ -1829,13 +2023,259 @@ So if I know all the sets for each index i that are valid, then I ultimately wan
 
 So that is kind of our set up 
 
-
 S_i is a set of permutations that satisfy the condition at index i. We want to compute the size of the intersection of all S_i.
 
+For a fixed subset:
 
+S={1,4,5}
+
+you are asking:
+
+How many draw-order permutations make operation 1, operation 4, and operation 5 gain a point?
+
+forbidden-position permutation counting problem
+
+So yes, saying:
+
+total permutations minus the union of forbidden sets
+
+is equivalent to saying:
+
+count permutations that lie in the complement of every scoring set
+
+So the full idea is:
+
+1. Convert random drawing into counting permutations.
+2. Use inclusion-exclusion over positions where we score.
+3. Group selected positions by goal color.
+4. For each color, build a polynomial describing how many scoring positions of that color we choose.
+5. Multiply all color polynomials.
+6. Coefficient $x^i$ gives the total signed contribution for selecting $i$ scoring positions.
+7. Multiply by $(N-i)!$ for the remaining free positions.
+8. Divide by $N!$.
+
+For one fixed color $k$:
+
+$$F_k(x) = \sum_{j=0}^{\min(X_k, Y_k)} (-1)^j \binom{Y_k}{j} \binom{X_k}{j} j!\, x^j$$
+
+The coefficient of $x^j$ is:
+
+$$(-1)^j \binom{Y_k}{j} \binom{X_k}{j} j!$$
+
+This does not directly count final permutations where exactly $j$ balls of color $k$ score.
+
+It counts the contribution for choosing $j$ positions of target color $k$ that we force to score inside inclusion-exclusion.
+
+That distinction matters because inclusion-exclusion counts “at least these positions score,” not “exactly these positions score.”
+
+the signed number of ways to choose $j$ scoring constraints involving color $k$, and assign actual balls of color $k$ to satisfy those constraints.
+
+To calculate the answer, you turn your inclusion-exclusion formula into a polynomial product.
+
+Let:
+
+- $X_k = \#\{\text{balls with color } k\}$
+- $Y_k = \#\{\text{operations } i : G_i = k\}$
+
+For each color $k$, define:
+
+$$F_k(x) = \sum_{j=0}^{\min(X_k, Y_k)} (-1)^j \binom{Y_k}{j} \binom{X_k}{j} j!\, x^j$$
+
+This polynomial says: for color $k$, if I force exactly $j$ scoring positions of this color, how many signed ways are there to choose those positions and assign actual balls to them?
+
+Then multiply all color polynomials:
+
+$$F(x) = \prod_{k=1}^{N} F_k(x)$$
+
+Suppose:
+
+$$F(x) = a_0 + a_1 x + a_2 x^2 + \cdots + a_N x^N$$
+
+Then $a_i$ represents the total signed contribution of all ways to force exactly $i$ scoring positions across all colors.
+
+Once those $i$ scoring positions are fixed, the remaining $N-i$ balls can be placed freely in $(N-i)!$ ways.
+
+So the number of valid permutations (permutations with zero score) is:
+
+$$\text{valid} = \sum_{i=0}^{N} a_i\, (N-i)!$$
+
+Finally, because every draw order is equally likely and there are $N!$ total permutations:
+
+$$\text{answer} = \frac{\text{valid}}{N!}$$
+
+Modulo 998244353, division by $N!$ means multiplying by the modular inverse of $N!$:
+
+$$\text{answer} = \left(\sum_{i=0}^{N} a_i\, (N-i)!\right) \cdot (N!)^{-1} \pmod{998244353}$$
+
+Putting it all together, the compressed closed form is:
+
+$$\text{answer} = \frac{1}{N!} \sum_{i=0}^{N} [x^i]\!\left(\prod_{k=1}^{N} \sum_{j=0}^{\min(X_k,\,Y_k)} (-1)^j \binom{Y_k}{j}\binom{X_k}{j} j!\, x^j\right)(N-i)!$$
 
 ```cpp
+const int64 MOD = 998244353;
 
+namespace NTT{
+    const int P = 998244353, R = 3, IR = (P + 1) / 3;
+
+    int L, N, IN;
+    vector<int> rev;
+
+    int qpow(int b, int k) {
+        int ret = 1;
+        while(k > 0) {
+            if(k & 1) ret = static_cast<int64>(ret) * b % P;
+            b = static_cast<int64>(b) * b % P;
+            k >>= 1;
+        }
+        return ret;
+    }
+
+    void initNTT(int l) {
+        L = 0;                                  
+        while((1 << L) < l) L ++;
+        N = 1 << L;
+        IN = qpow(N, P - 2);
+
+        rev = vector<int>(N);
+
+        for(int i = 0; i < N; i ++)
+            rev[i] = (rev[i >> 1] >> 1) | ((i & 1) << (L - 1));
+    }
+
+    void NTT(vector<int> &a, bool type) {
+        a.resize(N);
+        for(int i = 0; i < N; i ++)
+            if(i < rev[i])
+                swap(a[i], a[rev[i]]);
+
+        for(int i = 1; i < N; i *= 2) {
+            int64 g = qpow(type ? R : IR, (P - 1) / (i * 2));
+            for(int j = 0; j < N; j += i * 2) {
+                int64 gn = 1;
+                for(int k = 0; k < i; k ++, gn = gn * g % P) {
+                    int x = a[j + k], y = a[i + j + k] * gn % P;
+                    a[j + k] = (x + y) % P;
+                    a[i + j + k] = (x - y + P) % P;
+                }
+            }
+        }
+    }
+
+    vector<int> convolution(vector<int> a, vector<int> b) {
+        int len = (int)a.size() + (int)b.size() - 1;
+        NTT(a, 1);
+        NTT(b, 1);
+        for(int i = 0; i < N; i ++)
+            a[i] = a[i] * static_cast<int64>(b[i]) % P;
+        NTT(a, 0);
+        a.resize(len);
+        for(auto &x : a)
+            x = static_cast<int64>(x) * IN % P;
+        return a;
+    }
+}
+
+vector<int> polynomialMultiplication(const vector<int>& a, const vector<int>& b) {
+    NTT::initNTT(a.size() + b.size() - 1);
+    return NTT::convolution(a, b);
+}
+
+int64 inv(int i, int64 m) {
+  return i <= 1 ? i : m - (m / i) * inv(m % i, m) % m;
+}
+
+vector<int64> fact, inv_fact;
+
+void factorials(int n, int64 m) {
+    fact.assign(n + 1, 1);
+    inv_fact.assign(n + 1, 0);
+    for (int i = 2; i <= n; i++) {
+        fact[i] = (fact[i - 1] * i) % m;
+    }
+    inv_fact.end()[-1] = inv(fact.end()[-1], m);
+    for (int i = n - 1; i >= 0; i--) {
+        inv_fact[i] = (inv_fact[i + 1] * (i + 1)) % m;
+    }
+}
+
+int64 choose(int n, int r, int64 m) {
+    if (n < 0 || r < 0 || n < r) return 0;
+    return (fact[n] * inv_fact[r] % m) * inv_fact[n - r] % m;
+}
+
+int N;
+vector<int> C, G;
+
+void solve() {
+    cin >> N;
+    C.resize(N);
+    G.resize(N);
+    for (int i = 0; i < N; i++) cin >> C[i];
+    for (int i = 0; i < N; i++) cin >> G[i];
+
+    // X[k] = #balls of color k, Y[k] = #operations wanting color k
+    vector<int> X(N + 1, 0), Y(N + 1, 0);
+    for (int i = 0; i < N; i++) X[C[i]]++;
+    for (int i = 0; i < N; i++) Y[G[i]]++;
+
+    factorials(N, MOD);
+
+    // Build f_k(x) for each color present in both C and G.
+    // f_k[j] = (-1)^j * C(X_k, j) * C(Y_k, j) * j!
+    // Min-heap merge by size for O(N log^2 N).
+    vector<vector<int>> polys;
+    for (int k = 1; k <= N; k++) {
+        if (X[k] == 0 || Y[k] == 0) continue; // f_k = [1], skip
+        int d = min(X[k], Y[k]);
+        vector<int> p(d + 1);
+        for (int j = 0; j <= d; j++) {
+            int64 v = choose(X[k], j, MOD) * choose(Y[k], j, MOD) % MOD;
+            v = v * fact[j] % MOD;
+            if (j & 1) v = (MOD - v) % MOD;
+            p[j] = v;
+        }
+        polys.emplace_back(move(p));
+    }
+
+    int number_polynomials = polys.size();
+
+    vector<int> f;
+    if (polys.empty()) {
+        f = {1};
+    } else {
+        // (size, id) min-heap over a growing pool of polynomials
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> minheap;
+        for (int i = 0; i < number_polynomials; ++i) {
+            minheap.emplace(polys[i].size(), i);
+        }
+        while (minheap.size() > 1) {
+            auto [s1, i1] = minheap.top(); minheap.pop();
+            auto [s2, i2] = minheap.top(); minheap.pop();
+            vector<int> prod = polynomialMultiplication(polys[i1], polys[i2]);
+            int id = polys.size();
+            polys.push_back(move(prod));
+            minheap.emplace(polys[id].size(), id);
+        }
+        f = polys[minheap.top().second];
+    }
+
+    // numerator = sum_i c_i * (N - i)!
+    int64 numerator = 0;
+    for (int i = 0; i < f.size(); ++i) {
+        numerator = (numerator + 1LL * f[i] * fact[N - i]) % MOD;
+    }
+    // probability = numerator / N!
+    int64 ans = numerator * inv_fact[N] % MOD;
+    cout << ans << endl;
+}
+
+signed main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    solve();
+    return 0;
+}
 ```
 
 # Atcoder Beginner Contest 463

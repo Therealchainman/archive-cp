@@ -1,5 +1,7 @@
 # Lagrangian Relaxation (Alien's Trick)
 
+Exact count constraint+additive cost+DP-able relaxed problem
+
 Lagrangian relaxation is an optimization technique used to solve complex constrained problems by moving difficult constraints into the objective function with a penalty. It simplifies the problem into an "easy" subproblem that is efficiently solvable, generating tight mathematical bounds for integer or linear programming
 
 You replace "must use exactly K" with "using one more costs λ", then tune λ until the unconstrained optimum behaves like the constrained optimum.

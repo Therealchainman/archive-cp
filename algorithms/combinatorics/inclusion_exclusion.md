@@ -5,6 +5,16 @@ The Principle of Inclusion and Exclusion (PIE) is a fundamental counting tool in
 |A U B| = |A| + |B| - |A ∩ B|
 size of union when size of intersection is known.
 
+# De Morgan's Law — Intersection of Complements
+
+$$\bigcap_{i=1}^{n} A_i^c = \left(\bigcup_{i=1}^{n} A_i\right)^c$$
+
+In terms of counts over a universe U:
+
+$$\left|\bigcap_{i=1}^{n} A_i^c\right| = |U| - \left|\bigcup_{i=1}^{n} A_i\right|$$
+
+**Why it matters for PIE:** to count elements that belong to *none* of the sets, you don't need to intersect complements directly — just compute the union (via PIE) and subtract from the universe size.
+
 # Generalized inclusion–exclusion for “exactly M”
 
 ## Goal
